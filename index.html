@@ -1650,7 +1650,7 @@ function initGL(){
   /* dedicated magnifier pass: the lens interior re-renders the scene through a
      cropped (zoomed) projection at full drawing-buffer resolution — true optical
      magnification, sharper than the DoF/bloom-graded base image it sits in */
-  const LENS_MAG = 1.8;
+  const LENS_MAG = 1.22;   // was 1.8 — 1.8x over-zoomed the (already lens-filling 3.55x) stand-ins into a mush ball of atoms/sub-spheres; frame the WHOLE specimen instead
   const lensRT = new THREE.WebGLRenderTarget(8, 8, {
     type: THREE.HalfFloatType,
     samples: Math.min(4, renderer.capabilities.maxSamples || 0),
@@ -2192,8 +2192,21 @@ function initGL(){
       camera.setViewOffset(innerWidth, innerHeight,
         lcx - innerWidth / (2 * LENS_MAG), lcy - innerHeight / (2 * LENS_MAG),
         innerWidth / LENS_MAG, innerHeight / LENS_MAG);
+      // The lens REVEALS one clean specimen — not a magnified slice of the busy
+      // field. Hide the ambient dust motes + the cheap point-markers for this pass
+      // (the focused item is shown by its hi-fi stand-in), so they don't pile up
+      // and bury the subject inside the loupe. Base frame keeps its field intact.
+      const _dustVis = dust.visible, _featVis = featPoints.visible;
+      dust.visible = false; featPoints.visible = false;
+      // Isolate ONE subject in the loupe: render only the focused item's stand-in.
+      // During an auto-tour hand-off the outgoing + incoming stand-ins both linger
+      // (~0.2s) and would overlap into a sphere-pile; show only the focused one.
+      const _svis = [];
+      for (let k = 0; k < feat.length; k++){ _svis.push(feat[k].standIn.visible); if (k !== FOCUS.idx) feat[k].standIn.visible = false; }
       renderer.setRenderTarget(lensRT);
       renderer.render(scene, camera);
+      for (let k = 0; k < feat.length; k++) feat[k].standIn.visible = _svis[k];
+      dust.visible = _dustVis; featPoints.visible = _featVis;
       camera.clearViewOffset();
       renderer.setRenderTarget(null);
     }
