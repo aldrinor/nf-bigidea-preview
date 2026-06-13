@@ -134,6 +134,31 @@
     #hint{display:none;}
     #c{transition:none;}
   }
+  /* per-pollutant deep-story panel */
+  #detail{position:absolute;right:34px;top:50%;transform:translate(28px,-50%);width:360px;max-height:74vh;overflow:auto;
+    background:rgba(8,14,24,.82);border:1px solid rgba(52,225,255,.32);border-radius:16px;padding:22px 22px 20px;
+    backdrop-filter:blur(14px);box-shadow:0 24px 70px rgba(0,0,0,.55);opacity:0;pointer-events:none;
+    transition:opacity .42s ease,transform .42s cubic-bezier(.22,1,.36,1);z-index:40;}
+  #detail.open{opacity:1;pointer-events:auto;transform:translate(0,-50%);}
+  #detail-close{position:absolute;top:12px;right:14px;width:28px;height:28px;border:0;background:transparent;color:#7fa9c4;
+    font-size:22px;line-height:1;cursor:pointer;border-radius:8px;transition:color .2s,background .2s;}
+  #detail-close:hover{color:#cfeeff;background:rgba(52,225,255,.10);}
+  #detail-title{display:block;font-size:19px;font-weight:700;letter-spacing:.01em;color:#eaf6ff;padding-right:26px;}
+  #detail-sub{display:block;margin-top:5px;font-size:11px;letter-spacing:.12em;color:#34e1ff;font-weight:600;text-transform:uppercase;}
+  #detail-body{margin-top:16px;}
+  #detail-body .row{padding:11px 0;border-top:1px solid rgba(120,160,200,.14);}
+  #detail-body .row:first-child{border-top:0;}
+  #detail-body .k{font-size:9.5px;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:#6f93b0;}
+  #detail-body .v{margin-top:5px;font-size:13.5px;line-height:1.5;color:#d4e3f2;}
+  #detail-body .row.fate .k{color:#ff8090;}
+  #detail-body .row.fate .v{color:#ffdfe4;}
+  @media (max-width:700px){
+    #detail{right:0;left:0;top:auto;bottom:0;width:auto;transform:translateY(30px);max-height:62vh;border-radius:18px 18px 0 0;
+      padding:20px 20px calc(18px + env(safe-area-inset-bottom,0px));}
+    #detail.open{transform:translateY(0);}
+    #detail-title{font-size:18px;}
+    #detail-body .v{font-size:13px;}
+  }
 </style>
 </head>
 <body>
@@ -206,7 +231,14 @@
   <div class="grouplabel" id="group-b"></div>
   <div id="counter">0&thinsp;/&thinsp;0</div>
 
-  <div id="hint">SCROLL ↓</div>
+  <div id="hint">TAP A POLLUTANT&ensp;·&ensp;SCROLL ↓</div>
+
+  <!-- per-pollutant deep story: opens on click, persists through Act 2 -->
+  <div id="detail" aria-hidden="true">
+    <button id="detail-close" aria-label="Close">×</button>
+    <div id="detail-head"><span id="detail-title"></span><small id="detail-sub"></small></div>
+    <div id="detail-body"></div>
+  </div>
 </div>
 
 <div id="spacer"></div>
@@ -307,6 +339,29 @@ window.CONFIG = {
   ],
   ACT3_CODA: ["UV-C only works in the lamp's line of sight.","Ionizers can generate ozone and by-products.","HEPA adds pressure, energy, and hardware."],
   COLORS: { base:'#05070d', negative:'#ff5566', positive:'#34e1ff' },
+  // Per-pollutant deep story (click a pollutant -> expands). Device-safe: material/surface/charge
+  // language only; microbe fate = "destroys ... on contact, by physical action"; "most/typical"
+  // hedges on particle charge; NO hard stats here (those stay in Act 3, pending citation-check).
+  STORIES: {
+    f5:[["WHAT IT IS","A “forever chemical” from firefighting foam and grease-proof, water-repellent coatings."],["WHY IT’S NEGATIVE","Its head group sheds a proton and stays permanently negative; the fluorinated tail is inert armor."],["WHERE IT COMES FROM","Foams, coated packaging and textiles — now found in water worldwide."],["WHY FILTERS MISS IT","The carbon–fluorine bond resists breakdown; carbon and reverse-osmosis filters only concentrate and relocate it, and short-chain versions slip through."]],
+    f6:[["WHAT IT IS","A dissolved nitrogen ion — one of the most common man-made contaminants in groundwater."],["WHY IT’S NEGATIVE","An anion by nature: one extra electron shared evenly across three oxygens."],["WHERE IT COMES FROM","Fertilizer and septic runoff leaching into aquifers."],["WHY FILTERS MISS IT","Tiny, fully soluble and highly mobile — it passes straight through sediment and mechanical media."]],
+    f7:[["WHAT IT IS","A synthetic textile dye that colors industrial wastewater."],["WHY IT’S NEGATIVE","The charge sits on a sulfonate group — a strong acid that stays negative at any natural-water pH."],["WHERE IT COMES FROM","Textile dyeing effluent, where part of every batch is lost to water."],["WHY FILTERS MISS IT","The chemical stability that makes the color last also makes it resist biological breakdown."]],
+    f8:[["WHAT IT IS","A doubly-charged dissolved ion and a major fine-particle component in air."],["WHY IT’S NEGATIVE","Two extra electrons spread over a symmetric cage of oxygens — a strong, stable −2."],["WHERE IT COMES FROM","Oxidation of sulfur dioxide in air; mineral and industrial sources in water."],["WHY FILTERS MISS IT","Small, soluble and divalent — poorly caught by mechanical media, and in air it is continuously regenerated."]],
+    f9:[["WHAT IT IS","A common sulfa-drug residue that reaches the environment."],["WHY IT’S NEGATIVE","It ionizes to a net-negative anion at the pH of natural water."],["WHERE IT COMES FROM","Excreted and discarded pharmaceuticals reaching wastewater and groundwater."],["WHY FILTERS MISS IT","Dissolved and small — it slips through conventional mechanical filtration."]],
+    f10:[["WHAT IT IS","One of the most widely used herbicides."],["WHY IT’S NEGATIVE","Its carboxylate group ionizes to a negative charge in water."],["WHERE IT COMES FROM","Agricultural and lawn runoff entering drinking-water sources."],["WHY FILTERS MISS IT","Soluble and mobile — it travels with the water through mechanical media."]],
+    f11:[["WHAT IT IS","A conjugated estrogen — an endocrine-active micropollutant."],["WHY IT’S NEGATIVE","It carries a negative sulfate group (the conjugate, not free estrogen)."],["WHERE IT COMES FROM","Human and animal excretion reaching wastewater."],["WHY FILTERS MISS IT","Active at trace levels and dissolved — far below what mechanical filters target."]],
+    f17:[["WHAT IT IS","A triply-charged nutrient ion."],["WHY IT’S NEGATIVE","Three extra electrons over a symmetric tetrahedron — a strong −3."],["WHERE IT COMES FROM","Fertilizer, detergent and wastewater runoff."],["WHY FILTERS MISS IT","Fully soluble — it drives algal blooms and passes through mechanical media."]],
+    f18:[["WHAT IT IS","A single dissolved fluoride ion."],["WHY IT’S NEGATIVE","One of the most electronegative species — a simple, stable −1."],["WHERE IT COMES FROM","Geological leaching and industrial discharge."],["WHY FILTERS MISS IT","A lone soluble ion — too small for mechanical capture."]],
+    f1:[["WHAT IT IS","Fine combustion soot — among the most harmful particles to breathe."],["WHY IT’S NEGATIVE","Most smoke particles carry a net negative surface charge under typical conditions."],["WHERE IT COMES FROM","Wildfire, traffic and combustion."],["WHY FILTERS MISS IT","It overwhelms electrostatic filters fast — a smoke-loaded filter can lose most of its cleaning power with no change in airflow to warn you."]],
+    f12:[["WHAT IT IS","The smallest airborne particles — small enough to reach deep into the lungs."],["WHY IT’S NEGATIVE","Most carry a net negative surface charge."],["WHERE IT COMES FROM","Combustion, road and industrial sources."],["WHY FILTERS MISS IT","They sit in a filter’s worst-efficiency window — too small to impact, too big to diffuse — and slip through."]],
+    f13:[["WHAT IT IS","Plant grains and the finer fragments they shed."],["WHY IT’S NEGATIVE","A net negative surface charge in most conditions."],["WHERE IT COMES FROM","Seasonal plant release."],["WHY FILTERS MISS IT","Grains break into sub-pollen fragments that travel deeper than the whole grain."]],
+    f14:[["WHAT IT IS","Settled dust and the allergens carried with it."],["WHY IT’S NEGATIVE","A net negative surface charge."],["WHERE IT COMES FROM","Skin, fibers, soil and mite debris in indoor air."],["WHY FILTERS MISS IT","It loads filter media and, as it builds, can mask the very charge that does the capturing."]],
+    f15:[["WHAT IT IS","Microscopic skin flakes from animals."],["WHY IT’S NEGATIVE","A net negative surface charge."],["WHERE IT COMES FROM","Cats, dogs and other animals."],["WHY FILTERS MISS IT","Light and persistent — it re-suspends and recirculates rather than staying trapped."]],
+    f16:[["WHAT IT IS","Plastic fragments small enough to become airborne and waterborne."],["WHY IT’S NEGATIVE","Most carry a net negative surface charge."],["WHERE IT COMES FROM","Breakdown of synthetic textiles, packaging and tires."],["WHY FILTERS MISS IT","They span a huge size range and pass through both air and water media."]],
+    f2:[["WHAT IT IS","Enveloped and non-enveloped viruses — among the smallest airborne threats."],["WHY IT’S NEGATIVE","A net negative surface on the envelope or capsid."],["WHERE IT COMES FROM","Exhaled and shed into shared air."],["THE DIFFERENCE","A filter that catches one can let it stay infectious and re-release it. NanoFlashing captures it and destroys it on contact, by physical action."]],
+    f3:[["WHAT IT IS","Mold spores and fungal fragments."],["WHY IT’S NEGATIVE","A net negative cell-wall surface."],["WHERE IT COMES FROM","Damp building materials and outdoor air."],["THE DIFFERENCE","Trapped spores can stay alive in a filter and drift back into the air. NanoFlashing destroys them on contact, by physical action."]],
+    f4:[["WHAT IT IS","Gram-positive and gram-negative bacteria, and the biofilm they form."],["WHY IT’S NEGATIVE","A net negative membrane surface."],["WHERE IT COMES FROM","Skin, water systems and surfaces."],["THE DIFFERENCE","A loaded filter can become a living source. NanoFlashing destroys them on contact, by physical action."]],
+  },
 };
 
 /* Immediate (pre-module) DOM fill so the headline + poster paint early (LCP). */
@@ -458,6 +513,39 @@ ui.act4.querySelector('p').textContent  = CONFIG.CAPTIONS.act4_sub;
 ui.act5.querySelector('h2').textContent = CONFIG.CAPTIONS.act5_headline;
 ui.ga.textContent = CONFIG.CAPTIONS.group_a;
 ui.gb.textContent = CONFIG.CAPTIONS.group_b;
+
+/* per-pollutant deep-story panel (Option A: click a pollutant -> its story). */
+const detailEl = $('detail'), detailTitle = $('detail-title'), detailSub = $('detail-sub'), detailBody = $('detail-body');
+let detailIdx = -1;
+function showDetail(i){
+  const f = CONFIG.FEATURES[i]; if (!f) return;
+  const rows = CONFIG.STORIES && CONFIG.STORIES[f.id]; if (!rows) return;
+  detailIdx = i;
+  detailTitle.textContent = f.label;
+  detailSub.textContent = f.badge || (f.outcome === 'fade' ? 'CAPTURED & DESTROYED — BY PHYSICAL ACTION' : 'CAPTURED & HELD');
+  detailBody.innerHTML = '';
+  for (const pair of rows){
+    const row = document.createElement('div');
+    row.className = 'row' + (pair[0] === 'THE DIFFERENCE' ? ' fate' : '');
+    const k = document.createElement('div'); k.className = 'k'; k.textContent = pair[0];
+    const v = document.createElement('div'); v.className = 'v'; v.textContent = pair[1];
+    row.appendChild(k); row.appendChild(v); detailBody.appendChild(row);
+  }
+  detailEl.scrollTop = 0;
+  detailEl.classList.add('open');
+  detailEl.setAttribute('aria-hidden', 'false');
+}
+function hideDetail(){
+  if (detailIdx < 0) return;
+  detailIdx = -1;
+  detailEl.classList.remove('open');
+  detailEl.setAttribute('aria-hidden', 'true');
+}
+detailEl.addEventListener('click', e => e.stopPropagation());          // clicks inside the panel never reach the world picker
+$('detail-close').addEventListener('click', e => { e.stopPropagation(); hideDetail(); });
+// QA hook: ?open=N renders feature N's story panel at load (deterministic screenshot of the panel)
+{ const _o = new URLSearchParams(location.search).get('open');
+  if (_o !== null) showDetail(Math.max(0, Math.min(N_FEAT - 1, parseInt(_o, 10) || 0))); }
 
 const stopEls = CONFIG.ACT3_STOPS.map(txt => {
   const d = document.createElement('div');
@@ -1715,7 +1803,7 @@ function initGL(){
   addEventListener('click', e => {
     FOCUS.lastInput = performance.now();
     const i = pickNearest(e.clientX, e.clientY, 150);
-    if (i < 0){ SELECT.idx = -1; return; }            // click on empty space releases the lock
+    if (i < 0){ SELECT.idx = -1; hideDetail(); return; }   // click on empty space releases the lock + closes the story
     const f = feat[i];
     FOCUS.idx = i;
     SELECT.idx = i; SELECT.t = clock; f.popT = clock; // lock + scale-pop + ripple start
@@ -1726,6 +1814,7 @@ function initGL(){
     } else {
       f.haloT = clock;                               // soft halo, never the cloud
     }
+    showDetail(i);                                   // open the pollutant's deep story
   });
 
   function pickNearest(px, py, maxPx){
@@ -2123,6 +2212,7 @@ function initGL(){
       }
     } else if (p < 0.19) act2Adopted = false;
     if (p > 0.24 && SELECT.idx >= 0) SELECT.idx = -1;   // act-1 lock releases past the act
+    if (p > 0.44) hideDetail();                          // story panel persists through Act 2, then closes
 
     updateFocus(dt, now);
     updateFeatures(dt, now);
