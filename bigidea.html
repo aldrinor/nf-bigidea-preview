@@ -1948,10 +1948,10 @@ function initGL(){
   const focusTarget = new THREE.Vector3(0, 0, 0);   // critically-damped (lerp ~0.1)
   const focusGoal = new THREE.Vector3(0, 0, 0);
   let lensStrength = 0, lensGoal = 0, focusGlow = 0;
-  // act-1 "ride" mode: when true, the focused specimen is rendered AT focusTarget (a smooth
-  // controlled right-side path) rather than its own scattered drift position — so the lens
-  // examines each subject in place, on the right, clear of the headline.
-  let rideActive = false;
+  // act-1 "ride" mode: the focused specimen is rendered AT focusTarget (a smooth controlled
+  // path), centred, and is revealed by a ZOOM-IN (grow + focus pull) rather than a glass lens —
+  // a drifting speck flies toward the camera and resolves into a recognisable pollutant.
+  let rideActive = false, rideFrac = 0;
 
   const pointer = { x: 0, y: 0, has: false, dirty: false };
   const FOCUS = { mode: finePointer ? 'DRIFT' : 'AUTO_TOUR', idx: -1, lastInput: performance.now(), tourIdx: 0, tourUntil: 0 };
@@ -2073,24 +2073,22 @@ function initGL(){
           searching = true;
         }
       } else {
-        // SCROLL-DRIVEN sweep — the magnifier IS act 1. It rides a smooth CONTROLLED path on the
-        // right (clear of the headline) and examines one specimen after another IN PLACE: the
-        // focused specimen is rendered at focusTarget, so it is always centred in the loupe.
+        // SCROLL-DRIVEN ZOOM REVEAL — no glass lens. Each specimen is centred at focusTarget and
+        // GROWS from a small drifting speck into a large, sharp pollutant over its beat, while the
+        // surrounding dust falls out of focus (DoF). The reveal is the zoom + focus pull itself.
         FOCUS.mode = 'AUTO_TOUR';
         const t1 = clampR(0.012, 0.235, S.p);              // normalized act-1 progress
-        const env = 1 - clampR(0.92, 1.0, t1);             // lit across the act, fades into act-2 handoff
         const fpos = t1 * SWEEP.length;
         const beat = Math.min(SWEEP.length - 1, Math.floor(fpos));
         const frac = fpos - beat;                          // 0→1 within the current specimen
         focusedIdx = SWEEP[beat];
-        // controlled lens path: right side, migrating gently toward centre, gentle vertical arc
-        const sx = (0.61 - 0.08 * t1) * innerWidth;
-        const sy = (0.40 + 0.07 * Math.sin(t1 * Math.PI)) * innerHeight;
+        // centre the subject (it is the hero now) with a gentle drift so it isn't dead-static
+        const sx = (0.50 + 0.05 * Math.sin(t1 * Math.PI)) * innerWidth;
+        const sy = (0.43 + 0.05 * Math.sin(t1 * Math.PI * 1.3)) * innerHeight;
         screenToWorld(sx, sy, focusGoal);
         rideActive = true;
-        // settle: lens dips a touch while morphing between specimens, locks to full mid-specimen
-        const centerness = 1 - Math.abs(frac - 0.5) * 2;   // 0 at beat edges, 1 mid-specimen
-        lensGoal = env * (0.82 + 0.18 * clamp01(centerness / 0.5));
+        rideFrac = frac;
+        lensGoal = 0;                                      // bubble removed — zoom, not glass (user)
       }
     }
     pointer.dirty = false;
@@ -2280,11 +2278,15 @@ function initGL(){
       f.standIn.visible = vis;
       if (vis){
         const pop = 1 + 0.22 * Math.max(0, Math.exp(-(now / 1000 - f.popT) * 5)) * (now / 1000 > f.popT ? 1 : 0);
-        // act-1 ride: render the focused specimen AT the controlled lens point (focusTarget) so it
-        // is examined in place, centred in the loupe; all others keep their own drift position.
-        if (rideActive && i === FOCUS.idx) f.standIn.position.copy(focusTarget);
-        else f.standIn.position.copy(f.live);
-        f.standIn.scale.setScalar(3.55 * (0.8 + 0.2 * f.promote) * pop);
+        // act-1 ride: the focused specimen is centred at focusTarget and GROWS from a small speck
+        // into a large, sharp pollutant over its beat (zoom reveal); others keep their drift spot.
+        if (rideActive && i === FOCUS.idx){
+          f.standIn.position.copy(focusTarget);
+          f.standIn.scale.setScalar(3.55 * lerp(0.85, 2.6, easeIO(rideFrac)) * pop);
+        } else {
+          f.standIn.position.copy(f.live);
+          f.standIn.scale.setScalar(3.55 * (0.8 + 0.2 * f.promote) * pop);
+        }
         if (f.standMol){
           setMolecule(f.standMol, f.promote, i === SELECT.idx ? 0.6 : 0.32, now / 1000);
         } else {
