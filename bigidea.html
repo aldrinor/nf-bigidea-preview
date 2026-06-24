@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <meta name="robots" content="noindex,nofollow">
 <title>The Big Idea — Scroll Story</title>
 <meta name="description" content="An interactive, scroll-driven particle-and-molecule data visualization.">
@@ -28,10 +29,10 @@
      and each is composed against the hero panel framing so copy never touches the scene:
      act-4 copy lives below the panel's bottom edge, act-5 copy in the clear top band,
      sized to hold a long two-sentence caption at full scale. */
-  .cap{position:absolute;left:0;right:0;text-align:center;opacity:0;padding:0 7%;will-change:opacity;}
-  .cap h1,.cap h2{font-weight:800;letter-spacing:-.022em;line-height:1.07;font-size:clamp(26px,4.6vw,54px);text-shadow:0 2px 26px rgba(0,0,0,.55),0 1px 4px rgba(0,0,0,.35);text-wrap:balance;}
-  .cap p{margin:14px auto 0;font-size:clamp(15px,1.7vw,20px);color:#9aa6b6;font-weight:450;max-width:660px;text-shadow:0 1px 14px rgba(0,0,0,.5);text-wrap:balance;}
-  #cap-act1{bottom:14%;}
+  .cap{position:absolute;text-align:left;left:7%;right:auto;max-width:38%;padding:0;opacity:0;will-change:opacity;}
+  .cap h1,.cap h2{font-family: 'Instrument Serif', serif;font-weight: 400;font-style: normal;font-size: clamp(2.5rem, 4.5vw, 4.5rem);line-height: 1.02;letter-spacing: -0.015em;text-align: center;color: #eef6fb;text-shadow: 0 4px 24px rgba(5,7,13,0.9), 0 0 60px rgba(52,225,255,0.12);margin: 0;padding: 0 1rem;text-wrap:balance;}
+  .cap p{font-family: 'JetBrains Mono', monospace;font-weight: 400;font-size: clamp(0.85rem, 1.2vw, 1.05rem);line-height: 1.65;letter-spacing: 0.02em;text-align: center;color: #8ba2b3;max-width: 620px;margin: 2rem auto 0;text-shadow: 0 2px 12px rgba(5,7,13,0.9);text-wrap:balance;}
+  #cap-act1{bottom:12%;}
   #cap-act2{bottom:14%;}
   #cap-act2 h2{font-size:clamp(20px,3vw,34px);}
   #cap-act4{bottom:6.5%;}
@@ -68,19 +69,19 @@
   /* Act 3 — a designed three-band stack: held stop (header) · animating chart (middle) ·
      coda row (footer). Each stop holds in the SAME header slot so it reads as the narration
      for the chart drawing below it; the three coda cards land together as a finished row. */
-  #act3-stops{position:absolute;left:50%;top:15%;transform:translateX(-50%);width:min(820px,88vw);height:21vh;pointer-events:none;}
+  #act3-stops{position:absolute;left:6vw;top:9%;width:min(720px,74vw);height:18vh;pointer-events:none;}
   .stop{position:absolute;left:0;right:0;top:0;text-align:center;opacity:0;}
   .stop::before{content:"";display:block;width:46px;height:2px;margin:0 auto 18px;background:linear-gradient(90deg,transparent,rgba(120,150,180,.55),transparent);}
-  .stop h2{font-size:clamp(22px,3.4vw,42px);font-weight:800;letter-spacing:-.02em;line-height:1.12;max-width:780px;margin:0 auto;}
+  .stop h2{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(36px,5.8vw,76px);line-height:1.0;letter-spacing:-.018em;color:#eaf4ff;max-width:900px;margin:0 auto;text-shadow:0 0 48px rgba(52,225,255,.22),0 0 12px rgba(52,225,255,.10),0 2px 0 rgba(0,0,0,.45);max-width:820px;margin:0 auto;}
   .stop h2{text-shadow:0 2px 22px rgba(0,0,0,.6);}
-  #chartbox{position:absolute;left:50%;top:38%;transform:translateX(-50%);width:min(720px,86vw);opacity:0;}
+  #chartbox{position:absolute;left:50%;top:31%;transform:translateX(-50%);width:min(1100px,92vw);height:56vh;opacity:0;}
   #chartbox svg{width:100%;height:auto;display:block;overflow:visible;}
   #ev-pulse{transform-box:fill-box;transform-origin:center;animation:evpulse 1.6s ease-out infinite;}
   @keyframes evpulse{0%{transform:scale(.45);opacity:.9;}70%{transform:scale(1.55);opacity:0;}100%{transform:scale(1.55);opacity:0;}}
   #coda{position:absolute;left:50%;top:75%;transform:translate(-50%,-50%);display:flex;gap:20px;flex-wrap:nowrap;justify-content:center;align-items:stretch;width:min(960px,92vw);}
   /* scene-native frosted-glass panels: blur + saturate the field behind them, a thin
      luminous top edge, and an inner glow; the ACTIVE card lifts and warms. */
-  .coda-card{position:relative;flex:1 1 0;min-width:0;max-width:300px;display:flex;align-items:center;justify-content:center;background:rgba(13,19,31,.46);border:1px solid rgba(150,190,235,.28);border-radius:14px;padding:24px 20px;min-height:96px;font-size:clamp(14px,1.5vw,18px);font-weight:600;color:#dce4ef;letter-spacing:.01em;opacity:0;text-align:center;backdrop-filter:blur(16px) saturate(1.45);-webkit-backdrop-filter:blur(16px) saturate(1.45);box-shadow:inset 0 0 26px rgba(90,160,220,.10),inset 0 1px 0 rgba(190,225,255,.18),0 14px 36px rgba(0,0,0,.45);transition:border-color .35s ease,box-shadow .35s ease,transform .35s ease,color .35s ease;}
+  .coda-card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(18,26,40,.62),rgba(7,11,19,.46));border:1px solid rgba(120,180,230,.14);border-radius:12px;padding:24px 24px 22px;backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.05vw,13.5px);font-weight:500;letter-spacing:.015em;color:#c4d2e4;box-shadow:inset 0 1px 0 rgba(180,220,255,.06),0 28px 60px -32px rgba(0,0,0,.75);}
   .coda-card::before{content:"";position:absolute;left:14%;right:14%;top:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(190,228,255,.65),transparent);opacity:.7;}
   .coda-card.active{border-color:rgba(255,110,128,.55);color:#fff;transform:translateY(-4px);box-shadow:inset 0 0 30px rgba(255,85,102,.13),inset 0 1px 0 rgba(255,210,218,.22),0 18px 40px rgba(0,0,0,.5),0 0 26px rgba(255,85,102,.12);}
   @media (max-width:680px){
@@ -105,7 +106,7 @@
      furniture (legend, counter, badge, pills) gets safe-area insets and is allowed to
      wrap instead of running off the right edge. */
   @media (max-width:700px){
-    .cap{padding:0 6%;}
+    .cap{padding:0;left:6%;right:6%;max-width:88%;}
     .cap h1,.cap h2{font-size:clamp(20px,5.9vw,27px);line-height:1.18;}
     .cap p{font-size:clamp(13px,3.8vw,16px);margin-top:9px;max-width:88vw;}
     #cap-act1{bottom:calc(11% + env(safe-area-inset-bottom,0px));}
@@ -134,6 +135,9 @@
     #hint{display:none;}
     #c{transition:none;}
   }
+  /* full-viewport backdrop scrim: dims the scene behind the #detail panel so it reads as a focused overlay, not a card overlapping the headline. Sits below #detail (z:40) and above the canvas/headline. */
+  #detail-scrim{position:absolute;inset:0;background:rgba(4,6,11,.58);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .42s ease;z-index:39;}
+  #detail-scrim.open{opacity:1;pointer-events:auto;}
   /* per-pollutant deep-story panel */
   #detail{position:absolute;right:34px;top:50%;transform:translate(28px,-50%);width:360px;max-height:74vh;overflow:auto;
     background:rgba(8,14,24,.82);border:1px solid rgba(52,225,255,.32);border-radius:16px;padding:22px 22px 20px;
@@ -159,6 +163,34 @@
     #detail-title{font-size:18px;}
     #detail-body .v{font-size:13px;}
   }
+.cap .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #34e1ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 12px rgba(52,225,255,0.4);
+}
+.cap .eyebrow::before, .cap .eyebrow::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #34e1ff);
+}
+.cap .eyebrow::after {
+  background: linear-gradient(90deg, #34e1ff, transparent);
+}
+.cap::before{content:'';position:absolute;left:-10%;bottom:-20%;width:120%;height:140%;background:linear-gradient(to top, rgba(5,15,25,0.9) 0%, rgba(5,15,25,0) 100%);z-index:-1;pointer-events:none;}
+#cap-act4,#cap-act5{text-align:center;left:0;right:0;max-width:none;padding:0 7%;}
+/* act3 */ .stop{padding-top:6vh;}.stop::before{width:28px;height:1px;margin:0 auto 22px;background:linear-gradient(90deg,transparent,#34e1ff,transparent);opacity:.7;}.stop .eyebrow{display:block;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,.8vw,11px);font-weight:500;letter-spacing:.42em;text-transform:uppercase;color:#34e1ff;opacity:.78;margin:0 auto 26px;}.stop h2 em{font-style:italic;color:#34e1ff;text-shadow:0 0 30px rgba(52,225,255,.45),0 0 8px rgba(52,225,255,.25);}.coda-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(52,225,255,.55),transparent);}.coda-card .coda-tag{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:#34e1ff;opacity:.72;margin-bottom:10px;}.coda-card .coda-name{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:clamp(20px,1.9vw,26px);line-height:1.05;color:#eaf4ff;letter-spacing:-.01em;margin-bottom:8px;text-shadow:0 0 24px rgba(52,225,255,.12);}.coda-card .coda-fail{position:absolute;right:18px;top:18px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.22em;color:#ff5566;opacity:.85;}
+/* a3comp */ #chartbox svg,#chartbox canvas{width:100%;height:100%;display:block;} @media (max-aspect-ratio:3/4){#act3-stops{left:50%;transform:translateX(-50%);width:min(820px,88vw);top:7%;}#chartbox{top:30%;height:58vh;}}
 </style>
 </head>
 <body>
@@ -234,6 +266,7 @@
   <div id="hint">TAP A POLLUTANT&ensp;·&ensp;SCROLL ↓</div>
 
   <!-- per-pollutant deep story: opens on click, persists through Act 2 -->
+  <div id="detail-scrim"></div>
   <div id="detail" aria-hidden="true">
     <button id="detail-close" aria-label="Close">×</button>
     <div id="detail-head"><span id="detail-title"></span><small id="detail-sub"></small></div>
@@ -293,7 +326,7 @@ window.CONFIG = {
         {el:'C',x:0.6188,y:0.0985,z:-0.6033},{el:'C',x:-1.0169,y:-0.2967,z:0.1646},{el:'C',x:1.5262,y:0.8696,z:-0.0071},
         {el:'C',x:1.5845,y:0.359,z:0.5646},{el:'C',x:1.0433,y:0.7394,z:-0.5911},{el:'C',x:-1.3525,y:0.1989,z:0.6387},
         {el:'C',x:-1.6255,y:0.7193,z:0.1649},{el:'C',x:-2.0442,y:1.4041,z:0.2665}] },
-    { id:'f10', position:[  5,-5, -3], label:'Pesticide', treatment:'cloud', outcome:'hold', badge:'2,4-D — net charge −1',
+    { id:'f10', position:[  5,-5, -3], label:'Herbicide', treatment:'cloud', outcome:'hold', badge:'2,4-D — net charge −1',
       moleculeKey:'twofourd', chargeAtoms:[3,4,12], atoms:[
         {el:'Cl',x:-0.0609,y:-1.1731,z:0.0434},{el:'Cl',x:-2.1015,y:0.1659,z:0.24},{el:'O',x:0.5044,y:0.0159,z:-0.3213},
         {el:'O',x:1.8985,y:0.4416,z:0.4087},{el:'O',x:1.6598,y:-0.3959,z:-0.1512},{el:'C',x:-0.1005,y:0.0405,z:-0.189},
@@ -515,7 +548,7 @@ ui.ga.textContent = CONFIG.CAPTIONS.group_a;
 ui.gb.textContent = CONFIG.CAPTIONS.group_b;
 
 /* per-pollutant deep-story panel (Option A: click a pollutant -> its story). */
-const detailEl = $('detail'), detailTitle = $('detail-title'), detailSub = $('detail-sub'), detailBody = $('detail-body');
+const detailEl = $('detail'), detailTitle = $('detail-title'), detailSub = $('detail-sub'), detailBody = $('detail-body'), detailScrim = $('detail-scrim');
 let detailIdx = -1;
 function showDetail(i){
   const f = CONFIG.FEATURES[i]; if (!f) return;
@@ -534,15 +567,20 @@ function showDetail(i){
   detailEl.scrollTop = 0;
   detailEl.classList.add('open');
   detailEl.setAttribute('aria-hidden', 'false');
+  detailScrim.classList.add('open');
+  detailScrim.setAttribute('aria-hidden', 'false');
 }
 function hideDetail(){
   if (detailIdx < 0) return;
   detailIdx = -1;
   detailEl.classList.remove('open');
   detailEl.setAttribute('aria-hidden', 'true');
+  detailScrim.classList.remove('open');
+  detailScrim.setAttribute('aria-hidden', 'true');
 }
 detailEl.addEventListener('click', e => e.stopPropagation());          // clicks inside the panel never reach the world picker
 $('detail-close').addEventListener('click', e => { e.stopPropagation(); hideDetail(); });
+detailScrim.addEventListener('click', e => { e.stopPropagation(); hideDetail(); });  // clicking the dimmed backdrop closes the panel
 // QA hook: ?open=N renders feature N's story panel at load (deterministic screenshot of the panel)
 { const _o = new URLSearchParams(location.search).get('open');
   if (_o !== null) showDetail(Math.max(0, Math.min(N_FEAT - 1, parseInt(_o, 10) || 0))); }
@@ -859,6 +897,21 @@ function initGL(){
   renderer.setClearColor(BASE_COLOR, 1);
 
   const scene = new THREE.Scene();
+  // Atmospheric depth: replace the flat-black void with a soft radial field (a faint cool
+  // lift at center falling to deep black at the edges) so subjects read against cinematic
+  // depth, not a dead void. Identity-preserving (cool blue, very subtle).
+  scene.background = (() => {
+    const s = 512, cv = document.createElement('canvas'); cv.width = cv.height = s;
+    const g = cv.getContext('2d');
+    const rg = g.createRadialGradient(s*0.5, s*0.46, s*0.04, s*0.5, s*0.5, s*0.66);
+    rg.addColorStop(0.0, '#0c1a2b');   // subtle cool core lift
+    rg.addColorStop(0.45, '#070e18');
+    rg.addColorStop(1.0, '#030409');   // deep edges
+    g.fillStyle = rg; g.fillRect(0, 0, s, s);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  })();
   scene.fog = new THREE.FogExp2(new THREE.Color(CONFIG.COLORS.base), 0.0058);
   const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 600);
   camera.position.set(0, 0, 60);
@@ -2307,7 +2360,9 @@ function initGL(){
     // acts 4-5 focus the hero surface itself so the climax renders pin-sharp
     dofFx.target = (p > 0.22 && p < 0.45) ? feat[cloudIdx].live : (p > 0.62 ? PANEL.center : focusTarget);
     dofFx.bokehScale = lerp(0.8, 3.6, Math.max(focusGlow * lensFade, easeIO(clampR(0.24, 0.32, p)) * (1 - clampR(0.40, 0.45, p))));
-    bloomFx.intensity = 0.55 + 0.50 * clampR(0.80, 0.95, p) + 0.28 * redBoost * cloudVis;
+    // GLM-5.2 per-act bloom: dip+raise-threshold for act3 chart legibility, surge for act4/5 drama
+    bloomFx.intensity = 0.35 + 0.10 * clampR(0.22, 0.38, p) - 0.15 * clampR(0.38, 0.45, p) + 0.55 * clampR(0.66, 0.78, p) + 0.20 * clampR(0.80, 0.95, p) + 0.28 * redBoost * cloudVis;
+    bloomFx.luminanceThreshold = 0.30 + 0.30 * clampR(0.38, 0.45, p) - 0.30 * clampR(0.64, 0.72, p);
 
     composer.render(dt);
     if (firstFrame){
