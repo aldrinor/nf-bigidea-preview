@@ -731,6 +731,8 @@ const CHART = (() => {
 /* ============================== scroll-progress state ============================== */
 
 const S = { p: pinnedP !== null ? pinnedP : 0 };
+// act-1 auto-scan state (the scanner cycles through pollutants on its own, even without scrolling)
+let scannedTotal = 6;   // running "pollutants found" count for the climbing counter (read in applyFrame)
 
 /* Per-feature act-5 choreography (derived from CONFIG order, not hardcoded).
    Landings are staggered across the whole act so the climax stays ALIVE from
@@ -876,13 +878,14 @@ function applyFrame(p){
   ui.act4.style.opacity = act4Op;
   ui.act5.style.opacity = clampR(0.83, 0.87, p);
   // counter: act-1 climbs as you scan the pollutants ("and there are hundreds more"); act-5 = capture count
-  const scanVis = clampR(0.03, 0.07, p) * (1 - clampR(0.205, 0.235, p));
+  const scanVis = clampR(0.01, 0.05, p) * (1 - clampR(0.205, 0.235, p));
   if (scanVis > 0.001){
-    const tn = clampR(0.0, 0.235, p);
-    ui.counter.textContent = Math.round(6 + 236 * tn * tn) + ' +';   // accelerates 6 → 240+
-    ui.counter.style.opacity = 0.82 * scanVis;
+    ui.counter.textContent = scannedTotal + ' +';     // climbs as the auto-scan finds each pollutant
+    ui.counter.style.opacity = scanVis;
+    ui.counter.style.fontSize = '17px';               // the "hundreds more" punchline — make it read
   } else {
     ui.counter.style.opacity = 0.9 * clampR(0.835, 0.87, p);
+    ui.counter.style.fontSize = '';
   }
   const gOp = clampR(0.85, 0.89, p) * (act4Op > 0.001 ? 0 : 1);
   ui.ga.style.opacity = gOp;
@@ -1961,6 +1964,8 @@ function initGL(){
   // a drifting speck flies toward the camera and resolves into a recognisable pollutant.
   let rideActive = false, rideFrac = 0;
   let lastScanIdx = -1, scanLockT = -10;   // scan reticle: detect target change → re-snap + relabel
+  let scanPos = 0;                          // auto-scan position (advances on a timer, loops)
+  const SCAN_DWELL = 2.3;                   // seconds the scanner holds on each pollutant
 
   const pointer = { x: 0, y: 0, has: false, dirty: false };
   const FOCUS = { mode: finePointer ? 'DRIFT' : 'AUTO_TOUR', idx: -1, lastInput: performance.now(), tourIdx: 0, tourUntil: 0 };
@@ -2085,22 +2090,21 @@ function initGL(){
           searching = true;
         }
       } else {
-        // SCROLL-DRIVEN ZOOM REVEAL — no glass lens. Each specimen is centred at focusTarget and
-        // GROWS from a small drifting speck into a large, sharp pollutant over its beat, while the
-        // surrounding dust falls out of focus (DoF). The reveal is the zoom + focus pull itself.
+        // AUTO-SCAN — the scanner cycles through the pollutants ON ITS OWN (plays even without
+        // scrolling). Each is centred at focusTarget, GROWS + ROTATES into focus, then the scanner
+        // advances to the next. No glass lens. Scroll just carries you on to the next screen.
         FOCUS.mode = 'AUTO_TOUR';
-        const t1 = clampR(0.012, 0.235, S.p);              // normalized act-1 progress
-        const fpos = t1 * SWEEP.length;
-        const beat = Math.min(SWEEP.length - 1, Math.floor(fpos));
-        const frac = fpos - beat;                          // 0→1 within the current specimen
+        scanPos += dt / SCAN_DWELL;                        // ~1 pollutant every SCAN_DWELL seconds, loops
+        const beat = Math.floor(scanPos) % SWEEP.length;
+        rideFrac = clamp01(scanPos - Math.floor(scanPos)); // 0→1 within the current pollutant
         focusedIdx = SWEEP[beat];
-        // centre the subject (it is the hero now) with a gentle drift so it isn't dead-static
-        const sx = (0.50 + 0.05 * Math.sin(t1 * Math.PI)) * innerWidth;
-        const sy = (0.43 + 0.05 * Math.sin(t1 * Math.PI * 1.3)) * innerHeight;
+        // centre the subject with a slow drift so the frame isn't dead-static
+        const tt = scanPos * 0.5;
+        const sx = (0.50 + 0.06 * Math.sin(tt)) * innerWidth;
+        const sy = (0.43 + 0.05 * Math.cos(tt * 0.8)) * innerHeight;
         screenToWorld(sx, sy, focusGoal);
         rideActive = true;
-        rideFrac = frac;
-        lensGoal = 0;                                      // bubble removed — zoom, not glass (user)
+        lensGoal = 0;
       }
     }
     pointer.dirty = false;
@@ -2294,7 +2298,9 @@ function initGL(){
         // into a large, sharp pollutant over its beat (zoom reveal); others keep their drift spot.
         if (rideActive && i === FOCUS.idx){
           f.standIn.position.copy(focusTarget);
-          f.standIn.scale.setScalar(3.55 * lerp(0.95, 1.55, easeIO(rideFrac)) * pop);  // framed by the reticle
+          f.standIn.scale.setScalar(3.55 * lerp(0.98, 1.5, easeIO(rideFrac)) * pop);   // framed by the reticle
+          f.standIn.rotation.y += dt * 0.7;          // rotate so you see the 3D form
+          f.standIn.rotation.x = 0.18 + 0.05 * Math.sin(clock * 0.5);
         } else {
           f.standIn.position.copy(f.live);
           f.standIn.scale.setScalar(3.55 * (0.8 + 0.2 * f.promote) * pop);
@@ -2389,9 +2395,10 @@ function initGL(){
     } else { ui.badge.style.opacity = 0; ui.badgeLine.style.opacity = 0; }
     // act-1 SCAN reticle: locks onto each scanned pollutant in turn and snaps in its name + charge.
     if (rideActive && FOCUS.idx >= 0 && p < 0.232){
-      if (FOCUS.idx !== lastScanIdx){                 // new target → re-snap + relabel
+      if (FOCUS.idx !== lastScanIdx){                 // new target → re-snap, relabel, climb the count
         lastScanIdx = FOCUS.idx;
         scanLockT = clock;
+        scannedTotal = Math.min(scannedTotal + 11 + (FOCUS.idx % 7) * 2, 287);   // settles near "287 +"
         const fc = feat[FOCUS.idx].cfg;
         ui.callout.querySelector('span').textContent = fc.label;
         ui.callout.querySelector('small').textContent = (fc.badge && fc.badge.length) ? fc.badge : 'net charge −';
