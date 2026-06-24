@@ -1816,13 +1816,13 @@ function initGL(){
         zc.r = texture2D(uZoomTex, vec2(0.5) + dz * (1.0 + ca)).r;
         zc.g = texture2D(uZoomTex, vec2(0.5) + dz).g;
         zc.b = texture2D(uZoomTex, vec2(0.5) + dz * (1.0 - ca)).b;
-        col = mix(inputColor.rgb, zc * 1.10, smoothstep(0.0, 0.16, S));
+        col = mix(inputColor.rgb, zc * 1.55, smoothstep(0.0, 0.16, S));   // brighter so the specimen reads
       }
       if (S >= 0.003 && t <= 1.12){
         vec2 nd = d / uRadius;
-        /* crisp dark bezel — it magnifies, it emits nothing */
-        float rim = exp(-pow((t - 1.0) / 0.040, 2.0));
-        col *= 1.0 - 0.92 * S * rim;
+        /* soft bezel — a magnified patch of air, not a heavy glass marble */
+        float rim = exp(-pow((t - 1.0) / 0.050, 2.0));
+        col *= 1.0 - 0.45 * S * rim;
         /* glass catching ambient light: accretion ring + a whisper of disc lift */
         float ring = exp(-pow((t - 0.885) / 0.026, 2.0));
         col += vec3(0.72, 0.79, 0.88) * ring * 0.15 * S;
@@ -1832,7 +1832,7 @@ function initGL(){
         float spec = exp(-(g1.x * g1.x * 26.0 + g1.y * g1.y * 90.0 + g1.x * g1.y * 38.0));
         vec2 g2 = nd - vec2(0.33, -0.38);
         float spec2 = exp(-dot(g2, g2) * 160.0);
-        col += vec3(0.85, 0.92, 1.0) * (spec * 0.30 + spec2 * 0.12) * S;
+        col += vec3(0.85, 0.92, 1.0) * (spec * 0.16 + spec2 * 0.07) * S;   // calmer glint — less "shiny sphere"
         /* caustic crescent hugging the lower-right inner rim */
         float cres = exp(-pow((t - 0.78) / 0.085, 2.0)) * smoothstep(-0.2, 0.9, dot(normalize(nd + 1e-5), normalize(vec2(0.55, -0.6))));
         col += vec3(0.35, 0.85, 1.0) * cres * 0.07 * S;
@@ -1889,12 +1889,13 @@ function initGL(){
   /* GLM-5V realism: a visible cool light SOURCE (upper-left) that casts a volumetric
      god-ray shaft through the dust. The lit dust + the continuous ray glow together read
      as a real Tyndall light shaft. Gated to act 1 (opacity driven by scroll). */
-  // cloudy emitter texture so the god-ray shaft streaks/breaks up instead of a silky gradient (GLM-5V)
+  // Soft, FORMLESS glow (feathered edges + cloud streaks) — NOT a visible square/plate. Reads as
+  // light spilling in from off the top-left corner, so the source has no hard geometry the eye snags on.
   const shaftTex = (() => {
     const s = 128, cv = document.createElement('canvas'); cv.width = cv.height = s;
     const g = cv.getContext('2d'); const rr = mulberry32(321);
     g.fillStyle = '#ffffff'; g.fillRect(0, 0, s, s);
-    g.globalCompositeOperation = 'multiply';
+    g.globalCompositeOperation = 'multiply';            // break the glow into organic cloud streaks
     for (let i = 0; i < 150; i++){
       const x = rr() * s, y = rr() * s, rad = 4 + rr() * 34, a = 0.05 + rr() * 0.16;
       const v = 40 + (rr() * 70 | 0);
@@ -1903,17 +1904,19 @@ function initGL(){
       gr.addColorStop(1, 'rgba(255,255,255,0)');
       g.fillStyle = gr; g.fillRect(0, 0, s, s);
     }
+    g.globalCompositeOperation = 'destination-in';      // feather ALL edges to transparent → no square
+    const fr = g.createRadialGradient(s * 0.5, s * 0.5, s * 0.06, s * 0.5, s * 0.5, s * 0.5);
+    fr.addColorStop(0, 'rgba(0,0,0,1)'); fr.addColorStop(0.55, 'rgba(0,0,0,0.8)'); fr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = fr; g.fillRect(0, 0, s, s);
+    g.globalCompositeOperation = 'source-over';
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
   })();
   const lightSrcMat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(0xd6f1ff), map: shaftTex, transparent: true, opacity: 0.0,
+    color: new THREE.Color(0xcfeaff), map: shaftTex, transparent: true, opacity: 0.0,
     blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, fog: false,
   });
-  // GLM-5V: NOT a "magic orb" — a blown-out rectangular panel (skylight / overhead fixture)
-  // clipped at the top-left corner, so it reads as an interior scientific light, not a moon.
-  const lightSrc = new THREE.Mesh(new THREE.PlaneGeometry(17, 9), lightSrcMat);
-  lightSrc.position.set(-30, 25, -4);
-  lightSrc.rotation.z = -0.18;            // slight tilt — a fixture, not a perfect HUD rectangle
+  const lightSrc = new THREE.Mesh(new THREE.PlaneGeometry(34, 30), lightSrcMat);
+  lightSrc.position.set(-36, 30, -4);     // mostly off the top-left corner — only the spill shows
   lightSrc.renderOrder = -2;
   scene.add(lightSrc);
   const godRaysFx = new GodRaysEffect(camera, lightSrc, {
