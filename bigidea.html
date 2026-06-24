@@ -1020,7 +1020,7 @@ function initGL(){
       uTime: { value: 0 }, uGlobal: { value: 0.60 },
       uLightPos:   { value: new THREE.Vector3(-26, 22, -4) },
       uLightDir:   { value: new THREE.Vector3(36, -24, -6).normalize() }, // toward field centre
-      uBeamRadius: { value: 16.0 }, uBeamFalloff: { value: 1.1 }, uBeamBoost: { value: 3.2 },
+      uBeamRadius: { value: 22.0 }, uBeamFalloff: { value: 0.7 }, uBeamBoost: { value: 1.25 },
     },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: `
@@ -1064,8 +1064,8 @@ function initGL(){
         // big rare tier = soft out-of-focus bokeh blob (still solid, no ring)
         float blob = smoothstep(0.25, 0.02, r2);
         float shape = mix(core, blob, vKind);
-        // crush out-of-beam to near-black (≈25:1) so the lit dust reads as a real shaft
-        float lit = mix(0.04, 1.0, vBeam) * vScatter;
+        // gentle directional shading only (no harsh beam / no visible source)
+        float lit = mix(0.55, 1.0, vBeam) * vScatter;
         // GLM-5V: real motes in a beam flash a blinding specular pin-prick (the particle reflecting the bulb)
         float spec = vBeam * (1.0 - vKind) * exp(-r2 * 110.0);
         float a = (shape + spec * 0.9) * vA * lit * uGlobal;
@@ -2426,18 +2426,22 @@ function initGL(){
     dustMat.uniforms.uGlobal.value = 0.62 * (1 - 0.45 * cloudVis
       - 0.40 * clampR(0.45, 0.48, p) * (1 - clampR(0.655, 0.69, p))
       + 0.30 * clampR(0.80, 0.88, p));
-    // GLM-5V volumetric light shaft — visible only in act 1, fades out as the molecule takes over
-    const shaftLit = 1 - clampR(0.20, 0.30, S.p);
-    lightSrcMat.opacity = 0.95 * shaftLit;
-    lightSrc.visible = shaftLit > 0.001;
-    godRaysFx.blendMode.opacity.value = 0.85 * shaftLit;
-    fgBokeh.visible = shaftLit > 0.001;
+    // Light SOURCE + god-rays removed (user: the bright corner read as weird). The dust keeps a
+    // gentle directional shading for dimension, but there is no visible source/beam.
+    lightSrcMat.opacity = 0;
+    lightSrc.visible = false;
+    godRaysFx.blendMode.opacity.value = 0;
+    // keep the soft foreground bokeh (depth) through act 1
+    const act1vis = 1 - clampR(0.20, 0.30, S.p);
+    fgBokeh.visible = act1vis > 0.001;
     if (fgBokeh.visible){
       for (const sp of fgBokeh.children){
-        sp.material.opacity = sp.userData.baseO * shaftLit;
+        sp.material.opacity = sp.userData.baseO * act1vis;
         sp.position.x += sp.userData.dx * dt; sp.position.y += sp.userData.dy * dt;
       }
     }
+    // the act-4/5 charged surface must NOT peek into act 1 (the teal bar on the right edge)
+    panel.visible = S.p > 0.58;
     const hero = heroMolecule(cloudIdx);
     for (const [hi, HM] of heroMols) HM.group.visible = hi === cloudIdx && cloudVis > 0.004;
     if (cloudVis > 0.004){
