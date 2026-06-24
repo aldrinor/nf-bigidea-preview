@@ -457,7 +457,7 @@ import * as THREE from 'three';
 import {
   EffectComposer, RenderPass, EffectPass, Effect,
   BloomEffect, DepthOfFieldEffect, GodRaysEffect, VignetteEffect, NoiseEffect,
-  ChromaticAberrationEffect, BlendFunction, KernelSize
+  ChromaticAberrationEffect, ToneMappingEffect, ToneMappingMode, BlendFunction, KernelSize
 } from 'postprocessing';
 
 const CONFIG = window.CONFIG;
@@ -528,6 +528,9 @@ const pinnedP = urlP !== null ? clamp01(parseFloat(urlP) || 0) : null;
 // QA hook: ?focus=N pins the Act-1 lens onto feature index N (deterministic hero of one specimen)
 const _focusRaw = new URLSearchParams(location.search).get('focus');
 const focusPin = _focusRaw !== null ? Math.max(0, Math.min(N_FEAT - 1, parseInt(_focusRaw, 10) || 0)) : null;
+// QA hook: ?scan=N pins the auto-scan on SWEEP beat N (deterministic render of one pollutant in-scene)
+const _scanRaw = new URLSearchParams(location.search).get('scan');
+const scanPin = _scanRaw !== null ? Math.max(0, parseInt(_scanRaw, 10) || 0) : null;
 
 /* ============================== DOM from CONFIG ============================== */
 
@@ -962,6 +965,25 @@ function initGL(){
   key.position.set(6, 9, 14);
   scene.add(key);
 
+  /* GLM-5.2 look-dev Phase 1: a DARK, COOL image-based-lighting environment so PBR specimens
+     actually reflect something (a MeshStandardMaterial with no env map is just Lambertian → the
+     "flat plastic" the audit flagged). Tiny custom env scene = a dim cool key + a cyan accent +
+     a deep fill, baked to a PMREM cubemap. Background stays the dark radial gradient. */
+  {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(0x05070d);
+    const mkGlow = (hex, r, x, y, z) => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 18), new THREE.MeshBasicMaterial({ color: hex }));
+      m.position.set(x, y, z); envScene.add(m);
+    };
+    mkGlow(0x9fbfe2, 11, -7, 22, 6);    // cool key (upper-left)
+    mkGlow(0x34e1ff, 6,  17, 5, -11);   // cyan accent (palette)
+    mkGlow(0x1a2636, 8,  9, -13, 9);    // deep cool fill (lower)
+    scene.environment = pmrem.fromScene(envScene, 0.05).texture;
+    pmrem.dispose();
+  }
+
   /* ---------- soft round sprite texture (shared) ---------- */
   const spriteTex = (() => {
     const cv = document.createElement('canvas'); cv.width = cv.height = 64;
@@ -1321,7 +1343,7 @@ function initGL(){
       `#include <emissivemap_fragment>
       {
         float rF = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 3.0);
-        totalEmissiveRadiance += vec3(0.22, 0.42, 0.68) * rF * 0.9;
+        totalEmissiveRadiance += vec3(0.22, 0.42, 0.68) * rF * 0.28;
       }`);
   };
   const rimHookNeg = shader => {
@@ -1329,15 +1351,19 @@ function initGL(){
       `#include <emissivemap_fragment>
       {
         float rF = pow(1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0), 3.0);
-        totalEmissiveRadiance += vec3(0.95, 0.28, 0.34) * rF * 1.05;
+        totalEmissiveRadiance += vec3(0.95, 0.28, 0.34) * rF * 0.50;
       }`);
   };
   /* one material per atom: contact AO (crowded atoms darken) is baked into the
      colour/emissive; emissive then gets a per-frame depth cue in setMolecule */
   function makeAtomMat(isNeg, ao){
-    const m = new THREE.MeshStandardMaterial(isNeg
-      ? { color: 0xffd9de, roughness: 0.30, metalness: 0.0, emissive: NEG_COL, emissiveIntensity: 0.85 }
-      : { color: 0xdceafc, roughness: 0.34, metalness: 0.0, emissive: 0x86b4d6, emissiveIntensity: 0.48 });
+    // GLM-5.2 Phase 2: premium glossy "wet ceramic" atoms — clearcoat + env reflections, emissive
+    // killed (was the "neon plastic"). The negative-charge atom keeps only a faint red glow.
+    const m = new THREE.MeshPhysicalMaterial(isNeg
+      ? { color: 0xff9aa5, roughness: 0.18, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.06,
+          emissive: NEG_COL, emissiveIntensity: 0.20, envMapIntensity: 1.25 }
+      : { color: 0xcfe1f6, roughness: 0.16, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.05,
+          emissive: 0x000000, emissiveIntensity: 0.0, envMapIntensity: 1.25 });
     m.color.multiplyScalar(1 - 0.30 * ao);
     m.emissiveIntensity *= 1 - 0.45 * ao;
     m.onBeforeCompile = isNeg ? rimHookNeg : rimHookBody;
@@ -1565,8 +1591,8 @@ function initGL(){
 
     if (kind === 'virus'){
       // SPIKY CAPSID (virus) — core + radial club spikes + faint envelope + red charge sheen
-      const bodyMat = trk(new THREE.MeshStandardMaterial({ color:0xd7e2f2, roughness:0.34, metalness:0.10, emissive:0x40537a, emissiveIntensity:0.95 }), 1);
-      g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.60, 1), bodyMat));
+      const bodyMat = trk(new THREE.MeshPhysicalMaterial({ color:0xc2d2e8, roughness:0.42, metalness:0.0, clearcoat:0.7, clearcoatRoughness:0.35, transmission:0.12, thickness:0.7, ior:1.38, emissive:0x40537a, emissiveIntensity:0.95, envMapIntensity:1.0 }), 1);
+      g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.60, 2), bodyMat));
       const stemGeo = new THREE.CylinderGeometry(0.035, 0.055, 0.30, 6);
       const stemMat = trk(new THREE.MeshStandardMaterial({ color:0xc8d6ea, roughness:0.40, metalness:0.08, emissive:0x3a4d72, emissiveIntensity:0.8 }), 1);
       const knobMat = trk(new THREE.MeshStandardMaterial({ color:0xd2e0f4, roughness:0.30, metalness:0.05, emissive:0x49608c, emissiveIntensity:1.05 }), 1);
@@ -1586,8 +1612,8 @@ function initGL(){
 
     if (kind === 'spore'){
       // SPORE CLUSTER (fungi) — a few bumpy, granular spheroids
-      const bodyMat = trk(new THREE.MeshStandardMaterial({ color:0xdde6da, roughness:0.52, metalness:0.04, emissive:0x44513c, emissiveIntensity:0.72, flatShading:true }), 1);
-      const lobeGeo = new THREE.IcosahedronGeometry(1, 2);
+      const bodyMat = trk(new THREE.MeshPhysicalMaterial({ color:0xcdd8c8, roughness:0.50, metalness:0.0, clearcoat:0.5, clearcoatRoughness:0.40, transmission:0.10, thickness:0.6, ior:1.36, emissive:0x44513c, emissiveIntensity:0.72, envMapIntensity:0.9 }), 1);
+      const lobeGeo = new THREE.IcosahedronGeometry(1, 3);
       const pos = lobeGeo.attributes.position, v = new THREE.Vector3();
       for (let i=0;i<pos.count;i++){ v.fromBufferAttribute(pos,i); const d = 1 + (Math.sin(v.x*7)*Math.cos(v.y*6)*Math.sin(v.z*5))*0.12; v.multiplyScalar(d); pos.setXYZ(i, v.x, v.y, v.z); }
       lobeGeo.computeVertexNormals();
@@ -1603,8 +1629,8 @@ function initGL(){
 
     if (kind === 'rod'){
       // ROD CELL (bacteria) — smooth capsule membrane + trailing flagella + red sheen
-      const bodyMat = trk(new THREE.MeshStandardMaterial({ color:0xd9e4f0, roughness:0.28, metalness:0.16, emissive:0x3d5170, emissiveIntensity:0.9 }), 1);
-      const cap = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 1.0, 8, 18), bodyMat); cap.rotation.z = Math.PI*0.5; g.add(cap);
+      const bodyMat = trk(new THREE.MeshPhysicalMaterial({ color:0xc7d6e8, roughness:0.40, metalness:0.0, clearcoat:0.7, clearcoatRoughness:0.30, transmission:0.14, thickness:0.9, ior:1.40, emissive:0x3d5170, emissiveIntensity:0.9, envMapIntensity:1.0 }), 1);
+      const cap = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 1.0, 10, 24), bodyMat); cap.rotation.z = Math.PI*0.5; g.add(cap);
       const flMat = trk(new THREE.MeshStandardMaterial({ color:0xb8c8e0, roughness:0.40, metalness:0.05, emissive:0x35496c, emissiveIntensity:0.6 }), 0.9);
       const nFl = SD ? 2 : 3;
       for (let k=0;k<nFl;k++){
@@ -1633,8 +1659,8 @@ function initGL(){
 
     if (kind === 'pollen'){
       // POLLEN GRAIN — bumpy amber grain studded with conical (echinate) spikes; warm, single body (vs cool virus)
-      const bodyMat = trk(new THREE.MeshStandardMaterial({ color:0xe6d29a, roughness:0.55, metalness:0.04, emissive:0x6a5a2e, emissiveIntensity:0.85, flatShading:true }), 1);
-      const grain = new THREE.IcosahedronGeometry(0.70, 3);
+      const bodyMat = trk(new THREE.MeshStandardMaterial({ color:0xe6d29a, roughness:0.55, metalness:0.04, emissive:0x6a5a2e, emissiveIntensity:0.85 }), 1);
+      const grain = new THREE.IcosahedronGeometry(0.70, 4);
       { const pos=grain.attributes.position, v=new THREE.Vector3();
         for (let i=0;i<pos.count;i++){ v.fromBufferAttribute(pos,i); const d=1+(Math.sin(v.x*9)*Math.sin(v.y*9)*Math.sin(v.z*9))*0.07; v.multiplyScalar(d); pos.setXYZ(i,v.x,v.y,v.z); }
         grain.computeVertexNormals(); }
@@ -1742,6 +1768,21 @@ function initGL(){
       ring.position.copy(f.landingLocal).add(new THREE.Vector3(0, 0, 0.06));
       panel.add(ring);
       f.pulseMat = pm; f.pulseRing = ring;
+    }
+  }
+
+  /* GLM-5.2 Phase 2: the particle specimens were emissive "neon plastic". Kill the emissive so the
+     new dark-cool IBL environment does the lighting (reflections = realism), and make soot/PM read
+     as dark carbon that catches a cool rim rather than a glowing toy. (Molecules handled in makeAtomMat.) */
+  for (const f of feat){
+    if (f.cfg.treatment === 'cloud') continue;
+    const isSoot = f.cfg.specimen === 'soot' || f.cfg.specimen === 'pm';
+    for (const m of (f.standMats || [])){
+      if (!m || m.emissiveIntensity === undefined) continue;
+      m.emissiveIntensity *= isSoot ? 0.04 : 0.16;
+      m.envMapIntensity = isSoot ? 0.9 : 1.15;
+      if (isSoot && m.color){ m.color.setHex(0x17171a); m.roughness = Math.max(m.roughness || 0.5, 0.9); m.metalness = 0.0; }
+      m.needsUpdate = true;
     }
   }
 
@@ -1948,12 +1989,14 @@ function initGL(){
     offset: new THREE.Vector2(0.0007, 0.0009), radialModulation: true, modulationOffset: 0.20,
   });
   const vignetteFx = new VignetteEffect({ offset: 0.30, darkness: 0.55 });
+  // ACES filmic tone mapping so the PBR specimens + env reflections read correctly in the dark scene
+  const toneFx = new ToneMappingEffect({ mode: ToneMappingMode.ACES_FILMIC });
   composer.addPass(new RenderPass(scene, camera));
   composer.addPass(new EffectPass(camera, godRaysFx));  // volumetric light shaft (act 1)
   composer.addPass(new EffectPass(camera, dofFx));      // blur by depth (molecule is the focus target)
   composer.addPass(new EffectPass(camera, bloomFx));    // charge glow + finale bloom
   composer.addPass(new EffectPass(camera, lensFx));     // lens magnifies the final image
-  composer.addPass(new EffectPass(camera, caFx, vignetteFx, grainFx));   // film-stock finish
+  composer.addPass(new EffectPass(camera, toneFx, caFx, vignetteFx, grainFx));   // ACES + film-stock finish
 
   /* ---------- focus system: lens / DoF / dolly all follow one damped target ---------- */
   const focusTarget = new THREE.Vector3(0, 0, 0);   // critically-damped (lerp ~0.1)
@@ -2095,6 +2138,7 @@ function initGL(){
         // advances to the next. No glass lens. Scroll just carries you on to the next screen.
         FOCUS.mode = 'AUTO_TOUR';
         scanPos += dt / SCAN_DWELL;                        // ~1 pollutant every SCAN_DWELL seconds, loops
+        if (scanPin !== null) scanPos = scanPin + 0.6;     // QA: hold on one pollutant (grown, mid-dwell)
         const beat = Math.floor(scanPos) % SWEEP.length;
         rideFrac = clamp01(scanPos - Math.floor(scanPos)); // 0→1 within the current pollutant
         focusedIdx = SWEEP[beat];
@@ -2298,8 +2342,8 @@ function initGL(){
         // into a large, sharp pollutant over its beat (zoom reveal); others keep their drift spot.
         if (rideActive && i === FOCUS.idx){
           f.standIn.position.copy(focusTarget);
-          f.standIn.scale.setScalar(3.55 * lerp(0.98, 1.5, easeIO(rideFrac)) * pop);   // framed by the reticle
-          f.standIn.rotation.y += dt * 0.7;          // rotate so you see the 3D form
+          f.standIn.scale.setScalar(3.55 * lerp(1.7, 2.6, easeIO(rideFrac)) * pop);   // larger so the craft reads
+          f.standIn.rotation.y += dt * 0.55;         // rotate so you see the 3D form
           f.standIn.rotation.x = 0.18 + 0.05 * Math.sin(clock * 0.5);
         } else {
           f.standIn.position.copy(f.live);
@@ -2406,7 +2450,7 @@ function initGL(){
       projectPoint(focusTarget, _scr);
       if (!_scr.behind){
         const since = clock - scanLockT;
-        const snap = 1 + 0.45 * Math.exp(-since * 7);          // lock-on pop
+        const snap = 1.55 * (1 + 0.30 * Math.exp(-since * 7));   // lock-on pop, sized to the larger specimen
         const appear = Math.min(1, since * 5);
         ui.reticle.style.transform = `translate(${_scr.x}px,${_scr.y}px) scale(${snap.toFixed(3)})`;
         ui.reticle.style.opacity = appear * (1 - clampR(0.205, 0.232, p));
