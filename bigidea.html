@@ -456,7 +456,8 @@ window.CONFIG = {
 import * as THREE from 'three';
 import {
   EffectComposer, RenderPass, EffectPass, Effect,
-  BloomEffect, DepthOfFieldEffect, BlendFunction, KernelSize
+  BloomEffect, DepthOfFieldEffect, GodRaysEffect, VignetteEffect, NoiseEffect,
+  ChromaticAberrationEffect, BlendFunction, KernelSize
 } from 'postprocessing';
 
 const CONFIG = window.CONFIG;
@@ -906,9 +907,9 @@ function initGL(){
     const s = 512, cv = document.createElement('canvas'); cv.width = cv.height = s;
     const g = cv.getContext('2d');
     const rg = g.createRadialGradient(s*0.5, s*0.46, s*0.04, s*0.5, s*0.5, s*0.66);
-    rg.addColorStop(0.0, '#0c1a2b');   // subtle cool core lift
-    rg.addColorStop(0.45, '#070e18');
-    rg.addColorStop(1.0, '#030409');   // deep edges
+    rg.addColorStop(0.0, '#08131f');   // crushed cool core — the shaft provides the light (GLM-5V)
+    rg.addColorStop(0.45, '#04080f');
+    rg.addColorStop(1.0, '#01040a');   // near-black edges
     g.fillStyle = rg; g.fillRect(0, 0, s, s);
     const tex = new THREE.CanvasTexture(cv);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -1008,38 +1009,94 @@ function initGL(){
   dustGeo.setAttribute('aTint', new THREE.BufferAttribute(dustTint, 3));
   dustGeo.setAttribute('aSeed', new THREE.BufferAttribute(dustSeed, 1));
   dustGeo.setAttribute('aKind', new THREE.BufferAttribute(dustKind, 1));
+  /* GLM-5V/5.2 photo-real pass: dust is matter in a light medium, not LEDs in a void.
+     - a cool key light casts a soft cone; dust BRIGHTNESS depends on proximity to that
+       beam, so the lit dust itself forms a Tyndall shaft (you see light because it scatters)
+     - per-particle JAGGED silhouette (procedural noise) kills the perfect-circle "CG tell";
+       the rare big motes stay smooth bokeh discs with a bright rim
+     - a soft wrap-scatter term so motes catch the key light on one side                     */
   const dustMat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uGlobal: { value: 0.62 } },
+    uniforms: {
+      uTime: { value: 0 }, uGlobal: { value: 0.60 },
+      uLightPos:   { value: new THREE.Vector3(-26, 22, -4) },
+      uLightDir:   { value: new THREE.Vector3(36, -24, -6).normalize() }, // toward field centre
+      uBeamRadius: { value: 16.0 }, uBeamFalloff: { value: 1.1 }, uBeamBoost: { value: 3.2 },
+    },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: `
       attribute float aSize; attribute vec3 aTint; attribute float aSeed; attribute float aKind;
       uniform float uTime;
-      varying vec3 vT; varying float vKind; varying float vA;
+      uniform vec3 uLightPos; uniform vec3 uLightDir; uniform float uBeamRadius; uniform float uBeamFalloff;
+      varying vec3 vT; varying float vKind; varying float vA; varying float vBeam; varying float vScatter; varying float vSeed;
       void main(){
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
         float dist = max(1.0, -mv.z);
         gl_PointSize = min(aSize * (330.0 / dist), 80.0);
         gl_Position = projectionMatrix * mv;
-        vT = aTint; vKind = aKind;
+        vT = aTint; vKind = aKind; vSeed = aSeed;
         float tw = 0.74 + 0.26 * sin(uTime * (0.5 + fract(aSeed * 0.13) * 1.3) + aSeed);
         vA = tw * (0.30 + 0.70 * smoothstep(150.0, 35.0, dist)) * smoothstep(6.0, 16.0, dist);
+        // proximity to the key-light cone → the lit dust forms the visible shaft
+        vec3 toP = position - uLightPos;
+        float along = dot(toP, uLightDir);
+        vec3 perp = toP - along * uLightDir;
+        float coneR = uBeamRadius * (1.0 + 0.04 * max(along, 0.0));
+        vBeam = exp(-pow(length(perp) / coneR, 2.0) * uBeamFalloff) * smoothstep(-6.0, 8.0, along);
+        // soft wrap-around scatter: motes catch the light on the side facing it
+        vec3 L = normalize(uLightPos - position);
+        vScatter = pow(max(dot(normalize(-mv.xyz), L), 0.0), 1.5) * 0.55 + 0.45;
       }`,
     fragmentShader: `
-      uniform float uGlobal;
-      varying vec3 vT; varying float vKind; varying float vA;
+      uniform float uGlobal; uniform float uBeamBoost;
+      varying vec3 vT; varying float vKind; varying float vA; varying float vBeam; varying float vScatter; varying float vSeed;
       void main(){
+        // GLM-5V: dust is SOFT and SOLID — soft circles, but ~1/3 squashed into organic ellipses
+        // (real dust is fibres/flakes, rarely flawless spheres) so they don't all read as vector dots.
         vec2 q = gl_PointCoord - 0.5;
+        if (vKind < 0.5 && fract(vSeed * 0.371) > 0.68){
+          float a = vSeed * 2.399;
+          vec2 rq = vec2(q.x * cos(a) - q.y * sin(a), q.x * sin(a) + q.y * cos(a));
+          rq.x *= 1.55; rq.y *= 0.72;
+          q = rq;
+        }
         float r2 = dot(q, q);
-        float core = exp(-r2 * 15.0) * smoothstep(0.25, 0.16, r2);
-        float disc = smoothstep(0.245, 0.205, r2) * (0.40 + 0.60 * smoothstep(0.09, 0.225, r2));
-        float a = mix(core, disc, vKind) * vA * uGlobal;
-        if (a < 0.008) discard;
-        gl_FragColor = vec4(vT, a);
+        float core = exp(-r2 * 14.0) * smoothstep(0.25, 0.08, r2);
+        // big rare tier = soft out-of-focus bokeh blob (still solid, no ring)
+        float blob = smoothstep(0.25, 0.02, r2);
+        float shape = mix(core, blob, vKind);
+        // crush out-of-beam to near-black (≈25:1) so the lit dust reads as a real shaft
+        float lit = mix(0.04, 1.0, vBeam) * vScatter;
+        // GLM-5V: real motes in a beam flash a blinding specular pin-prick (the particle reflecting the bulb)
+        float spec = vBeam * (1.0 - vKind) * exp(-r2 * 110.0);
+        float a = (shape + spec * 0.9) * vA * lit * uGlobal;
+        if (a < 0.005) discard;
+        vec3 col = vT * (1.0 + vBeam * uBeamBoost) + spec * vec3(1.1, 1.15, 1.2);
+        gl_FragColor = vec4(col, a);
       }`,
   });
   const dust = new THREE.Points(dustGeo, dustMat);
   dust.frustumCulled = false;
   scene.add(dust);
+
+  /* GLM-5V: a few BIG, soft, dim out-of-focus bokeh discs near the camera — instant macro-lens
+     depth so the motes no longer read as one flat focal plane. Drift slowly; act 1 only. */
+  const fgBokeh = new THREE.Group();
+  {
+    const r = mulberry32(7777);
+    const c = new THREE.Color();
+    for (let i = 0; i < 6; i++){
+      c.setHSL(0.55, 0.22, 0.72);
+      const m = new THREE.SpriteMaterial({ map: spriteTex, color: c.clone(), transparent: true, opacity: 0,
+        depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, fog: false });
+      const sp = new THREE.Sprite(m);
+      sp.scale.setScalar(15 + r() * 17);
+      sp.position.set((r() - 0.5) * 72, (r() - 0.5) * 44, 38 + r() * 13);   // in front of the field (cam z=60)
+      sp.userData = { baseO: 0.05 + r() * 0.06, dx: (r() - 0.5) * 0.5, dy: (r() - 0.5) * 0.35 };
+      fgBokeh.add(sp);
+    }
+  }
+  fgBokeh.renderOrder = 3;
+  scene.add(fgBokeh);
 
   const _c = [0, 0, 0];
   let dustCursor = 0;
@@ -1829,14 +1886,60 @@ function initGL(){
     intensity: 0.55, luminanceThreshold: 0.30, luminanceSmoothing: 0.22,
     mipmapBlur: true, kernelSize: KernelSize.MEDIUM,
   });
+  /* GLM-5V realism: a visible cool light SOURCE (upper-left) that casts a volumetric
+     god-ray shaft through the dust. The lit dust + the continuous ray glow together read
+     as a real Tyndall light shaft. Gated to act 1 (opacity driven by scroll). */
+  // cloudy emitter texture so the god-ray shaft streaks/breaks up instead of a silky gradient (GLM-5V)
+  const shaftTex = (() => {
+    const s = 128, cv = document.createElement('canvas'); cv.width = cv.height = s;
+    const g = cv.getContext('2d'); const rr = mulberry32(321);
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, s, s);
+    g.globalCompositeOperation = 'multiply';
+    for (let i = 0; i < 150; i++){
+      const x = rr() * s, y = rr() * s, rad = 4 + rr() * 34, a = 0.05 + rr() * 0.16;
+      const v = 40 + (rr() * 70 | 0);
+      const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+      gr.addColorStop(0, 'rgba(' + v + ',' + v + ',' + (v + 18) + ',' + a + ')');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, s, s);
+    }
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  const lightSrcMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(0xd6f1ff), map: shaftTex, transparent: true, opacity: 0.0,
+    blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, fog: false,
+  });
+  // GLM-5V: NOT a "magic orb" — a blown-out rectangular panel (skylight / overhead fixture)
+  // clipped at the top-left corner, so it reads as an interior scientific light, not a moon.
+  const lightSrc = new THREE.Mesh(new THREE.PlaneGeometry(17, 9), lightSrcMat);
+  lightSrc.position.set(-30, 25, -4);
+  lightSrc.rotation.z = -0.18;            // slight tilt — a fixture, not a perfect HUD rectangle
+  lightSrc.renderOrder = -2;
+  scene.add(lightSrc);
+  const godRaysFx = new GodRaysEffect(camera, lightSrc, {
+    density: 0.92, decay: 0.93, weight: 0.5, exposure: 0.5, samples: 60,
+    blur: true, kernelSize: KernelSize.SMALL, blendFunction: BlendFunction.SCREEN,
+  });
+  godRaysFx.blendMode.opacity.value = 0.0;
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
     multisampling: Math.min(4, renderer.capabilities.maxSamples || 0),   // clean geometry edges (panel)
   });
+  /* GLM-5V "grain test": real volumetrics/optics are gritty, not silky digital gradients.
+     A restrained film-stock finish — fine grain + edge chromatic aberration + vignette — kills
+     the Photoshop-smooth feel across the whole piece. Values deliberately subtle. */
+  const grainFx = new NoiseEffect({ blendFunction: BlendFunction.OVERLAY, premultiply: true });
+  grainFx.blendMode.opacity.value = 0.06;
+  const caFx = new ChromaticAberrationEffect({
+    offset: new THREE.Vector2(0.0007, 0.0009), radialModulation: true, modulationOffset: 0.20,
+  });
+  const vignetteFx = new VignetteEffect({ offset: 0.30, darkness: 0.55 });
   composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new EffectPass(camera, godRaysFx));  // volumetric light shaft (act 1)
   composer.addPass(new EffectPass(camera, dofFx));      // blur by depth (molecule is the focus target)
   composer.addPass(new EffectPass(camera, bloomFx));    // charge glow + finale bloom
   composer.addPass(new EffectPass(camera, lensFx));     // lens magnifies the final image
+  composer.addPass(new EffectPass(camera, caFx, vignetteFx, grainFx));   // film-stock finish
 
   /* ---------- focus system: lens / DoF / dolly all follow one damped target ---------- */
   const focusTarget = new THREE.Vector3(0, 0, 0);   // critically-damped (lerp ~0.1)
@@ -2318,6 +2421,18 @@ function initGL(){
     dustMat.uniforms.uGlobal.value = 0.62 * (1 - 0.45 * cloudVis
       - 0.40 * clampR(0.45, 0.48, p) * (1 - clampR(0.655, 0.69, p))
       + 0.30 * clampR(0.80, 0.88, p));
+    // GLM-5V volumetric light shaft — visible only in act 1, fades out as the molecule takes over
+    const shaftLit = 1 - clampR(0.20, 0.30, S.p);
+    lightSrcMat.opacity = 0.95 * shaftLit;
+    lightSrc.visible = shaftLit > 0.001;
+    godRaysFx.blendMode.opacity.value = 0.85 * shaftLit;
+    fgBokeh.visible = shaftLit > 0.001;
+    if (fgBokeh.visible){
+      for (const sp of fgBokeh.children){
+        sp.material.opacity = sp.userData.baseO * shaftLit;
+        sp.position.x += sp.userData.dx * dt; sp.position.y += sp.userData.dy * dt;
+      }
+    }
     const hero = heroMolecule(cloudIdx);
     for (const [hi, HM] of heroMols) HM.group.visible = hi === cloudIdx && cloudVis > 0.004;
     if (cloudVis > 0.004){
