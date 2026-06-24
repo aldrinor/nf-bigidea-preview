@@ -2114,42 +2114,22 @@ function initGL(){
       focusGoal.copy(feat[focusPin].live);
       lensGoal = 1;
     } else {
-      // Desktop hover OVERRIDES the scroll-tour for ~1.6s after the cursor last moved, so
-      // pointing at a mote still magnifies it on demand. Otherwise the lens is SCROLL-DRIVEN.
-      if (finePointer && pointer.dirty) FOCUS.lastInput = now;
-      const userActive = finePointer && pointer.has && (now - FOCUS.lastInput < 1600);
-
-      if (userActive){
-        const i = pickNearest(pointer.x, pointer.y, Math.max(90, innerWidth * 0.07));
-        if (i >= 0){
-          FOCUS.mode = 'USER_FOCUS';
-          focusedIdx = i;
-          focusGoal.copy(feat[i].live);
-          lensGoal = 1;
-        } else {
-          FOCUS.mode = 'DRIFT';
-          cursorWorld(focusGoal);
-          lensGoal = 0.5;
-          searching = true;
-        }
-      } else {
-        // AUTO-SCAN — the scanner cycles through the pollutants ON ITS OWN (plays even without
-        // scrolling). Each is centred at focusTarget, GROWS + ROTATES into focus, then the scanner
-        // advances to the next. No glass lens. Scroll just carries you on to the next screen.
-        FOCUS.mode = 'AUTO_TOUR';
-        scanPos += dt / SCAN_DWELL;                        // ~1 pollutant every SCAN_DWELL seconds, loops
-        if (scanPin !== null) scanPos = scanPin + 0.6;     // QA: hold on one pollutant (grown, mid-dwell)
-        const beat = Math.floor(scanPos) % SWEEP.length;
-        rideFrac = clamp01(scanPos - Math.floor(scanPos)); // 0→1 within the current pollutant
-        focusedIdx = SWEEP[beat];
-        // centre the subject with a slow drift so the frame isn't dead-static
-        const tt = scanPos * 0.5;
-        const sx = (0.50 + 0.06 * Math.sin(tt)) * innerWidth;
-        const sy = (0.43 + 0.05 * Math.cos(tt * 0.8)) * innerHeight;
-        screenToWorld(sx, sy, focusGoal);
-        rideActive = true;
-        lensGoal = 0;
-      }
+      // ALWAYS auto-scan in act 1 — NO glass lens, ever (not even on desktop mouse-move; the old
+      // hover-loupe is gone for good). The scanner cycles through the pollutants on its own; each is
+      // centred at focusTarget, grows + rotates into focus, then it advances to the next.
+      FOCUS.mode = 'AUTO_TOUR';
+      scanPos += dt / SCAN_DWELL;                        // ~1 pollutant every SCAN_DWELL seconds, loops
+      if (scanPin !== null) scanPos = scanPin + 0.6;     // QA: hold on one pollutant (grown, mid-dwell)
+      const beat = Math.floor(scanPos) % SWEEP.length;
+      rideFrac = clamp01(scanPos - Math.floor(scanPos)); // 0→1 within the current pollutant
+      focusedIdx = SWEEP[beat];
+      // centre the subject with a slow drift so the frame isn't dead-static
+      const tt = scanPos * 0.5;
+      const sx = (0.50 + 0.06 * Math.sin(tt)) * innerWidth;
+      const sy = (0.43 + 0.05 * Math.cos(tt * 0.8)) * innerHeight;
+      screenToWorld(sx, sy, focusGoal);
+      rideActive = true;
+      lensGoal = 0;
     }
     pointer.dirty = false;
     FOCUS.idx = focusedIdx;
