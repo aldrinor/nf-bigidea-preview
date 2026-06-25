@@ -1,0 +1,30 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NanoFlashing — Pollutant Turntables</title>
+<style>
+body{margin:0;background:radial-gradient(circle at 50% 0%,#0a1018,#05070d 60%);color:#cfe;font-family:'Space Grotesk',system-ui,sans-serif;min-height:100vh}
+h1{text-align:center;font-weight:600;letter-spacing:.04em;padding:38px 16px 6px;font-size:25px}
+.sub{text-align:center;color:#5a8;font-size:13px;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;max-width:1120px;margin:0 auto;padding:0 18px 70px}
+.card{background:#0b1018;border:1px solid #15202e;border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .2s,border-color .2s,box-shadow .2s}
+.card:hover{transform:translateY(-4px);border-color:#2a6c49;box-shadow:0 12px 40px rgba(0,40,30,.4)}
+.card .thumb{width:100%;aspect-ratio:1;object-fit:cover;background:#05070d;display:block}
+.card .nm{padding:13px 15px;font-size:14px;font-weight:500}
+.card .tag{color:#3fa07a;font-size:11px;margin-top:3px;letter-spacing:.05em}
+.foot{text-align:center;color:#2a4055;font-size:11px;padding-bottom:40px}
+</style></head><body>
+<h1>NanoFlashing — Pollutant Turntables</h1>
+<div class="sub">Path‑traced 3D specimens · drag any to rotate 360°</div>
+<div class="grid" id="grid"></div>
+<div class="foot" id="foot"></div>
+<script>
+fetch('specs.json?cb='+Date.now()).then(r=>r.json()).then(list=>{
+  const g=document.getElementById('grid');
+  list.forEach(s=>{
+    const a=document.createElement('a'); a.className='card'; a.href='view.html?spec='+s.id;
+    const th=String(Math.floor((s.n||72)/4)).padStart(3,'0');
+    a.innerHTML='<img class="thumb" src="'+s.id+'/frame_'+th+'.jpg" loading="lazy"><div class="nm">'+s.name+'<div class="tag">DRAG TO ROTATE →</div></div>';
+    g.appendChild(a);
+  });
+  document.getElementById('foot').textContent=list.length+' of 18 pollutants ready · more rendering';
+});
+</script></body></html>

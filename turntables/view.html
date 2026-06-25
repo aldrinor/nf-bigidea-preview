@@ -1,0 +1,32 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NanoFlashing — Turntable</title>
+<style>
+body{margin:0;background:radial-gradient(circle at 50% 40%,#0a1018,#05070d 70%);color:#cfe;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab}
+#stage.drag{cursor:grabbing}
+#img{max-width:92vmin;max-height:92vmin;user-select:none;-webkit-user-drag:none;filter:drop-shadow(0 20px 60px rgba(0,0,0,.6))}
+#cap{position:fixed;top:26px;left:0;right:0;text-align:center;font-size:18px;letter-spacing:.04em;font-weight:600}
+#hint{position:fixed;bottom:26px;left:0;right:0;text-align:center;font-size:12px;color:#5a8;opacity:.65}
+#back{position:fixed;top:18px;left:18px;color:#5cf;text-decoration:none;font-size:13px;z-index:5}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#48a}
+</style></head><body>
+<a id="back" href="index.html">← all pollutants</a>
+<div id="cap"></div>
+<div id="stage"><img id="img"></div>
+<div id="hint">drag to rotate · 360°</div>
+<div id="load">loading turntable…</div>
+<script>
+const qs=new URLSearchParams(location.search), spec=qs.get('spec')||'';
+let N=72, frames=[], cur=0, vel=0.06, dragging=false, lastX=0, loaded=0;
+const img=document.getElementById('img'), stage=document.getElementById('stage'), cap=document.getElementById('cap'), load=document.getElementById('load');
+fetch('specs.json').then(r=>r.json()).then(list=>{
+  const s=list.find(x=>x.id===spec)||list[0]; N=s.n; cap.textContent=s.name; document.title='NanoFlashing — '+s.name;
+  for(let i=0;i<N;i++){const im=new Image(); im.onload=()=>{loaded++; if(loaded>=Math.min(8,N))load.style.display='none';}; im.src=s.id+'/frame_'+String(i).padStart(3,'0')+'.jpg'; frames[i]=im;}
+  img.src=frames[0].src; requestAnimationFrame(tick);
+});
+function show(i){i=((Math.round(i)%N)+N)%N; if(frames[i]&&frames[i].complete)img.src=frames[i].src;}
+function tick(){ if(!dragging){ cur=(cur+vel+N)%N; vel*=0.95; if(Math.abs(vel)<0.03)vel=0.05; show(cur);} requestAnimationFrame(tick);}
+stage.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;vel=0;stage.classList.add('drag');});
+window.addEventListener('pointermove',e=>{if(!dragging)return;const d=e.clientX-lastX;lastX=e.clientX;const step=d*0.18;cur=(cur-step+N)%N;vel=-step*0.4;show(cur);});
+window.addEventListener('pointerup',()=>{dragging=false;stage.classList.remove('drag');});
+</script></body></html>
