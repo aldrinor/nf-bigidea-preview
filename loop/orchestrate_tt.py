@@ -65,14 +65,19 @@ STRICT one-line JSON:
   "aura_good": <bool true only if red is a subtle glow hugging the molecule, atoms NOT obscured, FALSE if a solid red disc/backdrop or washes colors>,
   "photoreal": <int 1-10>, "sign_off": <bool true only if accurate AND aura_good AND photoreal>=9>,
   "fix": "<single most important fix if not signed off>"}}"""
-GATE_SPEC="""Path-traced TURNTABLE frame of the airborne pollutant "{name}" ({stype}), built from a real SEM
-micrograph, on a dark cinematic stage, with a SUBTLE red charge aura (negative-charge cue). Benchmark =
-Dyson's premium microscopic specimen render (SEM-grade micro-detail, correct morphology + color taxonomy —
-gold pollen / green microbe / dark soot, dark stage, soft rim light, premium, subtle red glow NOT a solid
-red backdrop). STRICT one-line JSON:
-{{"accurate": <bool: correct morphology + color for a {stype}, reads as a real specimen not a CG primitive>,
-  "aura_good": <bool true only if red is a subtle glow hugging the specimen, surface NOT obscured>,
-  "photoreal": <int 1-10>, "sign_off": <bool true only if accurate AND aura_good AND photoreal>=9>,
+GATE_SPEC="""You are a STRICT, skeptical scientific reviewer. This is ONE frame of a path-traced 360 turntable
+of the airborne pollutant "{name}" ({stype}), from a real SEM micrograph, dark cinematic stage, with a SUBTLE
+red charge aura. Frames are shown at SPREAD angles INCLUDING an edge-on (90deg) view. Benchmark = Dyson's
+premium microscopic specimen render. DEFAULT TO sign_off=false. HARD-FAIL (accurate=false) if ANY of:
+- the specimen looks FLAT / 2D — a flat disc, sheet, plate, blade or thin line from this angle. It MUST be a
+  believable 3D VOLUMETRIC object with real depth/thickness from every angle. A thin pancake = FAIL.
+- wrong morphology for a {stype} (a microbiologist would not accept it), or it reads as a bare CG primitive.
+- the red is a solid disc/backdrop or washes the colors.
+STRICT one-line JSON:
+{{"accurate": <bool: true ONLY if correct 3D morphology + color for a {stype} AND clearly NOT flat>,
+  "flat": <bool: true if it looks like a flat disc/sheet/line from this angle>,
+  "aura_good": <bool: red is a subtle glow hugging the specimen, surface not obscured>,
+  "photoreal": <int 1-10 vs Dyson>, "sign_off": <bool: true ONLY if accurate AND not flat AND aura_good AND photoreal>=9>,
   "fix": "<single most important fix if not signed off>"}}"""
 FIX="""You are GLM-5.2 in an automated loop with judge GLM-5V, refining a Blender 4.2 Cycles turntable script
 for "{name}". GLM-5V did NOT sign off. Verdict: {critique}. Top fix(es): {fixes}.
@@ -101,14 +106,14 @@ def process(spec):
     gate=(GATE_MOL if spec['type']=='mol' else GATE_SPEC).format(name=name, stype=spec.get('stype',''))
     log(sid,f'START {name} [{spec["type"]}]')
     for it in range(1,MAXIT+1):
-        imgs=render(spec,script,outdir,350,2)
+        imgs=render(spec,script,outdir,350,4)  # 4 spread angles (0/90/180/270) incl edge-on to expose flat geometry
         if len(imgs)<1: log(sid,f'it{it}: NO RENDER'); time.sleep(4); continue
         vs=[]
         for im in imgs[:2]:
             t=glm5v(gate,im)
             try: vs.append(json.loads(t[t.find('{'):t.rfind('}')+1]))
             except: vs.append({'error':1})
-        ok=len(vs)>0 and all(v.get('sign_off')==True for v in vs)
+        ok=len(vs)>0 and all(v.get('sign_off')==True for v in vs) and not any(v.get('flat')==True for v in vs)
         summ='|'.join(f"acc={v.get('accurate')} aura={v.get('aura_good')} pr={v.get('photoreal')} ok={v.get('sign_off')}" for v in vs)
         log(sid,f'it{it}: {summ}')
         if ok:
