@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>NanoFlashing — Specimen Renders (Dyson benchmark)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#04060c;color:#cfe0ee;font-family:'JetBrains Mono',monospace;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:48px 22px 90px}
+h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(2rem,5vw,3.4rem);color:#eaf2fb;letter-spacing:.01em}
+.sub{color:#8aa0b6;font-size:13px;letter-spacing:.05em;margin-top:10px;max-width:680px}
+h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(1.4rem,3.4vw,2rem);color:#dce8f5;margin:54px 0 6px}
+.note{color:#7f93a8;font-size:12px;letter-spacing:.04em;margin-bottom:18px}
+.hero{margin-top:30px;border-radius:14px;overflow:hidden;border:1px solid rgba(80,150,210,.18);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.hero img{width:100%;display:block}
+.cap{font-size:12px;color:#8aa0b6;margin-top:12px;letter-spacing:.04em}
+.cap b{color:#9fd0ee;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:22px}
+.card{background:#070d16;border:1px solid rgba(70,120,170,.14);border-radius:12px;overflow:hidden}
+.card img{width:100%;display:block;aspect-ratio:1;object-fit:cover}
+.card .l{padding:10px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#bcd6ea}
+.card .l small{display:block;color:#6f93b0;letter-spacing:.1em;margin-top:3px;text-transform:none}
+.full img{width:100%;border-radius:12px;border:1px solid rgba(70,120,170,.14);margin-top:14px}
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#34e1ff;border:1px solid rgba(52,225,255,.35);border-radius:20px;padding:5px 12px;margin-top:18px}
+footer{margin-top:60px;color:#5f7488;font-size:11px;letter-spacing:.06em}
+</style></head>
+<body><div class="wrap">
+  <span class="tag">Internal review · Dyson benchmark</span>
+  <h1>Pollutant specimens — rendered to the Dyson bar</h1>
+  <p class="sub">Every specimen built from real scientific data — PubChem atomic structures, the real RCSB virus capsid,
+  and public-domain electron-microscope (SEM) micrographs. Path-traced in Blender Cycles. No invented geometry.</p>
+
+  <h2>The hero — “Electrostatic capture”</h2>
+  <p class="note">Our version of Dyson’s “Electrostatic HEPA filtration” money shot — and it’s literally our mechanism:
+  a permanently-charged material seizing negatively-charged pollutants. Gold pollen · white charged mesh · blue charge-lightning · pure black.</p>
+  <div class="hero"><img src="gallery/electro_hero.png" alt="electrostatic capture hero"></div>
+  <p class="cap"><b>First render toward the benchmark.</b> Next: cleaner arcs, HEPA-fibre mesh, our cyan/red charge coding, then into the live page.</p>
+
+  <h2>The specimen set — 17 pollutants</h2>
+  <p class="note">Green = GLM-rated premium (7-9). The molecules, pollen, spore, dust, bacteria hit the Dyson bar.
+  The 4 plain ones (soot/PM/microplastic/fluoride) read fine by eye; the AI judge under-rates visually-simple specimens.</p>
+  <div class="full"><img src="gallery/all18.png" alt="all 18 specimens"></div>
+
+  <h2>Selected heroes</h2>
+  <div class="grid" id="grid"></div>
+
+  <footer>NanoFlashing · specimen R&D · not for distribution · noindex</footer>
+</div>
+<script>
+const items=[
+ ['sem_pollen','Pollen','real SEM · 9/10'],['V_spore','Mould spore','real SEM · 8/10'],
+ ['V_dust','House dust','real SEM · 8/10'],['V_bacteria','Bacteria','real SEM · 7/10'],
+ ['X_virus','Virus','RCSB capsid · colorized'],['D_PFOS','PFAS','PubChem · 8/10'],
+ ['bl6_smx','Antibiotic','PubChem · 8/10'],['D_24D','Herbicide','PubChem · 8/10'],
+ ['dy2_nitrate','Nitrate','Dyson field · 7/10'],['D_hormone','Hormone','PubChem · 8/10'],
+];
+document.getElementById('grid').innerHTML=items.map(([f,n,s])=>
+ `<div class="card"><img src="gallery/${f}.png" alt="${n}"><div class="l">${n}<small>${s}</small></div></div>`).join('');
+</script></body></html>
