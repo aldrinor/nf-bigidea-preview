@@ -15,5 +15,6 @@
  {"id":"virus","type":"spec","stype":"virus","sem":"spore.jpg","name":"virus capsid","sem_url":"https://upload.wikimedia.org/wikipedia/commons/3/32/Karnal_bunt_spore.jpg"},
  {"id":"soot","type":"spec","stype":"soot","sem":"soot.jpg","name":"wildfire soot","sem_url":"https://upload.wikimedia.org/wikipedia/commons/0/02/Microimage_of_soot_produced_by_car_engines_%282_photo%29.jpg"},
  {"id":"pm","type":"spec","stype":"pm","sem":"flyash.jpg","name":"PM2.5 fine particle","sem_url":"https://upload.wikimedia.org/wikipedia/commons/c/c9/Micrograph_of_fly_ash_from_a_thermal_power_plant_containing_hollow_cenospheres.jpg"},
- {"id":"microplastic","type":"spec","stype":"microplastic","sem":"mp.jpg","name":"microplastic fragment","sem_url":"https://upload.wikimedia.org/wikipedia/commons/5/54/Polystyrene_microspheres_SEM_image_2.jpg"}
+ {"id":"microplastic","type":"spec","stype":"microplastic","sem":"mp.jpg","name":"microplastic fragment","sem_url":"https://upload.wikimedia.org/wikipedia/commons/5/54/Polystyrene_microspheres_SEM_image_2.jpg"},
+ {"id":"dye","type":"mol","cid":"6099","name":"methylene blue dye"}
 ]
