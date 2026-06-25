@@ -314,11 +314,11 @@ def build_specimen():
         safe_set_bsdf(bsdf, 'Specular IOR Level', 0.6)
         safe_set_bsdf(bsdf, 'Subsurface Weight', 0.15)
         safe_set_bsdf(bsdf, 'Subsurface Radius', (0.4, 0.25, 0.1))
-        bump = add_displacement(nt, img, mid=0.5, scale=0.18, normal=1.0)
+        bump = add_displacement(nt, img, mid=0.5, scale=0.05, normal=0.6)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
         obj.data.materials.append(mat)
-        make_displace_mod(obj, sem_img, strength=0.22, mid=0.5)
+        make_displace_mod(obj, sem_img, strength=0.05, mid=0.5)
 
     elif t == 'spore':
         obj = mesh_icosphere(subdiv=5, radius=1.0, name='Spore')
@@ -333,11 +333,11 @@ def build_specimen():
         safe_set_bsdf(bsdf, 'Roughness', 0.78)
         safe_set_bsdf(bsdf, 'Subsurface Weight', 0.35)
         safe_set_bsdf(bsdf, 'Subsurface Radius', (0.5, 0.4, 0.2))
-        bump = add_displacement(nt, img, mid=0.5, scale=0.10, normal=1.2)
+        bump = add_displacement(nt, img, mid=0.5, scale=0.04, normal=0.5)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
         obj.data.materials.append(mat)
-        make_displace_mod(obj, sem_img, strength=0.12, mid=0.5)
+        make_displace_mod(obj, sem_img, strength=0.045, mid=0.5)
 
     elif t == 'bacteria':
         if random.random() < 0.4:
@@ -386,7 +386,7 @@ def build_specimen():
         safe_set_bsdf(bsdf, 'Roughness', 0.65)
         safe_set_bsdf(bsdf, 'Subsurface Weight', 0.45)
         safe_set_bsdf(bsdf, 'Subsurface Radius', (0.7, 0.55, 0.4))
-        bump = add_displacement(nt, img, mid=0.5, scale=0.04, normal=1.4)
+        bump = add_displacement(nt, img, mid=0.5, scale=0.03, normal=0.6)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
         obj.data.materials.append(mat)
@@ -617,7 +617,7 @@ try:
 except Exception:
     pass
 cam = bpy.data.objects.new('Cam', cam_data)
-cam.location = (0, -4.2, 0.6)
+cam.location = (0, -5.7, 0.7)
 cam.rotation_euler = (math.radians(88), 0, 0)
 bpy.context.collection.objects.link(cam)
 scene.camera = cam
