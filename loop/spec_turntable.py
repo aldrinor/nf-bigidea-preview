@@ -83,7 +83,7 @@ scene.cycles.use_adaptive_sampling = True
 scene.cycles.adaptive_threshold = 0.02
 scene.cycles.samples = SPP
 try:
-    scene.cycles.use_caustics = True
+    scene.cycles.use_caustics = False  # caustics very expensive; specimens are opaque, not needed
 except Exception:
     pass
 try:
@@ -111,8 +111,8 @@ try:
 except Exception:
     pass
 scene.render.film_transparent = False
-scene.render.resolution_x = 1280
-scene.render.resolution_y = 1280
+scene.render.resolution_x = 840
+scene.render.resolution_y = 840
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode = 'RGBA'
@@ -190,8 +190,8 @@ def add_displacement(nt, height_tex, mid=0.5, scale=0.05, normal=1.0):
 
 def make_subsurf(obj, levels=3, render_levels=6):
     m = obj.modifiers.new('Subsurf', 'SUBSURF')
-    m.levels = levels
-    m.render_levels = render_levels
+    m.levels = min(levels, 1)
+    m.render_levels = min(render_levels, 2)  # cap tessellation for feasible render time
     return m
 
 def make_displace_mod(obj, image, strength=0.05, mid=0.5):
