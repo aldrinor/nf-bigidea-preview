@@ -228,11 +228,14 @@ def mesh_capsule(length=1.6, radius=0.5, segments=48, rings=24, name='Spec'):
     return o
 
 def mesh_flake(name='Spec'):
-    bpy.ops.mesh.primitive_cube_add(size=1.6, location=(0,0,0))
+    """Crumpled, folded 3D flake (e.g. pet-dander skin flake) — NOT a flat disc."""
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1.0, location=(0,0,0))
     o = bpy.context.active_object
     o.name = name
-    o.scale = (1.4, 1.0, 0.18)
+    o.scale = (1.3, 1.05, 0.5)
     bpy.ops.object.transform_apply(scale=True)
+    for v in o.data.vertices:
+        v.co += Vector((random.uniform(-1,1), random.uniform(-1,1), random.uniform(-1,1))) * 0.24
     return o
 
 def mesh_shard(name='Spec'):
