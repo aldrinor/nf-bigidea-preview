@@ -11,7 +11,7 @@ subprocess.run("export DEBIAN_FRONTEND=noninteractive; apt-get install -y -qq li
                shell=True)
 KEY = open('/work/or_key').read().strip()
 OR  = "https://openrouter.ai/api/v1/chat/completions"
-BL  = subprocess.check_output("ls /work/blender*/blender 2>/dev/null | head -1", shell=True).decode().strip()
+def get_bl(): return subprocess.check_output("ls /work/blender*/blender 2>/dev/null | head -1", shell=True).decode().strip()
 WORK= "/work/3d"
 MANIFEST = json.load(open(WORK+'/manifest.json'))
 MINE = [s for s in os.environ.get('SPECIMENS','').split(',') if s]
@@ -35,9 +35,11 @@ def render(spec, script, outdir, spp, frames):
             try: os.remove(outdir+'/'+f)
             except: pass
     env=dict(os.environ,SPP=str(spp),FRAMES=str(frames),OUT=outdir)
+    bl=get_bl()
+    if not bl: time.sleep(8); return []   # Blender not installed yet (onstart still running) — wait, retry
     if spec['type']=='mol': args=[str(spec['cid']), outdir]
     else: args=[spec['stype'], WORK+'/sem/'+spec['sem'], outdir]
-    try: subprocess.run([BL,'--background','--python',script,'--']+args,env=env,timeout=1400,
+    try: subprocess.run([bl,'--background','--python',script,'--']+args,env=env,timeout=1400,
                         stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     except: pass
     return sorted(outdir+'/'+f for f in os.listdir(outdir) if f.endswith('.png'))
