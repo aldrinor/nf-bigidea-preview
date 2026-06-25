@@ -48,6 +48,8 @@
 
   /* Act-1 selection affordance: a snapping reticle ring with corner ticks + a small
      callout pill (CONFIG label/badge text only) tethered by a leader line. */
+  /* premium pre-rendered specimen (Blender Cycles, real data) — billboarded over the WebGL scene during the act-1 scan */
+  #specimg{position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;transform:translate(-50%,-50%);transform-origin:center;pointer-events:none;will-change:transform,opacity;filter:drop-shadow(0 10px 30px rgba(0,0,0,.5));}
   #reticle{position:absolute;left:0;top:0;width:118px;height:118px;margin:-59px 0 0 -59px;opacity:0;border-radius:50%;border:1px solid rgba(130,225,255,.75);box-shadow:0 0 22px rgba(52,225,255,.22),inset 0 0 18px rgba(52,225,255,.10);will-change:transform,opacity;}
   #reticle i{position:absolute;width:13px;height:13px;border:0 solid rgba(170,240,255,.95);}
   #reticle i:nth-child(1){left:-2px;top:-2px;border-left-width:2px;border-top-width:2px;border-top-left-radius:6px;}
@@ -208,6 +210,7 @@
   <div id="badge"></div>
   <div id="badge-line"></div>
   <div id="illustrative">Illustrative render</div>
+  <img id="specimg" alt="" aria-hidden="true">
   <div id="reticle"><i></i><i></i><i></i><i></i><div id="callout"><span></span><small></small></div></div>
 
   <div id="act3-stops"></div>
@@ -540,7 +543,7 @@ const ui = {
   badge: $('badge'), badgeLine: $('badge-line'), illus: $('illustrative'), chartbox: $('chartbox'),
   act4: $('cap-act4'), act5: $('cap-act5'), ga: $('group-a'), gb: $('group-b'),
   hint: $('hint'), coda: $('coda'), canvas: $('c'),
-  reticle: $('reticle'), callout: $('callout'), counter: $('counter'),
+  reticle: $('reticle'), callout: $('callout'), counter: $('counter'), specimg: $('specimg'),
   tracerLine: $('tracer-line'), tracerDot: $('tracer-dot'),
 };
 ui.legend2.textContent = CONFIG.CAPTIONS.act2_legend;
@@ -2016,6 +2019,14 @@ function initGL(){
   // a drifting speck flies toward the camera and resolves into a recognisable pollutant.
   let rideActive = false, rideFrac = 0;
   let lastScanIdx = -1, scanLockT = -10;   // scan reticle: detect target change → re-snap + relabel
+  // premium pre-rendered specimens (Blender Cycles, real PubChem/RCSB/SEM data) keyed by feature id.
+  // When present, the WebGL stand-in is hidden and this image is billboarded over the scene during the scan.
+  const SPEC_IMG = { f1:'soot', f2:'virus', f3:'spore', f4:'bacteria', f5:'PFOS', f6:'nitrate',
+    f8:'sulfate', f9:'sulfamethoxazole', f10:'24D', f11:'hormone', f12:'pm', f13:'pollen',
+    f14:'dust', f15:'dander', f16:'microplastic', f17:'phosphate', f18:'fluoride' };
+  const specImgCache = {};
+  for (const k in SPEC_IMG){ const im = new Image(); im.src = 'specimens/' + SPEC_IMG[k] + '.png'; specImgCache[SPEC_IMG[k]] = im; }
+  let specImgShownIdx = -1;
   let scanPos = 0;                          // auto-scan position (advances on a timer, loops)
   const SCAN_DWELL = 2.3;                   // seconds the scanner holds on each pollutant
 
@@ -2323,7 +2334,10 @@ function initGL(){
 
       // promoted stand-in (lens focus) — for cloud items this is the discrete molecule;
       // a click-pop briefly swells it, and a locked selection runs a hotter charge read
-      const vis = f.promote > 0.01;
+      // hide the fake WebGL stand-in for the focused specimen ONLY when its premium render has loaded
+      const _pk = SPEC_IMG[f.cfg.id], _pim = _pk && specImgCache[_pk];
+      const hasPremium = rideActive && i === FOCUS.idx && _pim && _pim.complete && _pim.naturalWidth > 0;
+      const vis = f.promote > 0.01 && !hasPremium;
       f.standIn.visible = vis;
       if (vis){
         const pop = 1 + 0.22 * Math.max(0, Math.exp(-(now / 1000 - f.popT) * 5)) * (now / 1000 > f.popT ? 1 : 0);
@@ -2441,12 +2455,27 @@ function initGL(){
         const since = clock - scanLockT;
         const snap = 1.55 * (1 + 0.30 * Math.exp(-since * 7));   // lock-on pop, sized to the larger specimen
         const appear = Math.min(1, since * 5);
+        const fade = appear * (1 - clampR(0.205, 0.232, p));
         ui.reticle.style.transform = `translate(${_scr.x}px,${_scr.y}px) scale(${snap.toFixed(3)})`;
-        ui.reticle.style.opacity = appear * (1 - clampR(0.205, 0.232, p));
-      } else ui.reticle.style.opacity = 0;
+        ui.reticle.style.opacity = fade;
+        // PREMIUM specimen render billboarded at the lock point, sized just inside the reticle
+        const key = SPEC_IMG[feat[FOCUS.idx].cfg.id];
+        const kimg = key && specImgCache[key];
+        if (key && kimg && kimg.complete && kimg.naturalWidth > 0){
+          if (specImgShownIdx !== FOCUS.idx){ ui.specimg.src = 'specimens/' + key + '.png'; specImgShownIdx = FOCUS.idx; }
+          const reticlePx = 118 * snap;                              // reticle element is 118px, scaled by snap
+          const sz = Math.max(150, reticlePx * 2.3);                 // specimen fills the frame, beyond the ring
+          const grow = lerp(0.92, 1.0, easeIO(rideFrac));            // subtle settle-in zoom
+          ui.specimg.style.width = (sz * grow) + 'px';
+          ui.specimg.style.height = (sz * grow) + 'px';
+          ui.specimg.style.transform = `translate(${_scr.x}px,${_scr.y}px) translate(-50%,-50%) rotate(${Math.sin(clock*0.25)*1.5}deg)`;
+          ui.specimg.style.opacity = fade;
+        } else { ui.specimg.style.opacity = 0; specImgShownIdx = -1; }
+      } else { ui.reticle.style.opacity = 0; ui.specimg.style.opacity = 0; }
     } else {
       lastScanIdx = -1;
       ui.reticle.style.opacity = 0;
+      ui.specimg.style.opacity = 0; specImgShownIdx = -1;
     }
   }
 
