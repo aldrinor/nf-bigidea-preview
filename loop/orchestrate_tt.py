@@ -5,6 +5,10 @@
 # benchmark; drill until 9/10 sign-off; then render the full 72-frame turntable.
 # Processes the specimens whose id is in env SPECIMENS (comma-sep).
 import json, base64, urllib.request, subprocess, os, re, time, shutil
+# self-heal: ensure Blender's system libs are present (lean cuda image lacks libxkbcommon etc.)
+subprocess.run("export DEBIAN_FRONTEND=noninteractive; apt-get install -y -qq libxkbcommon0 libsm6 libice6 "
+               "libxext6 libegl1 libgomp1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libgl1 >/dev/null 2>&1",
+               shell=True)
 KEY = open('/work/or_key').read().strip()
 OR  = "https://openrouter.ai/api/v1/chat/completions"
 BL  = subprocess.check_output("ls /work/blender*/blender 2>/dev/null | head -1", shell=True).decode().strip()
