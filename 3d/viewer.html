@@ -1,278 +1,266 @@
+<!-- viewer.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>PFOS — Dyson-grade Molecular Viewer</title>
+<title>PFOS · Dyson-grade molecular hero</title>
 <style>
-  html, body {
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background: #000; color: #cfd8e3;
-    font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-    overflow: hidden;
-  }
-  #app { position: fixed; inset: 0; }
-  canvas { display: block; }
-
+  html, body { margin:0; padding:0; height:100%; background:#000; overflow:hidden; }
+  #app { position:absolute; inset:0; }
   #hud {
-    position: fixed; left: 18px; top: 16px;
-    padding: 10px 14px;
-    background: rgba(8, 12, 20, 0.55);
-    border: 1px solid rgba(120, 160, 220, 0.18);
-    border-radius: 10px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    color: #9fb4cc;
-    pointer-events: none;
-    user-select: none;
+    position:absolute; left:14px; top:12px; z-index:5;
+    font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color:#9fb4c8; letter-spacing:.06em; pointer-events:none;
+    text-shadow:0 1px 2px rgba(0,0,0,.8);
   }
-  #hud b { color: #e6f0ff; font-weight: 600; }
-  #hud .accent { color: #6fb6ff; }
-
-  #loader {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: #000; color: #6fb6ff;
-    font-size: 14px; letter-spacing: 0.18em;
-    text-transform: uppercase;
-    z-index: 50;
-    transition: opacity 0.6s ease;
+  #hud b { color:#cfe3f2; font-weight:600; }
+  #hint {
+    position:absolute; right:14px; bottom:12px; z-index:5;
+    font:10px/1.4 ui-monospace, monospace; color:#5f7385;
+    letter-spacing:.08em; pointer-events:none;
   }
-  #loader.hidden { opacity: 0; pointer-events: none; }
 </style>
 </head>
 <body>
-  <div id="app"></div>
-  <div id="hud">
-    <div><b>PFOS</b> <span class="accent">·</span> PubChem CID 7443</div>
-    <div style="opacity:0.7; margin-top:4px;">drag to orbit · scroll to zoom</div>
-  </div>
-  <div id="loader">Loading molecule…</div>
+<div id="app"></div>
+<div id="hud"><b>PFOS</b> · perfluorooctanesulfonic acid · C8HF17O3S</div>
+<div id="hint">drag · orbit &nbsp;|&nbsp; scroll · zoom</div>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
   }
-  </script>
+}
+</script>
 
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
-    import { GTAOPass }       from 'three/addons/postprocessing/GTAOPass.js';
-    import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }     from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader }     from 'three/addons/loaders/RGBELoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { GTAOPass }       from 'three/addons/postprocessing/ GTAOPass.js';
+import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+import { ACESFilmicToneMapping } from 'three';
 
-    // ------------------------------------------------------------------
-    // Renderer
-    // ------------------------------------------------------------------
-    const app = document.getElementById('app');
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setClearColor(0x000000, 1.0);
-    app.appendChild(renderer.domElement);
+// ---------------------------------------------------------------- renderer
+const app = document.getElementById('app');
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+app.appendChild(renderer.domElement);
 
-    // ------------------------------------------------------------------
-    // Scene + camera
-    // ------------------------------------------------------------------
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+// ---------------------------------------------------------------- scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
 
-    const camera = new THREE.PerspectiveCamera(
-      40, window.innerWidth / window.innerHeight, 0.01, 1000
-    );
-    camera.position.set(0, 0, 14);
+const camera = new THREE.PerspectiveCamera(38, window.innerWidth/window.innerHeight, 0.01, 200);
+camera.position.set(0, 0.6, 14);
 
-    // ------------------------------------------------------------------
-    // IBL — RoomEnvironment, pushed for rich reflections
-    // ------------------------------------------------------------------
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environment = envTex;
-    scene.environmentIntensity = 1.6;     // Three r160+ supports this on Scene
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.rotateSpeed = 0.7;
+controls.minDistance = 4;
+controls.maxDistance = 40;
+controls.target.set(0,0,0);
 
-    // ------------------------------------------------------------------
-    // Cinematic 3-point lighting (cool key + cool rim + low fill + blue accent)
-    // ------------------------------------------------------------------
-    const keyLight = new THREE.DirectionalLight(0xbcd4ff, 2.2);
-    keyLight.position.set(6, 8, 6);
-    scene.add(keyLight);
+// ---------------------------------------------------------------- env (procedural studio)
+function makeStudioEnv() {
+  // Build a small cubemap-ish env via PMREM from a synthetic gradient scene
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  // simple gradient env using a Scene with a large sphere
+  const envScene = new THREE.Scene();
+  const geo = new THREE.SphereGeometry(50, 32, 16);
+  // vertical gradient material (backside)
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    depthWrite: false,
+    uniforms: {
+      top:    { value: new THREE.Color(0x0a1828) },
+      mid:    { value: new THREE.Color(0x05080d) },
+      bot:    { value: new THREE.Color(0x000000) },
+      keyCol: { value: new THREE.Color(0x9fd4ff) },
+      keyDir: { value: new THREE.Vector3(0.5, 0.7, 0.6).normalize() },
+      rimCol: { value: new THREE.Color(0x3b6cff) },
+      rimDir: { value: new THREE.Vector3(-0.6, 0.2, -0.8).normalize() },
+    },
+    vertexShader: `
+      varying vec3 vDir;
+      void main(){
+        vDir = normalize(position);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vDir;
+      uniform vec3 top, mid, bot, keyCol, keyDir, rimCol, rimDir;
+      void main(){
+        float h = vDir.y * 0.5 + 0.5;
+        vec3 grad = mix(bot, mid, smoothstep(0.0,0.5,h));
+        grad = mix(grad, top, smoothstep(0.5,1.0,h));
+        // bright key spot
+        float k = pow(max(dot(normalize(vDir), keyDir), 0.0), 18.0);
+        grad += keyCol * k * 2.2;
+        // cool rim spot
+        float r = pow(max(dot(normalize(vDir), rimDir), 0.0), 12.0);
+        grad += rimCol * r * 1.4;
+        // subtle floor bounce
+        float f = pow(max(-vDir.y, 0.0), 3.0);
+        grad += vec3(0.04, 0.06, 0.10) * f;
+        gl_FragColor = vec4(grad, 1.0);
+      }
+    `
+  });
+  envScene.add(new THREE.Mesh(geo, mat));
+  const rt = pmrem.fromScene(envScene, 0.04);
+  pmrem.dispose();
+  return rt.texture;
+}
 
-    const rimLight = new THREE.DirectionalLight(0x9fc2ff, 3.4);
-    rimLight.position.set(-7, -2, -8);
-    scene.add(rimLight);
+const envMap = makeStudioEnv();
+scene.environment = envMap;
+scene.environmentIntensity = 0.55;
 
-    const fillLight = new THREE.DirectionalLight(0x6f86a8, 0.6);
-    fillLight.position.set(-4, 3, 5);
-    scene.add(fillLight);
+// ---------------------------------------------------------------- lights (sculpted)
+const key = new THREE.SpotLight(0xbfe6ff, 2800, 0, 0, 0.55, 1.4);
+key.position.set(6, 7, 6);
+key.target.position.set(0,0,0);
+scene.add(key); scene.add(key.target);
 
-    // Subtle blue accent (our "charge")
-    const accentLight = new THREE.PointLight(0x3a7bff, 6.0, 30, 2.0);
-    accentLight.position.set(4, -4, 4);
-    scene.add(accentLight);
+const rim = new THREE.SpotLight(0x4f7bff, 1800, 0, 0, 0.45, 1.6);
+rim.position.set(-7, 2.5, -7);
+rim.target.position.set(0,0,0);
+scene.add(rim); scene.add(rim.target);
 
-    // Very soft ambient (mostly handled by IBL)
-    scene.add(new THREE.AmbientLight(0x223044, 0.25));
+const accent = new THREE.PointLight(0x2a6cff, 60, 30, 2.0);
+accent.position.set(-3, -2, 4);
+scene.add(accent);
 
-    // ------------------------------------------------------------------
-    // Soft ground shadow (bake-free AO helper + grounding)
-    // ------------------------------------------------------------------
-    const shadowGeo = new THREE.PlaneGeometry(60, 60);
-    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.0 });
-    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -6;
-    shadowPlane.receiveShadow = true;
-    scene.add(shadowPlane);
+const fill = new THREE.HemisphereLight(0x223044, 0x000000, 0.18);
+scene.add(fill);
 
-    // Enable shadow maps on key light only
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(2048, 2048);
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 50;
-    keyLight.shadow.camera.left = -10;
-    keyLight.shadow.camera.right = 10;
-    keyLight.shadow.camera.top = 10;
-    keyLight.shadow.camera.bottom = -10;
-    keyLight.shadow.bias = -0.0005;
-    keyLight.shadow.radius = 6;
+// faint ground reflection disk
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(20, 64),
+  new THREE.MeshStandardMaterial({
+    color: 0x05070b, metalness: 0.0, roughness: 0.55,
+    transparent: true, opacity: 0.6
+  })
+);
+ground.rotation.x = -Math.PI/2;
+ground.position.y = -6;
+scene.add(ground);
 
-    // ------------------------------------------------------------------
-    // Controls — free rotation, damping, no pan
-    // ------------------------------------------------------------------
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.enablePan = false;
-    controls.rotateSpeed = 0.9;
-    controls.zoomSpeed = 0.8;
-    controls.minDistance = 4;
-    controls.maxDistance = 40;
+// ---------------------------------------------------------------- load molecule
+const loader = new GLTFLoader();
+let molecule = null;
+let autoSpin = true;
 
-    // ------------------------------------------------------------------
-    // Load GLB
-    // ------------------------------------------------------------------
-    const GLB_URL = './PFOS.glb';
-    const loader = new GLTFLoader();
-    let modelRoot = null;
+loader.load('PFOS.glb', (gltf) => {
+  molecule = gltf.scene;
 
-    function frameObject(root) {
-      const box = new THREE.Box3().setFromObject(root);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+  // normalize & frame
+  const box = new THREE.Box3().setFromObject(molecule);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  const scale = 6.0 / maxDim;
+  molecule.scale.setScalar(scale);
+  molecule.position.sub(center.multiplyScalar(scale));
 
-      // Center
-      root.position.sub(center);
-
-      // Frame camera
-      const fov = camera.fov * Math.PI / 180;
-      const dist = (maxDim / 2) / Math.tan(fov / 2) * 1.8;
-      camera.position.set(0, 0, dist);
-      controls.target.set(0, 0, 0);
-      controls.update();
-
-      // Place shadow plane just under the model
-      shadowPlane.position.y = -maxDim * 0.6 - 0.5;
+  // boost env reflections on atom materials
+  molecule.traverse(o => {
+    if (o.isMesh) {
+      o.material.envMapIntensity = 1.35;
+      if (o.material.roughness !== undefined) {
+        // keep slight variation, but ensure crisp speculars
+      }
+      // labels: keep emissive, no tonemap blowout handled by bloom threshold
+      if (o.material.emissive && (o.material.emissive.r + o.material.emissive.g + o.material.emissive.b) > 0.1) {
+        o.material.envMapIntensity = 0.0;
+      }
+      o.castShadow = false;
+      o.receiveShadow = false;
     }
+  });
 
-    loader.load(GLB_URL, (gltf) => {
-      modelRoot = gltf.scene;
+  scene.add(molecule);
 
-      // Boost env reflections on every material
-      modelRoot.traverse((obj) => {
-        if (obj.isMesh) {
-          obj.castShadow = true;
-          obj.receiveShadow = true;
-          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-          for (const m of mats) {
-            if (m && m.isMeshStandardMaterial) {
-              m.envMapIntensity = 1.8;
-              m.needsUpdate = true;
-            }
-          }
-        }
-      });
+  // reframe camera distance based on scaled size
+  const radius = (maxDim * scale) * 0.62;
+  const dist = radius / Math.tan((camera.fov * Math.PI / 180) / 2) * 1.5;
+  camera.position.set(dist*0.35, dist*0.18, dist);
+  controls.maxDistance = dist * 4;
+  controls.minDistance = radius * 1.2;
+  controls.update();
+}, undefined, (err)=>{ console.error('GLTF load failed', err); });
 
-      scene.add(modelRoot);
-      frameObject(modelRoot);
+// stop auto-spin on user interaction
+controls.addEventListener('start', () => { autoSpin = false; });
 
-      document.getElementById('loader').classList.add('hidden');
-    }, (xhr) => {
-      // progress
-    }, (err) => {
-      console.error('GLB load failed:', err);
-      document.getElementById('loader').textContent = 'Failed to load PFOS.glb';
-    });
+// ---------------------------------------------------------------- postprocessing
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+composer.setSize(window.innerWidth, window.innerHeight);
 
-    // ------------------------------------------------------------------
-    // Post-processing: GTAOPass for crevice darkening + OutputPass
-    // ------------------------------------------------------------------
-    const size = renderer.getSize(new THREE.Vector2());
-    const gtaoPass = new GTAOPass(scene, camera, size.x, size.y);
-    gtapass_configure(gtaoPass);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
 
-    function gtapass_configure(p) {
-      // GTAOPass params (r160)
-      p.output = GTAOPass.OUTPUT.Default;
-      if (p.radius !== undefined) p.radius = 0.35;
-      if (p.distanceExponent !== undefined) p.distanceExponent = 1.0;
-      if (p.thickness !== undefined) p.thickness = 0.6;
-      if (p.scale !== undefined) p.scale = 1.0;
-      if (p.samples !== undefined) p.samples = 16;
-      if (p.screenSpaceRadius !== undefined) p.screenSpaceRadius = false;
-      if (p.blendIntensity !== undefined) p.blendIntensity = 0.9;
-    }
+// GTAO for crevice AO between atoms
+const gtao = new GTAOPass(scene, camera, window.innerWidth, window.innerHeight);
+gtao.output = GTAOPass.OUTPUT.Default;
+gtao.blendIntensity = 0.85;
+gtao.radius = 0.35;
+gtao.thickness = 1.0;
+gtao.scale = 1.0;
+gtao.samples = 16;
+composer.addPass(gtao);
 
-    const composer = new EffectComposer(renderer);
-    composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    composer.setSize(window.innerWidth, window.innerHeight);
+// subtle bloom only on speculars + emissive labels
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.55,   // strength
+  0.85,   // radius
+  0.85    // threshold (high -> only bright highlights bloom)
+);
+composer.addPass(bloom);
 
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
-    composer.addPass(gtaoPass);
-    const outputPass = new OutputPass();
-    composer.addPass(outputPass);
+// ACES + color space output
+const outputPass = new OutputPass();
+composer.addPass(outputPass);
 
-    // ------------------------------------------------------------------
-    // Resize
-    // ------------------------------------------------------------------
-    window.addEventListener('resize', () => {
-      const w = window.innerWidth, h = window.innerHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      composer.setSize(w, h);
-      gtaoPass.setSize(w, h);
-    });
+// ---------------------------------------------------------------- resize
+function onResize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  composer.setSize(w, h);
+  gtao.setSize(w, h);
+  bloom.setSize(w, h);
+}
+window.addEventListener('resize', onResize);
 
-    // ------------------------------------------------------------------
-    // Render loop
-    // ------------------------------------------------------------------
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-
-      // Subtle accent light orbit for life
-      const t = performance.now() * 0.0005;
-      accentLight.position.x = Math.cos(t) * 5;
-      accentLight.position.z = Math.sin(t) * 5;
-
-      composer.render();
-    }
-    animate();
-  </script>
+// ---------------------------------------------------------------- loop
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (molecule && autoSpin) {
+    molecule.rotation.y += dt * 0.18;
+  }
+  controls.update();
+  composer.render();
+}
+animate();
+</script>
 </body>
 </html>
