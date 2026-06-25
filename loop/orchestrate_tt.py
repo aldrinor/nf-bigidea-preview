@@ -9,6 +9,15 @@ import json, base64, urllib.request, subprocess, os, re, time, shutil
 subprocess.run("export DEBIAN_FRONTEND=noninteractive; apt-get install -y -qq libxkbcommon0 libsm6 libice6 "
                "libxext6 libegl1 libgomp1 libxrender1 libxi6 libxxf86vm1 libxfixes3 libgl1 >/dev/null 2>&1",
                shell=True)
+# singleton lock: prevent duplicate orchestrators (they thrash shared out_<id> dirs and stall completion)
+_LK='/work/3d/orch.lock'
+def _alive():
+    try:
+        p=int(open(_LK).read().strip()); os.kill(p,0); return True
+    except Exception: return False
+if _alive():
+    print('orchestrator already running, exiting'); raise SystemExit(0)
+open(_LK,'w').write(str(os.getpid()))
 KEY = open('/work/or_key').read().strip()
 OR  = "https://openrouter.ai/api/v1/chat/completions"
 def get_bl(): return subprocess.check_output("ls /work/blender*/blender 2>/dev/null | head -1", shell=True).decode().strip()
