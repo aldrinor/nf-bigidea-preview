@@ -1,278 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>PFOS — Dyson-grade Molecular Viewer</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background: #000; color: #cfd8e3;
-    font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-    overflow: hidden;
-  }
-  #app { position: fixed; inset: 0; }
-  canvas { display: block; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFOS Molecular Viewer - Charge Cloud</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000000;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #ffffff;
+        }
 
-  #hud {
-    position: fixed; left: 18px; top: 16px;
-    padding: 10px 14px;
-    background: rgba(8, 12, 20, 0.55);
-    border: 1px solid rgba(120, 160, 220, 0.18);
-    border-radius: 10px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    color: #9fb4cc;
-    pointer-events: none;
-    user-select: none;
-  }
-  #hud b { color: #e6f0ff; font-weight: 600; }
-  #hud .accent { color: #6fb6ff; }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-  #loader {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: #000; color: #6fb6ff;
-    font-size: 14px; letter-spacing: 0.18em;
-    text-transform: uppercase;
-    z-index: 50;
-    transition: opacity 0.6s ease;
-  }
-  #loader.hidden { opacity: 0; pointer-events: none; }
-</style>
-</head>
-<body>
-  <div id="app"></div>
-  <div id="hud">
-    <div><b>PFOS</b> <span class="accent">·</span> PubChem CID 7443</div>
-    <div style="opacity:0.7; margin-top:4px;">drag to orbit · scroll to zoom</div>
-  </div>
-  <div id="loader">Loading molecule…</div>
+        #info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+            z-index: 10;
+        }
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
+        #info-panel h1 {
+            font-size: 18px;
+            margin: 0 0 10px 0;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
 
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
-    import { GTAOPass }       from 'three/addons/postprocessing/GTAOPass.js';
-    import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+        #info-panel p {
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 0;
+            color: #cccccc;
+        }
 
-    // ------------------------------------------------------------------
-    // Renderer
-    // ------------------------------------------------------------------
-    const app = document.getElementById('app');
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setClearColor(0x000000, 1.0);
-    app.appendChild(renderer.domElement);
-
-    // ------------------------------------------------------------------
-    // Scene + camera
-    // ------------------------------------------------------------------
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
-
-    const camera = new THREE.PerspectiveCamera(
-      40, window.innerWidth / window.innerHeight, 0.01, 1000
-    );
-    camera.position.set(0, 0, 14);
-
-    // ------------------------------------------------------------------
-    // IBL — RoomEnvironment, pushed for rich reflections
-    // ------------------------------------------------------------------
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environment = envTex;
-    scene.environmentIntensity = 1.6;     // Three r160+ supports this on Scene
-
-    // ------------------------------------------------------------------
-    // Cinematic 3-point lighting (cool key + cool rim + low fill + blue accent)
-    // ------------------------------------------------------------------
-    const keyLight = new THREE.DirectionalLight(0xbcd4ff, 2.2);
-    keyLight.position.set(6, 8, 6);
-    scene.add(keyLight);
-
-    const rimLight = new THREE.DirectionalLight(0x9fc2ff, 3.4);
-    rimLight.position.set(-7, -2, -8);
-    scene.add(rimLight);
-
-    const fillLight = new THREE.DirectionalLight(0x6f86a8, 0.6);
-    fillLight.position.set(-4, 3, 5);
-    scene.add(fillLight);
-
-    // Subtle blue accent (our "charge")
-    const accentLight = new THREE.PointLight(0x3a7bff, 6.0, 30, 2.0);
-    accentLight.position.set(4, -4, 4);
-    scene.add(accentLight);
-
-    // Very soft ambient (mostly handled by IBL)
-    scene.add(new THREE.AmbientLight(0x223044, 0.25));
-
-    // ------------------------------------------------------------------
-    // Soft ground shadow (bake-free AO helper + grounding)
-    // ------------------------------------------------------------------
-    const shadowGeo = new THREE.PlaneGeometry(60, 60);
-    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.0 });
-    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -6;
-    shadowPlane.receiveShadow = true;
-    scene.add(shadowPlane);
-
-    // Enable shadow maps on key light only
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(2048, 2048);
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 50;
-    keyLight.shadow.camera.left = -10;
-    keyLight.shadow.camera.right = 10;
-    keyLight.shadow.camera.top = 10;
-    keyLight.shadow.camera.bottom = -10;
-    keyLight.shadow.bias = -0.0005;
-    keyLight.shadow.radius = 6;
-
-    // ------------------------------------------------------------------
-    // Controls — free rotation, damping, no pan
-    // ------------------------------------------------------------------
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.enablePan = false;
-    controls.rotateSpeed = 0.9;
-    controls.zoomSpeed = 0.8;
-    controls.minDistance = 4;
-    controls.maxDistance = 40;
-
-    // ------------------------------------------------------------------
-    // Load GLB
-    // ------------------------------------------------------------------
-    const GLB_URL = './PFOS.glb';
-    const loader = new GLTFLoader();
-    let modelRoot = null;
-
-    function frameObject(root) {
-      const box = new THREE.Box3().setFromObject(root);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z, 0.001);
-
-      // Center
-      root.position.sub(center);
-
-      // Frame camera
-      const fov = camera.fov * Math.PI / 180;
-      const dist = (maxDim / 2) / Math.tan(fov / 2) * 1.8;
-      camera.position.set(0, 0, dist);
-      controls.target.set(0, 0, 0);
-      controls.update();
-
-      // Place shadow plane just under the model
-      shadowPlane.position.y = -maxDim * 0.6 - 0.5;
-    }
-
-    loader.load(GLB_URL, (gltf) => {
-      modelRoot = gltf.scene;
-
-      // Boost env reflections on every material
-      modelRoot.traverse((obj) => {
-        if (obj.isMesh) {
-          obj.castShadow = true;
-          obj.receiveShadow = true;
-          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-          for (const m of mats) {
-            if (m && m.isMeshStandardMaterial) {
-              m.envMapIntensity = 1.8;
-              m.needsUpdate = true;
-            }
+        .charge-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ff1133;
+            box-shadow: 0 0 8px #ff1133;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+    </style>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
           }
         }
-      });
+    </script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="info-panel">
+        <h1>PFOS Specimen</h1>
+        <p>
+            <span class="charge-indicator"></span>Perfluorooctanesulfonic acid<br><br>
+            The soft red field represents the negative electrostatic charge cloud of the pollutant, indicating its anionic state in solution.
+        </p>
+    </div>
 
-      scene.add(modelRoot);
-      frameObject(modelRoot);
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-      document.getElementById('loader').classList.add('hidden');
-    }, (xhr) => {
-      // progress
-    }, (err) => {
-      console.error('GLB load failed:', err);
-      document.getElementById('loader').textContent = 'Failed to load PFOS.glb';
-    });
+        // --- Core Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
 
-    // ------------------------------------------------------------------
-    // Post-processing: GTAOPass for crevice darkening + OutputPass
-    // ------------------------------------------------------------------
-    const size = renderer.getSize(new THREE.Vector2());
-    const gtaoPass = new GTAOPass(scene, camera, size.x, size.y);
-    gtapass_configure(gtaoPass);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 10);
 
-    function gtapass_configure(p) {
-      // GTAOPass params (r160)
-      p.output = GTAOPass.OUTPUT.Default;
-      if (p.radius !== undefined) p.radius = 0.35;
-      if (p.distanceExponent !== undefined) p.distanceExponent = 1.0;
-      if (p.thickness !== undefined) p.thickness = 0.6;
-      if (p.scale !== undefined) p.scale = 1.0;
-      if (p.samples !== undefined) p.samples = 16;
-      if (p.screenSpaceRadius !== undefined) p.screenSpaceRadius = false;
-      if (p.blendIntensity !== undefined) p.blendIntensity = 0.9;
-    }
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        container.appendChild(renderer.domElement);
 
-    const composer = new EffectComposer(renderer);
-    composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    composer.setSize(window.innerWidth, window.innerHeight);
+        // --- Environment / IBL ---
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
-    composer.addPass(gtaoPass);
-    const outputPass = new OutputPass();
-    composer.addPass(outputPass);
+        // --- Controls ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
 
-    // ------------------------------------------------------------------
-    // Resize
-    // ------------------------------------------------------------------
-    window.addEventListener('resize', () => {
-      const w = window.innerWidth, h = window.innerHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-      composer.setSize(w, h);
-      gtaoPass.setSize(w, h);
-    });
+        // --- Lighting (Subtle direct light to complement IBL) ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
 
-    // ------------------------------------------------------------------
-    // Render loop
-    // ------------------------------------------------------------------
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
+        // --- Variables for Model and Cloud ---
+        let modelGroup = new THREE.Group();
+        scene.add(modelGroup);
+        let chargeCloud = null;
+        let modelBoundingRadius = 1;
 
-      // Subtle accent light orbit for life
-      const t = performance.now() * 0.0005;
-      accentLight.position.x = Math.cos(t) * 5;
-      accentLight.position.z = Math.sin(t) * 5;
+        // --- Load GLTF Model ---
+        const loader = new GLTFLoader();
+        loader.load('PFOS.glb', (gltf) => {
+            const model = gltf.scene;
+            
+            // Apply glossy atom materials
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    const oldMat = child.material;
+                    child.material = new THREE.MeshPhysicalMaterial({
+                        color: oldMat.color ? oldMat.color.clone() : new THREE.Color(0xffffff),
+                        metalness: 0.1,
+                        roughness: 0.15,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.1,
+                        vertexColors: oldMat.vertexColors,
+                        envMapIntensity: 1.2
+                    });
+                }
+            });
 
-      composer.render();
-    }
-    animate();
-  </script>
+            // Center the model and compute bounding sphere
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            modelBoundingRadius = maxDim / 2;
+
+            model.position.sub(center); // Center model at origin
+            modelGroup.add(model);
+
+            // Adjust camera to fit model
+            const fitDistance = modelBoundingRadius / Math.tan(Math.PI * camera.fov / 360);
+            camera.position.set(0, 0, fitDistance * 1.8);
+            controls.update();
+
+            // Create the charge cloud now that we know the size
+            createChargeCloud(modelBoundingRadius * 1.6);
+
+        }, undefined, (error) => {
+            console.error('Error loading PFOS.glb:', error);
+        });
+
+        // --- Charge Cloud Creation ---
+        function createChargeCloud(radius) {
+            const particleCount = 2000;
+            const positions = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            const phases = new Float32Array(particleCount);
+
+            // Distribute particles in a spherical shell with some depth
+            for (let i = 0; i < particleCount; i++) {
+                // Vary radius slightly to create volume rather than a hard shell
+                const r = radius * (0.7 + Math.random() * 0.3);
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+
+                positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = r * Math.cos(phi);
+
+                sizes[i] = 1.5 + Math.random() * 2.5; // Varied particle sizes
+                phases[i] = Math.random() * Math.PI * 2; // Random twinkle phase
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+            geometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+
+            // Generate a soft radial gradient texture for premium volumetric look
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+            gradient.addColorStop(0.5, 'rgba(255,255,255,0.3)');
+            gradient.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+            const particleTexture = new THREE.CanvasTexture(canvas);
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 },
+                    uTexture: { value: particleTexture },
+                    uColor: { value: new THREE.Color(0xff1133) },
+                    uPixelRatio: { value: window.devicePixelRatio }
+                },
+                vertexShader: `
+                    attribute float aSize;
+                    attribute float aPhase;
+                    uniform float uTime;
+                    uniform float uPixelRatio;
+                    varying float vAlpha;
+                    
+                    void main() {
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        gl_PointSize = aSize * uPixelRatio * (300.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                        
+                        // Gentle twinkle/pulse per particle
+                        vAlpha = 0.4 + 0.6 * (0.5 + 0.5 * sin(uTime * 1.5 + aPhase));
+                    }
+                `,
+                fragmentShader: `
+                    uniform sampler2D uTexture;
+                    uniform vec3 uColor;
+                    varying float vAlpha;
+                    
+                    void main() {
+                        vec4 tex = texture2D(uTexture, gl_PointCoord);
+                        // Keep overall opacity very low so it doesn't obscure the molecule
+                        gl_FragColor = vec4(uColor, tex.a * vAlpha * 0.12);
+                    }
+                `,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+
+            chargeCloud = new THREE.Points(geometry, material);
+            modelGroup.add(chargeCloud); // Add to modelGroup so it stays centered during orbit
+        }
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            if (chargeCloud) {
+                // Update shader time for twinkling
+                chargeCloud.material.uniforms.uTime.value = elapsedTime;
+                
+                // Gentle breathing/pulsing of the entire cloud
+                const pulse = 1.0 + Math.sin(elapsedTime * 0.5) * 0.03;
+                chargeCloud.scale.setScalar(pulse);
+                
+                // Slow drift/swirl
+                chargeCloud.rotation.y += 0.0005;
+                chargeCloud.rotation.x += 0.0002;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- Resize Handler ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
 </body>
 </html>
