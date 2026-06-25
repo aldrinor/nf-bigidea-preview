@@ -51,7 +51,7 @@ def render(spec, script, outdir, spp, frames):
     if not bl: time.sleep(8); return []   # Blender not installed yet (onstart still running) — wait, retry
     if spec['type']=='mol': args=[str(spec['cid']), outdir]
     else: args=[spec['stype'], WORK+'/sem/'+spec['sem'], outdir]
-    try: subprocess.run([bl,'--background','--python',script,'--']+args,env=env,timeout=1400,
+    try: subprocess.run([bl,'--background','--python',script,'--']+args,env=env,timeout=6000,
                         stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     except: pass
     return sorted(outdir+'/'+f for f in os.listdir(outdir) if f.endswith('.png'))
@@ -113,8 +113,10 @@ def process(spec):
         log(sid,f'it{it}: {summ}')
         if ok:
             log(sid,'*** GLM-5V SIGN-OFF *** full 72-frame turntable @640spp')
-            render(spec,script,outdir,640,72)
-            open(WORK+f'/DONE_{sid}','w').write(summ); log(sid,'TURNTABLE DONE'); return
+            imgs=render(spec,script,outdir,640,72)
+            if len(imgs)>=70:
+                open(WORK+f'/DONE_{sid}','w').write(summ); log(sid,f'TURNTABLE DONE {len(imgs)}'); return
+            log(sid,f'turntable incomplete {len(imgs)}/72 - retry'); continue
         fixes='; '.join(str(v.get('fix','')) for v in vs if 'error' not in v)
         out=glm52(FIX.format(name=name,critique=summ,fixes=fixes)+"\n\n===== CURRENT script =====\n"+open(script).read())
         m=re.findall(r'```python\n(.*?)```',out,re.S)
