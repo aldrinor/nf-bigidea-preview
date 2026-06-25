@@ -104,10 +104,7 @@ for _lk in ('AgX - Base Contrast','Filmic - Base Contrast','Medium Contrast','No
 scene.view_settings.exposure = 0.0
 scene.view_settings.gamma = 1.0
 
-# color management: ACES, slightly punchy
-scene.sequencer_colorspace_settings.name = 'AgX Base sRGB' if 'AgX Base sRGB' in [
-    cs.name for cs in bpy.types.ColorManagementInputColorSpaceSettings.bl_rna.properties['name'].enum_items
-] else scene.sequencer_colorspace_settings.name
+# color management handled by view_transform above (sequencer colorspace not needed for still renders)
 
 # -------------------------------------------------------------------- SEM image
 sem_img = bpy.data.images.load(SEM_PATH)
