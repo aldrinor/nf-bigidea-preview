@@ -82,13 +82,34 @@ except (TypeError, AttributeError):
 scene.cycles.use_adaptive_sampling = True
 scene.cycles.adaptive_threshold = 0.02
 scene.cycles.samples = SPP
-scene.cycles.use_caustics = True
-scene.cycles.transparent_max_bounces = 16
-scene.cycles.volume_bounces = 4
-scene.cycles.diffuse_bounces = 4
-scene.cycles.glossy_bounces = 4
-scene.cycles.transmission_bounces = 12
-scene.cycles.ao_bounces = 2
+try:
+    scene.cycles.use_caustics = True
+except Exception:
+    pass
+try:
+    scene.cycles.transparent_max_bounces = 16
+except Exception:
+    pass
+try:
+    scene.cycles.volume_bounces = 4
+except Exception:
+    pass
+try:
+    scene.cycles.diffuse_bounces = 4
+except Exception:
+    pass
+try:
+    scene.cycles.glossy_bounces = 4
+except Exception:
+    pass
+try:
+    scene.cycles.transmission_bounces = 12
+except Exception:
+    pass
+try:
+    scene.cycles.ao_bounces = 2
+except Exception:
+    pass
 scene.render.film_transparent = False
 scene.render.resolution_x = 1280
 scene.render.resolution_y = 1280
@@ -104,14 +125,16 @@ for _lk in ('AgX - Base Contrast','Filmic - Base Contrast','Medium Contrast','No
 scene.view_settings.exposure = 0.0
 scene.view_settings.gamma = 1.0
 
-# color management handled by view_transform above (sequencer colorspace not needed for still renders)
-
 # -------------------------------------------------------------------- SEM image
 sem_img = bpy.data.images.load(SEM_PATH)
-sem_img.colorspace_settings.name = 'Non-Color'
-sem_img.pack()
-
-# displacement-safe: convert to 16-bit grayscale via image settings if possible
+try:
+    sem_img.colorspace_settings.name = 'Non-Color'
+except Exception:
+    pass
+try:
+    sem_img.pack()
+except Exception:
+    pass
 try:
     sem_img.use_alpha = False
 except Exception:
@@ -132,22 +155,36 @@ def add_image_texture(nt, image, name='SEM', noncolor=True):
     n.image = image
     n.label = name
     if noncolor:
-        n.image.colorspace_settings.name = 'Non-Color'
+        try:
+            n.image.colorspace_settings.name = 'Non-Color'
+        except Exception:
+            pass
     return n
 
 def add_displacement(nt, height_tex, mid=0.5, scale=0.05, normal=1.0):
     """Wire a height texture into displacement output with bump for normals."""
     out = nt.nodes['Material Output']
-    # displacement
     disp = nt.nodes.new('ShaderNodeDisplacement')
-    disp.inputs['Midlevel'].default_value = mid
-    disp.inputs['Scale'].default_value = scale
+    try:
+        disp.inputs['Midlevel'].default_value = mid
+    except KeyError:
+        try: disp.inputs['Midlevel'].default_value = mid
+        except Exception: pass
+    try:
+        disp.inputs['Scale'].default_value = scale
+    except Exception:
+        pass
     nt.links.new(height_tex.outputs['Color'], disp.inputs['Height'])
     nt.links.new(disp.outputs['Displacement'], out.inputs['Displacement'])
-    # bump for normal
     bump = nt.nodes.new('ShaderNodeBump')
-    bump.inputs['Strength'].default_value = normal
-    bump.inputs['Distance'].default_value = 0.02
+    try:
+        bump.inputs['Strength'].default_value = normal
+    except Exception:
+        pass
+    try:
+        bump.inputs['Distance'].default_value = 0.02
+    except Exception:
+        pass
     nt.links.new(height_tex.outputs['Color'], bump.inputs['Height'])
     return bump
 
@@ -158,13 +195,19 @@ def make_subsurf(obj, levels=3, render_levels=6):
     return m
 
 def make_displace_mod(obj, image, strength=0.05, mid=0.5):
-    tex = bpy.data.textures.new('SEMDisp', 'IMAGE')
-    tex.image = image
-    m = obj.modifiers.new('Displace', 'DISPLACE')
-    m.texture = tex
-    m.strength = strength
-    m.mid_level = mid
-    return m
+    try:
+        tex = bpy.data.textures.new('SEMDisp', 'IMAGE')
+        tex.image = image
+        m = obj.modifiers.new('Displace', 'DISPLACE')
+        try:
+            m.texture = tex
+        except Exception:
+            pass
+        m.strength = strength
+        m.mid_level = mid
+        return m
+    except Exception:
+        return None
 
 # -------------------------------------------------------------------- base meshes
 def mesh_icosphere(subdiv=4, radius=1.0, name='Spec'):
@@ -177,7 +220,6 @@ def mesh_capsule(length=1.6, radius=0.5, segments=48, rings=24, name='Spec'):
     bpy.ops.mesh.primitive_cylinder_add(vertices=segments, radius=radius, depth=length, location=(0,0,0))
     o = bpy.context.active_object
     o.name = name
-    # cap ends with hemispheres via bmesh
     bpy.ops.object.mode_set(mode='EDIT')
     bm = bmesh.from_edit_mesh(o.data)
     bmesh.ops.inset_individual(bm, faces=[f for f in bm.faces if abs(f.normal.z) > 0.9], thickness=radius*0.4)
@@ -199,7 +241,6 @@ def mesh_shard(name='Spec'):
     o.name = name
     o.scale = (1.6, 0.5, 0.12)
     bpy.ops.object.transform_apply(scale=True)
-    # jagged edges
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.subdivide(number_cuts=3)
@@ -216,11 +257,9 @@ def mesh_aggregate(count=14, radius=1.0, name='Spec', fractal=True):
     parent = bpy.context.active_object
     parent.name = name
     parts = []
-    # seed center
     bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=radius*0.35, location=(0,0,0))
     parts.append(bpy.context.active_object)
     for i in range(count-1):
-        # random walk placement
         d = Vector((random.uniform(-1,1), random.uniform(-1,1), random.uniform(-1,1))).normalized()
         dist = radius * (0.35 + random.uniform(0.15, 0.55))
         loc = d * dist
@@ -228,11 +267,9 @@ def mesh_aggregate(count=14, radius=1.0, name='Spec', fractal=True):
         bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=r, location=loc)
         p = bpy.context.active_object
         if fractal:
-            # jitter vertices
             for v in p.data.vertices:
                 v.co += Vector((random.uniform(-1,1), random.uniform(-1,1), random.uniform(-1,1))) * r * 0.08
         parts.append(p)
-    # join
     bpy.ops.object.select_all(action='DESELECT')
     for p in parts:
         p.select_set(True)
@@ -244,29 +281,32 @@ def mesh_aggregate(count=14, radius=1.0, name='Spec', fractal=True):
     return obj
 
 # -------------------------------------------------------------------- specimen build
+def safe_set_bsdf(bsdf, key, value):
+    try:
+        if key in bsdf.inputs:
+            bsdf.inputs[key].default_value = value
+    except Exception:
+        pass
+
 def build_specimen():
     t = SPEC_TYPE
     if t == 'pollen':
         obj = mesh_icosphere(subdiv=5, radius=1.0, name='Pollen')
-        # echinate spikes via displacement (strong)
         make_subsurf(obj, 2, 4)
         mat, nt, out = new_mat('M_Pollen')
         img = add_image_texture(nt, sem_img, 'SEM')
-        # Principled with gold metallic + slight subsurface
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.83, 0.62, 0.20, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.85
-        bsdf.inputs['Roughness'].default_value = 0.32
-        bsdf.inputs['Specular IOR Level'].default_value = 0.6
-        if 'Subsurface Weight' in bsdf.inputs:
-            bsdf.inputs['Subsurface Weight'].default_value = 0.15
-            bsdf.inputs['Subsurface Radius'].default_value = (0.4, 0.25, 0.1)
+        safe_set_bsdf(bsdf, 'Base Color', (0.83, 0.62, 0.20, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.85)
+        safe_set_bsdf(bsdf, 'Roughness', 0.32)
+        safe_set_bsdf(bsdf, 'Specular IOR Level', 0.6)
+        safe_set_bsdf(bsdf, 'Subsurface Weight', 0.15)
+        safe_set_bsdf(bsdf, 'Subsurface Radius', (0.4, 0.25, 0.1))
         bump = add_displacement(nt, img, mid=0.5, scale=0.18, normal=1.0)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
         obj.data.materials.append(mat)
         make_displace_mod(obj, sem_img, strength=0.22, mid=0.5)
-        obj.data.materials[0].cyclic = False if hasattr(obj.data.materials[0],'cyclic') else None
 
     elif t == 'spore':
         obj = mesh_icosphere(subdiv=5, radius=1.0, name='Spore')
@@ -276,12 +316,11 @@ def build_specimen():
         mat, nt, out = new_mat('M_Spore')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.32, 0.28, 0.10, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.0
-        bsdf.inputs['Roughness'].default_value = 0.78
-        if 'Subsurface Weight' in bsdf.inputs:
-            bsdf.inputs['Subsurface Weight'].default_value = 0.35
-            bsdf.inputs['Subsurface Radius'].default_value = (0.5, 0.4, 0.2)
+        safe_set_bsdf(bsdf, 'Base Color', (0.32, 0.28, 0.10, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.0)
+        safe_set_bsdf(bsdf, 'Roughness', 0.78)
+        safe_set_bsdf(bsdf, 'Subsurface Weight', 0.35)
+        safe_set_bsdf(bsdf, 'Subsurface Radius', (0.5, 0.4, 0.2))
         bump = add_displacement(nt, img, mid=0.5, scale=0.10, normal=1.2)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -289,7 +328,6 @@ def build_specimen():
         make_displace_mod(obj, sem_img, strength=0.12, mid=0.5)
 
     elif t == 'bacteria':
-        # rod with coccus option baked in via random
         if random.random() < 0.4:
             obj = mesh_icosphere(subdiv=5, radius=0.9, name='Bacteria')
         else:
@@ -298,13 +336,12 @@ def build_specimen():
         mat, nt, out = new_mat('M_Bacteria')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.18, 0.55, 0.22, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.0
-        bsdf.inputs['Roughness'].default_value = 0.55
-        if 'Subsurface Weight' in bsdf.inputs:
-            bsdf.inputs['Subsurface Weight'].default_value = 0.55
-            bsdf.inputs['Subsurface Radius'].default_value = (0.6, 0.5, 0.3)
-            bsdf.inputs['Subsurface Scale'].default_value = 0.05
+        safe_set_bsdf(bsdf, 'Base Color', (0.18, 0.55, 0.22, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.0)
+        safe_set_bsdf(bsdf, 'Roughness', 0.55)
+        safe_set_bsdf(bsdf, 'Subsurface Weight', 0.55)
+        safe_set_bsdf(bsdf, 'Subsurface Radius', (0.6, 0.5, 0.3))
+        safe_set_bsdf(bsdf, 'Subsurface Scale', 0.05)
         bump = add_displacement(nt, img, mid=0.5, scale=0.06, normal=1.0)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -317,9 +354,9 @@ def build_specimen():
         mat, nt, out = new_mat('M_Dust')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.42, 0.34, 0.26, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.0
-        bsdf.inputs['Roughness'].default_value = 0.92
+        safe_set_bsdf(bsdf, 'Base Color', (0.42, 0.34, 0.26, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.0)
+        safe_set_bsdf(bsdf, 'Roughness', 0.92)
         bump = add_displacement(nt, img, mid=0.5, scale=0.08, normal=1.3)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -332,12 +369,11 @@ def build_specimen():
         mat, nt, out = new_mat('M_Dander')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.86, 0.78, 0.66, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.0
-        bsdf.inputs['Roughness'].default_value = 0.65
-        if 'Subsurface Weight' in bsdf.inputs:
-            bsdf.inputs['Subsurface Weight'].default_value = 0.45
-            bsdf.inputs['Subsurface Radius'].default_value = (0.7, 0.55, 0.4)
+        safe_set_bsdf(bsdf, 'Base Color', (0.86, 0.78, 0.66, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.0)
+        safe_set_bsdf(bsdf, 'Roughness', 0.65)
+        safe_set_bsdf(bsdf, 'Subsurface Weight', 0.45)
+        safe_set_bsdf(bsdf, 'Subsurface Radius', (0.7, 0.55, 0.4))
         bump = add_displacement(nt, img, mid=0.5, scale=0.04, normal=1.4)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -350,13 +386,11 @@ def build_specimen():
         mat, nt, out = new_mat('M_Virus')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.78, 0.78, 0.82, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.05
-        bsdf.inputs['Roughness'].default_value = 0.38
-        if 'Subsurface Weight' in bsdf.inputs:
-            bsdf.inputs['Subsurface Weight'].default_value = 0.30
-            bsdf.inputs['Subsurface Radius'].default_value = (0.4, 0.4, 0.4)
-        # spiky capsid — strong bump + sharp displacement
+        safe_set_bsdf(bsdf, 'Base Color', (0.78, 0.78, 0.82, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.05)
+        safe_set_bsdf(bsdf, 'Roughness', 0.38)
+        safe_set_bsdf(bsdf, 'Subsurface Weight', 0.30)
+        safe_set_bsdf(bsdf, 'Subsurface Radius', (0.4, 0.4, 0.4))
         bump = add_displacement(nt, img, mid=0.5, scale=0.14, normal=1.5)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -369,13 +403,11 @@ def build_specimen():
         mat, nt, out = new_mat('M_Soot')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.018, 0.018, 0.020, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.0
-        bsdf.inputs['Roughness'].default_value = 0.96
-        # slight sheen for carbon
-        if 'Coat Weight' in bsdf.inputs:
-            bsdf.inputs['Coat Weight'].default_value = 0.05
-            bsdf.inputs['Coat Roughness'].default_value = 0.8
+        safe_set_bsdf(bsdf, 'Base Color', (0.018, 0.018, 0.020, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.0)
+        safe_set_bsdf(bsdf, 'Roughness', 0.96)
+        safe_set_bsdf(bsdf, 'Coat Weight', 0.05)
+        safe_set_bsdf(bsdf, 'Coat Roughness', 0.8)
         bump = add_displacement(nt, img, mid=0.5, scale=0.05, normal=1.2)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -388,9 +420,9 @@ def build_specimen():
         mat, nt, out = new_mat('M_PM')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.52, 0.50, 0.48, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.05
-        bsdf.inputs['Roughness'].default_value = 0.82
+        safe_set_bsdf(bsdf, 'Base Color', (0.52, 0.50, 0.48, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.05)
+        safe_set_bsdf(bsdf, 'Roughness', 0.82)
         bump = add_displacement(nt, img, mid=0.5, scale=0.06, normal=1.2)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -403,15 +435,12 @@ def build_specimen():
         mat, nt, out = new_mat('M_Microplastic')
         img = add_image_texture(nt, sem_img, 'SEM')
         bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
-        bsdf.inputs['Base Color'].default_value = (0.85, 0.88, 0.92, 1.0)
-        bsdf.inputs['Metallic'].default_value = 0.0
-        bsdf.inputs['Roughness'].default_value = 0.12
-        if 'Transmission Weight' in bsdf.inputs:
-            bsdf.inputs['Transmission Weight'].default_value = 0.85
-            bsdf.inputs['Transmission Roughness'].default_value = 0.08
-            bsdf.inputs['IOR'].default_value = 1.49
-        elif 'Transmission' in bsdf.inputs:
-            bsdf.inputs['Transmission'].default_value = 0.85
+        safe_set_bsdf(bsdf, 'Base Color', (0.85, 0.88, 0.92, 1.0))
+        safe_set_bsdf(bsdf, 'Metallic', 0.0)
+        safe_set_bsdf(bsdf, 'Roughness', 0.12)
+        safe_set_bsdf(bsdf, 'Transmission Weight', 0.85)
+        safe_set_bsdf(bsdf, 'Transmission Roughness', 0.08)
+        safe_set_bsdf(bsdf, 'IOR', 1.49)
         bump = add_displacement(nt, img, mid=0.5, scale=0.02, normal=0.6)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
@@ -421,9 +450,9 @@ def build_specimen():
     # shade smooth + enable displacement on material
     for p in obj.data.polygons: p.use_smooth = True
     if obj.data.materials:
-        obj.data.materials[0].displacement_method = 'BOTH' if hasattr(obj.data.materials[0],'displacement_method') else obj.data.materials[0].displacement_method
+        m0 = obj.data.materials[0]
         try:
-            obj.data.materials[0].cyclic = False
+            m0.displacement_method = 'BOTH'
         except Exception:
             pass
     return obj
@@ -433,22 +462,22 @@ specimen = build_specimen()
 # center & frame
 bpy.context.view_layer.objects.active = specimen
 specimen.select_set(True)
-bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
+try:
+    bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
+except Exception:
+    try:
+        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+    except Exception:
+        pass
 specimen.location = (0, 0, 0)
 
 # -------------------------------------------------------------------- red charge aura
-# Subtle red volumetric glow hugging the specimen — NOT a backdrop.
-# Implementation: a thin spherical shell slightly larger than the specimen,
-# with volume scatter + red emission at very low density, plus a small red
-# point light at the specimen's center to give the surface a faint red rim.
-
-aura_radius = 1.55  # hugs the specimen (radius ~1.0)
+aura_radius = 1.55
 
 bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4, radius=aura_radius, location=(0,0,0))
 aura = bpy.context.active_object
 aura.name = 'AuraShell'
 for p in aura.data.polygons: p.use_smooth = True
-# flip normals so we see inside
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.mesh.flip_normals()
@@ -460,18 +489,21 @@ nt = aura_mat.node_tree
 for n in list(nt.nodes): nt.nodes.remove(n)
 out = nt.nodes.new('ShaderNodeOutputMaterial')
 out.location = (400, 0)
-# volume scatter (red tint)
 vs = nt.nodes.new('ShaderNodeVolumeScatter')
-vs.inputs['Density'].default_value = 0.35
-vs.inputs['Color'].default_value = (0.85, 0.08, 0.10, 1.0)
-# volume absorption (red)
+try: vs.inputs['Density'].default_value = 0.35
+except Exception: pass
+try: vs.inputs['Color'].default_value = (0.85, 0.08, 0.10, 1.0)
+except Exception: pass
 va = nt.nodes.new('ShaderNodeVolumeAbsorption')
-va.inputs['Density'].default_value = 0.15
-va.inputs['Color'].default_value = (0.95, 0.10, 0.10, 1.0)
-# emission (very faint red glow)
+try: va.inputs['Density'].default_value = 0.15
+except Exception: pass
+try: va.inputs['Color'].default_value = (0.95, 0.10, 0.10, 1.0)
+except Exception: pass
 ve = nt.nodes.new('ShaderNodeEmission')
-ve.inputs['Color'].default_value = (1.0, 0.12, 0.10, 1.0)
-ve.inputs['Strength'].default_value = 0.6
+try: ve.inputs['Color'].default_value = (1.0, 0.12, 0.10, 1.0)
+except Exception: pass
+try: ve.inputs['Strength'].default_value = 0.6
+except Exception: pass
 mix1 = nt.nodes.new('ShaderNodeMixShader')
 mix1.inputs['Fac'].default_value = 0.5
 mix2 = nt.nodes.new('ShaderNodeMixShader')
@@ -481,18 +513,26 @@ nt.links.new(va.outputs['Volume'], mix1.inputs[2])
 nt.links.new(mix1.outputs['Shader'], mix2.inputs[1])
 nt.links.new(ve.outputs['Emission'], mix2.inputs[2])
 nt.links.new(mix2.outputs['Shader'], out.inputs['Volume'])
-# transparent surface so we see through
 ts = nt.nodes.new('ShaderNodeBsdfTransparent')
 nt.links.new(ts.outputs['BSDF'], out.inputs['Surface'])
-aura_mat.blend_method = 'HASHED'
-aura_mat.shadow_method = 'HASHED'
+try:
+    aura_mat.blend_method = 'HASHED'
+except Exception:
+    pass
+try:
+    aura_mat.shadow_method = 'HASHED'
+except Exception:
+    pass
 aura.data.materials.append(aura_mat)
 
 # red point light at center — subtle rim charge
 light_data = bpy.data.lights.new('ChargeLight', type='POINT')
 light_data.energy = 12.0
 light_data.color = (1.0, 0.10, 0.08)
-light_data.shadow_soft_size = 0.6
+try:
+    light_data.shadow_soft_size = 0.6
+except Exception:
+    pass
 charge_light = bpy.data.objects.new('ChargeLight', light_data)
 charge_light.location = (0, 0, 0)
 bpy.context.collection.objects.link(charge_light)
@@ -506,8 +546,10 @@ for n in list(wnt.nodes): wnt.nodes.remove(n)
 wout = wnt.nodes.new('ShaderNodeOutputWorld')
 wout.location = (400, 0)
 bg = wnt.nodes.new('ShaderNodeBackground')
-bg.inputs['Color'].default_value = (0.012, 0.012, 0.014, 1.0)
-bg.inputs['Strength'].default_value = 0.6
+try: bg.inputs['Color'].default_value = (0.012, 0.012, 0.014, 1.0)
+except Exception: pass
+try: bg.inputs['Strength'].default_value = 0.6
+except Exception: pass
 wnt.links.new(bg.outputs['Background'], wout.inputs['Surface'])
 
 # dark floor for grounding
@@ -520,19 +562,25 @@ fnt = fmat.node_tree
 for n in list(fnt.nodes): fnt.nodes.remove(n)
 fout = fnt.nodes.new('ShaderNodeOutputMaterial')
 fbsdf = fnt.nodes.new('ShaderNodeBsdfPrincipled')
-fbsdf.inputs['Base Color'].default_value = (0.015, 0.015, 0.018, 1.0)
-fbsdf.inputs['Roughness'].default_value = 0.35
-fbsdf.inputs['Metallic'].default_value = 0.6
+safe_set_bsdf(fbsdf, 'Base Color', (0.015, 0.015, 0.018, 1.0))
+safe_set_bsdf(fbsdf, 'Roughness', 0.35)
+safe_set_bsdf(fbsdf, 'Metallic', 0.6)
 fnt.links.new(fbsdf.outputs['BSDF'], fout.inputs['Surface'])
 floor.data.materials.append(fmat)
 
 # key light — soft overhead-right
 def add_area(name, loc, rot, size, energy, color=(1,1,1)):
     ld = bpy.data.lights.new(name, type='AREA')
-    ld.size = size
+    try:
+        ld.size = size
+    except Exception:
+        pass
     ld.energy = energy
     ld.color = color
-    ld.shadow_soft_size = size * 0.5
+    try:
+        ld.shadow_soft_size = size * 0.5
+    except Exception:
+        pass
     o = bpy.data.objects.new(name, ld)
     o.location = loc
     o.rotation_euler = rot
@@ -546,10 +594,16 @@ add_area('Fill', (-2.0, -3.0, 1.5), (math.radians(80), math.radians(10), math.ra
 # -------------------------------------------------------------------- camera
 cam_data = bpy.data.cameras.new('Cam')
 cam_data.lens = 80
-cam_data.sensor_width = 36
-cam_data.dof.use_dof = True
-cam_data.dof.focus_distance = 4.2
-cam_data.dof.aperture_fstop = 8.0
+try:
+    cam_data.sensor_width = 36
+except Exception:
+    pass
+try:
+    cam_data.dof.use_dof = True
+    cam_data.dof.focus_distance = 4.2
+    cam_data.dof.aperture_fstop = 8.0
+except Exception:
+    pass
 cam = bpy.data.objects.new('Cam', cam_data)
 cam.location = (0, -4.2, 0.6)
 cam.rotation_euler = (math.radians(88), 0, 0)
@@ -557,13 +611,11 @@ bpy.context.collection.objects.link(cam)
 scene.camera = cam
 
 # -------------------------------------------------------------------- turntable
-# Parent specimen + aura to an empty that rotates.
 bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0,0,0))
 turn = bpy.context.active_object
 turn.name = 'Turntable'
 specimen.parent = turn
 aura.parent = turn
-# charge light stays at center (does not need to rotate, but parent for cleanliness)
 charge_light.parent = turn
 
 # animation
@@ -578,7 +630,10 @@ for f in range(1, FRAMES + 1):
 
 # -------------------------------------------------------------------- render
 scene.render.image_settings.file_format = 'PNG'
-scene.render.image_settings.color_depth = '16'
+try:
+    scene.render.image_settings.color_depth = '16'
+except Exception:
+    pass
 
 for f in range(1, FRAMES + 1):
     scene.frame_set(f)
