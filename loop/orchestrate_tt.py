@@ -21,8 +21,11 @@ def call(model,msgs,mt,tmp):
     p=json.dumps({"model":model,"messages":msgs,"max_tokens":mt,"temperature":tmp}).encode()
     rq=urllib.request.Request(OR,data=p,headers={"Authorization":"Bearer "+KEY,"Content-Type":"application/json"})
     for _ in range(3):
-        try: return json.loads(urllib.request.urlopen(rq,timeout=330).read().decode())["choices"][0]["message"]["content"]
-        except Exception: time.sleep(6)
+        try:
+            c=json.loads(urllib.request.urlopen(rq,timeout=330).read().decode())["choices"][0]["message"]["content"]
+            if c: return c
+        except Exception: pass
+        time.sleep(6)
     return ""
 def glm52(b): return call("z-ai/glm-5.2",[{"role":"user","content":b}],30000,0.5)
 def glm5v(prompt,img):
