@@ -119,6 +119,7 @@
         let modelGroup = new THREE.Group();
         scene.add(modelGroup);
         let chargeCloud = null;
+        let auraMaterial = null;
         let modelBoundingRadius = 1;
 
         // --- Load GLTF Model ---
@@ -165,32 +166,25 @@
         });
 
         // --- Charge Cloud Creation ---
-        // Conforming aura: duplicates each atom mesh, scales it up slightly, and
-        // applies a red fresnel-emission additive material. The aura exactly
-        // follows the molecule silhouette (thin elongated chain), hugging every
-        // atom tightly instead of forming a large detached sphere.
+        // Conforming aura: clones the entire model, replaces every mesh material
+        // with a single smooth red fresnel-emission additive material, and scales
+        // the clone uniformly so the glow hugs the true molecular silhouette.
         function createChargeCloud(model) {
-            const group = new THREE.Group();
-            const shellMaterials = [];
-
-            // Shared fresnel shader: bright at grazing rim, transparent facing camera.
-            const makeShellMaterial = (power, intensity, color, scale) => new THREE.ShaderMaterial({
+            // Single shared fresnel shader material for the whole clone.
+            auraMaterial = new THREE.ShaderMaterial({
                 uniforms: {
                     uTime: { value: 0 },
-                    uColor: { value: new THREE.Color(color) },
-                    uPower: { value: power },
-                    uIntensity: { value: intensity },
-                    uScale: { value: scale }
+                    uColor: { value: new THREE.Color(0xff1133) },
+                    uPower: { value: 2.5 },
+                    uIntensity: { value: 0.9 }
                 },
                 vertexShader: `
                     varying vec3 vNormal;
                     varying vec3 vViewDir;
-                    varying vec3 vLocalPos;
                     void main() {
                         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
                         vNormal = normalize(normalMatrix * normal);
                         vViewDir = normalize(-mvPosition.xyz);
-                        vLocalPos = position;
                         gl_Position = projectionMatrix * mvPosition;
                     }
                 `,
@@ -199,21 +193,17 @@
                     uniform float uPower;
                     uniform float uIntensity;
                     uniform float uTime;
-                    uniform float uScale;
                     varying vec3 vNormal;
                     varying vec3 vViewDir;
-                    varying vec3 vLocalPos;
                     void main() {
-                        // Fresnel: bright at silhouette, transparent facing camera.
+                        // Fresnel: transparent facing camera, glowing red at grazing rim.
                         float f = 1.0 - max(dot(vNormal, vViewDir), 0.0);
                         float fresnel = pow(f, uPower);
                         // Gentle breathing pulse.
-                        float pulse = 0.88 + 0.12 * sin(uTime * 0.6);
-                        // Subtle volumetric shimmer driven by position.
-                        float shimmer = 0.92 + 0.08 * sin(uTime * 0.9 + vLocalPos.y * 3.0 + vLocalPos.x * 2.0);
-                        float alpha = fresnel * uIntensity * pulse * shimmer;
+                        float pulse = 0.90 + 0.10 * sin(uTime * 0.6);
+                        float alpha = fresnel * uIntensity * pulse;
                         // Deep-to-bright red: darker at faint edges, brighter near rim peak.
-                        vec3 col = mix(uColor * 0.35, uColor * 1.6, fresnel);
+                        vec3 col = mix(uColor * 0.3, uColor * 1.7, fresnel);
                         gl_FragColor = vec4(col, alpha);
                     }
                 `,
@@ -221,37 +211,27 @@
                 depthWrite: false,
                 depthTest: true,
                 blending: THREE.AdditiveBlending,
-                side: THREE.FrontSide
+                side: THREE.BackSide
             });
 
-            // Traverse the model and create a scaled shell for each atom mesh.
-            // Using two layers: a tight inner shell (1.18x) and a softer outer
-            // shell (1.45x) per atom, so the aura hugs the true molecular shape.
-            model.traverse((child) => {
-                if (child.isMesh && child.geometry) {
-                    // Inner tight shell per atom.
-                    const innerShell = new THREE.Mesh(child.geometry, makeShellMaterial(3.0, 0.85, 0xff1133, 1.18));
-                    innerShell.scale.copy(child.scale).multiplyScalar(1.18);
-                    innerShell.position.copy(child.position);
-                    innerShell.quaternion.copy(child.quaternion);
-                    innerShell.renderOrder = -2;
-                    group.add(innerShell);
-                    shellMaterials.push(innerShell.material);
+            // Clone the whole model so the aura exactly matches the molecule geometry.
+            const auraGroup = model.clone(true);
 
-                    // Outer soft falloff per atom.
-                    const outerShell = new THREE.Mesh(child.geometry, makeShellMaterial(2.0, 0.4, 0xcc0a22, 1.45));
-                    outerShell.scale.copy(child.scale).multiplyScalar(1.45);
-                    outerShell.position.copy(child.position);
-                    outerShell.quaternion.copy(child.quaternion);
-                    outerShell.renderOrder = -1;
-                    group.add(outerShell);
-                    shellMaterials.push(outerShell.material);
+            // Replace every mesh material with the single shared aura material.
+            auraGroup.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = auraMaterial;
+                    child.renderOrder = -1;
                 }
             });
 
-            chargeCloud = group;
-            chargeCloud.userData.materials = shellMaterials;
-            modelGroup.add(chargeCloud); // Parent to modelGroup so it hugs during orbit.
+            // Uniform scale so the glow sits just outside each real atom (tight hug).
+            auraGroup.scale.setScalar(1.12);
+            // Keep aura centered with the model (model was already recentered to origin).
+            auraGroup.position.set(0, 0, 0);
+
+            chargeCloud = auraGroup;
+            modelGroup.add(chargeCloud); // Parent to modelGroup so it orbits with the molecule.
         }
 
         // --- Animation Loop ---
@@ -261,20 +241,17 @@
             requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
 
-            if (chargeCloud) {
-                // Update shader time for breathing/shimmer on all shells.
-                const mats = chargeCloud.userData.materials;
-                for (let i = 0; i < mats.length; i++) {
-                    mats[i].uniforms.uTime.value = elapsedTime;
-                }
+            if (chargeCloud && auraMaterial) {
+                // Update shader time for breathing pulse.
+                auraMaterial.uniforms.uTime.value = elapsedTime;
 
-                // Gentle breathing/pulsing of the entire aura.
-                const pulse = 1.0 + Math.sin(elapsedTime * 0.5) * 0.025;
+                // Gentle breathing/pulsing of the entire aura (1.10x..1.16x).
+                const pulse = 1.13 + Math.sin(elapsedTime * 0.5) * 0.03;
                 chargeCloud.scale.setScalar(pulse);
 
-                // Slow drift/swirl.
-                chargeCloud.rotation.y += 0.0005;
-                chargeCloud.rotation.x += 0.0002;
+                // Very slow drift/swirl.
+                chargeCloud.rotation.y += 0.0004;
+                chargeCloud.rotation.x += 0.00015;
             }
 
             controls.update();
