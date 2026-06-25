@@ -354,11 +354,11 @@ def build_specimen():
         safe_set_bsdf(bsdf, 'Subsurface Weight', 0.55)
         safe_set_bsdf(bsdf, 'Subsurface Radius', (0.6, 0.5, 0.3))
         safe_set_bsdf(bsdf, 'Subsurface Scale', 0.05)
-        bump = add_displacement(nt, img, mid=0.5, scale=0.06, normal=1.0)
+        bump = add_displacement(nt, img, mid=0.5, scale=0.012, normal=0.35)
         nt.links.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
         nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
         obj.data.materials.append(mat)
-        make_displace_mod(obj, sem_img, strength=0.06, mid=0.5)
+        make_displace_mod(obj, sem_img, strength=0.012, mid=0.5)  # gentle: smooth bacterial cell, not spiky shards
 
     elif t == 'dust':
         obj = mesh_aggregate(count=10, radius=1.0, name='Dust', fractal=True)
