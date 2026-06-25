@@ -98,8 +98,8 @@ def process(spec):
         summ='|'.join(f"acc={v.get('accurate')} aura={v.get('aura_good')} pr={v.get('photoreal')} ok={v.get('sign_off')}" for v in vs)
         log(sid,f'it{it}: {summ}')
         if ok:
-            log(sid,'*** GLM-5V SIGN-OFF *** full 72-frame turntable @2048spp')
-            render(spec,script,outdir,2048,72)
+            log(sid,'*** GLM-5V SIGN-OFF *** full 72-frame turntable @640spp')
+            render(spec,script,outdir,640,72)
             open(WORK+f'/DONE_{sid}','w').write(summ); log(sid,'TURNTABLE DONE'); return
         fixes='; '.join(str(v.get('fix','')) for v in vs if 'error' not in v)
         out=glm52(FIX.format(name=name,critique=summ,fixes=fixes)+"\n\n===== CURRENT script =====\n"+open(script).read())
