@@ -1,106 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Dyson Bar Viewer</title>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #000000; font-family: sans-serif; }
-        #info { position: absolute; top: 10px; left: 10px; color: white; z-index: 100; }
-        canvas { display: block; }
-    </style>
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+<meta charset="UTF-8" />
+<title>PFOS — Dyson-grade Molecular Viewer</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background: #000; color: #cfd8e3;
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+  #app { position: fixed; inset: 0; }
+  canvas { display: block; }
+
+  #hud {
+    position: fixed; left: 18px; top: 16px;
+    padding: 10px 14px;
+    background: rgba(8, 12, 20, 0.55);
+    border: 1px solid rgba(120, 160, 220, 0.18);
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: #9fb4cc;
+    pointer-events: none;
+    user-select: none;
+  }
+  #hud b { color: #e6f0ff; font-weight: 600; }
+  #hud .accent { color: #6fb6ff; }
+
+  #loader {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #000; color: #6fb6ff;
+    font-size: 14px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    z-index: 50;
+    transition: opacity 0.6s ease;
+  }
+  #loader.hidden { opacity: 0; pointer-events: none; }
+</style>
 </head>
 <body>
-    <div id="info">Loading model... Use mouse to rotate.</div>
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  <div id="app"></div>
+  <div id="hud">
+    <div><b>PFOS</b> <span class="accent">·</span> PubChem CID 7443</div>
+    <div style="opacity:0.7; margin-top:4px;">drag to orbit · scroll to zoom</div>
+  </div>
+  <div id="loader">Loading molecule…</div>
 
-        // Scene
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000000);
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 
-        // Camera
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 10);
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+    import { GTAOPass }       from 'three/addons/postprocessing/GTAOPass.js';
+    import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
 
-        // Renderer
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.0;
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        document.body.appendChild(renderer.domElement);
+    // ------------------------------------------------------------------
+    // Renderer
+    // ------------------------------------------------------------------
+    const app = document.getElementById('app');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 1.0);
+    app.appendChild(renderer.domElement);
 
-        // Environment (IBL)
-        const pmremGenerator = new THREE.PMREMGenerator(renderer);
-        scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    // ------------------------------------------------------------------
+    // Scene + camera
+    // ------------------------------------------------------------------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
 
-        // Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enablePan = false;
-        controls.minDistance = 3;
-        controls.maxDistance = 20;
+    const camera = new THREE.PerspectiveCamera(
+      40, window.innerWidth / window.innerHeight, 0.01, 1000
+    );
+    camera.position.set(0, 0, 14);
 
-        // Lights (Subtle rim light for Dyson look)
-        const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
-        rimLight.position.set(5, 10, 7);
-        scene.add(rimLight);
-        
-        const fillLight = new THREE.DirectionalLight(0x4a90e2, 0.5); // Electric blue accent
-        fillLight.position.set(-5, -5, -5);
-        scene.add(fillLight);
+    // ------------------------------------------------------------------
+    // IBL — RoomEnvironment, pushed for rich reflections
+    // ------------------------------------------------------------------
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = envTex;
+    scene.environmentIntensity = 1.6;     // Three r160+ supports this on Scene
 
-        // Load Model
-        const loader = new GLTFLoader();
-        const urlParams = new URLSearchParams(window.location.search);
-        const modelName = urlParams.get('model') || 'PFOS.glb';
+    // ------------------------------------------------------------------
+    // Cinematic 3-point lighting (cool key + cool rim + low fill + blue accent)
+    // ------------------------------------------------------------------
+    const keyLight = new THREE.DirectionalLight(0xbcd4ff, 2.2);
+    keyLight.position.set(6, 8, 6);
+    scene.add(keyLight);
 
-        loader.load(modelName, function (gltf) {
-            const model = gltf.scene;
-            
-            // Center and scale model
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = 5.0 / maxDim;
-            
-            model.scale.multiplyScalar(scale);
-            model.position.sub(center.multiplyScalar(scale));
-            
-            scene.add(model);
-            document.getElementById('info').innerText = modelName;
-            
-            animate();
-        }, undefined, function (error) {
-            console.error(error);
-            document.getElementById('info').innerText = 'Error loading model.';
-        });
+    const rimLight = new THREE.DirectionalLight(0x9fc2ff, 3.4);
+    rimLight.position.set(-7, -2, -8);
+    scene.add(rimLight);
 
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
+    const fillLight = new THREE.DirectionalLight(0x6f86a8, 0.6);
+    fillLight.position.set(-4, 3, 5);
+    scene.add(fillLight);
+
+    // Subtle blue accent (our "charge")
+    const accentLight = new THREE.PointLight(0x3a7bff, 6.0, 30, 2.0);
+    accentLight.position.set(4, -4, 4);
+    scene.add(accentLight);
+
+    // Very soft ambient (mostly handled by IBL)
+    scene.add(new THREE.AmbientLight(0x223044, 0.25));
+
+    // ------------------------------------------------------------------
+    // Soft ground shadow (bake-free AO helper + grounding)
+    // ------------------------------------------------------------------
+    const shadowGeo = new THREE.PlaneGeometry(60, 60);
+    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.0 });
+    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = -6;
+    shadowPlane.receiveShadow = true;
+    scene.add(shadowPlane);
+
+    // Enable shadow maps on key light only
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 50;
+    keyLight.shadow.camera.left = -10;
+    keyLight.shadow.camera.right = 10;
+    keyLight.shadow.camera.top = 10;
+    keyLight.shadow.camera.bottom = -10;
+    keyLight.shadow.bias = -0.0005;
+    keyLight.shadow.radius = 6;
+
+    // ------------------------------------------------------------------
+    // Controls — free rotation, damping, no pan
+    // ------------------------------------------------------------------
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.enablePan = false;
+    controls.rotateSpeed = 0.9;
+    controls.zoomSpeed = 0.8;
+    controls.minDistance = 4;
+    controls.maxDistance = 40;
+
+    // ------------------------------------------------------------------
+    // Load GLB
+    // ------------------------------------------------------------------
+    const GLB_URL = './PFOS.glb';
+    const loader = new GLTFLoader();
+    let modelRoot = null;
+
+    function frameObject(root) {
+      const box = new THREE.Box3().setFromObject(root);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+
+      // Center
+      root.position.sub(center);
+
+      // Frame camera
+      const fov = camera.fov * Math.PI / 180;
+      const dist = (maxDim / 2) / Math.tan(fov / 2) * 1.8;
+      camera.position.set(0, 0, dist);
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      // Place shadow plane just under the model
+      shadowPlane.position.y = -maxDim * 0.6 - 0.5;
+    }
+
+    loader.load(GLB_URL, (gltf) => {
+      modelRoot = gltf.scene;
+
+      // Boost env reflections on every material
+      modelRoot.traverse((obj) => {
+        if (obj.isMesh) {
+          obj.castShadow = true;
+          obj.receiveShadow = true;
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          for (const m of mats) {
+            if (m && m.isMeshStandardMaterial) {
+              m.envMapIntensity = 1.8;
+              m.needsUpdate = true;
+            }
+          }
         }
+      });
 
-        window.addEventListener('resize', function() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+      scene.add(modelRoot);
+      frameObject(modelRoot);
+
+      document.getElementById('loader').classList.add('hidden');
+    }, (xhr) => {
+      // progress
+    }, (err) => {
+      console.error('GLB load failed:', err);
+      document.getElementById('loader').textContent = 'Failed to load PFOS.glb';
+    });
+
+    // ------------------------------------------------------------------
+    // Post-processing: GTAOPass for crevice darkening + OutputPass
+    // ------------------------------------------------------------------
+    const size = renderer.getSize(new THREE.Vector2());
+    const gtaoPass = new GTAOPass(scene, camera, size.x, size.y);
+    gtapass_configure(gtaoPass);
+
+    function gtapass_configure(p) {
+      // GTAOPass params (r160)
+      p.output = GTAOPass.OUTPUT.Default;
+      if (p.radius !== undefined) p.radius = 0.35;
+      if (p.distanceExponent !== undefined) p.distanceExponent = 1.0;
+      if (p.thickness !== undefined) p.thickness = 0.6;
+      if (p.scale !== undefined) p.scale = 1.0;
+      if (p.samples !== undefined) p.samples = 16;
+      if (p.screenSpaceRadius !== undefined) p.screenSpaceRadius = false;
+      if (p.blendIntensity !== undefined) p.blendIntensity = 0.9;
+    }
+
+    const composer = new EffectComposer(renderer);
+    composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    composer.setSize(window.innerWidth, window.innerHeight);
+
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+    composer.addPass(gtaoPass);
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+
+    // ------------------------------------------------------------------
+    // Resize
+    // ------------------------------------------------------------------
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      composer.setSize(w, h);
+      gtaoPass.setSize(w, h);
+    });
+
+    // ------------------------------------------------------------------
+    // Render loop
+    // ------------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+
+      // Subtle accent light orbit for life
+      const t = performance.now() * 0.0005;
+      accentLight.position.x = Math.cos(t) * 5;
+      accentLight.position.z = Math.sin(t) * 5;
+
+      composer.render();
+    }
+    animate();
+  </script>
 </body>
 </html>
