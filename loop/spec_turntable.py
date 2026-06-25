@@ -280,6 +280,15 @@ def mesh_aggregate(count=14, radius=1.0, name='Spec', fractal=True):
     bpy.data.objects.remove(parent)
     return obj
 
+def mesh_chunk(name='Spec'):
+    """Single irregular 3D fragment — a chunky broken-plastic piece (NOT a flat shard)."""
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1.0, location=(0,0,0))
+    o = bpy.context.active_object; o.name = name
+    o.scale = (1.25, 0.95, 0.82); bpy.ops.object.transform_apply(scale=True)
+    for v in o.data.vertices:
+        v.co += Vector((random.uniform(-1,1), random.uniform(-1,1), random.uniform(-1,1))) * 0.16
+    return o
+
 # -------------------------------------------------------------------- specimen build
 def safe_set_bsdf(bsdf, key, value):
     try:
@@ -430,7 +439,7 @@ def build_specimen():
         make_displace_mod(obj, sem_img, strength=0.05, mid=0.5)
 
     elif t == 'microplastic':
-        obj = mesh_shard(name='Microplastic')
+        obj = mesh_chunk(name='Microplastic')
         make_subsurf(obj, 2, 4)
         mat, nt, out = new_mat('M_Microplastic')
         img = add_image_texture(nt, sem_img, 'SEM')
