@@ -110,6 +110,7 @@ def process(spec):
 
 for spec in MANIFEST:
     if spec['id'] in MINE:
+        if os.path.exists(WORK+'/DONE_'+spec['id']): log(spec['id'],'already DONE, skip'); continue
         try: process(spec)
         except Exception as e: log(spec['id'],'EXC '+str(e)[:120])
 log('_pool','ASSIGNED COMPLETE')
