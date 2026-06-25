@@ -1,0 +1,19 @@
+[
+ {"id":"pfas","type":"mol","cid":"74483","name":"PFOS perfluorooctanesulfonate (PFAS)"},
+ {"id":"nitrate","type":"mol","cid":"943","name":"nitrate NO3-"},
+ {"id":"sulfate","type":"mol","cid":"1117","name":"sulfate SO4 2-"},
+ {"id":"phosphate","type":"mol","cid":"1061","name":"phosphate PO4 3-"},
+ {"id":"antibiotic","type":"mol","cid":"5329","name":"sulfamethoxazole antibiotic"},
+ {"id":"herbicide","type":"mol","cid":"1480","name":"2,4-D herbicide"},
+ {"id":"hormone","type":"mol","cid":"6432093","name":"estrone-3-sulfate hormone"},
+ {"id":"fluoride","type":"mol","cid":"28179","name":"fluoride ion F-"},
+ {"id":"pollen","type":"spec","stype":"pollen","sem":"pollen.jpg","name":"pollen grain","sem_url":"https://upload.wikimedia.org/wikipedia/commons/9/95/Helianthus_annuus_pollen_1.jpg"},
+ {"id":"spore","type":"spec","stype":"spore","sem":"spore.jpg","name":"mould spore","sem_url":"https://upload.wikimedia.org/wikipedia/commons/3/32/Karnal_bunt_spore.jpg"},
+ {"id":"bacteria","type":"spec","stype":"bacteria","sem":"mrsa.jpg","name":"bacteria","sem_url":"https://upload.wikimedia.org/wikipedia/commons/b/bc/Methicillin-Resistant_Staphylococcus_Aureus_%28MRSA%29_Bacteria_colorized_scanning_electron_micrograph_-_11.jpg"},
+ {"id":"dust","type":"spec","stype":"dust","sem":"dust.jpg","name":"house dust mite","sem_url":"https://upload.wikimedia.org/wikipedia/commons/4/43/CSIRO_ScienceImage_11085_A_scanning_electron_micrograph_of_a_female_dust_mite.jpg"},
+ {"id":"dander","type":"spec","stype":"dander","sem":"pollen.jpg","name":"pet dander flake","sem_url":"https://upload.wikimedia.org/wikipedia/commons/9/95/Helianthus_annuus_pollen_1.jpg"},
+ {"id":"virus","type":"spec","stype":"virus","sem":"spore.jpg","name":"virus capsid","sem_url":"https://upload.wikimedia.org/wikipedia/commons/3/32/Karnal_bunt_spore.jpg"},
+ {"id":"soot","type":"spec","stype":"soot","sem":"soot.jpg","name":"wildfire soot","sem_url":"https://upload.wikimedia.org/wikipedia/commons/0/02/Microimage_of_soot_produced_by_car_engines_%282_photo%29.jpg"},
+ {"id":"pm","type":"spec","stype":"pm","sem":"flyash.jpg","name":"PM2.5 fine particle","sem_url":"https://upload.wikimedia.org/wikipedia/commons/c/c9/Micrograph_of_fly_ash_from_a_thermal_power_plant_containing_hollow_cenospheres.jpg"},
+ {"id":"microplastic","type":"spec","stype":"microplastic","sem":"mp.jpg","name":"microplastic fragment","sem_url":"https://upload.wikimedia.org/wikipedia/commons/5/54/Polystyrene_microspheres_SEM_image_2.jpg"}
+]
