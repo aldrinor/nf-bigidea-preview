@@ -95,8 +95,12 @@ scene.render.resolution_y = 1280
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode = 'RGBA'
-scene.view_settings.view_transform = 'ACES_FILM'
-scene.view_settings.look = 'Filmic - Base Contrast'
+for _vt in ('AgX','Filmic','Standard'):
+    try: scene.view_settings.view_transform = _vt; break
+    except Exception: continue
+for _lk in ('AgX - Base Contrast','Filmic - Base Contrast','Medium Contrast','None'):
+    try: scene.view_settings.look = _lk; break
+    except Exception: continue
 scene.view_settings.exposure = 0.0
 scene.view_settings.gamma = 1.0
 
