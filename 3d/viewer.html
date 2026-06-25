@@ -175,8 +175,8 @@
                 uniforms: {
                     uTime: { value: 0 },
                     uColor: { value: new THREE.Color(0xff1133) },
-                    uPower: { value: 2.5 },
-                    uIntensity: { value: 0.9 }
+                    uPower: { value: 4.0 }, // Sharpened fresnel for thinner rim
+                    uIntensity: { value: 0.4 } // Lowered intensity to prevent solid blobs
                 },
                 vertexShader: `
                     varying vec3 vNormal;
@@ -226,7 +226,7 @@
             });
 
             // Uniform scale so the glow sits just outside each real atom (tight hug).
-            auraGroup.scale.setScalar(1.12);
+            auraGroup.scale.setScalar(1.08); // Reduced scale for thinner shell
             // Keep aura centered with the model (model was already recentered to origin).
             auraGroup.position.set(0, 0, 0);
 
@@ -245,8 +245,8 @@
                 // Update shader time for breathing pulse.
                 auraMaterial.uniforms.uTime.value = elapsedTime;
 
-                // Gentle breathing/pulsing of the entire aura (1.10x..1.16x).
-                const pulse = 1.13 + Math.sin(elapsedTime * 0.5) * 0.03;
+                // Gentle breathing/pulsing of the entire aura (1.08x..1.10x).
+                const pulse = 1.08 + Math.sin(elapsedTime * 0.5) * 0.02;
                 chargeCloud.scale.setScalar(pulse);
 
                 // Very slow drift/swirl.
