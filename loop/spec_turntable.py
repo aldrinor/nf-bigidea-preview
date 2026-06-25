@@ -75,7 +75,10 @@ scene = bpy.context.scene
 scene.render.engine = 'CYCLES'
 scene.cycles.device = 'GPU'
 scene.cycles.use_denoising = True
-scene.cycles.denoiser = 'OPTIX'
+try:
+    scene.cycles.denoiser = 'OPTIX'
+except (TypeError, AttributeError):
+    scene.cycles.denoiser = 'OPENIMAGEDENOISE'
 scene.cycles.use_adaptive_sampling = True
 scene.cycles.adaptive_threshold = 0.02
 scene.cycles.samples = SPP
