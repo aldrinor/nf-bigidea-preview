@@ -106,9 +106,9 @@ addEventListener('mousemove',e=>{bub.tx=e.clientX;bub.ty=e.clientY;mouseActive=t
 addEventListener('mouseleave',()=>{mouseActive=false;});
 addEventListener('resize',resize);
 
-function pickAutoPoint(){ // a point in the room "air" (upper-center band), harmonic-ish spread
-  const ang=autoT*0.9; autoT++;
-  return {x:W*(0.40+0.32*Math.sin(ang*1.7)), y:H*(0.34+0.20*Math.sin(ang*1.1+1))};
+function pickAutoPoint(){ // a calm point in the open room air — gentle, stays central (no darting)
+  const ang=autoT*0.7; autoT++;
+  return {x:W*(0.42+0.22*Math.sin(ang*1.3)), y:H*(0.37+0.14*Math.sin(ang*0.9+1))};
 }
 function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
 
@@ -127,11 +127,12 @@ function tick(){
     distSinceAdvance+=Math.hypot(bub.x-prevx,bub.y-prevy);
     if(distSinceAdvance>230){ setSpec(specIndex+1); distSinceAdvance=0; }
   } else {
-    // auto mode: glide harmonically between scan points, reveal next at each arrival
+    // auto mode: a SLOW eased drift to a point, then a CALM dwell on the specimen — gentle, unhurried, harmonic
     if(!autoTarget){autoTarget=pickAutoPoint(); bub.sx=bub.x; bub.sy=bub.y; bub.t0=t;}
-    const dur=REDUCED?2600:2200, p=Math.min(1,(t-bub.t0)/dur), e=easeInOut(p);
-    bub.x=bub.sx+(autoTarget.x-bub.sx)*e; bub.y=bub.sy+(autoTarget.y-bub.sy)*e;
-    if(p>=1){ if(t-lastAdvance>650){setSpec(specIndex+1); lastAdvance=t;} autoTarget=null; }
+    const GLIDE=REDUCED?4800:4200, DWELL=3000, el=t-bub.t0;
+    if(el<GLIDE){ const e=easeInOut(el/GLIDE); bub.x=bub.sx+(autoTarget.x-bub.sx)*e; bub.y=bub.sy+(autoTarget.y-bub.sy)*e; }
+    else if(el<GLIDE+DWELL){ bub.x=autoTarget.x; bub.y=autoTarget.y; }
+    else { setSpec(specIndex+1); autoTarget=null; }
   }
   prevx=bub.x; prevy=bub.y;
   bub.R += (Math.min(W,H)*0.135 - bub.R)*0.12;
