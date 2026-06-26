@@ -3,693 +3,746 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing — Act 01 · The Field</title>
+<title>NanoFlashing — Act 01: The Field</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-center:#eef2f5;
-    --bg-edge:#e6ebf0;
-    --ink:#11181f;
-    --muted:#5d6b78;
-    --cyan:#34e1ff;
-    --red:#f26270;
-    --line:rgba(17,24,31,0.08);
+    --bg1:#eef2f5; --bg2:#e7ecf1;
+    --ink:#11181f; --muted:#5d6b78;
+    --red:#ef5364; --cyan:#34e1ff;
+    --line:rgba(17,24,31,0.12);
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; overflow-x:hidden;}
   body{
-    font-family:'Space Grotesk',sans-serif;
-    color:var(--ink);
-    background:radial-gradient(ellipse 120% 90% at 50% 30%, var(--bg-center) 0%, var(--bg-edge) 100%);
-    overflow-x:hidden;
-    -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
+    background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    min-height: 100vh;
   }
-  .act{
-    position:relative;
-    width:100%;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    padding:clamp(28px,5vw,72px) clamp(20px,5vw,96px) clamp(28px,4vw,56px);
-  }
+  #dust{position:fixed; inset:0; z-index:0; pointer-events:none; display:block;}
+  .stage{position:relative; z-index:2; min-height:100vh; padding: 56px 64px; display:flex; flex-direction:column;}
+  .top{max-width: 920px;}
   .eyebrow{
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.22em;
-    text-transform:uppercase;
-    color:var(--muted);
-    display:flex;
-    align-items:center;
-    gap:14px;
-    margin-bottom:clamp(28px,4vw,52px);
+    font-family:'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+    display:flex; align-items:center; gap:12px;
   }
-  .eyebrow .dot{
-    width:6px;height:6px;border-radius:50%;
-    background:var(--cyan);
-    box-shadow:0 0 14px var(--cyan);
-  }
-  .eyebrow .sep{flex:0 0 28px;height:1px;background:rgba(93,107,120,0.28)}
-  .headline{
-    font-family:'Instrument Serif',serif;
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--red); box-shadow:0 0 10px rgba(239,83,100,0.7);}
+  h1{
+    font-family:'Instrument Serif', serif;
     font-weight:400;
-    font-size:clamp(40px,7.4vw,108px);
-    line-height:0.98;
-    letter-spacing:-0.012em;
-    max-width:15ch;
-    color:var(--ink);
+    font-size: clamp(40px, 6.6vw, 88px);
+    line-height: 1.04;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin-bottom: 26px;
+    max-width: 14ch;
   }
-  .headline em{
-    font-style:italic;
-    color:var(--red);
-  }
+  h1 em{font-style:italic; color: var(--red);}
   .sub{
-    margin-top:clamp(20px,2.4vw,30px);
-    font-size:clamp(15px,1.15vw,18px);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:300;
+    font-size: clamp(15px, 1.35vw, 18px);
     line-height:1.55;
-    color:var(--muted);
-    max-width:48ch;
-    font-weight:400;
+    color: var(--muted);
+    max-width: 520px;
   }
-  .stage{
-    position:relative;
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    margin-top:clamp(32px,3.4vw,52px);
-    min-height:46vh;
-    border-top:1px solid var(--line);
-    padding-top:clamp(18px,2vw,26px);
+  .rule{
+    margin-top: 28px;
+    width: 56px; height:1px; background: var(--line);
   }
-  .stage-meta{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    font-family:'Space Mono',monospace;
-    font-size:10.5px;
-    letter-spacing:0.18em;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin-bottom:14px;
-    flex:0 0 auto;
-  }
-  .stage-meta .right{display:flex;gap:22px}
-  .stage-meta b{color:var(--ink);font-weight:400}
-  .canvas-wrap{
-    position:relative;
-    flex:1;
-    min-height:300px;
-  }
-  canvas{
-    display:block;
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-  }
-  .callout{
-    position:absolute;
+  /* bubble label */
+  .bubble-label{
+    position:fixed; z-index:3;
     pointer-events:none;
-    transform:translate(-50%,-50%);
-    padding:11px 15px 13px;
-    background:rgba(255,255,255,0.94);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    border:1px solid var(--line);
-    border-radius:11px;
-    box-shadow:0 22px 48px -22px rgba(17,24,31,0.28), 0 2px 8px -4px rgba(17,24,31,0.08);
-    min-width:168px;
+    transform: translate(0, -50%);
     opacity:0;
-    transition:opacity .4s ease, left .35s ease, top .35s ease;
-    z-index:5;
+    transition: opacity 0.4s ease;
+    width: 240px;
   }
-  .callout.visible{opacity:1}
-  .callout.left::after{
-    content:"";
-    position:absolute;
-    left:-6px;top:50%;
-    width:10px;height:10px;
-    background:rgba(255,255,255,0.94);
-    border-left:1px solid var(--line);
-    border-bottom:1px solid var(--line);
-    transform:translateY(-50%) rotate(45deg);
+  .bubble-label.show{opacity:1;}
+  .bubble-label .scan-line{
+    font-family:'Space Mono', monospace;
+    font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--cyan);
+    margin-bottom:10px;
+    display:flex; align-items:center; gap:8px;
   }
-  .callout.right::after{
-    content:"";
-    position:absolute;
-    right:-6px;top:50%;
-    width:10px;height:10px;
-    background:rgba(255,255,255,0.94);
-    border-right:1px solid var(--line);
-    border-top:1px solid var(--line);
-    transform:translateY(-50%) rotate(45deg);
+  .bubble-label .scan-line::before{
+    content:''; width:16px; height:1px; background:var(--cyan); flex-shrink:0;
   }
-  .callout .label{
-    font-family:'Space Mono',monospace;
-    font-size:13px;
-    color:var(--ink);
-    letter-spacing:0.01em;
+  .bubble-label .label{
+    font-family:'Instrument Serif', serif;
+    font-size: 28px; line-height:1.08; color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing:-0.01em;
+  }
+  .bubble-label .badge{
+    font-family:'Space Mono', monospace;
+    font-size: 10px; letter-spacing:0.06em;
+    color: var(--red);
+    background: rgba(239,83,100,0.07);
+    border: 1px solid rgba(239,83,100,0.28);
+    padding: 5px 9px; border-radius: 3px;
+    display:inline-block;
     line-height:1.3;
-    font-weight:700;
   }
-  .callout .sub-label{
-    font-family:'Space Mono',monospace;
-    font-size:10.5px;
-    color:var(--muted);
-    margin-top:3px;
-    letter-spacing:0.04em;
+  .bubble-label .tag{
+    font-family:'Space Mono', monospace;
+    font-size: 9px; letter-spacing:0.16em; text-transform:uppercase;
+    color: var(--muted);
+    margin-top:12px;
+    display:flex; align-items:center; gap:6px;
   }
-  .callout .badge{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    margin-top:9px;
-    padding:3px 9px 3px 7px;
-    border-radius:999px;
-    background:rgba(242,98,112,0.10);
-    border:1px solid rgba(242,98,112,0.38);
-    font-family:'Space Mono',monospace;
-    font-size:10.5px;
-    color:var(--red);
-    letter-spacing:0.04em;
-    font-weight:700;
+  .bubble-label .tag::before{
+    content:''; width:5px; height:5px; border-radius:50%;
+    background: var(--red); box-shadow:0 0 6px rgba(239,83,100,0.6);
   }
-  .callout .badge .pip{
-    width:5px;height:5px;border-radius:50%;
-    background:var(--red);
-    box-shadow:0 0 7px var(--red);
+  /* corners */
+  .corner{
+    position:fixed; bottom: 32px; left: 64px; z-index:3;
+    font-family:'Space Mono', monospace;
+    font-size: 10px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--muted);
+    display:flex; align-items:center; gap:10px;
   }
-  .callout .neutral{
-    margin-top:9px;
-    font-family:'Space Mono',monospace;
-    font-size:10px;
-    color:var(--muted);
-    letter-spacing:0.08em;
-    text-transform:uppercase;
+  .corner .pulse{width:6px;height:6px;border-radius:50%;background:var(--cyan); box-shadow:0 0 8px rgba(52,225,255,0.6); animation: pulse 2.4s infinite ease-in-out;}
+  @keyframes pulse{0%,100%{opacity:0.35; transform:scale(0.85);}50%{opacity:1; transform:scale(1);}}
+  .corner-r{
+    position:fixed; bottom: 32px; right: 64px; z-index:3;
+    font-family:'Space Mono', monospace;
+    font-size: 10px; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--muted);
+    text-align:right;
   }
-  .footer-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-top:14px;
-    font-family:'Space Mono',monospace;
-    font-size:10.5px;
-    letter-spacing:0.18em;
-    text-transform:uppercase;
-    color:var(--muted);
-    flex:0 0 auto;
+  .corner-r span{color: var(--ink);}
+  .counter{
+    position:fixed; top: 56px; right: 64px; z-index:3;
+    font-family:'Space Mono', monospace;
+    font-size: 10px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--muted);
+    text-align:right;
+    line-height:1.6;
   }
-  .footer-row .caption{max-width:50ch;line-height:1.5}
-  .progress{display:flex;align-items:center;gap:12px}
-  .progress .track{
-    width:130px;height:1px;background:rgba(17,24,31,0.14);position:relative;
+  .counter .num{color: var(--ink); font-size: 13px; letter-spacing:0.1em;}
+  .counter .of{opacity:0.5;}
+  .legend{
+    position:fixed; top: 56px; right: 64px; z-index:3;
+    display:none;
   }
-  .progress .fill{
-    position:absolute;left:0;top:-0.5px;height:2px;
-    background:var(--cyan);width:0;
-    transition:width .45s ease;
-    box-shadow:0 0 8px rgba(52,225,255,0.6);
-  }
-  @media (max-width:680px){
-    .stage-meta .right{display:none}
-    .footer-row{flex-direction:column;gap:14px;align-items:flex-start}
-    .progress .track{width:100px}
-    .headline{max-width:none}
-  }
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.001s!important;transition-duration:0.001s!important}
+  @media (max-width: 720px){
+    .stage{padding: 36px 26px;}
+    .corner{left:26px; bottom:22px; font-size:9px;}
+    .corner-r{right:26px; bottom:22px; font-size:9px;}
+    .counter{top:36px; right:26px; font-size:9px;}
+    .counter .num{font-size:11px;}
+    .bubble-label{width: 180px;}
+    .bubble-label .label{font-size:22px;}
+    h1{max-width:none;}
   }
 </style>
 </head>
 <body>
-<section class="act" id="act1">
-  <div class="eyebrow">
-    <span class="dot"></span>
-    <span>Act 01 — The Field</span>
-    <span class="sep"></span>
-    <span>NanoFlashing / Big Idea</span>
+<canvas id="dust"></canvas>
+<div class="stage">
+  <div class="top">
+    <div class="eyebrow"><span class="dot"></span>ACT 01 — THE FIELD</div>
+    <h1>Most pollutants carry a <em>negative charge.</em></h1>
+    <p class="sub">Hundreds of them — drifting in the air you breathe and the water you drink.</p>
+    <div class="rule"></div>
   </div>
+</div>
 
-  <h1 class="headline">Most pollutants carry a <em>negative charge.</em></h1>
-  <p class="sub">Hundreds of them — drifting in the air you breathe and the water you drink.</p>
+<div class="counter"><span class="num" id="idx">01</span><span class="of"> / 18</span><br>scanning</div>
 
-  <div class="stage" id="stage">
-    <div class="stage-meta">
-      <span>Specimen field · 18 motes · drifting</span>
-      <div class="right">
-        <span>Lens <b id="lensIdx">01</b></span>
-        <span>Charge <b id="lensCharge">—</b></span>
-      </div>
-    </div>
-    <div class="canvas-wrap" id="wrap">
-      <canvas id="field"></canvas>
-      <div class="callout" id="callout">
-        <div class="label" id="cLabel"></div>
-        <div class="sub-label" id="cSub"></div>
-        <div id="cBadge"></div>
-      </div>
-    </div>
-    <div class="footer-row">
-      <span class="caption">Look closely — they're all negatively charged.</span>
-      <div class="progress">
-        <span id="progLabel">01 / 18</span>
-        <div class="track"><div class="fill" id="progFill"></div></div>
-      </div>
-    </div>
-  </div>
-</section>
+<div class="bubble-label" id="blabel">
+  <div class="scan-line" id="bl-scan">Scanning the air</div>
+  <div class="label" id="bl-label">—</div>
+  <div class="badge" id="bl-badge"></div>
+  <div class="tag" id="bl-tag">— charge zone</div>
+</div>
+
+<div class="corner"><span class="pulse"></span>NanoFlashing — Big Idea / Act 01</div>
+<div class="corner-r"><span>Light editorial study</span> — 2D canvas</div>
 
 <script>
-(function(){
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FEATURES = [
+    { id:'f1',  position:[ -9, 5, -3], label:'Wildfire smoke',  treatment:'halo',  outcome:'hold', badge:'', specimen:'soot' },
+    { id:'f2',  position:[  7, 3,  2], label:'Virus',  treatment:'halo',  outcome:'fade', badge:'', specimen:'virus' },
+    { id:'f3',  position:[ -4,-6,  4], label:'Fungi',  treatment:'halo',  outcome:'fade', badge:'', specimen:'spore' },
+    { id:'f4',  position:[ 10,-2, -5], label:'Bacteria',  treatment:'halo',  outcome:'fade', badge:'', specimen:'rod' },
+    { id:'f5',  position:[ -8, 1,  6], label:'PFAS',  treatment:'cloud', outcome:'hold', badge:'PFOS — net charge −1',
+      moleculeKey:'pfos', chargeAtoms:[0,18,19,20], atoms:[
+        {el:'S',x:1.6338,y:-0.3027,z:-0.0688},{el:'F',x:-0.3072,y:-0.6814,z:-0.2928},{el:'F',x:0.3203,y:-0.6313,z:0.3116},
+        {el:'F',x:0.0284,y:0.2618,z:-0.7483},{el:'F',x:0.6404,y:-0.3581,z:-0.6995},{el:'F',x:-0.0374,y:0.2975,z:0.6909},
+        {el:'F',x:-0.6135,y:-0.3572,z:0.701},{el:'F',x:1.0021,y:0.6467,z:-0.5534},{el:'F',x:0.4635,y:0.7617,z:0.1245},
+        {el:'F',x:-1.0281,y:0.6262,z:0.5534},{el:'F',x:-0.5313,y:0.7685,z:-0.1481},{el:'F',x:0.9295,y:-0.0716,z:0.6527},
+        {el:'F',x:1.4628,y:0.5852,z:0.445},{el:'F',x:-1.002,y:-0.066,z:-0.6799},{el:'F',x:-1.5421,y:0.5534,z:-0.3854},
+        {el:'F',x:-1.8462,y:-0.0919,z:0.4583},{el:'F',x:-1.2828,y:-0.7059,z:0.1943},{el:'F',x:-1.9453,y:-0.4679,z:-0.3279},
+        {el:'O',x:2.0547,y:-0.337,z:0.4324},{el:'O',x:1.9053,y:-0.0506,z:-0.5177},{el:'O',x:1.3652,y:-0.8167,z:-0.1199},
+        {el:'C',x:-0.0032,y:-0.3279,z:-0.0098},{el:'C',x:0.3468,y:-0.0077,z:-0.3971},{el:'C',x:-0.3619,y:-0.0034,z:0.3661},
+        {el:'C',x:0.7498,y:0.3793,z:-0.1458},{el:'C',x:-0.7842,y:0.3722,z:0.1322},{el:'C',x:1.1834,y:0.1688,z:0.2297},
+        {el:'C',x:-1.2218,y:0.1382,z:-0.2247},{el:'C',x:-1.5793,y:-0.2822,z:0.0269}] },
+    { id:'f6',  position:[  3, 7, -2], label:'Nitrate',  treatment:'cloud', outcome:'hold', badge:'NO₃⁻ — net charge −1',
+      moleculeKey:'nitrate', chargeAtoms:[1,2,3], atoms:[
+        {el:'N',x:0,y:0,z:0},{el:'O',x:2.3094,y:0,z:0},{el:'O',x:-1.1547,y:2,z:0},{el:'O',x:-1.1547,y:-2,z:0}] },
+    { id:'f7',  position:[ -6,-3, -6], label:'Dye',  treatment:'cloud', outcome:'hold', badge:'Anionic dye — net charge −1 (sulfonate)',
+      moleculeKey:'dye', chargeAtoms:[0,1,2,3], atoms:[
+        {el:'S',x:-1.7364,y:0.007,z:0.0568},{el:'O',x:-1.9222,y:-0.043,z:-0.3899},{el:'O',x:-1.848,y:-0.3468,z:0.2803},
+        {el:'O',x:-1.8398,y:0.4013,z:0.2019},{el:'N',x:1.8377,y:-0.0055,z:-0.0402},{el:'N',x:0.1853,y:0.0191,z:0.1661},
+        {el:'N',x:0.0149,y:-0.0178,z:-0.1635},{el:'C',x:1.4214,y:0.0008,z:0.0117},{el:'C',x:1.2159,y:0.361,z:-0.0027},
+        {el:'C',x:1.2152,y:-0.3533,z:0.0775},{el:'C',x:-1.2212,y:-0.0002,z:-0.0082},{el:'C',x:0.598,y:0.0131,z:0.1145},
+        {el:'C',x:0.8042,y:0.3671,z:0.0487},{el:'C',x:0.8035,y:-0.3471,z:0.1289},{el:'C',x:-0.3998,y:-0.0119,z:-0.1115},
+        {el:'C',x:2.0778,y:0.3318,z:0.08},{el:'C',x:2.0313,y:-0.351,z:-0.2108},{el:'C',x:-1.0152,y:0.3539,z:-0.0741},
+        {el:'C',x:-1.0154,y:-0.3603,z:0.006},{el:'C',x:-0.6036,y:0.348,z:-0.1259},{el:'C',x:-0.6037,y:-0.3661,z:-0.0458}] },
+    { id:'f8',  position:[  8, 4,  5], label:'Sulfate',  treatment:'cloud', outcome:'hold', badge:'SO₄²⁻ — net charge −2',
+      moleculeKey:'sulfate', chargeAtoms:[1,2,3,4], atoms:[
+        {el:'S',x:0,y:0,z:0},{el:'O',x:2,y:2,z:2},{el:'O',x:2,y:-2,z:-2},{el:'O',x:-2,y:2,z:-2},{el:'O',x:-2,y:-2,z:2}] },
+    { id:'f9',  position:[ -2, 6,  1], label:'Antibiotic',  treatment:'cloud', outcome:'hold', badge:'Sulfamethoxazole — net charge −1',
+      moleculeKey:'sulfamethoxazole', chargeAtoms:[0,2,3,4], atoms:[
+        {el:'S',x:0.1458,y:-1.2143,z:-0.0466},{el:'O',x:-1.4559,y:0.5323,z:-0.5395},{el:'O',x:0.5216,y:-1.7654,z:0.4017},
+        {el:'O',x:-0.031,y:-1.3914,z:-0.8101},{el:'N',x:-0.6445,y:-0.952,z:0.41},{el:'N',x:-1.0625,y:-0.1248,z:-0.5389},
+        {el:'N',x:1.9558,y:1.5175,z:0.0047},{el:'C',x:0.6772,y:-0.4121,z:-0.0315},{el:'C',x:1.16,y:-0.2819,z:0.5524},
+        {el:'C',x:0.6188,y:0.0985,z:-0.6033},{el:'C',x:-1.0169,y:-0.2967,z:0.1646},{el:'C',x:1.5262,y:0.8696,z:-0.0071},
+        {el:'C',x:1.5845,y:0.359,z:0.5646},{el:'C',x:1.0433,y:0.7394,z:-0.5911},{el:'C',x:-1.3525,y:0.1989,z:0.6387},
+        {el:'C',x:-1.6255,y:0.7193,z:0.1649},{el:'C',x:-2.0442,y:1.4041,z:0.2665}] },
+    { id:'f10', position:[  5,-5, -3], label:'Herbicide', treatment:'cloud', outcome:'hold', badge:'2,4-D — net charge −1',
+      moleculeKey:'twofourd', chargeAtoms:[3,4,12], atoms:[
+        {el:'Cl',x:-0.0609,y:-1.1731,z:0.0434},{el:'Cl',x:-2.1015,y:0.1659,z:0.24},{el:'O',x:0.5044,y:0.0159,z:-0.3213},
+        {el:'O',x:1.8985,y:0.4416,z:0.4087},{el:'O',x:1.6598,y:-0.3959,z:-0.1512},{el:'C',x:-0.1005,y:0.0405,z:-0.189},
+        {el:'C',x:-0.42,y:-0.4783,z:-0.0135},{el:'C',x:-0.3996,y:0.5978,z:-0.2316},{el:'C',x:-1.0388,y:-0.4397,z:0.1195},
+        {el:'C',x:-1.0184,y:0.6364,z:-0.0987},{el:'C',x:0.8994,y:0.3823,z:0.0389},{el:'C',x:-1.3379,y:0.1177,z:0.0768},
+        {el:'C',x:1.5154,y:0.089,z:0.0781}] },
+    { id:'f11', position:[ -10,-1, 2], label:'Hormone', treatment:'cloud', outcome:'hold', badge:'Estrone-3-sulfate — net charge −1',
+      moleculeKey:'estronesulfate', chargeAtoms:[0,2,3,4,5], atoms:[
+        {el:'S',x:1.7637,y:-0.1239,z:0.1772},{el:'O',x:-1.8632,y:-0.452,z:-0.0047},{el:'O',x:1.4535,y:0.1378,z:-0.1334},
+        {el:'O',x:1.5279,y:-0.1529,z:0.5641},{el:'O',x:2.1368,y:0.1325,z:0.2099},{el:'O',x:1.8238,y:-0.5232,z:-0.0299},
+        {el:'C',x:-1.0037,y:0.197,z:-0.0505},{el:'C',x:-1.1511,y:-0.2293,z:0.11},{el:'C',x:-0.539,y:0.2566,z:0.0224},
+        {el:'C',x:-0.3017,y:-0.0799,z:-0.2323},{el:'C',x:-0.9405,y:-0.5631,z:-0.151},{el:'C',x:-1.3141,y:0.5033,z:0.1329},
+        {el:'C',x:-0.4643,y:-0.5229,z:-0.1331},{el:'C',x:-0.3853,y:0.6859,z:-0.1086},{el:'C',x:-1.6137,y:-0.17,z:0.0447},
+        {el:'C',x:-1.732,y:0.2862,z:0.0587},{el:'C',x:-1.0891,y:-0.3111,z:0.5768},{el:'C',x:0.1671,y:-0.0247,z:-0.1944},
+        {el:'C',x:0.0702,y:0.7368,z:0.0102},{el:'C',x:0.3373,y:0.3662,z:-0.0931},{el:'C',x:0.4412,y:-0.3517,z:-0.2858},
+        {el:'C',x:0.7703,y:0.4153,z:-0.0703},{el:'C',x:0.8707,y:-0.2979,z:-0.2645},{el:'C',x:1.0353,y:0.0851,z:-0.1554}] },
+    { id:'f12', position:[  4,-8,  3], label:'PM2.5 / ultrafine', treatment:'halo',  outcome:'hold', badge:'', specimen:'pm' },
+    { id:'f13', position:[ -7, 8, -4], label:'Pollen',            treatment:'halo',  outcome:'hold', badge:'', specimen:'pollen' },
+    { id:'f14', position:[ 11, 1, -7], label:'Dust & dust-mite',  treatment:'halo',  outcome:'hold', badge:'', specimen:'dust' },
+    { id:'f15', position:[-11, 4,  5], label:'Pet dander',        treatment:'halo',  outcome:'hold', badge:'', specimen:'dander' },
+    { id:'f16', position:[  2,-3,  9], label:'Microplastics',     treatment:'halo',  outcome:'hold', badge:'', specimen:'microplastic' },
+    { id:'f17', position:[ -5,-9, -2], label:'Phosphate',         treatment:'cloud', outcome:'hold', badge:'PO₄³⁻ — net charge −3',
+      moleculeKey:'phosphate', chargeAtoms:[1,2,3,4], atoms:[
+        {el:'P',x:0,y:0,z:0},{el:'O',x:2,y:2,z:2},{el:'O',x:2,y:-2,z:-2},{el:'O',x:-2,y:2,z:-2},{el:'O',x:-2,y:-2,z:2}] },
+    { id:'f18', position:[  9, 8,  1], label:'Fluoride',          treatment:'cloud', outcome:'hold', badge:'F⁻ — net charge −1',
+      moleculeKey:'fluoride', chargeAtoms:[0], atoms:[
+        {el:'F',x:0,y:0,z:0}] },
+];
 
-  const POLLUTANTS = [
-    {label:"Wildfire smoke",        sub:"particulate · organic",   charge:null},
-    {label:"Virus",                 sub:"aerosol · biological",    charge:null},
-    {label:"Fungi",                 sub:"spore · biological",      charge:null},
-    {label:"Bacteria",              sub:"colony · biological",     charge:null},
-    {label:"PFAS",                  sub:"PFOS",                    charge:"−1"},
-    {label:"Nitrate",               sub:"NO₃⁻",                    charge:"−1"},
-    {label:"Dye",                   sub:"anionic",                 charge:"−1"},
-    {label:"Sulfate",               sub:"SO₄²⁻",                   charge:"−2"},
-    {label:"Antibiotic",            sub:"sulfamethoxazole",        charge:"−1"},
-    {label:"Herbicide",             sub:"2,4-D",                   charge:"−1"},
-    {label:"Hormone",               sub:"estrone-3-sulfate",       charge:"−1"},
-    {label:"PM2.5 / ultrafine",     sub:"particulate",             charge:null},
-    {label:"Pollen",                sub:"biological",              charge:null},
-    {label:"Dust & dust-mite",      sub:"particulate · biological",charge:null},
-    {label:"Pet dander",            sub:"biological",              charge:null},
-    {label:"Microplastics",         sub:"particulate",             charge:null},
-    {label:"Phosphate",             sub:"PO₄³⁻",                   charge:"−3"},
-    {label:"Fluoride",              sub:"F⁻",                      charge:"−1"},
-  ];
+const CPK = {
+  C:'#7c858e', O:'#d6595a', N:'#4f78c8', S:'#d4a93a',
+  F:'#5cb88a', Cl:'#6fbf73', P:'#d88a3e'
+};
 
-  // Tour order: prefer negatively-charged (red) motes first so the lens
-  // lands on red specimens and matches the "negative charge" headline.
-  const chargedIdx = POLLUTANTS.map((p,i)=>i).filter(i=>POLLUTANTS[i].charge);
-  const neutralIdx = POLLUTANTS.map((p,i)=>i).filter(i=>!POLLUTANTS[i].charge);
-  const tourOrder = chargedIdx.concat(neutralIdx);
+const canvas = document.getElementById('dust');
+const ctx = canvas.getContext('2d');
+let W=0, H=0, DPR=1;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = Math.floor(W*DPR);
+  canvas.height = Math.floor(H*DPR);
+  canvas.style.width = W+'px';
+  canvas.style.height = H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  bubR = W<720 ? 112 : (W<1100 ? 140 : 168);
+  buildDust();
+  updateHeadlineRect();
+}
 
-  const canvas = document.getElementById('field');
-  const ctx = canvas.getContext('2d');
-  const wrap = document.getElementById('wrap');
-  const callout = document.getElementById('callout');
-  const cLabel = document.getElementById('cLabel');
-  const cSub = document.getElementById('cSub');
-  const cBadge = document.getElementById('cBadge');
-  const lensIdxEl = document.getElementById('lensIdx');
-  const lensChargeEl = document.getElementById('lensCharge');
-  const progLabel = document.getElementById('progLabel');
-  const progFill = document.getElementById('progFill');
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let W=0,H=0,DPR=1;
-  let motes=[];
-  let dust=[];            // dense cloud of tiny atmospheric dots
-  let lens={x:0,y:0,tx:0,ty:0,r:0,init:false};
-  let activeIdx = tourOrder[0];
-  let tourPos = 0;
-  let lastSwitch=0;
-  const DWELL = 2800;
-
-  function resize(){
-    DPR = Math.min(window.devicePixelRatio||1, 2);
-    const rect = wrap.getBoundingClientRect();
-    W = Math.max(1, rect.width);
-    H = Math.max(1, rect.height);
-    canvas.width = Math.floor(W*DPR);
-    canvas.height = Math.floor(H*DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    lens.r = Math.max(64, Math.min(Math.min(W,H)*0.18, 128));
-    layoutMotes();
-    layoutDust();
-  }
-
-  function layoutMotes(){
-    const cols = W < 520 ? 3 : (W < 880 ? 4 : 6);
-    const rows = Math.ceil(POLLUTANTS.length/cols);
-    const padX = W*0.07;
-    const padY = H*0.10;
-    const cellW = (W - padX*2)/cols;
-    const cellH = (H - padY*2)/rows;
-    const prev = motes;
-    motes = POLLUTANTS.map((p,i)=>{
-      const col = i % cols;
-      const row = Math.floor(i/cols);
-      const baseX = padX + cellW*(col+0.5);
-      const baseY = padY + cellH*(row+0.5);
-      const ox = Math.sin(i*12.9+1.3)*cellW*0.18;
-      const oy = Math.cos(i*7.3+0.7)*cellH*0.18;
-      const old = prev[i] || {};
-      return {
-        ...p,
-        bx: baseX+ox, by: baseY+oy,
-        x: old.x ?? baseX+ox, y: old.y ?? baseY+oy,
-        phase: old.phase ?? (Math.random()*Math.PI*2),
-        size: 4.4 + ((i*7)%5)*0.6,
-        driftAmp: 5 + (i%4)*2.2,
-        driftSpd: 0.00035 + (i%5)*0.00012,
-      };
+// ---- Dust ----
+let dust = [];
+function buildDust(){
+  const count = W<600 ? 520 : (W<1100 ? 950 : 1340);
+  dust = [];
+  for(let i=0;i<count;i++){
+    dust.push({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      vx: (Math.random()-0.5)*0.10,
+      vy: (Math.random()-0.5)*0.10,
+      r: 1.1 + Math.random()*1.9,
+      a: 0.42 + Math.random()*0.48,
+      ph: Math.random()*Math.PI*2,
+      sp: 0.0006 + Math.random()*0.0014
     });
-    if(!lens.init && motes.length){
-      const m = motes[activeIdx];
-      lens.x = m.bx; lens.y = m.by;
-      lens.tx = m.bx; lens.ty = m.by;
-      lens.init = true;
+  }
+}
+
+let hRect = {x:0,y:0,w:0,h:0};
+function updateHeadlineRect(){
+  const top = document.querySelector('.top');
+  if(!top){ hRect={x:0,y:0,w:0,h:0}; return; }
+  const r = top.getBoundingClientRect();
+  hRect = {x:r.left-20, y:r.top-20, w:r.width+40, h:r.height+40};
+}
+
+// ---- Bubble tour ----
+let bubIdx = 0;
+let bubState = 'dwell'; // 'travel' | 'dwell'
+let bubT = 0;
+const TRAVEL = 0.9;
+const DWELL = 2.2;
+let bubFrom = {x:0,y:0};
+let bubTo = {x:0,y:0};
+let bubX = 0, bubY = 0;
+let bubR = 168;
+
+function featureScreenPos(f){
+  const s = Math.min(W,H) * (W<720 ? 0.026 : 0.032);
+  return {
+    x: W*0.5 + f.position[0]*s,
+    y: H*0.5 - f.position[1]*s
+  };
+}
+function easeInOutCubic(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+
+function initBubble(){
+  const p = featureScreenPos(FEATURES[0]);
+  bubFrom = {x:p.x, y:p.y};
+  bubTo = {x:p.x, y:p.y};
+  bubX = p.x; bubY = p.y;
+  bubState = 'dwell'; bubT = 0;
+}
+
+function updateBubble(dt){
+  bubT += dt;
+  if(bubState==='travel'){
+    const t = Math.min(1, bubT/TRAVEL);
+    const e = easeInOutCubic(t);
+    bubX = bubFrom.x + (bubTo.x-bubFrom.x)*e;
+    bubY = bubFrom.y + (bubTo.y-bubFrom.y)*e;
+    if(t>=1){ bubState='dwell'; bubT=0; }
+  } else {
+    bubX = bubTo.x; bubY = bubTo.y;
+    if(bubT >= DWELL){
+      bubIdx = (bubIdx+1) % FEATURES.length;
+      bubFrom = {x:bubX, y:bubY};
+      bubTo = featureScreenPos(FEATURES[bubIdx]);
+      bubState='travel'; bubT=0;
     }
   }
+}
 
-  // Dense dust cloud: many tiny dots drifting in gentle Brownian motion.
-  // Aim ~280-360 on desktop, fewer on mobile for perf.
-  function layoutDust(){
-    const area = W*H;
-    const isMobile = W < 680;
-    const density = isMobile ? 0.0013 : 0.0021; // dots per px² (dense dust cloud, Intercept-like)
-    let count = Math.round(area * density);
-    count = Math.max(240, Math.min(isMobile?340:820, count));
-    const prev = dust;
-    dust = new Array(count);
-    for(let i=0;i<count;i++){
-      const old = prev[i];
-      // weight distribution slightly toward lower/right bed region
-      const x = old ? old.x : (Math.random()*W);
-      const y = old ? old.y : (Math.random()*H);
-      dust[i] = {
-        x, y,
-        // slow continuous wander velocity
-        vx: old ? old.vx : (Math.random()-0.5)*0.12,
-        vy: old ? old.vy : (Math.random()-0.5)*0.12,
-        // tiny dust radius
-        r: 1.0 + Math.random()*1.8,
-        // visible red charge tint; a few brighter (dense dust must READ on light ground)
-        a: 0.30 + Math.random()*0.38 + (Math.random()<0.12 ? 0.25 : 0),
-        charged: Math.random() < 0.62,  // most carry the faint red cue
-        phase: Math.random()*Math.PI*2,
-        spd: 0.0004 + Math.random()*0.0009,
-        amp: 0.6 + Math.random()*1.4,
-      };
-    }
-  }
-
-  function drawMote(x,y,size,charge,alpha,magnified){
-    const charged = !!charge;
-    if(charged){
-      const g = ctx.createRadialGradient(x,y,0,x,y,size*4.2);
-      g.addColorStop(0, `rgba(242,98,112,${0.30*alpha})`);
-      g.addColorStop(0.5, `rgba(242,98,112,${0.10*alpha})`);
-      g.addColorStop(1, 'rgba(242,98,112,0)');
-      ctx.fillStyle=g;
-      ctx.beginPath();ctx.arc(x,y,size*4.2,0,Math.PI*2);ctx.fill();
-    } else {
-      const g = ctx.createRadialGradient(x,y,0,x,y,size*3.4);
-      g.addColorStop(0, `rgba(93,107,120,${0.20*alpha})`);
-      g.addColorStop(1, 'rgba(93,107,120,0)');
-      ctx.fillStyle=g;
-      ctx.beginPath();ctx.arc(x,y,size*3.4,0,Math.PI*2);ctx.fill();
-    }
+// ---- Inner dust (calmer, inside bubble) ----
+const innerDust = [];
+for(let i=0;i<26;i++){
+  innerDust.push({
+    a: Math.random()*Math.PI*2,
+    r: Math.random(),
+    sp: (Math.random()-0.5)*0.0006,
+    rr: 0.5 + Math.random()*1.0,
+    al: 0.15 + Math.random()*0.25
+  });
+}
+function drawInnerDust(cx,cy,R){
+  ctx.fillStyle = '#ef5364';
+  for(const d of innerDust){
+    d.a += d.sp;
+    const px = cx + Math.cos(d.a)*d.r*R*0.92;
+    const py = cy + Math.sin(d.a)*d.r*R*0.92;
+    ctx.globalAlpha = d.al;
     ctx.beginPath();
-    ctx.arc(x,y,size,0,Math.PI*2);
-    ctx.fillStyle = charged
-      ? `rgba(242,98,112,${0.88*alpha})`
-      : `rgba(93,107,120,${0.55*alpha})`;
+    ctx.arc(px,py,d.rr,0,Math.PI*2);
     ctx.fill();
-    if(magnified){
-      // emphasize the red charge cue on magnified charged motes
-      if(charged){
-        ctx.strokeStyle = 'rgba(242,98,112,0.5)';
-        ctx.lineWidth=1.1;
-        ctx.beginPath();ctx.arc(x,y,size*1.9,0,Math.PI*2);ctx.stroke();
-        ctx.strokeStyle = 'rgba(242,98,112,0.65)';
-        ctx.lineWidth=1;
-        ctx.beginPath();ctx.arc(x,y,size*0.55,0,Math.PI*2);ctx.stroke();
-      } else {
-        ctx.strokeStyle = 'rgba(93,107,120,0.45)';
-        ctx.lineWidth=0.9;
-        ctx.beginPath();ctx.arc(x,y,size*0.5,0,Math.PI*2);ctx.stroke();
-      }
-      // small satellite dot
-      ctx.beginPath();
-      ctx.arc(x+size*1.4, y-size*0.8, size*0.18, 0, Math.PI*2);
-      ctx.fillStyle = charged ? 'rgba(242,98,112,0.7)' : 'rgba(93,107,120,0.5)';
-      ctx.fill();
-    }
   }
+  ctx.globalAlpha = 1;
+}
 
-  function drawLens(t){
-    const r = lens.r;
-    const x = lens.x, y = lens.y;
-
-    // horizontal tether toward the callout side
-    const side = (x < W*0.5) ? 1 : -1;
-    ctx.save();
-    ctx.strokeStyle='rgba(52,225,255,0.35)';
-    ctx.lineWidth=1;
-    ctx.setLineDash([2,3]);
-    ctx.beginPath();
-    ctx.moveTo(x + side*(r+2), y);
-    ctx.lineTo(x + side*(r+16), y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-
-    // magnified content inside lens
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x,y,r-2,0,Math.PI*2);
-    ctx.clip();
-
-    const bg = ctx.createRadialGradient(x,y,0,x,y,r);
-    bg.addColorStop(0,'rgba(255,255,255,0.92)');
-    bg.addColorStop(0.7,'rgba(238,242,245,0.7)');
-    bg.addColorStop(1,'rgba(230,235,240,0.5)');
-    ctx.fillStyle=bg;
-    ctx.fillRect(x-r,y-r,r*2,r*2);
-
-    const m = motes[activeIdx];
-    if(m){
-      const mag = 3.4;
-      drawMote(x, y, m.size*mag, m.charge, 1.0, true);
-      // faint orbiting ticks
-      ctx.strokeStyle='rgba(52,225,255,0.28)';
-      ctx.lineWidth=0.7;
-      for(let i=0;i<6;i++){
-        const a = t*0.0004 + i*Math.PI/3;
-        const r1 = r*0.52, r2 = r*0.68;
+// ---- Molecule drawing ----
+function drawMolecule(f, cx, cy, R){
+  const atoms = f.atoms;
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const a of atoms){
+    if(a.x<minX)minX=a.x; if(a.x>maxX)maxX=a.x;
+    if(a.y<minY)minY=a.y; if(a.y>maxY)maxY=a.y;
+  }
+  const ext = Math.max(maxX-minX, maxY-minY, 0.8);
+  const scale = (R*0.58)/ext;
+  const proj = atoms.map(a=>({
+    x: cx + a.x*scale,
+    y: cy - a.y*scale,
+    el: a.el
+  }));
+  // bonds
+  ctx.strokeStyle='rgba(80,92,104,0.42)';
+  ctx.lineWidth=1.1;
+  for(let i=0;i<atoms.length;i++){
+    for(let j=i+1;j<atoms.length;j++){
+      const dx=atoms[i].x-atoms[j].x, dy=atoms[i].y-atoms[j].y, dz=(atoms[i].z||0)-(atoms[j].z||0);
+      const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+      if(d<1.85){
         ctx.beginPath();
-        ctx.moveTo(x+Math.cos(a)*r1, y+Math.sin(a)*r1);
-        ctx.lineTo(x+Math.cos(a)*r2, y+Math.sin(a)*r2);
+        ctx.moveTo(proj[i].x,proj[i].y);
+        ctx.lineTo(proj[j].x,proj[j].y);
         ctx.stroke();
       }
-      // crosshair center
-      ctx.strokeStyle='rgba(52,225,255,0.5)';
-      ctx.lineWidth=0.8;
+    }
+  }
+  // charge halos (behind atoms)
+  for(const ci of f.chargeAtoms){
+    const p=proj[ci]; if(!p) continue;
+    const hr = R*0.30;
+    const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,hr);
+    grd.addColorStop(0,'rgba(239,83,100,0.55)');
+    grd.addColorStop(0.5,'rgba(239,83,100,0.22)');
+    grd.addColorStop(1,'rgba(239,83,100,0)');
+    ctx.fillStyle=grd;
+    ctx.beginPath(); ctx.arc(p.x,p.y,hr,0,Math.PI*2); ctx.fill();
+  }
+  // atoms
+  for(let i=0;i<proj.length;i++){
+    const p=proj[i];
+    const col = CPK[p.el] || '#888';
+    const ar = (p.el==='S'||p.el==='P')?4.6 : (p.el==='Cl')?4.2 : 3.3;
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(p.x,p.y,ar,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.32)';
+    ctx.beginPath(); ctx.arc(p.x-ar*0.3,p.y-ar*0.3,ar*0.42,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(17,24,31,0.22)';
+    ctx.lineWidth=0.6;
+    ctx.beginPath(); ctx.arc(p.x,p.y,ar,0,Math.PI*2); ctx.stroke();
+  }
+  // mono tag inside bubble
+  ctx.fillStyle='rgba(239,83,100,0.85)';
+  ctx.font='9px "Space Mono", monospace';
+  ctx.textAlign='center';
+  ctx.fillText('— CHARGE ZONE', cx, cy+R*0.80);
+}
+
+// ---- Specimen drawing ----
+function drawSpecimen(f, cx, cy, R){
+  const sp = f.specimen;
+  const s = R*0.46;
+  // red surface glow
+  const grd = ctx.createRadialGradient(cx,cy,R*0.15, cx,cy,R*0.82);
+  grd.addColorStop(0,'rgba(239,83,100,0.04)');
+  grd.addColorStop(0.65,'rgba(239,83,100,0.14)');
+  grd.addColorStop(1,'rgba(239,83,100,0)');
+  ctx.fillStyle=grd;
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.82,0,Math.PI*2); ctx.fill();
+
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.lineCap='round';
+
+  if(sp==='soot'){
+    for(let i=0;i<7;i++){
+      const a=i*0.9, r=s*0.32;
+      const x=Math.cos(a)*r, y=Math.sin(a)*r;
+      ctx.beginPath(); ctx.arc(x,y,s*0.2,0,Math.PI*2);
+      ctx.fillStyle='rgba(38,44,52,0.88)'; ctx.fill();
+      ctx.strokeStyle='rgba(239,83,100,0.45)'; ctx.lineWidth=1; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0,0,s*0.24,0,Math.PI*2);
+    ctx.fillStyle='rgba(38,44,52,0.92)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.55)'; ctx.stroke();
+  } else if(sp==='virus'){
+    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1.1;
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI*2/12;
       ctx.beginPath();
-      ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);
-      ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);
+      ctx.moveTo(Math.cos(a)*s*0.45, Math.sin(a)*s*0.45);
+      ctx.lineTo(Math.cos(a)*s*0.72, Math.sin(a)*s*0.72);
       ctx.stroke();
-    }
-    ctx.restore();
-
-    // lens ring
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.strokeStyle='rgba(52,225,255,0.92)';
-    ctx.lineWidth=1.7;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x,y,r+6,0,Math.PI*2);
-    ctx.strokeStyle='rgba(52,225,255,0.16)';
-    ctx.lineWidth=1;
-    ctx.stroke();
-    // crosshair ticks at ring
-    ctx.strokeStyle='rgba(52,225,255,0.6)';
-    ctx.lineWidth=1.1;
-    const tick=9;
-    [[0,-1],[0,1],[1,0],[-1,0]].forEach(d=>{
       ctx.beginPath();
-      ctx.moveTo(x+d[0]*(r-tick), y+d[1]*(r-tick));
-      ctx.lineTo(x+d[0]*(r+2), y+d[1]*(r+2));
+      ctx.arc(Math.cos(a)*s*0.74, Math.sin(a)*s*0.74, s*0.07,0,Math.PI*2);
+      ctx.fillStyle='rgba(239,83,100,0.7)'; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(0,0,s*0.45,0,Math.PI*2);
+    ctx.fillStyle='rgba(82,92,104,0.85)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.55)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,s*0.18,0,Math.PI*2);
+    ctx.fillStyle='rgba(60,70,82,0.7)'; ctx.fill();
+  } else if(sp==='spore'){
+    ctx.beginPath();
+    for(let i=0;i<=28;i++){
+      const a=i/28*Math.PI*2;
+      const r=s*0.5 + Math.sin(a*5)*s*0.07;
+      const x=Math.cos(a)*r, y=Math.sin(a)*r*0.78;
+      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(92,102,114,0.82)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0,0,s*0.18,s*0.12,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(60,70,82,0.6)'; ctx.fill();
+  } else if(sp==='rod'){
+    const w=s*1.2, h=s*0.46;
+    ctx.beginPath();
+    if(ctx.roundRect){ ctx.roundRect(-w/2,-h/2,w,h,h/2); }
+    else { ctx.rect(-w/2,-h/2,w,h); }
+    ctx.fillStyle='rgba(82,92,104,0.85)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle='rgba(239,83,100,0.32)'; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(-w*0.35,0); ctx.lineTo(w*0.35,0); ctx.stroke();
+    ctx.fillStyle='rgba(239,83,100,0.5)';
+    for(let i=0;i<4;i++){
+      const x=-w*0.3 + i*w*0.2;
+      ctx.beginPath(); ctx.arc(x,0,s*0.04,0,Math.PI*2); ctx.fill();
+    }
+  } else if(sp==='pm'){
+    ctx.beginPath();
+    for(let i=0;i<=18;i++){
+      const a=i/18*Math.PI*2;
+      const r=s*0.42 + Math.sin(a*3+1.2)*s*0.13 + Math.cos(a*5)*s*0.06;
+      const x=Math.cos(a)*r, y=Math.sin(a)*r;
+      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(48,56,64,0.9)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.55)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle='rgba(239,83,100,0.4)';
+    ctx.beginPath(); ctx.arc(s*0.1,-s*0.1,s*0.05,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-s*0.15,s*0.08,s*0.04,0,Math.PI*2); ctx.fill();
+  } else if(sp==='pollen'){
+    ctx.strokeStyle='rgba(180,158,86,0.75)'; ctx.lineWidth=1.1;
+    for(let i=0;i<16;i++){
+      const a=i*Math.PI*2/16;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a)*s*0.4, Math.sin(a)*s*0.4);
+      ctx.lineTo(Math.cos(a)*s*0.62, Math.sin(a)*s*0.62);
       ctx.stroke();
-    });
-    ctx.restore();
-  }
-
-  function updateCallout(){
-    const m = motes[activeIdx];
-    if(!m) return;
-    cLabel.textContent = m.label;
-    cSub.textContent = m.sub || '';
-    if(m.charge){
-      cBadge.innerHTML = `<span class="badge"><span class="pip"></span>Charge ${m.charge}</span>`;
-    } else {
-      cBadge.innerHTML = `<div class="neutral">No ionic charge</div>`;
-    }
-
-    const cw = callout.offsetWidth || 180;
-    const ch = callout.offsetHeight || 70;
-    const margin = 12;
-    // snap to the side with more room — tidy, no overlap with the mote field
-    const placeRight = lens.x < W*0.5;
-    let cx, cy;
-    if(placeRight){
-      cx = lens.x + lens.r + 22 + cw/2;
-    } else {
-      cx = lens.x - lens.r - 22 - cw/2;
-    }
-    cx = Math.max(cw/2 + margin, Math.min(W - cw/2 - margin, cx));
-    cy = lens.y;
-    cy = Math.max(ch/2 + margin, Math.min(H - ch/2 - margin, cy));
-
-    callout.style.left = cx + 'px';
-    callout.style.top = cy + 'px';
-    callout.classList.toggle('left', placeRight);
-    callout.classList.toggle('right', !placeRight);
-    callout.classList.add('visible');
-
-    const tourNum = tourPos + 1;
-    lensIdxEl.textContent = String(tourNum).padStart(2,'0');
-    lensChargeEl.textContent = m.charge ? m.charge : '—';
-    progLabel.textContent = String(tourNum).padStart(2,'0')+' / 18';
-    progFill.style.width = (tourNum/18*100)+'%';
-  }
-
-  function advance(){
-    tourPos = (tourPos + 1) % tourOrder.length;
-    activeIdx = tourOrder[tourPos];
-    const m = motes[activeIdx];
-    if(m){ lens.tx=m.x; lens.ty=m.y; }
-    lastSwitch = performance.now();
-  }
-
-  let t0 = performance.now();
-  function frame(now){
-    const t = now - t0;
-    const dt = 16; // approx frame dt for stable wander
-
-    // drift motes
-    for(const m of motes){
-      m.phase += m.driftSpd*16;
-      m.x = m.bx + Math.sin(m.phase)*m.driftAmp + Math.cos(m.phase*0.7)*m.driftAmp*0.35;
-      m.y = m.by + Math.cos(m.phase*1.1)*m.driftAmp*0.7 + Math.sin(m.phase*0.5)*m.driftAmp*0.25;
-    }
-
-    // drift dust: gentle Brownian wander + slow organic dispersal
-    if(!reduceMotion){
-      for(const d of dust){
-        // tiny random acceleration (Brownian)
-        d.vx += (Math.random()-0.5)*0.012;
-        d.vy += (Math.random()-0.5)*0.012;
-        // damping toward calm
-        d.vx *= 0.985;
-        d.vy *= 0.985;
-        // slow sinusoidal organic drift
-        d.phase += d.spd*dt;
-        d.x += d.vx + Math.cos(d.phase)*d.amp*0.02;
-        d.y += d.vy + Math.sin(d.phase*0.8)*d.amp*0.02;
-        // wrap softly across the field
-        if(d.x < -4) d.x = W+4;
-        else if(d.x > W+4) d.x = -4;
-        if(d.y < -4) d.y = H+4;
-        else if(d.y > H+4) d.y = -4;
-      }
-    }
-
-    // lens follows active mote's drifting position
-    const am = motes[activeIdx];
-    if(am){ lens.tx = am.x; lens.ty = am.y; }
-
-    if(reduceMotion){
-      lens.x = lens.tx; lens.y = lens.ty;
-    } else {
-      lens.x += (lens.tx - lens.x)*0.07;
-      lens.y += (lens.ty - lens.y)*0.07;
-    }
-
-    if(!reduceMotion && now - lastSwitch > DWELL){
-      advance();
-    }
-
-    ctx.clearRect(0,0,W,H);
-
-    // subtle field guide lines (very faint)
-    ctx.save();
-    ctx.strokeStyle='rgba(17,24,31,0.025)';
-    ctx.lineWidth=1;
-    const gridStep = 80;
-    for(let gx=0; gx<W; gx+=gridStep){
-      ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();
-    }
-    for(let gy=0; gy<H; gy+=gridStep){
-      ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();
-    }
-    ctx.restore();
-
-    // draw dense dust cloud (the air full of pollutant particles)
-    for(let i=0;i<dust.length;i++){
-      const d = dust[i];
-      if(d.charged){
-        ctx.fillStyle = `rgba(242,98,112,${d.a})`;
-      } else {
-        ctx.fillStyle = `rgba(78,92,106,${d.a*0.92})`;
-      }
       ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
-      ctx.fill();
+      ctx.arc(Math.cos(a)*s*0.64, Math.sin(a)*s*0.64, s*0.055,0,Math.PI*2);
+      ctx.fillStyle='rgba(239,83,100,0.6)'; ctx.fill();
     }
-
-    // draw motes (the 18 named specimens sit on top of the dust bed)
-    for(let i=0;i<motes.length;i++){
-      const m = motes[i];
-      const isActive = i===activeIdx;
-      if(isActive){
-        // faint marker in field (the real one is magnified in lens)
-        ctx.beginPath();
-        ctx.arc(m.x,m.y,2,0,Math.PI*2);
-        ctx.fillStyle='rgba(93,107,120,0.22)';
-        ctx.fill();
-      } else {
-        drawMote(m.x,m.y,m.size,m.charge,0.85,false);
-      }
+    ctx.beginPath(); ctx.arc(0,0,s*0.4,0,Math.PI*2);
+    ctx.fillStyle='rgba(184,162,90,0.85)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.5)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,s*0.16,0,Math.PI*2);
+    ctx.fillStyle='rgba(140,120,60,0.7)'; ctx.fill();
+  } else if(sp==='dust'){
+    ctx.beginPath();
+    for(let i=0;i<=22;i++){
+      const a=i/22*Math.PI*2;
+      const r=s*0.46 + Math.sin(a*4+0.5)*s*0.16 + Math.cos(a*7)*s*0.05;
+      const x=Math.cos(a)*r, y=Math.sin(a)*r*0.85;
+      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
     }
-
-    drawLens(t);
-    updateCallout();
-
-    requestAnimationFrame(frame);
-  }
-
-  // scroll-driven advance (mapped through the tour order)
-  function onScroll(){
-    const rect = wrap.getBoundingClientRect();
-    const vh = window.innerHeight;
-    const p = (vh*0.55 - rect.top) / Math.max(rect.height,1);
-    const tp = Math.max(0, Math.min(tourOrder.length-1, Math.floor(p*tourOrder.length)));
-    if(tp !== tourPos){
-      tourPos = tp;
-      activeIdx = tourOrder[tourPos];
-      const m = motes[activeIdx];
-      if(m){ lens.tx=m.x; lens.ty=m.y; }
-      lastSwitch = performance.now();
+    ctx.closePath();
+    ctx.fillStyle='rgba(118,98,78,0.82)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.5)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle='rgba(60,50,40,0.7)';
+    for(let i=0;i<5;i++){
+      const a=i*1.3, r=s*0.22;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a)*r,Math.sin(a)*r,s*0.06,0,Math.PI*2); ctx.fill();
     }
+  } else if(sp==='dander'){
+    ctx.beginPath();
+    ctx.moveTo(-s*0.5,-s*0.1);
+    ctx.quadraticCurveTo(-s*0.3,-s*0.42, s*0.1,-s*0.32);
+    ctx.quadraticCurveTo(s*0.52,-s*0.2, s*0.46,s*0.16);
+    ctx.quadraticCurveTo(s*0.2,s*0.42, -s*0.1,s*0.36);
+    ctx.quadraticCurveTo(-s*0.5,s*0.3, -s*0.5,-s*0.1);
+    ctx.closePath();
+    ctx.fillStyle='rgba(222,212,196,0.88)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle='rgba(180,168,150,0.5)'; ctx.lineWidth=0.6;
+    ctx.beginPath(); ctx.moveTo(-s*0.3,-s*0.05); ctx.quadraticCurveTo(0,s*0.05, s*0.3,-s*0.02); ctx.stroke();
+  } else if(sp==='microplastic'){
+    ctx.beginPath();
+    ctx.moveTo(-s*0.5,-s*0.3);
+    ctx.lineTo(s*0.2,-s*0.46);
+    ctx.lineTo(s*0.56,s*0.1);
+    ctx.lineTo(s*0.1,s*0.42);
+    ctx.lineTo(-s*0.4,s*0.26);
+    ctx.closePath();
+    ctx.fillStyle='rgba(138,150,162,0.82)'; ctx.fill();
+    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.32)'; ctx.lineWidth=0.7;
+    ctx.beginPath(); ctx.moveTo(-s*0.2,-s*0.1); ctx.lineTo(s*0.3,s*0.15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(s*0.05,-s*0.3); ctx.lineTo(-s*0.1,s*0.2); ctx.stroke();
   }
-  window.addEventListener('scroll', onScroll, {passive:true});
+  ctx.restore();
 
-  function init(){
-    resize();
-    lastSwitch = performance.now();
-    requestAnimationFrame(frame);
+  // mono tag
+  ctx.fillStyle='rgba(239,83,100,0.85)';
+  ctx.font='9px "Space Mono", monospace';
+  ctx.textAlign='center';
+  ctx.fillText('— SURFACE CHARGE', cx, cy+R*0.80);
+}
+
+// ---- Bubble composite ----
+function drawBubble(){
+  const cx=bubX, cy=bubY, R=bubR;
+  // outer soft glow
+  const og = ctx.createRadialGradient(cx,cy,R*0.85, cx,cy,R*1.45);
+  og.addColorStop(0,'rgba(52,225,255,0.10)');
+  og.addColorStop(1,'rgba(52,225,255,0)');
+  ctx.fillStyle=og;
+  ctx.beginPath(); ctx.arc(cx,cy,R*1.45,0,Math.PI*2); ctx.fill();
+
+  // clip + content
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
+  // clarify background
+  ctx.fillStyle='rgba(238,242,245,0.80)';
+  ctx.fillRect(cx-R,cy-R,R*2,R*2);
+  // calmer inner dust
+  drawInnerDust(cx,cy,R);
+  // structure
+  const f = FEATURES[bubIdx];
+  if(f.atoms) drawMolecule(f, cx, cy, R);
+  else drawSpecimen(f, cx, cy, R);
+  ctx.restore();
+
+  // ring
+  ctx.strokeStyle='rgba(52,225,255,0.92)';
+  ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  // inner hairline
+  ctx.strokeStyle='rgba(255,255,255,0.55)';
+  ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.arc(cx,cy,R-2.5,0,Math.PI*2); ctx.stroke();
+  // tick marks
+  ctx.strokeStyle='rgba(52,225,255,0.55)';
+  ctx.lineWidth=1;
+  for(let i=0;i<4;i++){
+    const a = i*Math.PI/2 + Math.PI/4;
+    const x1=cx+Math.cos(a)*(R+4), y1=cy+Math.sin(a)*(R+4);
+    const x2=cx+Math.cos(a)*(R+11), y2=cy+Math.sin(a)*(R+11);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   }
-  window.addEventListener('resize', ()=>{
-    resize();
-    const m = motes[activeIdx];
-    if(m){ lens.x=m.x; lens.y=m.y; lens.tx=m.x; lens.ty=m.y; }
-  });
+  // crosshair center (subtle)
+  ctx.strokeStyle='rgba(52,225,255,0.18)';
+  ctx.lineWidth=0.6;
+  ctx.beginPath();
+  ctx.moveTo(cx-6,cy); ctx.lineTo(cx+6,cy);
+  ctx.moveTo(cx,cy-6); ctx.lineTo(cx,cy+6);
+  ctx.stroke();
+}
 
-  if(document.readyState === 'complete') init();
-  else window.addEventListener('load', init);
-})();
+// ---- Label (DOM) ----
+const blabel = document.getElementById('blabel');
+const blLabel = document.getElementById('bl-label');
+const blBadge = document.getElementById('bl-badge');
+const blTag = document.getElementById('bl-tag');
+const blScan = document.getElementById('bl-scan');
+const idxEl = document.getElementById('idx');
+
+function computeLabelPos(){
+  const margin = 24;
+  const lw = W<720 ? 180 : 240;
+  let lx = bubX + bubR + 22;
+  let ly = bubY;
+  // flip to left if no room on right
+  if(lx + lw > W - 16){
+    lx = bubX - bubR - 22 - lw;
+  }
+  // clamp vertical
+  if(ly < 110) ly = 110;
+  if(ly > H - 110) ly = H - 110;
+  // clamp horizontal
+  if(lx < 16) lx = 16;
+  if(lx + lw > W - 16) lx = W - 16 - lw;
+  return {x:lx, y:ly};
+}
+
+function updateLabel(){
+  const f = FEATURES[bubIdx];
+  blLabel.textContent = f.label;
+  if(f.badge){
+    blBadge.textContent = f.badge;
+    blBadge.style.display = 'inline-block';
+  } else {
+    blBadge.style.display = 'none';
+  }
+  blTag.textContent = f.atoms ? '— charge zone' : '— surface charge';
+  blScan.textContent = 'Scanning the air —';
+  idxEl.textContent = String(bubIdx+1).padStart(2,'0');
+  const p = computeLabelPos();
+  blabel.style.left = p.x+'px';
+  blabel.style.top = p.y+'px';
+  blabel.classList.add('show');
+}
+
+// ---- Connector line from bubble to label ----
+function drawConnector(){
+  const p = computeLabelPos();
+  const ang = Math.atan2(p.y-bubY, p.x-bubX);
+  const sx = bubX + Math.cos(ang)*(bubR+2);
+  const sy = bubY + Math.sin(ang)*(bubR+2);
+  ctx.strokeStyle='rgba(52,225,255,0.35)';
+  ctx.lineWidth=0.8;
+  ctx.setLineDash([2,3]);
+  ctx.beginPath();
+  ctx.moveTo(sx,sy);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(52,225,255,0.7)';
+  ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
+}
+
+// ---- Main loop ----
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now-last)/1000);
+  last = now;
+
+  ctx.clearRect(0,0,W,H);
+
+  // dust
+  ctx.fillStyle = '#ef5364';
+  for(const d of dust){
+    if(!REDUCED){
+      d.vx += (Math.random()-0.5)*0.009;
+      d.vy += (Math.random()-0.5)*0.009;
+      d.vx *= 0.955; d.vy *= 0.955;
+      d.x += d.vx; d.y += d.vy;
+      d.ph += d.sp*16;
+    }
+    if(d.x<-2)d.x+=W; if(d.x>W+2)d.x-=W;
+    if(d.y<-2)d.y+=H; if(d.y>H+2)d.y-=H;
+
+    let a = d.a;
+    if(d.x>hRect.x && d.x<hRect.x+hRect.w && d.y>hRect.y && d.y<hRect.y+hRect.h){
+      a *= 0.16;
+    }
+    const flick = 0.82 + Math.sin(d.ph)*0.18;
+    ctx.globalAlpha = a*flick;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  updateBubble(dt);
+  updateLabel();
+  drawConnector();
+  drawBubble();
+
+  requestAnimationFrame(frame);
+}
+
+// ---- Boot ----
+resize();
+initBubble();
+window.addEventListener('resize', ()=>{
+  resize();
+  initBubble();
+});
+requestAnimationFrame((t)=>{ last = t; frame(t); });
 </script>
 </body>
 </html>
