@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Liquid Glass — Magnifier</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0a0a;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+    cursor: none;
+  }
+  #c {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+  .hint {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    pointer-events: none;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55), 0 0 2px rgba(0, 0, 0, 0.4);
+    font-weight: 500;
+    user-select: none;
+  }
+  .dot {
+    position: fixed;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 0 8px rgba(255,255,255,0.6);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="dot" id="dot"></div>
+<div class="hint">Move cursor — Liquid Glass</div>
+
+<script>
+"use strict";
+
+const canvas = document.getElementById('c');
+const dot = document.getElementById('dot');
+
+const gl = canvas.getContext('webgl', {
+  antialias: true,
+  premultipliedAlpha: false,
+  preserveDrawingBuffer: false
+});
+
+if (!gl) {
+  console.error('[LiquidGlass] WebGL context creation failed. WebGL is required.');
+  throw new Error('WebGL unavailable');
+}
+
+// ---------- Shaders ----------
+const VS = `
+attribute vec2 aPos;
+varying vec2 vUv;
+void main() {
+  vUv = aPos * 0.5 + 0.5;
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}
+`;
+
+const FS = `
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2  uResolution;   // CSS pixels
+uniform vec2  uLensCenter;    // CSS pixels
+uniform float uLensRadius;   // CSS pixels
+uniform float uTime;
+varying vec2  vUv;
+
+// hash for subtle noise on specular
+float hash21(vec2 p){
+  p = fract(p * vec2(123.34, 345.45));
+  p += dot(p, p + 34.345);
+  return fract(p.x * p.y);
+}
+
+void main() {
+  vec2  px  = vUv * uResolution;
+  vec2  d   = px - uLensCenter;
+  float r   = length(d);
+  float R   = uLensRadius;
+  float t   = r / R;
+  vec2  dir = d / max(r, 0.0001);
+
+  // Base background
+  vec2 bgUv = px / uResolution;
+  vec3 col = texture2D(uTex, bgUv).rgb;
+
+  // ---- Drop shadow (outside lens, offset slightly down) ----
+  vec2  shC  = uLensCenter + vec2(0.0, R * 0.10);
+  float shR  = R * 1.22;
+  float shD  = length(px - shC);
+  float shBand = smoothstep(shR, shR * 0.80, shD);   // 0 outside ring, 1 inside
+  float shMask = smoothstep(R * 1.0, R * 1.04, r);   // only outside lens
+  float shadow = shBand * shMask * 0.42;
+  col *= 1.0 - shadow;
+
+  // Light direction (upper-left). Screen y is down, so up = -y.
+  vec2 L1 = normalize(vec2(-0.72, -0.92));  // primary
+  vec2 L2 = normalize(vec2(-0.45, -0.78));  // secondary glint
+  float angDot = dot(dir, L1);
+
+  if (t < 1.0) {
+    // ===== REFRACTION: convex / barrel distortion =====
+    // Base magnification ~1.30x, ramping up toward the rim so the outer
+    // ~25% ring visibly stretches outward (barrel curvature).
+    float mag = 1.30 + 0.42 * pow(t, 4.0);
+    float sampleDist = r * mag;
+    vec2  samplePos  = uLensCenter + dir * sampleDist;
+    vec2  sUv = samplePos / uResolution;
+
+    // ===== CHROMATIC ABERRATION =====
+    // Radial offset grows toward the rim -> colour fringe at the edge.
+    float caPx = 7.5 * pow(t, 2.6);
+    vec2  caOff = dir * caPx / uResolution;
+    float rC = texture2D(uTex, sUv + caOff).r;
+    float gC = texture2D(uTex, sUv).g;
+    float bC = texture2D(uTex, sUv - caOff).b;
+    vec3 refr = vec3(rC, gC, bC);
+
+    col = refr;
+
+    // Slight global brightening — clear crystal transmits light
+    col *= 1.035;
+
+    // ===== INNER SHADOW RING (glass thickness) =====
+    float innerShade = smoothstep(0.74, 1.0, t);
+    col *= 1.0 - innerShade * 0.28;
+
+    // Soft inner refractive darkening right at the very inner edge of the bevel
+    float bevelInner = smoothstep(0.985, 1.0, t);
+    col *= 1.0 - bevelInner * 0.55;
+
+    // ===== PRIMARY SPECULAR CRESCENT (upper-left) =====
+    float crescent = pow(max(0.0, angDot), 5.5);
+    crescent *= smoothstep(0.50, 0.90, t);
+    crescent *= (1.0 - smoothstep(0.93, 1.0, t));
+    col += vec3(1.0) * crescent * 0.85;
+
+    // ===== SECONDARY GLINT (smaller, sharper) =====
+    float glint = pow(max(0.0, dot(dir, L2)), 22.0);
+    glint *= smoothstep(0.66, 0.86, t);
+    glint *= (1.0 - smoothstep(0.90, 0.99, t));
+    col += vec3(1.0, 0.98, 0.94) * glint * 0.75;
+
+    // ===== CRISP RIM HIGHLIGHT (light-facing edge) =====
+    float rim = smoothstep(0.952, 0.992, t) * (1.0 - smoothstep(0.992, 1.0, t));
+    float rimLight = pow(max(0.0, angDot), 1.6);
+    col += vec3(1.0) * rim * (0.35 + 0.95 * rimLight);
+
+    // ===== BOTTOM EDGE LIGHT (transmitted) =====
+    float bottom = smoothstep(0.30, 1.0, dir.y);
+    bottom *= smoothstep(0.93, 0.992, t) * (1.0 - smoothstep(0.992, 1.0, t));
+    col += vec3(1.0, 0.95, 0.86) * bottom * 0.30;
+
+    // ===== SUBTLE FRESNEL TINT (cool edge) =====
+    float fres = pow(1.0 - t, 2.0);
+    col += vec3(0.02, 0.03, 0.05) * (1.0 - fres) * 0.6;
+
+    // ===== MICRO-SPECULAR NOISE (glassy sparkle) =====
+    float n = hash21(dir * 73.0 + uTime * 0.05);
+    float spark = step(0.985, n) * smoothstep(0.6, 0.95, t) * (1.0 - smoothstep(0.97, 1.0, t));
+    col += vec3(1.0) * spark * 0.5;
+  } else {
+    // ===== OUTER RIM GLOW (just outside the lens, light side) =====
+    float outer = smoothstep(1.0, 1.012, t) * (1.0 - smoothstep(1.012, 1.05, t));
+    col += vec3(1.0) * outer * 0.18 * max(0.0, angDot);
+
+    // Faint outer ambient ring on the dark side (defines glass edge)
+    float outerDark = smoothstep(1.0, 1.008, t) * (1.0 - smoothstep(1.008, 1.03, t));
+    col *= 1.0 - outerDark * 0.10 * max(0.0, -angDot);
+  }
+
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    console.error('[LiquidGlass] Shader compile error:\n' + gl.getShaderInfoLog(s));
+    gl.deleteShader(s);
+    return null;
+  }
+  return s;
+}
+
+const vsh = compile(gl.VERTEX_SHADER, VS);
+const fsh = compile(gl.FRAGMENT_SHADER, FS);
+const prog = gl.createProgram();
+gl.attachShader(prog, vsh);
+gl.attachShader(prog, fsh);
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+  console.error('[LiquidGlass] Program link error:\n' + gl.getProgramInfoLog(prog));
+}
+gl.useProgram(prog);
+
+// Fullscreen quad
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1, -1,  1, -1, -1,  1,
+  -1,  1,  1, -1,  1,  1
+]), gl.STATIC_DRAW);
+const aPos = gl.getAttribLocation(prog, 'aPos');
+gl.enableVertexAttribArray(aPos);
+gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+const uTex  = gl.getUniformLocation(prog, 'uTex');
+const uRes  = gl.getUniformLocation(prog, 'uResolution');
+const uLens = gl.getUniformLocation(prog, 'uLensCenter');
+const uRad  = gl.getUniformLocation(prog, 'uLensRadius');
+const uTime = gl.getUniformLocation(prog, 'uTime');
+
+// ---------- Texture ----------
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+// Placeholder warm tone matching the expected room photo
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+  new Uint8Array([214, 196, 174, 255]));
+
+const img = new Image();
+img.onload = function () {
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+  console.log('[LiquidGlass] Background texture loaded:', img.naturalWidth + 'x' + img.naturalHeight);
+};
+img.onerror = function () {
+  console.warn('[LiquidGlass] Background.png failed to load — using placeholder.');
+};
+img.src = 'Background.png';
+
+// ---------- State ----------
+let dpr = Math.min(window.devicePixelRatio || 1, 2);
+let W = 0, H = 0;
+
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width  = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Lens radius: diameter clamp(260, 34vmin, 380) → radius = diameter / 2
+function lensRadius() {
+  const vmin = Math.min(W, H);
+  const diameter = Math.max(260, Math.min(380, vmin * 0.34));
+  return diameter * 0.5;
+}
+
+let mouseX = W * 0.5, mouseY = H * 0.5;
+let lensX  = W * 0.5, lensY  = H * 0.5;
+let lastMove = performance.now();
+
+window.addEventListener('mousemove', function (e) {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  lastMove = performance.now();
+  dot.style.left = mouseX + 'px';
+  dot.style.top  = mouseY + 'px';
+});
+window.addEventListener('touchmove', function (e) {
+  if (e.touches[0]) {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+    lastMove = performance.now();
+    dot.style.left = mouseX + 'px';
+    dot.style.top  = mouseY + 'px';
+  }
+}, { passive: true });
+
+// Initial cursor dot position
+dot.style.left = mouseX + 'px';
+dot.style.top  = mouseY + 'px';
+
+const t0 = performance.now();
+
+function frame(now) {
+  const t = (now - t0) / 1000;
+  const idle = (now - lastMove) / 1000;
+
+  // Idle auto-drift: gentle Lissajous path around the screen centre
+  let tx = mouseX, ty = mouseY;
+  if (idle > 2.0) {
+    const drift = Math.min(1.0, (idle - 2.0) * 0.5);
+    const cx = W * 0.5, cy = H * 0.5;
+    const dx = Math.cos(t * 0.27) * W * 0.20 + Math.sin(t * 0.19 + 1.3) * W * 0.07;
+    const dy = Math.sin(t * 0.31) * H * 0.16 + Math.cos(t * 0.23 + 0.7) * H * 0.06;
+    const targetX = cx + dx;
+    const targetY = cy + dy;
+    tx = mouseX + (targetX - mouseX) * drift;
+    ty = mouseY + (targetY - mouseY) * drift;
+  }
+
+  // Smooth lerp follow
+  const lerp = 0.13;
+  lensX += (tx - lensX) * lerp;
+  lensY += (ty - lensY) * lerp;
+
+  // Uniforms are in CSS pixels; shader uses vUv * uResolution → CSS px space
+  gl.uniform2f(uRes, W, H);
+  gl.uniform2f(uLens, lensX, lensY);
+  gl.uniform1f(uRad, lensRadius());
+  gl.uniform1f(uTime, t);
+  gl.uniform1i(uTex, 0);
+
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
