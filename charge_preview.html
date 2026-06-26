@@ -68,15 +68,15 @@
 const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
 let W=0,H=0,DPR=1;
 const SPECS=[
-  {file:'Wildfire_Smoke_Particle_red.png', name:'Wildfire smoke'},
-  {file:'Fungal_Spore_red.png',            name:'Fungal spore'},
-  {file:'Virus_red.png',                   name:'Virus'},
-  {file:'Bacteria_red.png',                name:'Bacteria'},
-  {file:'Ultrafine_Particle_red.png',      name:'Ultrafine particle'},
-  {file:'PFAS_red.png',                    name:'PFAS'},
-  {file:'Pollen_red.png',                  name:'Pollen'},
+  {file:'Wildfire_Smoke_Particle_rc.png', name:'Wildfire smoke'},
+  {file:'Fungal_Spore_rc.png',            name:'Fungal spore'},
+  {file:'Virus_rc.png',                   name:'Virus'},
+  {file:'Bacteria_rc.png',                name:'Bacteria'},
+  {file:'Ultrafine_Particle_rc.png',      name:'Ultrafine particle'},
+  {file:'PFAS_rc.png',                    name:'PFAS'},
+  {file:'Pollen_rc.png',                  name:'Pollen'},
 ];
-SPECS.forEach(s=>{ const im=new Image(); im.src='assets/red/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true; });
+SPECS.forEach(s=>{ const im=new Image(); im.src='assets/rc/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true; });
 const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
 
 let dustB=[]; const NB=8;
