@@ -81,17 +81,19 @@ SPECS.forEach(s=>{const im=new Image(); im.src='assets/'+s.file; s.img=im; s.rea
 const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
 
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let dust=[], purifier={x:0.76,y:0.42};
+let dustB=[], purifier={x:0.76,y:0.42};
+const NB=8;  // alpha buckets → batch fillStyle once per bucket (keeps 4000+ motes at 60fps)
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
   cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  const n=Math.round(Math.min(820, W*H/2300));   // denser dust field
-  dust=[]; for(let i=0;i<n;i++) dust.push(mote());
+  const n=Math.round(Math.min(4200, W*H/460));   // 5× dust field
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.09+b*0.05, motes:[]});
+  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
 }
 function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,
-  r:.6+Math.random()*1.9,a:.14+Math.random()*.34,ph:Math.random()*6.28};}
+  r:.55+Math.random()*1.7};}
 
 const bub={x:innerWidth*.55,y:innerHeight*.5,tx:innerWidth*.55,ty:innerHeight*.5,R:0};
 let mouseActive=false,lastMove=-9999,specIndex=0,lastAdvance=0,autoTarget=null,autoT=0,distSinceAdvance=0,prevx=bub.x,prevy=bub.y;
@@ -131,22 +133,21 @@ function tick(){
 
 function draw(t){
   ctx.clearRect(0,0,W,H);
-  // ---- dust (drifts, gentle pull toward the wall air-purifier) ----
+  // ---- dust (drifts, gentle pull toward the wall air-purifier) — batched by alpha bucket ----
   const px=purifier.x*W, py=purifier.y*H;
-  ctx.save();
-  for(const d of dust){
-    if(!REDUCED){
-      d.vx+=(Math.random()-.5)*.012; d.vy+=(Math.random()-.5)*.012;
-      const dx=px-d.x, dy=py-d.y, dl=Math.hypot(dx,dy)||1;
-      d.vx+=dx/dl*0.0016; d.vy+=dy/dl*0.0016;      // subtle attractor → purifier
-      d.vx*=.97; d.vy*=.97; d.x+=d.vx; d.y+=d.vy; d.ph+=.02;
+  for(const bucket of dustB){
+    ctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
+    for(const d of bucket.motes){
+      if(!REDUCED){
+        d.vx+=(Math.random()-.5)*.012; d.vy+=(Math.random()-.5)*.012;
+        const dx=px-d.x, dy=py-d.y, dl=Math.hypot(dx,dy)||1;
+        d.vx+=dx/dl*0.0016; d.vy+=dy/dl*0.0016;     // subtle attractor → purifier
+        d.vx*=.97; d.vy*=.97; d.x+=d.vx; d.y+=d.vy;
+      }
+      if(d.x<-4)d.x=W+4; if(d.x>W+4)d.x=-4; if(d.y<-4)d.y=H+4; if(d.y>H+4)d.y=-4;
+      ctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2);
     }
-    if(d.x<-4)d.x=W+4; if(d.x>W+4)d.x=-4; if(d.y<-4)d.y=H+4; if(d.y>H+4)d.y=-4;
-    const tw=.7+.3*Math.sin(d.ph);
-    ctx.fillStyle='rgba(74,66,58,'+(d.a*tw).toFixed(3)+')';
-    ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,6.2832); ctx.fill();
   }
-  ctx.restore();
 
   // ---- magnifier bubble ----
   const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
