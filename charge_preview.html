@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Standardized Charge Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2a2622; --muted:#8a817a;
+    --charge:#e23b3b; --charge-deep:#c22d2d;   /* red = negative charge */
+    --scan:#1b7bff;   --scan-deep:#1558c8;      /* blue = NanoFlashing scanner */
+    --paper:#ece7e1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:'Space Grotesk',system-ui,sans-serif; color:var(--ink);
+    background:#ece7e1 url('assets/Background.png') center/cover no-repeat;
+    cursor:default;
+  }
+  #scene{position:fixed;inset:0;z-index:1;}
+  .scrim{position:fixed;top:0;left:0;width:62%;height:52%;z-index:2;pointer-events:none;
+    background:radial-gradient(120% 95% at 8% 18%, rgba(236,231,225,0.78) 0%, rgba(236,231,225,0.30) 42%, rgba(236,231,225,0) 70%);}
+  .hero{position:fixed;z-index:3;top:7.5vh;left:5vw;max-width:46ch;pointer-events:none;}
+  .eyebrow{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+  .eyebrow .sym{width:14px;height:14px;flex:0 0 auto;}
+  h1{font-family:'Instrument Serif',serif;font-weight:400;
+    font-size:clamp(38px,5.6vw,76px);line-height:1.02;letter-spacing:-.01em;color:var(--ink);}
+  h1 .chg{font-style:italic;color:var(--charge);}
+  .sub{margin-top:22px;font-size:clamp(14px,1.3vw,16px);line-height:1.55;color:#6a625b;max-width:34ch;font-weight:400;}
+  .readout{position:fixed;z-index:3;left:5vw;bottom:6vh;font-family:'Space Mono',monospace;
+    display:flex;align-items:center;gap:18px;pointer-events:none;}
+  .readout .live{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+  .readout .dot{width:7px;height:7px;border-radius:50%;background:var(--scan);box-shadow:0 0 9px rgba(27,123,255,.7);animation:pulse 2.2s infinite ease-in-out;}
+  @keyframes pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+  .readout .name{font-size:13px;letter-spacing:.06em;color:var(--ink);min-width:13ch;}
+  .readout .chg{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--charge-deep);}
+  .readout .count{font-size:11px;letter-spacing:.14em;color:var(--muted);}
+  .hint{position:fixed;z-index:3;right:5vw;bottom:6vh;font-family:'Space Mono',monospace;
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);opacity:.8;pointer-events:none;}
+  @media (max-width:720px){ .hero{left:6vw;top:6vh;max-width:none} .readout{left:6vw} .hint{display:none} .scrim{width:100%;height:44%} }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div class="scrim"></div>
+<div class="hero">
+  <div class="eyebrow">
+    <svg class="sym" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e23b3b" stroke-width="2"/><rect x="7" y="11" width="10" height="2" rx="1" fill="#e23b3b"/></svg>
+    The Big Idea
+  </div>
+  <h1>Most pollutants carry a <span class="chg">negative charge.</span></h1>
+  <p class="sub">Clean-looking air is full of them — drifting, invisible, charged. The scanner reveals one.</p>
+</div>
+<div class="readout">
+  <span class="live"><span class="dot"></span>Scanning the air</span>
+  <span class="name" id="r-name">—</span>
+  <span class="chg"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#c22d2d" stroke-width="2"/><rect x="7" y="11" width="10" height="2" rx="1" fill="#c22d2d"/></svg>Negative</span>
+  <span class="count" id="r-count">01 / 07</span>
+</div>
+<div class="hint">Standardized charge · code overlay</div>
+
+<script>
+const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+const SPECS=[
+  {file:'Wildfire_Smoke_Particle_red.png', name:'Wildfire smoke'},
+  {file:'Fungal_Spore_red.png',            name:'Fungal spore'},
+  {file:'Virus_red.png',                   name:'Virus'},
+  {file:'Bacteria_red.png',                name:'Bacteria'},
+  {file:'Ultrafine_Particle_red.png',      name:'Ultrafine particle'},
+  {file:'PFAS_red.png',                    name:'PFAS'},
+  {file:'Pollen_red.png',                  name:'Pollen'},
+];
+SPECS.forEach(s=>{ const im=new Image(); im.src='assets/red/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true; });
+const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
+
+let dustB=[]; const NB=8;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth; H=window.innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const n=Math.round(Math.min(4200, W*H/460));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.09+b*0.05, motes:[]});
+  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
+}
+function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:.55+Math.random()*1.7};}
+
+const params=new URLSearchParams(location.search);
+let specIndex=params.get('spec')!==null?(+params.get('spec'))%SPECS.length:2;  // default: virus
+const bub={x:0,y:0,R:0};
+const BUBBLE=0.215;
+
+function setSpec(i){ specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
+  rName.textContent=SPECS[specIndex].name; rCount.textContent=String(specIndex+1).padStart(2,'0')+' / 07'; }
+setSpec(specIndex);
+
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  for(const bucket of dustB){
+    ctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
+    for(const d of bucket.motes){
+      d.vx+=(Math.random()-.5)*.012; d.vy+=(Math.random()-.5)*.012;
+      d.vx*=.95; d.vy*=.95; d.x+=d.vx; d.y+=d.vy;
+      if(d.x<-4)d.x=W+4; if(d.x>W+4)d.x=-4; if(d.y<-4)d.y=H+4; if(d.y>H+4)d.y=-4;
+      ctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2);
+    }
+  }
+  const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x,y,R,0,6.2832);
+  ctx.shadowColor='rgba(40,34,28,.28)'; ctx.shadowBlur=34; ctx.shadowOffsetY=14;
+  ctx.fillStyle='rgba(236,231,225,0.92)'; ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x,y,R-1,0,6.2832); ctx.clip();
+  ctx.fillStyle='rgba(238,233,227,0.96)'; ctx.fillRect(x-R,y-R,2*R,2*R);
+  { const bob=Math.sin(t*0.0017)*R*0.025, sway=Math.cos(t*0.0011)*R*0.010;
+    const d=R*2.0;
+    ctx.save(); ctx.translate(x+sway, y+bob);
+    if(s.ready){ ctx.drawImage(s.img, -d/2,-d/2,d,d); }
+    ctx.restore(); }
+  ctx.restore();
+  // lens rim (scanner-blue) + inner highlight
+  ctx.lineWidth=2; ctx.strokeStyle='rgba(27,123,255,.85)'; ctx.beginPath(); ctx.arc(x,y,R,0,6.2832); ctx.stroke();
+  ctx.lineWidth=1; ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(x,y,R-3,0,6.2832); ctx.stroke();
+  ctx.strokeStyle='rgba(27,123,255,.55)'; ctx.lineWidth=1.4;
+  for(const ang of [0,Math.PI/2,Math.PI,3*Math.PI/2]){ctx.beginPath(); ctx.moveTo(x+Math.cos(ang)*(R-7),y+Math.sin(ang)*(R-7)); ctx.lineTo(x+Math.cos(ang)*(R-1),y+Math.sin(ang)*(R-1)); ctx.stroke();}
+  // tethered label — sentence case
+  const lx=x+R*0.86, ly=y-R*0.86;
+  ctx.strokeStyle='rgba(42,38,34,.4)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+R*0.7,y-R*0.7); ctx.lineTo(lx,ly); ctx.stroke();
+  ctx.font='700 13px "Space Mono",monospace'; ctx.fillStyle='#2a2622'; ctx.textBaseline='middle';
+  ctx.fillText(s.name, lx+6, ly);
+}
+function tick(){ const t=performance.now();
+  bub.tx=W*0.60; bub.ty=H*0.52;
+  if(bub.R===0){ bub.x=bub.tx; bub.y=bub.ty; }
+  bub.R += (Math.min(W,H)*BUBBLE - bub.R)*0.12;
+  draw(t); requestAnimationFrame(tick); }
+resize(); addEventListener('resize',resize); requestAnimationFrame(tick);
+</script>
+</body>
+</html>
