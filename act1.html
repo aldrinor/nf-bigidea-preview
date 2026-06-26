@@ -3,176 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing — Act 01: The Field</title>
+<title>NanoFlashing — ACT 01 — The Field</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg1:#eef2f5; --bg2:#e7ecf1;
     --ink:#11181f; --muted:#5d6b78;
-    --red:#ef5364; --cyan:#1B7BFF;
-    --line:rgba(17,24,31,0.12);
+    --dust:#8893a0;
+    --blue:#1B7BFF;
+    --red:#ef5364;
   }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%; overflow-x:hidden;}
-  body{
-    background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
-    color: var(--ink);
-    font-family: 'Space Grotesk', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    position: relative;
-    min-height: 100vh;
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    height:100%; width:100%;
+    overflow:hidden;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
   }
-  #dust{position:fixed; inset:0; z-index:0; pointer-events:none; display:block;}
-  .stage{position:relative; z-index:2; min-height:100vh; padding: 56px 64px; display:flex; flex-direction:column;}
-  .top{max-width: 920px;}
+  canvas{position:fixed;inset:0;display:block}
+  #dust{z-index:0}
+  #bubble-layer{z-index:1;pointer-events:none}
+
+  .slogan{
+    position:fixed; inset:0; z-index:2;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center; pointer-events:none;
+    padding:24px;
+  }
   .eyebrow{
-    font-family:'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 32px;
-    display:flex; align-items:center; gap:12px;
+    font-family:'Space Mono',monospace;
+    font-size:12px; letter-spacing:0.28em;
+    text-transform:uppercase; color:var(--muted);
+    margin-bottom:30px; display:flex; align-items:center; gap:10px;
   }
-  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--red); box-shadow:0 0 10px rgba(239,83,100,0.7);}
-  h1{
-    font-family:'Instrument Serif', serif;
+  .eyebrow .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--blue);
+    box-shadow:0 0 0 0 rgba(27,123,255,0.5);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(27,123,255,0.5)}
+    70%{box-shadow:0 0 0 8px rgba(27,123,255,0)}
+    100%{box-shadow:0 0 0 0 rgba(27,123,255,0)}
+  }
+  .headline{
+    font-family:'Instrument Serif',serif;
     font-weight:400;
-    font-size: clamp(40px, 6.6vw, 88px);
-    line-height: 1.04;
-    letter-spacing: -0.012em;
-    color: var(--ink);
-    margin-bottom: 26px;
-    max-width: 14ch;
+    font-size:clamp(40px, 7.4vw, 112px);
+    line-height:1.0;
+    letter-spacing:-0.012em;
+    max-width:14ch;
   }
-  h1 em{font-style:italic; color: var(--red);}
+  .headline em{
+    font-style:italic;
+    color:var(--red);
+    position:relative;
+  }
   .sub{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:300;
-    font-size: clamp(15px, 1.35vw, 18px);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(15px, 1.4vw, 19px);
+    color:var(--muted);
+    margin-top:26px;
+    max-width:48ch;
     line-height:1.55;
-    color: var(--muted);
-    max-width: 520px;
+    font-weight:400;
   }
-  .rule{
-    margin-top: 28px;
-    width: 56px; height:1px; background: var(--line);
-  }
-  /* bubble label */
-  .bubble-label{
-    position:fixed; z-index:3;
-    pointer-events:none;
-    transform: translate(0, -50%);
-    opacity:0;
-    transition: opacity 0.4s ease;
-    width: 240px;
-  }
-  .bubble-label.show{opacity:1;}
-  .bubble-label .scan-line{
-    font-family:'Space Mono', monospace;
-    font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
-    color: var(--cyan);
-    margin-bottom:10px;
-    display:flex; align-items:center; gap:8px;
-  }
-  .bubble-label .scan-line::before{
-    content:''; width:16px; height:1px; background:var(--cyan); flex-shrink:0;
-  }
-  .bubble-label .label{
-    font-family:'Instrument Serif', serif;
-    font-size: 28px; line-height:1.08; color: var(--ink);
-    margin-bottom: 10px;
-    letter-spacing:-0.01em;
-  }
-  .bubble-label .badge{
-    font-family:'Space Mono', monospace;
-    font-size: 10px; letter-spacing:0.06em;
-    color: var(--red);
-    background: rgba(239,83,100,0.07);
-    border: 1px solid rgba(239,83,100,0.28);
-    padding: 5px 9px; border-radius: 3px;
-    display:inline-block;
-    line-height:1.3;
-  }
-  .bubble-label .tag{
-    font-family:'Space Mono', monospace;
-    font-size: 9px; letter-spacing:0.16em; text-transform:uppercase;
-    color: var(--muted);
-    margin-top:12px;
-    display:flex; align-items:center; gap:6px;
-  }
-  .bubble-label .tag::before{
-    content:''; width:5px; height:5px; border-radius:50%;
-    background: var(--red); box-shadow:0 0 6px rgba(239,83,100,0.6);
-  }
-  /* corners */
-  .corner{
-    position:fixed; bottom: 32px; left: 64px; z-index:3;
-    font-family:'Space Mono', monospace;
-    font-size: 10px; letter-spacing:0.2em; text-transform:uppercase;
-    color: var(--muted);
+  .hint{
+    font-family:'Space Mono',monospace;
+    font-size:11px; letter-spacing:0.22em;
+    text-transform:uppercase; color:var(--muted);
+    margin-top:52px; opacity:0.72;
     display:flex; align-items:center; gap:10px;
   }
-  .corner .pulse{width:6px;height:6px;border-radius:50%;background:var(--cyan); box-shadow:0 0 8px rgba(27,123,255,0.6); animation: pulse 2.4s infinite ease-in-out;}
-  @keyframes pulse{0%,100%{opacity:0.35; transform:scale(0.85);}50%{opacity:1; transform:scale(1);}}
-  .corner-r{
-    position:fixed; bottom: 32px; right: 64px; z-index:3;
-    font-family:'Space Mono', monospace;
-    font-size: 10px; letter-spacing:0.2em; text-transform:uppercase;
-    color: var(--muted);
-    text-align:right;
+  .hint::before, .hint::after{
+    content:""; display:inline-block;
+    width:28px; height:1px; background:var(--muted); opacity:0.4;
   }
-  .corner-r span{color: var(--ink);}
-  .counter{
-    position:fixed; top: 56px; right: 64px; z-index:3;
-    font-family:'Space Mono', monospace;
-    font-size: 10px; letter-spacing:0.18em; text-transform:uppercase;
-    color: var(--muted);
-    text-align:right;
-    line-height:1.6;
+
+  .corner{
+    position:fixed; z-index:2;
+    font-family:'Space Mono',monospace;
+    font-size:10px; letter-spacing:0.22em;
+    text-transform:uppercase; color:var(--muted);
+    pointer-events:none;
   }
-  .counter .num{color: var(--ink); font-size: 13px; letter-spacing:0.1em;}
-  .counter .of{opacity:0.5;}
-  .legend{
-    position:fixed; top: 56px; right: 64px; z-index:3;
-    display:none;
+  .corner.tl{top:22px; left:28px}
+  .corner.tr{top:22px; right:28px; text-align:right}
+  .corner.bl{bottom:22px; left:28px}
+  .corner.br{bottom:22px; right:28px; text-align:right}
+  .corner b{color:var(--ink); font-weight:700; letter-spacing:0.18em}
+  .corner .bar{display:inline-block; width:18px; height:1px; background:var(--muted); vertical-align:middle; margin:0 8px; opacity:0.5}
+
+  .callout{
+    position:fixed; z-index:4;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.28s ease;
+    transform:translateY(-50%);
+    max-width:230px;
   }
-  @media (max-width: 720px){
-    .stage{padding: 36px 26px;}
-    .corner{left:26px; bottom:22px; font-size:9px;}
-    .corner-r{right:26px; bottom:22px; font-size:9px;}
-    .counter{top:36px; right:26px; font-size:9px;}
-    .counter .num{font-size:11px;}
-    .bubble-label{width: 180px;}
-    .bubble-label .label{font-size:22px;}
-    h1{max-width:none;}
+  .callout.visible{opacity:1}
+  .callout .stick{
+    width:18px; height:1px; background:var(--blue); margin-bottom:10px; opacity:0.7;
+  }
+  .callout .label{
+    font-family:'Instrument Serif',serif;
+    font-size:28px; line-height:1.05;
+    color:var(--ink);
+  }
+  .callout .badge{
+    font-family:'Space Mono',monospace;
+    font-size:11px; letter-spacing:0.04em;
+    color:var(--red); margin-top:8px;
+  }
+  .callout .tag{
+    font-family:'Space Mono',monospace;
+    font-size:10px; letter-spacing:0.18em;
+    text-transform:uppercase; color:var(--muted);
+    margin-top:6px;
+  }
+
+  @media (max-width:600px){
+    .corner.tr,.corner.br{display:none}
+    .slogan{padding:18px}
+    .eyebrow{margin-bottom:20px; font-size:10px}
+    .hint{margin-top:36px}
+    .hint::before,.hint::after{width:18px}
   }
 </style>
 </head>
 <body>
-<canvas id="dust"></canvas>
-<div class="stage">
-  <div class="top">
+  <canvas id="dust"></canvas>
+  <canvas id="bubble-layer"></canvas>
+
+  <div class="corner tl"><b>NANOFLASHING</b><span class="bar"></span>BIG IDEA</div>
+  <div class="corner tr">ACT 01 / 04<span class="bar"></span>THE FIELD</div>
+  <div class="corner bl">SCAN MODE<span class="bar"></span>CURSOR + AUTO</div>
+  <div class="corner br">MOST POLLUTANTS CARRY A − CHARGE</div>
+
+  <div class="slogan">
     <div class="eyebrow"><span class="dot"></span>ACT 01 — THE FIELD</div>
-    <h1>Most pollutants carry a <em>negative charge.</em></h1>
+    <h1 class="headline">Most pollutants carry a <em>negative charge</em>.</h1>
     <p class="sub">Hundreds of them — drifting in the air you breathe and the water you drink.</p>
-    <div class="rule"></div>
+    <div class="hint">Move your cursor to scan the air</div>
   </div>
-</div>
 
-<div class="counter"><span class="num" id="idx">01</span><span class="of"> / 18</span><br>scanning</div>
-
-<div class="bubble-label" id="blabel">
-  <div class="scan-line" id="bl-scan">Scanning the air</div>
-  <div class="label" id="bl-label">—</div>
-  <div class="badge" id="bl-badge"></div>
-  <div class="tag" id="bl-tag">— charge zone</div>
-</div>
-
-<div class="corner"><span class="pulse"></span>NanoFlashing — Big Idea / Act 01</div>
-<div class="corner-r"><span>Light editorial study</span> — 2D canvas</div>
+  <div class="callout" id="callout">
+    <div class="stick"></div>
+    <div class="label" id="callout-label"></div>
+    <div class="badge" id="callout-badge"></div>
+    <div class="tag" id="callout-tag"></div>
+  </div>
 
 <script>
 const FEATURES = [
@@ -180,6 +168,11 @@ const FEATURES = [
     { id:'f2',  position:[  7, 3,  2], label:'Virus',  treatment:'halo',  outcome:'fade', badge:'', specimen:'virus' },
     { id:'f3',  position:[ -4,-6,  4], label:'Fungi',  treatment:'halo',  outcome:'fade', badge:'', specimen:'spore' },
     { id:'f4',  position:[ 10,-2, -5], label:'Bacteria',  treatment:'halo',  outcome:'fade', badge:'', specimen:'rod' },
+    // Items 5–11 (treatment:'cloud') carry REAL heavy-atom 3D structures (H omitted).
+    // `atoms` = {el,x,y,z} centered on centroid, scaled so the largest bbox extent = 4 units.
+    // `chargeAtoms` = 0-based indices of the charge-locus atoms (glow red in COLORS.negative).
+    // Mapped by molecule (NOT by array order): 5=PFOS 6=nitrate 7=methyl-orange 8=sulfate
+    // 9=sulfamethoxazole 10=2,4-D 11=estrone-3-sulfate.
     { id:'f5',  position:[ -8, 1,  6], label:'PFAS',  treatment:'cloud', outcome:'hold', badge:'PFOS — net charge −1',
       moleculeKey:'pfos', chargeAtoms:[0,18,19,20], atoms:[
         {el:'S',x:1.6338,y:-0.3027,z:-0.0688},{el:'F',x:-0.3072,y:-0.6814,z:-0.2928},{el:'F',x:0.3203,y:-0.6313,z:0.3116},
@@ -232,6 +225,7 @@ const FEATURES = [
         {el:'C',x:-1.732,y:0.2862,z:0.0587},{el:'C',x:-1.0891,y:-0.3111,z:0.5768},{el:'C',x:0.1671,y:-0.0247,z:-0.1944},
         {el:'C',x:0.0702,y:0.7368,z:0.0102},{el:'C',x:0.3373,y:0.3662,z:-0.0931},{el:'C',x:0.4412,y:-0.3517,z:-0.2858},
         {el:'C',x:0.7703,y:0.4153,z:-0.0703},{el:'C',x:0.8707,y:-0.2979,z:-0.2645},{el:'C',x:1.0353,y:0.0851,z:-0.1554}] },
+    // --- expanded roster (Yin "build all", 2026-06-12): 5 more surface-charge particles + 2 more molecular anions ---
     { id:'f12', position:[  4,-8,  3], label:'PM2.5 / ultrafine', treatment:'halo',  outcome:'hold', badge:'', specimen:'pm' },
     { id:'f13', position:[ -7, 8, -4], label:'Pollen',            treatment:'halo',  outcome:'hold', badge:'', specimen:'pollen' },
     { id:'f14', position:[ 11, 1, -7], label:'Dust & dust-mite',  treatment:'halo',  outcome:'hold', badge:'', specimen:'dust' },
@@ -245,504 +239,676 @@ const FEATURES = [
         {el:'F',x:0,y:0,z:0}] },
 ];
 
-const CPK = {
-  C:'#7c858e', O:'#d6595a', N:'#4f78c8', S:'#d4a93a',
-  F:'#5cb88a', Cl:'#6fbf73', P:'#d88a3e'
-};
+/* ---------- setup ---------- */
+const dustCanvas = document.getElementById('dust');
+const bubbleCanvas = document.getElementById('bubble-layer');
+const dctx = dustCanvas.getContext('2d');
+const bctx = bubbleCanvas.getContext('2d');
 
-const canvas = document.getElementById('dust');
-const ctx = canvas.getContext('2d');
-let W=0, H=0, DPR=1;
+let W = 0, H = 0;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
+
 function resize(){
-  DPR = Math.min(window.devicePixelRatio||1, 2);
-  W = window.innerWidth; H = window.innerHeight;
-  canvas.width = Math.floor(W*DPR);
-  canvas.height = Math.floor(H*DPR);
-  canvas.style.width = W+'px';
-  canvas.style.height = H+'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  bubR = W<720 ? 112 : (W<1100 ? 140 : 168);
-  buildDust();
-  updateHeadlineRect();
+  W = window.innerWidth;
+  H = window.innerHeight;
+  for(const c of [dustCanvas, bubbleCanvas]){
+    c.width = Math.floor(W * DPR);
+    c.height = Math.floor(H * DPR);
+    c.style.width = W + 'px';
+    c.style.height = H + 'px';
+  }
+  dctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  bctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
+resize();
 
-const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// ---- Dust ----
-let dust = [];
-function buildDust(){
-  const count = W<600 ? 520 : (W<1100 ? 950 : 1340);
-  dust = [];
-  for(let i=0;i<count;i++){
+/* ---------- dust field ---------- */
+const dust = [];
+function makeDust(){
+  dust.length = 0;
+  const area = W * H;
+  const count = Math.round(Math.min(1300, Math.max(440, area / 1350)));
+  for(let i = 0; i < count; i++){
     dust.push({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      vx: (Math.random()-0.5)*0.10,
-      vy: (Math.random()-0.5)*0.10,
-      r: 1.1 + Math.random()*1.9,
-      a: 0.42 + Math.random()*0.48,
-      ph: Math.random()*Math.PI*2,
-      sp: 0.0006 + Math.random()*0.0014
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.18,
+      r: 0.6 + Math.random() * 1.9,
+      a: 0.45 + Math.random() * 0.45,
+      phase: Math.random() * Math.PI * 2,
+      ps: 0.008 + Math.random() * 0.02
     });
   }
 }
+makeDust();
 
-let hRect = {x:0,y:0,w:0,h:0};
-function updateHeadlineRect(){
-  const top = document.querySelector('.top');
-  if(!top){ hRect={x:0,y:0,w:0,h:0}; return; }
-  const r = top.getBoundingClientRect();
-  hRect = {x:r.left-20, y:r.top-20, w:r.width+40, h:r.height+40};
-}
+/* ---------- embedded pollutants ---------- */
+const pollutants = [];
+function placePollutants(){
+  pollutants.length = 0;
+  if(!FEATURES || !Array.isArray(FEATURES) || !FEATURES.length) return;
 
-// ---- Bubble tour ----
-let bubIdx = 0;
-let bubState = 'dwell'; // 'travel' | 'dwell'
-let bubT = 0;
-const TRAVEL = 0.9;
-const DWELL = 2.2;
-let bubFrom = {x:0,y:0};
-let bubTo = {x:0,y:0};
-let bubX = 0, bubY = 0;
-let bubR = 168;
+  const n = FEATURES.length;
+  const cx = W / 2, cy = H / 2;
+  const avoidR = Math.min(W, H) * 0.26; // keep clear of slogan
+  const margin = 70;
+  const minSep = Math.min(140, Math.max(90, Math.sqrt(W * H / n) * 0.6));
 
-function featureScreenPos(f){
-  const s = Math.min(W,H) * (W<720 ? 0.026 : 0.032);
-  return {
-    x: W*0.5 + f.position[0]*s,
-    y: H*0.5 - f.position[1]*s
-  };
-}
-function easeInOutCubic(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
-
-function initBubble(){
-  const p = featureScreenPos(FEATURES[0]);
-  bubFrom = {x:p.x, y:p.y};
-  bubTo = {x:p.x, y:p.y};
-  bubX = p.x; bubY = p.y;
-  bubState = 'dwell'; bubT = 0;
-}
-
-function updateBubble(dt){
-  bubT += dt;
-  if(bubState==='travel'){
-    const t = Math.min(1, bubT/TRAVEL);
-    const e = easeInOutCubic(t);
-    bubX = bubFrom.x + (bubTo.x-bubFrom.x)*e;
-    bubY = bubFrom.y + (bubTo.y-bubFrom.y)*e;
-    if(t>=1){ bubState='dwell'; bubT=0; }
-  } else {
-    bubX = bubTo.x; bubY = bubTo.y;
-    if(bubT >= DWELL){
-      bubIdx = (bubIdx+1) % FEATURES.length;
-      bubFrom = {x:bubX, y:bubY};
-      bubTo = featureScreenPos(FEATURES[bubIdx]);
-      bubState='travel'; bubT=0;
+  const placed = [];
+  let attempts = 0;
+  const maxAttempts = n * 80;
+  while(placed.length < n && attempts < maxAttempts){
+    attempts++;
+    const x = margin + Math.random() * (W - margin * 2);
+    const y = margin + Math.random() * (H - margin * 2);
+    if(Math.hypot(x - cx, y - cy) < avoidR) continue;
+    let ok = true;
+    for(const q of placed){
+      if(Math.hypot(x - q.x, y - q.y) < minSep){ ok = false; break; }
     }
+    if(!ok) continue;
+    placed.push({ x, y });
+  }
+  // backfill if needed (ignore avoid zone)
+  while(placed.length < n){
+    placed.push({
+      x: margin + Math.random() * (W - margin * 2),
+      y: margin + Math.random() * (H - margin * 2)
+    });
+  }
+
+  for(let i = 0; i < n; i++){
+    const f = FEATURES[i];
+    const pos = placed[i];
+    pollutants.push({
+      f,
+      x: pos.x,
+      y: pos.y,
+      r: 2.4 + Math.random() * 1.1,
+      a: 0.7 + Math.random() * 0.25
+    });
+  }
+}
+placePollutants();
+
+/* ---------- bubble ---------- */
+const bubble = {
+  x: W * 0.5, y: H * 0.65,
+  tx: W * 0.5, ty: H * 0.65,
+  R: 150,
+  mag: 2.2,
+  mode: 'tour',
+  lastMove: performance.now() - 5000,
+  tourIdx: 0,
+  tourState: 'moving',
+  tourTimer: 0,
+  active: null,
+  activeStrength: 0
+};
+function setBubbleSize(){
+  bubble.R = Math.round(Math.min(170, Math.max(118, Math.min(W, H) * 0.19)));
+  bubble.mag = W < 600 ? 2.0 : 2.25;
+}
+setBubbleSize();
+
+/* ---------- pointer ---------- */
+let mouseX = W * 0.5, mouseY = H * 0.65;
+let hasMoved = false;
+window.addEventListener('mousemove', e => {
+  if(reduced || isTouch) return;
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  hasMoved = true;
+  bubble.mode = 'cursor';
+  bubble.lastMove = performance.now();
+}, { passive: true });
+
+window.addEventListener('mouseleave', () => {
+  bubble.lastMove = performance.now() - 4000;
+});
+
+/* ---------- colors ---------- */
+const CPK = {
+  C: '#7c858e', O: '#d6595a', N: '#4f78c8', S: '#d4a93a',
+  F: '#5fb878', Cl: '#5fb878', P: '#d88a3e', H: '#cfd6dd'
+};
+function lighten(hex, amt){
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const nr = Math.min(255, Math.round(r + (255 - r) * amt));
+  const ng = Math.min(255, Math.round(g + (255 - g) * amt));
+  const nb = Math.min(255, Math.round(b + (255 - b) * amt));
+  return `rgb(${nr},${ng},${nb})`;
+}
+
+/* ---------- drawing: dust canvas ---------- */
+function drawDustLayer(){
+  // background gradient
+  const bg = dctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#eef2f5');
+  bg.addColorStop(1, '#e7ecf1');
+  dctx.fillStyle = bg;
+  dctx.fillRect(0, 0, W, H);
+
+  // dust motes
+  for(const d of dust){
+    const flick = 0.82 + 0.18 * Math.sin(d.phase);
+    dctx.fillStyle = `rgba(136,147,160,${(d.a * flick).toFixed(3)})`;
+    dctx.beginPath();
+    dctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    dctx.fill();
+  }
+
+  // pollutant markers (look like slightly larger dust until scanned)
+  for(const p of pollutants){
+    if(p === bubble.active && bubble.activeStrength > 0.5) continue;
+    const fade = (p === bubble.active) ? (1 - bubble.activeStrength) : 1;
+    dctx.fillStyle = `rgba(120,131,145,${(p.a * fade).toFixed(3)})`;
+    dctx.beginPath();
+    dctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    dctx.fill();
   }
 }
 
-// ---- Inner dust (calmer, inside bubble) ----
-const innerDust = [];
-for(let i=0;i<26;i++){
-  innerDust.push({
-    a: Math.random()*Math.PI*2,
-    r: Math.random(),
-    sp: (Math.random()-0.5)*0.0006,
-    rr: 0.5 + Math.random()*1.0,
-    al: 0.15 + Math.random()*0.25
-  });
-}
-function drawInnerDust(cx,cy,R){
-  ctx.fillStyle = '#ef5364';
-  for(const d of innerDust){
-    d.a += d.sp;
-    const px = cx + Math.cos(d.a)*d.r*R*0.92;
-    const py = cy + Math.sin(d.a)*d.r*R*0.92;
-    ctx.globalAlpha = d.al;
-    ctx.beginPath();
-    ctx.arc(px,py,d.rr,0,Math.PI*2);
-    ctx.fill();
+/* ---------- drawing: bubble canvas ---------- */
+function drawBubble(){
+  bctx.clearRect(0, 0, W, H);
+  const bx = bubble.x, by = bubble.y, R = bubble.R;
+  const t = performance.now() / 1000;
+  const pulse = 0.5 + 0.5 * Math.sin(t * 3.0);
+
+  bctx.save();
+  // clip to circle
+  bctx.beginPath();
+  bctx.arc(bx, by, R, 0, Math.PI * 2);
+  bctx.closePath();
+  bctx.clip();
+
+  // lens background — slightly lifted, cool
+  const lg = bctx.createRadialGradient(bx, by - R * 0.2, R * 0.05, bx, by, R);
+  lg.addColorStop(0, 'rgba(255,255,255,0.92)');
+  lg.addColorStop(0.7, 'rgba(241,245,249,0.78)');
+  lg.addColorStop(1, 'rgba(214,223,231,0.7)');
+  bctx.fillStyle = lg;
+  bctx.fillRect(bx - R, by - R, R * 2, R * 2);
+
+  // magnified dust
+  const mag = bubble.mag;
+  for(const d of dust){
+    const dx = (d.x - bx) * mag + bx;
+    const dy = (d.y - by) * mag + by;
+    const ddx = dx - bx, ddy = dy - by;
+    if(ddx * ddx + ddy * ddy > R * R) continue;
+    const r = Math.max(0.4, d.r * mag * 0.92);
+    const flick = 0.82 + 0.18 * Math.sin(d.phase);
+    bctx.fillStyle = `rgba(120,131,145,${(d.a * flick * 0.95).toFixed(3)})`;
+    bctx.beginPath();
+    bctx.arc(dx, dy, r, 0, Math.PI * 2);
+    bctx.fill();
   }
-  ctx.globalAlpha = 1;
+
+  // magnified non-active pollutant markers that happen to be in view
+  for(const p of pollutants){
+    if(p === bubble.active) continue;
+    const dx = (p.x - bx) * mag + bx;
+    const dy = (p.y - by) * mag + by;
+    const ddx = dx - bx, ddy = dy - by;
+    if(ddx * ddx + ddy * ddy > R * R) continue;
+    const r = p.r * mag;
+    bctx.fillStyle = `rgba(110,121,135,0.85)`;
+    bctx.beginPath();
+    bctx.arc(dx, dy, r, 0, Math.PI * 2);
+    bctx.fill();
+  }
+
+  // active pollutant structure
+  if(bubble.active && bubble.activeStrength > 0.02){
+    bctx.globalAlpha = Math.min(1, bubble.activeStrength);
+    const p = bubble.active;
+    if(p.f && p.f.treatment === 'cloud' && p.f.atoms){
+      drawMolecule(p, bx, by, R);
+    } else if(p.f && p.f.treatment === 'halo' && p.f.specimen){
+      drawSpecimen(p, bx, by, R);
+    }
+    bctx.globalAlpha = 1;
+  }
+
+  // lens highlight (top-left)
+  const hg = bctx.createRadialGradient(bx - R * 0.35, by - R * 0.4, 0, bx - R * 0.2, by - R * 0.2, R * 0.95);
+  hg.addColorStop(0, 'rgba(255,255,255,0.32)');
+  hg.addColorStop(0.4, 'rgba(255,255,255,0.05)');
+  hg.addColorStop(1, 'rgba(255,255,255,0)');
+  bctx.fillStyle = hg;
+  bctx.fillRect(bx - R, by - R, R * 2, R * 2);
+
+  // bottom-right subtle vignette inside lens
+  const vg = bctx.createRadialGradient(bx + R * 0.3, by + R * 0.3, R * 0.2, bx + R * 0.3, by + R * 0.3, R);
+  vg.addColorStop(0, 'rgba(20,30,45,0)');
+  vg.addColorStop(1, 'rgba(20,30,45,0.08)');
+  bctx.fillStyle = vg;
+  bctx.fillRect(bx - R, by - R, R * 2, R * 2);
+
+  bctx.restore();
+
+  // outer soft halo
+  bctx.beginPath();
+  bctx.arc(bx, by, R + 1, 0, Math.PI * 2);
+  bctx.strokeStyle = `rgba(27,123,255,${(0.1 + 0.07 * pulse).toFixed(3)})`;
+  bctx.lineWidth = 9;
+  bctx.stroke();
+
+  // main flashing ring
+  bctx.beginPath();
+  bctx.arc(bx, by, R, 0, Math.PI * 2);
+  bctx.strokeStyle = `rgba(27,123,255,${(0.55 + 0.35 * pulse).toFixed(3)})`;
+  bctx.lineWidth = 1.7;
+  bctx.stroke();
+
+  // inner faint ring
+  bctx.beginPath();
+  bctx.arc(bx, by, R - 3.5, 0, Math.PI * 2);
+  bctx.strokeStyle = `rgba(27,123,255,${(0.16 + 0.12 * pulse).toFixed(3)})`;
+  bctx.lineWidth = 0.8;
+  bctx.stroke();
+
+  // crosshair
+  bctx.strokeStyle = `rgba(27,123,255,0.55)`;
+  bctx.lineWidth = 1;
+  bctx.beginPath();
+  bctx.moveTo(bx - R * 0.07, by); bctx.lineTo(bx + R * 0.07, by);
+  bctx.moveTo(bx, by - R * 0.07); bctx.lineTo(bx, by + R * 0.07);
+  bctx.stroke();
+
+  // tiny tick marks at cardinal points
+  bctx.strokeStyle = `rgba(27,123,255,${(0.4 + 0.2 * pulse).toFixed(3)})`;
+  bctx.lineWidth = 1.2;
+  const tickLen = 5;
+  for(let i = 0; i < 4; i++){
+    const a = i * Math.PI / 2;
+    const x1 = bx + Math.cos(a) * (R - tickLen);
+    const y1 = by + Math.sin(a) * (R - tickLen);
+    const x2 = bx + Math.cos(a) * R;
+    const y2 = by + Math.sin(a) * R;
+    bctx.beginPath();
+    bctx.moveTo(x1, y1); bctx.lineTo(x2, y2);
+    bctx.stroke();
+  }
 }
 
-// ---- Molecule drawing ----
-function drawMolecule(f, cx, cy, R){
-  const atoms = f.atoms;
-  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+/* ---------- molecule rendering ---------- */
+function drawMolecule(p, cx, cy, R){
+  const atoms = p.f.atoms;
+  if(!atoms || !atoms.length) return;
+
+  // bounds (skip H for sizing)
+  let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
   for(const a of atoms){
-    if(a.x<minX)minX=a.x; if(a.x>maxX)maxX=a.x;
-    if(a.y<minY)minY=a.y; if(a.y>maxY)maxY=a.y;
+    if(a.el === 'H') continue;
+    if(a.x < minx) minx = a.x;
+    if(a.x > maxx) maxx = a.x;
+    if(a.y < miny) miny = a.y;
+    if(a.y > maxy) maxy = a.y;
   }
-  const ext = Math.max(maxX-minX, maxY-minY, 0.8);
-  const scale = (R*0.58)/ext;
-  const proj = atoms.map(a=>({
-    x: cx + a.x*scale,
-    y: cy - a.y*scale,
-    el: a.el
-  }));
-  // bonds
-  ctx.strokeStyle='rgba(80,92,104,0.42)';
-  ctx.lineWidth=1.1;
-  for(let i=0;i<atoms.length;i++){
-    for(let j=i+1;j<atoms.length;j++){
-      const dx=atoms[i].x-atoms[j].x, dy=atoms[i].y-atoms[j].y, dz=(atoms[i].z||0)-(atoms[j].z||0);
-      const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-      if(d<1.85){
-        ctx.beginPath();
-        ctx.moveTo(proj[i].x,proj[i].y);
-        ctx.lineTo(proj[j].x,proj[j].y);
-        ctx.stroke();
+  if(!isFinite(minx)){ minx = 0; maxx = 1; miny = 0; maxy = 1; }
+  const span = Math.max(maxx - minx, maxy - miny, 0.5);
+  const target = R * 0.58;
+  const scale = target / span;
+  const ccx = (minx + maxx) / 2;
+  const ccy = (miny + maxy) / 2;
+
+  const proj = (a) => ({ x: cx + (a.x - ccx) * scale, y: cy + (a.y - ccy) * scale });
+
+  // bonds by distance
+  const bondThresh = span * 0.6;
+  bctx.lineWidth = 1.5;
+  bctx.strokeStyle = 'rgba(90,100,115,0.6)';
+  for(let i = 0; i < atoms.length; i++){
+    for(let j = i + 1; j < atoms.length; j++){
+      const dx = atoms[i].x - atoms[j].x;
+      const dy = atoms[i].y - atoms[j].y;
+      const d = Math.hypot(dx, dy);
+      if(d < bondThresh){
+        const p1 = proj(atoms[i]);
+        const p2 = proj(atoms[j]);
+        bctx.beginPath();
+        bctx.moveTo(p1.x, p1.y);
+        bctx.lineTo(p2.x, p2.y);
+        bctx.stroke();
       }
     }
   }
-  // charge halos (behind atoms)
-  for(const ci of f.chargeAtoms){
-    const p=proj[ci]; if(!p) continue;
-    const hr = R*0.30;
-    const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,hr);
-    grd.addColorStop(0,'rgba(239,83,100,0.55)');
-    grd.addColorStop(0.5,'rgba(239,83,100,0.22)');
-    grd.addColorStop(1,'rgba(239,83,100,0)');
-    ctx.fillStyle=grd;
-    ctx.beginPath(); ctx.arc(p.x,p.y,hr,0,Math.PI*2); ctx.fill();
+
+  // charge zone halos
+  const chargeSet = new Set(Array.isArray(p.f.chargeAtoms) ? p.f.chargeAtoms : []);
+  for(let i = 0; i < atoms.length; i++){
+    if(!chargeSet.has(i)) continue;
+    const pp = proj(atoms[i]);
+    const haloR = 24;
+    const rg = bctx.createRadialGradient(pp.x, pp.y, 0, pp.x, pp.y, haloR);
+    rg.addColorStop(0, 'rgba(239,83,100,0.6)');
+    rg.addColorStop(0.45, 'rgba(239,83,100,0.28)');
+    rg.addColorStop(1, 'rgba(239,83,100,0)');
+    bctx.fillStyle = rg;
+    bctx.beginPath();
+    bctx.arc(pp.x, pp.y, haloR, 0, Math.PI * 2);
+    bctx.fill();
   }
+
   // atoms
-  for(let i=0;i<proj.length;i++){
-    const p=proj[i];
-    const col = CPK[p.el] || '#888';
-    const ar = (p.el==='S'||p.el==='P')?4.6 : (p.el==='Cl')?4.2 : 3.3;
-    ctx.fillStyle=col;
-    ctx.beginPath(); ctx.arc(p.x,p.y,ar,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,0.32)';
-    ctx.beginPath(); ctx.arc(p.x-ar*0.3,p.y-ar*0.3,ar*0.42,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='rgba(17,24,31,0.22)';
-    ctx.lineWidth=0.6;
-    ctx.beginPath(); ctx.arc(p.x,p.y,ar,0,Math.PI*2); ctx.stroke();
+  for(let i = 0; i < atoms.length; i++){
+    const a = atoms[i];
+    if(a.el === 'H') continue;
+    const pp = proj(a);
+    const col = CPK[a.el] || '#7c858e';
+    const rad = (a.el === 'C') ? 7 : 8.5;
+    const gg = bctx.createRadialGradient(pp.x - 2.2, pp.y - 2.4, 0, pp.x, pp.y, rad);
+    gg.addColorStop(0, lighten(col, 0.4));
+    gg.addColorStop(1, col);
+    bctx.fillStyle = gg;
+    bctx.beginPath();
+    bctx.arc(pp.x, pp.y, rad, 0, Math.PI * 2);
+    bctx.fill();
+    bctx.strokeStyle = 'rgba(20,28,35,0.28)';
+    bctx.lineWidth = 0.8;
+    bctx.stroke();
+
+    // element label for non-C
+    if(a.el !== 'C'){
+      bctx.fillStyle = 'rgba(255,255,255,0.92)';
+      bctx.font = "600 9px 'Space Mono', monospace";
+      bctx.textAlign = 'center';
+      bctx.textBaseline = 'middle';
+      bctx.fillText(a.el, pp.x, pp.y + 0.5);
+    }
   }
-  // mono tag inside bubble
-  ctx.fillStyle='rgba(239,83,100,0.85)';
-  ctx.font='9px "Space Mono", monospace';
-  ctx.textAlign='center';
-  ctx.fillText('— CHARGE ZONE', cx, cy+R*0.80);
+
+  // tag
+  bctx.font = "10px 'Space Mono', monospace";
+  bctx.fillStyle = 'rgba(239,83,100,0.95)';
+  bctx.textAlign = 'center';
+  bctx.textBaseline = 'alphabetic';
+  bctx.fillText('− charge zone', cx, cy + R * 0.8);
 }
 
-// ---- Specimen drawing ----
-function drawSpecimen(f, cx, cy, R){
-  const sp = f.specimen;
-  const s = R*0.46;
-  // red surface glow
-  const grd = ctx.createRadialGradient(cx,cy,R*0.15, cx,cy,R*0.82);
-  grd.addColorStop(0,'rgba(239,83,100,0.04)');
-  grd.addColorStop(0.65,'rgba(239,83,100,0.14)');
-  grd.addColorStop(1,'rgba(239,83,100,0)');
-  ctx.fillStyle=grd;
-  ctx.beginPath(); ctx.arc(cx,cy,R*0.82,0,Math.PI*2); ctx.fill();
+/* ---------- specimen rendering ---------- */
+function drawSpecimen(p, cx, cy, R){
+  const sp = p.f.specimen;
+  const rad = R * 0.5;
 
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.lineCap='round';
+  bctx.save();
+  bctx.translate(cx, cy);
 
-  if(sp==='soot'){
-    for(let i=0;i<7;i++){
-      const a=i*0.9, r=s*0.32;
-      const x=Math.cos(a)*r, y=Math.sin(a)*r;
-      ctx.beginPath(); ctx.arc(x,y,s*0.2,0,Math.PI*2);
-      ctx.fillStyle='rgba(38,44,52,0.88)'; ctx.fill();
-      ctx.strokeStyle='rgba(239,83,100,0.45)'; ctx.lineWidth=1; ctx.stroke();
+  // red surface-charge rim glow
+  const rg = bctx.createRadialGradient(0, 0, rad * 0.55, 0, 0, rad * 1.18);
+  rg.addColorStop(0, 'rgba(239,83,100,0)');
+  rg.addColorStop(0.65, 'rgba(239,83,100,0.16)');
+  rg.addColorStop(1, 'rgba(239,83,100,0.42)');
+  bctx.fillStyle = rg;
+  bctx.beginPath();
+  bctx.arc(0, 0, rad * 1.18, 0, Math.PI * 2);
+  bctx.fill();
+
+  bctx.fillStyle = '#5d6b78';
+  bctx.strokeStyle = '#3a4651';
+  bctx.lineWidth = 1;
+
+  if(sp === 'virus'){
+    bctx.beginPath();
+    bctx.arc(0, 0, rad * 0.52, 0, Math.PI * 2);
+    bctx.fill();
+    const spikes = 14;
+    for(let i = 0; i < spikes; i++){
+      const a = (i / spikes) * Math.PI * 2;
+      const x1 = Math.cos(a) * rad * 0.52, y1 = Math.sin(a) * rad * 0.52;
+      const x2 = Math.cos(a) * rad * 0.95, y2 = Math.sin(a) * rad * 0.95;
+      bctx.beginPath();
+      bctx.moveTo(x1, y1); bctx.lineTo(x2, y2);
+      bctx.stroke();
+      bctx.beginPath();
+      bctx.arc(x2, y2, 2.4, 0, Math.PI * 2);
+      bctx.fill();
     }
-    ctx.beginPath(); ctx.arc(0,0,s*0.24,0,Math.PI*2);
-    ctx.fillStyle='rgba(38,44,52,0.92)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.55)'; ctx.stroke();
-  } else if(sp==='virus'){
-    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1.1;
-    for(let i=0;i<12;i++){
-      const a=i*Math.PI*2/12;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(a)*s*0.45, Math.sin(a)*s*0.45);
-      ctx.lineTo(Math.cos(a)*s*0.72, Math.sin(a)*s*0.72);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(Math.cos(a)*s*0.74, Math.sin(a)*s*0.74, s*0.07,0,Math.PI*2);
-      ctx.fillStyle='rgba(239,83,100,0.7)'; ctx.fill();
+  } else if(sp === 'soot'){
+    const blobs = 7;
+    for(let i = 0; i < blobs; i++){
+      const a = (i / blobs) * Math.PI * 2;
+      const d = rad * 0.38;
+      bctx.beginPath();
+      bctx.arc(Math.cos(a) * d, Math.sin(a) * d, rad * 0.32, 0, Math.PI * 2);
+      bctx.fill();
     }
-    ctx.beginPath(); ctx.arc(0,0,s*0.45,0,Math.PI*2);
-    ctx.fillStyle='rgba(82,92,104,0.85)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.55)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.beginPath(); ctx.arc(0,0,s*0.18,0,Math.PI*2);
-    ctx.fillStyle='rgba(60,70,82,0.7)'; ctx.fill();
-  } else if(sp==='spore'){
-    ctx.beginPath();
-    for(let i=0;i<=28;i++){
-      const a=i/28*Math.PI*2;
-      const r=s*0.5 + Math.sin(a*5)*s*0.07;
-      const x=Math.cos(a)*r, y=Math.sin(a)*r*0.78;
-      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    bctx.beginPath();
+    bctx.arc(0, 0, rad * 0.42, 0, Math.PI * 2);
+    bctx.fill();
+  } else if(sp === 'spore'){
+    bctx.beginPath();
+    const bumps = 14;
+    for(let i = 0; i <= bumps; i++){
+      const a = (i / bumps) * Math.PI * 2;
+      const rr = rad * 0.72 + Math.sin(a * 6) * rad * 0.07;
+      const x = Math.cos(a) * rr * 0.92, y = Math.sin(a) * rr * 0.68;
+      if(i === 0) bctx.moveTo(x, y); else bctx.lineTo(x, y);
     }
-    ctx.closePath();
-    ctx.fillStyle='rgba(92,102,114,0.82)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(0,0,s*0.18,s*0.12,0,0,Math.PI*2);
-    ctx.fillStyle='rgba(60,70,82,0.6)'; ctx.fill();
-  } else if(sp==='rod'){
-    const w=s*1.2, h=s*0.46;
-    ctx.beginPath();
-    if(ctx.roundRect){ ctx.roundRect(-w/2,-h/2,w,h,h/2); }
-    else { ctx.rect(-w/2,-h/2,w,h); }
-    ctx.fillStyle='rgba(82,92,104,0.85)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.strokeStyle='rgba(239,83,100,0.32)'; ctx.lineWidth=0.8;
-    ctx.beginPath(); ctx.moveTo(-w*0.35,0); ctx.lineTo(w*0.35,0); ctx.stroke();
-    ctx.fillStyle='rgba(239,83,100,0.5)';
-    for(let i=0;i<4;i++){
-      const x=-w*0.3 + i*w*0.2;
-      ctx.beginPath(); ctx.arc(x,0,s*0.04,0,Math.PI*2); ctx.fill();
+    bctx.closePath();
+    bctx.fill();
+  } else if(sp === 'rod'){
+    const w = rad * 1.55, h = rad * 0.58;
+    bctx.beginPath();
+    bctx.moveTo(-w / 2 + h / 2, -h / 2);
+    bctx.lineTo(w / 2 - h / 2, -h / 2);
+    bctx.arc(w / 2 - h / 2, 0, h / 2, -Math.PI / 2, Math.PI / 2);
+    bctx.lineTo(-w / 2 + h / 2, h / 2);
+    bctx.arc(-w / 2 + h / 2, 0, h / 2, Math.PI / 2, -Math.PI / 2);
+    bctx.closePath();
+    bctx.fill();
+  } else if(sp === 'pm' || sp === 'dust'){
+    bctx.beginPath();
+    const pts = 11;
+    for(let i = 0; i <= pts; i++){
+      const a = (i / pts) * Math.PI * 2;
+      const rr = rad * 0.6 + Math.sin(a * 3 + 1) * rad * 0.18 + Math.cos(a * 2) * rad * 0.1;
+      const x = Math.cos(a) * rr, y = Math.sin(a) * rr;
+      if(i === 0) bctx.moveTo(x, y); else bctx.lineTo(x, y);
     }
-  } else if(sp==='pm'){
-    ctx.beginPath();
-    for(let i=0;i<=18;i++){
-      const a=i/18*Math.PI*2;
-      const r=s*0.42 + Math.sin(a*3+1.2)*s*0.13 + Math.cos(a*5)*s*0.06;
-      const x=Math.cos(a)*r, y=Math.sin(a)*r;
-      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    bctx.closePath();
+    bctx.fill();
+  } else if(sp === 'pollen'){
+    bctx.beginPath();
+    bctx.arc(0, 0, rad * 0.48, 0, Math.PI * 2);
+    bctx.fill();
+    const spikes = 16;
+    for(let i = 0; i < spikes; i++){
+      const a = (i / spikes) * Math.PI * 2;
+      bctx.beginPath();
+      bctx.moveTo(Math.cos(a) * rad * 0.48, Math.sin(a) * rad * 0.48);
+      bctx.lineTo(Math.cos(a) * rad * 0.96, Math.sin(a) * rad * 0.96);
+      bctx.stroke();
+      bctx.beginPath();
+      bctx.arc(Math.cos(a) * rad * 0.96, Math.sin(a) * rad * 0.96, 1.8, 0, Math.PI * 2);
+      bctx.fill();
     }
-    ctx.closePath();
-    ctx.fillStyle='rgba(48,56,64,0.9)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.55)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.fillStyle='rgba(239,83,100,0.4)';
-    ctx.beginPath(); ctx.arc(s*0.1,-s*0.1,s*0.05,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(-s*0.15,s*0.08,s*0.04,0,Math.PI*2); ctx.fill();
-  } else if(sp==='pollen'){
-    ctx.strokeStyle='rgba(180,158,86,0.75)'; ctx.lineWidth=1.1;
-    for(let i=0;i<16;i++){
-      const a=i*Math.PI*2/16;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(a)*s*0.4, Math.sin(a)*s*0.4);
-      ctx.lineTo(Math.cos(a)*s*0.62, Math.sin(a)*s*0.62);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(Math.cos(a)*s*0.64, Math.sin(a)*s*0.64, s*0.055,0,Math.PI*2);
-      ctx.fillStyle='rgba(239,83,100,0.6)'; ctx.fill();
-    }
-    ctx.beginPath(); ctx.arc(0,0,s*0.4,0,Math.PI*2);
-    ctx.fillStyle='rgba(184,162,90,0.85)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.5)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.beginPath(); ctx.arc(0,0,s*0.16,0,Math.PI*2);
-    ctx.fillStyle='rgba(140,120,60,0.7)'; ctx.fill();
-  } else if(sp==='dust'){
-    ctx.beginPath();
-    for(let i=0;i<=22;i++){
-      const a=i/22*Math.PI*2;
-      const r=s*0.46 + Math.sin(a*4+0.5)*s*0.16 + Math.cos(a*7)*s*0.05;
-      const x=Math.cos(a)*r, y=Math.sin(a)*r*0.85;
-      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.closePath();
-    ctx.fillStyle='rgba(118,98,78,0.82)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.5)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.fillStyle='rgba(60,50,40,0.7)';
-    for(let i=0;i<5;i++){
-      const a=i*1.3, r=s*0.22;
-      ctx.beginPath();
-      ctx.arc(Math.cos(a)*r,Math.sin(a)*r,s*0.06,0,Math.PI*2); ctx.fill();
-    }
-  } else if(sp==='dander'){
-    ctx.beginPath();
-    ctx.moveTo(-s*0.5,-s*0.1);
-    ctx.quadraticCurveTo(-s*0.3,-s*0.42, s*0.1,-s*0.32);
-    ctx.quadraticCurveTo(s*0.52,-s*0.2, s*0.46,s*0.16);
-    ctx.quadraticCurveTo(s*0.2,s*0.42, -s*0.1,s*0.36);
-    ctx.quadraticCurveTo(-s*0.5,s*0.3, -s*0.5,-s*0.1);
-    ctx.closePath();
-    ctx.fillStyle='rgba(222,212,196,0.88)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.strokeStyle='rgba(180,168,150,0.5)'; ctx.lineWidth=0.6;
-    ctx.beginPath(); ctx.moveTo(-s*0.3,-s*0.05); ctx.quadraticCurveTo(0,s*0.05, s*0.3,-s*0.02); ctx.stroke();
-  } else if(sp==='microplastic'){
-    ctx.beginPath();
-    ctx.moveTo(-s*0.5,-s*0.3);
-    ctx.lineTo(s*0.2,-s*0.46);
-    ctx.lineTo(s*0.56,s*0.1);
-    ctx.lineTo(s*0.1,s*0.42);
-    ctx.lineTo(-s*0.4,s*0.26);
-    ctx.closePath();
-    ctx.fillStyle='rgba(138,150,162,0.82)'; ctx.fill();
-    ctx.strokeStyle='rgba(239,83,100,0.6)'; ctx.lineWidth=1; ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,0.32)'; ctx.lineWidth=0.7;
-    ctx.beginPath(); ctx.moveTo(-s*0.2,-s*0.1); ctx.lineTo(s*0.3,s*0.15); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(s*0.05,-s*0.3); ctx.lineTo(-s*0.1,s*0.2); ctx.stroke();
-  }
-  ctx.restore();
-
-  // mono tag
-  ctx.fillStyle='rgba(239,83,100,0.85)';
-  ctx.font='9px "Space Mono", monospace';
-  ctx.textAlign='center';
-  ctx.fillText('— SURFACE CHARGE', cx, cy+R*0.80);
-}
-
-// ---- Bubble composite ----
-function drawBubble(){
-  const cx=bubX, cy=bubY, R=bubR;
-  // outer soft glow
-  const og = ctx.createRadialGradient(cx,cy,R*0.85, cx,cy,R*1.45);
-  og.addColorStop(0,'rgba(27,123,255,0.10)');
-  og.addColorStop(1,'rgba(27,123,255,0)');
-  ctx.fillStyle=og;
-  ctx.beginPath(); ctx.arc(cx,cy,R*1.45,0,Math.PI*2); ctx.fill();
-
-  // clip + content
-  ctx.save();
-  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
-  // clarify background
-  ctx.fillStyle='rgba(238,242,245,0.80)';
-  ctx.fillRect(cx-R,cy-R,R*2,R*2);
-  // calmer inner dust
-  drawInnerDust(cx,cy,R);
-  // structure
-  const f = FEATURES[bubIdx];
-  if(f.atoms) drawMolecule(f, cx, cy, R);
-  else drawSpecimen(f, cx, cy, R);
-  ctx.restore();
-
-  // ring
-  ctx.strokeStyle='rgba(27,123,255,0.92)';
-  ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
-  // inner hairline
-  ctx.strokeStyle='rgba(255,255,255,0.55)';
-  ctx.lineWidth=0.8;
-  ctx.beginPath(); ctx.arc(cx,cy,R-2.5,0,Math.PI*2); ctx.stroke();
-  // tick marks
-  ctx.strokeStyle='rgba(27,123,255,0.55)';
-  ctx.lineWidth=1;
-  for(let i=0;i<4;i++){
-    const a = i*Math.PI/2 + Math.PI/4;
-    const x1=cx+Math.cos(a)*(R+4), y1=cy+Math.sin(a)*(R+4);
-    const x2=cx+Math.cos(a)*(R+11), y2=cy+Math.sin(a)*(R+11);
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-  }
-  // crosshair center (subtle)
-  ctx.strokeStyle='rgba(27,123,255,0.18)';
-  ctx.lineWidth=0.6;
-  ctx.beginPath();
-  ctx.moveTo(cx-6,cy); ctx.lineTo(cx+6,cy);
-  ctx.moveTo(cx,cy-6); ctx.lineTo(cx,cy+6);
-  ctx.stroke();
-}
-
-// ---- Label (DOM) ----
-const blabel = document.getElementById('blabel');
-const blLabel = document.getElementById('bl-label');
-const blBadge = document.getElementById('bl-badge');
-const blTag = document.getElementById('bl-tag');
-const blScan = document.getElementById('bl-scan');
-const idxEl = document.getElementById('idx');
-
-function computeLabelPos(){
-  const margin = 24;
-  const lw = W<720 ? 180 : 240;
-  let lx = bubX + bubR + 22;
-  let ly = bubY;
-  // flip to left if no room on right
-  if(lx + lw > W - 16){
-    lx = bubX - bubR - 22 - lw;
-  }
-  // clamp vertical
-  if(ly < 110) ly = 110;
-  if(ly > H - 110) ly = H - 110;
-  // clamp horizontal
-  if(lx < 16) lx = 16;
-  if(lx + lw > W - 16) lx = W - 16 - lw;
-  return {x:lx, y:ly};
-}
-
-function updateLabel(){
-  const f = FEATURES[bubIdx];
-  blLabel.textContent = f.label;
-  if(f.badge){
-    blBadge.textContent = f.badge;
-    blBadge.style.display = 'inline-block';
+  } else if(sp === 'dander'){
+    bctx.beginPath();
+    bctx.moveTo(-rad * 0.72, -rad * 0.18);
+    bctx.quadraticCurveTo(-rad * 0.3, -rad * 0.72, rad * 0.32, -rad * 0.5);
+    bctx.quadraticCurveTo(rad * 0.82, -rad * 0.08, rad * 0.5, rad * 0.42);
+    bctx.quadraticCurveTo(0, rad * 0.72, -rad * 0.5, rad * 0.42);
+    bctx.quadraticCurveTo(-rad * 0.92, rad * 0.1, -rad * 0.72, -rad * 0.18);
+    bctx.closePath();
+    bctx.fill();
+  } else if(sp === 'microplastic'){
+    bctx.beginPath();
+    bctx.moveTo(-rad * 0.82, -rad * 0.3);
+    bctx.lineTo(rad * 0.2, -rad * 0.72);
+    bctx.lineTo(rad * 0.72, 0);
+    bctx.lineTo(rad * 0.3, rad * 0.72);
+    bctx.lineTo(-rad * 0.5, rad * 0.5);
+    bctx.closePath();
+    bctx.fill();
   } else {
-    blBadge.style.display = 'none';
+    bctx.beginPath();
+    bctx.arc(0, 0, rad * 0.6, 0, Math.PI * 2);
+    bctx.fill();
   }
-  blTag.textContent = f.atoms ? '— charge zone' : '— surface charge';
-  blScan.textContent = 'Scanning the air —';
-  idxEl.textContent = String(bubIdx+1).padStart(2,'0');
-  const p = computeLabelPos();
-  blabel.style.left = p.x+'px';
-  blabel.style.top = p.y+'px';
-  blabel.classList.add('show');
+
+  bctx.restore();
+
+  // tag
+  bctx.font = "10px 'Space Mono', monospace";
+  bctx.fillStyle = 'rgba(239,83,100,0.95)';
+  bctx.textAlign = 'center';
+  bctx.textBaseline = 'alphabetic';
+  bctx.fillText('− surface charge', cx, cy + R * 0.8);
 }
 
-// ---- Connector line from bubble to label ----
-function drawConnector(){
-  const p = computeLabelPos();
-  const ang = Math.atan2(p.y-bubY, p.x-bubX);
-  const sx = bubX + Math.cos(ang)*(bubR+2);
-  const sy = bubY + Math.sin(ang)*(bubR+2);
-  ctx.strokeStyle='rgba(27,123,255,0.35)';
-  ctx.lineWidth=0.8;
-  ctx.setLineDash([2,3]);
-  ctx.beginPath();
-  ctx.moveTo(sx,sy);
-  ctx.lineTo(p.x, p.y);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle='rgba(27,123,255,0.7)';
-  ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
+/* ---------- callout ---------- */
+const callout = document.getElementById('callout');
+const cLabel = document.getElementById('callout-label');
+const cBadge = document.getElementById('callout-badge');
+const cTag = document.getElementById('callout-tag');
+
+function updateCallout(){
+  if(bubble.active && bubble.activeStrength > 0.4){
+    const p = bubble.active;
+    cLabel.textContent = p.f.label || '';
+    cBadge.textContent = p.f.badge || '';
+    cBadge.style.display = p.f.badge ? 'block' : 'none';
+    cTag.textContent = (p.f.treatment === 'cloud') ? '− charge zone' : '− surface charge';
+
+    // position to the right of bubble, or left if near right edge
+    let ox = bubble.x + bubble.R + 26;
+    let oy = bubble.y;
+    const cw = 230;
+    if(ox + cw > W - 20){
+      ox = bubble.x - bubble.R - 26 - cw;
+    }
+    if(ox < 20){
+      ox = Math.min(W - cw - 20, Math.max(20, bubble.x + bubble.R + 26));
+    }
+    oy = Math.max(90, Math.min(H - 90, oy));
+    callout.style.left = ox + 'px';
+    callout.style.top = oy + 'px';
+    callout.classList.add('visible');
+  } else {
+    callout.classList.remove('visible');
+  }
 }
 
-// ---- Main loop ----
+/* ---------- main loop ---------- */
 let last = performance.now();
 function frame(now){
-  const dt = Math.min(0.05, (now-last)/1000);
+  const dt = Math.min(40, now - last);
   last = now;
 
-  ctx.clearRect(0,0,W,H);
-
-  // dust
-  ctx.fillStyle = '#ef5364';
+  // dust wander (Brownian)
   for(const d of dust){
-    if(!REDUCED){
-      d.vx += (Math.random()-0.5)*0.009;
-      d.vy += (Math.random()-0.5)*0.009;
-      d.vx *= 0.955; d.vy *= 0.955;
-      d.x += d.vx; d.y += d.vy;
-      d.ph += d.sp*16;
-    }
-    if(d.x<-2)d.x+=W; if(d.x>W+2)d.x-=W;
-    if(d.y<-2)d.y+=H; if(d.y>H+2)d.y-=H;
-
-    let a = d.a;
-    if(d.x>hRect.x && d.x<hRect.x+hRect.w && d.y>hRect.y && d.y<hRect.y+hRect.h){
-      a *= 0.16;
-    }
-    const flick = 0.82 + Math.sin(d.ph)*0.18;
-    ctx.globalAlpha = a*flick;
-    ctx.beginPath();
-    ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
-    ctx.fill();
+    d.vx += (Math.random() - 0.5) * 0.05;
+    d.vy += (Math.random() - 0.5) * 0.05;
+    d.vx *= 0.955;
+    d.vy *= 0.955;
+    d.x += d.vx;
+    d.y += d.vy;
+    if(d.x < -6) d.x = W + 6;
+    else if(d.x > W + 6) d.x = -6;
+    if(d.y < -6) d.y = H + 6;
+    else if(d.y > H + 6) d.y = -6;
+    d.phase += d.ps;
   }
-  ctx.globalAlpha = 1;
 
-  updateBubble(dt);
-  updateLabel();
-  drawConnector();
+  // mode switching
+  const idleTime = now - bubble.lastMove;
+  if((isTouch || reduced) && pollutants.length){
+    bubble.mode = 'tour';
+  } else if(idleTime > 2500 && pollutants.length){
+    bubble.mode = 'tour';
+  }
+
+  // tour logic
+  if(bubble.mode === 'tour' && pollutants.length){
+    const target = pollutants[bubble.tourIdx % pollutants.length];
+    const dist = Math.hypot(target.x - bubble.x, target.y - bubble.y);
+    if(bubble.tourState === 'moving'){
+      bubble.tx = target.x;
+      bubble.ty = target.y;
+      if(dist < 8){
+        bubble.tourState = 'dwelling';
+        bubble.tourTimer = now;
+      }
+    } else {
+      bubble.tx = target.x;
+      bubble.ty = target.y;
+      if(now - bubble.tourTimer > 2100){
+        bubble.tourIdx = (bubble.tourIdx + 1) % pollutants.length;
+        bubble.tourState = 'moving';
+      }
+    }
+  } else if(bubble.mode === 'cursor' && hasMoved){
+    bubble.tx = mouseX;
+    bubble.ty = mouseY;
+  }
+
+  // lerp
+  const k = 0.12;
+  bubble.x += (bubble.tx - bubble.x) * k;
+  bubble.y += (bubble.ty - bubble.y) * k;
+
+  // detect active pollutant
+  let active = null;
+  let bestDist = bubble.R * 0.85;
+  for(const p of pollutants){
+    const d = Math.hypot(p.x - bubble.x, p.y - bubble.y);
+    if(d < bestDist){
+      bestDist = d;
+      active = p;
+    }
+  }
+  bubble.active = active;
+  // strength: 0 at edge, 1 at center
+  const targetStrength = active
+    ? Math.max(0, Math.min(1, 1 - bestDist / (bubble.R * 0.85)))
+    : 0;
+  bubble.activeStrength += (targetStrength - bubble.activeStrength) * 0.18;
+
+  // render
+  drawDustLayer();
   drawBubble();
+  updateCallout();
 
   requestAnimationFrame(frame);
 }
 
-// ---- Boot ----
-resize();
-initBubble();
-window.addEventListener('resize', ()=>{
-  resize();
-  initBubble();
+/* ---------- init ---------- */
+mouseX = W * 0.5;
+mouseY = H * 0.65;
+bubble.x = W * 0.5;
+bubble.y = H * 0.65;
+bubble.tx = bubble.x;
+bubble.ty = bubble.y;
+bubble.lastMove = performance.now() - 5000; // begin auto-tour immediately
+
+requestAnimationFrame(frame);
+
+/* ---------- resize ---------- */
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  if(resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    resize();
+    setBubbleSize();
+    makeDust();
+    placePollutants();
+    // keep bubble in bounds
+    bubble.x = Math.min(W - 20, Math.max(20, bubble.x));
+    bubble.y = Math.min(H - 20, Math.max(20, bubble.y));
+    bubble.tx = bubble.x;
+    bubble.ty = bubble.y;
+  }, 120);
 });
-requestAnimationFrame((t)=>{ last = t; frame(t); });
 </script>
 </body>
 </html>
