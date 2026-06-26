@@ -83,6 +83,7 @@ SPECS.forEach(s=>{
   s.vid=v; s.vReady=false; v.addEventListener('loadeddata',()=>{s.vReady=true;});
 });
 const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
+const roomImg=new Image(); roomImg.src='assets/Background.png'; let roomReady=false; roomImg.onload=()=>roomReady=true;
 
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let dustB=[], purifier={x:0.76,y:0.42};
@@ -123,7 +124,7 @@ setSpec(PROBE!==null?+PROBE:0);
 
 function tick(){
   const t=now();
-  if(PROBE!==null){ bub.x=W*0.5; bub.y=H*0.46; bub.R+=(Math.min(W,H)*BUBBLE - bub.R)*0.2; draw(t); requestAnimationFrame(tick); return; }
+  if(PROBE!==null){ bub.x=W*0.40; bub.y=H*0.56; bub.R+=(Math.min(W,H)*BUBBLE - bub.R)*0.2; draw(t); requestAnimationFrame(tick); return; }
   if(mouseActive && t-lastMove<2500){
     // cursor mode: bubble follows pointer; advance specimen as you sweep to new air
     bub.x+=(bub.tx-bub.x)*.14; bub.y+=(bub.ty-bub.y)*.14;
@@ -158,37 +159,74 @@ function draw(t){
     }
   }
 
-  // ---- magnifier bubble ----
+  // ====== LIQUID GLASS LOUPE ======
   const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
-  // soft outer shadow / lens
+  const LX=-0.55, LY=-0.62, la=Math.atan2(LY,LX);   // light from upper-left (matches the room window)
+  // 1) soft grounded contact shadow
   ctx.save();
-  ctx.beginPath(); ctx.arc(x,y,R,0,6.2832);
-  ctx.shadowColor='rgba(40,34,28,.28)'; ctx.shadowBlur=34; ctx.shadowOffsetY=14;
-  ctx.fillStyle='rgba(236,231,225,0.92)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x, y+R*0.10, R*0.98, 0, 6.2832);
+  ctx.shadowColor='rgba(38,32,26,0.34)'; ctx.shadowBlur=R*0.34; ctx.shadowOffsetY=R*0.12;
+  ctx.fillStyle='rgba(231,226,220,0.55)'; ctx.fill();
   ctx.restore();
-  // clip to lens, draw the specimen render (its own warm bg blends with the room)
+  // 2) glass body — clarified base + specimen + EDGE REFRACTION ring
   ctx.save();
-  ctx.beginPath(); ctx.arc(x,y,R-1,0,6.2832); ctx.clip();
-  ctx.fillStyle='rgba(238,233,227,0.96)'; ctx.fillRect(x-R,y-R,2*R,2*R);
-  {  // the seamless-looped Seedance clip provides the rotation; gentle float
-    const bob=Math.sin(t*0.0017)*R*0.03, sway=Math.cos(t*0.0011)*R*0.012;
-    const d=R*2.0*(s.scale||1);
-    ctx.save(); ctx.translate(x+sway, y+bob);
-    if(s.vReady && s.vid.readyState>=2){ ctx.drawImage(s.vid, -d/2,-d/2,d,d); }
-    else if(s.ready){ ctx.drawImage(s.img, -d/2,-d/2,d,d); }
-    ctx.restore();
+  ctx.beginPath(); ctx.arc(x,y,R,0,6.2832); ctx.clip();
+  // REFRACTED ROOM behind the glass — magnified + barrel-bent at the rim (the real lens tell)
+  if(roomReady && roomImg.naturalWidth){
+    const iw=roomImg.naturalWidth, ih=roomImg.naturalHeight, csc=Math.max(W/iw,H/ih);
+    const ox=(W-iw*csc)/2, oy=(H-ih*csc)/2, ix=(x-ox)/csc, iy=(y-oy)/csc;
+    const drawRoom=(m)=>{ const sc=csc*m; ctx.drawImage(roomImg, x-ix*sc, y-iy*sc, iw*sc, ih*sc); };
+    drawRoom(1.14);                                   // gentle lens zoom of the room
+    for(let bi=0; bi<7; bi++){                         // barrel ramp concentrated in the outer ring
+      const r0=R*(0.60+0.40*bi/7), r1=R*(0.60+0.40*(bi+1)/7), m=1.14*(1 + 0.85*Math.pow(bi/6,1.7));
+      ctx.save(); ctx.beginPath(); ctx.arc(x,y,r1,0,6.2832); ctx.arc(x,y,r0,0,6.2832,true); ctx.clip(); drawRoom(m); ctx.restore();
+    }
+  } else { ctx.fillStyle='#efeae3'; ctx.fillRect(x-R,y-R,2*R,2*R); }
+  const bob=Math.sin(t*0.0017)*R*0.025, sway=Math.cos(t*0.0011)*R*0.012, cx=x+sway, cy=y+bob;
+  const d=R*1.98*(s.scale||1);
+  const drawSpec=(dd)=>{ if(s.vReady&&s.vid.readyState>=2) ctx.drawImage(s.vid, cx-dd/2,cy-dd/2,dd,dd); else if(s.ready) ctx.drawImage(s.img, cx-dd/2,cy-dd/2,dd,dd); };
+  drawSpec(d);                                        // specimen fills the lens (over the refracted room)
+  for(let bi=0; bi<6; bi++){                          // BARREL on the specimen: ⊖ symbols + edges curve at the rim (visible blue-on-cream refraction)
+    const r0=R*(0.66+0.34*bi/6), r1=R*(0.66+0.34*(bi+1)/6), m=1+0.55*Math.pow(bi/5,1.6);
+    ctx.save(); ctx.beginPath(); ctx.arc(x,y,r1,0,6.2832); ctx.arc(x,y,r0,0,6.2832,true); ctx.clip(); drawSpec(d*m); ctx.restore();
   }
   ctx.restore();
-  // lens rim (charge-blue) + inner highlight
-  ctx.lineWidth=2; ctx.strokeStyle='rgba(27,123,255,.85)'; ctx.beginPath(); ctx.arc(x,y,R,0,6.2832); ctx.stroke();
-  ctx.lineWidth=1; ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(x,y,R-3,0,6.2832); ctx.stroke();
-  // crosshair ticks (instrument)
-  ctx.strokeStyle='rgba(27,123,255,.55)'; ctx.lineWidth=1.4;
-  for(const ang of [0,Math.PI/2,Math.PI,3*Math.PI/2]){ctx.beginPath(); ctx.moveTo(x+Math.cos(ang)*(R-7),y+Math.sin(ang)*(R-7)); ctx.lineTo(x+Math.cos(ang)*(R-1),y+Math.sin(ang)*(R-1)); ctx.stroke();}
-  // tethered label
-  const lx=x+R*0.86, ly=y-R*0.86;
-  ctx.strokeStyle='rgba(27,123,255,.55)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+R*0.7,y-R*0.7); ctx.lineTo(lx,ly); ctx.stroke();
-  ctx.font='700 12px "Space Mono",monospace'; ctx.fillStyle='#2a2622'; ctx.textBaseline='middle';
+  // 3) glass tint + transmission brighten + strong inner depth shadow (volumetric thickness)
+  ctx.save(); ctx.beginPath(); ctx.arc(x,y,R,0,6.2832); ctx.clip();
+  ctx.fillStyle='rgba(230,239,250,0.10)'; ctx.fillRect(x-R,y-R,2*R,2*R);                  // faint cool glass tint
+  let ish=ctx.createRadialGradient(x-LX*R*0.30, y-LY*R*0.30, R*0.40, x,y,R*1.02);
+  ish.addColorStop(0,'rgba(20,16,12,0)'); ish.addColorStop(0.7,'rgba(20,16,12,0.04)'); ish.addColorStop(0.92,'rgba(20,16,12,0.17)'); ish.addColorStop(1,'rgba(20,16,12,0.36)');
+  ctx.fillStyle=ish; ctx.fillRect(x-R,y-R,2*R,2*R);
+  // big specular bloom (upper-left) + bottom-edge transmission light (light wraps the lower rim)
+  const hx=x+LX*R*0.5, hy=y+LY*R*0.5;
+  let sp=ctx.createRadialGradient(hx,hy,0, hx,hy,R*1.0);
+  sp.addColorStop(0,'rgba(255,255,255,0.72)'); sp.addColorStop(0.28,'rgba(255,255,255,0.17)'); sp.addColorStop(0.62,'rgba(255,255,255,0)');
+  ctx.fillStyle=sp; ctx.fillRect(x-R,y-R,2*R,2*R);
+  let bl=ctx.createRadialGradient(x-LX*R*0.66,y-LY*R*0.66,R*0.42, x-LX*R*0.66,y-LY*R*0.66,R*0.72);
+  bl.addColorStop(0,'rgba(255,255,255,0)'); bl.addColorStop(1,'rgba(255,255,255,0.18)');
+  ctx.fillStyle=bl; ctx.fillRect(x-R,y-R,2*R,2*R);
+  ctx.restore();
+  // 4) crisp specular glints (primary upper-left + secondary lower-right)
+  ctx.lineCap='round';
+  ctx.lineWidth=R*0.055; ctx.strokeStyle='rgba(255,255,255,0.82)'; ctx.beginPath(); ctx.arc(x,y,R*0.9, la-0.5, la+0.2); ctx.stroke();
+  ctx.lineWidth=R*0.022; ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(x,y,R*0.85, la+Math.PI-0.2, la+Math.PI+0.2); ctx.stroke();
+  // 5) CHROMATIC DISPERSION at the rim — cool on the lit edge, warm on the shadow edge
+  ctx.lineWidth=2.6;
+  ctx.strokeStyle='rgba(96,162,255,0.52)'; ctx.beginPath(); ctx.arc(x,y,R-2.6, la-1.5, la+1.3); ctx.stroke();
+  ctx.strokeStyle='rgba(255,120,90,0.38)'; ctx.beginPath(); ctx.arc(x,y,R-2.6, la+1.8, la+4.6); ctx.stroke();
+  // 6) beveled glass RIM (thickness): dark outer lip + bright inner bevel (brightest on the light side)
+  ctx.lineWidth=3.2; ctx.strokeStyle='rgba(34,28,22,0.22)'; ctx.beginPath(); ctx.arc(x,y,R-1.5,0,6.2832); ctx.stroke();         // outer lip
+  ctx.lineWidth=3.2; ctx.strokeStyle='rgba(255,255,255,0.34)'; ctx.beginPath(); ctx.arc(x,y,R-5.4,0,6.2832); ctx.stroke();      // inner bevel ring
+  ctx.lineCap='round'; ctx.lineWidth=4.2; ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(x,y,R-5.4, la-1.0, la+0.7); ctx.stroke(); // bright bevel, light side
+  ctx.lineWidth=1.3; ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.arc(x,y,R-0.8,0,6.2832); ctx.stroke();       // crisp outer hairline
+  // 7) precision RETICLE — fine graticule ticks around the bezel
+  for(let i=0;i<72;i++){ const a=i/72*6.2832, major=(i%9===0), len=major?R*0.05:R*0.022;
+    ctx.lineWidth=major?1.1:0.6; ctx.strokeStyle='rgba(27,123,255,'+(major?0.34:0.20)+')';
+    ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*(R-3.5-len), y+Math.sin(a)*(R-3.5-len)); ctx.lineTo(x+Math.cos(a)*(R-3.5), y+Math.sin(a)*(R-3.5)); ctx.stroke(); }
+  // 8) tethered label
+  const lx=x+R*0.82, ly=y-R*0.82;
+  ctx.strokeStyle='rgba(27,123,255,0.5)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+R*0.64,y-R*0.64); ctx.lineTo(lx,ly); ctx.stroke();
+  ctx.font='700 12px "Space Mono",monospace'; ctx.fillStyle='#2a2622'; ctx.textBaseline='middle'; ctx.textAlign='left';
   ctx.fillText(s.name.toUpperCase(), lx+6, ly);
 }
 resize(); requestAnimationFrame(tick);
