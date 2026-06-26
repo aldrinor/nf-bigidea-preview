@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Engraved Specimens v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg1:#eef2f5; --bg2:#e7ecf1; --ink:#11181f; --muted:#5d6b78; --blue:#1B7BFF; --red:#ef5364; --line:rgba(17,24,31,0.10); }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);color:var(--ink);font-family:'Space Mono',monospace;-webkit-font-smoothing:antialiased;}
+  .wrap{padding:46px 60px 40px;}
+  .title{font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;}
+  .title em{font-style:italic;color:var(--muted);}
+  .rule{height:1px;background:var(--blue);margin:14px 0 6px;opacity:.85;}
+  .sub{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+  .plate{position:relative;margin-top:26px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,0.16);}
+  canvas{display:block;width:100%;}
+  .foot{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Specimen Plate — <em>Soft-Engraved</em></div>
+  <div class="rule"></div>
+  <div class="sub">Tapered ink contour · soft tonal volume · negative-charge contour in red</div>
+  <div class="plate"><canvas id="c"></canvas></div>
+  <div class="foot">CANVAS-2D · HAND-AUTHORED · INK #11181F · NEGATIVE CHARGE #EF5364</div>
+</div>
+<script>
+const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+const INK='#11181f', MUT='#5d6b78', RED='#ef5364';
+const LIGHT=norm(-0.55,-0.83);
+let W=0,H=0,DPR=1;
+function norm(x,y){const l=Math.hypot(x,y)||1;return [x/l,y/l];}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=cv.clientWidth; H=Math.round(W*0.34);
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  draw();
+}
+
+// soft tonal volume: a clean shadow gradient on the shadow side of a disc (NOT dots)
+function softShadeDisc(cx,cy,R,strength){
+  strength=strength||0.22;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.985,0,7); ctx.clip();
+  const lx=cx+LIGHT[0]*R*0.55, ly=cy+LIGHT[1]*R*0.55;
+  const sx=cx-LIGHT[0]*R*0.55, sy=cy-LIGHT[1]*R*0.55;
+  const g=ctx.createRadialGradient(lx,ly,R*0.1, sx,sy,R*1.7);
+  g.addColorStop(0,'rgba(17,24,31,0)');
+  g.addColorStop(0.6,'rgba(17,24,31,'+(strength*0.28).toFixed(3)+')');
+  g.addColorStop(1,'rgba(17,24,31,'+strength.toFixed(3)+')');
+  ctx.fillStyle=g; ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  // subtle highlight bloom on lit side
+  const hg=ctx.createRadialGradient(lx,ly,0, lx,ly,R*0.9);
+  hg.addColorStop(0,'rgba(255,255,255,0.5)'); hg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=hg; ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  ctx.restore();
+}
+
+// tapered closed contour: thicker on shadow side, thin on lit side
+function taperedContour(pts,base,contrast,color){
+  color=color||INK; ctx.strokeStyle=color; ctx.lineCap='round'; ctx.lineJoin='round';
+  const cx=pts.reduce((s,p)=>s+p.x,0)/pts.length, cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i], b=pts[(i+1)%pts.length];
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    const nrm=norm(mx-cx,my-cy);
+    const lit=nrm[0]*LIGHT[0]+nrm[1]*LIGHT[1];
+    ctx.lineWidth=Math.max(0.5,base*(1-contrast*lit));
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  }
+}
+function circlePts(cx,cy,R,n,jit,rng){const p=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2;const rr=R*(1+(jit?(rng()-0.5)*jit:0));p.push({x:cx+Math.cos(a)*rr,y:cy+Math.sin(a)*rr});}return p;}
+
+function chargeArc(cx,cy,R,a0,a1,lx,ly){
+  ctx.strokeStyle=RED; ctx.lineWidth=1.8; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(cx,cy,R*1.015,a0,a1); ctx.stroke();
+  const am=(a0+a1)/2, ax=cx+Math.cos(am)*R*1.04, ay=cy+Math.sin(am)*R*1.04;
+  ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(lx-3,ly); ctx.stroke();
+  ctx.fillStyle=RED; ctx.font='9px "Space Mono",monospace'; ctx.textBaseline='middle'; ctx.textAlign='left';
+  ctx.fillText('− charge', lx, ly);
+}
+function label(cx,y,name,desc){
+  ctx.textAlign='center';
+  ctx.fillStyle=INK; ctx.font='700 13px "Space Mono",monospace'; ctx.fillText(name.toUpperCase(),cx,y);
+  ctx.fillStyle=MUT; ctx.font='10px "Space Mono",monospace'; ctx.fillText(desc,cx,y+17);
+  ctx.textAlign='left';
+}
+
+function virus(cx,cy,R){
+  const rng=mulberry(11);
+  for(let i=0;i<16;i++){
+    const a=i/16*Math.PI*2+(rng()-0.5)*0.22, len=R*(0.24+rng()*0.26);
+    const x0=cx+Math.cos(a)*R,y0=cy+Math.sin(a)*R,x1=cx+Math.cos(a)*(R+len),y1=cy+Math.sin(a)*(R+len);
+    const lit=Math.cos(a)*LIGHT[0]+Math.sin(a)*LIGHT[1];
+    ctx.strokeStyle=INK; ctx.lineCap='round'; ctx.lineWidth=1.5*(1-0.45*lit);
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+    const hr=2.1+rng()*1.2;
+    ctx.fillStyle='#eef2f5'; ctx.beginPath(); ctx.arc(x1,y1,hr,0,7); ctx.fill();
+    ctx.lineWidth=Math.max(0.6,1.1*(1-0.4*lit)); ctx.beginPath(); ctx.arc(x1,y1,hr,0,7); ctx.stroke();
+  }
+  softShadeDisc(cx,cy,R,0.20);
+  taperedContour(circlePts(cx,cy,R,90,0.01,rng),2.0,0.78,INK);
+  ctx.strokeStyle='rgba(17,24,31,0.22)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(cx,cy,R*0.6,0,7); ctx.stroke();
+  chargeArc(cx,cy,R,-1.15,-0.2,cx+R*0.72,cy-R*1.06);
+  label(cx,cy+R+56,'Virus','corona · envelope + spike proteins');
+}
+
+function bacteria(cx,cy,L,r){
+  const rng=mulberry(22);
+  const pts=[],seg=24;
+  for(let i=0;i<=seg;i++){const a=-Math.PI/2+Math.PI*i/seg;pts.push({x:cx+L/2+Math.cos(a)*r,y:cy+Math.sin(a)*r});}
+  for(let i=0;i<=seg;i++){const a=Math.PI/2+Math.PI*i/seg;pts.push({x:cx-L/2+Math.cos(a)*r,y:cy+Math.sin(a)*r});}
+  // soft volume: clip capsule, gradient shadow on lower side
+  ctx.save(); ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath(); ctx.clip();
+  const g=ctx.createLinearGradient(0,cy-r,0,cy+r);
+  g.addColorStop(0,'rgba(255,255,255,0.35)'); g.addColorStop(0.5,'rgba(17,24,31,0)'); g.addColorStop(1,'rgba(17,24,31,0.16)');
+  ctx.fillStyle=g; ctx.fillRect(cx-L,cy-r,2*L,2*r);
+  ctx.restore();
+  taperedContour(pts,2.0,0.6,INK);
+  // one clean faint nucleoid curve
+  ctx.strokeStyle='rgba(17,24,31,0.22)'; ctx.lineWidth=1.0; ctx.beginPath();
+  for(let i=0;i<=40;i++){const t=i/40,x=cx-L*0.30+t*L*0.60,y=cy+Math.sin(t*Math.PI*3)*r*0.20;i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
+  // two ORGANIC flagella — varied amplitude + random-walk drift (NOT a perfect sine), fine tapering tips
+  const fr=mulberry(77);
+  for(let f=0;f<2;f++){
+    const baseY=cy+(f?r*0.42:-r*0.42), ph=f*1.9, len=L*0.98;
+    let px=cx+L/2+r, py=baseY, drift=0;
+    ctx.strokeStyle=INK; ctx.lineCap='round';
+    for(let i=1;i<=52;i++){
+      const t=i/52;
+      drift += (fr()-0.5)*r*0.06;                                   // random walk = organic wobble
+      const amp=r*(0.42+0.28*Math.sin(t*5.0+f*2))*(1-t*0.45);       // amplitude varies along length
+      const xx=cx+L/2+r+t*len;
+      const yy=baseY+Math.sin(t*Math.PI*2.7+ph)*amp + drift*(1-t*0.25);
+      ctx.lineWidth=Math.max(0.4,1.5*(1-t*0.8));
+      ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(xx,yy); ctx.stroke(); px=xx; py=yy;
+    }
+  }
+  chargeArc(cx-L*0.16,cy-r,r*0.18,-Math.PI,0,cx-L*0.16,cy-r-26);
+  label(cx,cy+r+58,'Bacteria','bacillus · membrane + polar flagella');
+}
+
+function pollen(cx,cy,R){
+  const rng=mulberry(33);
+  for(let i=0;i<19;i++){
+    const a=i/19*Math.PI*2+(rng()-0.5)*0.18, len=R*(0.28+rng()*0.24), hw=0.075+rng()*0.07;
+    const tip={x:cx+Math.cos(a)*(R+len),y:cy+Math.sin(a)*(R+len)};
+    const bL={x:cx+Math.cos(a-hw)*R,y:cy+Math.sin(a-hw)*R}, bR={x:cx+Math.cos(a+hw)*R,y:cy+Math.sin(a+hw)*R};
+    const lit=Math.cos(a)*LIGHT[0]+Math.sin(a)*LIGHT[1];
+    ctx.fillStyle=lit>0?'rgba(17,24,31,0.05)':'rgba(17,24,31,0.14)';
+    ctx.beginPath(); ctx.moveTo(bL.x,bL.y); ctx.lineTo(tip.x,tip.y); ctx.lineTo(bR.x,bR.y); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle=INK; ctx.lineWidth=Math.max(0.5,1.2*(1-0.42*lit)); ctx.lineJoin='round'; ctx.stroke();
+  }
+  softShadeDisc(cx,cy,R,0.20);
+  taperedContour(circlePts(cx,cy,R,84,0.008,rng),2.0,0.74,INK);
+  for(let i=0;i<5;i++){
+    const a=rng()*6.28, rr=rng()*R*0.5, x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr;
+    ctx.strokeStyle='rgba(17,24,31,0.42)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.stroke();
+    ctx.strokeStyle='rgba(17,24,31,0.7)'; ctx.lineWidth=1.0; ctx.beginPath(); ctx.arc(x,y,2.6,0.7,2.5); ctx.stroke();
+  }
+  chargeArc(cx,cy,R,2.5,3.2,cx-R*1.62,cy+R*0.7);
+  label(cx,cy+R+56,'Pollen','echinate grain · spines + pores');
+}
+
+function soot(cx,cy,S){
+  const rng=mulberry(44);
+  const balls=[{x:cx,y:cy,r:S*0.11}];
+  for(let i=0;i<200 && balls.length<34;i++){
+    const seed=balls[Math.floor(rng()*balls.length)];
+    const nr=S*(0.05+Math.pow(rng(),2.5)*0.12);                  // moderate size variation
+    const ang=rng()*Math.PI*2, d=seed.r+nr*(0.82+rng()*0.18);   // TOUCHING/fused → connected branched chain
+    const x=seed.x+Math.cos(ang)*d, y=seed.y+Math.sin(ang)*d;
+    if(Math.hypot(x-cx,y-cy)>S*0.95) continue;
+    let ok=true; for(const b of balls){ if(Math.hypot(x-b.x,y-b.y)<(b.r+nr)*0.78){ok=false;break;} }
+    if(!ok) continue; balls.push({x,y,r:nr});
+  }
+  for(const b of balls){ softShadeDisc(b.x,b.y,b.r,0.24); const r2=mulberry((b.x*7+b.y*13|0)+5); taperedContour(circlePts(b.x,b.y,b.r,Math.max(20,b.r|0),0.015,r2),1.3,0.6,INK); }
+  // charge on the right-most spherule, label clearly to the right of the whole cluster (no overlap)
+  let outer=balls[0]; for(const b of balls) if(b.x>outer.x) outer=b;
+  chargeArc(outer.x,outer.y,outer.r,-1.5,1.0,cx+S*1.15,cy-S*0.2);
+  label(cx,cy+S+42,'Wildfire soot','fractal aggregate · dendritic chain');
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const cols=4,cw=W/cols,cy=H*0.45;
+  ctx.strokeStyle='rgba(17,24,31,0.05)'; ctx.lineWidth=1;
+  for(let i=1;i<cols;i++){ctx.beginPath();ctx.moveTo(cw*i,24);ctx.lineTo(cw*i,H-24);ctx.stroke();}
+  const R=Math.min(cw*0.17,H*0.19);
+  virus(cw*0.5,cy,R);
+  bacteria(cw*1.5,cy,R*1.7,R*0.6);
+  pollen(cw*2.5,cy,R);
+  soot(cw*3.5,cy,R*1.05);
+}
+window.addEventListener('resize',resize);
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(draw);}
+resize(); setTimeout(draw,400);
+</script>
+</body>
+</html>
