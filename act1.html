@@ -11,7 +11,7 @@
   :root{
     --bg1:#eef2f5; --bg2:#e7ecf1;
     --ink:#11181f; --muted:#5d6b78;
-    --red:#ef5364; --cyan:#34e1ff;
+    --red:#ef5364; --cyan:#1B7BFF;
     --line:rgba(17,24,31,0.12);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -115,7 +115,7 @@
     color: var(--muted);
     display:flex; align-items:center; gap:10px;
   }
-  .corner .pulse{width:6px;height:6px;border-radius:50%;background:var(--cyan); box-shadow:0 0 8px rgba(52,225,255,0.6); animation: pulse 2.4s infinite ease-in-out;}
+  .corner .pulse{width:6px;height:6px;border-radius:50%;background:var(--cyan); box-shadow:0 0 8px rgba(27,123,255,0.6); animation: pulse 2.4s infinite ease-in-out;}
   @keyframes pulse{0%,100%{opacity:0.35; transform:scale(0.85);}50%{opacity:1; transform:scale(1);}}
   .corner-r{
     position:fixed; bottom: 32px; right: 64px; z-index:3;
@@ -587,8 +587,8 @@ function drawBubble(){
   const cx=bubX, cy=bubY, R=bubR;
   // outer soft glow
   const og = ctx.createRadialGradient(cx,cy,R*0.85, cx,cy,R*1.45);
-  og.addColorStop(0,'rgba(52,225,255,0.10)');
-  og.addColorStop(1,'rgba(52,225,255,0)');
+  og.addColorStop(0,'rgba(27,123,255,0.10)');
+  og.addColorStop(1,'rgba(27,123,255,0)');
   ctx.fillStyle=og;
   ctx.beginPath(); ctx.arc(cx,cy,R*1.45,0,Math.PI*2); ctx.fill();
 
@@ -607,7 +607,7 @@ function drawBubble(){
   ctx.restore();
 
   // ring
-  ctx.strokeStyle='rgba(52,225,255,0.92)';
+  ctx.strokeStyle='rgba(27,123,255,0.92)';
   ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
   // inner hairline
@@ -615,7 +615,7 @@ function drawBubble(){
   ctx.lineWidth=0.8;
   ctx.beginPath(); ctx.arc(cx,cy,R-2.5,0,Math.PI*2); ctx.stroke();
   // tick marks
-  ctx.strokeStyle='rgba(52,225,255,0.55)';
+  ctx.strokeStyle='rgba(27,123,255,0.55)';
   ctx.lineWidth=1;
   for(let i=0;i<4;i++){
     const a = i*Math.PI/2 + Math.PI/4;
@@ -624,7 +624,7 @@ function drawBubble(){
     ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   }
   // crosshair center (subtle)
-  ctx.strokeStyle='rgba(52,225,255,0.18)';
+  ctx.strokeStyle='rgba(27,123,255,0.18)';
   ctx.lineWidth=0.6;
   ctx.beginPath();
   ctx.moveTo(cx-6,cy); ctx.lineTo(cx+6,cy);
@@ -682,7 +682,7 @@ function drawConnector(){
   const ang = Math.atan2(p.y-bubY, p.x-bubX);
   const sx = bubX + Math.cos(ang)*(bubR+2);
   const sy = bubY + Math.sin(ang)*(bubR+2);
-  ctx.strokeStyle='rgba(52,225,255,0.35)';
+  ctx.strokeStyle='rgba(27,123,255,0.35)';
   ctx.lineWidth=0.8;
   ctx.setLineDash([2,3]);
   ctx.beginPath();
@@ -690,7 +690,7 @@ function drawConnector(){
   ctx.lineTo(p.x, p.y);
   ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle='rgba(52,225,255,0.7)';
+  ctx.fillStyle='rgba(27,123,255,0.7)';
   ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
 }
 
