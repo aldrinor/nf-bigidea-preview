@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Act 01 · The Field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-center:#eef2f5;
+    --bg-edge:#e6ebf0;
+    --ink:#11181f;
+    --muted:#5d6b78;
+    --cyan:#34e1ff;
+    --red:#f26270;
+    --line:rgba(17,24,31,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Space Grotesk',sans-serif;
+    color:var(--ink);
+    background:radial-gradient(ellipse 120% 90% at 50% 30%, var(--bg-center) 0%, var(--bg-edge) 100%);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .act{
+    position:relative;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:clamp(28px,5vw,72px) clamp(20px,5vw,96px) clamp(28px,4vw,56px);
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:clamp(28px,4vw,52px);
+  }
+  .eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 14px var(--cyan);
+  }
+  .eyebrow .sep{flex:0 0 28px;height:1px;background:rgba(93,107,120,0.28)}
+  .headline{
+    font-family:'Instrument Serif',serif;
+    font-weight:400;
+    font-size:clamp(40px,7.4vw,108px);
+    line-height:0.98;
+    letter-spacing:-0.012em;
+    max-width:15ch;
+    color:var(--ink);
+  }
+  .headline em{
+    font-style:italic;
+    color:var(--red);
+  }
+  .sub{
+    margin-top:clamp(20px,2.4vw,30px);
+    font-size:clamp(15px,1.15vw,18px);
+    line-height:1.55;
+    color:var(--muted);
+    max-width:48ch;
+    font-weight:400;
+  }
+  .stage{
+    position:relative;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    margin-top:clamp(32px,3.4vw,52px);
+    min-height:46vh;
+    border-top:1px solid var(--line);
+    padding-top:clamp(18px,2vw,26px);
+  }
+  .stage-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:14px;
+    flex:0 0 auto;
+  }
+  .stage-meta .right{display:flex;gap:22px}
+  .stage-meta b{color:var(--ink);font-weight:400}
+  .canvas-wrap{
+    position:relative;
+    flex:1;
+    min-height:300px;
+  }
+  canvas{
+    display:block;
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+  }
+  .callout{
+    position:absolute;
+    pointer-events:none;
+    transform:translate(-50%,-50%);
+    padding:11px 15px 13px;
+    background:rgba(255,255,255,0.94);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--line);
+    border-radius:11px;
+    box-shadow:0 22px 48px -22px rgba(17,24,31,0.28), 0 2px 8px -4px rgba(17,24,31,0.08);
+    min-width:168px;
+    opacity:0;
+    transition:opacity .4s ease, left .35s ease, top .35s ease;
+    z-index:5;
+  }
+  .callout.visible{opacity:1}
+  .callout.left::after{
+    content:"";
+    position:absolute;
+    left:-6px;top:50%;
+    width:10px;height:10px;
+    background:rgba(255,255,255,0.94);
+    border-left:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    transform:translateY(-50%) rotate(45deg);
+  }
+  .callout.right::after{
+    content:"";
+    position:absolute;
+    right:-6px;top:50%;
+    width:10px;height:10px;
+    background:rgba(255,255,255,0.94);
+    border-right:1px solid var(--line);
+    border-top:1px solid var(--line);
+    transform:translateY(-50%) rotate(45deg);
+  }
+  .callout .label{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:var(--ink);
+    letter-spacing:0.01em;
+    line-height:1.3;
+    font-weight:700;
+  }
+  .callout .sub-label{
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:3px;
+    letter-spacing:0.04em;
+  }
+  .callout .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:9px;
+    padding:3px 9px 3px 7px;
+    border-radius:999px;
+    background:rgba(242,98,112,0.10);
+    border:1px solid rgba(242,98,112,0.38);
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+    color:var(--red);
+    letter-spacing:0.04em;
+    font-weight:700;
+  }
+  .callout .badge .pip{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 7px var(--red);
+  }
+  .callout .neutral{
+    margin-top:9px;
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:var(--muted);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .footer-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:14px;
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+    flex:0 0 auto;
+  }
+  .footer-row .caption{max-width:50ch;line-height:1.5}
+  .progress{display:flex;align-items:center;gap:12px}
+  .progress .track{
+    width:130px;height:1px;background:rgba(17,24,31,0.14);position:relative;
+  }
+  .progress .fill{
+    position:absolute;left:0;top:-0.5px;height:2px;
+    background:var(--cyan);width:0;
+    transition:width .45s ease;
+    box-shadow:0 0 8px rgba(52,225,255,0.6);
+  }
+  @media (max-width:680px){
+    .stage-meta .right{display:none}
+    .footer-row{flex-direction:column;gap:14px;align-items:flex-start}
+    .progress .track{width:100px}
+    .headline{max-width:none}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001s!important;transition-duration:0.001s!important}
+  }
+</style>
+</head>
+<body>
+<section class="act" id="act1">
+  <div class="eyebrow">
+    <span class="dot"></span>
+    <span>Act 01 — The Field</span>
+    <span class="sep"></span>
+    <span>NanoFlashing / Big Idea</span>
+  </div>
+
+  <h1 class="headline">Most pollutants carry a <em>negative charge.</em></h1>
+  <p class="sub">Hundreds of them — drifting in the air you breathe and the water you drink.</p>
+
+  <div class="stage" id="stage">
+    <div class="stage-meta">
+      <span>Specimen field · 18 motes · drifting</span>
+      <div class="right">
+        <span>Lens <b id="lensIdx">01</b></span>
+        <span>Charge <b id="lensCharge">—</b></span>
+      </div>
+    </div>
+    <div class="canvas-wrap" id="wrap">
+      <canvas id="field"></canvas>
+      <div class="callout" id="callout">
+        <div class="label" id="cLabel"></div>
+        <div class="sub-label" id="cSub"></div>
+        <div id="cBadge"></div>
+      </div>
+    </div>
+    <div class="footer-row">
+      <span class="caption">Look closely — they're all negatively charged.</span>
+      <div class="progress">
+        <span id="progLabel">01 / 18</span>
+        <div class="track"><div class="fill" id="progFill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const POLLUTANTS = [
+    {label:"Wildfire smoke",        sub:"particulate · organic",   charge:null},
+    {label:"Virus",                 sub:"aerosol · biological",    charge:null},
+    {label:"Fungi",                 sub:"spore · biological",      charge:null},
+    {label:"Bacteria",              sub:"colony · biological",     charge:null},
+    {label:"PFAS",                  sub:"PFOS",                    charge:"−1"},
+    {label:"Nitrate",               sub:"NO₃⁻",                    charge:"−1"},
+    {label:"Dye",                   sub:"anionic",                 charge:"−1"},
+    {label:"Sulfate",               sub:"SO₄²⁻",                   charge:"−2"},
+    {label:"Antibiotic",            sub:"sulfamethoxazole",        charge:"−1"},
+    {label:"Herbicide",             sub:"2,4-D",                   charge:"−1"},
+    {label:"Hormone",               sub:"estrone-3-sulfate",       charge:"−1"},
+    {label:"PM2.5 / ultrafine",     sub:"particulate",             charge:null},
+    {label:"Pollen",                sub:"biological",              charge:null},
+    {label:"Dust & dust-mite",      sub:"particulate · biological",charge:null},
+    {label:"Pet dander",            sub:"biological",              charge:null},
+    {label:"Microplastics",         sub:"particulate",             charge:null},
+    {label:"Phosphate",             sub:"PO₄³⁻",                   charge:"−3"},
+    {label:"Fluoride",              sub:"F⁻",                      charge:"−1"},
+  ];
+
+  // Tour order: prefer negatively-charged (red) motes first so the lens
+  // lands on red specimens and matches the "negative charge" headline.
+  const chargedIdx = POLLUTANTS.map((p,i)=>i).filter(i=>POLLUTANTS[i].charge);
+  const neutralIdx = POLLUTANTS.map((p,i)=>i).filter(i=>!POLLUTANTS[i].charge);
+  const tourOrder = chargedIdx.concat(neutralIdx);
+
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('wrap');
+  const callout = document.getElementById('callout');
+  const cLabel = document.getElementById('cLabel');
+  const cSub = document.getElementById('cSub');
+  const cBadge = document.getElementById('cBadge');
+  const lensIdxEl = document.getElementById('lensIdx');
+  const lensChargeEl = document.getElementById('lensCharge');
+  const progLabel = document.getElementById('progLabel');
+  const progFill = document.getElementById('progFill');
+
+  let W=0,H=0,DPR=1;
+  let motes=[];
+  let lens={x:0,y:0,tx:0,ty:0,r:0,init:false};
+  let activeIdx = tourOrder[0];
+  let tourPos = 0;
+  let lastSwitch=0;
+  const DWELL = 2800;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    const rect = wrap.getBoundingClientRect();
+    W = Math.max(1, rect.width);
+    H = Math.max(1, rect.height);
+    canvas.width = Math.floor(W*DPR);
+    canvas.height = Math.floor(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    lens.r = Math.max(64, Math.min(Math.min(W,H)*0.18, 128));
+    layoutMotes();
+  }
+
+  function layoutMotes(){
+    const cols = W < 520 ? 3 : (W < 880 ? 4 : 6);
+    const rows = Math.ceil(POLLUTANTS.length/cols);
+    const padX = W*0.07;
+    const padY = H*0.10;
+    const cellW = (W - padX*2)/cols;
+    const cellH = (H - padY*2)/rows;
+    const prev = motes;
+    motes = POLLUTANTS.map((p,i)=>{
+      const col = i % cols;
+      const row = Math.floor(i/cols);
+      const baseX = padX + cellW*(col+0.5);
+      const baseY = padY + cellH*(row+0.5);
+      const ox = Math.sin(i*12.9+1.3)*cellW*0.18;
+      const oy = Math.cos(i*7.3+0.7)*cellH*0.18;
+      const old = prev[i] || {};
+      return {
+        ...p,
+        bx: baseX+ox, by: baseY+oy,
+        x: old.x ?? baseX+ox, y: old.y ?? baseY+oy,
+        phase: old.phase ?? (Math.random()*Math.PI*2),
+        size: 4.4 + ((i*7)%5)*0.6,
+        driftAmp: 5 + (i%4)*2.2,
+        driftSpd: 0.00035 + (i%5)*0.00012,
+      };
+    });
+    if(!lens.init && motes.length){
+      const m = motes[activeIdx];
+      lens.x = m.bx; lens.y = m.by;
+      lens.tx = m.bx; lens.ty = m.by;
+      lens.init = true;
+    }
+  }
+
+  function drawMote(x,y,size,charge,alpha,magnified){
+    const charged = !!charge;
+    if(charged){
+      const g = ctx.createRadialGradient(x,y,0,x,y,size*4.2);
+      g.addColorStop(0, `rgba(242,98,112,${0.30*alpha})`);
+      g.addColorStop(0.5, `rgba(242,98,112,${0.10*alpha})`);
+      g.addColorStop(1, 'rgba(242,98,112,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath();ctx.arc(x,y,size*4.2,0,Math.PI*2);ctx.fill();
+    } else {
+      const g = ctx.createRadialGradient(x,y,0,x,y,size*3.4);
+      g.addColorStop(0, `rgba(93,107,120,${0.20*alpha})`);
+      g.addColorStop(1, 'rgba(93,107,120,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath();ctx.arc(x,y,size*3.4,0,Math.PI*2);ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(x,y,size,0,Math.PI*2);
+    ctx.fillStyle = charged
+      ? `rgba(242,98,112,${0.88*alpha})`
+      : `rgba(93,107,120,${0.55*alpha})`;
+    ctx.fill();
+    if(magnified){
+      // emphasize the red charge cue on magnified charged motes
+      if(charged){
+        ctx.strokeStyle = 'rgba(242,98,112,0.5)';
+        ctx.lineWidth=1.1;
+        ctx.beginPath();ctx.arc(x,y,size*1.9,0,Math.PI*2);ctx.stroke();
+        ctx.strokeStyle = 'rgba(242,98,112,0.65)';
+        ctx.lineWidth=1;
+        ctx.beginPath();ctx.arc(x,y,size*0.55,0,Math.PI*2);ctx.stroke();
+      } else {
+        ctx.strokeStyle = 'rgba(93,107,120,0.45)';
+        ctx.lineWidth=0.9;
+        ctx.beginPath();ctx.arc(x,y,size*0.5,0,Math.PI*2);ctx.stroke();
+      }
+      // small satellite dot
+      ctx.beginPath();
+      ctx.arc(x+size*1.4, y-size*0.8, size*0.18, 0, Math.PI*2);
+      ctx.fillStyle = charged ? 'rgba(242,98,112,0.7)' : 'rgba(93,107,120,0.5)';
+      ctx.fill();
+    }
+  }
+
+  function drawLens(t){
+    const r = lens.r;
+    const x = lens.x, y = lens.y;
+
+    // horizontal tether toward the callout side
+    const side = (x < W*0.5) ? 1 : -1;
+    ctx.save();
+    ctx.strokeStyle='rgba(52,225,255,0.35)';
+    ctx.lineWidth=1;
+    ctx.setLineDash([2,3]);
+    ctx.beginPath();
+    ctx.moveTo(x + side*(r+2), y);
+    ctx.lineTo(x + side*(r+16), y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // magnified content inside lens
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x,y,r-2,0,Math.PI*2);
+    ctx.clip();
+
+    const bg = ctx.createRadialGradient(x,y,0,x,y,r);
+    bg.addColorStop(0,'rgba(255,255,255,0.92)');
+    bg.addColorStop(0.7,'rgba(238,242,245,0.7)');
+    bg.addColorStop(1,'rgba(230,235,240,0.5)');
+    ctx.fillStyle=bg;
+    ctx.fillRect(x-r,y-r,r*2,r*2);
+
+    const m = motes[activeIdx];
+    if(m){
+      const mag = 3.4;
+      drawMote(x, y, m.size*mag, m.charge, 1.0, true);
+      // faint orbiting ticks
+      ctx.strokeStyle='rgba(52,225,255,0.28)';
+      ctx.lineWidth=0.7;
+      for(let i=0;i<6;i++){
+        const a = t*0.0004 + i*Math.PI/3;
+        const r1 = r*0.52, r2 = r*0.68;
+        ctx.beginPath();
+        ctx.moveTo(x+Math.cos(a)*r1, y+Math.sin(a)*r1);
+        ctx.lineTo(x+Math.cos(a)*r2, y+Math.sin(a)*r2);
+        ctx.stroke();
+      }
+      // crosshair center
+      ctx.strokeStyle='rgba(52,225,255,0.5)';
+      ctx.lineWidth=0.8;
+      ctx.beginPath();
+      ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);
+      ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // lens ring
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(52,225,255,0.92)';
+    ctx.lineWidth=1.7;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x,y,r+6,0,Math.PI*2);
+    ctx.strokeStyle='rgba(52,225,255,0.16)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+    // crosshair ticks at ring
+    ctx.strokeStyle='rgba(52,225,255,0.6)';
+    ctx.lineWidth=1.1;
+    const tick=9;
+    [[0,-1],[0,1],[1,0],[-1,0]].forEach(d=>{
+      ctx.beginPath();
+      ctx.moveTo(x+d[0]*(r-tick), y+d[1]*(r-tick));
+      ctx.lineTo(x+d[0]*(r+2), y+d[1]*(r+2));
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function updateCallout(){
+    const m = motes[activeIdx];
+    if(!m) return;
+    cLabel.textContent = m.label;
+    cSub.textContent = m.sub || '';
+    if(m.charge){
+      cBadge.innerHTML = `<span class="badge"><span class="pip"></span>Charge ${m.charge}</span>`;
+    } else {
+      cBadge.innerHTML = `<div class="neutral">No ionic charge</div>`;
+    }
+
+    const cw = callout.offsetWidth || 180;
+    const ch = callout.offsetHeight || 70;
+    const margin = 12;
+    // snap to the side with more room — tidy, no overlap with the mote field
+    const placeRight = lens.x < W*0.5;
+    let cx, cy;
+    if(placeRight){
+      cx = lens.x + lens.r + 22 + cw/2;
+    } else {
+      cx = lens.x - lens.r - 22 - cw/2;
+    }
+    cx = Math.max(cw/2 + margin, Math.min(W - cw/2 - margin, cx));
+    cy = lens.y;
+    cy = Math.max(ch/2 + margin, Math.min(H - ch/2 - margin, cy));
+
+    callout.style.left = cx + 'px';
+    callout.style.top = cy + 'px';
+    callout.classList.toggle('left', placeRight);
+    callout.classList.toggle('right', !placeRight);
+    callout.classList.add('visible');
+
+    const tourNum = tourPos + 1;
+    lensIdxEl.textContent = String(tourNum).padStart(2,'0');
+    lensChargeEl.textContent = m.charge ? m.charge : '—';
+    progLabel.textContent = String(tourNum).padStart(2,'0')+' / 18';
+    progFill.style.width = (tourNum/18*100)+'%';
+  }
+
+  function advance(){
+    tourPos = (tourPos + 1) % tourOrder.length;
+    activeIdx = tourOrder[tourPos];
+    const m = motes[activeIdx];
+    if(m){ lens.tx=m.x; lens.ty=m.y; }
+    lastSwitch = performance.now();
+  }
+
+  let t0 = performance.now();
+  function frame(now){
+    const t = now - t0;
+    // drift motes
+    for(const m of motes){
+      m.phase += m.driftSpd*16;
+      m.x = m.bx + Math.sin(m.phase)*m.driftAmp + Math.cos(m.phase*0.7)*m.driftAmp*0.35;
+      m.y = m.by + Math.cos(m.phase*1.1)*m.driftAmp*0.7 + Math.sin(m.phase*0.5)*m.driftAmp*0.25;
+    }
+    // lens follows active mote's drifting position
+    const am = motes[activeIdx];
+    if(am){ lens.tx = am.x; lens.ty = am.y; }
+
+    if(reduceMotion){
+      lens.x = lens.tx; lens.y = lens.ty;
+    } else {
+      lens.x += (lens.tx - lens.x)*0.07;
+      lens.y += (lens.ty - lens.y)*0.07;
+    }
+
+    if(!reduceMotion && now - lastSwitch > DWELL){
+      advance();
+    }
+
+    ctx.clearRect(0,0,W,H);
+
+    // subtle field guide lines (very faint)
+    ctx.save();
+    ctx.strokeStyle='rgba(17,24,31,0.025)';
+    ctx.lineWidth=1;
+    const gridStep = 80;
+    for(let gx=0; gx<W; gx+=gridStep){
+      ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();
+    }
+    for(let gy=0; gy<H; gy+=gridStep){
+      ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();
+    }
+    ctx.restore();
+
+    // draw motes
+    for(let i=0;i<motes.length;i++){
+      const m = motes[i];
+      const isActive = i===activeIdx;
+      if(isActive){
+        // faint marker in field (the real one is magnified in lens)
+        ctx.beginPath();
+        ctx.arc(m.x,m.y,2,0,Math.PI*2);
+        ctx.fillStyle='rgba(93,107,120,0.22)';
+        ctx.fill();
+      } else {
+        drawMote(m.x,m.y,m.size,m.charge,0.85,false);
+      }
+    }
+
+    drawLens(t);
+    updateCallout();
+
+    requestAnimationFrame(frame);
+  }
+
+  // scroll-driven advance (mapped through the tour order)
+  function onScroll(){
+    const rect = wrap.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const p = (vh*0.55 - rect.top) / Math.max(rect.height,1);
+    const tp = Math.max(0, Math.min(tourOrder.length-1, Math.floor(p*tourOrder.length)));
+    if(tp !== tourPos){
+      tourPos = tp;
+      activeIdx = tourOrder[tourPos];
+      const m = motes[activeIdx];
+      if(m){ lens.tx=m.x; lens.ty=m.y; }
+      lastSwitch = performance.now();
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  function init(){
+    resize();
+    lastSwitch = performance.now();
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('resize', ()=>{
+    resize();
+    const m = motes[activeIdx];
+    if(m){ lens.x=m.x; lens.y=m.y; lens.tx=m.x; lens.ty=m.y; }
+  });
+
+  if(document.readyState === 'complete') init();
+  else window.addEventListener('load', init);
+})();
+</script>
+</body>
+</html>
