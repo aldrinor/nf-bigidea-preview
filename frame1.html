@@ -69,15 +69,19 @@ const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
 let W=0,H=0,DPR=1;
 // order: smoke → fungal spore → virus → bacteria → ultrafine → pfas → pollen
 const SPECS=[
-  {file:'Wildfire_Smoke_Particle.png', name:'Wildfire smoke'},
-  {file:'Fungal_Spore.png',            name:'Fungal spore'},
-  {file:'Virus.png',                   name:'Virus'},
-  {file:'Bacteria.png',                name:'Bacteria'},
-  {file:'Ultrafine_Particle.png',      name:'Ultrafine particle'},
-  {file:'PFAS.png',                    name:'PFAS'},
-  {file:'Pollen.png',                  name:'Pollen'},
+  {file:'Wildfire_Smoke_Particle.png', video:'Wildfire_Smoke_Particle.mp4', name:'Wildfire smoke'},
+  {file:'Fungal_Spore.png',            video:'Fungal_Spore.mp4',            name:'Fungal spore'},
+  {file:'Virus.png',                   video:'Virus.mp4',                   name:'Virus'},
+  {file:'Bacteria.png',                video:'Bacteria.mp4',                name:'Bacteria'},
+  {file:'Ultrafine_Particle.png',      video:'Ultrafine_Particle.mp4',      name:'Ultrafine particle'},
+  {file:'PFAS.png',                    video:'PFAS.mp4',                    name:'PFAS'},
+  {file:'Pollen.png',                  video:'Pollen.mp4',                  name:'Pollen'},
 ];
-SPECS.forEach(s=>{const im=new Image(); im.src='assets/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true;});
+SPECS.forEach(s=>{
+  const im=new Image(); im.src='assets/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
+  const v=document.createElement('video'); v.src='assets/'+s.video; v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
+  s.vid=v; s.vReady=false; v.addEventListener('loadeddata',()=>{s.vReady=true;});
+});
 const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
 
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -108,7 +112,11 @@ function pickAutoPoint(){ // a point in the room "air" (upper-center band), harm
 }
 function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
 
-function setSpec(i){specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length; rName.textContent=SPECS[specIndex].name; rCount.textContent=String(specIndex+1).padStart(2,'0')+' / 07';}
+function setSpec(i){
+  specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
+  SPECS.forEach((s,k)=>{ if(s.vid){ if(k===specIndex){ s.vid.play().catch(()=>{}); } else { try{s.vid.pause();}catch(e){} } } });
+  rName.textContent=SPECS[specIndex].name; rCount.textContent=String(specIndex+1).padStart(2,'0')+' / 07';
+}
 setSpec(0);
 
 function tick(){
@@ -161,9 +169,11 @@ function draw(t){
   ctx.save();
   ctx.beginPath(); ctx.arc(x,y,R-1,0,6.2832); ctx.clip();
   ctx.fillStyle='rgba(238,233,227,0.96)'; ctx.fillRect(x-R,y-R,2*R,2*R);
-  if(s.ready){  // gentle procedural life: float + breathe (NO 2D rotation — would expose flatness)
-    const bob=Math.sin(t*0.0017)*R*0.035, sway=Math.cos(t*0.0011)*R*0.015, breathe=1+Math.sin(t*0.0012)*0.02;
-    const d=R*2.16*breathe; ctx.drawImage(s.img, x-d/2+sway, y-d/2+bob, d, d);
+  {  // the Seedance loop provides the rotation; a tiny float keeps it "suspended"
+    const bob=Math.sin(t*0.0017)*R*0.03, sway=Math.cos(t*0.0011)*R*0.012;
+    const d=R*2.16;
+    if(s.vReady && s.vid.readyState>=2){ ctx.drawImage(s.vid, x-d/2+sway, y-d/2+bob, d, d); }
+    else if(s.ready){ ctx.drawImage(s.img, x-d/2+sway, y-d/2+bob, d, d); }
   }
   // faint magnified dust inside, for life
   ctx.globalAlpha=.5; for(let i=0;i<10;i++){const a=t*0.0004+i; const mx=x+Math.cos(a*1.7+i)*R*0.7, my=y+Math.sin(a*1.3+i)*R*0.7; ctx.fillStyle='rgba(74,66,58,.18)'; ctx.beginPath(); ctx.arc(mx,my,1.3,0,6.28); ctx.fill();}
