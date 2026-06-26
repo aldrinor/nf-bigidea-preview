@@ -306,6 +306,7 @@
 
   let W=0,H=0,DPR=1;
   let motes=[];
+  let dust=[];            // dense cloud of tiny atmospheric dots
   let lens={x:0,y:0,tx:0,ty:0,r:0,init:false};
   let activeIdx = tourOrder[0];
   let tourPos = 0;
@@ -322,6 +323,7 @@
     ctx.setTransform(DPR,0,0,DPR,0,0);
     lens.r = Math.max(64, Math.min(Math.min(W,H)*0.18, 128));
     layoutMotes();
+    layoutDust();
   }
 
   function layoutMotes(){
@@ -355,6 +357,38 @@
       lens.x = m.bx; lens.y = m.by;
       lens.tx = m.bx; lens.ty = m.by;
       lens.init = true;
+    }
+  }
+
+  // Dense dust cloud: many tiny dots drifting in gentle Brownian motion.
+  // Aim ~280-360 on desktop, fewer on mobile for perf.
+  function layoutDust(){
+    const area = W*H;
+    const isMobile = W < 680;
+    const density = isMobile ? 0.0013 : 0.0021; // dots per px² (dense dust cloud, Intercept-like)
+    let count = Math.round(area * density);
+    count = Math.max(240, Math.min(isMobile?340:820, count));
+    const prev = dust;
+    dust = new Array(count);
+    for(let i=0;i<count;i++){
+      const old = prev[i];
+      // weight distribution slightly toward lower/right bed region
+      const x = old ? old.x : (Math.random()*W);
+      const y = old ? old.y : (Math.random()*H);
+      dust[i] = {
+        x, y,
+        // slow continuous wander velocity
+        vx: old ? old.vx : (Math.random()-0.5)*0.12,
+        vy: old ? old.vy : (Math.random()-0.5)*0.12,
+        // tiny dust radius
+        r: 1.0 + Math.random()*1.8,
+        // visible red charge tint; a few brighter (dense dust must READ on light ground)
+        a: 0.30 + Math.random()*0.38 + (Math.random()<0.12 ? 0.25 : 0),
+        charged: Math.random() < 0.62,  // most carry the faint red cue
+        phase: Math.random()*Math.PI*2,
+        spd: 0.0004 + Math.random()*0.0009,
+        amp: 0.6 + Math.random()*1.4,
+      };
     }
   }
 
@@ -532,12 +566,36 @@
   let t0 = performance.now();
   function frame(now){
     const t = now - t0;
+    const dt = 16; // approx frame dt for stable wander
+
     // drift motes
     for(const m of motes){
       m.phase += m.driftSpd*16;
       m.x = m.bx + Math.sin(m.phase)*m.driftAmp + Math.cos(m.phase*0.7)*m.driftAmp*0.35;
       m.y = m.by + Math.cos(m.phase*1.1)*m.driftAmp*0.7 + Math.sin(m.phase*0.5)*m.driftAmp*0.25;
     }
+
+    // drift dust: gentle Brownian wander + slow organic dispersal
+    if(!reduceMotion){
+      for(const d of dust){
+        // tiny random acceleration (Brownian)
+        d.vx += (Math.random()-0.5)*0.012;
+        d.vy += (Math.random()-0.5)*0.012;
+        // damping toward calm
+        d.vx *= 0.985;
+        d.vy *= 0.985;
+        // slow sinusoidal organic drift
+        d.phase += d.spd*dt;
+        d.x += d.vx + Math.cos(d.phase)*d.amp*0.02;
+        d.y += d.vy + Math.sin(d.phase*0.8)*d.amp*0.02;
+        // wrap softly across the field
+        if(d.x < -4) d.x = W+4;
+        else if(d.x > W+4) d.x = -4;
+        if(d.y < -4) d.y = H+4;
+        else if(d.y > H+4) d.y = -4;
+      }
+    }
+
     // lens follows active mote's drifting position
     const am = motes[activeIdx];
     if(am){ lens.tx = am.x; lens.ty = am.y; }
@@ -568,7 +626,20 @@
     }
     ctx.restore();
 
-    // draw motes
+    // draw dense dust cloud (the air full of pollutant particles)
+    for(let i=0;i<dust.length;i++){
+      const d = dust[i];
+      if(d.charged){
+        ctx.fillStyle = `rgba(242,98,112,${d.a})`;
+      } else {
+        ctx.fillStyle = `rgba(78,92,106,${d.a*0.92})`;
+      }
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // draw motes (the 18 named specimens sit on top of the dust bed)
     for(let i=0;i<motes.length;i++){
       const m = motes[i];
       const isActive = i===activeIdx;
