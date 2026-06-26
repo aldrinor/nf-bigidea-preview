@@ -26,7 +26,7 @@
 <div class="wrap">
   <div class="title">Specimen Set — <em>Soft-Engraved</em></div>
   <div class="rule"></div>
-  <div class="sub">Tapered ink contour · soft tonal volume · negative-charge contour in red</div>
+  <div class="sub">Soft-engraved ink · each particle wrapped in a red aura = its net negative surface charge</div>
   <div class="plate"><canvas id="c"></canvas></div>
   <div class="foot">CANVAS-2D · HAND-AUTHORED · INK #11181F · NEGATIVE CHARGE #EF5364 · BLUE #1B7BFF</div>
 </div>
@@ -62,11 +62,23 @@ function taperedContour(pts,base,contrast,color){
   for(let i=0;i<pts.length;i++){const a=pts[i], b=pts[(i+1)%pts.length]; const mx=(a.x+b.x)/2,my=(a.y+b.y)/2; const nrm=norm(mx-cx,my-cy); const lit=nrm[0]*LIGHT[0]+nrm[1]*LIGHT[1]; ctx.lineWidth=Math.max(0.5,base*(1-contrast*lit)); ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();}
 }
 function circlePts(cx,cy,R,n,jit,rng){const p=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2;const rr=R*(1+(jit?(rng()-0.5)*jit:0));p.push({x:cx+Math.cos(a)*rr,y:cy+Math.sin(a)*rr});}return p;}
-function chargeArc(cx,cy,R,a0,a1,lx,ly){
-  ctx.strokeStyle=RED; ctx.lineWidth=1.8; ctx.lineCap='round'; ctx.beginPath(); ctx.arc(cx,cy,R*1.015,a0,a1); ctx.stroke();
-  const am=(a0+a1)/2, ax=cx+Math.cos(am)*R*1.04, ay=cy+Math.sin(am)*R*1.04;
-  ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(lx-3,ly); ctx.stroke();
-  ctx.fillStyle=RED; ctx.font='9px "Space Mono",monospace'; ctx.textBaseline='middle'; ctx.textAlign='left'; ctx.fillText('− charge', lx, ly);
+// net negative SURFACE charge = wraps the WHOLE particle. Soft red aura around the entire perimeter.
+function chargeHalo(cx,cy,oR){
+  const g=ctx.createRadialGradient(cx,cy,oR*0.74, cx,cy,oR*1.16);
+  g.addColorStop(0,'rgba(239,83,100,0)');
+  g.addColorStop(0.52,'rgba(239,83,100,0.22)');
+  g.addColorStop(1,'rgba(239,83,100,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,oR*1.16,0,7); ctx.fill();
+}
+// capsule version (bacteria): red glow following the whole membrane outline
+function chargeCapsule(cx,cy,L,r){
+  for(let pass=0;pass<2;pass++){
+    ctx.strokeStyle='rgba(239,83,100,'+(pass?0.10:0.24)+')'; ctx.lineWidth=pass?8:3.2; ctx.lineCap='round'; ctx.lineJoin='round';
+    const R=r+5, seg=24; ctx.beginPath();
+    for(let i=0;i<=seg;i++){const a=-Math.PI/2+Math.PI*i/seg;const x=cx+L/2+Math.cos(a)*R,y=cy+Math.sin(a)*R;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    for(let i=0;i<=seg;i++){const a=Math.PI/2+Math.PI*i/seg;const x=cx-L/2+Math.cos(a)*R,y=cy+Math.sin(a)*R;ctx.lineTo(x,y);}
+    ctx.closePath(); ctx.stroke();
+  }
 }
 function label(cx,y,name,desc){
   ctx.textAlign='center';
@@ -84,7 +96,7 @@ function virus(cx,cy,R,ly){
     const hr=2.0+rng()*1.2; ctx.fillStyle='#eef2f5'; ctx.beginPath(); ctx.arc(x1,y1,hr,0,7); ctx.fill(); ctx.lineWidth=Math.max(0.6,1.1*(1-0.4*lit)); ctx.beginPath(); ctx.arc(x1,y1,hr,0,7); ctx.stroke();}
   softShadeDisc(cx,cy,R,0.20); taperedContour(circlePts(cx,cy,R,90,0.01,rng),2.0,0.78,INK);
   ctx.strokeStyle='rgba(17,24,31,0.22)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(cx,cy,R*0.6,0,7); ctx.stroke();
-  chargeArc(cx,cy,R,-1.15,-0.2,cx+R*0.72,cy-R*1.06);
+  chargeHalo(cx,cy,R*1.5);
   label(cx,ly,'Virus','corona · envelope + spikes');
 }
 function bacteria(cx,cy,R,ly){
@@ -96,17 +108,17 @@ function bacteria(cx,cy,R,ly){
   const g=ctx.createLinearGradient(0,cy-r,0,cy+r); g.addColorStop(0,'rgba(255,255,255,0.35)'); g.addColorStop(0.5,'rgba(17,24,31,0)'); g.addColorStop(1,'rgba(17,24,31,0.16)');
   ctx.fillStyle=g; ctx.fillRect(cx-L,cy-r,2*L,2*r); ctx.restore();
   taperedContour(pts,2.0,0.6,INK);
-  ctx.strokeStyle='rgba(17,24,31,0.22)'; ctx.lineWidth=1.0; ctx.beginPath();
-  for(let i=0;i<=40;i++){const t=i/40,x=cx-L*0.30+t*L*0.60,y=cy+Math.sin(t*Math.PI*3)*r*0.20;i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
+  ctx.strokeStyle='rgba(17,24,31,0.15)'; ctx.lineWidth=0.9; ctx.beginPath();
+  for(let i=0;i<=40;i++){const t=i/40,x=cx-L*0.27+t*L*0.54,y=cy+Math.sin(t*Math.PI*2)*r*0.15;i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
   const fr=mulberry(77);
   for(let f=0;f<2;f++){const baseY=cy+(f?r*0.42:-r*0.42), ph=f*1.9, len=L*0.92; let px=cx+L/2+r, py=baseY, drift=0; ctx.strokeStyle=INK; ctx.lineCap='round';
-    for(let i=1;i<=52;i++){const t=i/52; drift+=(fr()-0.5)*r*0.06; const amp=r*(0.42+0.28*Math.sin(t*5+f*2))*(1-t*0.45); const xx=cx+L/2+r+t*len, yy=baseY+Math.sin(t*Math.PI*2.7+ph)*amp+drift*(1-t*0.25); ctx.lineWidth=Math.max(0.4,1.5*(1-t*0.8)); ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(xx,yy); ctx.stroke(); px=xx; py=yy;}}
-  chargeArc(cx-L*0.16,cy-r,r*0.18,-Math.PI,0,cx-L*0.16,cy-r-24);
+    for(let i=1;i<=52;i++){const t=i/52; drift+=(fr()-0.5)*r*0.035; const amp=r*(0.42+0.28*Math.sin(t*5+f*2))*(1-t*0.45); const xx=cx+L/2+r+t*len, yy=baseY+Math.sin(t*Math.PI*2.7+ph)*amp+drift*(1-t*0.25); ctx.lineWidth=Math.max(0.4,1.5*(1-t*0.8)); ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(xx,yy); ctx.stroke(); px=xx; py=yy;}}
+  chargeCapsule(cx,cy,L,r);
   label(cx,ly,'Bacteria','bacillus · membrane + flagella');
 }
 function pollen(cx,cy,R,ly){
   const rng=mulberry(33);
-  for(let i=0;i<19;i++){const a=i/19*Math.PI*2+(rng()-0.5)*0.18, len=R*(0.28+rng()*0.24), hw=0.075+rng()*0.07;
+  for(let i=0;i<19;i++){const a=i/19*Math.PI*2+(rng()-0.5)*0.07, len=R*(0.34+rng()*0.12), hw=0.09+rng()*0.035;
     const tip={x:cx+Math.cos(a)*(R+len),y:cy+Math.sin(a)*(R+len)}, bL={x:cx+Math.cos(a-hw)*R,y:cy+Math.sin(a-hw)*R}, bR={x:cx+Math.cos(a+hw)*R,y:cy+Math.sin(a+hw)*R};
     const lit=Math.cos(a)*LIGHT[0]+Math.sin(a)*LIGHT[1]; ctx.fillStyle=lit>0?'rgba(17,24,31,0.05)':'rgba(17,24,31,0.14)';
     ctx.beginPath(); ctx.moveTo(bL.x,bL.y); ctx.lineTo(tip.x,tip.y); ctx.lineTo(bR.x,bR.y); ctx.closePath(); ctx.fill();
@@ -115,7 +127,7 @@ function pollen(cx,cy,R,ly){
   for(let i=0;i<5;i++){const a=rng()*6.28, rr=rng()*R*0.5, x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr;
     ctx.strokeStyle='rgba(17,24,31,0.42)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(x,y,2.4,0,7); ctx.stroke();
     ctx.strokeStyle='rgba(17,24,31,0.7)'; ctx.lineWidth=1.0; ctx.beginPath(); ctx.arc(x,y,2.4,0.7,2.5); ctx.stroke();}
-  chargeArc(cx,cy,R,2.5,3.2,cx-R*1.6,cy+R*0.7);
+  chargeHalo(cx,cy,R*1.5);
   label(cx,ly,'Pollen','echinate grain · spines + pores');
 }
 function fungi(cx,cy,R,ly){
@@ -132,7 +144,7 @@ function fungi(cx,cy,R,ly){
     for(let k=0;k<nc;k++){const cr=2.4-k*0.35; chx+=Math.cos(a)*cr*1.9; chy+=Math.sin(a)*cr*1.9; ctx.fillStyle='#eef2f5'; ctx.beginPath(); ctx.arc(chx,chy,cr,0,7); ctx.fill(); ctx.lineWidth=0.8; ctx.strokeStyle=INK; ctx.beginPath(); ctx.arc(chx,chy,cr,0,7); ctx.stroke();}}
   // vesicle (swollen head) on top
   softShadeDisc(vx,vy,vR,0.20); taperedContour(circlePts(vx,vy,vR,46,0.015,rng),1.7,0.62,INK);
-  chargeArc(vx,vy,vR+R*0.42,-2.3,-1.5,vx+R*0.8,vy-R*0.55);
+  chargeHalo(vx,vy,R*0.95);
   label(cx,ly,'Fungi','conidiophore · spore chains');
 }
 function spore(cx,cy,R,ly){
@@ -142,7 +154,7 @@ function spore(cx,cy,R,ly){
   softShadeDisc(cx,cy,R,0.22); taperedContour(pts,2.0,0.7,INK);
   for(let i=0;i<11;i++){const a=rng()*6.28, rr=rng()*R*0.72, x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr, lr=1.3+rng()*1.7;
     ctx.strokeStyle='rgba(17,24,31,0.30)'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.arc(x,y,lr,0.4,3.6); ctx.stroke();}
-  chargeArc(cx,cy,R,2.1,3.0,cx-R*1.5,cy+R*0.5);
+  chargeHalo(cx,cy,R*1.12);
   label(cx,ly,'Spore','ornamented wall · warty');
 }
 function soot(cx,cy,S,ly){
@@ -150,7 +162,7 @@ function soot(cx,cy,S,ly){
   for(let i=0;i<200 && balls.length<32;i++){const seed=balls[Math.floor(rng()*balls.length)]; const nr=S*(0.05+Math.pow(rng(),2.5)*0.12); const ang=rng()*Math.PI*2, d=seed.r+nr*(0.82+rng()*0.18); const x=seed.x+Math.cos(ang)*d, y=seed.y+Math.sin(ang)*d; if(Math.hypot(x-cx,y-cy)>S*0.95) continue; let ok=true; for(const b of balls){ if(Math.hypot(x-b.x,y-b.y)<(b.r+nr)*0.78){ok=false;break;} } if(!ok) continue; balls.push({x,y,r:nr});}
   for(const b of balls){ softShadeDisc(b.x,b.y,b.r,0.24); const r2=mulberry((b.x*7+b.y*13|0)+5); taperedContour(circlePts(b.x,b.y,b.r,Math.max(20,b.r|0),0.015,r2),1.3,0.6,INK); }
   let outer=balls[0]; for(const b of balls) if(b.x>outer.x) outer=b;
-  chargeArc(outer.x,outer.y,outer.r,-1.5,1.0,cx+S*1.12,cy-S*0.2);
+  chargeHalo(cx,cy,S*0.92);
   label(cx,ly,'Wildfire smoke','soot · fractal aggregate');
 }
 function ultrafine(cx,cy,S,ly){
@@ -159,7 +171,7 @@ function ultrafine(cx,cy,S,ly){
   for(let i=0;i<70 && balls.length<7;i++){const seed=balls[Math.floor(rng()*balls.length)]; const nr=S*sc*(0.10+rng()*0.07); const a=rng()*6.28, d=seed.r+nr*0.55; const x=seed.x+Math.cos(a)*d, y=seed.y+Math.sin(a)*d; let ok=true; for(const b of balls){ if(Math.hypot(x-b.x,y-b.y)<(b.r+nr)*0.5){ok=false;break;} } if(!ok) continue; balls.push({x,y,r:nr});}
   for(const b of balls){ softShadeDisc(b.x,b.y,b.r,0.24); const r2=mulberry((b.x*5+b.y*11|0)+3); taperedContour(circlePts(b.x,b.y,b.r,26,0.03,r2),1.4,0.6,INK); }
   let outer=balls[0]; for(const b of balls) if(b.x>outer.x) outer=b;
-  chargeArc(outer.x,outer.y,outer.r,-1.5,0.6,cx+S*0.8,cy-S*0.25);
+  chargeHalo(cx,cy,S*0.5);
   label(cx,ly,'Ultrafine PM2.5','sub-2.5µm · compact');
 }
 
