@@ -6,10 +6,11 @@
 <title>NanoFlashing — The Big Idea · Act 01: The Field</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/open-props">
 <style>
   :root{
-    --ink:#2a2622;
+    --ink:#231f20;
     --ink-soft:#4a423c;
     --muted:#8a817a;
     --charge:#e23b3b;
@@ -19,6 +20,7 @@
     --paper:#ece7e1;
     --glass-bg:rgba(255,255,255,0.55);
     --glass-border:rgba(255,255,255,0.7);
+    --page-gutter:clamp(var(--size-5),5vw,var(--size-10));
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overflow:hidden;}
@@ -40,14 +42,14 @@
     background:radial-gradient(120% 100% at 4% 88%, rgba(236,231,225,0.74) 0%, rgba(236,231,225,0.28) 50%, rgba(236,231,225,0) 78%);
   }
 
-  .brand{position:fixed;top:24px;left:28px;z-index:6;height:26px;pointer-events:none;}
+  .brand{position:fixed;top:var(--size-5);left:var(--page-gutter);z-index:6;height:26px;pointer-events:none;}
   .brand img{height:100%;width:auto;display:block;}
 
-  .hero{position:fixed;z-index:5;top:9vh;left:5vw;max-width:46ch;pointer-events:none;}
+  .hero{position:fixed;z-index:5;top:9vh;left:var(--page-gutter);max-width:46ch;pointer-events:none;}
   .eyebrow{
     display:flex;align-items:center;gap:10px;
-    font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.32em;
-    text-transform:uppercase;color:var(--muted);margin-bottom:22px;
+    font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:500;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:var(--size-5);
   }
   .eyebrow .glyph{
     width:15px;height:15px;border:1.5px solid var(--charge);border-radius:50%;
@@ -60,16 +62,16 @@
   .eyebrow .div{width:18px;height:1px;background:rgba(138,129,122,.5);}
   h1{
     font-family:'Instrument Serif',serif;font-weight:400;
-    font-size:clamp(34px,5.4vw,72px);line-height:1.02;letter-spacing:-.012em;color:var(--ink);
+    font-size:clamp(2.75rem,6vw,6rem);line-height:1.0;letter-spacing:-0.015em;color:var(--ink);
   }
   h1 .chg{font-style:italic;color:var(--charge);}
   .sub{
-    margin-top:22px;font-size:clamp(13.5px,1.25vw,16px);line-height:1.55;
+    margin-top:var(--size-5);font-size:clamp(1rem,1.3vw,1.25rem);line-height:1.5;
     color:var(--ink-soft);max-width:34ch;font-weight:400;
   }
 
   .readout{
-    position:fixed;z-index:5;left:5vw;bottom:6vh;pointer-events:none;
+    position:fixed;z-index:5;left:var(--page-gutter);bottom:6vh;pointer-events:none;
     display:flex;align-items:stretch;
     background:var(--glass-bg);
     backdrop-filter:blur(18px) saturate(1.2);
@@ -79,14 +81,14 @@
     box-shadow:0 8px 28px rgba(40,34,28,.14), 0 1px 0 rgba(255,255,255,.55) inset;
     overflow:hidden;
   }
-  .readout .cell{padding:11px 16px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+  .readout .cell{padding:var(--size-2) var(--size-4);display:flex;flex-direction:column;justify-content:center;gap:4px;}
   .readout .cell + .cell{border-left:1px solid rgba(255,255,255,.45);}
   .readout .k{
-    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.24em;
+    font-family:'Space Grotesk',sans-serif;font-size:0.5625rem;font-weight:500;letter-spacing:.22em;
     text-transform:uppercase;color:var(--muted);
   }
   .readout .v{
-    font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;
+    font-family:'Space Grotesk',sans-serif;font-size:0.875rem;font-weight:500;
     color:var(--ink);letter-spacing:.01em;min-width:11ch;
   }
   .readout .live-cell{flex-direction:row;align-items:center;gap:9px;}
@@ -97,52 +99,16 @@
   @keyframes pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
   .readout .charge-cell .v{
     color:var(--charge-deep);display:flex;align-items:center;gap:7px;
-    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    font-family:'Space Grotesk',sans-serif;font-size:0.6875rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
   }
   .charge-glyph{
     width:14px;height:14px;border:1.5px solid var(--charge);border-radius:50%;position:relative;flex:0 0 auto;
   }
   .charge-glyph::after{content:'';position:absolute;top:50%;left:3px;right:3px;height:1.5px;background:var(--charge);transform:translateY(-50%);}
 
-  .callout{
-    position:fixed;z-index:4;pointer-events:none;
-    transform:translate(-50%,-50%);
-    left:50%;top:50%;
-    background:var(--glass-bg);
-    backdrop-filter:blur(20px) saturate(1.25);
-    -webkit-backdrop-filter:blur(20px) saturate(1.25);
-    border:1px solid var(--glass-border);
-    border-radius:12px;
-    box-shadow:0 10px 30px rgba(40,34,28,.18), 0 1px 0 rgba(255,255,255,.55) inset;
-    padding:9px 13px 9px 14px;
-    display:flex;align-items:center;gap:11px;
-    white-space:nowrap;
-    opacity:0;
-  }
-  .callout.ready{opacity:1;transition:opacity .35s ease;}
-  .callout .idx{
-    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.18em;
-    color:var(--scanner);font-weight:700;
-  }
-  .callout .nm{
-    font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:500;
-    color:var(--ink);letter-spacing:.005em;
-  }
-  .callout .badge{
-    display:flex;align-items:center;gap:5px;
-    font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--charge-deep);font-weight:700;
-    padding:3px 7px 3px 6px;border:1px solid rgba(226,59,59,.4);
-    border-radius:20px;background:rgba(226,59,59,.06);
-  }
-  .callout .badge .cg{
-    width:9px;height:9px;border:1.4px solid var(--charge);border-radius:50%;position:relative;flex:0 0 auto;
-  }
-  .callout .badge .cg::after{content:'';position:absolute;top:50%;left:2px;right:2px;height:1.4px;background:var(--charge);transform:translateY(-50%);}
-
   .hint{
-    position:fixed;z-index:5;right:5vw;bottom:6vh;
-    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.26em;
+    position:fixed;z-index:5;right:var(--page-gutter);bottom:6vh;
+    font-family:'Space Grotesk',sans-serif;font-size:0.6rem;font-weight:500;letter-spacing:.26em;
     text-transform:uppercase;color:var(--muted);opacity:.82;pointer-events:none;
   }
 
@@ -155,18 +121,17 @@
   }
 
   @media (max-width:720px){
-    .brand{top:18px;left:18px;height:22px;}
-    .hero{left:6vw;top:6vh;max-width:none}
-    h1{font-size:clamp(28px,8.4vw,44px);line-height:1.05;}
-    .sub{font-size:13px;max-width:32ch;margin-top:16px;}
-    .eyebrow{margin-bottom:14px;font-size:9.5px;letter-spacing:.28em;}
-    .readout{left:4vw;bottom:4vh;flex-wrap:wrap;}
-    .readout .cell{padding:8px 11px;}
-    .readout .v{font-size:12px;min-width:9ch;}
+    :root{--page-gutter:var(--size-3);}
+    .brand{top:var(--size-2);height:22px;}
+    .hero{top:6vh;max-width:none}
+    h1{font-size:clamp(1.75rem,8.4vw,2.75rem);line-height:1.05;}
+    .sub{font-size:0.875rem;max-width:32ch;margin-top:var(--size-3);}
+    .eyebrow{margin-bottom:var(--size-3);font-size:0.625rem;letter-spacing:.24em;}
+    .readout{bottom:4vh;flex-wrap:wrap;}
+    .readout .cell{padding:var(--size-2) var(--size-3);}
+    .readout .v{font-size:0.75rem;min-width:9ch;}
     .hint{display:none}
     .scrim{width:100%;height:46%}
-    .callout{padding:7px 10px 7px 11px;}
-    .callout .nm{font-size:11px;}
   }
 </style>
 </head>
@@ -201,18 +166,12 @@
   </div>
   <div class="cell">
     <span class="k">Index</span>
-    <span class="v" id="r-count" style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.1em;">01 / 07</span>
+    <span class="v" id="r-count" style="font-size:0.8125rem;letter-spacing:.1em;">01 / 07</span>
   </div>
   <div class="cell charge-cell">
     <span class="k">Net charge</span>
     <span class="v"><span class="charge-glyph"></span>Negative</span>
   </div>
-</div>
-
-<div class="callout" id="callout">
-  <span class="idx" id="c-idx">01</span>
-  <span class="nm" id="c-name">Wildfire smoke</span>
-  <span class="badge"><span class="cg"></span>Negative</span>
 </div>
 
 <div class="hint">Idle → auto-scan</div>
@@ -255,16 +214,26 @@ const ov=document.getElementById('overlay');
 const octx=ov.getContext('2d');
 const gl=glCanvas.getContext('webgl',{antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:false});
 
-// offscreen room+dust+specimen canvas (becomes the WebGL texture the glass refracts)
 const room=document.createElement('canvas');
 const rctx=room.getContext('2d');
-// persistent specimen layer (feathered circle, composited onto room)
 const specLayer=document.createElement('canvas');
 const sctx=specLayer.getContext('2d');
 
+// soft round dust sprite (pre-rendered radial gradient → faint, clean motes)
+const moteSprite=document.createElement('canvas');
+moteSprite.width=20; moteSprite.height=20;
+{
+  const ms=moteSprite.getContext('2d');
+  const g=ms.createRadialGradient(10,10,0,10,10,10);
+  g.addColorStop(0,'rgba(74,66,58,0.55)');
+  g.addColorStop(0.45,'rgba(74,66,58,0.18)');
+  g.addColorStop(1,'rgba(74,66,58,0)');
+  ms.fillStyle=g; ms.fillRect(0,0,20,20);
+}
+
 let W=0,H=0,DPR=1;
 let dustB=[];
-const NB=8;
+const NB=5;
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
@@ -275,11 +244,11 @@ function resize(){
   room.width=W; room.height=H;
   specLayer.width=W; specLayer.height=H;
   if(gl) gl.viewport(0,0,glCanvas.width,glCanvas.height);
-  const n=Math.round(Math.min(4200, W*H/460));
-  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.09+b*0.05, motes:[]});
+  const n=Math.round(Math.min(900, W*H/2400));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.035+b*0.018, motes:[]});
   for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
 }
-function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:.55+Math.random()*1.7};}
+function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.10,vy:(Math.random()-.5)*.10,r:1.0+Math.random()*1.5};}
 
 // ============ LENS STATE ============
 const bub={x:0,y:0,tx:0,ty:0,R:0,sx:0,sy:0,t0:0};
@@ -314,8 +283,6 @@ function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
 function easeOut(t){return 1-Math.pow(1-t,3);}
 
 const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
-const cName=document.getElementById('c-name'), cIdx=document.getElementById('c-idx');
-const calloutEl=document.getElementById('callout');
 
 function setSpec(i){
   specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
@@ -328,8 +295,6 @@ function setSpec(i){
   const nm=SPECS[specIndex].name;
   rName.textContent=nm;
   rCount.textContent=String(specIndex+1).padStart(2,'0')+' / 07';
-  cName.textContent=nm;
-  cIdx.textContent=String(specIndex+1).padStart(2,'0');
   lockT=now();
 }
 
@@ -342,6 +307,7 @@ void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}
 const FS=`
 precision highp float;
 uniform sampler2D uTex;
+uniform sampler2D uSpec;
 uniform vec2 uResolution;
 uniform vec2 uLensCenter;
 uniform float uLensRadius;
@@ -357,7 +323,7 @@ void main(){
   vec2 dir=d/max(r,0.0001);
   vec2 bgUv=px/uResolution;
   vec3 col=texture2D(uTex,bgUv).rgb;
-  // drop shadow (outside lens, slight downward offset) — small, soft, natural contact shadow
+  // small soft contact shadow
   vec2 shC=uLensCenter+vec2(0.0,R*0.06);
   float shR=R*1.06;
   float shD=length(px-shC);
@@ -365,43 +331,50 @@ void main(){
   float shMask=smoothstep(R*1.0,R*1.02,r);
   float shadow=shBand*shMask*0.13;
   col*=1.0-shadow;
+  // window light from upper-left (screen y is down → up = -y)
   vec2 L1=normalize(vec2(-0.72,-0.92));
   vec2 L2=normalize(vec2(-0.45,-0.78));
   float angDot=dot(dir,L1);
   if(t<1.0){
-    // strong barrel refraction
+    // barrel refraction of the room
     float mag=1.30+0.42*pow(t,4.0);
     float sampleDist=r*mag;
     vec2 samplePos=uLensCenter+dir*sampleDist;
     vec2 sUv=samplePos/uResolution;
-    // chromatic aberration fringe at rim
-    float caPx=7.5*pow(t,2.6);
+    // faint chromatic aberration at rim only
+    float caPx=2.3*pow(t,2.6);
     vec2 caOff=dir*caPx/uResolution;
     float rC=texture2D(uTex,sUv+caOff).r;
     float gC=texture2D(uTex,sUv).g;
     float bC=texture2D(uTex,sUv-caOff).b;
     vec3 refr=vec3(rC,gC,bC);
-    col=refr;
+    // specimen: SHARP, magnified, no CA
+    vec4 spec=texture2D(uSpec,sUv);
+    col=mix(refr,spec.rgb,spec.a);
     col*=1.035;
     // inner glass-thickness shadow
     float innerShade=smoothstep(0.74,1.0,t);
     col*=1.0-innerShade*0.28;
     float bevelInner=smoothstep(0.985,1.0,t);
     col*=1.0-bevelInner*0.55;
-    // primary specular crescent (upper-left)
-    float crescent=pow(max(0.0,angDot),5.5);
-    crescent*=smoothstep(0.50,0.90,t);
-    crescent*=(1.0-smoothstep(0.93,1.0,t));
-    col+=vec3(1.0)*crescent*0.85;
-    // secondary glint
-    float glint=pow(max(0.0,dot(dir,L2)),22.0);
+    // PRIMARY specular crescent — TIGHTER + BRIGHTER, catches window light (upper-left)
+    float crescent=pow(max(0.0,angDot),9.0);
+    crescent*=smoothstep(0.52,0.86,t);
+    crescent*=(1.0-smoothstep(0.90,1.0,t));
+    col+=vec3(1.0,0.99,0.97)*crescent*1.15;
+    // subtle darker thickness on the OPPOSITE (lower-right) edge — real crystal volume
+    float darkEdge=pow(max(0.0,-angDot),3.0);
+    darkEdge*=smoothstep(0.55,0.95,t);
+    col*=1.0-darkEdge*0.16;
+    // secondary glint (small, sharp)
+    float glint=pow(max(0.0,dot(dir,L2)),24.0);
     glint*=smoothstep(0.66,0.86,t);
     glint*=(1.0-smoothstep(0.90,0.99,t));
     col+=vec3(1.0,0.98,0.94)*glint*0.75;
     // crisp light-facing rim highlight
     float rim=smoothstep(0.952,0.992,t)*(1.0-smoothstep(0.992,1.0,t));
     float rimLight=pow(max(0.0,angDot),1.6);
-    col+=vec3(1.0)*rim*(0.35+0.95*rimLight);
+    col+=vec3(1.0)*rim*(0.35+1.05*rimLight);
     // bottom transmitted edge light
     float bottom=smoothstep(0.30,1.0,dir.y);
     bottom*=smoothstep(0.93,0.992,t)*(1.0-smoothstep(0.992,1.0,t));
@@ -448,10 +421,12 @@ const aPos=gl.getAttribLocation(prog,'aPos');
 gl.enableVertexAttribArray(aPos);
 gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
 const uTex=gl.getUniformLocation(prog,'uTex');
+const uSpec=gl.getUniformLocation(prog,'uSpec');
 const uRes=gl.getUniformLocation(prog,'uResolution');
 const uLens=gl.getUniformLocation(prog,'uLensCenter');
 const uRad=gl.getUniformLocation(prog,'uLensRadius');
 const uTime=gl.getUniformLocation(prog,'uTime');
+
 const tex=gl.createTexture();
 gl.bindTexture(gl.TEXTURE_2D,tex);
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
@@ -461,9 +436,17 @@ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([214,196,174,255]));
 
-// ============ DRAW ROOM + DUST + SPECIMEN INTO OFFSCREEN (the texture glass refracts) ============
+const specTex=gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D,specTex);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,0]));
+
+// ============ DRAW ROOM + DUST (NO specimen) ============
 function drawRoom(t){
-  // 1) REAL ROOM, full-frame — no opaque warm fill anywhere
   rctx.clearRect(0,0,W,H);
   if(bgReady){
     rctx.drawImage(bgImg,0,0,W,H);
@@ -471,118 +454,81 @@ function drawRoom(t){
     rctx.fillStyle='#ece7e1';
     rctx.fillRect(0,0,W,H);
   }
-  // 2) drifting dust (batched by alpha bucket)
+  const lensCx=bub.x, lensCy=bub.y;
+  const lensFootR=bub.R*1.30;
+  const inLensAlphaScale=0.60;
   if(!REDUCED){
     for(const bucket of dustB){
-      rctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
       for(const d of bucket.motes){
-        d.vx+=(Math.random()-.5)*.012; d.vy+=(Math.random()-.5)*.012;
+        d.vx+=(Math.random()-.5)*.008; d.vy+=(Math.random()-.5)*.008;
         d.vx*=.95; d.vy*=.95; d.x+=d.vx; d.y+=d.vy;
-        if(d.x<-4)d.x=W+4; if(d.x>W+4)d.x=-4; if(d.y<-4)d.y=H+4; if(d.y>H+4)d.y=-4;
-        rctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2);
+        if(d.x<-8)d.x=W+8; if(d.x>W+8)d.x=-8; if(d.y<-8)d.y=H+8; if(d.y>H+8)d.y=-8;
+        const ddx=d.x-lensCx, ddy=d.y-lensCy;
+        const inLens=(ddx*ddx+ddy*ddy) < (lensFootR*lensFootR);
+        rctx.globalAlpha=bucket.a*(inLens?inLensAlphaScale:1.0);
+        const sz=d.r*4.5;
+        rctx.drawImage(moteSprite,d.x-sz,d.y-sz,sz*2,sz*2);
       }
     }
+    rctx.globalAlpha=1;
   } else {
     for(const bucket of dustB){
-      rctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
-      for(const d of bucket.motes){ rctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2); }
+      for(const d of bucket.motes){
+        const ddx=d.x-lensCx, ddy=d.y-lensCy;
+        const inLens=(ddx*ddx+ddy*ddy) < (lensFootR*lensFootR);
+        rctx.globalAlpha=bucket.a*(inLens?inLensAlphaScale:1.0);
+        const sz=d.r*4.5;
+        rctx.drawImage(moteSprite,d.x-sz,d.y-sz,sz*2,sz*2);
+      }
     }
+    rctx.globalAlpha=1;
   }
-  // 3) specimen + red ⊖ dots composited into the scene at lens center
-  drawSpecimenIntoScene(t);
 }
 
-// Draw the active specimen into a feathered circular alpha layer, then composite onto the room.
-// The glass shader refracts the room around it (clear ring) and the specimen at center.
-function drawSpecimenIntoScene(t){
+// ============ DRAW SPECIMEN (video only — dots + glow are baked in) ============
+function drawSpecimen(t){
   const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
+  sctx.clearRect(0,0,W,H);
   if(R<2) return;
   if(!s.vReady && !s.ready) return;
 
-  // specimen drawn at ~62% of lens diameter on screen after refraction.
-  // texture radius ~0.8R → on screen ~0.62R (center mag ~1.3).
-  const d=R*1.6;            // specimen square size in texture px
-  const sr=d*0.5;           // specimen radius in texture px
-  const bob=Math.sin(t*0.0017)*R*0.02, sway=Math.cos(t*0.0011)*R*0.008;
+  // Enlarged: specimen body + baked red ⊖ dot-ring now fill ~85% of the lens diameter.
+  // d = drawn video size; clip to full lens radius so the feather can reach R*1.0.
+  const d=R*2.4;
+  const bob=Math.sin(t*0.0017)*R*0.018, sway=Math.cos(t*0.0011)*R*0.008;
   const cx=x+sway, cy=y+bob;
 
-  // clear specimen layer
-  sctx.clearRect(0,0,W,H);
-
-  // draw the specimen video/poster clipped to a circle (no warm square)
+  // Draw ONLY the video — it already contains the rotating 3D specimen, its red charge glow,
+  // and its ring of red ⊖ charge dots. No synthesized dots, no code-drawn glow.
   sctx.save();
   sctx.beginPath();
-  sctx.arc(cx,cy,sr,0,Math.PI*2);
+  sctx.arc(cx,cy,R,0,Math.PI*2);
   sctx.clip();
   if(s.vReady && s.vid.readyState>=2){
-    try{ sctx.drawImage(s.vid, cx-sr, cy-sr, d, d); }catch(e){}
+    try{ sctx.drawImage(s.vid, cx-d/2, cy-d/2, d, d); }catch(e){}
   } else if(s.ready){
-    sctx.drawImage(s.img, cx-sr, cy-sr, d, d);
+    sctx.drawImage(s.img, cx-d/2, cy-d/2, d, d);
   }
   sctx.restore();
 
-  // feather the outer ~18% to transparent so the specimen dissolves into the air/room
-  // (destination-out erases the specimen layer's alpha at the rim → room shows through)
+  // FEATHER ONLY the warm square background — fade starts at R*0.88 (just OUTSIDE the
+  // baked dot-ring) and reaches full transparency at R*1.0 (the clip edge).
+  // The specimen body, its glow, and its red ⊖ dots stay 100% opaque and SHARP.
   sctx.globalCompositeOperation='destination-out';
-  const fade=sctx.createRadialGradient(cx,cy,sr*0.82, cx,cy,sr);
-  fade.addColorStop(0,'rgba(0,0,0,0)');
-  fade.addColorStop(1,'rgba(0,0,0,1)');
+  const fade=sctx.createRadialGradient(cx,cy, R*0.88, cx,cy, R*1.0);
+  fade.addColorStop(0,'rgba(0,0,0,0)');   // inside R*0.88 → fully KEPT (specimen + all ⊖ dots)
+  fade.addColorStop(1,'rgba(0,0,0,1)');   // R*0.88→R*1.0 → only the warm bg corners fade out
   sctx.fillStyle=fade;
   sctx.fillRect(0,0,W,H);
   sctx.globalCompositeOperation='source-over';
-
-  // red ⊖ charge markers — SHARP, ringed just inside the specimen edge
-  const dotR=sr*0.84;
-  const dotCount=6;
-  for(let i=0;i<dotCount;i++){
-    const a=(i/dotCount)*Math.PI*2 + t*0.0004;
-    const dx=cx+Math.cos(a)*dotR, dy=cy+Math.sin(a)*dotR;
-    // soft glow
-    sctx.fillStyle='rgba(226,59,59,0.16)';
-    sctx.beginPath(); sctx.arc(dx,dy,9,0,Math.PI*2); sctx.fill();
-    // red ring
-    sctx.strokeStyle='rgba(226,59,59,0.95)';
-    sctx.lineWidth=1.6;
-    sctx.beginPath(); sctx.arc(dx,dy,5.5,0,Math.PI*2); sctx.stroke();
-    // minus bar
-    sctx.fillStyle='rgba(226,59,59,0.96)';
-    sctx.fillRect(dx-3,dy-1,6,2);
-  }
-
-  // composite the feathered specimen + dots onto the room (room remains visible as a clear ring)
-  rctx.drawImage(specLayer,0,0);
 }
 
-// ============ OVERLAY: leader, node, lock-on beat, callout (glass optics live in the shader) ============
+// ============ OVERLAY: lock-on focus beat only (no floating tag) ============
 function drawOverlay(t){
   octx.clearRect(0,0,W,H);
   const R=bub.R, x=bub.x, y=bub.y;
   if(R<2) return;
 
-  // ---- leader line + node dot (callout chip is HTML, positioned below) ----
-  const nodeAng=-Math.PI*0.28; // upper-right of rim
-  const nx=x+Math.cos(nodeAng)*R, ny=y+Math.sin(nodeAng)*R;
-  let ex=nx+R*0.42, ey=ny-R*0.34;
-  let flipLeft = (ex + (calloutEl.offsetWidth||180) + 12) > W;
-  if(flipLeft){
-    ex = x - Math.cos(nodeAng)*R - R*0.42;
-    ey = ny - R*0.34;
-  }
-  octx.strokeStyle='rgba(42,38,34,0.42)';
-  octx.lineWidth=1;
-  octx.beginPath();
-  octx.moveTo(nx,ny);
-  octx.lineTo(ex,ey);
-  octx.stroke();
-  // node dot — frosted white with blue instrument core
-  octx.fillStyle='rgba(255,255,255,0.92)';
-  octx.strokeStyle='rgba(27,123,255,0.9)';
-  octx.lineWidth=1.4;
-  octx.beginPath(); octx.arc(nx,ny,3.4,0,Math.PI*2); octx.fill(); octx.stroke();
-  octx.fillStyle='rgba(27,123,255,0.95)';
-  octx.beginPath(); octx.arc(nx,ny,1.4,0,Math.PI*2); octx.fill();
-
-  // ---- lock-on focus beat ----
   const lockAge=t-lockT;
   if(lockAge<700){
     const e=easeOut(lockAge/700);
@@ -593,19 +539,6 @@ function drawOverlay(t){
     octx.lineWidth=1.1;
     octx.beginPath(); octx.arc(x,y,R-e*R*0.16,0,Math.PI*2); octx.stroke();
   }
-
-  // ---- position HTML callout chip beyond the elbow ----
-  const chipW=calloutEl.offsetWidth||180;
-  const chipH=calloutEl.offsetHeight||40;
-  let chipX = flipLeft ? (ex - chipW*0.5 - 8) : (ex + chipW*0.5 + 8);
-  let chipY = ey;
-  if(chipX-chipW/2 < 12){ chipX = chipW/2 + 12; }
-  if(chipX+chipW/2 > W-12){ chipX = W - chipW/2 - 12; }
-  if(chipY-chipH/2 < 12){ chipY = chipH/2 + 12; }
-  if(chipY+chipH/2 > H-12){ chipY = H - chipH/2 - 12; }
-  calloutEl.style.left=chipX+'px';
-  calloutEl.style.top=chipY+'px';
-  if(!calloutEl.classList.contains('ready')) calloutEl.classList.add('ready');
 }
 
 // ============ MAIN LOOP ============
@@ -613,7 +546,6 @@ const t0=performance.now();
 function frame(now){
   const t=now;
 
-  // ---- lens motion ----
   if(PROBE!==null){
     bub.x += (W*0.5 - bub.x)*0.18;
     bub.y += (H*0.46 - bub.y)*0.18;
@@ -638,22 +570,28 @@ function frame(now){
   }
   prevx=bub.x; prevy=bub.y;
 
-  // 1) draw REAL room + dust + feathered specimen + red dots into offscreen canvas
   drawRoom(t);
-  // 2) upload as WebGL texture — the glass now refracts the live room (bent wall/window/floor)
   gl.bindTexture(gl.TEXTURE_2D,tex);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,room);
-  // 3) render the liquid glass over the full screen (specular + rim + CA read over the specimen)
+
+  drawSpecimen(t);
+  gl.bindTexture(gl.TEXTURE_2D,specTex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,specLayer);
+
   gl.uniform2f(uRes,W,H);
   gl.uniform2f(uLens,bub.x,bub.y);
   gl.uniform1f(uRad,bub.R);
   gl.uniform1f(uTime,(t-t0)/1000);
   gl.uniform1i(uTex,0);
+  gl.uniform1i(uSpec,1);
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D,specTex);
   gl.drawArrays(gl.TRIANGLES,0,6);
-  // 4) overlay: leader, node, lock-on beat, callout chip
+
   drawOverlay(t);
 
   requestAnimationFrame(frame);
