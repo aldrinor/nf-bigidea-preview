@@ -1,613 +1,480 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="robots" content="noindex,nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NanoFlashing — Charged-Material Platform</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Microscope</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#070b0c; --ink:#f0e8d6; --ink-dim:#b3ab99; --ink-soft:#8a8270;
-    --mono-dim:#7c8a8d; --mono-bright:#aebcc0;
-    --copper:#ff9d3c; --copper-deep:#c4621a; --cyan:#6dd5ff;
-    --line:rgba(240,232,214,0.12);
-  }
   *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{background:var(--bg);color:var(--ink);font-family:'Fraunces',serif;-webkit-font-smoothing:antialiased;}
-  body{overflow-x:hidden;}
-  ::selection{background:var(--copper);color:var(--bg);}
-  .mono{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:11px;color:var(--mono-dim);}
-  .mono-bright{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:11px;color:var(--mono-bright);}
-
-  /* WebGL canvas */
-  #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
-  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:radial-gradient(ellipse at 30% 40%, rgba(255,157,60,0.06), transparent 55%),
-               radial-gradient(ellipse at 80% 70%, rgba(109,213,255,0.025), transparent 50%),
-               linear-gradient(180deg, rgba(7,11,12,0.4) 0%, transparent 25%, transparent 75%, rgba(7,11,12,0.7) 100%);}
-
-  /* Corner brackets - fixed */
-  .corner{position:fixed;width:22px;height:22px;z-index:60;pointer-events:none;}
-  .corner::before,.corner::after{content:'';position:absolute;background:var(--copper);}
-  .corner::before{width:22px;height:1px;}
-  .corner::after{width:1px;height:22px;}
-  .c-tl{top:18px;left:18px;}.c-tl::before{top:0;left:0;}.c-tl::after{top:0;left:0;}
-  .c-tr{top:18px;right:18px;}.c-tr::before{top:0;right:0;}.c-tr::after{top:0;right:0;}
-  .c-bl{bottom:18px;left:18px;}.c-bl::before{bottom:0;left:0;}.c-bl::after{bottom:0;left:0;}
-  .c-br{bottom:18px;right:18px;}.c-br::before{bottom:0;right:0;}.c-br::after{bottom:0;right:0;}
-
-  /* Nav */
-  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
-    padding:22px 48px;mix-blend-mode:normal;}
-  nav .brand{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.22em;font-size:11px;color:var(--ink);}
-  nav .brand span{color:var(--copper);}
-  nav ul{display:flex;gap:34px;list-style:none;}
-  nav ul a{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:10.5px;
-    color:var(--mono-dim);text-decoration:none;transition:color .4s ease;position:relative;}
-  nav ul a:hover{color:var(--ink);}
-  nav ul a.active{color:var(--copper);}
-  nav .nav-meta{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:10px;color:var(--mono-dim);}
-
-  main{position:relative;z-index:2;}
-  section{position:relative;min-height:100vh;padding:120px 64px 80px;display:flex;flex-direction:column;justify-content:center;}
-
-  .eyebrow{display:flex;align-items:center;gap:14px;margin-bottom:34px;}
-  .eyebrow .dash{width:42px;height:1px;background:var(--copper);}
-  .eyebrow .label{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.22em;font-size:10.5px;color:var(--mono-dim);}
-  .eyebrow .label .id{color:var(--copper);}
-
-  h1.headline{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(48px,7.4vw,124px);line-height:0.92;
-    letter-spacing:-0.02em;max-width:14ch;}
-  h2.headline{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(44px,6.4vw,108px);line-height:0.93;
-    letter-spacing:-0.02em;max-width:16ch;}
-  .copper{color:var(--copper);}
-  .cyan{color:var(--cyan);}
-  .underline-copper{position:relative;display:inline-block;}
-  .underline-copper::after{content:'';position:absolute;left:0;right:0;bottom:0.06em;height:1px;background:var(--copper);opacity:0.55;}
-  .italic{font-style:italic;font-weight:300;}
-
-  .sub{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(17px,1.35vw,21px);line-height:1.5;color:var(--ink-dim);
-    max-width:54ch;margin-top:34px;}
-
-  /* Data panel */
-  .panel{border:1px solid var(--line);background:rgba(10,15,16,0.55);backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);padding:26px 28px;position:relative;}
-  .panel::before,.panel::after{content:'';position:absolute;width:8px;height:8px;}
-  .panel::before{top:-1px;left:-1px;border-top:1px solid var(--copper);border-left:1px solid var(--copper);}
-  .panel::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--copper);border-right:1px solid var(--copper);}
-  .panel-title{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.2em;font-size:10px;
-    color:var(--mono-bright);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
-  .panel-title .tag{color:var(--copper);}
-  .row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);
-    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.04em;}
-  .row:last-child{border-bottom:none;}
-  .row .k{color:var(--mono-dim);text-transform:uppercase;letter-spacing:0.16em;font-size:10.5px;}
-  .row .v{color:var(--ink);}
-  .row .v.lead{color:var(--copper);}
-
-  /* Layout helpers */
-  .two-col{display:grid;grid-template-columns:1.15fr 0.85fr;gap:80px;align-items:end;}
-  .two-col-panels{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:54px;max-width:980px;}
-
-  /* Section 1 hero specifics */
-  #s1{padding-top:140px;}
-  #s1 .hero-grid{display:grid;grid-template-columns:1.3fr 0.7fr;gap:80px;align-items:end;}
-  #s1 .field-record{max-width:380px;justify-self:end;width:100%;}
-
-  /* Section 3 panels */
-  .pill-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
-  .pill{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.14em;font-size:10px;
-    padding:7px 11px;border:1px solid var(--line);color:var(--ink-dim);}
-  .pill.cyan{border-color:rgba(109,213,255,0.35);color:var(--cyan);}
-
-  /* Section 4 grid */
-  .field-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:54px;}
-  .group-card{border:1px solid var(--line);background:rgba(10,15,16,0.5);backdrop-filter:blur(6px);padding:24px 24px 28px;position:relative;}
-  .group-card .ghead{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:10px;
-    color:var(--mono-bright);margin-bottom:6px;}
-  .group-card .ghead .accent{color:var(--copper);}
-  .group-card .gsub{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:9px;
-    color:var(--mono-dim);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line);}
-  .group-card ul{list-style:none;}
-  .group-card li{font-family:'Fraunces',serif;font-weight:300;font-size:17px;color:var(--ink-dim);padding:7px 0;
-    border-bottom:1px dashed rgba(240,232,214,0.06);display:flex;align-items:center;gap:10px;}
-  .group-card li:last-child{border-bottom:none;}
-  .group-card li::before{content:'';width:5px;height:5px;background:var(--copper);opacity:0.7;flex-shrink:0;}
-  .group-card.destroy li::before{background:var(--cyan);}
-
-  /* Section 6 facts */
-  .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:48px;border:1px solid var(--line);}
-  .fact{background:rgba(7,11,12,0.7);padding:26px 22px;}
-  .fact .num{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(40px,4.2vw,64px);color:var(--copper);line-height:1;letter-spacing:-0.02em;}
-  .fact .lbl{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.16em;font-size:10px;
-    color:var(--mono-dim);margin-top:10px;}
-  .comparison{margin-top:36px;border-left:2px solid var(--copper);padding:6px 0 6px 22px;max-width:780px;}
-  .comparison .ctag{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.2em;font-size:10px;color:var(--copper);margin-bottom:10px;}
-  .comparison .ctext{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(18px,1.5vw,24px);line-height:1.45;color:var(--ink);}
-  .comparison .ctext .big{color:var(--copper);font-weight:500;}
-
-  /* Section 7 apps */
-  .app-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);margin-top:48px;border:1px solid var(--line);}
-  .app{background:rgba(7,11,12,0.7);padding:28px 18px;min-height:160px;display:flex;flex-direction:column;justify-content:space-between;position:relative;}
-  .app .name{font-family:'Fraunces',serif;font-weight:400;font-size:24px;color:var(--ink);}
-  .app .st{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.18em;font-size:9px;color:var(--mono-dim);margin-top:6px;}
-  .app.flagship .name{color:var(--copper);}
-  .app.flagship .st{color:var(--copper);}
-  .app .idx{position:absolute;top:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--mono-dim);letter-spacing:0.1em;}
-  .closing{margin-top:72px;font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:clamp(28px,3.4vw,52px);
-    line-height:1.1;max-width:18ch;color:var(--ink);}
-  .closing .copper{font-style:normal;font-weight:400;}
-
-  footer{position:relative;z-index:2;padding:48px 64px 64px;border-top:1px solid var(--line);margin-top:40px;
-    display:flex;justify-content:space-between;align-items:center;}
-  footer .fl{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.2em;font-size:10.5px;color:var(--mono-dim);}
-  footer .fl .copper{color:var(--copper);}
-  footer .fr{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.2em;font-size:10.5px;color:var(--mono-dim);}
-
-  /* Scroll reveal */
-  .reveal{opacity:0;transform:translateY(28px);}
-  .reveal-line{opacity:0;transform:translateY(20px);}
-
-  /* Section index marker (right rail) */
-  .rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:14px;}
-  .rail a{width:18px;height:1px;background:var(--line);display:block;transition:background .4s, width .4s;}
-  .rail a.active{background:var(--copper);width:30px;}
-
-  /* Section number watermark */
-  .sec-num{position:absolute;top:90px;right:64px;font-family:'JetBrains Mono',monospace;font-size:10px;
-    letter-spacing:0.2em;color:var(--mono-dim);text-transform:uppercase;z-index:3;}
-  .sec-num .copper{color:var(--copper);}
-
-  @media (max-width:980px){
-    section{padding:100px 28px 60px;}
-    nav{padding:18px 24px;} nav ul{display:none;}
-    #s1 .hero-grid,.two-col,.two-col-panels,.field-grid,.facts,.app-strip{grid-template-columns:1fr;}
-    .field-record{justify-self:start;}
-    .sec-num{right:28px;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    color:#2a2622;
+    background:#ece7e1 url('assets/Background.png') center/cover no-repeat;
+    cursor:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  #scene{position:fixed;inset:0;z-index:1;}
+  .scrim{position:fixed;top:0;left:0;width:64%;height:62%;z-index:2;pointer-events:none;
+    background:radial-gradient(120% 95% at 12% 22%, rgba(236,231,225,0.72) 0%, rgba(236,231,225,0.28) 48%, rgba(236,231,225,0) 76%);}
+  .brand{position:fixed;top:4vh;left:5vw;z-index:3;height:140px;pointer-events:none;}
+  .brand img{height:100%;width:auto;display:block;}
+  .hero{position:fixed;z-index:3;left:5vw;max-width:26ch;pointer-events:none;
+    top:calc(4vh + 140px + 5vh);}
+  h1{
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(34px,5.4vw,72px);
+    line-height:1.05;
+    letter-spacing:-0.022em;
+    color:#1a1a1a;
+    text-wrap:balance;
+  }
+  h1 .chg{
+    color:#e23b3b;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    white-space:nowrap;
+  }
+  /* premium annotation card */
+  .tag{
+    position:fixed;z-index:5;pointer-events:none;
+    background:rgba(255,255,255,0.96);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    backdrop-filter:blur(14px) saturate(140%);
+    border:1px solid rgba(20,20,20,0.08);
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
+    padding:15px 16px 13px;
+    min-width:218px;max-width:248px;
+    opacity:0;transition:opacity .28s ease;
+    will-change:transform,opacity;
+  }
+  .tag.show{opacity:1;}
+  .tag .name{
+    font-weight:600;font-size:17px;letter-spacing:-0.012em;
+    color:#1a1a1a;line-height:1.2;
+  }
+  .tag .charge{
+    display:flex;align-items:center;gap:7px;margin-top:8px;
+    font-size:13px;letter-spacing:0;color:#6a6a6a;
+  }
+  .tag .charge .badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:16px;height:16px;flex:0 0 auto;border-radius:50%;
+    background:#e23b3b;color:#fff;font-size:11px;line-height:1;font-weight:700;
+  }
+  .tag .divider{
+    height:1px;margin:11px 0 9px;
+    background:rgba(20,20,20,0.08);
+  }
+  .tag .more{
+    display:inline-flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;
+    font-size:13px;color:#e23b3b;font-weight:500;
+    text-decoration:none;user-select:none;
+    border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease, gap .18s ease;
+  }
+  .tag .more:hover{border-bottom-color:#e23b3b;gap:8px;}
+  .tag .more .arrow{transition:transform .18s ease;}
+  .tag .more:hover .arrow{transform:translateX(2px);}
+  @media (max-width:720px){
+    .brand{height:92px;top:3vh;}
+    .hero{top:calc(3vh + 92px + 4vh);max-width:none;right:5vw;}
+    h1{font-size:clamp(26px,7.2vw,40px);}
+    .tag{min-width:188px;max-width:208px;padding:13px 14px 11px;}
+    .tag .name{font-size:15px;}
+    .tag .charge{font-size:12px;}
+    .tag .more{font-size:12px;}
   }
 </style>
 </head>
 <body>
-
-<canvas id="bg-canvas"></canvas>
-<div class="vignette"></div>
-
-<div class="corner c-tl"></div>
-<div class="corner c-tr"></div>
-<div class="corner c-bl"></div>
-<div class="corner c-br"></div>
-
-<nav>
-  <div class="brand">NanoFlashing<span>™</span></div>
-  <ul>
-    <li><a href="#s1" class="active">NanoFlashing</a></li>
-    <li><a href="#s3">Material</a></li>
-    <li><a href="#s6">Research</a></li>
-    <li><a href="#s7">Applications</a></li>
-    <li><a href="#s7">Index</a></li>
-  </ul>
-  <div class="nav-meta">NF—PLATFORM / 01</div>
-</nav>
-
-<div class="rail">
-  <a href="#s1" class="active" data-r="1"></a>
-  <a href="#s2" data-r="2"></a>
-  <a href="#s3" data-r="3"></a>
-  <a href="#s4" data-r="4"></a>
-  <a href="#s5" data-r="5"></a>
-  <a href="#s6" data-r="6"></a>
-  <a href="#s7" data-r="7"></a>
+<canvas id="scene"></canvas>
+<div class="scrim"></div>
+<div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+<div class="hero">
+  <h1>Most pollutants<br>carry a<br><span class="chg">negative charge.</span></h1>
 </div>
+<div class="tag" id="tag">
+  <div class="name" id="t-name">—</div>
+  <div class="charge"><span class="badge">⊖</span> Negatively charged</div>
+  <div class="divider"></div>
+  <a class="more" id="t-more" href="#">Learn more <span class="arrow">→</span></a>
+</div>
+<script>
+const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
+const tagEl=document.getElementById('tag'), tName=document.getElementById('t-name'), tMore=document.getElementById('t-more');
+tMore.addEventListener('click',e=>{e.preventDefault();});
 
-<main>
+let W=0,H=0,DPR=1,lastT=performance.now();
 
-<!-- SECTION 1 -->
-<section id="s1">
-  <div class="sec-num"><span class="copper">01</span> / 07 — HERO</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—01</span> / Charged-Material Platform</span></div>
-  <div class="hero-grid">
-    <div>
-      <h1 class="headline reveal">A permanent<br><span class="copper underline-copper italic">positive</span><br>charge pulls<br>pollution in.</h1>
-      <p class="sub reveal">Most pollutants carry a negative charge. NanoFlashing holds a permanent positive charge — built into the material itself — that captures them by physical action.</p>
-    </div>
-    <div class="field-record reveal">
-      <div class="panel">
-        <div class="panel-title"><span>Field Record</span><span class="tag">NF—01</span></div>
-        <div class="row"><span class="k">Facilities</span><span class="v lead">441</span></div>
-        <div class="row"><span class="k">Countries</span><span class="v lead">7</span></div>
-        <div class="row"><span class="k">Scientists</span><span class="v lead">31</span></div>
-        <div class="row"><span class="k">Institutes</span><span class="v lead">16</span></div>
-        <div class="row"><span class="k">Action</span><span class="v">physical</span></div>
-        <div class="row"><span class="k">Charge</span><span class="v">permanent</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION 2 -->
-<section id="s2">
-  <div class="sec-num"><span class="copper">02</span> / 07 — NEGATIVE</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—02</span> / The Negative Charge</span></div>
-  <div class="two-col">
-    <div>
-      <h2 class="headline reveal">Most pollutants carry a <span class="copper underline-copper italic">negative charge</span>.</h2>
-    </div>
-    <div>
-      <p class="sub reveal" style="margin-top:0;">The smoke and viruses in the air you breathe. The PFAS, nitrate and dyes in the water you drink. Completely different problems — but electrically, most of them share one trait: a negative charge.</p>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION 3 -->
-<section id="s3">
-  <div class="sec-num"><span class="copper">03</span> / 07 — ACTION</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—03</span> / What It Does</span></div>
-  <h2 class="headline reveal">It <span class="copper underline-copper italic">captures</span> the negative.<br>It <span class="cyan underline-copper italic" style="text-decoration-color:var(--cyan);">destroys</span> the living.</h2>
-  <p class="sub reveal">NanoFlashing holds a permanent positive charge, built into the material itself. It captures the negatively charged. The living part — viruses, bacteria, and fungi — it destroys on contact, by physical action. The charge does the work; the material is its permanent source.</p>
-  <div class="two-col-panels">
-    <div class="panel reveal">
-      <div class="panel-title"><span>Captured &amp; Held</span><span class="tag">PHYSICAL</span></div>
-      <div class="pill-list">
-        <span class="pill">smoke</span>
-        <span class="pill">particles</span>
-        <span class="pill">PFAS</span>
-        <span class="pill">nitrate</span>
-      </div>
-    </div>
-    <div class="panel reveal">
-      <div class="panel-title"><span>Captured &amp; Destroyed</span><span class="tag">BY PHYSICAL ACTION</span></div>
-      <div class="pill-list">
-        <span class="pill cyan">viruses</span>
-        <span class="pill cyan">bacteria</span>
-        <span class="pill cyan">fungi</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION 4 -->
-<section id="s4">
-  <div class="sec-num"><span class="copper">04</span> / 07 — THE FIELD</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—04</span> / The Field</span></div>
-  <h2 class="headline reveal">Eighteen pollutants. <span class="copper underline-copper italic">One trait.</span></h2>
-  <p class="sub reveal">Across the air you breathe and the water you drink, the things that foul our world share a negative charge — so one positive material reaches across all of them.</p>
-  <div class="field-grid">
-    <div class="group-card reveal">
-      <div class="ghead"><span class="accent">Captured &amp; Held</span></div>
-      <div class="gsub">Particles</div>
-      <ul>
-        <li>wildfire smoke</li>
-        <li>PM2.5 ultrafine</li>
-        <li>pollen</li>
-        <li>dust &amp; dust-mite</li>
-        <li>pet dander</li>
-        <li>microplastics</li>
-      </ul>
-    </div>
-    <div class="group-card reveal">
-      <div class="ghead"><span class="accent">Captured &amp; Held</span></div>
-      <div class="gsub">Molecular Anions</div>
-      <ul>
-        <li>PFAS</li>
-        <li>nitrate</li>
-        <li>anionic dye</li>
-        <li>sulfate</li>
-        <li>antibiotic</li>
-        <li>herbicide</li>
-        <li>hormone</li>
-        <li>phosphate</li>
-        <li>fluoride</li>
-      </ul>
-    </div>
-    <div class="group-card destroy reveal">
-      <div class="ghead"><span class="accent">Captured &amp; Destroyed</span></div>
-      <div class="gsub">By Physical Action</div>
-      <ul>
-        <li>viruses</li>
-        <li>bacteria</li>
-        <li>fungi</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION 5 -->
-<section id="s5">
-  <div class="sec-num"><span class="copper">05</span> / 07 — FORCE</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—05</span> / Why Conventional Fails</span></div>
-  <div class="two-col">
-    <div>
-      <h2 class="headline reveal">A filter is a barrier.<br>A charge is a <span class="copper underline-copper italic">force</span>.</h2>
-    </div>
-    <div>
-      <p class="sub reveal" style="margin-top:0;">Conventional filters fade as they load and can release what they trapped back into the air. A permanent charge does not fade and does not release — the capture is held, by physical action.</p>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION 6 -->
-<section id="s6">
-  <div class="sec-num"><span class="copper">06</span> / 07 — PROOF</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—06</span> / The Proof</span></div>
-  <h2 class="headline reveal">Not claimed. <span class="copper underline-copper italic">Measured.</span></h2>
-  <p class="sub reveal">NanoFlashing has been deployed, tested in the field, and reviewed by independent science.</p>
-  <div class="facts reveal">
-    <div class="fact"><div class="num">441</div><div class="lbl">Facilities</div></div>
-    <div class="fact"><div class="num">7</div><div class="lbl">Countries</div></div>
-    <div class="fact"><div class="num">31</div><div class="lbl">Scientists</div></div>
-    <div class="fact"><div class="num">16</div><div class="lbl">Research Institutes</div></div>
-    <div class="fact"><div class="num">19</div><div class="lbl">Field Sites</div></div>
-    <div class="fact"><div class="num">5</div><div class="lbl">Countries Field-Tested</div></div>
-    <div class="fact"><div class="num" style="font-size:clamp(22px,2vw,32px);line-height:1.1;">Peer-<br>reviewed</div><div class="lbl">Independent</div></div>
-    <div class="fact"><div class="num" style="font-size:clamp(22px,2vw,32px);line-height:1.1;">OEKO-<br>TEX</div><div class="lbl">Certified</div></div>
-  </div>
-  <div class="comparison reveal">
-    <div class="ctag">Side-by-Side Field Deployment</div>
-    <div class="ctext">In a side-by-side field deployment, the NanoFlashing vent ended <span class="big">−95.44%</span> versus the conventional tower over the same period.</div>
-  </div>
-</section>
-
-<!-- SECTION 7 -->
-<section id="s7">
-  <div class="sec-num"><span class="copper">07</span> / 07 — PLATFORM</div>
-  <div class="eyebrow reveal"><span class="dash"></span><span class="label"><span class="id">NF—07</span> / The Platform</span></div>
-  <h2 class="headline reveal">One <span class="copper underline-copper italic">charged</span> material.<br>A platform across applications.</h2>
-  <p class="sub reveal">Air is the proven flagship. The same permanent positive charge is in early research across water, textiles, food packaging, surfaces, and medical.</p>
-  <div class="app-strip reveal">
-    <div class="app flagship"><span class="idx">01</span><div class="name">Air</div><div class="st">Flagship · Proven</div></div>
-    <div class="app"><span class="idx">02</span><div class="name">Water</div><div class="st">Early Research</div></div>
-    <div class="app"><span class="idx">03</span><div class="name">Textiles</div><div class="st">Early Research</div></div>
-    <div class="app"><span class="idx">04</span><div class="name">Food packaging</div><div class="st">Early Research</div></div>
-    <div class="app"><span class="idx">05</span><div class="name">Surfaces</div><div class="st">Early Research</div></div>
-    <div class="app"><span class="idx">06</span><div class="name">Medical</div><div class="st">Early Research</div></div>
-  </div>
-  <div class="closing reveal">The <span class="copper">charge</span> does the work.<br>The <span class="copper">material</span> is its permanent source.</div>
-</section>
-
-</main>
-
-<footer>
-  <div class="fl">NanoFlashing<span class="copper">™</span> · Charged-Material Platform</div>
-  <div class="fr">Contact</div>
-</footer>
-
-<script type="importmap">
-{
-  "imports":{
-    "three":"https://unpkg.com/three@0.160.0/build/three.module.js"
-  }
-}
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-<script type="module">
-import * as THREE from 'three';
-
-/* ===== Volumetric warm light-field WebGL background ===== */
-const canvas = document.getElementById('bg-canvas');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x070b0c, 1);
-
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x070b0c, 0.055);
-
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.set(0,0,9);
-
-/* Warm light-field: layered planes of soft glowing wisps via shader */
-const vert = `
-  varying vec2 vUv;
-  void main(){
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-  }
-`;
-
-const frag = `
-  precision highp float;
-  varying vec2 vUv;
-  uniform float uTime;
-  uniform vec2 uRes;
-  uniform vec2 uMouse;
-
-  // hash + noise
-  float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
-  float noise(vec2 p){
-    vec2 i = floor(p); vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i+vec2(1.0,0.0));
-    float c = hash(i+vec2(0.0,1.0));
-    float d = hash(i+vec2(1.0,1.0));
-    vec2 u = f*f*(3.0-2.0*f);
-    return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;
-  }
-  float fbm(vec2 p){
-    float v = 0.0; float a = 0.5;
-    for(int i=0;i<6;i++){
-      v += a*noise(p);
-      p *= 2.02; a *= 0.5;
-    }
-    return v;
-  }
-
-  void main(){
-    vec2 uv = vUv;
-    vec2 p = (uv - 0.5);
-    p.x *= uRes.x/uRes.y;
-
-    float t = uTime*0.04;
-
-    // drifting warm field
-    vec2 q = p*1.6 + vec2(t*1.2, t*0.6);
-    float n1 = fbm(q + fbm(q*0.6 + t));
-    float n2 = fbm(q*2.1 - vec2(t*0.8, t*1.4) + n1);
-
-    // volumetric rays — soft radial bias toward upper-left warm source
-    vec2 src = vec2(-0.30, 0.26) + uMouse*0.15;
-    float d = length(p - src);
-    float radial = exp(-d*1.25) * 1.35;
-
-    // copper warm
-    vec3 copper = vec3(1.0, 0.616, 0.235);
-    vec3 copperDeep = vec3(0.769, 0.384, 0.102);
-    vec3 cyan = vec3(0.427, 0.835, 1.0);
-    vec3 base = vec3(0.027, 0.043, 0.047);
-
-    float warm = smoothstep(0.35, 0.95, n1) * radial;
-    float deep = smoothstep(0.2, 0.7, n2) * 0.35;
-    float cool = smoothstep(0.6, 0.95, fbm(p*3.0 + t*0.5)) * 0.06;
-
-    vec3 col = base;
-    col += copper * warm * 0.9;
-    col += copperDeep * deep * 0.6;
-    col += cyan * cool;
-
-    // fine grain
-    float grain = (hash(uv*uRes + t)*2.0 - 1.0)*0.018;
-    col += grain;
-
-    // gentle vignette
-    float vig = 1.0 - smoothstep(0.4, 1.2, length(p));
-    col *= mix(0.7, 1.0, vig);
-
-    gl_FragColor = vec4(col, 1.0);
-  }
-`;
-
-const uniforms = {
-  uTime:{value:0},
-  uRes:{value:new THREE.Vector2(window.innerWidth, window.innerHeight)},
-  uMouse:{value:new THREE.Vector2(0,0)}
-};
-
-const geo = new THREE.PlaneGeometry(120,80);
-const mat = new THREE.ShaderMaterial({vertexShader:vert, fragmentShader:frag, uniforms, depthWrite:false, depthTest:false});
-const quad = new THREE.Mesh(geo, mat);
-scene.add(quad);
-
-// Floating particles for depth (low-key)
-const pCount = 1800;
-const pGeo = new THREE.BufferGeometry();
-const pPos = new Float32Array(pCount*3);
-const pSize = new Float32Array(pCount);
-for(let i=0;i<pCount;i++){
-  pPos[i*3] = (Math.random()-0.5)*22;
-  pPos[i*3+1] = (Math.random()-0.5)*14;
-  pPos[i*3+2] = (Math.random()-0.5)*10 - 2;
-  pSize[i] = Math.random()*2.5 + 0.5;
-}
-pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
-pGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize,1));
-
-const pMat = new THREE.ShaderMaterial({
-  transparent:true,
-  depthWrite:false,
-  blending:THREE.AdditiveBlending,
-  uniforms:{uTime:{value:0}, uPixel:{value:renderer.getPixelRatio()}},
-  vertexShader:`
-    attribute float aSize;
-    uniform float uTime;
-    uniform float uPixel;
-    varying float vAlpha;
-    void main(){
-      vec3 p = position;
-      p.y += sin(uTime*0.3 + position.x*0.5)*0.4;
-      p.x += cos(uTime*0.2 + position.y*0.3)*0.3;
-      vec4 mv = modelViewMatrix * vec4(p,1.0);
-      gl_PointSize = aSize * uPixel * (8.0 / -mv.z);
-      gl_Position = projectionMatrix * mv;
-      vAlpha = 0.25 + 0.25*sin(uTime*0.6 + position.z);
-    }
-  `,
-  fragmentShader:`
-    varying float vAlpha;
-    void main(){
-      vec2 c = gl_PointCoord - 0.5;
-      float d = length(c);
-      float a = smoothstep(0.5, 0.0, d) * vAlpha;
-      vec3 col = mix(vec3(1.0,0.616,0.235), vec3(0.769,0.384,0.102), d*2.0);
-      gl_FragColor = vec4(col, a*0.5);
-    }
-  `
-});
-const points = new THREE.Points(pGeo, pMat);
-scene.add(points);
-
-// Mouse parallax
-let mx=0, my=0, tmx=0, tmy=0;
-window.addEventListener('pointermove', e=>{
-  tmx = (e.clientX/window.innerWidth - 0.5);
-  tmy = (e.clientY/window.innerHeight - 0.5);
+const SPECS=[
+  {key:'Wildfire_Smoke_Particle', name:'Wildfire smoke', rate:0.78},
+  {key:'Fungal_Spore',            name:'Fungal spore',    rate:0.67},
+  {key:'Virus',                   name:'Virus',           rate:0.54},
+  {key:'Bacteria',                name:'Bacteria',        rate:0.65},
+  {key:'Ultrafine_Particle',      name:'Ultrafine particle', rate:0.50},
+  {key:'PFAS',                    name:'PFAS',            rate:0.97},
+  {key:'Pollen',                  name:'Pollen',          rate:1.57},
+];
+SPECS.forEach(s=>{
+  const im=new Image(); im.src='assets/charged/'+s.key+'_charged.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
+  const v=document.createElement('video');
+  v.src='assets/videos/'+s.key+'_flashloop.mp4';
+  v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
+  s.vid=v; s.vReady=false;
+  const applyRate=()=>{ try{ v.playbackRate=s.rate; }catch(e){} };
+  v.addEventListener('loadeddata',()=>{ s.vReady=true; applyRate(); });
+  v.addEventListener('canplay',applyRate);
+  v.addEventListener('play',applyRate);
+  v.addEventListener('ratechange',()=>{ if(Math.abs(v.playbackRate-s.rate)>0.001){ try{v.playbackRate=s.rate;}catch(e){} } });
 });
 
-let scrollY = 0;
-window.addEventListener('scroll', ()=>{ scrollY = window.scrollY; });
+const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PROBE=new URLSearchParams(location.search).get('probe');
 
-const clock = new THREE.Clock();
-function render(){
-  const t = clock.getElapsedTime();
-  mx += (tmx - mx)*0.04;
-  my += (tmy - my)*0.04;
-  uniforms.uTime.value = t;
-  pMat.uniforms.uTime.value = t;
+const POSITIONS=[
+  {x:0.60,y:0.30},
+  {x:0.82,y:0.40},
+  {x:0.48,y:0.56},
+  {x:0.74,y:0.62},
+  {x:0.36,y:0.70},
+  {x:0.86,y:0.74},
+  {x:0.58,y:0.82},
+];
 
-  // camera drift with scroll + mouse
-  const scrollNorm = scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
-  camera.position.x = mx * 0.8;
-  camera.position.y = -my * 0.6 + scrollNorm*1.2;
-  camera.lookAt(mx*0.3, -my*0.2 + scrollNorm*0.6, 0);
-
-  renderer.render(scene, camera);
-  requestAnimationFrame(render);
+function pollutantPoint(i){
+  const p=POSITIONS[i%POSITIONS.length];
+  return {x:p.x*W, y:p.y*H};
 }
-render();
 
-window.addEventListener('resize', ()=>{
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
-});
+// ---------- dust ----------
+const NB=8;
+let dustB=[];
+function mote(){
+  const ang=Math.random()*Math.PI*2;
+  const sp=0.18+Math.random()*0.32;
+  return {
+    x:Math.random()*W, y:Math.random()*H,
+    vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
+    r:.55+Math.random()*1.7
+  };
+}
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth; H=window.innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const n=Math.round(Math.min(3800, W*H/520));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.08+b*0.045, motes:[]});
+  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
+}
+function updateDust(dt){
+  const f=dt/16.67;
+  for(const bucket of dustB){
+    for(const d of bucket.motes){
+      if(!REDUCED){
+        d.vx += (Math.random()-.5)*0.018*f;
+        d.vy += (Math.random()-.5)*0.018*f;
+        d.vx *= Math.pow(0.992, f);
+        d.vy *= Math.pow(0.992, f);
+        let sp = Math.hypot(d.vx, d.vy);
+        if(sp < 0.12){
+          if(sp < 1e-6){ const a=Math.random()*Math.PI*2; d.vx=Math.cos(a)*0.18; d.vy=Math.sin(a)*0.18; }
+          else { const k=0.18/sp; d.vx*=k; d.vy*=k; }
+          sp = 0.18;
+        } else if(sp > 0.5){
+          const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
+        }
+        d.x += d.vx*f; d.y += d.vy*f;
+      }
+      if(isNaN(d.x)||isNaN(d.y)||!isFinite(d.x)||!isFinite(d.y)){
+        d.x=Math.random()*W; d.y=Math.random()*H;
+        const a=Math.random()*Math.PI*2; const s=0.25;
+        d.vx=Math.cos(a)*s; d.vy=Math.sin(a)*s;
+        continue;
+      }
+      if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
+      if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
+    }
+  }
+}
+function drawDust(){
+  for(const bucket of dustB){
+    ctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
+    for(const d of bucket.motes){
+      ctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2);
+    }
+  }
+}
 
-/* ===== GSAP scroll reveals ===== */
-gsap.registerPlugin(ScrollTrigger);
+// ---------- lens state ----------
+const bub={x:0,y:0,tx:0,ty:0,R:0};
+let mouseActive=false,lastMove=-9999;
+let specIndex=0;
+let mode='auto';
+let autoIdx=0, autoState='glide', autoT0=0, autoStart={x:0,y:0};
 
-document.querySelectorAll('section').forEach(sec=>{
-  const items = sec.querySelectorAll('.reveal');
-  items.forEach((el, i)=>{
-    gsap.to(el, {
-      opacity:1, y:0,
-      duration:1.1,
-      ease:'power3.out',
-      delay: i*0.08,
-      scrollTrigger:{ trigger: el, start:'top 88%' }
-    });
+function targetR(){
+  const mobile = W<720;
+  if(mobile) return W*0.64*0.5;
+  return Math.min(W,H)*0.42*0.5;
+}
+
+function setSpec(i){
+  specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
+  SPECS.forEach((s,k)=>{
+    if(!s.vid) return;
+    if(k===specIndex){ s.vid.play().catch(()=>{}); try{s.vid.playbackRate=s.rate;}catch(e){} }
+    else { try{s.vid.pause();}catch(e){} }
   });
+  tName.textContent=SPECS[specIndex].name;
+}
+
+function findNearestSpec(x,y){
+  let best=0,bd=1e9;
+  for(let i=0;i<POSITIONS.length;i++){
+    const p=pollutantPoint(i);
+    const d=Math.hypot(p.x-x,p.y-y);
+    if(d<bd){bd=d;best=i;}
+  }
+  return best;
+}
+
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
+addEventListener('mousemove',e=>{
+  bub.tx=e.clientX; bub.ty=e.clientY;
+  mouseActive=true; lastMove=performance.now();
+  mode='mouse';
 });
+addEventListener('mouseleave',()=>{mouseActive=false;});
+addEventListener('touchmove',e=>{
+  if(e.touches[0]){bub.tx=e.touches[0].clientX;bub.ty=e.touches[0].clientY;mouseActive=true;lastMove=performance.now();mode='mouse';}
+},{passive:true});
+addEventListener('touchend',()=>{mouseActive=false;});
+addEventListener('resize',resize);
 
-/* Nav active + rail active */
-const sections = document.querySelectorAll('section');
-const navLinks = document.querySelectorAll('nav ul a');
-const railLinks = document.querySelectorAll('.rail a');
+function resetClock(){ lastT=performance.now(); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') resetClock(); });
+window.addEventListener('focus',resetClock);
 
-const io = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      const id = e.target.id;
-      navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+id));
-      const idx = Array.from(sections).findIndex(s=>s.id===id)+1;
-      railLinks.forEach(r=>r.classList.toggle('active', parseInt(r.dataset.r)===idx));
+resize();
+bub.x=W*0.5; bub.y=H*0.5; bub.tx=bub.x; bub.ty=bub.y;
+setSpec(PROBE!==null?(+PROBE||0):0);
+if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE||0).y; }
+
+// ---------- main loop ----------
+function tick(t){
+  const dt=Math.min(40, t-lastT);
+  lastT=t;
+
+  updateDust(dt);
+
+  if(PROBE!==null){
+    const p=pollutantPoint(+PROBE||0);
+    bub.x+=(p.x-bub.x)*0.2; bub.y+=(p.y-bub.y)*0.2;
+    bub.R+=(targetR()-bub.R)*0.15;
+    if(specIndex!==(+PROBE||0)) setSpec(+PROBE||0);
+  } else if(mode==='mouse' && t-lastMove<2600){
+    bub.x+=(bub.tx-bub.x)*0.16;
+    bub.y+=(bub.ty-bub.y)*0.16;
+    const near=findNearestSpec(bub.x,bub.y);
+    if(near!==specIndex) setSpec(near);
+  } else {
+    mode='auto';
+    const target=pollutantPoint(autoIdx);
+    if(autoState==='glide'){
+      const GLIDE=REDUCED?100:2400;
+      const el=t-autoT0;
+      if(el>=GLIDE){
+        bub.x=target.x; bub.y=target.y;
+        autoState='dwell'; autoT0=t;
+        if(specIndex!==autoIdx) setSpec(autoIdx);
+      } else {
+        const e=easeInOut(el/GLIDE);
+        bub.x=autoStart.x+(target.x-autoStart.x)*e;
+        bub.y=autoStart.y+(target.y-autoStart.y)*e;
+        if(el>GLIDE-30){bub.x=target.x;bub.y=target.y;}
+        if(el>GLIDE*0.55 && specIndex!==autoIdx) setSpec(autoIdx);
+      }
+    } else {
+      const DWELL=2500;
+      const el=t-autoT0;
+      bub.x=target.x; bub.y=target.y;
+      if(el>=DWELL){
+        autoIdx=(autoIdx+1)%SPECS.length;
+        autoState='glide'; autoT0=t;
+        autoStart={x:bub.x,y:bub.y};
+      }
     }
-  });
-},{threshold:0.4});
-sections.forEach(s=>io.observe(s));
+  }
+
+  bub.R+=(targetR()-bub.R)*0.12;
+  draw(t);
+  requestAnimationFrame(tick);
+}
+
+autoStart={x:bub.x,y:bub.y};
+autoT0=performance.now();
+
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  drawDust();
+  drawLens(t);
+  positionTag();
+}
+
+function drawLens(t){
+  const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
+
+  // 1. small soft contact shadow under the lens (offset ~8px, blurred, opacity ~0.18)
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y+8, R*0.94, 0, Math.PI*2);
+  ctx.fillStyle='rgba(40,34,28,0.18)';
+  ctx.filter='blur(14px)';
+  ctx.fill();
+  ctx.restore();
+
+  // 2. clip to circle and draw the specimen VIDEO covering the whole circle
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, R, 0, Math.PI*2);
+  ctx.clip();
+  const vw=(s.vReady && s.vid.videoWidth)?s.vid.videoWidth:(s.ready?s.img.naturalWidth:2);
+  const vh=(s.vReady && s.vid.videoHeight)?s.vid.videoHeight:(s.ready?s.img.naturalHeight:2);
+  const d=R*2;
+  let dw=d, dh=d;
+  if(vw&&vh){
+    const scale=Math.max(d/vw, d/vh);
+    dw=vw*scale; dh=vh*scale;
+  }
+  if(s.vReady && s.vid.readyState>=2){
+    ctx.drawImage(s.vid, x-dw/2, y-dh/2, dw, dh);
+  } else if(s.ready){
+    ctx.drawImage(s.img, x-dw/2, y-dh/2, dw, dh);
+  } else {
+    ctx.fillStyle='#e8e0d4';
+    ctx.fillRect(x-R,y-R,2*R,2*R);
+  }
+
+  // 2b. subtle inner-edge vignette (soft darkening only in last ~12% toward rim)
+  const vg=ctx.createRadialGradient(x,y,R*0.74, x,y,R);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(0.7,'rgba(20,16,12,0.04)');
+  vg.addColorStop(1,'rgba(20,16,12,0.22)');
+  ctx.fillStyle=vg;
+  ctx.fillRect(x-R,y-R,2*R,2*R);
+
+  // 2c. soft specular gloss in upper-left quadrant (light on a glass dome)
+  const gloss=ctx.createRadialGradient(x-R*0.42, y-R*0.42, R*0.02, x-R*0.42, y-R*0.42, R*0.95);
+  gloss.addColorStop(0,'rgba(255,255,255,0.42)');
+  gloss.addColorStop(0.35,'rgba(255,255,255,0.14)');
+  gloss.addColorStop(0.7,'rgba(255,255,255,0.0)');
+  gloss.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=gloss;
+  ctx.fillRect(x-R,y-R,2*R,2*R);
+  ctx.restore();
+
+  // 3. PREMIUM GLASS RIM
+  // 3a. thin bezel band just inside rim — subtle light→dark→light sheen
+  ctx.save();
+  ctx.lineWidth=6;
+  const bezel=ctx.createLinearGradient(x-R, y-R, x+R, y+R);
+  bezel.addColorStop(0,'rgba(255,255,255,0.55)');
+  bezel.addColorStop(0.5,'rgba(180,170,158,0.28)');
+  bezel.addColorStop(1,'rgba(255,255,255,0.42)');
+  ctx.strokeStyle=bezel;
+  ctx.beginPath(); ctx.arc(x,y,R-3,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // 3b. crisp bright rim highlight — full thin ring
+  ctx.save();
+  ctx.lineWidth=1.8;
+  ctx.strokeStyle='rgba(255,255,255,0.55)';
+  ctx.beginPath(); ctx.arc(x,y,R-0.9,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // bright upper-left arc (light source)
+  ctx.save();
+  ctx.lineWidth=2.2;
+  ctx.lineCap='round';
+  const rimGrad=ctx.createLinearGradient(x-R*0.7, y-R*0.7, x+R*0.7, y+R*0.7);
+  rimGrad.addColorStop(0,'rgba(255,255,255,0.98)');
+  rimGrad.addColorStop(0.45,'rgba(255,255,255,0.75)');
+  rimGrad.addColorStop(1,'rgba(255,255,255,0.25)');
+  ctx.strokeStyle=rimGrad;
+  ctx.beginPath(); ctx.arc(x,y,R-0.9, Math.PI*0.95, Math.PI*1.7); ctx.stroke();
+  ctx.restore();
+
+  // 3c. soft specular crescent on the upper-left rim edge
+  ctx.save();
+  ctx.lineWidth=3.2;
+  ctx.lineCap='round';
+  ctx.strokeStyle='rgba(255,255,255,0.85)';
+  ctx.beginPath(); ctx.arc(x,y,R-1.6, Math.PI*1.08, Math.PI*1.5); ctx.stroke();
+  ctx.restore();
+
+  // 3d. faint outer halo — glass melting into room (no hard border)
+  ctx.save();
+  ctx.lineWidth=2;
+  ctx.strokeStyle='rgba(255,255,255,0.18)';
+  ctx.beginPath(); ctx.arc(x,y,R+1.2,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // 3e. inner hairline for glass depth
+  ctx.save();
+  ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,0.30)';
+  ctx.beginPath(); ctx.arc(x,y,R-6.5,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- tag chip ----------
+function positionTag(){
+  const R=bub.R, x=bub.x, y=bub.y;
+  const chipW=tagEl.offsetWidth||220, chipH=tagEl.offsetHeight||96;
+  const sideRight = (x + R + 28 + chipW/2 < W - 8);
+  const side = sideRight ? 1 : -1;
+  const placeAbove = (y - R*0.5 - chipH/2 - 12 > 8);
+  const ang = side===1 ? (placeAbove? -Math.PI*0.28 : Math.PI*0.28)
+                       : (placeAbove? -Math.PI*0.72 : Math.PI*0.72);
+  const ax = x + Math.cos(ang)*R;
+  const ay = y + Math.sin(ang)*R;
+  const ex = x + Math.cos(ang)*(R+22);
+  const ey = y + Math.sin(ang)*(R+22);
+  const cx = ex + side*(chipW/2 + 6);
+  const cy = ey;
+
+  ctx.save();
+  // short thin connector from pin on rim to card
+  ctx.strokeStyle='rgba(60,54,46,0.45)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(ax,ay);
+  ctx.lineTo(ex,ey);
+  ctx.stroke();
+  // hotspot pin sitting ON the lens rim
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(ax,ay,3.2,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(226,59,59,0.9)';
+  ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(ax,ay,3.2,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#e23b3b';
+  ctx.beginPath(); ctx.arc(ax,ay,1.4,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  const left = Math.max(8, Math.min(W-chipW-8, cx-chipW/2));
+  const top  = Math.max(8, Math.min(H-chipH-8, cy-chipH/2));
+  tagEl.style.transform=`translate(${left}px, ${top}px)`;
+  tagEl.classList.add('show');
+}
+
+requestAnimationFrame(tick);
 </script>
 </body>
 </html>
