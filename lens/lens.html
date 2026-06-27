@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Specimen Charge Ring</title>
+<style>
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:#ece7e1;
+    overflow:hidden;
+  }
+  #stage{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #wrap{
+    position:relative;
+    line-height:0;
+  }
+  #spec{
+    display:block;
+    width:100%; height:100%;
+    object-fit: contain;
+  }
+  #svg{
+    position:absolute; inset:0;
+    pointer-events:none;
+  }
+  #detect{ display:none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="wrap">
+    <video id="spec" src="specimen.mp4" autoplay loop muted playsinline></video>
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ee524d"/><stop offset="50%" stop-color="#e8443f"/><stop offset="100%" stop-color="#d83a35"/>
+        </linearGradient>
+        <filter id="glow" x="-140%" y="-140%" width="380%" height="380%"><feGaussianBlur stdDeviation="0.55"/></filter>
+        <filter id="glowWide" x="-180%" y="-180%" width="460%" height="460%"><feGaussianBlur stdDeviation="1.1"/></filter>
+        <filter id="shadow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="0.2"/></filter>
+        <g id="marker">
+          <ellipse cx="0" cy="0.4" rx="0.8" ry="0.14" fill="#3a0a06" opacity="0.12" filter="url(#shadow)"/>
+          <circle cx="0" cy="0" r="1.4" fill="#e8443f" opacity="0.26" filter="url(#glowWide)"/>
+          <circle cx="0" cy="0" r="1.08" fill="#ef4a45" opacity="0.5" filter="url(#glow)"/>
+          <circle cx="0" cy="0" r="0.92" fill="url(#bodyGrad)"/>
+          <circle cx="0" cy="0" r="0.92" fill="none" stroke="#c2332e" stroke-width="0.03" opacity="0.35"/>
+          <rect x="-0.5" y="-0.1" width="1.0" height="0.2" rx="0.1" fill="#f7e7df"/>
+          <rect x="-0.5" y="0.075" width="1.0" height="0.025" rx="0.012" fill="#b22923" opacity="0.35"/>
+        </g>
+      </defs>
+      <g id="ring" opacity="0.85"></g>
+    </svg>
+  </div>
+</div>
+<canvas id="detect"></canvas>
+<script>
+(function(){
+  const svg    = document.getElementById('svg');
+  const ring   = document.getElementById('ring');
+  const wrap   = document.getElementById('wrap');
+  const detect = document.getElementById('detect');
+  const ctx    = detect.getContext('2d', {willReadFrequently:true});
+  const SVGNS  = 'http://www.w3.org/2000/svg';
+
+  const detectImg = new Image();
+  detectImg.src = 'specimen.png';
+
+  function frameSize(){
+    return Math.min(window.innerWidth, window.innerHeight);
+  }
+
+  function layout(){
+    const size = frameSize();
+    wrap.style.width  = size + 'px';
+    wrap.style.height = size + 'px';
+    svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+    svg.setAttribute('width',  size);
+    svg.setAttribute('height', size);
+    return size;
+  }
+
+  function build(){
+    const N = layout();
+    detect.width  = N;
+    detect.height = N;
+    ctx.clearRect(0,0,N,N);
+    ctx.drawImage(detectImg, 0, 0, N, N);
+
+    let imgData;
+    try {
+      imgData = ctx.getImageData(0, 0, N, N).data;
+    } catch(e){
+      return;
+    }
+
+    // body mask: pixels differing from #ece7e1 (236,231,225).
+    // Threshold lowered so WHITE specimen bodies (diff ~73 from bg) are captured.
+    const THRESH = 55;
+    const body = new Uint8Array(N * N);
+    for (let i = 0; i < N * N; i++){
+      const r = imgData[i*4], g = imgData[i*4+1], b = imgData[i*4+2];
+      if (Math.abs(r-236) + Math.abs(g-231) + Math.abs(b-225) > THRESH) body[i] = 1;
+    }
+
+    const cx = N / 2, cy = N / 2;
+    const markerDiameter = N * 0.04;
+    const markerRadius   = markerDiameter / 2;
+    const GAP            = 1.5 * markerDiameter;
+    const maxR           = Math.hypot(N, N) / 2;
+
+    const dirs = [];
+    for (let k = 0; k < 8; k++){
+      const ang = -Math.PI/2 + k * Math.PI/4;
+      dirs.push({dx: Math.cos(ang), dy: Math.sin(ang)});
+    }
+
+    function bodyHit(px, py){
+      if (px < 0 || px >= N || py < 0 || py >= N) return false;
+      return body[py * N + px] === 1;
+    }
+
+    const dots = [];
+    for (const d of dirs){
+      let farthest = -1;
+      for (let r = 0; r < maxR; r += 1){
+        const x = Math.round(cx + d.dx * r);
+        const y = Math.round(cy + d.dy * r);
+        if (x < 0 || x >= N || y < 0 || y >= N) break;
+        if (body[y * N + x]) farthest = r;
+      }
+      if (farthest < 0) continue;
+
+      // dot centre at farthest + markerRadius + GAP along the ray
+      let dist = farthest + markerRadius + GAP;
+      let dotX = cx + d.dx * dist;
+      let dotY = cy + d.dy * dist;
+
+      // safety: push outward while any body pixel sits within
+      // (markerRadius + margin) of the dot centre
+      const margin = markerRadius * 0.75;
+      const clearR = markerRadius + margin;
+      const scanR  = Math.ceil(clearR);
+      let guard = 0;
+      while (guard < 600){
+        let hit = false;
+        const ix = Math.round(dotX), iy = Math.round(dotY);
+        for (let yy = -scanR; yy <= scanR && !hit; yy++){
+          for (let xx = -scanR; xx <= scanR && !hit; xx++){
+            if (xx*xx + yy*yy > clearR*clearR) continue;
+            if (bodyHit(ix + xx, iy + yy)) hit = true;
+          }
+        }
+        if (!hit) break;
+        dist += markerRadius * 0.5;
+        dotX = cx + d.dx * dist;
+        dotY = cy + d.dy * dist;
+        guard++;
+      }
+
+      dots.push({x: dotX, y: dotY});
+    }
+
+    // remove lone dangling bottom dot
+    if (dots.length > 1){
+      const sorted = dots.slice().sort((a,b) => a.y - b.y);
+      const lowest = sorted[sorted.length - 1];
+      const next   = sorted[sorted.length - 2];
+      if (lowest.y - next.y > 1.3 * markerDiameter){
+        const idx = dots.indexOf(lowest);
+        if (idx >= 0) dots.splice(idx, 1);
+      }
+    }
+
+    // render
+    ring.innerHTML = '';
+    const scale = markerRadius;
+    for (const d of dots){
+      const u = document.createElementNS(SVGNS, 'use');
+      u.setAttribute('href', '#marker');
+      u.setAttribute('transform',
+        'translate(' + d.x.toFixed(2) + ',' + d.y.toFixed(2) + ') scale(' + scale.toFixed(4) + ')');
+      ring.appendChild(u);
+    }
+  }
+
+  function start(){ try { build(); } catch(e){ /* swallow */ } }
+
+  if (detectImg.complete && detectImg.naturalWidth > 0){
+    start();
+  } else {
+    detectImg.addEventListener('load', start, {once:true});
+    detectImg.addEventListener('error', function(){ }, {once:true});
+  }
+
+  let rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt = setTimeout(start, 120);
+  });
+})();
+</script>
+</body>
+</html>
