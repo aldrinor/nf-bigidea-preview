@@ -18,40 +18,77 @@
     -webkit-font-smoothing:antialiased;
   }
   #scene{position:fixed;inset:0;z-index:1;}
-  .scrim{position:fixed;top:0;left:0;width:62%;height:54%;z-index:2;pointer-events:none;
-    background:radial-gradient(120% 95% at 10% 18%, rgba(236,231,225,0.74) 0%, rgba(236,231,225,0.30) 46%, rgba(236,231,225,0) 74%);}
-  .brand{position:fixed;top:5vh;left:5vw;z-index:3;height:50px;pointer-events:none;}
+  .scrim{position:fixed;top:0;left:0;width:64%;height:62%;z-index:2;pointer-events:none;
+    background:radial-gradient(120% 95% at 12% 22%, rgba(236,231,225,0.72) 0%, rgba(236,231,225,0.28) 48%, rgba(236,231,225,0) 76%);}
+  .brand{position:fixed;top:4vh;left:5vw;z-index:3;height:140px;pointer-events:none;}
   .brand img{height:100%;width:auto;display:block;}
-  .hero{position:fixed;z-index:3;top:5vh;left:5vw;max-width:42ch;pointer-events:none;
-    margin-top:78px;}
-  h1{font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
-    font-weight:600;font-size:clamp(32px,4.8vw,64px);line-height:1.04;letter-spacing:-.022em;color:#2a2622;}
-  h1 .chg{color:#e23b3b;}
-  .tag{position:fixed;z-index:5;pointer-events:none;
-    background:rgba(255,255,255,0.94);
-    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,0.85);
-    box-shadow:0 10px 30px rgba(40,34,28,0.16), 0 1px 0 rgba(255,255,255,0.7) inset;
-    border-radius:14px;
-    padding:13px 16px 12px;
-    min-width:210px;max-width:240px;
+  .hero{position:fixed;z-index:3;left:5vw;max-width:26ch;pointer-events:none;
+    top:calc(4vh + 140px + 5vh);}
+  h1{
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(34px,5.4vw,72px);
+    line-height:1.05;
+    letter-spacing:-0.022em;
+    color:#1a1a1a;
+    text-wrap:balance;
+  }
+  h1 .chg{
+    color:#e23b3b;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    white-space:nowrap;
+  }
+  /* premium annotation card */
+  .tag{
+    position:fixed;z-index:5;pointer-events:none;
+    background:rgba(255,255,255,0.96);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    backdrop-filter:blur(14px) saturate(140%);
+    border:1px solid rgba(20,20,20,0.08);
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
+    padding:15px 16px 13px;
+    min-width:218px;max-width:248px;
     opacity:0;transition:opacity .28s ease;
     will-change:transform,opacity;
   }
   .tag.show{opacity:1;}
-  .tag .name{font-weight:600;font-size:15px;letter-spacing:-.012em;color:#2a2622;line-height:1.2;}
-  .tag .charge{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11.5px;letter-spacing:.01em;color:#6a625b;}
-  .tag .charge .sym{color:#e23b3b;font-weight:700;font-size:13px;line-height:1;}
-  .tag .more{margin-top:10px;display:inline-flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;
-    font-size:12px;color:#2a2622;font-weight:500;border-bottom:1px solid rgba(226,59,59,.45);padding-bottom:1px;
-    text-decoration:none;user-select:none;}
-  .tag .more:hover{color:#e23b3b;border-bottom-color:#e23b3b;}
+  .tag .name{
+    font-weight:600;font-size:17px;letter-spacing:-0.012em;
+    color:#1a1a1a;line-height:1.2;
+  }
+  .tag .charge{
+    display:flex;align-items:center;gap:7px;margin-top:8px;
+    font-size:13px;letter-spacing:0;color:#6a6a6a;
+  }
+  .tag .charge .badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:16px;height:16px;flex:0 0 auto;border-radius:50%;
+    background:#e23b3b;color:#fff;font-size:11px;line-height:1;font-weight:700;
+  }
+  .tag .divider{
+    height:1px;margin:11px 0 9px;
+    background:rgba(20,20,20,0.08);
+  }
+  .tag .more{
+    display:inline-flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;
+    font-size:13px;color:#e23b3b;font-weight:500;
+    text-decoration:none;user-select:none;
+    border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease, gap .18s ease;
+  }
+  .tag .more:hover{border-bottom-color:#e23b3b;gap:8px;}
+  .tag .more .arrow{transition:transform .18s ease;}
+  .tag .more:hover .arrow{transform:translateX(2px);}
   @media (max-width:720px){
-    .brand{height:40px;top:4vh;}
-    .hero{margin-top:58px;max-width:none;right:5vw;}
+    .brand{height:92px;top:3vh;}
+    .hero{top:calc(3vh + 92px + 4vh);max-width:none;right:5vw;}
     h1{font-size:clamp(26px,7.2vw,40px);}
-    .tag{min-width:180px;max-width:200px;padding:11px 13px 10px;}
-    .tag .name{font-size:14px;}
+    .tag{min-width:188px;max-width:208px;padding:13px 14px 11px;}
+    .tag .name{font-size:15px;}
+    .tag .charge{font-size:12px;}
+    .tag .more{font-size:12px;}
   }
 </style>
 </head>
@@ -60,12 +97,13 @@
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
 <div class="hero">
-  <h1>Most pollutants carry a <span class="chg">negative charge.</span></h1>
+  <h1>Most pollutants<br>carry a<br><span class="chg">negative charge.</span></h1>
 </div>
 <div class="tag" id="tag">
   <div class="name" id="t-name">—</div>
-  <div class="charge"><span class="sym">⊖</span> Negatively charged</div>
-  <a class="more" id="t-more">Learn more →</a>
+  <div class="charge"><span class="badge">⊖</span> Negatively charged</div>
+  <div class="divider"></div>
+  <a class="more" id="t-more" href="#">Learn more <span class="arrow">→</span></a>
 </div>
 <script>
 const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
@@ -117,7 +155,15 @@ function pollutantPoint(i){
 // ---------- dust ----------
 const NB=8;
 let dustB=[];
-function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:.55+Math.random()*1.7};}
+function mote(){
+  const ang=Math.random()*Math.PI*2;
+  const sp=0.18+Math.random()*0.32;
+  return {
+    x:Math.random()*W, y:Math.random()*H,
+    vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
+    r:.55+Math.random()*1.7
+  };
+}
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
@@ -132,11 +178,26 @@ function updateDust(dt){
   for(const bucket of dustB){
     for(const d of bucket.motes){
       if(!REDUCED){
-        d.vx+=(Math.random()-.5)*.012*f; d.vy+=(Math.random()-.5)*.012*f;
-        d.vx*=Math.pow(.95,f); d.vy*=Math.pow(.95,f);
-        d.x+=d.vx*f; d.y+=d.vy*f;
+        d.vx += (Math.random()-.5)*0.018*f;
+        d.vy += (Math.random()-.5)*0.018*f;
+        d.vx *= Math.pow(0.992, f);
+        d.vy *= Math.pow(0.992, f);
+        let sp = Math.hypot(d.vx, d.vy);
+        if(sp < 0.12){
+          if(sp < 1e-6){ const a=Math.random()*Math.PI*2; d.vx=Math.cos(a)*0.18; d.vy=Math.sin(a)*0.18; }
+          else { const k=0.18/sp; d.vx*=k; d.vy*=k; }
+          sp = 0.18;
+        } else if(sp > 0.5){
+          const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
+        }
+        d.x += d.vx*f; d.y += d.vy*f;
       }
-      if(isNaN(d.x)||isNaN(d.y)){d.x=Math.random()*W;d.y=Math.random()*H;d.vx=0;d.vy=0;continue;}
+      if(isNaN(d.x)||isNaN(d.y)||!isFinite(d.x)||!isFinite(d.y)){
+        d.x=Math.random()*W; d.y=Math.random()*H;
+        const a=Math.random()*Math.PI*2; const s=0.25;
+        d.vx=Math.cos(a)*s; d.vy=Math.sin(a)*s;
+        continue;
+      }
       if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
       if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
     }
@@ -271,11 +332,11 @@ function draw(t){
 function drawLens(t){
   const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
 
-  // 1. small soft contact shadow under the lens (offset ~8px, blurred, opacity ~0.16)
+  // 1. small soft contact shadow under the lens (offset ~8px, blurred, opacity ~0.18)
   ctx.save();
   ctx.beginPath();
   ctx.arc(x, y+8, R*0.94, 0, Math.PI*2);
-  ctx.fillStyle='rgba(40,34,28,0.16)';
+  ctx.fillStyle='rgba(40,34,28,0.18)';
   ctx.filter='blur(14px)';
   ctx.fill();
   ctx.restore();
@@ -302,7 +363,7 @@ function drawLens(t){
     ctx.fillRect(x-R,y-R,2*R,2*R);
   }
 
-  // 2b. subtle inner-edge vignette (soft darkening only in last ~12% toward rim) — defines lens, NOT a dark ring
+  // 2b. subtle inner-edge vignette (soft darkening only in last ~12% toward rim)
   const vg=ctx.createRadialGradient(x,y,R*0.74, x,y,R);
   vg.addColorStop(0,'rgba(0,0,0,0)');
   vg.addColorStop(0.7,'rgba(20,16,12,0.04)');
@@ -310,7 +371,7 @@ function drawLens(t){
   ctx.fillStyle=vg;
   ctx.fillRect(x-R,y-R,2*R,2*R);
 
-  // 2c. soft specular crescent / gloss in upper-left quadrant (light on a glass dome)
+  // 2c. soft specular gloss in upper-left quadrant (light on a glass dome)
   const gloss=ctx.createRadialGradient(x-R*0.42, y-R*0.42, R*0.02, x-R*0.42, y-R*0.42, R*0.95);
   gloss.addColorStop(0,'rgba(255,255,255,0.42)');
   gloss.addColorStop(0.35,'rgba(255,255,255,0.14)');
@@ -321,7 +382,7 @@ function drawLens(t){
   ctx.restore();
 
   // 3. PREMIUM GLASS RIM
-  // 3a. thin bezel band just inside rim — subtle light→dark→light sheen (thick glass edge)
+  // 3a. thin bezel band just inside rim — subtle light→dark→light sheen
   ctx.save();
   ctx.lineWidth=6;
   const bezel=ctx.createLinearGradient(x-R, y-R, x+R, y+R);
@@ -332,8 +393,7 @@ function drawLens(t){
   ctx.beginPath(); ctx.arc(x,y,R-3,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 
-  // 3b. crisp bright rim highlight — brightest at upper-left (light source), fading around the circle
-  // draw full thin ring first, then brighten the upper-left arc
+  // 3b. crisp bright rim highlight — full thin ring
   ctx.save();
   ctx.lineWidth=1.8;
   ctx.strokeStyle='rgba(255,255,255,0.55)';
@@ -352,7 +412,7 @@ function drawLens(t){
   ctx.beginPath(); ctx.arc(x,y,R-0.9, Math.PI*0.95, Math.PI*1.7); ctx.stroke();
   ctx.restore();
 
-  // 3c. soft specular crescent on the upper-left rim edge (on the glass edge, not over specimen)
+  // 3c. soft specular crescent on the upper-left rim edge
   ctx.save();
   ctx.lineWidth=3.2;
   ctx.lineCap='round';
@@ -378,12 +438,10 @@ function drawLens(t){
 // ---------- tag chip ----------
 function positionTag(){
   const R=bub.R, x=bub.x, y=bub.y;
-  const chipW=tagEl.offsetWidth||220, chipH=tagEl.offsetHeight||84;
+  const chipW=tagEl.offsetWidth||220, chipH=tagEl.offsetHeight||96;
   const sideRight = (x + R + 28 + chipW/2 < W - 8);
   const side = sideRight ? 1 : -1;
   const placeAbove = (y - R*0.5 - chipH/2 - 12 > 8);
-  const vSign = placeAbove ? -1 : 1;
-
   const ang = side===1 ? (placeAbove? -Math.PI*0.28 : Math.PI*0.28)
                        : (placeAbove? -Math.PI*0.72 : Math.PI*0.72);
   const ax = x + Math.cos(ang)*R;
@@ -394,16 +452,20 @@ function positionTag(){
   const cy = ey;
 
   ctx.save();
+  // short thin connector from pin on rim to card
   ctx.strokeStyle='rgba(60,54,46,0.45)';
   ctx.lineWidth=1;
   ctx.beginPath();
   ctx.moveTo(ax,ay);
   ctx.lineTo(ex,ey);
   ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,0.95)';
-  ctx.beginPath(); ctx.arc(ax,ay,2.4,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='rgba(60,54,46,0.4)';
-  ctx.lineWidth=1; ctx.beginPath(); ctx.arc(ax,ay,2.4,0,Math.PI*2); ctx.stroke();
+  // hotspot pin sitting ON the lens rim
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(ax,ay,3.2,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(226,59,59,0.9)';
+  ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(ax,ay,3.2,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#e23b3b';
+  ctx.beginPath(); ctx.arc(ax,ay,1.4,0,Math.PI*2); ctx.fill();
   ctx.restore();
 
   const left = Math.max(8, Math.min(W-chipW-8, cx-chipW/2));
