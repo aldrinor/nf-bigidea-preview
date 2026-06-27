@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Frame 2</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #8a817a;
+    --red: #e23b3b;
+    --paper: #edf0f2;
+    --line: rgba(26,26,26,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* Two stacked videos, cross-faded */
+  .video-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 600ms ease;
+    will-change: opacity;
+  }
+
+  #v-discharge { opacity: 1; z-index: 1; }
+  #v-hold      { opacity: 0; z-index: 2; }
+
+  /* Subtle cool wash to keep tone consistent */
+  .wash {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(237,240,242,0.55) 0%, rgba(237,240,242,0.0) 22%, rgba(237,240,242,0.0) 60%, rgba(237,240,242,0.78) 100%),
+      linear-gradient(90deg, rgba(237,240,242,0.40) 0%, rgba(237,240,242,0.0) 38%);
+  }
+
+  /* Top bar: logo */
+  .topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 28px 36px;
+    pointer-events: none;
+  }
+
+  .logo {
+    height: 130px;
+    width: auto;
+    display: block;
+    pointer-events: auto;
+  }
+  .logo .word { fill: var(--ink); }
+
+  /* Headline block — persistent, top-left under logo */
+  .headline-wrap {
+    position: absolute;
+    left: 36px;
+    top: 178px;
+    z-index: 10;
+    max-width: 640px;
+    pointer-events: none;
+  }
+
+  .headline-wrap::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    left: -16px;
+    right: -24px;
+    bottom: -24px;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(120% 120% at 0% 0%, rgba(237,240,242,0.82) 0%, rgba(237,240,242,0.55) 42%, rgba(237,240,242,0) 78%);
+  }
+
+  .kicker {
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    color: #4a4e52;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .headline {
+    font-size: clamp(28px, 3.4vw, 46px);
+    line-height: 1.12;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  .headline .accent { color: var(--red); }
+
+  /* Caption zone — bottom, with subtle scrim */
+  .caption-zone {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 10;
+    padding: 0 36px 44px 36px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .caption-zone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(237,240,242,0) 0%, rgba(237,240,242,0.85) 55%, rgba(237,240,242,0.95) 100%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .caption-block {
+    max-width: 560px;
+    transition: opacity 500ms ease;
+  }
+
+  .state-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .caption {
+    font-size: clamp(15px, 1.15vw, 18px);
+    line-height: 1.5;
+    color: var(--ink);
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+
+  /* Replay affordance */
+  .replay {
+    pointer-events: auto;
+    appearance: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+    padding: 8px 0;
+    transition: color 200ms ease;
+  }
+  .replay:hover { color: var(--ink); }
+  .replay svg { width: 14px; height: 14px; }
+  .replay .ring {
+    transform-origin: center;
+    transition: transform 600ms cubic-bezier(.4,.0,.2,1);
+  }
+  .replay:hover .ring { transform: rotate(-120deg); }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .topbar { padding: 18px 20px; }
+    .logo { height: 64px; }
+    .headline-wrap {
+      left: 20px;
+      right: 20px;
+      top: 110px;
+      max-width: none;
+    }
+    .kicker { font-size: 12px; margin-bottom: 12px; }
+    .headline { font-size: 26px; line-height: 1.16; }
+    .caption-zone {
+      padding: 0 20px 28px 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+    }
+    .caption-block { max-width: 100%; }
+    .state-label { font-size: 12px; }
+    .caption { font-size: 15px; line-height: 1.5; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .video-layer { transition: none; }
+    .caption-block { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <video id="v-discharge" class="video-layer" muted playsinline preload="auto"
+           src="assets/videos/frame2_discharge.mp4"></video>
+    <video id="v-hold" class="video-layer" muted playsinline loop preload="auto"
+           src="assets/videos/frame2_hold.mp4"></video>
+
+    <div class="wash"></div>
+
+    <div class="topbar">
+      <img class="logo" src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing">
+    </div>
+
+    <div class="headline-wrap">
+      <div class="kicker">Charge, not chemistry. Built in, not sprayed on.</div>
+      <h1 class="headline">
+        Watch an ordinary filter lose its charge. <span class="accent">Ours never does.</span>
+      </h1>
+    </div>
+
+    <div class="caption-zone">
+      <div class="caption-block" id="cap-ordinary">
+        <div class="state-label" id="state-label">
+          <span id="state-text">An ordinary filter</span>
+        </div>
+        <p class="caption" id="caption-text">
+          Its charge is sprayed on. It fades in weeks — and the filter becomes the source.
+        </p>
+      </div>
+
+      <button class="replay" id="replay" type="button" aria-label="Replay sequence">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <g class="ring">
+            <path d="M3 12a9 9 0 1 0 3-6.7"/>
+            <polyline points="3 4 3 9 8 9"/>
+          </g>
+        </svg>
+        <span>Replay</span>
+      </button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const discharge = document.getElementById('v-discharge');
+  const hold      = document.getElementById('v-hold');
+  const stateLabel = document.getElementById('state-label');
+  const stateText  = document.getElementById('state-text');
+  const captionText = document.getElementById('caption-text');
+  const capBlock    = document.getElementById('cap-ordinary');
+  const replayBtn   = document.getElementById('replay');
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const STATE = {
+    ordinary: {
+      label: 'An ordinary filter',
+      caption: 'Its charge is sprayed on. It fades in weeks — and the filter becomes the source.',
+      nano: false
+    },
+    nano: {
+      label: 'NanoFlashing',
+      caption: 'Ours is built into the fiber. It captures the inert and destroys the living, by physical action.',
+      nano: true
+    }
+  };
+
+  let phase = 'idle'; // 'discharge' | 'hold'
+
+  function setCaption(state) {
+    // gentle cross-fade of caption text
+    capBlock.style.opacity = '0';
+    setTimeout(() => {
+      stateText.textContent = state.label;
+      captionText.textContent = state.caption;
+      capBlock.style.opacity = '1';
+    }, 260);
+  }
+
+  function showDischarge() {
+    discharge.style.opacity = '1';
+    hold.style.opacity = '0';
+  }
+  function showHold() {
+    discharge.style.opacity = '0';
+    hold.style.opacity = '1';
+  }
+
+  function playSequence() {
+    if (reduceMotion) {
+      // Static hold frame + headline + both captions visible
+      showHold();
+      hold.currentTime = 0;
+      try { hold.pause(); } catch(e){}
+      setCaption(STATE.ordinary);
+      // Show both captions stacked? Spec says show hold still + headline + both captions.
+      // We'll show ordinary briefly then nano, but reduced motion = no autoplay.
+      // Simplest: show nano state (the persistent truth) and include ordinary caption inline above.
+      stateText.textContent = 'An ordinary filter  →  NanoFlashing';
+      captionText.innerHTML =
+        'An ordinary filter: its charge is sprayed on. It fades in weeks — and the filter becomes the source.<br>' +
+        '<span style="color:var(--muted)">NanoFlashing: ours is built into the fiber. It captures the inert and destroys the living, by physical action.</span>';
+      return;
+    }
+
+    phase = 'discharge';
+    showDischarge();
+    setCaption(STATE.ordinary);
+
+    // Reset videos
+    try { hold.pause(); } catch(e){}
+    discharge.currentTime = 0;
+    discharge.play().catch(()=>{});
+  }
+
+  discharge.addEventListener('ended', () => {
+    phase = 'hold';
+    showHold();
+    setCaption(STATE.nano);
+    hold.currentTime = 0;
+    hold.play().catch(()=>{});
+  });
+
+  replayBtn.addEventListener('click', () => {
+    playSequence();
+  });
+
+  // Safety: if discharge fails to fire 'ended', fall back after a timeout
+  discharge.addEventListener('error', () => {
+    showHold(); setCaption(STATE.nano); phase='hold'; hold.play().catch(()=>{});
+  });
+  hold.addEventListener('error', () => { /* nothing graceful */ });
+
+  // Kick off once metadata is ready (or immediately)
+  if (discharge.readyState >= 1) {
+    playSequence();
+  } else {
+    discharge.addEventListener('loadedmetadata', playSequence, { once: true });
+    // Fallback start
+    setTimeout(() => { if (phase === 'idle') playSequence(); }, 800);
+  }
+})();
+</script>
+</body>
+</html>
