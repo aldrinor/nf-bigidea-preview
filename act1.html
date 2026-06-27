@@ -203,13 +203,21 @@ function updateDust(dt){
     }
   }
 }
+// soft round mote sprite (built once) — replaces hard square fillRect
+const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
+(function(){const m=moteSprite.getContext('2d');
+  const g=m.createRadialGradient(9,9,0,9,9,9);
+  g.addColorStop(0,'rgba(74,66,58,0.95)'); g.addColorStop(0.45,'rgba(74,66,58,0.55)'); g.addColorStop(1,'rgba(74,66,58,0)');
+  m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
 function drawDust(){
   for(const bucket of dustB){
-    ctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
+    ctx.globalAlpha=bucket.a;
     for(const d of bucket.motes){
-      ctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2);
+      const s=d.r*3.0;
+      ctx.drawImage(moteSprite, d.x-s/2, d.y-s/2, s, s);
     }
   }
+  ctx.globalAlpha=1;
 }
 
 // ---------- lens state ----------
