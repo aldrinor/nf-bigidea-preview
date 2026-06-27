@@ -357,13 +357,13 @@ void main(){
   vec2 dir=d/max(r,0.0001);
   vec2 bgUv=px/uResolution;
   vec3 col=texture2D(uTex,bgUv).rgb;
-  // drop shadow (outside lens, offset down)
-  vec2 shC=uLensCenter+vec2(0.0,R*0.10);
-  float shR=R*1.22;
+  // drop shadow (outside lens, slight downward offset) — small, soft, natural contact shadow
+  vec2 shC=uLensCenter+vec2(0.0,R*0.06);
+  float shR=R*1.06;
   float shD=length(px-shC);
-  float shBand=smoothstep(shR,shR*0.80,shD);
-  float shMask=smoothstep(R*1.0,R*1.04,r);
-  float shadow=shBand*shMask*0.42;
+  float shBand=smoothstep(shR,R*0.99,shD);
+  float shMask=smoothstep(R*1.0,R*1.02,r);
+  float shadow=shBand*shMask*0.13;
   col*=1.0-shadow;
   vec2 L1=normalize(vec2(-0.72,-0.92));
   vec2 L2=normalize(vec2(-0.45,-0.78));
