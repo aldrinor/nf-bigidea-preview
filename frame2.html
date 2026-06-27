@@ -348,13 +348,21 @@
   });
   hold.addEventListener('error', () => { /* nothing graceful */ });
 
-  // Kick off once metadata is ready (or immediately)
-  if (discharge.readyState >= 1) {
-    playSequence();
-  } else {
-    discharge.addEventListener('loadedmetadata', playSequence, { once: true });
-    // Fallback start
-    setTimeout(() => { if (phase === 'idle') playSequence(); }, 800);
+  // Play fresh when the parent scrolls this frame into view (embedded narrative).
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'nf-play') playSequence();
+  });
+
+  const embedded = window.self !== window.top;
+  // Standalone: auto-play on load. Embedded: wait for the 'nf-play' trigger so the
+  // discharge arc is seen fresh when the viewer scrolls down to it.
+  if (!embedded) {
+    if (discharge.readyState >= 1) {
+      playSequence();
+    } else {
+      discharge.addEventListener('loadedmetadata', playSequence, { once: true });
+      setTimeout(() => { if (phase === 'idle') playSequence(); }, 800);
+    }
   }
 })();
 </script>
