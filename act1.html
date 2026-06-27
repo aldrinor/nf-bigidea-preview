@@ -2,193 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>NanoFlashing — The Big Idea · Act 01: The Field</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Microscope</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/open-props">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#231f20;
-    --ink-soft:#4a423c;
-    --muted:#8a817a;
-    --charge:#e23b3b;
-    --charge-deep:#b62a2a;
-    --scanner:#1b7bff;
-    --scanner-deep:#1558c8;
-    --paper:#ece7e1;
-    --glass-bg:rgba(255,255,255,0.55);
-    --glass-border:rgba(255,255,255,0.7);
-    --page-gutter:clamp(var(--size-5),5vw,var(--size-10));
-  }
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overflow:hidden;}
   body{
-    font-family:'Space Grotesk',system-ui,sans-serif;
-    color:var(--ink);
-    background:#0a0a0a;
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    color:#2a2622;
+    background:#ece7e1 url('assets/Background.png') center/cover no-repeat;
     cursor:none;
+    -webkit-font-smoothing:antialiased;
   }
-  #gl{position:fixed;inset:0;z-index:1;display:block;}
-  #overlay{position:fixed;inset:0;z-index:2;pointer-events:none;}
-
-  .scrim{
-    position:fixed;top:0;left:0;width:64%;height:54%;z-index:3;pointer-events:none;
-    background:radial-gradient(120% 95% at 6% 16%, rgba(236,231,225,0.82) 0%, rgba(236,231,225,0.34) 44%, rgba(236,231,225,0) 72%);
-  }
-  .scrim-bl{
-    position:fixed;left:0;bottom:0;width:48%;height:36%;z-index:3;pointer-events:none;
-    background:radial-gradient(120% 100% at 4% 88%, rgba(236,231,225,0.74) 0%, rgba(236,231,225,0.28) 50%, rgba(236,231,225,0) 78%);
-  }
-
-  .brand{position:fixed;top:var(--size-5);left:var(--page-gutter);z-index:6;height:26px;pointer-events:none;}
+  #scene{position:fixed;inset:0;z-index:1;}
+  .scrim{position:fixed;top:0;left:0;width:62%;height:54%;z-index:2;pointer-events:none;
+    background:radial-gradient(120% 95% at 10% 18%, rgba(236,231,225,0.74) 0%, rgba(236,231,225,0.30) 46%, rgba(236,231,225,0) 74%);}
+  .brand{position:fixed;top:5vh;left:5vw;z-index:3;height:50px;pointer-events:none;}
   .brand img{height:100%;width:auto;display:block;}
-
-  .hero{position:fixed;z-index:5;top:9vh;left:var(--page-gutter);max-width:46ch;pointer-events:none;}
-  .eyebrow{
-    display:flex;align-items:center;gap:10px;
-    font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:500;letter-spacing:.28em;
-    text-transform:uppercase;color:var(--muted);margin-bottom:var(--size-5);
-  }
-  .eyebrow .glyph{
-    width:15px;height:15px;border:1.5px solid var(--charge);border-radius:50%;
-    position:relative;flex:0 0 auto;
-  }
-  .eyebrow .glyph::after{
-    content:'';position:absolute;top:50%;left:3px;right:3px;height:1.5px;
-    background:var(--charge);transform:translateY(-50%);
-  }
-  .eyebrow .div{width:18px;height:1px;background:rgba(138,129,122,.5);}
-  h1{
-    font-family:'Instrument Serif',serif;font-weight:400;
-    font-size:clamp(2.75rem,6vw,6rem);line-height:1.0;letter-spacing:-0.015em;color:var(--ink);
-  }
-  h1 .chg{font-style:italic;color:var(--charge);}
-  .sub{
-    margin-top:var(--size-5);font-size:clamp(1rem,1.3vw,1.25rem);line-height:1.5;
-    color:var(--ink-soft);max-width:34ch;font-weight:400;
-  }
-
-  .readout{
-    position:fixed;z-index:5;left:var(--page-gutter);bottom:6vh;pointer-events:none;
-    display:flex;align-items:stretch;
-    background:var(--glass-bg);
-    backdrop-filter:blur(18px) saturate(1.2);
-    -webkit-backdrop-filter:blur(18px) saturate(1.2);
-    border:1px solid var(--glass-border);
+  .hero{position:fixed;z-index:3;top:5vh;left:5vw;max-width:42ch;pointer-events:none;
+    margin-top:78px;}
+  h1{font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    font-weight:600;font-size:clamp(32px,4.8vw,64px);line-height:1.04;letter-spacing:-.022em;color:#2a2622;}
+  h1 .chg{color:#e23b3b;}
+  .tag{position:fixed;z-index:5;pointer-events:none;
+    background:rgba(255,255,255,0.94);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.85);
+    box-shadow:0 10px 30px rgba(40,34,28,0.16), 0 1px 0 rgba(255,255,255,0.7) inset;
     border-radius:14px;
-    box-shadow:0 8px 28px rgba(40,34,28,.14), 0 1px 0 rgba(255,255,255,.55) inset;
-    overflow:hidden;
+    padding:13px 16px 12px;
+    min-width:210px;max-width:240px;
+    opacity:0;transition:opacity .28s ease;
+    will-change:transform,opacity;
   }
-  .readout .cell{padding:var(--size-2) var(--size-4);display:flex;flex-direction:column;justify-content:center;gap:4px;}
-  .readout .cell + .cell{border-left:1px solid rgba(255,255,255,.45);}
-  .readout .k{
-    font-family:'Space Grotesk',sans-serif;font-size:0.5625rem;font-weight:500;letter-spacing:.22em;
-    text-transform:uppercase;color:var(--muted);
-  }
-  .readout .v{
-    font-family:'Space Grotesk',sans-serif;font-size:0.875rem;font-weight:500;
-    color:var(--ink);letter-spacing:.01em;min-width:11ch;
-  }
-  .readout .live-cell{flex-direction:row;align-items:center;gap:9px;}
-  .readout .pulse{
-    width:7px;height:7px;border-radius:50%;background:var(--scanner);
-    box-shadow:0 0 10px rgba(27,123,255,.8);animation:pulse 2.2s infinite ease-in-out;
-  }
-  @keyframes pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
-  .readout .charge-cell .v{
-    color:var(--charge-deep);display:flex;align-items:center;gap:7px;
-    font-family:'Space Grotesk',sans-serif;font-size:0.6875rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
-  }
-  .charge-glyph{
-    width:14px;height:14px;border:1.5px solid var(--charge);border-radius:50%;position:relative;flex:0 0 auto;
-  }
-  .charge-glyph::after{content:'';position:absolute;top:50%;left:3px;right:3px;height:1.5px;background:var(--charge);transform:translateY(-50%);}
-
-  .hint{
-    position:fixed;z-index:5;right:var(--page-gutter);bottom:6vh;
-    font-family:'Space Grotesk',sans-serif;font-size:0.6rem;font-weight:500;letter-spacing:.26em;
-    text-transform:uppercase;color:var(--muted);opacity:.82;pointer-events:none;
-  }
-
-  .cursor-dot{
-    position:fixed;width:6px;height:6px;border-radius:50%;
-    background:rgba(255,255,255,.85);
-    pointer-events:none;transform:translate(-50%,-50%);z-index:10;
-    mix-blend-mode:difference;
-    left:50%;top:50%;
-  }
-
+  .tag.show{opacity:1;}
+  .tag .name{font-weight:600;font-size:15px;letter-spacing:-.012em;color:#2a2622;line-height:1.2;}
+  .tag .charge{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11.5px;letter-spacing:.01em;color:#6a625b;}
+  .tag .charge .sym{color:#e23b3b;font-weight:700;font-size:13px;line-height:1;}
+  .tag .more{margin-top:10px;display:inline-flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;
+    font-size:12px;color:#2a2622;font-weight:500;border-bottom:1px solid rgba(226,59,59,.45);padding-bottom:1px;
+    text-decoration:none;user-select:none;}
+  .tag .more:hover{color:#e23b3b;border-bottom-color:#e23b3b;}
   @media (max-width:720px){
-    :root{--page-gutter:var(--size-3);}
-    .brand{top:var(--size-2);height:22px;}
-    .hero{top:6vh;max-width:none}
-    h1{font-size:clamp(1.75rem,8.4vw,2.75rem);line-height:1.05;}
-    .sub{font-size:0.875rem;max-width:32ch;margin-top:var(--size-3);}
-    .eyebrow{margin-bottom:var(--size-3);font-size:0.625rem;letter-spacing:.24em;}
-    .readout{bottom:4vh;flex-wrap:wrap;}
-    .readout .cell{padding:var(--size-2) var(--size-3);}
-    .readout .v{font-size:0.75rem;min-width:9ch;}
-    .hint{display:none}
-    .scrim{width:100%;height:46%}
+    .brand{height:40px;top:4vh;}
+    .hero{margin-top:58px;max-width:none;right:5vw;}
+    h1{font-size:clamp(26px,7.2vw,40px);}
+    .tag{min-width:180px;max-width:200px;padding:11px 13px 10px;}
+    .tag .name{font-size:14px;}
   }
 </style>
 </head>
 <body>
-<canvas id="gl"></canvas>
-<canvas id="overlay"></canvas>
-
+<canvas id="scene"></canvas>
 <div class="scrim"></div>
-<div class="scrim-bl"></div>
-
-<div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none'"></div>
-
+<div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
 <div class="hero">
-  <div class="eyebrow">
-    <span class="glyph"></span>
-    <span>The Big Idea</span>
-    <span class="div"></span>
-    <span>Act 01 · The Field</span>
-  </div>
   <h1>Most pollutants carry a <span class="chg">negative charge.</span></h1>
-  <p class="sub">Clean-looking air is full of them — drifting, invisible, charged. Move your cursor to scan the field.</p>
 </div>
-
-<div class="readout">
-  <div class="cell live-cell">
-    <span class="pulse"></span>
-    <span class="k">Scanning</span>
-  </div>
-  <div class="cell">
-    <span class="k">Specimen</span>
-    <span class="v" id="r-name">—</span>
-  </div>
-  <div class="cell">
-    <span class="k">Index</span>
-    <span class="v" id="r-count" style="font-size:0.8125rem;letter-spacing:.1em;">01 / 07</span>
-  </div>
-  <div class="cell charge-cell">
-    <span class="k">Net charge</span>
-    <span class="v"><span class="charge-glyph"></span>Negative</span>
-  </div>
+<div class="tag" id="tag">
+  <div class="name" id="t-name">—</div>
+  <div class="charge"><span class="sym">⊖</span> Negatively charged</div>
+  <a class="more" id="t-more">Learn more →</a>
 </div>
-
-<div class="hint">Idle → auto-scan</div>
-<div class="cursor-dot" id="cdot"></div>
-
 <script>
-"use strict";
+const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
+const tagEl=document.getElementById('tag'), tName=document.getElementById('t-name'), tMore=document.getElementById('t-more');
+tMore.addEventListener('click',e=>{e.preventDefault();});
 
-// ============ SPECIMEN ASSETS ============
+let W=0,H=0,DPR=1,lastT=performance.now();
+
 const SPECS=[
-  {key:'Wildfire_Smoke_Particle', name:'Wildfire smoke'},
-  {key:'Fungal_Spore',            name:'Fungal spore'},
-  {key:'Virus',                   name:'Virus'},
-  {key:'Bacteria',                name:'Bacteria'},
-  {key:'Ultrafine_Particle',      name:'Ultrafine particle'},
-  {key:'PFAS',                    name:'PFAS'},
-  {key:'Pollen',                  name:'Pollen'},
+  {key:'Wildfire_Smoke_Particle', name:'Wildfire smoke', rate:0.78},
+  {key:'Fungal_Spore',            name:'Fungal spore',    rate:0.67},
+  {key:'Virus',                   name:'Virus',           rate:0.54},
+  {key:'Bacteria',                name:'Bacteria',        rate:0.65},
+  {key:'Ultrafine_Particle',      name:'Ultrafine particle', rate:0.50},
+  {key:'PFAS',                    name:'PFAS',            rate:0.97},
+  {key:'Pollen',                  name:'Pollen',          rate:1.57},
 ];
 SPECS.forEach(s=>{
   const im=new Image(); im.src='assets/charged/'+s.key+'_charged.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
@@ -196,412 +89,330 @@ SPECS.forEach(s=>{
   v.src='assets/videos/'+s.key+'_flashloop.mp4';
   v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
   s.vid=v; s.vReady=false;
-  v.addEventListener('loadeddata',()=>{s.vReady=true;});
+  const applyRate=()=>{ try{ v.playbackRate=s.rate; }catch(e){} };
+  v.addEventListener('loadeddata',()=>{ s.vReady=true; applyRate(); });
+  v.addEventListener('canplay',applyRate);
+  v.addEventListener('play',applyRate);
+  v.addEventListener('ratechange',()=>{ if(Math.abs(v.playbackRate-s.rate)>0.001){ try{v.playbackRate=s.rate;}catch(e){} } });
 });
 
-// ============ BACKGROUND ============
-const bgImg=new Image();
-let bgReady=false;
-bgImg.onload=()=>{bgReady=true;};
-bgImg.src='assets/Background.png';
-
-// ============ STATE ============
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PROBE=new URLSearchParams(location.search).get('probe');
 
-const glCanvas=document.getElementById('gl');
-const ov=document.getElementById('overlay');
-const octx=ov.getContext('2d');
-const gl=glCanvas.getContext('webgl',{antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:false});
+const POSITIONS=[
+  {x:0.60,y:0.30},
+  {x:0.82,y:0.40},
+  {x:0.48,y:0.56},
+  {x:0.74,y:0.62},
+  {x:0.36,y:0.70},
+  {x:0.86,y:0.74},
+  {x:0.58,y:0.82},
+];
 
-const room=document.createElement('canvas');
-const rctx=room.getContext('2d');
-const specLayer=document.createElement('canvas');
-const sctx=specLayer.getContext('2d');
-
-// soft round dust sprite (pre-rendered radial gradient → faint, clean motes)
-const moteSprite=document.createElement('canvas');
-moteSprite.width=20; moteSprite.height=20;
-{
-  const ms=moteSprite.getContext('2d');
-  const g=ms.createRadialGradient(10,10,0,10,10,10);
-  g.addColorStop(0,'rgba(74,66,58,0.55)');
-  g.addColorStop(0.45,'rgba(74,66,58,0.18)');
-  g.addColorStop(1,'rgba(74,66,58,0)');
-  ms.fillStyle=g; ms.fillRect(0,0,20,20);
+function pollutantPoint(i){
+  const p=POSITIONS[i%POSITIONS.length];
+  return {x:p.x*W, y:p.y*H};
 }
 
-let W=0,H=0,DPR=1;
+// ---------- dust ----------
+const NB=8;
 let dustB=[];
-const NB=5;
+function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:.55+Math.random()*1.7};}
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
-  glCanvas.width=W*DPR; glCanvas.height=H*DPR;
-  glCanvas.style.width=W+'px'; glCanvas.style.height=H+'px';
-  ov.width=W*DPR; ov.height=H*DPR; ov.style.width=W+'px'; ov.style.height=H+'px';
-  octx.setTransform(DPR,0,0,DPR,0,0);
-  room.width=W; room.height=H;
-  specLayer.width=W; specLayer.height=H;
-  if(gl) gl.viewport(0,0,glCanvas.width,glCanvas.height);
-  const n=Math.round(Math.min(900, W*H/2400));
-  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.035+b*0.018, motes:[]});
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const n=Math.round(Math.min(3800, W*H/520));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.08+b*0.045, motes:[]});
   for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
 }
-function mote(){return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.10,vy:(Math.random()-.5)*.10,r:1.0+Math.random()*1.5};}
-
-// ============ LENS STATE ============
-const bub={x:0,y:0,tx:0,ty:0,R:0,sx:0,sy:0,t0:0};
-let mouseActive=false,lastMove=-9999,specIndex=0,autoTarget=null,autoT=0,distSinceAdvance=0,prevx=0,prevy=0,lockT=0;
-function now(){return performance.now();}
-function lensRadius(){
-  const vmin=Math.min(W,H);
-  const diameter=Math.max(280,Math.min(420,vmin*0.36));
-  return diameter*0.5;
-}
-
-const cdot=document.getElementById('cdot');
-addEventListener('mousemove',e=>{
-  bub.tx=e.clientX; bub.ty=e.clientY; mouseActive=true; lastMove=now();
-  cdot.style.left=e.clientX+'px'; cdot.style.top=e.clientY+'px';
-});
-addEventListener('mouseleave',()=>{mouseActive=false;});
-addEventListener('touchmove',e=>{
-  if(e.touches[0]){
-    bub.tx=e.touches[0].clientX; bub.ty=e.touches[0].clientY;
-    mouseActive=true; lastMove=now();
-    cdot.style.left=e.touches[0].clientX+'px'; cdot.style.top=e.touches[0].clientY+'px';
+function updateDust(dt){
+  const f=dt/16.67;
+  for(const bucket of dustB){
+    for(const d of bucket.motes){
+      if(!REDUCED){
+        d.vx+=(Math.random()-.5)*.012*f; d.vy+=(Math.random()-.5)*.012*f;
+        d.vx*=Math.pow(.95,f); d.vy*=Math.pow(.95,f);
+        d.x+=d.vx*f; d.y+=d.vy*f;
+      }
+      if(isNaN(d.x)||isNaN(d.y)){d.x=Math.random()*W;d.y=Math.random()*H;d.vx=0;d.vy=0;continue;}
+      if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
+      if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
+    }
   }
-},{passive:true});
-addEventListener('resize',resize);
-
-function pickAutoPoint(){
-  const ang=autoT*0.7; autoT++;
-  return {x:W*(0.42+0.22*Math.sin(ang*1.3)), y:H*(0.40+0.16*Math.sin(ang*0.9+1))};
 }
-function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
-function easeOut(t){return 1-Math.pow(1-t,3);}
+function drawDust(){
+  for(const bucket of dustB){
+    ctx.fillStyle='rgba(74,66,58,'+bucket.a.toFixed(2)+')';
+    for(const d of bucket.motes){
+      ctx.fillRect(d.x-d.r,d.y-d.r,d.r*2,d.r*2);
+    }
+  }
+}
 
-const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
+// ---------- lens state ----------
+const bub={x:0,y:0,tx:0,ty:0,R:0};
+let mouseActive=false,lastMove=-9999;
+let specIndex=0;
+let mode='auto';
+let autoIdx=0, autoState='glide', autoT0=0, autoStart={x:0,y:0};
+
+function targetR(){
+  const mobile = W<720;
+  if(mobile) return W*0.64*0.5;
+  return Math.min(W,H)*0.42*0.5;
+}
 
 function setSpec(i){
   specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
   SPECS.forEach((s,k)=>{
-    if(s.vid){
-      if(k===specIndex){ s.vid.play().catch(()=>{}); }
-      else { try{s.vid.pause();}catch(e){} }
-    }
+    if(!s.vid) return;
+    if(k===specIndex){ s.vid.play().catch(()=>{}); try{s.vid.playbackRate=s.rate;}catch(e){} }
+    else { try{s.vid.pause();}catch(e){} }
   });
-  const nm=SPECS[specIndex].name;
-  rName.textContent=nm;
-  rCount.textContent=String(specIndex+1).padStart(2,'0')+' / 07';
-  lockT=now();
+  tName.textContent=SPECS[specIndex].name;
 }
 
-// ============ WEBGL — LIQUID GLASS SHADER ============
-const VS=`
-attribute vec2 aPos;
-varying vec2 vUv;
-void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}
-`;
-const FS=`
-precision highp float;
-uniform sampler2D uTex;
-uniform sampler2D uSpec;
-uniform vec2 uResolution;
-uniform vec2 uLensCenter;
-uniform float uLensRadius;
-uniform float uTime;
-varying vec2 vUv;
-float hash21(vec2 p){p=fract(p*vec2(123.34,345.45));p+=dot(p,p+34.345);return fract(p.x*p.y);}
-void main(){
-  vec2 px=vUv*uResolution;
-  vec2 d=px-uLensCenter;
-  float r=length(d);
-  float R=uLensRadius;
-  float t=r/max(R,0.0001);
-  vec2 dir=d/max(r,0.0001);
-  vec2 bgUv=px/uResolution;
-  vec3 col=texture2D(uTex,bgUv).rgb;
-  // small soft contact shadow
-  vec2 shC=uLensCenter+vec2(0.0,R*0.06);
-  float shR=R*1.06;
-  float shD=length(px-shC);
-  float shBand=smoothstep(shR,R*0.99,shD);
-  float shMask=smoothstep(R*1.0,R*1.02,r);
-  float shadow=shBand*shMask*0.13;
-  col*=1.0-shadow;
-  // window light from upper-left (screen y is down → up = -y)
-  vec2 L1=normalize(vec2(-0.72,-0.92));
-  vec2 L2=normalize(vec2(-0.45,-0.78));
-  float angDot=dot(dir,L1);
-  if(t<1.0){
-    // barrel refraction of the room
-    float mag=1.30+0.42*pow(t,4.0);
-    float sampleDist=r*mag;
-    vec2 samplePos=uLensCenter+dir*sampleDist;
-    vec2 sUv=samplePos/uResolution;
-    // faint chromatic aberration at rim only
-    float caPx=2.3*pow(t,2.6);
-    vec2 caOff=dir*caPx/uResolution;
-    float rC=texture2D(uTex,sUv+caOff).r;
-    float gC=texture2D(uTex,sUv).g;
-    float bC=texture2D(uTex,sUv-caOff).b;
-    vec3 refr=vec3(rC,gC,bC);
-    // specimen: SHARP, magnified, no CA
-    vec4 spec=texture2D(uSpec,sUv);
-    col=mix(refr,spec.rgb,spec.a);
-    col*=1.035;
-    // inner glass-thickness shadow
-    float innerShade=smoothstep(0.74,1.0,t);
-    col*=1.0-innerShade*0.28;
-    float bevelInner=smoothstep(0.985,1.0,t);
-    col*=1.0-bevelInner*0.55;
-    // PRIMARY specular crescent — TIGHTER + BRIGHTER, catches window light (upper-left)
-    float crescent=pow(max(0.0,angDot),9.0);
-    crescent*=smoothstep(0.52,0.86,t);
-    crescent*=(1.0-smoothstep(0.90,1.0,t));
-    col+=vec3(1.0,0.99,0.97)*crescent*1.15;
-    // subtle darker thickness on the OPPOSITE (lower-right) edge — real crystal volume
-    float darkEdge=pow(max(0.0,-angDot),3.0);
-    darkEdge*=smoothstep(0.55,0.95,t);
-    col*=1.0-darkEdge*0.16;
-    // secondary glint (small, sharp)
-    float glint=pow(max(0.0,dot(dir,L2)),24.0);
-    glint*=smoothstep(0.66,0.86,t);
-    glint*=(1.0-smoothstep(0.90,0.99,t));
-    col+=vec3(1.0,0.98,0.94)*glint*0.75;
-    // crisp light-facing rim highlight
-    float rim=smoothstep(0.952,0.992,t)*(1.0-smoothstep(0.992,1.0,t));
-    float rimLight=pow(max(0.0,angDot),1.6);
-    col+=vec3(1.0)*rim*(0.35+1.05*rimLight);
-    // bottom transmitted edge light
-    float bottom=smoothstep(0.30,1.0,dir.y);
-    bottom*=smoothstep(0.93,0.992,t)*(1.0-smoothstep(0.992,1.0,t));
-    col+=vec3(1.0,0.95,0.86)*bottom*0.30;
-    // faint cool fresnel tint (clear glass, not blue)
-    float fres=pow(1.0-t,2.0);
-    col+=vec3(0.02,0.03,0.05)*(1.0-fres)*0.6;
-    // micro sparkle
-    float n=hash21(dir*73.0+uTime*0.05);
-    float spark=step(0.985,n)*smoothstep(0.6,0.95,t)*(1.0-smoothstep(0.97,1.0,t));
-    col+=vec3(1.0)*spark*0.5;
-  } else {
-    // outer rim glow (light side)
-    float outer=smoothstep(1.0,1.012,t)*(1.0-smoothstep(1.012,1.05,t));
-    col+=vec3(1.0)*outer*0.18*max(0.0,angDot);
-    float outerDark=smoothstep(1.0,1.008,t)*(1.0-smoothstep(1.008,1.03,t));
-    col*=1.0-outerDark*0.10*max(0.0,-angDot);
+function findNearestSpec(x,y){
+  let best=0,bd=1e9;
+  for(let i=0;i<POSITIONS.length;i++){
+    const p=pollutantPoint(i);
+    const d=Math.hypot(p.x-x,p.y-y);
+    if(d<bd){bd=d;best=i;}
   }
-  gl_FragColor=vec4(col,1.0);
-}
-`;
-function compile(type,src){
-  const s=gl.createShader(type);
-  gl.shaderSource(s,src); gl.compileShader(s);
-  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){
-    console.error('[LiquidGlass] shader error:',gl.getShaderInfoLog(s));
-    return null;
-  }
-  return s;
-}
-const vsh=compile(gl.VERTEX_SHADER,VS);
-const fsh=compile(gl.FRAGMENT_SHADER,FS);
-const prog=gl.createProgram();
-gl.attachShader(prog,vsh); gl.attachShader(prog,fsh);
-gl.linkProgram(prog);
-if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){
-  console.error('[LiquidGlass] link error:',gl.getProgramInfoLog(prog));
-}
-gl.useProgram(prog);
-const buf=gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
-const aPos=gl.getAttribLocation(prog,'aPos');
-gl.enableVertexAttribArray(aPos);
-gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
-const uTex=gl.getUniformLocation(prog,'uTex');
-const uSpec=gl.getUniformLocation(prog,'uSpec');
-const uRes=gl.getUniformLocation(prog,'uResolution');
-const uLens=gl.getUniformLocation(prog,'uLensCenter');
-const uRad=gl.getUniformLocation(prog,'uLensRadius');
-const uTime=gl.getUniformLocation(prog,'uTime');
-
-const tex=gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D,tex);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([214,196,174,255]));
-
-const specTex=gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D,specTex);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,0]));
-
-// ============ DRAW ROOM + DUST (NO specimen) ============
-function drawRoom(t){
-  rctx.clearRect(0,0,W,H);
-  if(bgReady){
-    rctx.drawImage(bgImg,0,0,W,H);
-  } else {
-    rctx.fillStyle='#ece7e1';
-    rctx.fillRect(0,0,W,H);
-  }
-  const lensCx=bub.x, lensCy=bub.y;
-  const lensFootR=bub.R*1.30;
-  const inLensAlphaScale=0.60;
-  if(!REDUCED){
-    for(const bucket of dustB){
-      for(const d of bucket.motes){
-        d.vx+=(Math.random()-.5)*.008; d.vy+=(Math.random()-.5)*.008;
-        d.vx*=.95; d.vy*=.95; d.x+=d.vx; d.y+=d.vy;
-        if(d.x<-8)d.x=W+8; if(d.x>W+8)d.x=-8; if(d.y<-8)d.y=H+8; if(d.y>H+8)d.y=-8;
-        const ddx=d.x-lensCx, ddy=d.y-lensCy;
-        const inLens=(ddx*ddx+ddy*ddy) < (lensFootR*lensFootR);
-        rctx.globalAlpha=bucket.a*(inLens?inLensAlphaScale:1.0);
-        const sz=d.r*4.5;
-        rctx.drawImage(moteSprite,d.x-sz,d.y-sz,sz*2,sz*2);
-      }
-    }
-    rctx.globalAlpha=1;
-  } else {
-    for(const bucket of dustB){
-      for(const d of bucket.motes){
-        const ddx=d.x-lensCx, ddy=d.y-lensCy;
-        const inLens=(ddx*ddx+ddy*ddy) < (lensFootR*lensFootR);
-        rctx.globalAlpha=bucket.a*(inLens?inLensAlphaScale:1.0);
-        const sz=d.r*4.5;
-        rctx.drawImage(moteSprite,d.x-sz,d.y-sz,sz*2,sz*2);
-      }
-    }
-    rctx.globalAlpha=1;
-  }
+  return best;
 }
 
-// ============ DRAW SPECIMEN (video only — dots + glow are baked in) ============
-function drawSpecimen(t){
-  const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
-  sctx.clearRect(0,0,W,H);
-  if(R<2) return;
-  if(!s.vReady && !s.ready) return;
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
 
-  // Enlarged: specimen body + baked red ⊖ dot-ring now fill ~85% of the lens diameter.
-  // d = drawn video size; clip to full lens radius so the feather can reach R*1.0.
-  const d=R*2.4;
-  const bob=Math.sin(t*0.0017)*R*0.018, sway=Math.cos(t*0.0011)*R*0.008;
-  const cx=x+sway, cy=y+bob;
+addEventListener('mousemove',e=>{
+  bub.tx=e.clientX; bub.ty=e.clientY;
+  mouseActive=true; lastMove=performance.now();
+  mode='mouse';
+});
+addEventListener('mouseleave',()=>{mouseActive=false;});
+addEventListener('touchmove',e=>{
+  if(e.touches[0]){bub.tx=e.touches[0].clientX;bub.ty=e.touches[0].clientY;mouseActive=true;lastMove=performance.now();mode='mouse';}
+},{passive:true});
+addEventListener('touchend',()=>{mouseActive=false;});
+addEventListener('resize',resize);
 
-  // Draw ONLY the video — it already contains the rotating 3D specimen, its red charge glow,
-  // and its ring of red ⊖ charge dots. No synthesized dots, no code-drawn glow.
-  sctx.save();
-  sctx.beginPath();
-  sctx.arc(cx,cy,R,0,Math.PI*2);
-  sctx.clip();
-  if(s.vReady && s.vid.readyState>=2){
-    try{ sctx.drawImage(s.vid, cx-d/2, cy-d/2, d, d); }catch(e){}
-  } else if(s.ready){
-    sctx.drawImage(s.img, cx-d/2, cy-d/2, d, d);
-  }
-  sctx.restore();
+function resetClock(){ lastT=performance.now(); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') resetClock(); });
+window.addEventListener('focus',resetClock);
 
-  // FEATHER ONLY the warm square background — fade starts at R*0.88 (just OUTSIDE the
-  // baked dot-ring) and reaches full transparency at R*1.0 (the clip edge).
-  // The specimen body, its glow, and its red ⊖ dots stay 100% opaque and SHARP.
-  sctx.globalCompositeOperation='destination-out';
-  const fade=sctx.createRadialGradient(cx,cy, R*0.88, cx,cy, R*1.0);
-  fade.addColorStop(0,'rgba(0,0,0,0)');   // inside R*0.88 → fully KEPT (specimen + all ⊖ dots)
-  fade.addColorStop(1,'rgba(0,0,0,1)');   // R*0.88→R*1.0 → only the warm bg corners fade out
-  sctx.fillStyle=fade;
-  sctx.fillRect(0,0,W,H);
-  sctx.globalCompositeOperation='source-over';
-}
+resize();
+bub.x=W*0.5; bub.y=H*0.5; bub.tx=bub.x; bub.ty=bub.y;
+setSpec(PROBE!==null?(+PROBE||0):0);
+if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE||0).y; }
 
-// ============ OVERLAY: lock-on focus beat only (no floating tag) ============
-function drawOverlay(t){
-  octx.clearRect(0,0,W,H);
-  const R=bub.R, x=bub.x, y=bub.y;
-  if(R<2) return;
+// ---------- main loop ----------
+function tick(t){
+  const dt=Math.min(40, t-lastT);
+  lastT=t;
 
-  const lockAge=t-lockT;
-  if(lockAge<700){
-    const e=easeOut(lockAge/700);
-    octx.strokeStyle='rgba(27,123,255,'+(0.7*(1-e))+')';
-    octx.lineWidth=1.6;
-    octx.beginPath(); octx.arc(x,y,R+e*R*0.4,0,Math.PI*2); octx.stroke();
-    octx.strokeStyle='rgba(255,255,255,'+(0.5*(1-e))+')';
-    octx.lineWidth=1.1;
-    octx.beginPath(); octx.arc(x,y,R-e*R*0.16,0,Math.PI*2); octx.stroke();
-  }
-}
-
-// ============ MAIN LOOP ============
-const t0=performance.now();
-function frame(now){
-  const t=now;
+  updateDust(dt);
 
   if(PROBE!==null){
-    bub.x += (W*0.5 - bub.x)*0.18;
-    bub.y += (H*0.46 - bub.y)*0.18;
-    bub.R += (lensRadius() - bub.R)*0.18;
-  } else if(REDUCED){
-    bub.x += (W*0.5 - bub.x)*0.12;
-    bub.y += (H*0.5 - bub.y)*0.12;
-    bub.R += (lensRadius() - bub.R)*0.12;
+    const p=pollutantPoint(+PROBE||0);
+    bub.x+=(p.x-bub.x)*0.2; bub.y+=(p.y-bub.y)*0.2;
+    bub.R+=(targetR()-bub.R)*0.15;
+    if(specIndex!==(+PROBE||0)) setSpec(+PROBE||0);
+  } else if(mode==='mouse' && t-lastMove<2600){
+    bub.x+=(bub.tx-bub.x)*0.16;
+    bub.y+=(bub.ty-bub.y)*0.16;
+    const near=findNearestSpec(bub.x,bub.y);
+    if(near!==specIndex) setSpec(near);
   } else {
-    if(mouseActive && t-lastMove<2500){
-      bub.x+=(bub.tx-bub.x)*.14; bub.y+=(bub.ty-bub.y)*.14;
-      distSinceAdvance+=Math.hypot(bub.x-prevx,bub.y-prevy);
-      if(distSinceAdvance>230){ setSpec(specIndex+1); distSinceAdvance=0; }
+    mode='auto';
+    const target=pollutantPoint(autoIdx);
+    if(autoState==='glide'){
+      const GLIDE=REDUCED?100:2400;
+      const el=t-autoT0;
+      if(el>=GLIDE){
+        bub.x=target.x; bub.y=target.y;
+        autoState='dwell'; autoT0=t;
+        if(specIndex!==autoIdx) setSpec(autoIdx);
+      } else {
+        const e=easeInOut(el/GLIDE);
+        bub.x=autoStart.x+(target.x-autoStart.x)*e;
+        bub.y=autoStart.y+(target.y-autoStart.y)*e;
+        if(el>GLIDE-30){bub.x=target.x;bub.y=target.y;}
+        if(el>GLIDE*0.55 && specIndex!==autoIdx) setSpec(autoIdx);
+      }
     } else {
-      if(!autoTarget){autoTarget=pickAutoPoint(); bub.sx=bub.x; bub.sy=bub.y; bub.t0=t;}
-      const GLIDE=4200, DWELL=3000, el=t-bub.t0;
-      if(el<GLIDE){ const e=easeInOut(el/GLIDE); bub.x=bub.sx+(autoTarget.x-bub.sx)*e; bub.y=bub.sy+(autoTarget.y-bub.sy)*e; }
-      else if(el<GLIDE+DWELL){ bub.x=autoTarget.x; bub.y=autoTarget.y; }
-      else { setSpec(specIndex+1); autoTarget=null; }
+      const DWELL=2500;
+      const el=t-autoT0;
+      bub.x=target.x; bub.y=target.y;
+      if(el>=DWELL){
+        autoIdx=(autoIdx+1)%SPECS.length;
+        autoState='glide'; autoT0=t;
+        autoStart={x:bub.x,y:bub.y};
+      }
     }
-    bub.R += (lensRadius() - bub.R)*0.12;
   }
-  prevx=bub.x; prevy=bub.y;
 
-  drawRoom(t);
-  gl.bindTexture(gl.TEXTURE_2D,tex);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,room);
-
-  drawSpecimen(t);
-  gl.bindTexture(gl.TEXTURE_2D,specTex);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,specLayer);
-
-  gl.uniform2f(uRes,W,H);
-  gl.uniform2f(uLens,bub.x,bub.y);
-  gl.uniform1f(uRad,bub.R);
-  gl.uniform1f(uTime,(t-t0)/1000);
-  gl.uniform1i(uTex,0);
-  gl.uniform1i(uSpec,1);
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D,tex);
-  gl.activeTexture(gl.TEXTURE1);
-  gl.bindTexture(gl.TEXTURE_2D,specTex);
-  gl.drawArrays(gl.TRIANGLES,0,6);
-
-  drawOverlay(t);
-
-  requestAnimationFrame(frame);
+  bub.R+=(targetR()-bub.R)*0.12;
+  draw(t);
+  requestAnimationFrame(tick);
 }
 
-// ============ INIT ============
-resize();
-bub.x=W*0.5; bub.y=H*0.5; bub.tx=W*0.5; bub.ty=H*0.5;
-setSpec(PROBE!==null?(+PROBE||0):0);
-requestAnimationFrame(frame);
+autoStart={x:bub.x,y:bub.y};
+autoT0=performance.now();
+
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  drawDust();
+  drawLens(t);
+  positionTag();
+}
+
+function drawLens(t){
+  const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
+
+  // 1. small soft contact shadow under the lens (offset ~8px, blurred, opacity ~0.16)
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y+8, R*0.94, 0, Math.PI*2);
+  ctx.fillStyle='rgba(40,34,28,0.16)';
+  ctx.filter='blur(14px)';
+  ctx.fill();
+  ctx.restore();
+
+  // 2. clip to circle and draw the specimen VIDEO covering the whole circle
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, R, 0, Math.PI*2);
+  ctx.clip();
+  const vw=(s.vReady && s.vid.videoWidth)?s.vid.videoWidth:(s.ready?s.img.naturalWidth:2);
+  const vh=(s.vReady && s.vid.videoHeight)?s.vid.videoHeight:(s.ready?s.img.naturalHeight:2);
+  const d=R*2;
+  let dw=d, dh=d;
+  if(vw&&vh){
+    const scale=Math.max(d/vw, d/vh);
+    dw=vw*scale; dh=vh*scale;
+  }
+  if(s.vReady && s.vid.readyState>=2){
+    ctx.drawImage(s.vid, x-dw/2, y-dh/2, dw, dh);
+  } else if(s.ready){
+    ctx.drawImage(s.img, x-dw/2, y-dh/2, dw, dh);
+  } else {
+    ctx.fillStyle='#e8e0d4';
+    ctx.fillRect(x-R,y-R,2*R,2*R);
+  }
+
+  // 2b. subtle inner-edge vignette (soft darkening only in last ~12% toward rim) — defines lens, NOT a dark ring
+  const vg=ctx.createRadialGradient(x,y,R*0.74, x,y,R);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(0.7,'rgba(20,16,12,0.04)');
+  vg.addColorStop(1,'rgba(20,16,12,0.22)');
+  ctx.fillStyle=vg;
+  ctx.fillRect(x-R,y-R,2*R,2*R);
+
+  // 2c. soft specular crescent / gloss in upper-left quadrant (light on a glass dome)
+  const gloss=ctx.createRadialGradient(x-R*0.42, y-R*0.42, R*0.02, x-R*0.42, y-R*0.42, R*0.95);
+  gloss.addColorStop(0,'rgba(255,255,255,0.42)');
+  gloss.addColorStop(0.35,'rgba(255,255,255,0.14)');
+  gloss.addColorStop(0.7,'rgba(255,255,255,0.0)');
+  gloss.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=gloss;
+  ctx.fillRect(x-R,y-R,2*R,2*R);
+  ctx.restore();
+
+  // 3. PREMIUM GLASS RIM
+  // 3a. thin bezel band just inside rim — subtle light→dark→light sheen (thick glass edge)
+  ctx.save();
+  ctx.lineWidth=6;
+  const bezel=ctx.createLinearGradient(x-R, y-R, x+R, y+R);
+  bezel.addColorStop(0,'rgba(255,255,255,0.55)');
+  bezel.addColorStop(0.5,'rgba(180,170,158,0.28)');
+  bezel.addColorStop(1,'rgba(255,255,255,0.42)');
+  ctx.strokeStyle=bezel;
+  ctx.beginPath(); ctx.arc(x,y,R-3,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // 3b. crisp bright rim highlight — brightest at upper-left (light source), fading around the circle
+  // draw full thin ring first, then brighten the upper-left arc
+  ctx.save();
+  ctx.lineWidth=1.8;
+  ctx.strokeStyle='rgba(255,255,255,0.55)';
+  ctx.beginPath(); ctx.arc(x,y,R-0.9,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // bright upper-left arc (light source)
+  ctx.save();
+  ctx.lineWidth=2.2;
+  ctx.lineCap='round';
+  const rimGrad=ctx.createLinearGradient(x-R*0.7, y-R*0.7, x+R*0.7, y+R*0.7);
+  rimGrad.addColorStop(0,'rgba(255,255,255,0.98)');
+  rimGrad.addColorStop(0.45,'rgba(255,255,255,0.75)');
+  rimGrad.addColorStop(1,'rgba(255,255,255,0.25)');
+  ctx.strokeStyle=rimGrad;
+  ctx.beginPath(); ctx.arc(x,y,R-0.9, Math.PI*0.95, Math.PI*1.7); ctx.stroke();
+  ctx.restore();
+
+  // 3c. soft specular crescent on the upper-left rim edge (on the glass edge, not over specimen)
+  ctx.save();
+  ctx.lineWidth=3.2;
+  ctx.lineCap='round';
+  ctx.strokeStyle='rgba(255,255,255,0.85)';
+  ctx.beginPath(); ctx.arc(x,y,R-1.6, Math.PI*1.08, Math.PI*1.5); ctx.stroke();
+  ctx.restore();
+
+  // 3d. faint outer halo — glass melting into room (no hard border)
+  ctx.save();
+  ctx.lineWidth=2;
+  ctx.strokeStyle='rgba(255,255,255,0.18)';
+  ctx.beginPath(); ctx.arc(x,y,R+1.2,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // 3e. inner hairline for glass depth
+  ctx.save();
+  ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,0.30)';
+  ctx.beginPath(); ctx.arc(x,y,R-6.5,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- tag chip ----------
+function positionTag(){
+  const R=bub.R, x=bub.x, y=bub.y;
+  const chipW=tagEl.offsetWidth||220, chipH=tagEl.offsetHeight||84;
+  const sideRight = (x + R + 28 + chipW/2 < W - 8);
+  const side = sideRight ? 1 : -1;
+  const placeAbove = (y - R*0.5 - chipH/2 - 12 > 8);
+  const vSign = placeAbove ? -1 : 1;
+
+  const ang = side===1 ? (placeAbove? -Math.PI*0.28 : Math.PI*0.28)
+                       : (placeAbove? -Math.PI*0.72 : Math.PI*0.72);
+  const ax = x + Math.cos(ang)*R;
+  const ay = y + Math.sin(ang)*R;
+  const ex = x + Math.cos(ang)*(R+22);
+  const ey = y + Math.sin(ang)*(R+22);
+  const cx = ex + side*(chipW/2 + 6);
+  const cy = ey;
+
+  ctx.save();
+  ctx.strokeStyle='rgba(60,54,46,0.45)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(ax,ay);
+  ctx.lineTo(ex,ey);
+  ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath(); ctx.arc(ax,ay,2.4,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(60,54,46,0.4)';
+  ctx.lineWidth=1; ctx.beginPath(); ctx.arc(ax,ay,2.4,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  const left = Math.max(8, Math.min(W-chipW-8, cx-chipW/2));
+  const top  = Math.max(8, Math.min(H-chipH-8, cy-chipH/2));
+  tagEl.style.transform=`translate(${left}px, ${top}px)`;
+  tagEl.classList.add('show');
+}
+
+requestAnimationFrame(tick);
 </script>
 </body>
 </html>
