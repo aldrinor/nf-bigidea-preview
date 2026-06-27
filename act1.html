@@ -82,7 +82,7 @@
   .tag .more .arrow{transition:transform .18s ease;}
   .tag .more:hover .arrow{transform:translateX(2px);}
   @media (max-width:720px){
-    .brand{height:92px;top:3vh;left:4vw;}
+    .brand{height:92px;top:3vh;left:50%;transform:translateX(-50%);}
     .hero{top:calc(3vh + 92px + 4vh);left:4vw;max-width:none;right:5vw;}
     h1{font-size:clamp(26px, 8vw, 44px);}
     h1 .line{white-space:normal;}
@@ -240,7 +240,7 @@ let autoIdx=0, autoState='glide', autoT0=0, autoStart={x:0,y:0};
 
 function targetR(){
   const mobile = W<720;
-  if(mobile) return W*0.64*0.5;
+  if(mobile) return W*0.32*0.5;
   return Math.min(W,H)*0.36*0.5;
 }
 
@@ -505,11 +505,9 @@ function positionTag(){
 
   const left = Math.max(8, Math.min(W-chipW-8, cx-chipW/2));
   let top  = Math.max(8, Math.min(H-chipH-8, cy-chipH/2));
-  if (!mobile) {
-    // Ensure tag does not overlap the headline area
-    const safeTop = H * 0.42; 
-    if (top < safeTop) top = safeTop;
-  }
+  // Ensure tag never overlaps the headline area (mobile guard added)
+  const safeTop = mobile ? H * 0.32 : H * 0.42;
+  if (top < safeTop) top = safeTop;
   tagEl.style.transform=`translate(${left}px, ${top}px)`;
   tagEl.classList.add('show');
 }
