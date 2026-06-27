@@ -23,7 +23,7 @@
   body.detail-active #scene{cursor:default;}
   .scrim{position:fixed;top:0;left:0;width:64%;height:62%;z-index:2;pointer-events:none;
     background:radial-gradient(120% 95% at 12% 22%, rgba(236,231,225,0.72) 0%, rgba(236,231,225,0.28) 48%, rgba(236,231,225,0) 76%);}
-  .brand{position:fixed;top:4vh;left:3vw;z-index:3;height:140px;pointer-events:none;transition:opacity .5s ease;}
+  .brand{position:fixed;top:4vh;left:3vw;z-index:7;height:140px;pointer-events:none;transition:opacity .5s ease;}
   .brand img{height:100%;width:auto;display:block;}
   .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
     top:calc(4vh + 140px + 5vh);transition:opacity .5s ease;}
@@ -102,11 +102,22 @@
   .sec{padding:20px 0; border-top:1px solid rgba(20,20,20,0.09);}
   .sec:first-of-type{border-top:0; padding-top:26px;}
   .sec .lab{
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
-    color:#8a817a; font-weight:500;
+    font-size:12px; letter-spacing:0;
+    color:#8a817a; font-weight:600;
   }
   .sec .body{font-size:16.5px; line-height:1.6; color:#2a2622; margin-top:10px;}
   .sec .src{font-size:12px; color:#8a7f74; margin-top:10px; font-style:italic;}
+
+  /* detail mode: solid clean background (no room) + bare specimen video (no lens) */
+  .detail-screen{position:fixed; inset:0; z-index:4; background:#ece7e1;
+    opacity:0; visibility:hidden; transition:opacity .5s ease, visibility .5s; pointer-events:none;}
+  body.detail-active .detail-screen{opacity:1; visibility:visible;}
+  .detail-vid{position:fixed; z-index:5; left:5vw; top:50%; transform:translateY(-50%);
+    width:min(40vw,500px); height:auto; opacity:0; visibility:hidden;
+    transition:opacity .5s ease, visibility .5s; pointer-events:none;
+    -webkit-mask:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);
+    mask:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);}
+  body.detail-active .detail-vid{opacity:1; visibility:visible;}
 
   @media (max-width:720px){
     .brand{height:92px;top:3vh;left:50%;transform:translateX(-50%);}
@@ -128,6 +139,7 @@
     .sec .body{font-size:15.5px;}
     .sec{padding:16px 0;}
     .sec:first-of-type{padding-top:20px;}
+    .detail-vid{left:50%; top:6vh; transform:translateX(-50%); width:62vw;}
   }
 </style>
 </head>
@@ -142,6 +154,8 @@
   <div class="name" id="t-name">—</div>
   <div class="whisper">Negatively Charged</div>
 </div>
+<div class="detail-screen" aria-hidden="true"></div>
+<video class="detail-vid" id="detailVid" muted loop playsinline preload="auto"></video>
 <aside class="detail" id="detail" aria-hidden="true">
   <button class="detail-close" id="detailClose" aria-label="Close detail view">&#10005;</button>
   <div class="detail-inner" id="detailInner"></div>
@@ -152,6 +166,7 @@ const tagEl=document.getElementById('tag'), tName=document.getElementById('t-nam
 const detailEl=document.getElementById('detail');
 const detailInner=document.getElementById('detailInner');
 const detailClose=document.getElementById('detailClose');
+const detailVid=document.getElementById('detailVid');
 const heroEl=document.querySelector('.hero');
 const brandEl=document.querySelector('.brand');
 
@@ -290,16 +305,16 @@ const DETAIL_DATA={
     title:"Wildfire Smoke",
     sub:"Ultrafine biomass soot",
     sections:[
-      {label:"WHAT IT IS",
+      {label:"What it is",
        body:"Wildfire smoke is mostly ultrafine soot: particles under 100 nanometres. By number they make up the bulk of the smoke — far smaller than what ordinary filters are built to catch.",
        source:"Ultrafine Particles from Residential Biomass Combustion, review (PMC6834185)"},
-      {label:"ITS CHARGE",
+      {label:"Its charge",
        body:"Combustion leaves this soot electrically charged: a known property of flame-born particles, and enough to act on — wood-smoke collectors pull it from the air by that charge alone, no power applied. It's an inert particle — captured and held, nothing released back.",
        source:"Naturally-charged soot collection, J. Cleaner Production 2021"},
-      {label:"HOW WIDESPREAD",
+      {label:"How widespread",
        body:"Exposure is effectively universal. In recent years, close to 100% of the continental U.S. population was exposed to wildfire smoke every year.",
        source:"Childs et al., Environ. Sci. Technol. (PMC10543292)"},
-      {label:"HEALTH IMPACT",
+      {label:"Health impact",
        body:"Now tied to about 40,000 U.S. deaths a year — and on a high-warming path, 70,000 by 2050. The ultrafine fraction crosses into the bloodstream, raising blood pressure and compounding heart and lung disease.",
        source:"Qiu et al., Nature 2025"}
     ]
@@ -371,7 +386,7 @@ if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE
 function renderDetail(i){
   const s=SPECS[i];
   const d=DETAIL_DATA[s.key];
-  let html=`<div class="kicker"><span class="charge-mark"></span>Negatively Charged Specimen</div>`;
+  let html='';
   if(d){
     html+=`<h2>${d.title}</h2><div class="sub">${d.sub}</div>`;
     d.sections.forEach(sec=>{
@@ -395,6 +410,8 @@ function enterDetail(i){
   mode='detail';
   if(specIndex!==detailIndex) setSpec(detailIndex);
   renderDetail(detailIndex);
+  detailVid.src='assets/videos/'+SPECS[detailIndex].key+'_flashloop.mp4';
+  detailVid.play().catch(()=>{});
 }
 
 function exitDetail(){
@@ -405,6 +422,7 @@ function exitDetail(){
   detailEl.setAttribute('aria-hidden','true');
   heroEl.style.opacity='';
   brandEl.style.opacity='';
+  try{ detailVid.pause(); }catch(e){}
   autoT0=performance.now(); autoState='glide'; autoStart={x:bub.x,y:bub.y};
   mode='auto';
 }
