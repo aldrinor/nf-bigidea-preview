@@ -68,15 +68,15 @@
 const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
 let W=0,H=0,DPR=1;
 const SPECS=[
-  {file:'Wildfire_Smoke_Particle_hyb.png', name:'Wildfire smoke'},
-  {file:'Fungal_Spore_hyb.png',            name:'Fungal spore'},
-  {file:'Virus_hyb.png',                   name:'Virus'},
-  {file:'Bacteria_hyb.png',                name:'Bacteria'},
-  {file:'Ultrafine_Particle_hyb.png',      name:'Ultrafine particle'},
-  {file:'PFAS_hyb.png',                    name:'PFAS'},
-  {file:'Pollen_hyb.png',                  name:'Pollen'},
+  {file:'Wildfire_Smoke_Particle_norm.png', name:'Wildfire smoke'},
+  {file:'Fungal_Spore_norm.png',            name:'Fungal spore'},
+  {file:'Virus_norm.png',                   name:'Virus'},
+  {file:'Bacteria_norm.png',                name:'Bacteria'},
+  {file:'Ultrafine_Particle_norm.png',      name:'Ultrafine particle'},
+  {file:'PFAS_norm.png',                    name:'PFAS'},
+  {file:'Pollen_norm.png',                  name:'Pollen'},
 ];
-SPECS.forEach(s=>{ const im=new Image(); im.src='assets/hyb/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true; });
+SPECS.forEach(s=>{ const im=new Image(); im.src='assets/glow/'+s.file; s.img=im; s.ready=false; im.onload=()=>s.ready=true; });
 const rName=document.getElementById('r-name'), rCount=document.getElementById('r-count');
 
 let dustB=[]; const NB=8;
