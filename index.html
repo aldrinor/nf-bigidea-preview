@@ -20,19 +20,20 @@
   #scene{position:fixed;inset:0;z-index:1;}
   .scrim{position:fixed;top:0;left:0;width:64%;height:62%;z-index:2;pointer-events:none;
     background:radial-gradient(120% 95% at 12% 22%, rgba(236,231,225,0.72) 0%, rgba(236,231,225,0.28) 48%, rgba(236,231,225,0) 76%);}
-  .brand{position:fixed;top:4vh;left:5vw;z-index:3;height:140px;pointer-events:none;}
+  .brand{position:fixed;top:4vh;left:3vw;z-index:3;height:140px;pointer-events:none;}
   .brand img{height:100%;width:auto;display:block;}
-  .hero{position:fixed;z-index:3;left:5vw;max-width:26ch;pointer-events:none;
+  .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
     top:calc(4vh + 140px + 5vh);}
   h1{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
     font-weight:600;
-    font-size:clamp(34px,5.4vw,72px);
-    line-height:1.05;
+    font-size:clamp(30px, 4.5vw, 66px);
+    line-height:1.1;
     letter-spacing:-0.022em;
     color:#1a1a1a;
     text-wrap:balance;
   }
+  h1 .line { display:block; white-space:nowrap; }
   h1 .chg{
     color:#e23b3b;
     font-weight:700;
@@ -42,38 +43,37 @@
   /* premium annotation card */
   .tag{
     position:fixed;z-index:5;pointer-events:none;
-    background:rgba(255,255,255,0.96);
-    -webkit-backdrop-filter:blur(14px) saturate(140%);
-    backdrop-filter:blur(14px) saturate(140%);
-    border:1px solid rgba(20,20,20,0.08);
-    border-radius:15px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
-    padding:15px 16px 13px;
-    min-width:218px;max-width:248px;
+    background:rgba(255,255,255,0.82);
+    -webkit-backdrop-filter:blur(16px) saturate(150%);
+    backdrop-filter:blur(16px) saturate(150%);
+    border:1px solid rgba(20,20,20,0.07);
+    border-radius:12px;
+    box-shadow:0 1px 2px rgba(20,16,12,0.04), 0 6px 18px rgba(20,16,12,0.08), 0 14px 40px rgba(20,16,12,0.06);
+    padding:13px 15px 11px;
+    min-width:204px;max-width:228px;
     opacity:0;transition:opacity .28s ease;
     will-change:transform,opacity;
   }
   .tag.show{opacity:1;}
   .tag .name{
-    font-weight:600;font-size:17px;letter-spacing:-0.012em;
-    color:#1a1a1a;line-height:1.2;
+    font-weight:600;font-size:16px;letter-spacing:-0.012em;
+    color:#14110d;line-height:1.22;
   }
   .tag .charge{
-    display:flex;align-items:center;gap:7px;margin-top:8px;
-    font-size:13px;letter-spacing:0;color:#6a6a6a;
+    display:flex;align-items:center;gap:6px;margin-top:6px;
+    font-size:12.5px;letter-spacing:0;color:#7a736b;font-weight:500;
   }
-  .tag .charge .badge{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:16px;height:16px;flex:0 0 auto;border-radius:50%;
-    background:#e23b3b;color:#fff;font-size:11px;line-height:1;font-weight:700;
+  .tag .charge .dot{
+    display:inline-block;width:6px;height:6px;flex:0 0 auto;border-radius:50%;
+    background:#e23b3b;box-shadow:0 0 0 2px rgba(226,59,59,0.14);
   }
   .tag .divider{
-    height:1px;margin:11px 0 9px;
-    background:rgba(20,20,20,0.08);
+    height:1px;margin:10px 0 8px;
+    background:rgba(20,20,20,0.07);
   }
   .tag .more{
     display:inline-flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;
-    font-size:13px;color:#e23b3b;font-weight:500;
+    font-size:12.5px;color:#e23b3b;font-weight:500;
     text-decoration:none;user-select:none;
     border-bottom:1px solid transparent;
     transition:color .15s ease, border-color .15s ease, gap .18s ease;
@@ -82,10 +82,11 @@
   .tag .more .arrow{transition:transform .18s ease;}
   .tag .more:hover .arrow{transform:translateX(2px);}
   @media (max-width:720px){
-    .brand{height:92px;top:3vh;}
-    .hero{top:calc(3vh + 92px + 4vh);max-width:none;right:5vw;}
-    h1{font-size:clamp(26px,7.2vw,40px);}
-    .tag{min-width:188px;max-width:208px;padding:13px 14px 11px;}
+    .brand{height:92px;top:3vh;left:4vw;}
+    .hero{top:calc(3vh + 92px + 4vh);left:4vw;max-width:none;right:5vw;}
+    h1{font-size:clamp(26px, 8vw, 44px);}
+    h1 .line{white-space:normal;}
+    .tag{min-width:180px;max-width:200px;padding:12px 13px 10px;}
     .tag .name{font-size:15px;}
     .tag .charge{font-size:12px;}
     .tag .more{font-size:12px;}
@@ -97,11 +98,11 @@
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
 <div class="hero">
-  <h1>Most pollutants<br>carry a<br><span class="chg">negative charge.</span></h1>
+  <h1><span class="line">Most pollutants</span><span class="line">carry a <span class="chg">negative charge.</span></span></h1>
 </div>
 <div class="tag" id="tag">
   <div class="name" id="t-name">—</div>
-  <div class="charge"><span class="badge">⊖</span> Negatively charged</div>
+  <div class="charge"><span class="dot"></span> Negatively charged</div>
   <div class="divider"></div>
   <a class="more" id="t-more" href="#">Learn more <span class="arrow">→</span></a>
 </div>
@@ -113,13 +114,13 @@ tMore.addEventListener('click',e=>{e.preventDefault();});
 let W=0,H=0,DPR=1,lastT=performance.now();
 
 const SPECS=[
-  {key:'Wildfire_Smoke_Particle', name:'Wildfire smoke', rate:0.78},
-  {key:'Fungal_Spore',            name:'Fungal spore',    rate:0.67},
-  {key:'Virus',                   name:'Virus',           rate:0.54},
-  {key:'Bacteria',                name:'Bacteria',        rate:0.65},
-  {key:'Ultrafine_Particle',      name:'Ultrafine particle', rate:0.50},
-  {key:'PFAS',                    name:'PFAS',            rate:0.97},
-  {key:'Pollen',                  name:'Pollen',          rate:1.57},
+  {key:'Wildfire_Smoke_Particle', name:'Wildfire smoke', rate:1.0},
+  {key:'Fungal_Spore',            name:'Fungal spore',    rate:1.0},
+  {key:'Virus',                   name:'Virus',           rate:1.0},
+  {key:'Bacteria',                name:'Bacteria',        rate:1.0},
+  {key:'Ultrafine_Particle',      name:'Ultrafine particle', rate:1.0},
+  {key:'PFAS',                    name:'PFAS',            rate:1.0},
+  {key:'Pollen',                  name:'Pollen',          rate:1.0},
 ];
 SPECS.forEach(s=>{
   const im=new Image(); im.src='assets/charged/'+s.key+'_charged.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
@@ -137,18 +138,28 @@ SPECS.forEach(s=>{
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PROBE=new URLSearchParams(location.search).get('probe');
 
-const POSITIONS=[
+const POSITIONS_DESKTOP=[
+  {x:0.46,y:0.66},
+  {x:0.66,y:0.64},
+  {x:0.56,y:0.78},
+  {x:0.72,y:0.74},
+  {x:0.42,y:0.78},
+  {x:0.62,y:0.70},
+  {x:0.52,y:0.62}
+];
+const POSITIONS_MOBILE=[
   {x:0.60,y:0.30},
   {x:0.82,y:0.40},
   {x:0.48,y:0.56},
   {x:0.74,y:0.62},
   {x:0.36,y:0.70},
   {x:0.86,y:0.74},
-  {x:0.58,y:0.82},
+  {x:0.58,y:0.82}
 ];
 
 function pollutantPoint(i){
-  const p=POSITIONS[i%POSITIONS.length];
+  const pos = W < 720 ? POSITIONS_MOBILE : POSITIONS_DESKTOP;
+  const p = pos[i%pos.length];
   return {x:p.x*W, y:p.y*H};
 }
 
@@ -230,7 +241,7 @@ let autoIdx=0, autoState='glide', autoT0=0, autoStart={x:0,y:0};
 function targetR(){
   const mobile = W<720;
   if(mobile) return W*0.64*0.5;
-  return Math.min(W,H)*0.42*0.5;
+  return Math.min(W,H)*0.36*0.5;
 }
 
 function setSpec(i){
@@ -245,7 +256,7 @@ function setSpec(i){
 
 function findNearestSpec(x,y){
   let best=0,bd=1e9;
-  for(let i=0;i<POSITIONS.length;i++){
+  for(let i=0;i<POSITIONS_DESKTOP.length;i++){
     const p=pollutantPoint(i);
     const d=Math.hypot(p.x-x,p.y-y);
     if(d<bd){bd=d;best=i;}
@@ -298,7 +309,7 @@ function tick(t){
     const target=pollutantPoint(autoIdx);
     if(autoState==='glide'){
       const GLIDE=REDUCED?100:2400;
-      const el=t-autoT0;
+     const el=t-autoT0;
       if(el>=GLIDE){
         bub.x=target.x; bub.y=target.y;
         autoState='dwell'; autoT0=t;
@@ -447,17 +458,33 @@ function drawLens(t){
 function positionTag(){
   const R=bub.R, x=bub.x, y=bub.y;
   const chipW=tagEl.offsetWidth||220, chipH=tagEl.offsetHeight||96;
-  const sideRight = (x + R + 28 + chipW/2 < W - 8);
-  const side = sideRight ? 1 : -1;
-  const placeAbove = (y - R*0.5 - chipH/2 - 12 > 8);
-  const ang = side===1 ? (placeAbove? -Math.PI*0.28 : Math.PI*0.28)
-                       : (placeAbove? -Math.PI*0.72 : Math.PI*0.72);
-  const ax = x + Math.cos(ang)*R;
-  const ay = y + Math.sin(ang)*R;
-  const ex = x + Math.cos(ang)*(R+22);
-  const ey = y + Math.sin(ang)*(R+22);
-  const cx = ex + side*(chipW/2 + 6);
-  const cy = ey;
+  const mobile = W < 720;
+  
+  let ax, ay, ex, ey, cx, cy;
+  if (mobile) {
+    const sideRight = (x + R + 28 + chipW/2 < W - 8);
+    const side = sideRight ? 1 : -1;
+    const placeAbove = (y - R*0.5 - chipH/2 - 12 > 8);
+    const ang = side===1 ? (placeAbove? -Math.PI*0.28 : Math.PI*0.28)
+                         : (placeAbove? -Math.PI*0.72 : Math.PI*0.72);
+    ax = x + Math.cos(ang)*R;
+    ay = y + Math.sin(ang)*R;
+    ex = x + Math.cos(ang)*(R+22);
+    ey = y + Math.sin(ang)*(R+22);
+    cx = ex + side*(chipW/2 + 6);
+    cy = ey;
+  } else {
+    // Desktop: clean placement to the right (or left if not enough space)
+    const sideRight = (x + R + 28 + chipW < W - 8);
+    const side = sideRight ? 1 : -1;
+    const ang = side===1 ? 0 : Math.PI;
+    ax = x + Math.cos(ang)*R;
+    ay = y + Math.sin(ang)*R;
+    ex = x + Math.cos(ang)*(R+22);
+    ey = y + Math.sin(ang)*(R+22);
+    cx = ex + side*(chipW/2 + 6);
+    cy = ey;
+  }
 
   ctx.save();
   // short thin connector from pin on rim to card
@@ -477,7 +504,12 @@ function positionTag(){
   ctx.restore();
 
   const left = Math.max(8, Math.min(W-chipW-8, cx-chipW/2));
-  const top  = Math.max(8, Math.min(H-chipH-8, cy-chipH/2));
+  let top  = Math.max(8, Math.min(H-chipH-8, cy-chipH/2));
+  if (!mobile) {
+    // Ensure tag does not overlap the headline area
+    const safeTop = H * 0.42; 
+    if (top < safeTop) top = safeTop;
+  }
   tagEl.style.transform=`translate(${left}px, ${top}px)`;
   tagEl.classList.add('show');
 }
