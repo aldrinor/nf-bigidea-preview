@@ -1,58 +1,630 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex">
-<title>NanoFlashing — Specimen Renders (Dyson benchmark)</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#04060c;color:#cfe0ee;font-family:'JetBrains Mono',monospace;line-height:1.6;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1100px;margin:0 auto;padding:48px 22px 90px}
-h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(2rem,5vw,3.4rem);color:#eaf2fb;letter-spacing:.01em}
-.sub{color:#8aa0b6;font-size:13px;letter-spacing:.05em;margin-top:10px;max-width:680px}
-h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(1.4rem,3.4vw,2rem);color:#dce8f5;margin:54px 0 6px}
-.note{color:#7f93a8;font-size:12px;letter-spacing:.04em;margin-bottom:18px}
-.hero{margin-top:30px;border-radius:14px;overflow:hidden;border:1px solid rgba(80,150,210,.18);box-shadow:0 30px 80px rgba(0,0,0,.6)}
-.hero img{width:100%;display:block}
-.cap{font-size:12px;color:#8aa0b6;margin-top:12px;letter-spacing:.04em}
-.cap b{color:#9fd0ee;font-weight:500}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:22px}
-.card{background:#070d16;border:1px solid rgba(70,120,170,.14);border-radius:12px;overflow:hidden}
-.card img{width:100%;display:block;aspect-ratio:1;object-fit:cover}
-.card .l{padding:10px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#bcd6ea}
-.card .l small{display:block;color:#6f93b0;letter-spacing:.1em;margin-top:3px;text-transform:none}
-.full img{width:100%;border-radius:12px;border:1px solid rgba(70,120,170,.14);margin-top:14px}
-.tag{display:inline-block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#34e1ff;border:1px solid rgba(52,225,255,.35);border-radius:20px;padding:5px 12px;margin-top:18px}
-footer{margin-top:60px;color:#5f7488;font-size:11px;letter-spacing:.06em}
-</style></head>
-<body><div class="wrap">
-  <span class="tag">Internal review · Dyson benchmark</span>
-  <h1>Pollutant specimens — rendered to the Dyson bar</h1>
-  <p class="sub">Every specimen built from real scientific data — PubChem atomic structures, the real RCSB virus capsid,
-  and public-domain electron-microscope (SEM) micrographs. Path-traced in Blender Cycles. No invented geometry.</p>
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --muted:#828a90;
+    --faint:#aab2b8;
+    --hairline:rgba(20,24,28,0.10);
+    --panel:#e7ebee;
+    --red:#e23b3b;
+    --dot-faint:#c2c8cc;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:"Newsreader",Georgia,serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{min-height:100vh;overflow-x:hidden}
 
-  <h2>The hero — “Electrostatic capture”</h2>
-  <p class="note">Our version of Dyson’s “Electrostatic HEPA filtration” money shot — and it’s literally our mechanism:
-  a permanently-charged material seizing negatively-charged pollutants. Gold pollen · white charged mesh · blue charge-lightning · pure black.</p>
-  <div class="hero"><img src="gallery/electro_hero.png" alt="electrostatic capture hero"></div>
-  <p class="cap"><b>First render toward the benchmark.</b> Next: cleaner arcs, HEPA-fibre mesh, our cyan/red charge coding, then into the live page.</p>
+  /* ---------- LAYOUT ---------- */
+  .stage{
+    display:grid;
+    grid-template-columns:36% 1fr;
+    min-height:100vh;
+    width:100%;
+  }
+  .left-zone{
+    position:sticky;top:0;
+    height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .specimen{
+    width:min(32vw,440px);
+    height:min(32vw,440px);
+    -webkit-mask:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);
+            mask:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);
+    object-fit:cover;
+    display:block;
+  }
+  .right-zone{
+    position:relative;
+    padding:48px 64px 96px 32px;
+  }
+  .reading{
+    max-width:600px;
+    margin:0 auto;
+  }
+  .close-btn{
+    position:absolute;
+    top:28px;right:36px;
+    width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);
+    text-decoration:none;
+    font-family:"Space Mono",monospace;
+    font-size:22px;
+    line-height:1;
+    border-radius:50%;
+    transition:color .2s ease;
+  }
+  .close-btn:hover{color:var(--ink)}
 
-  <h2>The specimen set — 17 pollutants</h2>
-  <p class="note">Green = GLM-rated premium (7-9). The molecules, pollen, spore, dust, bacteria hit the Dyson bar.
-  The 4 plain ones (soot/PM/microplastic/fluoride) read fine by eye; the AI judge under-rates visually-simple specimens.</p>
-  <div class="full"><img src="gallery/all18.png" alt="all 18 specimens"></div>
+  /* ---------- TYPOGRAPHY ---------- */
+  .eyebrow{
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-weight:400;
+  }
+  .title{
+    font-family:"Instrument Serif",serif;
+    font-weight:400;
+    font-size:52px;
+    line-height:1;
+    letter-spacing:-0.02em;
+    color:var(--ink);
+    margin-top:18px;
+  }
+  .subtitle{
+    font-family:"Newsreader",serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:17px;
+    color:var(--muted);
+    margin-top:10px;
+  }
 
-  <h2>Selected heroes</h2>
-  <div class="grid" id="grid"></div>
+  /* ---------- STAT ROWS ---------- */
+  .stats{
+    margin-top:44px;
+    display:flex;flex-direction:column;
+    gap:18px;
+  }
+  .stat{
+    border-left:2px solid var(--faint);
+    padding-left:16px;
+    display:flex;flex-direction:column;
+    gap:4px;
+  }
+  .stat-figure{
+    font-family:"Space Mono",monospace;
+    font-size:20px;
+    color:var(--ink);
+    letter-spacing:0;
+    line-height:1.1;
+  }
+  .stat-figure.red{color:var(--red)}
+  .stat-qual{
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0;
+    line-height:1.3;
+  }
 
-  <footer>NanoFlashing · specimen R&D · not for distribution · noindex</footer>
+  /* ---------- NARRATIVE ---------- */
+  .narrative{margin-top:56px}
+  .section{margin-top:36px}
+  .section:first-child{margin-top:0}
+  .section-label{
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .section p{
+    font-family:"Newsreader",serif;
+    font-weight:400;
+    font-size:17px;
+    line-height:1.6;
+    color:var(--ink);
+  }
+  .fnref{
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    color:var(--ink);
+    vertical-align:super;
+    text-decoration:none;
+    padding:0 1px;
+    letter-spacing:0;
+    line-height:1;
+  }
+  .fnref a{color:inherit;text-decoration:none}
+  .fnref a:hover{color:var(--red)}
+
+  /* ---------- ISOTYPE ---------- */
+  .isotype{
+    margin-top:28px;
+    padding:28px 0 0 0;
+    display:flex;
+    align-items:flex-start;
+    gap:32px;
+    flex-wrap:wrap;
+  }
+  .isotype-grid{
+    display:grid;
+    grid-template-columns:repeat(10,7px);
+    grid-auto-rows:7px;
+    gap:8px;
+    flex:0 0 auto;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ink)}
+  .dot.faint{background:var(--dot-faint)}
+  .isotype-meta{flex:1;min-width:200px;padding-top:2px}
+  .isotype-value{
+    font-family:"Space Mono",monospace;
+    font-size:30px;
+    color:var(--red);
+    line-height:1;
+    letter-spacing:0;
+  }
+  .isotype-caption{
+    font-family:"Newsreader",serif;
+    font-size:15px;
+    line-height:1.45;
+    color:var(--ink);
+    margin-top:10px;
+    max-width:240px;
+  }
+
+  /* ---------- TRAJECTORY ---------- */
+  .trajectory{
+    margin-top:28px;
+    padding:28px 0 0 0;
+  }
+  .trajectory svg{display:block;width:100%}
+  .trajectory-meta{
+    margin-top:10px;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .trajectory-value{
+    font-family:"Space Mono",monospace;
+    font-size:22px;
+    color:var(--red);
+    line-height:1;
+    letter-spacing:0;
+  }
+  .trajectory-value-label{
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    color:var(--red);
+    letter-spacing:0;
+  }
+  .trajectory-caption{
+    font-family:"Newsreader",serif;
+    font-size:15px;
+    line-height:1.45;
+    color:var(--ink);
+    margin-top:8px;
+    max-width:320px;
+  }
+
+  /* ---------- CURVE ---------- */
+  .curve{
+    margin-top:28px;
+    padding:28px 0 0 0;
+  }
+  .curve svg{display:block;width:100%}
+  .curve-caption{
+    font-family:"Newsreader",serif;
+    font-size:15px;
+    line-height:1.45;
+    color:var(--ink);
+    margin-top:8px;
+    max-width:320px;
+  }
+
+  /* ---------- MAGNITUDE ---------- */
+  .magnitude{
+    margin-top:28px;
+    padding:28px 0 0 0;
+  }
+  .magnitude-value{
+    font-family:"Space Mono",monospace;
+    font-size:46px;
+    color:var(--ink);
+    line-height:1;
+    letter-spacing:0;
+  }
+  .magnitude-rule{
+    width:48px;
+    height:2px;
+    background:var(--red);
+    margin-top:12px;
+  }
+  .magnitude-caption{
+    font-family:"Newsreader",serif;
+    font-size:15px;
+    line-height:1.45;
+    color:var(--ink);
+    margin-top:12px;
+    max-width:320px;
+  }
+
+  /* ---------- FIGURE SOURCE ---------- */
+  .figure-source{
+    margin-top:24px;
+    padding-top:10px;
+    border-top:1px solid var(--hairline);
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    color:rgba(31,35,39,0.75);
+    letter-spacing:0;
+    line-height:1.5;
+    max-width:100%;
+  }
+  .figure-source a{
+    color:rgba(31,35,39,0.75);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:color .2s,border-color .2s;
+  }
+  .figure-source a:hover{
+    color:var(--ink);
+    border-bottom-color:var(--ink);
+  }
+
+  /* ---------- REFERENCES ---------- */
+  .references{margin-top:72px;padding-top:24px;border-top:1px solid var(--hairline)}
+  .ref-list{
+    list-style:none;
+    counter-reset:ref;
+    margin-top:18px;
+    display:flex;flex-direction:column;
+    gap:14px;
+  }
+  .ref-item{
+    counter-increment:ref;
+    display:grid;
+    grid-template-columns:28px 1fr auto;
+    gap:12px;
+    align-items:start;
+    padding:8px 10px;
+    border-radius:2px;
+    transition:background .25s ease;
+  }
+  .ref-item:target{background:rgba(226,59,59,0.07)}
+  .ref-num{
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0;
+  }
+  .ref-num::before{content:"[" counter(ref) "]"}
+  .ref-cite{
+    font-family:"Space Mono",monospace;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.55;
+    letter-spacing:0;
+  }
+  .ref-actions{
+    display:flex;align-items:center;gap:10px;
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    letter-spacing:0;
+    white-space:nowrap;
+  }
+  .ref-link{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:border-color .2s;
+  }
+  .ref-link:hover{border-bottom-color:var(--ink)}
+  .ref-back{
+    color:var(--muted);
+    text-decoration:none;
+    transition:color .2s;
+  }
+  .ref-back:hover{color:var(--ink)}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:860px){
+    .stage{grid-template-columns:1fr}
+    .left-zone{
+      position:relative;
+      height:auto;
+      padding:32px 24px 8px;
+    }
+    .specimen{width:min(58vw,260px);height:min(58vw,260px)}
+    .right-zone{padding:24px 24px 64px}
+    .close-btn{top:18px;right:18px}
+    .title{font-size:44px}
+    .isotype{gap:24px}
+  }
+  @media (max-width:480px){
+    .right-zone{padding:20px 20px 56px}
+    .title{font-size:38px}
+    .section p{font-size:16px}
+    .ref-item{grid-template-columns:24px 1fr;grid-template-rows:auto auto}
+    .ref-actions{grid-column:2;justify-self:start}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .specimen{animation:none}
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- LEFT: specimen -->
+  <div class="left-zone">
+    <video class="specimen"
+           autoplay muted loop playsinline></video>
+  </div>
+
+  <!-- RIGHT: editorial column -->
+  <div class="right-zone">
+    <a href="#" class="close-btn" aria-label="Close">×</a>
+
+    <div class="reading">
+
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1 class="title" id="title"></h1>
+      <div class="subtitle" id="subtitle"></div>
+
+      <!-- STAT ROWS -->
+      <div class="stats" id="stats"></div>
+
+      <!-- NARRATIVE -->
+      <div class="narrative" id="narrative"></div>
+
+      <!-- REFERENCES -->
+      <div class="references">
+        <div class="eyebrow">REFERENCES</div>
+        <ol class="ref-list" id="refList"></ol>
+      </div>
+
+    </div>
+  </div>
+
 </div>
+
+<script src="detail_data_v2.js"></script>
 <script>
-const items=[
- ['sem_pollen','Pollen','real SEM · 9/10'],['V_spore','Mould spore','real SEM · 8/10'],
- ['V_dust','House dust','real SEM · 8/10'],['V_bacteria','Bacteria','real SEM · 7/10'],
- ['X_virus','Virus','RCSB capsid · colorized'],['D_PFOS','PFAS','PubChem · 8/10'],
- ['bl6_smx','Antibiotic','PubChem · 8/10'],['D_24D','Herbicide','PubChem · 8/10'],
- ['dy2_nitrate','Nitrate','Dyson field · 7/10'],['D_hormone','Hormone','PubChem · 8/10'],
-];
-document.getElementById('grid').innerHTML=items.map(([f,n,s])=>
- `<div class="card"><img src="gallery/${f}.png" alt="${n}"><div class="l">${n}<small>${s}</small></div></div>`).join('');
-</script></body></html>
+(function(){
+  "use strict";
+
+  // ---------- URL PARAM ----------
+  var params = new URLSearchParams(window.location.search);
+  var idx = parseInt(params.get('p'), 10);
+  if (isNaN(idx) || idx < 0) idx = 0;
+  var order = window.DETAIL_ORDER_V2 || [];
+  var key = order[idx] || order[0];
+  var data = (window.DETAIL_DATA_V2 || {})[key];
+
+  if (!data) {
+    document.getElementById('title').textContent = 'Data not found';
+    return;
+  }
+
+  // ---------- DOCUMENT TITLE + SPECIMEN ----------
+  document.title = data.title + ' — NanoFlashing';
+  var video = document.querySelector('.specimen');
+  video.src = 'assets/videos/' + key + '_flashloop_c2.mp4';
+  video.setAttribute('aria-label', 'Specimen capture of ' + data.title);
+
+  // ---------- HEADER ----------
+  document.getElementById('eyebrow').textContent = data.eyebrow;
+  document.getElementById('title').textContent = data.title;
+  document.getElementById('subtitle').textContent = data.sub;
+
+  // ---------- STATS ----------
+  (function(){
+    var container = document.getElementById('stats');
+    var html = '';
+    data.stats.forEach(function(s){
+      html += '<div class="stat">'
+            + '<div class="stat-figure' + (s.red ? ' red' : '') + '">' + s.fig + '</div>'
+            + '<div class="stat-qual">' + s.qual + '</div>'
+            + '</div>';
+    });
+    container.innerHTML = html;
+  })();
+
+  // ---------- FOOTNOTE MARKER PARSER ----------
+  function renderBody(body){
+    var seen = {};
+    return body.replace(/\[(\d+)\]/g, function(match, n){
+      var idAttr = seen[n] ? '' : ' id="fnref-' + n + '"';
+      seen[n] = true;
+      return '<sup class="fnref"><a href="#ref-' + n + '"' + idAttr + ' role="doc-noteref">' + n + '</a></sup>';
+    });
+  }
+
+  // ---------- FIGURE RENDERERS ----------
+  function figureSource(fig){
+    return '<div class="figure-source">Source: <a href="' + fig.sourceUrl + '" target="_blank" rel="noopener">' + fig.sourceText + '</a></div>';
+  }
+
+  function renderIsotype(fig){
+    var filled = fig.filled, total = fig.total;
+    var faintCount = total - filled;
+    var faintPositions = {};
+    if (faintCount > 0){
+      for (var i = 0; i < faintCount; i++){
+        var pos = Math.round((i * total) / faintCount);
+        faintPositions[pos] = true;
+      }
+    }
+    var dots = '';
+    for (var j = 0; j < total; j++){
+      dots += '<span class="dot' + (faintPositions[j] ? ' faint' : '') + '"></span>';
+    }
+    return '<div class="isotype">'
+         + '<div class="isotype-grid" aria-hidden="true">' + dots + '</div>'
+         + '<div class="isotype-meta">'
+         + '<div class="isotype-value">' + fig.value + '</div>'
+         + '<div class="isotype-caption">' + fig.caption + '</div>'
+         + '</div>'
+         + '</div>';
+  }
+
+  function renderTrajectory(fig){
+    var points = fig.points;
+    var W = 600, H = 120;
+    var padX = 70, padY = 22;
+    var vals = points.map(function(p){ return p.val; });
+    var minV = Math.min.apply(null, vals);
+    var maxV = Math.max.apply(null, vals);
+    var range = (maxV - minV) || 1;
+    var n = points.length;
+
+    function px(i){ return padX + (i * (W - 2*padX)) / (n - 1); }
+    function py(v){ return padY + (1 - (v - minV) / range) * (H - 2*padY); }
+
+    var lines = '';
+    for (var i = 0; i < n - 1; i++){
+      var p1 = points[i], p2 = points[i+1];
+      var x1 = px(i), y1 = py(p1.val), x2 = px(i+1), y2 = py(p2.val);
+      if (p2.projected){
+        lines += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>';
+      } else {
+        lines += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#828a90" stroke-width="1.5"/>';
+      }
+    }
+
+    var dotsAndLabels = '';
+    for (var j = 0; j < n; j++){
+      var p = points[j];
+      var cx = px(j), cy = py(p.val);
+      var isLast = (j === n - 1);
+      var color = isLast ? '#e23b3b' : '#1f2327';
+      dotsAndLabels += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.5" fill="' + color + '"/>';
+      dotsAndLabels += '<text x="' + cx.toFixed(1) + '" y="' + (cy + 18).toFixed(1) + '" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="#828a90">' + p.year + '</text>';
+      if (p.label){
+        dotsAndLabels += '<text x="' + cx.toFixed(1) + '" y="' + (cy + 30).toFixed(1) + '" text-anchor="middle" font-family="Space Mono, monospace" font-size="9" fill="#aab2b8">' + p.label + '</text>';
+      }
+    }
+
+    var baselineY = H - padY + 10;
+
+    return '<div class="trajectory">'
+         + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="xMidYMid meet">'
+         + '<line x1="' + padX + '" y1="' + baselineY + '" x2="' + (W - padX) + '" y2="' + baselineY + '" stroke="rgba(20,24,28,0.10)" stroke-width="1"/>'
+         + lines
+         + dotsAndLabels
+         + '</svg>'
+         + '<div class="trajectory-meta">'
+         + '<span class="trajectory-value">' + fig.value + '</span>'
+         + '<span class="trajectory-value-label">' + fig.valueLabel + '</span>'
+         + '</div>'
+         + '<div class="trajectory-caption">' + fig.caption + '</div>'
+         + '</div>';
+  }
+
+  function renderCurve(fig){
+    var W = 600, H = 120;
+    var padX = 55, padY = 15;
+    var steps = 60;
+    var pathD = '';
+    for (var i = 0; i <= steps; i++){
+      var t = i / steps;
+      var x = padX + t * (W - 2*padX);
+      var decay = Math.exp(-3.5 * t);
+      var y = padY + (1 - decay * 0.85) * (H - 2*padY);
+      pathD += (i === 0 ? 'M ' : 'L ') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+    }
+    var baselineY = H - padY + 5;
+    var peakX = padX;
+    var peakY = padY + (1 - 0.85) * (H - 2*padY);
+
+    return '<div class="curve">'
+         + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="xMidYMid meet">'
+         + '<line x1="' + padX + '" y1="' + baselineY + '" x2="' + (W - padX) + '" y2="' + baselineY + '" stroke="rgba(20,24,28,0.10)" stroke-width="1"/>'
+         + '<path d="' + pathD + '" fill="none" stroke="#828a90" stroke-width="1.5"/>'
+         + '<circle cx="' + peakX.toFixed(1) + '" cy="' + peakY.toFixed(1) + '" r="3.5" fill="#e23b3b"/>'
+         + '<text x="' + (peakX + 10) + '" y="' + (peakY - 6).toFixed(1) + '" font-family="Space Mono, monospace" font-size="12" fill="#e23b3b">' + fig.value + '</text>'
+         + '<text x="' + padX + '" y="' + (baselineY + 14) + '" text-anchor="middle" font-family="Space Mono, monospace" font-size="9" fill="#aab2b8">roadside</text>'
+         + '<text x="' + (W - padX) + '" y="' + (baselineY + 14) + '" text-anchor="middle" font-family="Space Mono, monospace" font-size="9" fill="#aab2b8">~300 m</text>'
+         + '</svg>'
+         + '<div class="curve-caption">' + fig.caption + '</div>'
+         + '</div>';
+  }
+
+  function renderMagnitude(fig){
+    return '<div class="magnitude">'
+         + '<div class="magnitude-value">' + fig.value + '</div>'
+         + '<div class="magnitude-rule"></div>'
+         + '<div class="magnitude-caption">' + fig.caption + '</div>'
+         + '</div>';
+  }
+
+  function renderFigure(fig){
+    if (!fig) return '';
+    var body = '';
+    switch(fig.type){
+      case 'isotype':   body = renderIsotype(fig);   break;
+      case 'trajectory':body = renderTrajectory(fig);break;
+      case 'curve':     body = renderCurve(fig);     break;
+      case 'magnitude': body = renderMagnitude(fig); break;
+      default: return '';
+    }
+    return body + figureSource(fig);
+  }
+
+  // ---------- NARRATIVE ----------
+  (function(){
+    var container = document.getElementById('narrative');
+    var html = '';
+    data.sections.forEach(function(sec){
+      html += '<div class="section">'
+            + '<div class="section-label">' + sec.label + '</div>'
+            + '<p>' + renderBody(sec.body) + '</p>'
+            + '</div>';
+      if (sec.label === 'How widespread' && data.figure){
+        html += renderFigure(data.figure);
+      }
+    });
+    container.innerHTML = html;
+  })();
+
+  // ---------- REFERENCES ----------
+  (function(){
+    var container = document.getElementById('refList');
+    var html = '';
+    data.references.forEach(function(r){
+      html += '<li class="ref-item" id="ref-' + r.n + '">'
+            + '<span class="ref-num"></span>'
+            + '<span class="ref-cite">' + r.cite + '</span>'
+            + '<span class="ref-actions">'
+            + '<a class="ref-link" href="' + r.url + '" target="_blank" rel="noopener">View source ↗</a>'
+            + '<a class="ref-back" href="#fnref-' + r.n + '" aria-label="Back to text">↩</a>'
+            + '</span>'
+            + '</li>';
+    });
+    container.innerHTML = html;
+  })();
+
+})();
+</script>
+
+</body>
+</html>
