@@ -15,700 +15,291 @@
     --faint:#aab2b8;
     --hair:rgba(20,24,28,0.10);
     --red:#e23b3b;
+    --ease:cubic-bezier(.4,0,.2,1);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:400;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  ::selection{background:var(--ink);color:var(--bg)}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  sup{font-family:'Space Mono',monospace;font-size:.62em;vertical-align:super;line-height:0;padding:0 .1em}
+  sup a{color:var(--red)}
+
+  /* ---------- HEADER ---------- */
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px 36px;pointer-events:none}
+  .topbar img{height:34px;pointer-events:auto;opacity:.92}
+  .topbar .meta{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+  .topbar .meta b{color:var(--ink);font-weight:700}
 
   /* ---------- INTRO ---------- */
-  .intro{
-    min-height:100vh;
-    padding:32px 48px 64px;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-  }
-  .brand{
-    display:block;
-  }
-  .brand img{
-    height:110px;
-    width:auto;
-    display:block;
-    opacity:0.92;
-  }
-  .intro-body{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    max-width:920px;
-    padding-top:6vh;
-  }
-  .eyebrow{
-    font-family:'Space Mono',monospace;
-    font-size:12px;
-    letter-spacing:0.18em;
-    color:var(--muted);
-    text-transform:uppercase;
-    margin-bottom:28px;
-  }
-  .eyebrow .dot{
-    display:inline-block;
-    width:6px;height:6px;
-    background:var(--red);
-    border-radius:50%;
-    margin-right:10px;
-    vertical-align:middle;
-    transform:translateY(-1px);
-  }
-  h1.title{
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:clamp(48px,8vw,112px);
-    line-height:0.98;
-    letter-spacing:-0.02em;
-    color:var(--ink);
-    margin-bottom:28px;
-  }
-  .standfirst{
-    font-size:clamp(18px,1.6vw,22px);
-    color:var(--muted);
-    max-width:640px;
-    line-height:1.45;
-  }
-  .down-cue{
-    position:absolute;
-    bottom:36px;
-    left:48px;
-    display:flex;
-    align-items:center;
-    gap:14px;
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.18em;
-    color:var(--muted);
-    text-transform:uppercase;
-  }
-  .down-cue .line{
-    width:48px;height:1px;background:var(--ink);
-    animation:cue 2.4s ease-in-out infinite;
-    transform-origin:left;
-  }
-  @keyframes cue{
-    0%,100%{transform:scaleX(1);opacity:0.5}
-    50%{transform:scaleX(0.4);opacity:1}
-  }
+  .intro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 8vw 80px;max-width:1400px;margin:0 auto}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:28px}
+  .eyebrow .dot{display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;vertical-align:middle;margin:0 10px 2px}
+  .intro h1{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(54px,9vw,128px);line-height:.96;letter-spacing:-.025em;color:var(--ink)}
+  .intro .standfirst{margin-top:34px;max-width:620px;font-size:clamp(17px,1.6vw,21px);line-height:1.5;color:var(--muted);font-weight:400}
+  .intro .standfirst em{font-style:normal;color:var(--ink)}
+  .intro .cue{margin-top:80px;display:flex;align-items:center;gap:14px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+  .intro .cue .line{width:48px;height:1px;background:var(--ink);opacity:.4;animation:cuePulse 2.4s var(--ease) infinite}
+  @keyframes cuePulse{0%,100%{transform:scaleY(1);opacity:.4}50%{transform:scaleY(1);opacity:.9}}
 
-  /* ---------- SCROLLYTELLING ---------- */
-  .scroll{
-    display:grid;
-    grid-template-columns:48% 52%;
-    align-items:start;
-    padding-top:24px;
-  }
-  .narrative{
-    display:flex;
-    flex-direction:column;
-  }
-  .beat{
-    min-height:92vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding:80px 48px 80px 48px;
-    max-width:520px;
-  }
-  .beat .step{
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.22em;
-    color:var(--muted);
-    text-transform:uppercase;
-    margin-bottom:28px;
-    display:flex;
-    align-items:center;
-    gap:14px;
-  }
-  .beat .step::before{
-    content:"";
-    width:24px;height:1px;background:var(--ink);
-  }
-  .beat .copy{
-    font-size:17px;
-    line-height:1.6;
-    color:var(--ink);
-    max-width:440px;
-  }
-  .beat .copy p{margin-bottom:1em}
-  .beat .copy p:last-child{margin-bottom:0}
-  .beat .copy ul{
-    list-style:none;
-    margin:1em 0;
-  }
-  .beat .copy li{
-    padding:10px 0;
-    border-top:1px solid var(--hair);
-    font-size:15px;
-    line-height:1.5;
-  }
-  .beat .copy li:last-child{border-bottom:1px solid var(--hair)}
-  .beat .copy strong{
-    color:var(--ink);
-    font-weight:500;
-  }
-  .beat .copy sup{
-    font-family:'Space Mono',monospace;
-    font-size:10px;
-    color:var(--muted);
-    padding-left:2px;
-    vertical-align:super;
-    line-height:0;
-  }
-  .beat .copy sup a{color:inherit;text-decoration:none}
-  .beat .copy sup a:hover{color:var(--red)}
-  .beat .copy .key{
-    color:var(--red);
-    font-weight:500;
-  }
+  /* ---------- SCROLL SECTION ---------- */
+  .scroll{position:relative;display:grid;grid-template-columns:48% 52%;max-width:1500px;margin:0 auto}
+  .narr{position:relative;z-index:2}
+  .beat{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:60px 7vw 60px 8vw;max-width:480px}
+  .beat .step{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:30px;display:flex;align-items:center;gap:14px}
+  .beat .step .num{color:var(--ink);font-weight:700}
+  .beat .step .bar{flex:1;height:1px;background:var(--hair);max-width:120px}
+  .beat .step .redmark{width:8px;height:8px;background:var(--red);border-radius:50%}
+  .beat p{font-size:clamp(16px,1.25vw,18px);line-height:1.62;color:var(--ink);font-weight:400;margin-bottom:1.1em}
+  .beat p:last-child{margin-bottom:0}
+  .beat p .muted{color:var(--muted)}
+  .beat .sublabel{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin:6px 0 14px}
+  .beat ul{list-style:none;margin:.4em 0 1em}
+  .beat ul li{font-size:clamp(15px,1.15vw,17px);line-height:1.55;padding:11px 0;border-top:1px solid var(--hair);display:flex;gap:14px}
+  .beat ul li:last-child{border-bottom:1px solid var(--hair)}
+  .beat ul li .tag{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:var(--red);text-transform:uppercase;flex-shrink:0;width:120px;padding-top:3px}
+  .beat ul li .body{flex:1;color:var(--ink)}
+  .beat ul li .body .src{display:block;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
 
-  /* ---------- STAGE ---------- */
-  .stage-wrap{
-    position:sticky;
-    top:0;
-    height:100vh;
-    align-self:start;
-  }
-  .stage{
-    position:relative;
-    width:100%;
-    height:100vh;
-    overflow:hidden;
-    background:
-      linear-gradient(180deg,rgba(20,24,28,0.015),rgba(20,24,28,0.03));
-    border-left:1px solid var(--hair);
-  }
-  .stage::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(20,24,28,0.025) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(20,24,28,0.02) 0%, transparent 45%);
-    pointer-events:none;
-  }
-  .layer{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    opacity:0;
-    visibility:hidden;
-    transition:opacity 450ms ease, visibility 0s linear 450ms;
-    pointer-events:none;
-  }
-  .layer.active{
-    opacity:1;
-    visibility:visible;
-    transition:opacity 450ms ease, visibility 0s linear 0s;
-  }
-  .stage-meta{
-    position:absolute;
-    bottom:24px;
-    left:24px;
-    right:24px;
-    display:flex;
-    justify-content:space-between;
-    font-family:'Space Mono',monospace;
-    font-size:10px;
-    letter-spacing:0.18em;
-    color:var(--muted);
-    text-transform:uppercase;
-    pointer-events:none;
-    z-index:5;
-  }
-  .stage-meta .progress{
-    display:flex;
-    gap:6px;
-  }
-  .stage-meta .progress span{
-    width:18px;height:2px;background:var(--faint);
-    transition:background 300ms;
-  }
-  .stage-meta .progress span.on{background:var(--ink)}
+  .keyfigure{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(40px,5vw,68px);line-height:1;color:var(--red);letter-spacing:-.02em;margin:.2em 0 .1em}
 
-  /* ---------- LAYER 1: PARTICLE VIDEO ---------- */
-  .l1{position:relative}
-  .l1 .video-mask{
-    width:min(30vw,420px);
-    height:min(30vw,420px);
-    -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);
-    mask-image:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);
-    position:relative;
-  }
-  .l1 video{
-    width:100%;height:100%;object-fit:cover;display:block;
-    filter:grayscale(0.4) contrast(1.05) brightness(0.95);
-  }
-  .l1 .charge{
-    position:absolute;
-    font-family:'Space Mono',monospace;
-    font-size:18px;
-    color:var(--muted);
-    opacity:0.55;
-    animation:float 6s ease-in-out infinite;
-  }
-  .l1 .charge.pos{color:var(--red);opacity:0.7}
-  .l1 .charge:nth-child(2){top:18%;left:22%;animation-delay:0s}
-  .l1 .charge:nth-child(3){top:24%;right:20%;animation-delay:1.2s}
-  .l1 .charge:nth-child(4){bottom:22%;left:18%;animation-delay:2.4s}
-  .l1 .charge:nth-child(5){bottom:28%;right:24%;animation-delay:3.6s}
-  @keyframes float{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-8px)}
-  }
+  /* ---------- STICKY STAGE ---------- */
+  .stageWrap{position:relative}
+  .stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .stage::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(237,240,242,0) 80%,rgba(237,240,242,.6) 100%);pointer-events:none;z-index:3}
+  .layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+  .layer.active{opacity:1;pointer-events:auto}
+  .stageMeta{position:absolute;top:34px;right:36px;z-index:5;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px}
+  .stageMeta .pill{padding:5px 10px;border:1px solid var(--hair);border-radius:999px;color:var(--ink)}
+  .stageMeta .pill.live{color:var(--red);border-color:rgba(226,59,59,.35)}
+  .stageMeta .pill.live::before{content:"";display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:7px;vertical-align:middle;animation:livePulse 1.8s infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .stageIndex{position:absolute;bottom:34px;left:36px;z-index:5;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:14px}
+  .stageIndex .dots{display:flex;gap:8px}
+  .stageIndex .dots i{width:6px;height:6px;border-radius:50%;background:var(--faint);transition:background .3s,transform .3s}
+  .stageIndex .dots i.on{background:var(--red);transform:scale(1.4)}
 
-  /* ---------- LAYER 2: PARTICLE FIELD ---------- */
-  .l2 canvas{width:100%;height:100%;display:block}
+  /* LAYER 1 — charged particle */
+  .l1 .vidwrap{position:relative;width:min(30vw,420px);height:min(30vw,420px)}
+  .l1 video{width:100%;height:100%;object-fit:cover;-webkit-mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 76%);filter:grayscale(.4) contrast(1.05)}
+  .l1 .charge{position:absolute;font-family:'Space Mono',monospace;font-size:18px;color:var(--muted);opacity:.55}
+  .l1 .charge.plus{color:var(--red);opacity:.7}
+  .l1 .c1{top:8%;left:14%}
+  .l1 .c2{top:18%;right:10%}
+  .l1 .c3{bottom:14%;left:8%}
+  .l1 .c4{bottom:22%;right:14%}
+  .l1 .ring{position:absolute;top:50%;left:50%;width:min(30vw,420px);height:min(30vw,420px);transform:translate(-50%,-50%);border:1px solid var(--hair);border-radius:50%;pointer-events:none}
+  .l1 .ring::after{content:"";position:absolute;inset:18%;border:1px dashed rgba(20,24,28,.08);border-radius:50%}
 
-  /* ---------- LAYER 3: MAP PLACEHOLDER ---------- */
-  .l3 .panel{
-    width:min(78%,680px);
-    height:min(72%,560px);
-    background:rgba(255,255,255,0.5);
-    border:1px solid var(--hair);
-    border-radius:14px;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    backdrop-filter:blur(4px);
-  }
-  .l3 svg{width:80%;height:auto;opacity:0.4}
-  .l3 .blob{
-    position:absolute;
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(130,138,144,0.35), rgba(130,138,144,0) 70%);
-    filter:blur(8px);
-  }
-  .l3 .blob.b1{width:140px;height:90px;top:30%;left:22%}
-  .l3 .blob.b2{width:180px;height:110px;top:42%;left:48%}
-  .l3 .blob.b3{width:120px;height:80px;top:55%;left:30%}
-  .l3 .cap{
-    position:absolute;
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.18em;
-    color:var(--muted);
-    text-transform:uppercase;
-    text-align:center;
-    background:rgba(237,240,242,0.85);
-    padding:10px 16px;
-    border:1px solid var(--hair);
-    border-radius:4px;
-  }
+  /* LAYER 2 — smoke haze */
+  .l2 video{width:100%;height:100%;object-fit:contain;filter:grayscale(.85) contrast(1.05) brightness(1.02)}
+  .l2 .scalebar{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;z-index:2}
+  .l2 .scalebar .line{width:80px;height:1px;background:var(--muted);position:relative}
+  .l2 .scalebar .line::before,.l2 .scalebar .line::after{content:"";position:absolute;top:-3px;width:1px;height:7px;background:var(--muted)}
+  .l2 .scalebar .line::before{left:0}.l2 .scalebar .line::after{right:0}
 
-  /* ---------- LAYER 4: HEALTH DIAGRAM ---------- */
-  .l4{flex-direction:column;gap:24px}
-  .l4 .scale{
-    display:flex;
-    align-items:center;
-    gap:32px;
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-  }
-  .l4 .scale .item{display:flex;align-items:center;gap:10px}
-  .l4 .scale .big{
-    width:64px;height:64px;border-radius:50%;
-    background:rgba(130,138,144,0.25);border:1px solid var(--faint);
-  }
-  .l4 .scale .tiny{
-    width:5px;height:5px;border-radius:50%;background:var(--red);
-    box-shadow:0 0 0 4px rgba(226,59,59,0.15);
-  }
-  .l4 .figure{
-    position:relative;
-    width:min(40vw,360px);
-  }
-  .l4 .figure svg{width:100%;height:auto;display:block}
-  .l4 .leader{
-    position:absolute;
-    font-family:'Space Mono',monospace;
-    font-size:10px;
-    color:var(--muted);
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-  }
+  /* LAYER 3 — map */
+  .l3 iframe{width:100%;height:100%;border:0;display:block;background:#e8ebef}
+  .l3 .mapframe{position:absolute;inset:5vh 5vw;border:1px solid var(--hair);background:#fff;box-shadow:0 30px 80px -40px rgba(20,24,28,.25)}
+  .l3 .mapframe iframe{width:100%;height:100%}
+  .l3 .mapcap{position:absolute;top:calc(5vh + 14px);left:calc(5vw + 16px);font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;z-index:2;background:rgba(237,240,242,.85);padding:4px 9px;backdrop-filter:blur(4px)}
 
-  /* ---------- LAYER 5: FILTER DIAGRAM ---------- */
-  .l5{flex-direction:column;gap:28px;padding:0 40px}
-  .l5 .filter-svg{width:min(60vw,520px)}
-  .l5 .gauge{
-    display:flex;
-    align-items:flex-end;
-    gap:36px;
-    font-family:'Space Mono',monospace;
-  }
-  .l5 .gauge .read{
-    display:flex;flex-direction:column;gap:6px;
-  }
-  .l5 .gauge .label{
-    font-size:10px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;
-  }
-  .l5 .gauge .val{
-    font-size:28px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);
-  }
-  .l5 .gauge .val.red{color:var(--red)}
-  .l5 .gauge .sub{font-size:10px;letter-spacing:0.1em;color:var(--muted)}
-  .l5 .bars{
-    display:flex;align-items:flex-end;gap:48px;
-    font-family:'Space Mono',monospace;
-  }
-  .l5 .bars .bar{
-    display:flex;flex-direction:column;align-items:center;gap:8px;
-  }
-  .l5 .bars .bar .col{
-    width:42px;background:rgba(130,138,144,0.35);
-  }
-  .l5 .bars .bar .col.tall{height:120px}
-  .l5 .bars .bar .col.short{height:42px}
-  .l5 .bars .bar .name{
-    font-size:10px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;
-  }
+  /* LAYER 4 — lung */
+  .l4 img{max-height:84%;max-width:80%;object-fit:contain;filter:grayscale(.15) contrast(1.02)}
+  .l4 .lungcap{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;text-align:center}
+  .l4 .lungcap b{color:var(--red);font-weight:700}
+
+  /* LAYER 5 — filter */
+  .l5 video{width:100%;height:100%;object-fit:cover;filter:grayscale(.5) contrast(1.1) brightness(.95)}
+  .l5 .overlay{position:absolute;left:5%;bottom:7%;z-index:3;display:flex;flex-direction:column;gap:18px;background:linear-gradient(135deg,rgba(237,240,242,.92),rgba(237,240,242,.78));backdrop-filter:blur(6px);border:1px solid var(--hair);padding:22px 26px;max-width:340px}
+  .l5 .overlay .row{display:flex;gap:32px}
+  .l5 .overlay .cell .eb{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+  .l5 .overlay .cell .big{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1;letter-spacing:-.02em}
+  .l5 .overlay .cell .big.red{color:var(--red)}
+  .l5 .overlay .cell .sub{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:5px;letter-spacing:.04em}
+  .l5 .overlay .bars{display:flex;align-items:flex-end;gap:18px;height:64px;padding-top:6px;border-top:1px solid var(--hair)}
+  .l5 .overlay .bar{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .l5 .overlay .bar .b{width:34px;background:#1f2327}
+  .l5 .overlay .bar.tall .b{height:54px}
+  .l5 .overlay .bar.short .b{height:18px;opacity:.45}
+  .l5 .overlay .bar .lbl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
 
   /* ---------- REFERENCES ---------- */
-  .refs{
-    padding:120px 48px 80px;
-    border-top:1px solid var(--hair);
-    max-width:1100px;
-    margin:0 auto;
-  }
-  .refs h2{
-    font-family:'Space Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.22em;
-    color:var(--muted);
-    text-transform:uppercase;
-    margin-bottom:36px;
-    font-weight:400;
-  }
-  .refs ol{
-    list-style:none;
-    counter-reset:ref;
-  }
-  .refs li{
-    counter-increment:ref;
-    padding:14px 0;
-    border-top:1px solid var(--hair);
-    font-family:'Space Mono',monospace;
-    font-size:13px;
-    line-height:1.55;
-    color:var(--ink);
-    display:grid;
-    grid-template-columns:48px 1fr 24px;
-    gap:14px;
-    align-items:start;
-  }
+  .refs{max-width:1400px;margin:0 auto;padding:140px 8vw 120px;border-top:1px solid var(--hair)}
+  .refs .eyebrow{margin-bottom:18px}
+  .refs h2{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(34px,4.5vw,56px);letter-spacing:-.02em;line-height:1;margin-bottom:50px}
+  .refs ol{list-style:none;counter-reset:ref}
+  .refs li{counter-increment:ref;display:grid;grid-template-columns:60px 1fr auto;gap:24px;padding:18px 0;border-top:1px solid var(--hair);align-items:baseline;font-family:'Space Mono',monospace;font-size:13px;line-height:1.55;color:var(--ink)}
   .refs li:last-child{border-bottom:1px solid var(--hair)}
-  .refs li::before{
-    content:"[" counter(ref) "]";
-    color:var(--muted);
-  }
-  .refs li a{
-    color:var(--ink);
-    text-decoration:none;
-    border-bottom:1px solid var(--hair);
-    transition:border-color 200ms;
-  }
-  .refs li a:hover{border-color:var(--red);color:var(--red)}
-  .refs li .arrow{color:var(--muted);font-size:11px}
+  .refs li::before{content:"[" counter(ref) "]";color:var(--muted);font-size:12px;letter-spacing:.04em}
+  .refs li .cite{color:var(--ink)}
+  .refs li .cite .src{color:var(--muted)}
+  .refs li a.link{color:var(--red);font-size:12px;letter-spacing:.04em;white-space:nowrap}
+  .refs li a.link:hover{text-decoration:underline}
 
-  footer.foot{
-    padding:40px 48px 60px;
-    font-family:'Space Mono',monospace;
-    font-size:10px;
-    letter-spacing:0.18em;
-    color:var(--muted);
-    text-transform:uppercase;
-    display:flex;
-    justify-content:space-between;
-    max-width:1100px;
-    margin:0 auto;
-  }
+  footer{max-width:1400px;margin:0 auto;padding:40px 8vw 80px;display:flex;justify-content:space-between;align-items:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;border-top:1px solid var(--hair)}
+  footer .right{display:flex;gap:24px}
 
   /* ---------- MOBILE ---------- */
   @media (max-width:860px){
-    .intro{padding:24px 24px 48px}
-    .brand img{height:80px}
-    .scroll{
-      grid-template-columns:1fr;
-    }
-    .stage-wrap{
-      position:sticky;
-      top:0;
-      height:46vh;
-      order:-1;
-      z-index:5;
-      background:var(--bg);
-      box-shadow:0 6px 14px -10px rgba(20,24,28,0.25);
-    }
-    .stage{height:46vh;border-left:none;border-bottom:1px solid var(--hair);background:var(--bg)}
-    .beat:first-of-type{padding-top:32px}
-    .beat{
-      min-height:auto;
-      padding:48px 24px;
-    }
-    .beat .copy{font-size:16px}
-    .l1 .video-mask{width:min(50vw,260px);height:min(50vw,260px)}
-    .l3 .panel{width:90%;height:80%}
-    .l4 .scale{gap:18px;font-size:9px}
-    .l4 .scale .big{width:44px;height:44px}
-    .l5{padding:0 16px;gap:18px}
-    .l5 .filter-svg{width:90%}
-    .l5 .gauge{gap:20px}
-    .l5 .gauge .val{font-size:22px}
-    .l5 .bars{gap:28px}
-    .refs{padding:80px 24px 40px}
-    .refs li{grid-template-columns:36px 1fr 18px;font-size:12px}
-    footer.foot{padding:32px 24px 48px;flex-direction:column;gap:8px}
-    .down-cue{left:24px;bottom:24px}
+    .topbar{padding:16px 22px}
+    .topbar img{height:28px}
+    .intro{padding:100px 22px 60px}
+    .scroll{display:grid;grid-template-columns:1fr}
+    .stageWrap{order:-1;position:sticky;top:0;height:46vh;z-index:5;background:var(--bg);box-shadow:0 8px 16px -12px rgba(20,24,28,.3)}
+    .stage{height:46vh}
+    .stageMeta{top:14px;right:14px;font-size:9.5px}
+    .stageIndex{bottom:14px;left:14px;font-size:9.5px}
+    .beat{min-height:auto;padding:11vh 22px 60px;max-width:none}
+    .beat:first-of-type{padding-top:5vh}
+    .beat ul li{flex-direction:column;gap:6px}
+    .beat ul li .tag{width:auto}
+    .l1 .vidwrap,.l1 .ring{width:min(38vw,180px);height:min(38vw,180px)}
+    .l3 .mapframe{inset:3vh 4vw}
+    .l5 .overlay{left:4%;bottom:6%;padding:14px 16px;max-width:240px}
+    .l5 .overlay .cell .big{font-size:28px}
+    .l5 .overlay .row{gap:20px}
+    .refs{padding:80px 22px}
+    .refs li{grid-template-columns:42px 1fr;gap:14px}
+    .refs li a.link{grid-column:2;justify-self:start;margin-top:6px}
+    footer{flex-direction:column;gap:14px;align-items:flex-start;padding:30px 22px 50px}
   }
 
   @media (prefers-reduced-motion:reduce){
-    *{animation:none !important;transition:none !important}
-    .layer{transition:none !important}
+    *{animation:none!important;transition:none!important}
+    .layer{transition:none}
   }
 </style>
 </head>
 <body>
 
-<!-- ============ INTRO ============ -->
+<div class="topbar">
+  <img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none'">
+  <div class="meta"><b>Module 01</b> &nbsp;·&nbsp; Wildfire Smoke</div>
+</div>
+
+<!-- INTRO -->
 <section class="intro">
-  <a class="brand" href="#" aria-label="NanoFlashing">
-    <img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none';this.parentNode.innerHTML='<span style=\'font-family:Space Grotesk;font-weight:700;font-size:22px;letter-spacing:-0.02em\'>NanoFlashing</span>'">
-  </a>
-  <div class="intro-body">
-    <div class="eyebrow"><span class="dot"></span>INERT · CAPTURED &amp; HELD</div>
-    <h1 class="title">Wildfire smoke</h1>
-    <p class="standfirst">What it is, where it is, and why the filter you're told to use can't keep up.</p>
-  </div>
-  <div class="down-cue">
-    <span>Scroll</span>
-    <span class="line"></span>
-  </div>
+  <div class="eyebrow">INERT<span class="dot"></span>CAPTURED &amp; HELD</div>
+  <h1>Wildfire smoke</h1>
+  <p class="standfirst">What it is, where it is, and why the filter you're told to use can't keep up.</p>
+  <div class="cue"><span class="line"></span> Scroll to begin</div>
 </section>
 
-<!-- ============ SCROLLYTELLING ============ -->
-<section class="scroll">
+<!-- SCROLLYTELLING -->
+<section class="scroll" id="scroll">
 
   <!-- LEFT: narrative -->
-  <div class="narrative">
+  <div class="narr">
 
-    <article class="beat" data-beat="0">
-      <div class="step">01 / A charged particle</div>
-      <div class="copy">
-        <p>Wildfire smoke is mostly soot: fine and ultrafine particles, most smaller than 2.5 micrometers across. The majority of these particles carry an electric charge.<sup><a href="#ref-1">[1]</a></sup> Air filters that use a static electric charge rely on this property to pull the particles out of the air.</p>
-      </div>
-    </article>
+    <div class="beat" data-beat="0">
+      <div class="step"><span class="num">01</span><span class="bar"></span><span>A charged particle</span><span class="redmark"></span></div>
+      <p>Wildfire smoke is mostly soot: fine and ultrafine particles, most smaller than 2.5 micrometers across. The majority of these particles carry an electric charge.<sup><a href="#ref-1">1</a></sup> Air filters that use a static electric charge rely on this property to pull the particles out of the air.</p>
+    </div>
 
-    <article class="beat" data-beat="1">
-      <div class="step">02 / Scale</div>
-      <div class="copy">
-        <p>A single large wildfire emits these particles in very large numbers, and prevailing winds carry them hundreds to thousands of kilometres. Smoke from fires in the West now reaches the eastern United States and Canada on a regular basis.</p>
-      </div>
-    </article>
+    <div class="beat" data-beat="1">
+      <div class="step"><span class="num">02</span><span class="bar"></span><span>Scale</span><span class="redmark"></span></div>
+      <p>A single large wildfire emits these particles in very large numbers, and prevailing winds carry them hundreds to thousands of kilometres. Smoke from fires in the West now reaches the eastern United States and Canada on a regular basis.</p>
+    </div>
 
-    <article class="beat" data-beat="2">
-      <div class="step">03 / Current extent</div>
-      <div class="copy">
-        <p>This map shows current wildfire smoke across North America, from NOAA satellite analysis and EPA air-quality monitors.<sup><a href="#ref-2">[2]</a></sup> The slider replays recent days; hover a location to see its measured air quality.</p>
-        <p>Wildfire smoke is no longer a regional problem. In recent years, an estimated <span class="key">95 to 100 percent</span> of the contiguous U.S. population was exposed to wildfire smoke at some point each year.<sup><a href="#ref-3">[3]</a></sup></p>
-        <p>The associated mortality is rising. Smoke-related fine-particle pollution is estimated to cause about 41,000 premature U.S. deaths per year (2011–2020 average), projected to reach about 71,000 per year by 2050 under a high-warming scenario — roughly 1.9 million cumulative deaths between 2026 and 2055.<sup><a href="#ref-4">[4]</a></sup></p>
-      </div>
-    </article>
+    <div class="beat" data-beat="2">
+      <div class="step"><span class="num">03</span><span class="bar"></span><span>Current extent</span><span class="redmark"></span></div>
+      <p>This map shows current wildfire smoke across North America, from NOAA satellite analysis and EPA air-quality monitors.<sup><a href="#ref-2">2</a></sup> The slider replays recent days; hover a location to see its measured air quality.</p>
+      <p>Wildfire smoke is no longer a regional problem. In recent years, an estimated <span style="color:var(--red);font-weight:600">95 to 100 percent</span> of the contiguous U.S. population was exposed to wildfire smoke at some point each year.<sup><a href="#ref-3">3</a></sup></p>
+      <p>The associated mortality is rising. Smoke-related fine-particle pollution is estimated to cause about 41,000 premature U.S. deaths per year (2011–2020 average), projected to reach about 71,000 per year by 2050 under a high-warming scenario — roughly 1.9 million cumulative deaths between 2026 and 2055.<sup><a href="#ref-4">4</a></sup></p>
+    </div>
 
-    <article class="beat" data-beat="3">
-      <div class="step">04 / Deposition and health</div>
-      <div class="copy">
-        <p>The particles of greatest concern are the smallest. A PM2.5 particle is roughly one-thirtieth the diameter of a human hair.<sup><a href="#ref-5">[5]</a></sup> Particles this small deposit deep in the lungs, and a fraction pass into the bloodstream.<sup><a href="#ref-6">[6]</a></sup></p>
-        <p>Documented associations with wildfire-smoke fine-particle exposure:</p>
-        <ul>
-          <li><strong>Children</strong> — up to about ten times the increase in pediatric respiratory visits seen with equal-mass PM2.5 from other sources; largest in ages 0–5. (UC San Diego, Pediatrics, 2021)<sup><a href="#ref-7">[7]</a></sup></li>
-          <li><strong>Pregnancy</strong> — higher odds of preterm birth. (UC Berkeley and UCSF, Environment International, 2024)<sup><a href="#ref-8">[8]</a></sup></li>
-          <li><strong>Cognition</strong> — lower student test scores after a cumulative school-year exposure. (Stanford, Nature Sustainability, 2022)<sup><a href="#ref-9">[9]</a></sup></li>
-          <li><strong>Cardiovascular</strong> — the EPA finds a causal relationship between fine-particle exposure and cardiovascular events, including heart attack and stroke. (EPA, 2019)<sup><a href="#ref-6">[6]</a></sup></li>
-          <li><strong>Urban-fire smoke</strong> — after the January 2025 Los Angeles fires, researchers measured hexavalent chromium on particles smaller than 56 nanometres, up to about nine miles from cleanup zones. (UC Davis, 2026)<sup><a href="#ref-10">[10]</a></sup></li>
-        </ul>
-      </div>
-    </article>
+    <div class="beat" data-beat="3">
+      <div class="step"><span class="num">04</span><span class="bar"></span><span>Deposition and health</span><span class="redmark"></span></div>
+      <p>The particles of greatest concern are the smallest. A PM2.5 particle is roughly one-thirtieth the diameter of a human hair.<sup><a href="#ref-5">5</a></sup> Particles this small deposit deep in the lungs, and a fraction pass into the bloodstream.<sup><a href="#ref-6">6</a></sup></p>
+      <div class="sublabel">Documented associations with wildfire-smoke fine-particle exposure</div>
+      <ul>
+        <li><span class="tag">Children</span><span class="body">Up to about ten times the increase in pediatric respiratory visits seen with equal-mass PM2.5 from other sources; largest in ages 0–5.<span class="src">UC San Diego, Pediatrics, 2021<sup><a href="#ref-7">7</a></sup></span></span></li>
+        <li><span class="tag">Pregnancy</span><span class="body">Higher odds of preterm birth.<span class="src">UC Berkeley and UCSF, Environment International, 2024<sup><a href="#ref-8">8</a></sup></span></span></li>
+        <li><span class="tag">Cognition</span><span class="body">Lower student test scores after a cumulative school-year exposure.<span class="src">Stanford, Nature Sustainability, 2022<sup><a href="#ref-9">9</a></sup></span></span></li>
+        <li><span class="tag">Cardiovascular</span><span class="body">The EPA finds a causal relationship between fine-particle exposure and cardiovascular events, including heart attack and stroke.<span class="src">EPA, 2019<sup><a href="#ref-6">6</a></sup></span></span></li>
+        <li><span class="tag">Urban-fire smoke</span><span class="body">After the January 2025 Los Angeles fires, researchers measured hexavalent chromium on particles smaller than 56 nanometres, up to about nine miles from cleanup zones.<span class="src">UC Davis, 2026<sup><a href="#ref-10">10</a></sup></span></span></li>
+      </ul>
+    </div>
 
-    <article class="beat" data-beat="4">
-      <div class="step">05 / Filter performance under smoke</div>
-      <div class="copy">
-        <p>Federal guidance recommends a MERV-13 or higher filter during smoke events.<sup><a href="#ref-11">[11]</a></sup> Many such filters are electret media: they hold a manufactured static charge that adds to mechanical filtration.</p>
-        <p>In EPA testing, a charged filter's clean-air delivery rate fell about <span class="key">95 percent</span> after roughly 10 milligrams of smoke had deposited — a few hours of a moderate event — while airflow resistance rose only about 7 percent.<sup><a href="#ref-12">[12]</a></sup> Because the pressure change is small, the loss of performance produces no clog and no usual indication that the filter is spent. The charge can be restored only by washing the filter in alcohol, which is not done in practice.</p>
-        <p>Filter ratings reflect this. A filter can be rated as MERV, measured with its charge intact, and as MERV-A, measured after the electrostatic charge is neutralized (ASHRAE 52.2, Appendix J) — the second being closer to performance under real loading.<sup><a href="#ref-13">[13]</a></sup> A filter that depends on a manufactured charge rates well as MERV and markedly lower as MERV-A.</p>
-        <p>The relevant question for any filter is therefore not whether it begins with a charge, but whether that charge persists under smoke loading.</p>
-      </div>
-    </article>
+    <div class="beat" data-beat="4">
+      <div class="step"><span class="num">05</span><span class="bar"></span><span>Filter performance under smoke</span><span class="redmark"></span></div>
+      <p>Federal guidance recommends a MERV-13 or higher filter during smoke events.<sup><a href="#ref-11">11</a></sup> Many such filters are electret media: they hold a manufactured static charge that adds to mechanical filtration.</p>
+      <p>In EPA testing, a charged filter's clean-air delivery rate fell about 95 percent after roughly 10 milligrams of smoke had deposited — a few hours of a moderate event — while airflow resistance rose only about 7 percent.<sup><a href="#ref-12">12</a></sup> Because the pressure change is small, the loss of performance produces no clog and no usual indication that the filter is spent. The charge can be restored only by washing the filter in alcohol, which is not done in practice.</p>
+      <p>Filter ratings reflect this. A filter can be rated as MERV, measured with its charge intact, and as MERV-A, measured after the electrostatic charge is neutralized (ASHRAE 52.2, Appendix J) — the second being closer to performance under real loading.<sup><a href="#ref-13">13</a></sup> A filter that depends on a manufactured charge rates well as MERV and markedly lower as MERV-A.</p>
+      <p>The relevant question for any filter is therefore not whether it begins with a charge, but whether that charge persists under smoke loading.</p>
+    </div>
 
   </div>
 
   <!-- RIGHT: sticky stage -->
-  <div class="stage-wrap">
-    <div class="stage">
+  <div class="stageWrap">
+    <div class="stage" id="stage">
+
+      <div class="stageMeta">
+        <span class="pill" id="stageLabel">Particle</span>
+        <span class="pill live" id="stageLive">Captured</span>
+      </div>
+
+      <div class="stageIndex">
+        <span>Stage</span>
+        <span class="dots" id="dots">
+          <i class="on"></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span id="stageNum">01 / 05</span>
+      </div>
 
       <!-- LAYER 1 -->
-      <div class="layer l1" data-layer="0">
-        <div class="video-mask">
+      <div class="layer l1 active" data-layer="0">
+        <div class="ring"></div>
+        <div class="vidwrap">
           <video src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" autoplay muted loop playsinline></video>
+          <span class="charge plus c1">＋</span>
+          <span class="charge c2">－</span>
+          <span class="charge c3">－</span>
+          <span class="charge plus c4">＋</span>
         </div>
-        <span class="charge pos">＋</span>
-        <span class="charge">－</span>
-        <span class="charge pos">＋</span>
-        <span class="charge">－</span>
       </div>
 
       <!-- LAYER 2 -->
       <div class="layer l2" data-layer="1">
-        <canvas id="smoke-canvas"></canvas>
+        <video src="assets/videos/wf_smoke.mp4" autoplay muted loop playsinline></video>
+        <div class="scalebar"><span>0</span><span class="line"></span><span>1000 km</span></div>
       </div>
 
       <!-- LAYER 3 -->
       <div class="layer l3" data-layer="2">
-        <div class="panel">
-          <svg viewBox="0 0 600 460" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M70,180 C90,140 140,120 180,110 C220,95 260,80 300,85 C340,90 380,75 420,90 C460,105 500,130 520,170 C535,200 530,240 510,270 C490,300 470,330 440,350 C410,370 380,360 350,365 C320,370 290,385 260,380 C230,375 200,360 175,345 C150,330 130,310 110,285 C90,260 75,235 70,200 Z" stroke="#aab2b8" stroke-width="1.2" fill="rgba(130,138,144,0.08)"/>
-            <path d="M180,110 C200,130 220,150 230,180 C235,200 230,220 220,240" stroke="#aab2b8" stroke-width="0.8" fill="none" opacity="0.5"/>
-            <path d="M300,85 C310,110 320,140 315,170 C310,200 295,220 280,240" stroke="#aab2b8" stroke-width="0.8" fill="none" opacity="0.5"/>
-            <path d="M420,90 C410,120 400,150 405,180 C410,210 425,230 440,250" stroke="#aab2b8" stroke-width="0.8" fill="none" opacity="0.5"/>
-          </svg>
-          <div class="blob b1"></div>
-          <div class="blob b2"></div>
-          <div class="blob b3"></div>
-          <div class="cap">Near-real-time smoke map — loads here</div>
+        <div class="mapframe">
+          <div class="mapcap">NOAA HMS · EPA AirNow</div>
+          <iframe src="wfmap.html" title="Live North America wildfire smoke map" style="width:100%;height:100%;border:0;display:block"></iframe>
         </div>
       </div>
 
       <!-- LAYER 4 -->
       <div class="layer l4" data-layer="3">
-        <div class="scale">
-          <div class="item"><div class="big"></div><span>Human hair ~70 µm</span></div>
-          <div class="item"><div class="tiny"></div><span>PM2.5 ≤2.5 µm</span></div>
-        </div>
-        <div class="figure">
-          <svg viewBox="0 0 240 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- head -->
-            <ellipse cx="120" cy="58" rx="42" ry="48" fill="rgba(130,138,144,0.22)" stroke="#aab2b8" stroke-width="1"/>
-            <!-- neck -->
-            <path d="M100,100 L100,120 L140,120 L140,100" fill="rgba(130,138,144,0.22)" stroke="#aab2b8" stroke-width="1"/>
-            <!-- torso -->
-            <path d="M70,120 C60,140 55,170 55,210 L55,300 L185,300 L185,210 C185,170 180,140 170,120 Z" fill="rgba(130,138,144,0.22)" stroke="#aab2b8" stroke-width="1"/>
-            <!-- lungs -->
-            <path d="M95,135 C85,150 80,180 82,220 C84,250 92,270 100,270 L105,200 L105,150 Z" fill="rgba(130,138,144,0.35)" stroke="#828a90" stroke-width="1"/>
-            <path d="M145,135 C155,150 160,180 158,220 C156,250 148,270 140,270 L135,200 L135,150 Z" fill="rgba(130,138,144,0.35)" stroke="#828a90" stroke-width="1"/>
-            <!-- trachea -->
-            <line x1="120" y1="105" x2="120" y2="150" stroke="#828a90" stroke-width="1.2"/>
-            <!-- leader line + particle -->
-            <path d="M200,180 C180,190 160,200 140,210" stroke="#e23b3b" stroke-width="1" stroke-dasharray="2 3" fill="none"/>
-            <circle cx="200" cy="180" r="2.5" fill="#e23b3b"/>
-            <circle cx="140" cy="210" r="1.8" fill="#e23b3b"/>
-            <text x="206" y="176" font-family="Space Mono" font-size="8" fill="#828a90" letter-spacing="0.1em">PM2.5</text>
-            <text x="206" y="186" font-family="Space Mono" font-size="8" fill="#828a90" letter-spacing="0.1em">DEEP LUNG</text>
-          </svg>
-        </div>
+        <img src="assets/wf_lung.png" alt="Medical illustration of the airway and lungs">
+        <div class="lungcap">PM2.5 deposition · <b>deep lung &amp; bloodstream</b></div>
       </div>
 
       <!-- LAYER 5 -->
       <div class="layer l5" data-layer="4">
-        <svg class="filter-svg" viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- frame -->
-          <rect x="20" y="20" width="480" height="160" stroke="#aab2b8" stroke-width="1" fill="rgba(255,255,255,0.3)" rx="4"/>
-          <!-- fibres -->
-          <g stroke="#828a90" stroke-width="1.2" opacity="0.7">
-            <line x1="80" y1="30" x2="80" y2="170"/>
-            <line x1="120" y1="30" x2="120" y2="170"/>
-            <line x1="160" y1="30" x2="160" y2="170"/>
-            <line x1="200" y1="30" x2="200" y2="170"/>
-            <line x1="240" y1="30" x2="240" y2="170"/>
-            <line x1="280" y1="30" x2="280" y2="170"/>
-            <line x1="320" y1="30" x2="320" y2="170"/>
-            <line x1="360" y1="30" x2="360" y2="170"/>
-            <line x1="400" y1="30" x2="400" y2="170"/>
-            <line x1="440" y1="30" x2="440" y2="170"/>
-          </g>
-          <!-- red glow on left fibres fading right -->
-          <defs>
-            <linearGradient id="glow" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#e23b3b" stop-opacity="0.35"/>
-              <stop offset="35%" stop-color="#e23b3b" stop-opacity="0.15"/>
-              <stop offset="70%" stop-color="#e23b3b" stop-opacity="0"/>
-              <stop offset="100%" stop-color="#e23b3b" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <rect x="20" y="20" width="480" height="160" fill="url(#glow)" rx="4"/>
-          <!-- accumulated smoke dots on left -->
-          <g fill="#828a90" opacity="0.6">
-            <circle cx="78" cy="60" r="2"/>
-            <circle cx="82" cy="90" r="1.5"/>
-            <circle cx="118" cy="75" r="2"/>
-            <circle cx="122" cy="110" r="1.8"/>
-            <circle cx="158" cy="65" r="1.5"/>
-            <circle cx="162" cy="130" r="2"/>
-            <circle cx="198" cy="85" r="1.5"/>
-            <circle cx="202" cy="140" r="1.8"/>
-            <circle cx="238" cy="100" r="1.5"/>
-            <circle cx="278" cy="120" r="1.2"/>
-          </g>
-          <!-- airflow arrow -->
-          <path d="M0,100 L18,100" stroke="#828a90" stroke-width="1"/>
-          <path d="M14,97 L18,100 L14,103" stroke="#828a90" stroke-width="1" fill="none"/>
-          <text x="0" y="92" font-family="Space Mono" font-size="8" fill="#828a90" letter-spacing="0.1em">AIR</text>
-        </svg>
-
-        <div class="gauge">
-          <div class="read">
-            <span class="label">Clean-air delivery</span>
-            <span class="val red">−95%</span>
-            <span class="sub">after ~10 mg smoke</span>
+        <video src="assets/videos/wf_filter.mp4" autoplay muted loop playsinline></video>
+        <div class="overlay">
+          <div class="row">
+            <div class="cell">
+              <div class="eb">Clean-air delivery</div>
+              <div class="big red">−95%</div>
+              <div class="sub">after ~10 mg smoke</div>
+            </div>
+            <div class="cell">
+              <div class="eb">Pressure</div>
+              <div class="big">+7%</div>
+              <div class="sub">no clog signal</div>
+            </div>
           </div>
-          <div class="read">
-            <span class="label">Pressure</span>
-            <span class="val">+7%</span>
-            <span class="sub">no clog signal</span>
+          <div class="bars">
+            <div class="bar tall"><div class="b"></div><div class="lbl">MERV</div></div>
+            <div class="bar short"><div class="b"></div><div class="lbl">MERV-A</div></div>
           </div>
-        </div>
-
-        <div class="bars">
-          <div class="bar">
-            <div class="col tall"></div>
-            <span class="name">MERV</span>
-          </div>
-          <div class="bar">
-            <div class="col short"></div>
-            <span class="name">MERV-A</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- stage meta -->
-      <div class="stage-meta">
-        <span>NanoFlashing · Wildfire Smoke</span>
-        <div class="progress">
-          <span></span><span></span><span></span><span></span><span></span>
         </div>
       </div>
 
@@ -717,219 +308,101 @@
 
 </section>
 
-<!-- ============ REFERENCES ============ -->
+<!-- REFERENCES -->
 <section class="refs" id="refs">
+  <div class="eyebrow">Sources<span class="dot"></span>13 references</div>
   <h2>References</h2>
   <ol>
-    <li id="ref-1"><span>Sorokin et al., Atmospheric Chemistry and Physics, 2003 — <a href="https://acp.copernicus.org/articles/3/325/2003/" target="_blank" rel="noopener">acp.copernicus.org/articles/3/325/2003</a></span><span class="arrow">↗</span></li>
-    <li id="ref-2"><span>NOAA Hazard Mapping System; EPA AirNow — <a href="https://www.ospo.noaa.gov/products/land/hms.html" target="_blank" rel="noopener">ospo.noaa.gov/products/land/hms</a></span><span class="arrow">↗</span></li>
-    <li id="ref-3"><span>Zhang et al., Environ. Sci. Technol. — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov/articles/PMC10543292</a></span><span class="arrow">↗</span></li>
-    <li id="ref-4"><span>Qiu et al., Nature, 2025 — <a href="https://www.nature.com/articles/s41586-025-09611-w" target="_blank" rel="noopener">nature.com/articles/s41586-025-09611-w</a></span><span class="arrow">↗</span></li>
-    <li id="ref-5"><span>US EPA, Particulate Matter Basics — <a href="https://www.epa.gov/pm-pollution/particulate-matter-pm-basics" target="_blank" rel="noopener">epa.gov/pm-pollution/particulate-matter-pm-basics</a></span><span class="arrow">↗</span></li>
-    <li id="ref-6"><span>US EPA, Integrated Science Assessment for PM, 2019 — <a href="https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease" target="_blank" rel="noopener">epa.gov/air-research/clinical-outcomes-related-…</a></span><span class="arrow">↗</span></li>
-    <li id="ref-7"><span>Aguilera et al., Pediatrics, 2021 — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9298841/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov/articles/PMC9298841</a></span><span class="arrow">↗</span></li>
-    <li id="ref-8"><span>Picciotto, Padula et al., Environment International, 2024 — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov/articles/PMC11410054</a></span><span class="arrow">↗</span></li>
-    <li id="ref-9"><span>Wen &amp; Burke, Nature Sustainability, 2022 — <a href="https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf" target="_blank" rel="noopener">web.stanford.edu/~mburke/papers/WenBurke2022…</a></span><span class="arrow">↗</span></li>
-    <li id="ref-10"><span>Kleeman et al. (UC Davis), Communications Earth &amp; Environment, 2026 — <a href="https://www.ucdavis.edu/climate/news/chromium-6-nanosilver-detected-la-fire-cleanup-zones" target="_blank" rel="noopener">ucdavis.edu/climate/news/chromium-6-nanosilver…</a></span><span class="arrow">↗</span></li>
-    <li id="ref-11"><span>US EPA, Preparing for Smoke and Heat — <a href="https://www.epa.gov/wildfire-smoke-course/preparing-smoke-and-heat" target="_blank" rel="noopener">epa.gov/wildfire-smoke-course/preparing-smoke-and-heat</a></span><span class="arrow">↗</span></li>
-    <li id="ref-12"><span>Holder et al., Indoor Air, 2022 — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov/articles/PMC9828579</a></span><span class="arrow">↗</span></li>
-    <li id="ref-13"><span>ANSI/ASHRAE Standard 52.2, Appendix J — <a href="https://www.hpac.com/iaq-ventilation/article/20925695/updated-standard-for-air-filter-testing" target="_blank" rel="noopener">hpac.com/iaq-ventilation/article/20925695</a></span><span class="arrow">↗</span></li>
+    <li id="ref-1"><span></span><span class="cite">Sorokin et al., <span class="src">Atmospheric Chemistry and Physics, 2003</span></span><a class="link" href="https://acp.copernicus.org/articles/3/325/2003/" target="_blank" rel="noopener">acp.copernicus.org ↗</a></li>
+    <li id="ref-2"><span></span><span class="cite">NOAA Hazard Mapping System; EPA AirNow</span><a class="link" href="https://www.ospo.noaa.gov/products/land/hms.html" target="_blank" rel="noopener">ospo.noaa.gov ↗</a></li>
+    <li id="ref-3"><span></span><span class="cite">Zhang et al., <span class="src">Environ. Sci. Technol.</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-4"><span></span><span class="cite">Qiu et al., <span class="src">Nature, 2025</span></span><a class="link" href="https://www.nature.com/articles/s41586-025-09611-w" target="_blank" rel="noopener">nature.com ↗</a></li>
+    <li id="ref-5"><span></span><span class="cite">US EPA, <span class="src">Particulate Matter Basics</span></span><a class="link" href="https://www.epa.gov/pm-pollution/particulate-matter-pm-basics" target="_blank" rel="noopener">epa.gov ↗</a></li>
+    <li id="ref-6"><span></span><span class="cite">US EPA, <span class="src">Integrated Science Assessment for PM, 2019</span></span><a class="link" href="https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease" target="_blank" rel="noopener">epa.gov ↗</a></li>
+    <li id="ref-7"><span></span><span class="cite">Aguilera et al., <span class="src">Pediatrics, 2021</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9298841/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-8"><span></span><span class="cite">Picciotto, Padula et al., <span class="src">Environment International, 2024</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-9"><span></span><span class="cite">Wen &amp; Burke, <span class="src">Nature Sustainability, 2022</span></span><a class="link" href="https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf" target="_blank" rel="noopener">web.stanford.edu ↗</a></li>
+    <li id="ref-10"><span></span><span class="cite">Kleeman et al. (UC Davis), <span class="src">Communications Earth &amp; Environment, 2026</span></span><a class="link" href="https://www.ucdavis.edu/climate/news/chromium-6-nanosilver-detected-la-fire-cleanup-zones" target="_blank" rel="noopener">ucdavis.edu ↗</a></li>
+    <li id="ref-11"><span></span><span class="cite">US EPA, <span class="src">Preparing for Smoke and Heat</span></span><a class="link" href="https://www.epa.gov/wildfire-smoke-course/preparing-smoke-and-heat" target="_blank" rel="noopener">epa.gov ↗</a></li>
+    <li id="ref-12"><span></span><span class="cite">Holder et al., <span class="src">Indoor Air, 2022</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-13"><span></span><span class="cite">ANSI/ASHRAE Standard 52.2, Appendix J</span><a class="link" href="https://www.hpac.com/iaq-ventilation/article/20925695/updated-standard-for-air-filter-testing" target="_blank" rel="noopener">hpac.com ↗</a></li>
   </ol>
 </section>
 
-<footer class="foot">
-  <span>NanoFlashing · Module 1</span>
-  <span>Wildfire Smoke · v1.0</span>
+<footer>
+  <div>NanoFlashing · Science Desk</div>
+  <div class="right"><span>Module 01 / 05</span><span>Wildfire Smoke</span><span>2026</span></div>
 </footer>
 
 <script>
 (function(){
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isMobile = () => window.matchMedia('(max-width: 860px)').matches;
+  const beats = document.querySelectorAll('.beat');
+  const layers = document.querySelectorAll('.layer');
+  const dots = document.querySelectorAll('#dots i');
+  const stageNum = document.getElementById('stageNum');
+  const stageLabel = document.getElementById('stageLabel');
+  const stageLive = document.getElementById('stageLive');
+  const labels = ['Particle','Plume','Live map','Deposition','Filter'];
+  const liveStates = ['Captured','Dispersing','Live','Depositing','Loaded'];
 
-  // ---------- Scroll engine ----------
-  const beats = Array.from(document.querySelectorAll('.beat'));
-  const layers = Array.from(document.querySelectorAll('.layer'));
-  const progressDots = Array.from(document.querySelectorAll('.stage-meta .progress span'));
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let current = -1;
-
-  function setActive(i){
-    if(i === current) return;
-    current = i;
-    layers.forEach((l,idx)=>{
-      const on = idx === i;
-      l.classList.toggle('active', on);
-      // ensure visibility state matches opacity for cross-fade
-      l.style.visibility = on ? 'visible' : 'hidden';
+  function setActive(n){
+    layers.forEach((l,i)=>{
+      if(i===n) l.classList.add('active');
+      else l.classList.remove('active');
     });
-    progressDots.forEach((d,idx)=>{
-      d.classList.toggle('on', idx===i);
-    });
-    // start/stop canvas based on whether layer 2 is active
-    if(i === 1) startField(); else stopField();
+    dots.forEach((d,i)=>d.classList.toggle('on',i===n));
+    stageNum.textContent = String(n+1).padStart(2,'0')+' / 05';
+    stageLabel.textContent = labels[n];
+    stageLive.textContent = liveStates[n];
+    stageLive.classList.toggle('live', n===2);
   }
 
-  // ---------- Layer 2 canvas state (declared before setActive/stopField use it) ----------
-  const canvas = document.getElementById('smoke-canvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-  let rafId = null;
-  let running = false;
-  let sized = false;
-
-  // Set first active immediately
-  setActive(0);
-
-  if('IntersectionObserver' in window){
-    // Use a centered narrow band as the root; threshold 0 so any beat
-    // crossing the viewport centre fires. With ~92vh beats only one beat
-    // occupies the band at a time.
-    const io = new IntersectionObserver((entries)=>{
-      // pick the entry whose centre is closest to the viewport centre
-      let best = null;
-      let bestDist = Infinity;
-      const viewMid = window.innerHeight / 2;
-      entries.forEach(e=>{
-        if(!e.isIntersecting) return;
-        const r = e.boundingClientRect;
-        const centre = r.top + r.height/2;
-        const dist = Math.abs(centre - viewMid);
-        if(dist < bestDist){ bestDist = dist; best = e; }
-      });
-      if(best){
-        const idx = parseInt(best.target.dataset.beat,10);
-        if(!isNaN(idx)) setActive(idx);
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const n = parseInt(e.target.dataset.beat,10);
+        if(!isNaN(n)) setActive(n);
       }
-    }, {
-      root: null,
-      rootMargin: isMobile() ? '-27% 0px -27% 0px' : '-45% 0px -45% 0px',
-      threshold: [0, 0.25, 0.5, 0.75, 1]
     });
-    beats.forEach(b=>io.observe(b));
-  } else {
-    // fallback: scroll position
-    const onScroll = ()=>{
-      const mid = window.scrollY + window.innerHeight/2;
-      let cur = 0;
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+
+  beats.forEach(b=>io.observe(b));
+
+  // Fallback: also listen to scroll for edge cases
+  let ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(()=>{
+      const center = window.innerHeight/2;
+      let best = 0, bestDist = Infinity;
       beats.forEach((b,i)=>{
-        if(b.offsetTop <= mid) cur = i;
+        const r = b.getBoundingClientRect();
+        const c = (r.top + r.bottom)/2;
+        const d = Math.abs(c - center);
+        if(d < bestDist){ bestDist = d; best = i; }
       });
-      setActive(cur);
-    };
+      setActive(best);
+      ticking = false;
+    });
+  }
+  // Use IO as primary; scroll handler only kicks in if IO unsupported
+  if(!('IntersectionObserver' in window)){
     window.addEventListener('scroll', onScroll, {passive:true});
     onScroll();
   }
 
-  // ---------- Layer 2: particle field canvas ----------
-  function sizeCanvas(){
-    const r = canvas.getBoundingClientRect();
-    if(r.width < 2 || r.height < 2) return;
-    const dpr = Math.min(window.devicePixelRatio||1, 2);
-    canvas.width = Math.max(1, Math.floor(r.width * dpr));
-    canvas.height = Math.max(1, Math.floor(r.height * dpr));
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    sized = true;
-  }
-
-  function initParticles(){
-    const r = canvas.getBoundingClientRect();
-    const count = 400;
-    particles = [];
-    for(let i=0;i<count;i++){
-      particles.push({
-        x: Math.random()*r.width,
-        y: Math.random()*r.height,
-        vx: (Math.random()-0.5)*0.25,
-        vy: (Math.random()-0.5)*0.18,
-        r: Math.random()*1.6 + 0.4,
-        a: Math.random()*0.35 + 0.1
-      });
-    }
-  }
-
-  function drawField(){
-    const r = canvas.getBoundingClientRect();
-    ctx.clearRect(0,0,r.width,r.height);
-    // soft haze
-    const g = ctx.createRadialGradient(r.width*0.5, r.height*0.5, 0, r.width*0.5, r.height*0.5, Math.max(r.width,r.height)*0.55);
-    g.addColorStop(0, 'rgba(130,138,144,0.06)');
-    g.addColorStop(1, 'rgba(130,138,144,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,r.width,r.height);
-
-    for(const p of particles){
-      p.x += p.vx;
-      p.y += p.vy;
-      if(p.x < -10) p.x = r.width+10;
-      if(p.x > r.width+10) p.x = -10;
-      if(p.y < -10) p.y = r.height+10;
-      if(p.y > r.height+10) p.y = -10;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(130,138,144,${p.a})`;
-      ctx.fill();
-    }
-    rafId = requestAnimationFrame(drawField);
-  }
-
-  function drawStatic(){
-    const r = canvas.getBoundingClientRect();
-    ctx.clearRect(0,0,r.width,r.height);
-    const g = ctx.createRadialGradient(r.width*0.5, r.height*0.5, 0, r.width*0.5, r.height*0.5, Math.max(r.width,r.height)*0.55);
-    g.addColorStop(0, 'rgba(130,138,144,0.08)');
-    g.addColorStop(1, 'rgba(130,138,144,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,r.width,r.height);
-    for(const p of particles){
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(130,138,144,${p.a})`;
-      ctx.fill();
-    }
-  }
-
-  function startField(){
-    if(!sized){ sizeCanvas(); initParticles(); }
-    if(running) return;
-    running = true;
-    if(!reduceMotion){
-      rafId = requestAnimationFrame(drawField);
-    } else {
-      drawStatic();
-    }
-  }
-
-  function stopField(){
-    running = false;
-    if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
-  }
-
-  function setupCanvas(){
-    sizeCanvas();
-    initParticles();
-    if(current === 1) startField();
-  }
-
-  // Defer canvas setup until layout settles
-  window.addEventListener('load', ()=>{
-    requestAnimationFrame(setupCanvas);
+  // Smooth scroll for footnote jumps
+  document.querySelectorAll('sup a[href^="#ref-"]').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const t = document.querySelector(a.getAttribute('href'));
+      if(t) t.scrollIntoView({behavior: reduced?'auto':'smooth', block:'center'});
+    });
   });
-
-  let resizeTimer;
-  window.addEventListener('resize', ()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(()=>{
-      const wasRunning = running;
-      stopField();
-      sized = false;
-      setupCanvas();
-      if(wasRunning) startField();
-    }, 200);
-  });
-
 })();
 </script>
-
 </body>
 </html>
