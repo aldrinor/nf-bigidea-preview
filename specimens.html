@@ -163,7 +163,7 @@ function soot(cx,cy,S,ly){
   for(const b of balls){ softShadeDisc(b.x,b.y,b.r,0.24); const r2=mulberry((b.x*7+b.y*13|0)+5); taperedContour(circlePts(b.x,b.y,b.r,Math.max(20,b.r|0),0.015,r2),1.3,0.6,INK); }
   let outer=balls[0]; for(const b of balls) if(b.x>outer.x) outer=b;
   chargeHalo(cx,cy,S*0.92);
-  label(cx,ly,'Wildfire smoke','soot · fractal aggregate');
+  label(cx,ly,'Wildfire Smoke','soot · fractal aggregate');
 }
 function ultrafine(cx,cy,S,ly){
   const rng=mulberry(88), sc=0.66;  // SMALLER → reads as "the smallest"

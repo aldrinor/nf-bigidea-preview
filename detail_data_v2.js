@@ -81,17 +81,17 @@ window.DETAIL_DATA_V2 = {
       { fig: "~70,000", qual: "projected a year by 2050" }
     ],
     sections: [
-      { label: "What it is", body: "Wildfire smoke is mostly ultrafine soot: particles under 100 nanometres. By number they make up the bulk of the smoke — far smaller than what ordinary filters are built to catch.[1]" },
+      { label: "What it is", body: "Wildfire Smoke is mostly ultrafine soot: particles under 100 nanometres. By number they make up the bulk of the smoke — far smaller than what ordinary filters are built to catch.[1]" },
       { label: "Its charge", body: "Combustion leaves this soot electrically charged: a known property of flame-born particles, and strong enough that wood-smoke collectors pull it onto a surface by that charge.[2] It's an inert particle — captured and held, nothing released back." },
-      { label: "How widespread", body: "Exposure is effectively universal. In recent years, between 95% and nearly 100% of the continental U.S. population was exposed to wildfire smoke each year.[3]" },
+      { label: "How widespread", body: "Exposure is effectively universal. In recent years, between 95% and nearly 100% of the continental U.S. population was exposed to Wildfire Smoke each year.[3]" },
       { label: "Health impact", body: "Now tied to about 40,000 U.S. deaths a year — and on a high-warming path, about 70,000 a year by 2050.[4]" }
     ],
-    figure: { type: "isotype", filled: 97, total: 100, value: "~100%", caption: "of the continental U.S. population was exposed to wildfire smoke in a recent year", sourceText: "Zhang et al., Environ. Sci. Technol.", sourceUrl: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" },
+    figure: { type: "isotype", filled: 97, total: 100, value: "~100%", caption: "of the continental U.S. population was exposed to Wildfire Smoke in a recent year", sourceText: "Zhang et al., Environ. Sci. Technol.", sourceUrl: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" },
     references: [
       { n: 1, cite: "Ultrafine particles from residential biomass combustion, review, PMC6834185", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6834185/" },
       { n: 2, cite: "Suhonen et al., naturally-charged soot collection, J. Cleaner Production, 2021", url: "https://researchportal.tuni.fi/en/publications/novel-fine-particle-reduction-method-for-wood-stoves-based-on-hig/" },
       { n: 3, cite: "Zhang et al., wildfire & U.S. PM2.5 exposure, Environ. Sci. Technol. (PMC10543292)", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" },
-      { n: 4, cite: "Qiu et al., wildfire smoke mortality under climate change, Nature, 2025", url: "https://pubmed.ncbi.nlm.nih.gov/40967551/" }
+      { n: 4, cite: "Qiu et al., Wildfire Smoke mortality under climate change, Nature, 2025", url: "https://pubmed.ncbi.nlm.nih.gov/40967551/" }
     ]
   },
   Ultrafine_Particle: {
