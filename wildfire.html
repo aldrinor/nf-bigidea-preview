@@ -42,21 +42,34 @@
   @keyframes cuePulse{0%,100%{transform:scaleY(1);opacity:.4}50%{transform:scaleY(1);opacity:.9}}
 
   /* ---------- SCROLL SECTION ---------- */
-  .scroll{position:relative;display:grid;grid-template-columns:48% 52%;max-width:1500px;margin:0 auto}
+  .scroll{position:relative;display:grid;grid-template-columns:40% 60%;max-width:1500px;margin:0 auto}
   .narr{position:relative;z-index:2}
-  .beat{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:60px 7vw 60px 8vw;max-width:480px}
+
+  /* CONTINUOUS FLOWING NARRATIVE — no full-height centered blocks */
+  .beat{
+    max-width:620px;
+    margin-left:auto;
+    padding:11vh 56px 11vh 5vw;
+    min-height:0;
+    opacity:.28;
+    transition:opacity .45s ease;
+  }
+  .beat.is-active{opacity:1}
+  .beat:first-of-type{padding-top:24vh}
+  .beat:last-of-type{padding-bottom:24vh}
+  .beat:last-of-type{padding-bottom:26vh}
+
   .beat .step{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:30px;display:flex;align-items:center;gap:14px}
   .beat .step .num{color:var(--ink);font-weight:700}
   .beat .step .bar{flex:1;height:1px;background:var(--hair);max-width:120px}
   .beat .step .redmark{width:8px;height:8px;background:var(--red);border-radius:50%}
-  .beat p{font-size:clamp(16px,1.25vw,18px);line-height:1.62;color:var(--ink);font-weight:400;margin-bottom:1.1em}
+  .beat p{font-size:18px;line-height:1.62;color:var(--ink);font-weight:400;margin-bottom:1.1em}
   .beat p:last-child{margin-bottom:0}
   .beat p .muted{color:var(--muted)}
   .beat .sublabel{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin:6px 0 14px}
-  .beat ul{list-style:none;margin:.4em 0 1em}
-  .beat ul li{font-size:clamp(15px,1.15vw,17px);line-height:1.55;padding:11px 0;border-top:1px solid var(--hair);display:flex;gap:14px}
-  .beat ul li:last-child{border-bottom:1px solid var(--hair)}
-  .beat ul li .tag{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:var(--red);text-transform:uppercase;flex-shrink:0;width:120px;padding-top:3px}
+  .beat ul{list-style:none;margin:.4em 0 1em;display:flex;flex-direction:column;gap:18px}
+  .beat ul li{font-size:17px;line-height:1.5;padding:4px 0;display:flex;gap:18px}
+  .beat ul li .tag{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--ink);text-transform:uppercase;flex-shrink:0;width:130px;padding-top:3px}
   .beat ul li .body{flex:1;color:var(--ink)}
   .beat ul li .body .src{display:block;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
 
@@ -64,64 +77,66 @@
 
   /* ---------- STICKY STAGE ---------- */
   .stageWrap{position:relative}
-  .stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:transparent}
   .stage::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(237,240,242,0) 80%,rgba(237,240,242,.6) 100%);pointer-events:none;z-index:3}
   .layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
   .layer.active{opacity:1;pointer-events:auto}
-  .stageMeta{position:absolute;top:34px;right:36px;z-index:5;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px}
-  .stageMeta .pill{padding:5px 10px;border:1px solid var(--hair);border-radius:999px;color:var(--ink)}
-  .stageMeta .pill.live{color:var(--red);border-color:rgba(226,59,59,.35)}
-  .stageMeta .pill.live::before{content:"";display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:7px;vertical-align:middle;animation:livePulse 1.8s infinite}
+
+  /* LIVE pill — only on map beat */
+  .stageLive{position:absolute;top:34px;right:36px;z-index:6;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;opacity:0;transition:opacity .4s var(--ease);pointer-events:none}
+  .stageLive.on{opacity:1}
+  .stageLive .pill{display:inline-flex;align-items:center;padding:6px 12px;border:1px solid rgba(226,59,59,.35);border-radius:999px;color:var(--red);background:rgba(237,240,242,.7);backdrop-filter:blur(4px)}
+  .stageLive .pill::before{content:"";display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:8px;vertical-align:middle;animation:livePulse 1.8s infinite}
   @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .stageIndex{position:absolute;bottom:34px;left:36px;z-index:5;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:14px}
+
+  /* Bottom-left progress dots only */
+  .stageIndex{position:absolute;bottom:34px;left:36px;z-index:5;display:flex;align-items:center;gap:14px}
   .stageIndex .dots{display:flex;gap:8px}
   .stageIndex .dots i{width:6px;height:6px;border-radius:50%;background:var(--faint);transition:background .3s,transform .3s}
   .stageIndex .dots i.on{background:var(--red);transform:scale(1.4)}
 
   /* LAYER 1 — charged particle */
-  .l1 .vidwrap{position:relative;width:min(30vw,420px);height:min(30vw,420px)}
-  .l1 video{width:100%;height:100%;object-fit:cover;-webkit-mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 76%);filter:grayscale(.4) contrast(1.05)}
-  .l1 .charge{position:absolute;font-family:'Space Mono',monospace;font-size:18px;color:var(--muted);opacity:.55}
-  .l1 .charge.plus{color:var(--red);opacity:.7}
-  .l1 .c1{top:8%;left:14%}
-  .l1 .c2{top:18%;right:10%}
-  .l1 .c3{bottom:14%;left:8%}
-  .l1 .c4{bottom:22%;right:14%}
-  .l1 .ring{position:absolute;top:50%;left:50%;width:min(30vw,420px);height:min(30vw,420px);transform:translate(-50%,-50%);border:1px solid var(--hair);border-radius:50%;pointer-events:none}
-  .l1 .ring::after{content:"";position:absolute;inset:18%;border:1px dashed rgba(20,24,28,.08);border-radius:50%}
+  .l1{justify-content:flex-start;padding-left:4vw}
+  .l1 .vidwrap{position:relative;width:min(44vw,600px);height:min(44vw,600px)}
+  .l1 video{width:100%;height:100%;object-fit:cover;-webkit-mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 78%);filter:grayscale(1) contrast(1.06) brightness(1.02)}
 
   /* LAYER 2 — smoke haze */
-  .l2 video{width:100%;height:100%;object-fit:contain;filter:grayscale(.85) contrast(1.05) brightness(1.02)}
+  .l2 video{width:100%;height:100%;object-fit:cover;filter:grayscale(.92) contrast(1.05)}
   .l2 .scalebar{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;z-index:2}
   .l2 .scalebar .line{width:80px;height:1px;background:var(--muted);position:relative}
   .l2 .scalebar .line::before,.l2 .scalebar .line::after{content:"";position:absolute;top:-3px;width:1px;height:7px;background:var(--muted)}
   .l2 .scalebar .line::before{left:0}.l2 .scalebar .line::after{right:0}
 
   /* LAYER 3 — map */
-  .l3 iframe{width:100%;height:100%;border:0;display:block;background:#e8ebef}
-  .l3 .mapframe{position:absolute;inset:5vh 5vw;border:1px solid var(--hair);background:#fff;box-shadow:0 30px 80px -40px rgba(20,24,28,.25)}
-  .l3 .mapframe iframe{width:100%;height:100%}
-  .l3 .mapcap{position:absolute;top:calc(5vh + 14px);left:calc(5vw + 16px);font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;z-index:2;background:rgba(237,240,242,.85);padding:4px 9px;backdrop-filter:blur(4px)}
+  .l3 .mapframe{position:absolute;inset:1.5vh 1.5vw;border:1px solid var(--hair);overflow:hidden}
+  .l3 .mapframe iframe{width:100%;height:100%;border:0;display:block}
+  .l3 .mapcap{position:absolute;top:14px;left:16px;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;z-index:2;background:rgba(237,240,242,.85);padding:4px 9px;backdrop-filter:blur(4px)}
 
   /* LAYER 4 — lung */
-  .l4 img{max-height:84%;max-width:80%;object-fit:contain;filter:grayscale(.15) contrast(1.02)}
+  .l4 img{max-height:90%;max-width:90%;object-fit:contain;filter:grayscale(.15) contrast(1.02);
+    -webkit-mask:radial-gradient(ellipse 86% 78% at 50% 46%,#000 46%,transparent 92%);
+            mask:radial-gradient(ellipse 86% 78% at 50% 46%,#000 46%,transparent 92%)}
   .l4 .lungcap{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;text-align:center}
   .l4 .lungcap b{color:var(--red);font-weight:700}
 
   /* LAYER 5 — filter */
   .l5 video{width:100%;height:100%;object-fit:cover;filter:grayscale(.5) contrast(1.1) brightness(.95)}
-  .l5 .overlay{position:absolute;left:5%;bottom:7%;z-index:3;display:flex;flex-direction:column;gap:18px;background:linear-gradient(135deg,rgba(237,240,242,.92),rgba(237,240,242,.78));backdrop-filter:blur(6px);border:1px solid var(--hair);padding:22px 26px;max-width:340px}
-  .l5 .overlay .row{display:flex;gap:32px}
-  .l5 .overlay .cell .eb{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-  .l5 .overlay .cell .big{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1;letter-spacing:-.02em}
-  .l5 .overlay .cell .big.red{color:var(--red)}
-  .l5 .overlay .cell .sub{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:5px;letter-spacing:.04em}
-  .l5 .overlay .bars{display:flex;align-items:flex-end;gap:18px;height:64px;padding-top:6px;border-top:1px solid var(--hair)}
-  .l5 .overlay .bar{display:flex;flex-direction:column;align-items:center;gap:6px}
-  .l5 .overlay .bar .b{width:34px;background:#1f2327}
-  .l5 .overlay .bar.tall .b{height:54px}
-  .l5 .overlay .bar.short .b{height:18px;opacity:.45}
+  .l5 .overlay{position:absolute;left:0;bottom:0;z-index:3;display:flex;flex-direction:column;gap:26px;padding:48px 56px;max-width:460px;
+    background:radial-gradient(ellipse at 0% 100%,rgba(237,240,242,.94) 0%,rgba(237,240,242,.82) 38%,rgba(237,240,242,0) 78%);
+    border:0}
+  .l5 .overlay .row{display:flex;gap:40px;align-items:flex-end}
+  .l5 .overlay .cell .eb{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+  .l5 .overlay .cell .big{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:1;letter-spacing:-.02em}
+  .l5 .overlay .cell .big.red{color:var(--red);font-size:64px}
+  .l5 .overlay .cell .big.sec{color:var(--ink);font-size:38px}
+  .l5 .overlay .cell .sub{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:8px;letter-spacing:.04em}
+  .l5 .overlay .bars{display:flex;align-items:flex-end;gap:28px;height:200px;padding-top:6px}
+  .l5 .overlay .bar{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .l5 .overlay .bar .b{width:54px;background:#1f2327}
+  .l5 .overlay .bar.tall .b{height:160px}
+  .l5 .overlay .bar.short .b{height:80px;opacity:.4}
   .l5 .overlay .bar .lbl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .l5 .overlay .barcap{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:.04em;line-height:1.5;margin-top:-2px}
 
   /* ---------- REFERENCES ---------- */
   .refs{max-width:1400px;margin:0 auto;padding:140px 8vw 120px;border-top:1px solid var(--hair)}
@@ -147,17 +162,24 @@
     .scroll{display:grid;grid-template-columns:1fr}
     .stageWrap{order:-1;position:sticky;top:0;height:46vh;z-index:5;background:var(--bg);box-shadow:0 8px 16px -12px rgba(20,24,28,.3)}
     .stage{height:46vh}
-    .stageMeta{top:14px;right:14px;font-size:9.5px}
-    .stageIndex{bottom:14px;left:14px;font-size:9.5px}
-    .beat{min-height:auto;padding:11vh 22px 60px;max-width:none}
+    .stageLive{top:14px;right:14px;font-size:9.5px}
+    .stageIndex{bottom:14px;left:14px}
+    .beat{padding:11vh 22px 60px;max-width:none;margin-left:0}
     .beat:first-of-type{padding-top:5vh}
+    .beat p{font-size:17px}
     .beat ul li{flex-direction:column;gap:6px}
     .beat ul li .tag{width:auto}
-    .l1 .vidwrap,.l1 .ring{width:min(38vw,180px);height:min(38vw,180px)}
+    .l1{justify-content:center;padding-left:0}
+    .l1 .vidwrap{width:min(38vw,180px);height:min(38vw,180px)}
     .l3 .mapframe{inset:3vh 4vw}
-    .l5 .overlay{left:4%;bottom:6%;padding:14px 16px;max-width:240px}
-    .l5 .overlay .cell .big{font-size:28px}
-    .l5 .overlay .row{gap:20px}
+    .l5 .overlay{left:0;bottom:0;padding:24px 22px;max-width:300px}
+    .l5 .overlay .cell .big.red{font-size:40px}
+    .l5 .overlay .cell .big.sec{font-size:26px}
+    .l5 .overlay .row{gap:24px}
+    .l5 .overlay .bars{height:130px}
+    .l5 .overlay .bar .b{width:38px}
+    .l5 .overlay .bar.tall .b{height:100px}
+    .l5 .overlay .bar.short .b{height:50px}
     .refs{padding:80px 22px}
     .refs li{grid-template-columns:42px 1fr;gap:14px}
     .refs li a.link{grid-column:2;justify-self:start;margin-top:6px}
@@ -174,7 +196,7 @@
 
 <div class="topbar">
   <img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none'">
-  <div class="meta"><b>Module 01</b> &nbsp;·&nbsp; Wildfire Smoke</div>
+  <div class="meta">Wildfire smoke</div>
 </div>
 
 <!-- INTRO -->
@@ -235,28 +257,20 @@
   <div class="stageWrap">
     <div class="stage" id="stage">
 
-      <div class="stageMeta">
-        <span class="pill" id="stageLabel">Particle</span>
-        <span class="pill live" id="stageLive">Captured</span>
+      <div class="stageLive" id="stageLive">
+        <span class="pill">Live</span>
       </div>
 
       <div class="stageIndex">
-        <span>Stage</span>
         <span class="dots" id="dots">
           <i class="on"></i><i></i><i></i><i></i><i></i>
         </span>
-        <span id="stageNum">01 / 05</span>
       </div>
 
       <!-- LAYER 1 -->
       <div class="layer l1 active" data-layer="0">
-        <div class="ring"></div>
         <div class="vidwrap">
           <video src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" autoplay muted loop playsinline></video>
-          <span class="charge plus c1">＋</span>
-          <span class="charge c2">－</span>
-          <span class="charge c3">－</span>
-          <span class="charge plus c4">＋</span>
         </div>
       </div>
 
@@ -270,7 +284,7 @@
       <div class="layer l3" data-layer="2">
         <div class="mapframe">
           <div class="mapcap">NOAA HMS · EPA AirNow</div>
-          <iframe src="wfmap.html" title="Live North America wildfire smoke map" style="width:100%;height:100%;border:0;display:block"></iframe>
+          <iframe src="wfmap.html" title="Live North America wildfire smoke map"></iframe>
         </div>
       </div>
 
@@ -292,7 +306,7 @@
             </div>
             <div class="cell">
               <div class="eb">Pressure</div>
-              <div class="big">+7%</div>
+              <div class="big sec">+7%</div>
               <div class="sub">no clog signal</div>
             </div>
           </div>
@@ -300,6 +314,7 @@
             <div class="bar tall"><div class="b"></div><div class="lbl">MERV</div></div>
             <div class="bar short"><div class="b"></div><div class="lbl">MERV-A</div></div>
           </div>
+          <div class="barcap">rated efficiency — charge intact vs neutralized</div>
         </div>
       </div>
 
@@ -339,67 +354,62 @@
   const beats = document.querySelectorAll('.beat');
   const layers = document.querySelectorAll('.layer');
   const dots = document.querySelectorAll('#dots i');
-  const stageNum = document.getElementById('stageNum');
-  const stageLabel = document.getElementById('stageLabel');
   const stageLive = document.getElementById('stageLive');
-  const labels = ['Particle','Plume','Live map','Deposition','Filter'];
-  const liveStates = ['Captured','Dispersing','Live','Depositing','Loaded'];
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  let currentActive = -1;
+
   function setActive(n){
+    if(n === currentActive) return;
+    currentActive = n;
+
     layers.forEach((l,i)=>{
       if(i===n) l.classList.add('active');
       else l.classList.remove('active');
     });
     dots.forEach((d,i)=>d.classList.toggle('on',i===n));
-    stageNum.textContent = String(n+1).padStart(2,'0')+' / 05';
-    stageLabel.textContent = labels[n];
-    stageLive.textContent = liveStates[n];
-    stageLive.classList.toggle('live', n===2);
+    beats.forEach((b,i)=>b.classList.toggle('is-active', i===n));
+    // LIVE pill only on map beat (index 2)
+    stageLive.classList.toggle('on', n===2);
   }
 
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const n = parseInt(e.target.dataset.beat,10);
-        if(!isNaN(n)) setActive(n);
-      }
-    });
-  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-
-  beats.forEach(b=>io.observe(b));
-
-  // Fallback: also listen to scroll for edge cases
+  // Continuous-flow active-step detection:
+  // The active beat is the one whose centre is closest to the viewport centre.
   let ticking = false;
+
+  function update(){
+    const center = window.innerHeight / 2;
+    let best = 0, bestDist = Infinity;
+    beats.forEach((b,i)=>{
+      const r = b.getBoundingClientRect();
+      const c = (r.top + r.bottom) / 2;
+      const d = Math.abs(c - center);
+      if(d < bestDist){ bestDist = d; best = i; }
+    });
+    setActive(best);
+    ticking = false;
+  }
+
   function onScroll(){
     if(ticking) return;
     ticking = true;
-    requestAnimationFrame(()=>{
-      const center = window.innerHeight/2;
-      let best = 0, bestDist = Infinity;
-      beats.forEach((b,i)=>{
-        const r = b.getBoundingClientRect();
-        const c = (r.top + r.bottom)/2;
-        const d = Math.abs(c - center);
-        if(d < bestDist){ bestDist = d; best = i; }
-      });
-      setActive(best);
-      ticking = false;
-    });
+    requestAnimationFrame(update);
   }
-  // Use IO as primary; scroll handler only kicks in if IO unsupported
-  if(!('IntersectionObserver' in window)){
-    window.addEventListener('scroll', onScroll, {passive:true});
-    onScroll();
-  }
+
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+
+  // Initial state: first beat active
+  beats[0].classList.add('is-active');
+  update();
 
   // Smooth scroll for footnote jumps
   document.querySelectorAll('sup a[href^="#ref-"]').forEach(a=>{
     a.addEventListener('click', (e)=>{
       e.preventDefault();
       const t = document.querySelector(a.getAttribute('href'));
-      if(t) t.scrollIntoView({behavior: reduced?'auto':'smooth', block:'center'});
+      if(t) t.scrollIntoView({behavior: reduced?'auto':'smooth', block: 'center'});
     });
   });
 })();

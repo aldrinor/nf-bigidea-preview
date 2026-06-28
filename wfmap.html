@@ -14,6 +14,7 @@
     --muted:#6b7178;
     --hair:rgba(20,24,28,0.18);
     --land:#eef0f2;
+    --faint:#aab2b8;
   }
   *{box-sizing:border-box;}
   html,body{
@@ -44,19 +45,14 @@
   .caption .count{color:var(--ink);}
 
   .legend{
-    position:absolute;left:14px;bottom:14px;
-    font-size:10px;line-height:1.5;color:var(--ink);
-    background:rgba(237,240,242,0.78);
-    backdrop-filter:blur(4px);
-    -webkit-backdrop-filter:blur(4px);
-    padding:10px 12px;
-    border:1px solid rgba(20,24,28,0.08);
-    border-radius:3px;
+    position:absolute;left:16px;bottom:16px;
+    font-family:'Space Mono',monospace;
+    font-size:9px;line-height:1.6;color:var(--muted);
     pointer-events:none;
   }
   .legend .title{
-    font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
-    font-size:9px;color:var(--muted);margin-bottom:6px;
+    letter-spacing:0.12em;text-transform:uppercase;
+    font-size:8.5px;color:var(--faint);margin-bottom:4px;
   }
   .legend .row{display:flex;align-items:center;gap:8px;margin:2px 0;}
   .legend .sw{width:18px;height:10px;display:inline-block;border:1px solid rgba(20,24,28,0.12);}
@@ -168,8 +164,15 @@
 
   function fitProjection(){
     if(!_basemap) return;
-    // Fit to basemap bounding box
-    projection.fitSize([window.innerWidth, window.innerHeight], _basemap);
+    const W = window.innerWidth, H = window.innerHeight;
+    // Fit the full basemap, then zoom in about the viewport centre so the populated band
+    // fills the frame and the empty edges (ocean / arctic) crop off. Robust at any aspect.
+    projection.fitSize([W, H], _basemap);
+    const k = 1.45;
+    const s = projection.scale();
+    const t = projection.translate();
+    projection.scale(s * k)
+              .translate([ W/2 + (t[0] - W/2) * k, H/2 + (t[1] - H/2) * k ]);
   }
 
   function renderBasemap(){
@@ -496,13 +499,7 @@
       if(notes.length){
         setStatus(`<span class="err">${notes.join(" · ")}</span>`, true);
       }else{
-        const stamp = monR.value;
-        if(stamp){
-          const pretty = stamp.slice(0,8) + " " + stamp.slice(8) + " UTC";
-          setStatus(`Live · PM2.5 hour ${pretty}`);
-        }else{
-          setStatus("Live");
-        }
+        setStatus("");
       }
     }else{
       setStatus('<span class="err">Basemap failed to load</span>', true);
