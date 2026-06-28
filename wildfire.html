@@ -26,6 +26,7 @@
 
   /* ---------- HEADER ---------- */
   .topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px 36px;pointer-events:none}
+  .topbar::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 30%,rgba(237,240,242,0));z-index:-1;pointer-events:none}
   .topbar img{height:34px;pointer-events:auto;opacity:.92}
   .topbar .meta{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
   .topbar .meta b{color:var(--ink);font-weight:700}
@@ -56,8 +57,7 @@
   }
   .beat.is-active{opacity:1}
   .beat:first-of-type{padding-top:24vh}
-  .beat:last-of-type{padding-bottom:24vh}
-  .beat:last-of-type{padding-bottom:26vh}
+  .beat:last-of-type{padding-bottom:4vh}
 
   .beat .step{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:30px;display:flex;align-items:center;gap:14px}
   .beat .step .num{color:var(--ink);font-weight:700}

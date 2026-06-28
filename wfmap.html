@@ -428,22 +428,26 @@
       sites = new Map();
     }
 
-    // Try current UTC hour, then up to 3 hours back
+    // Walk back up to 12 UTC hours and pick the DENSEST hour (most PM2.5 rows), so a
+    // sparse early-reporting hour doesn't leave the map nearly empty. Stop early once a
+    // substantial hour (>=150 rows) is found.
     const now = new Date();
     let hourlyRows = null;
     let usedStamp = null;
-    for(let back=0; back<=8; back++){
+    let bestCount = 0;
+    for(let back=0; back<=12; back++){
       const d = new Date(now.getTime() - back*3600*1000);
       const stamp = utcHourStamp(d);
       const url = `https://files.airnowtech.org/airnow/today/HourlyData_${stamp}.dat`;
       try{
         const txt = await fetchText(url);
         const rows = parseHourlyDat(txt);
-        if(rows.length > 0){
+        if(rows.length > bestCount){
+          bestCount = rows.length;
           hourlyRows = rows;
           usedStamp = stamp;
-          break;
         }
+        if(bestCount >= 150) break;
       }catch(e){
         // continue to previous hour
       }
