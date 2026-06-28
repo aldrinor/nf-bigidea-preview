@@ -83,6 +83,32 @@
   .layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
   .layer.active{opacity:1;pointer-events:auto}
 
+  /* SPLIT LAYER COMMON — vertical split: graphic top, chart iframe below */
+  .layer.split{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2vh;
+    padding:5vh 3vw;
+  }
+  .layer.split .topgfx{
+    height:52vh;
+    max-height:52vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+  }
+  .layer.split .chartframe{
+    width:min(56vw,820px);
+    height:50vh;
+    max-height:50vh;
+    border:0;
+    background:transparent;
+    display:block;
+  }
+
   /* LIVE pill — only on map beat */
   .stageLive{position:absolute;top:34px;right:36px;z-index:6;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;opacity:0;transition:opacity .4s var(--ease);pointer-events:none}
   .stageLive.on{opacity:1}
@@ -96,32 +122,44 @@
   .stageIndex .dots i{width:6px;height:6px;border-radius:50%;background:var(--faint);transition:background .3s,transform .3s}
   .stageIndex .dots i.on{background:var(--red);transform:scale(1.4)}
 
-  /* LAYER 1 — charged particle */
-  .l1{justify-content:flex-start;padding-left:4vw}
-  .l1 .vidwrap{position:relative;width:min(44vw,600px);height:min(44vw,600px)}
-  .l1 video{width:100%;height:100%;object-fit:cover;-webkit-mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 78%);filter:grayscale(1) contrast(1.06) brightness(1.02)}
+  /* LAYER 1 — charged particle (split) */
+  .l1 .topgfx .vidwrap{position:relative;width:auto;height:34vh;aspect-ratio:1/1;max-width:min(34vw,440px)}
+  .l1 .topgfx .vidwrap video{width:100%;height:100%;object-fit:cover;-webkit-mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 56%,transparent 78%);filter:grayscale(1) contrast(1.06) brightness(1.02)}
 
-  /* LAYER 2 — smoke haze */
-  .l2 video{width:100%;height:100%;object-fit:cover;filter:grayscale(.92) contrast(1.05)}
-  .l2 .scalebar{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;z-index:2}
+  /* LAYER 2 — smoke haze (split) */
+  .l2 .topgfx{position:relative}
+  .l2 .topgfx video{width:min(70vw,900px);height:46vh;object-fit:contain;filter:grayscale(.92) contrast(1.05)}
+  .l2 .scalebar{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;z-index:2}
   .l2 .scalebar .line{width:80px;height:1px;background:var(--muted);position:relative}
   .l2 .scalebar .line::before,.l2 .scalebar .line::after{content:"";position:absolute;top:-3px;width:1px;height:7px;background:var(--muted)}
   .l2 .scalebar .line::before{left:0}.l2 .scalebar .line::after{right:0}
 
-  /* LAYER 3 — map */
+  /* LAYER 3 — map (with inset chart) */
   .l3 .mapframe{position:absolute;inset:1.5vh 1.5vw;border:1px solid var(--hair);overflow:hidden}
   .l3 .mapframe iframe{width:100%;height:100%;border:0;display:block}
   .l3 .mapcap{position:absolute;top:14px;left:16px;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;z-index:2;background:rgba(237,240,242,.85);padding:4px 9px;backdrop-filter:blur(4px)}
+  .l3 .inset-chart{
+    position:absolute;
+    left:2vw;
+    bottom:2vh;
+    width:min(40vw,480px);
+    height:min(44vh,440px);
+    border:1px solid var(--hair);
+    background:var(--bg);
+    box-shadow:0 10px 30px -16px rgba(20,24,28,.3);
+    z-index:4;
+  }
 
-  /* LAYER 4 — lung */
+  /* LAYER 4 — lung (untouched) */
   .l4 img{max-height:90%;max-width:90%;object-fit:contain;filter:grayscale(.15) contrast(1.02);
     -webkit-mask:radial-gradient(ellipse 86% 78% at 50% 46%,#000 46%,transparent 92%);
             mask:radial-gradient(ellipse 86% 78% at 50% 46%,#000 46%,transparent 92%)}
   .l4 .lungcap{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;text-align:center}
   .l4 .lungcap b{color:var(--red);font-weight:700}
 
-  /* LAYER 5 — filter */
-  .l5 video{width:100%;height:100%;object-fit:cover;filter:grayscale(.5) contrast(1.1) brightness(.95)}
+  /* LAYER 5 — filter (split) */
+  .l5 .topgfx{position:relative;width:min(70vw,900px);height:46vh;overflow:hidden;border-radius:8px}
+  .l5 .topgfx video{width:100%;height:100%;object-fit:cover;filter:grayscale(.5) contrast(1.1) brightness(.95)}
   .l5 .overlay{position:absolute;left:0;bottom:0;z-index:3;display:flex;flex-direction:column;gap:26px;padding:48px 56px;max-width:460px;
     background:radial-gradient(ellipse at 0% 100%,rgba(237,240,242,.94) 0%,rgba(237,240,242,.82) 38%,rgba(237,240,242,0) 78%);
     border:0}
@@ -170,17 +208,27 @@
     .beat p{font-size:17px}
     .beat ul li{flex-direction:column;gap:6px}
     .beat ul li .tag{width:auto}
-    .l1{justify-content:center;padding-left:0}
-    .l1 .vidwrap{width:min(38vw,180px);height:min(38vw,180px)}
+    /* Split layers shrink to fit 46vh band */
+    .layer.split{padding:2vh 4vw;gap:1vh}
+    .layer.split .topgfx{height:24vh;max-height:24vh}
+    .layer.split .chartframe{width:90vw;height:20vh;max-height:20vh}
+    .l1 .topgfx .vidwrap{height:24vh;width:auto;max-width:90vw}
+    .l2 .topgfx video{height:24vh;width:auto;max-width:90vw}
+    .l5 .topgfx{height:24vh;width:100%;max-width:90vw}
+    .l5 .topgfx video{height:24vh}
+    .l5 .overlay{left:0;bottom:0;padding:14px 16px;max-width:240px;gap:14px}
+    .l5 .overlay .cell .big.red{font-size:30px}
+    .l5 .overlay .cell .big.sec{font-size:20px}
+    .l5 .overlay .row{gap:18px}
+    .l5 .overlay .bars{height:70px;gap:14px}
+    .l5 .overlay .bar .b{width:24px}
+    .l5 .overlay .bar.tall .b{height:54px}
+    .l5 .overlay .bar.short .b{height:28px}
+    .l5 .overlay .bar .lbl{font-size:8.5px}
+    .l5 .overlay .barcap{font-size:9px}
+    /* Map inset chart */
     .l3 .mapframe{inset:3vh 4vw}
-    .l5 .overlay{left:0;bottom:0;padding:24px 22px;max-width:300px}
-    .l5 .overlay .cell .big.red{font-size:40px}
-    .l5 .overlay .cell .big.sec{font-size:26px}
-    .l5 .overlay .row{gap:24px}
-    .l5 .overlay .bars{height:130px}
-    .l5 .overlay .bar .b{width:38px}
-    .l5 .overlay .bar.tall .b{height:100px}
-    .l5 .overlay .bar.short .b{height:50px}
+    .l3 .inset-chart{width:46vw;height:22vh;left:4vw;bottom:3vh}
     .refs{padding:80px 22px}
     .refs li{grid-template-columns:42px 1fr;gap:14px}
     .refs li a.link{grid-column:2;justify-self:start;margin-top:6px}
@@ -268,55 +316,65 @@
         </span>
       </div>
 
-      <!-- LAYER 1 -->
-      <div class="layer l1 active" data-layer="0">
-        <div class="vidwrap">
-          <video src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" autoplay muted loop playsinline></video>
+      <!-- LAYER 1 — charged particle + particle-size chart -->
+      <div class="layer l1 split active" data-layer="0">
+        <div class="topgfx">
+          <div class="vidwrap">
+            <video src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" autoplay muted loop playsinline></video>
+          </div>
         </div>
+        <iframe class="chartframe" src="wf_chart_size.html" title="Particle size scale" loading="lazy"></iframe>
       </div>
 
-      <!-- LAYER 2 -->
-      <div class="layer l2" data-layer="1">
-        <video src="assets/videos/wf_smoke.mp4" autoplay muted loop playsinline></video>
-        <div class="scalebar"><span>0</span><span class="line"></span><span>1000 km</span></div>
+      <!-- LAYER 2 — smoke haze + mortality trend chart -->
+      <div class="layer l2 split" data-layer="1">
+        <div class="topgfx">
+          <video src="assets/videos/wf_smoke.mp4" autoplay muted loop playsinline></video>
+          <div class="scalebar"><span>0</span><span class="line"></span><span>1000 km</span></div>
+        </div>
+        <iframe class="chartframe" src="wf_chart_mortality.html" title="Wildfire-smoke mortality trend" loading="lazy"></iframe>
       </div>
 
-      <!-- LAYER 3 -->
+      <!-- LAYER 3 — map + inset exposure chart -->
       <div class="layer l3" data-layer="2">
         <div class="mapframe">
           <div class="mapcap">NOAA HMS · EPA AirNow</div>
           <iframe src="wfmap.html" title="Live North America Wildfire Smoke map"></iframe>
         </div>
+        <iframe class="inset-chart" src="wf_chart_exposure.html" title="Exposure share" loading="lazy"></iframe>
       </div>
 
-      <!-- LAYER 4 -->
+      <!-- LAYER 4 — lung (untouched) -->
       <div class="layer l4" data-layer="3">
         <img src="assets/wf_lung.png" alt="Medical illustration of the airway and lungs">
         <div class="lungcap">PM2.5 deposition · <b>deep lung &amp; bloodstream</b></div>
       </div>
 
-      <!-- LAYER 5 -->
-      <div class="layer l5" data-layer="4">
-        <video src="assets/videos/wf_filter.mp4" autoplay muted loop playsinline></video>
-        <div class="overlay">
-          <div class="row">
-            <div class="cell">
-              <div class="eb">Clean-air delivery</div>
-              <div class="big red">−95%</div>
-              <div class="sub">after ~10 mg smoke</div>
+      <!-- LAYER 5 — filter + CADR collapse chart -->
+      <div class="layer l5 split" data-layer="4">
+        <div class="topgfx">
+          <video src="assets/videos/wf_filter.mp4" autoplay muted loop playsinline></video>
+          <div class="overlay">
+            <div class="row">
+              <div class="cell">
+                <div class="eb">Clean-air delivery</div>
+                <div class="big red">−95%</div>
+                <div class="sub">after ~10 mg smoke</div>
+              </div>
+              <div class="cell">
+                <div class="eb">Pressure</div>
+                <div class="big sec">+7%</div>
+                <div class="sub">no clog signal</div>
+              </div>
             </div>
-            <div class="cell">
-              <div class="eb">Pressure</div>
-              <div class="big sec">+7%</div>
-              <div class="sub">no clog signal</div>
+            <div class="bars">
+              <div class="bar tall"><div class="b"></div><div class="lbl">MERV</div></div>
+              <div class="bar short"><div class="b"></div><div class="lbl">MERV-A</div></div>
             </div>
+            <div class="barcap">rated efficiency — charge intact vs neutralized</div>
           </div>
-          <div class="bars">
-            <div class="bar tall"><div class="b"></div><div class="lbl">MERV</div></div>
-            <div class="bar short"><div class="b"></div><div class="lbl">MERV-A</div></div>
-          </div>
-          <div class="barcap">rated efficiency — charge intact vs neutralized</div>
         </div>
+        <iframe class="chartframe" src="wf_chart_filter.html" title="Filter CADR collapse" loading="lazy"></iframe>
       </div>
 
     </div>

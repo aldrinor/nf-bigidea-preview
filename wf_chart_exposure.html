@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<title>Wildfire Smoke — Editorial Charts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --muted:#828a90;
+    --faint:#aab2b8;
+    --hair:rgba(20,24,28,0.12);
+    --red:#e23b3b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;}
+  body{padding:36px 40px 48px;}
+  .masthead{
+    max-width:1180px;margin:0 auto 28px;
+    border-top:2px solid var(--ink);
+    padding-top:14px;
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:'Space Mono',monospace;font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+  .masthead .brand{color:var(--ink);font-weight:700;letter-spacing:.18em;}
+  .deck{max-width:1180px;margin:0 auto 24px;}
+  .deck h1{font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:26px;margin:0 0 6px;letter-spacing:-0.01em;}
+  .deck p{font-family:'Space Mono',monospace;font-size:10.5px;
+    letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin:0;}
+  .grid{
+    max-width:1180px;margin:0 auto;
+    display:grid;grid-template-columns:1fr 1fr;gap:28px;
+  }
+  .cell{
+    background:transparent;
+    padding:0;
+  }
+  .cell .label{
+    font-family:'Space Mono',monospace;font-size:10px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 4px;display:flex;justify-content:space-between;
+    border-bottom:1px solid var(--hair);padding-bottom:8px;
+  }
+  .cell .label .tag{color:var(--red);font-weight:700;}
+  .cell h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:18px;margin:0 0 14px;letter-spacing:-0.005em;
+    line-height:1.2;
+  }
+  .cell svg{display:block;width:100%;height:auto;}
+  .cell .source{
+    font-family:'Space Mono',monospace;font-size:9.5px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    margin:6px 0 0;
+  }
+</style>
+</head>
+<style>
+ html,body{margin:0;padding:0;height:100%;background:#edf0f2;display:flex;align-items:center;justify-content:center;}
+ .cell{max-width:96%;width:620px;}
+ .cell h2{font-size:18px;}
+ svg{width:100%;height:auto;}
+</style>
+<body><div class="cell">
+    <div class="label"><span>FIG. 03 · EXPOSURE-UNITS</span><span class="tag">▲ SCALE</span></div>
+    <h2>Near-universal smoke exposure across the lower 48</h2>
+    <svg viewBox="0 0 560 360" role="img" aria-label="Isotype dot grid showing 95-100 percent exposure">
+      <style>
+        .mono{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#828a90;}
+        .mono-ink{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#1f2327;}
+        .bignum{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;letter-spacing:-0.02em;}
+      </style>
+
+      <!-- 10x10 grid: each dot r=7, spacing 24, starting x=44 y=44 -->
+      <g id="dotgrid"></g>
+
+      <!-- right side: red number + caption -->
+      <text class="bignum" x="300" y="160" style="fill:#e23b3b;">95–100%</text>
+      <text class="mono-ink" x="300" y="186" style="line-height:1.5;">
+        <tspan x="300" dy="0">of the lower-48 population</tspan>
+        <tspan x="300" dy="15">breathed wildfire smoke at</tspan>
+        <tspan x="300" dy="15">some point in a recent year.</tspan>
+      </text>
+
+      <!-- legend dots -->
+      <g transform="translate(300,250)">
+        <circle cx="6" cy="6" r="6" fill="#1f2327"/>
+        <text class="mono" x="20" y="9.5">exposed</text>
+        <circle cx="6" cy="30" r="6" fill="#c2c8cc"/>
+        <text class="mono" x="20" y="33.5">unexposed (3 of 100)</text>
+      </g>
+
+      <!-- corner tag -->
+      <text class="mono" x="44" y="312">100 UNITS = TOTAL POPULATION</text>
+      <line x1="44" y1="318" x2="525" y2="318" stroke="rgba(20,24,28,0.12)"/>
+    </svg>
+    <p class="source">Source: Zhang et al., Environ. Sci. Technol.</p>
+  </div></body></html>

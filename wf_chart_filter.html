@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<title>Wildfire Smoke — Editorial Charts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --muted:#828a90;
+    --faint:#aab2b8;
+    --hair:rgba(20,24,28,0.12);
+    --red:#e23b3b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;}
+  body{padding:36px 40px 48px;}
+  .masthead{
+    max-width:1180px;margin:0 auto 28px;
+    border-top:2px solid var(--ink);
+    padding-top:14px;
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-family:'Space Mono',monospace;font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+  .masthead .brand{color:var(--ink);font-weight:700;letter-spacing:.18em;}
+  .deck{max-width:1180px;margin:0 auto 24px;}
+  .deck h1{font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:26px;margin:0 0 6px;letter-spacing:-0.01em;}
+  .deck p{font-family:'Space Mono',monospace;font-size:10.5px;
+    letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin:0;}
+  .grid{
+    max-width:1180px;margin:0 auto;
+    display:grid;grid-template-columns:1fr 1fr;gap:28px;
+  }
+  .cell{
+    background:transparent;
+    padding:0;
+  }
+  .cell .label{
+    font-family:'Space Mono',monospace;font-size:10px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 4px;display:flex;justify-content:space-between;
+    border-bottom:1px solid var(--hair);padding-bottom:8px;
+  }
+  .cell .label .tag{color:var(--red);font-weight:700;}
+  .cell h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:18px;margin:0 0 14px;letter-spacing:-0.005em;
+    line-height:1.2;
+  }
+  .cell svg{display:block;width:100%;height:auto;}
+  .cell .source{
+    font-family:'Space Mono',monospace;font-size:9.5px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    margin:6px 0 0;
+  }
+</style>
+</head>
+<style>
+ html,body{margin:0;padding:0;height:100%;background:#edf0f2;display:flex;align-items:center;justify-content:center;}
+ .cell{max-width:96%;width:620px;}
+ .cell h2{font-size:18px;}
+ svg{width:100%;height:auto;}
+</style>
+<body><div class="cell">
+    <div class="label"><span>FIG. 02 · FILTER-COLLAPSE</span><span class="tag">▲ FAILURE</span></div>
+    <h2>Charged-filter CADR collapses as smoke deposits accumulate</h2>
+    <svg viewBox="0 0 560 360" role="img" aria-label="Filter CADR collapse curve">
+      <style>
+        .mono{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#828a90;}
+        .mono-ink{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#1f2327;}
+      </style>
+
+      <!-- gridlines -->
+      <g stroke="rgba(20,24,28,0.08)" stroke-width="1">
+        <line x1="60" y1="40"  x2="525" y2="40"/>
+        <line x1="60" y1="103" x2="525" y2="103"/>
+        <line x1="60" y1="165" x2="525" y2="165"/>
+        <line x1="60" y1="228" x2="525" y2="228"/>
+      </g>
+      <!-- y axis -->
+      <g class="mono" text-anchor="end">
+        <text x="52" y="294">0</text>
+        <text x="52" y="232">25</text>
+        <text x="52" y="169">50</text>
+        <text x="52" y="107">75</text>
+        <text x="52" y="44">100%</text>
+      </g>
+      <!-- baseline -->
+      <line x1="60" y1="290" x2="525" y2="290" stroke="#1f2327" stroke-width="1"/>
+
+      <!-- x ticks -->
+      <g class="mono" text-anchor="middle">
+        <text x="60"  y="312">0</text>
+        <text x="137.5" y="312">2</text>
+        <text x="215" y="312">4</text>
+        <text x="292.5" y="312">6</text>
+        <text x="370" y="312">8</text>
+        <text x="447.5" y="312">10</text>
+        <text x="525" y="312">12 mg</text>
+      </g>
+      <text class="mono" x="525" y="326" text-anchor="end" style="font-size:9px;">smoke deposited</text>
+      <g stroke="#1f2327" stroke-width="1">
+        <line x1="60"  y1="290" x2="60"  y2="294"/>
+        <line x1="137.5" y1="290" x2="137.5" y2="294"/>
+        <line x1="215" y1="290" x2="215" y2="294"/>
+        <line x1="292.5" y1="290" x2="292.5" y2="294"/>
+        <line x1="370" y1="290" x2="370" y2="294"/>
+        <line x1="447.5" y1="290" x2="447.5" y2="294"/>
+        <line x1="525" y1="290" x2="525" y2="294"/>
+      </g>
+
+      <!-- CADR curve. x=60..525 (0..12mg), y=40..290 (100..0%) -->
+      <!-- pts: 0,100 2,80 4,55 6,30 8,15 10,5 12,3 -->
+      <!-- screen: 60,40 ; 137.5,90 ; 215,152.5 ; 292.5,215 ; 370,252.5 ; 447.5,277.5 ; 525,282.5 -->
+      <path d="M 60,40 C 90,42 110,60 137.5,90 S 190,130 215,152.5 S 270,195 292.5,215 S 350,248 370,252.5 S 425,273 447.5,277.5 S 500,281 525,282.5"
+            fill="none" stroke="#1f2327" stroke-width="2"/>
+
+      <!-- area fill light -->
+      <path d="M 60,40 C 90,42 110,60 137.5,90 S 190,130 215,152.5 S 270,195 292.5,215 S 350,248 370,252.5 S 425,273 447.5,277.5 S 500,281 525,282.5 L 525,290 L 60,290 Z"
+            fill="rgba(20,24,28,0.04)"/>
+
+      <!-- start dot -->
+      <circle cx="60" cy="40" r="3" fill="#1f2327"/>
+      <text class="mono-ink" x="68" y="34">100% · INITIAL</text>
+
+      <!-- flat airflow-resistance line near bottom (7%) -->
+      <!-- y at 7%: 290 - 7/100*250 = 290-17.5 = 272.5 -->
+      <line x1="60" y1="272.5" x2="525" y2="272.5" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text class="mono" x="68" y="268" style="fill:#828a90;">airflow resistance +7% (no clog signal)</text>
+
+      <!-- collapse endpoint RED at 10mg,5% -->
+      <circle cx="447.5" cy="277.5" r="5" fill="#e23b3b"/>
+      <circle cx="447.5" cy="277.5" r="9" fill="none" stroke="#e23b3b" stroke-width="1" opacity="0.35"/>
+      <g>
+        <line x1="447.5" y1="277.5" x2="447.5" y2="210" stroke="rgba(226,59,59,0.5)" stroke-width="1"/>
+        <text class="mono-ink" x="440" y="200" text-anchor="end" style="fill:#e23b3b;font-weight:700;">−95% at ~10 mg</text>
+        <text class="mono" x="440" y="213" text-anchor="end">CADR collapses</text>
+      </g>
+
+      <!-- annotation "a few hours of a moderate smoke event" -->
+      <g transform="translate(335,340)">
+        <text class="mono" x="0" y="0">↳ a few hours of a moderate smoke event</text>
+      </g>
+    </svg>
+    <p class="source">Source: Holder et al., EPA, Indoor Air, 2022</p>
+  </div></body></html>
