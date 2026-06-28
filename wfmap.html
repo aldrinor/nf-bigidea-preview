@@ -107,7 +107,7 @@
   <svg id="map" role="img" aria-label="North America wildfire smoke and PM2.5 monitor map"></svg>
 
   <div class="caption">
-    <b>Near-real-time</b> · NOAA satellite smoke + EPA PM2.5 monitors · updated through the day<br>
+    <span id="caphead"><b>Near-real-time</b> · NOAA satellite smoke + EPA PM2.5 monitors · updated through the day</span><br>
     <span id="counts"></span>
   </div>
 
@@ -161,6 +161,7 @@
   let _basemap = null;
   let _smoke = null;
   let _monitors = null;
+  let _archiveDate = null;
 
   function fitProjection(){
     if(!_basemap) return;
@@ -277,10 +278,14 @@
   function updateCounts(){
     const nSmoke = (_smoke && _smoke.features) ? _smoke.features.length : 0;
     const nMon = _monitors ? _monitors.length : 0;
-    if(nSmoke > 0){
+    const capHead = document.getElementById("caphead");
+    if(_archiveDate){
+      // Showing a committed real smoke day because live smoke is currently sparse.
+      if(capHead) capHead.innerHTML = `<b>${_archiveDate}</b> · a recent major wildfire-smoke event · NOAA satellite smoke + live EPA PM2.5 monitors`;
+      countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · ${nMon} air-quality monitors live`;
+    } else if(nSmoke > 0){
       countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · <span class="count">${nMon}</span> air-quality monitors`;
     } else {
-      // Honest, non-broken state when satellites detect no active smoke right now.
       countsEl.innerHTML = `No active wildfire smoke detected · <span class="count">${nMon}</span> air-quality monitors reporting`;
     }
   }
@@ -327,16 +332,39 @@
     throw lastErr || new Error("basemap failed");
   }
 
-  // ---- Smoke ----
+  // ---- Smoke (live, with date-stamped historical fallback) ----
+  // The NOAA HMS layer is current-operational-day-only and is legitimately empty
+  // when little smoke is active. So we gate on SUBSTANCE: if live has real
+  // Medium/Heavy plumes we show it (LIVE); otherwise we load a committed real
+  // heavy-smoke day from the repo (ARCHIVE), clearly date-labelled. Never empty.
+  const FALLBACK = { url: "data/smoke_fallback_2023-06-07.geojson", label: "Jun 7, 2023" };
+
   async function loadSmoke(){
     const url = "https://services2.arcgis.com/C8EMgrsFcRFL6LrL/arcgis/rest/services/NOAA_Satellite_Smoke_Detection_(v1)/FeatureServer/0/query?where=1%3D1&outFields=Density&f=geojson&resultRecordCount=2000";
+    let live = null;
     try{
       const data = await fetchJson(url);
-      if(data && data.features){
-        _smoke = data;
+      if(data && data.features) live = data;
+    }catch(e){ /* fall through to archive */ }
+
+    // Substance gate: at least a few Medium/Heavy plumes, not just a wisp.
+    const heavy = live ? live.features.filter(f => {
+      const d = (f.properties && (f.properties.Density || f.properties.density) || "").toString();
+      return d === "Medium" || d === "Heavy";
+    }).length : 0;
+
+    if(live && heavy >= 3){
+      _smoke = live;
+      _archiveDate = null;
+    }else{
+      // ARCHIVE mode — load the committed real smoke day (same-origin, no CORS).
+      try{
+        const fb = await fetchJson(FALLBACK.url);
+        if(fb && fb.features){ _smoke = fb; _archiveDate = FALLBACK.label; }
+      }catch(e){
+        // last resort: show whatever live had (may be empty)
+        _smoke = live; _archiveDate = null;
       }
-    }catch(e){
-      // silent — partial render
     }
   }
 
