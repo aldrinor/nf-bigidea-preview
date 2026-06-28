@@ -13,7 +13,7 @@
   body{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
     color:#2a2622;
-    background:#edf0f2 url('assets/Background.png?v=cool') center/cover no-repeat;
+    background:#edf0f2 url('assets/Background_c2.png') center/cover no-repeat;
     cursor:none;
     -webkit-font-smoothing:antialiased;
   }
@@ -184,7 +184,7 @@ const SPECS=[
 SPECS.forEach(s=>{
   const im=new Image(); im.src='assets/charged/'+s.key+'_charged.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
   const v=document.createElement('video');
-  v.src='assets/videos/'+s.key+'_flashloop.mp4?v=cool';
+  v.src='assets/videos/'+s.key+'_flashloop_c2.mp4';
   v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
   s.vid=v; s.vReady=false;
   const applyRate=()=>{ try{ v.playbackRate=s.rate; }catch(e){} };
@@ -518,7 +518,7 @@ function enterDetail(i){
   mode='detail';
   if(specIndex!==detailIndex) setSpec(detailIndex);
   renderDetail(detailIndex);
-  detailVid.src='assets/videos/'+SPECS[detailIndex].key+'_flashloop.mp4?v=cool';
+  detailVid.src='assets/videos/'+SPECS[detailIndex].key+'_flashloop_c2.mp4';
   detailVid.play().catch(()=>{});
 }
 
