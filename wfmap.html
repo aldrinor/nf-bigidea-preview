@@ -277,7 +277,12 @@
   function updateCounts(){
     const nSmoke = (_smoke && _smoke.features) ? _smoke.features.length : 0;
     const nMon = _monitors ? _monitors.length : 0;
-    countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke polygons · <span class="count">${nMon}</span> PM2.5 monitors`;
+    if(nSmoke > 0){
+      countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · <span class="count">${nMon}</span> air-quality monitors`;
+    } else {
+      // Honest, non-broken state when satellites detect no active smoke right now.
+      countsEl.innerHTML = `No active wildfire smoke detected · <span class="count">${nMon}</span> air-quality monitors reporting`;
+    }
   }
 
   function setStatus(html, isError){

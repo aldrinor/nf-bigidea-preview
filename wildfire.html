@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wildfire Smoke — NanoFlashing</title>
+<title>Wildfire smoke — NanoFlashing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -26,9 +26,10 @@
 
   /* ---------- HEADER ---------- */
   .topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px 36px;pointer-events:none}
-  .topbar::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 30%,rgba(237,240,242,0));z-index:-1;pointer-events:none}
+  .topbar::before{content:"";position:absolute;left:0;right:0;top:0;bottom:-44px;background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 62%,rgba(237,240,242,0) 100%);z-index:-1;pointer-events:none}
   .topbar img{height:34px;pointer-events:auto;opacity:.92}
-  .topbar .meta{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+  .topbar .meta{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:none}
+  .footer-title{text-transform:none}
   .topbar .meta b{color:var(--ink);font-weight:700}
 
   /* ---------- INTRO ---------- */
@@ -52,7 +53,7 @@
     margin-left:auto;
     padding:11vh 56px 11vh 5vw;
     min-height:0;
-    opacity:.28;
+    opacity:.42;
     transition:opacity .45s ease;
   }
   .beat.is-active{opacity:1}
@@ -247,7 +248,7 @@
       <div class="step"><span class="num">05</span><span class="bar"></span><span>Filter performance under smoke</span><span class="redmark"></span></div>
       <p>Federal guidance recommends a MERV-13 or higher filter during smoke events.<sup><a href="#ref-11">11</a></sup> Many such filters are electret media: they hold a manufactured static charge that adds to mechanical filtration.</p>
       <p>In EPA testing, a charged filter's clean-air delivery rate fell about 95 percent after roughly 10 milligrams of smoke had deposited — a few hours of a moderate event — while airflow resistance rose only about 7 percent.<sup><a href="#ref-12">12</a></sup> Because the pressure change is small, the loss of performance produces no clog and no usual indication that the filter is spent. The charge can be restored only by washing the filter in alcohol, which is not done in practice.</p>
-      <p>Filter ratings reflect this. A filter can be rated as MERV, measured with its charge intact, and as MERV-A, measured after the electrostatic charge is neutralized (ASHRAE 52.2, Appendix J) — the second being closer to performance under real loading.<sup><a href="#ref-13">13</a></sup> A filter that depends on a manufactured charge rates well as MERV and markedly lower as MERV-A.</p>
+      <p>Filter ratings reflect this. A filter can be rated as MERV, measured with its charge intact, and as MERV-A, measured after the electrostatic charge is neutralized (ASHRAE 52.2, Appendix J) — the second being closer to performance under real loading.<sup><a href="#ref-13">13</a></sup> A filter that depends on a manufactured charge earns a high MERV rating and a markedly lower MERV-A.</p>
       <p>The relevant question for any filter is therefore not whether it begins with a charge, but whether that charge persists under smoke loading.</p>
     </div>
 
@@ -346,7 +347,7 @@
 
 <footer>
   <div>NanoFlashing · Science Desk</div>
-  <div class="right"><span>Module 01 / 05</span><span>Wildfire Smoke</span><span>2026</span></div>
+  <div class="right"><span>Module 01 / 05</span><span class="footer-title">Wildfire smoke</span><span>2026</span></div>
 </footer>
 
 <script>
