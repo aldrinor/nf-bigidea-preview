@@ -109,7 +109,7 @@
   .sec .src{font-size:12px; color:#8a7f74; margin-top:10px; font-style:italic;}
 
   /* detail mode: solid clean background (no room) + bare specimen video (no lens) */
-  .detail-screen{position:fixed; inset:0; z-index:4; background:#ece7e1;
+  .detail-screen{position:fixed; inset:0; z-index:4; background:#edf0f2;
     opacity:0; visibility:hidden; transition:opacity .5s ease, visibility .5s; pointer-events:none;}
   body.detail-active .detail-screen{opacity:1; visibility:visible;}
   .detail-vid{position:fixed; z-index:5; left:5vw; top:50%; transform:translateY(-50%);
@@ -184,7 +184,7 @@ const SPECS=[
 SPECS.forEach(s=>{
   const im=new Image(); im.src='assets/charged/'+s.key+'_charged.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
   const v=document.createElement('video');
-  v.src='assets/videos/'+s.key+'_flashloop.mp4';
+  v.src='assets/videos/'+s.key+'_flashloop.mp4?v=cool';
   v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
   s.vid=v; s.vReady=false;
   const applyRate=()=>{ try{ v.playbackRate=s.rate; }catch(e){} };
@@ -277,7 +277,7 @@ function updateDust(dt){
 const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
 (function(){const m=moteSprite.getContext('2d');
   const g=m.createRadialGradient(9,9,0,9,9,9);
-  g.addColorStop(0,'rgba(74,66,58,0.95)'); g.addColorStop(0.45,'rgba(74,66,58,0.55)'); g.addColorStop(1,'rgba(74,66,58,0)');
+  g.addColorStop(0,'rgba(60,64,72,0.95)'); g.addColorStop(0.45,'rgba(60,64,72,0.55)'); g.addColorStop(1,'rgba(60,64,72,0)');
   m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
 function drawDust(){
   for(const bucket of dustB){
@@ -518,7 +518,7 @@ function enterDetail(i){
   mode='detail';
   if(specIndex!==detailIndex) setSpec(detailIndex);
   renderDetail(detailIndex);
-  detailVid.src='assets/videos/'+SPECS[detailIndex].key+'_flashloop.mp4';
+  detailVid.src='assets/videos/'+SPECS[detailIndex].key+'_flashloop.mp4?v=cool';
   detailVid.play().catch(()=>{});
 }
 
@@ -641,7 +641,7 @@ function drawLens(t){
   ctx.save();
   ctx.beginPath();
   ctx.arc(x, y+8, R*0.94, 0, Math.PI*2);
-  ctx.fillStyle='rgba(40,34,28,0.18)';
+  ctx.fillStyle='rgba(30,34,40,0.18)';
   ctx.filter='blur(14px)';
   ctx.fill();
   ctx.restore();
@@ -663,14 +663,14 @@ function drawLens(t){
   } else if(s.ready){
     ctx.drawImage(s.img, x-dw/2, y-dh/2, dw, dh);
   } else {
-    ctx.fillStyle='#e8e0d4';
+    ctx.fillStyle='#e2e6ea';
     ctx.fillRect(x-R,y-R,2*R,2*R);
   }
 
   const vg=ctx.createRadialGradient(x,y,R*0.74, x,y,R);
   vg.addColorStop(0,'rgba(0,0,0,0)');
-  vg.addColorStop(0.7,'rgba(20,16,12,0.04)');
-  vg.addColorStop(1,'rgba(20,16,12,0.22)');
+  vg.addColorStop(0.7,'rgba(16,20,26,0.04)');
+  vg.addColorStop(1,'rgba(16,20,26,0.22)');
   ctx.fillStyle=vg;
   ctx.fillRect(x-R,y-R,2*R,2*R);
 
@@ -687,7 +687,7 @@ function drawLens(t){
   ctx.lineWidth=6;
   const bezel=ctx.createLinearGradient(x-R, y-R, x+R, y+R);
   bezel.addColorStop(0,'rgba(255,255,255,0.55)');
-  bezel.addColorStop(0.5,'rgba(180,170,158,0.28)');
+  bezel.addColorStop(0.5,'rgba(170,176,184,0.28)');
   bezel.addColorStop(1,'rgba(255,255,255,0.42)');
   ctx.strokeStyle=bezel;
   ctx.beginPath(); ctx.arc(x,y,R-3,0,Math.PI*2); ctx.stroke();
