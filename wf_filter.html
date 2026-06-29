@@ -9,11 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e1418;
-  --ink:#eef2f4;
-  --muted:#9aa7ad;
-  --line:rgba(255,255,255,.12);
-  --cyan:#34e1ff;
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --muted:#8a9095;
+  --hair:rgba(20,24,28,0.08);
+  --accent:#1b7bff;
   --red:#e23b3b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -33,19 +33,19 @@ section{
 }
 .stage{
   position:relative;
-  border-right:1px solid var(--line);
+  border-right:1px solid var(--hair);
   min-height:100vh;
   padding: 40px;
   background:
-    radial-gradient(ellipse at 30% 50%, rgba(52,225,255,0.04), transparent 60%),
-    var(--bg);
+    radial-gradient(ellipse at 30% 50%, rgba(27,123,255,0.05), transparent 60%),
+    #f4f6f8;
 }
 canvas#filter{
   position:absolute;
   inset: 40px;
   display:block;
   width: calc(100% - 80px);
-  height: calc(100% - 80px);
+  height: calc(100% - 40px);
 }
 .copy{
   padding: 80px 64px;
@@ -68,7 +68,7 @@ canvas#filter{
   display:inline-block;
   width:24px;
   height:1px;
-  background:var(--cyan);
+  background:var(--accent);
   margin-right:12px;
 }
 h1{
@@ -89,25 +89,25 @@ h1{
 .source{
   font-family:'Space Mono',monospace;
   font-size:12px;
-  color:var(--cyan);
+  color:var(--accent);
   text-decoration:none;
   letter-spacing:.02em;
   width:fit-content;
-  border-bottom:1px solid rgba(52,225,255,.3);
+  border-bottom:1px solid rgba(27,123,255,.3);
   padding-bottom:2px;
   transition:border-color .2s, color .2s;
   margin-top:4px;
 }
-.source:hover{border-color:var(--cyan)}
+.source:hover{border-color:var(--accent)}
 .handoff{
-  border-left:2px solid var(--cyan);
+  border-left:2px solid var(--accent);
   padding: 16px 20px;
   font-family:'Instrument Serif',serif;
   font-style:italic;
   font-size: 21px;
   line-height:1.4;
   color:var(--ink);
-  background:rgba(52,225,255,.04);
+  background:rgba(27,123,255,.05);
   max-width:520px;
   margin-top:8px;
 }
@@ -128,7 +128,7 @@ h1{
 .readout .big{
   font-size: 64px;
   font-weight:700;
-  color:var(--cyan);
+  color:var(--accent);
   line-height:1;
   transition:color .5s;
   font-variant-numeric: tabular-nums;
@@ -147,7 +147,7 @@ h1{
 .gauge .val{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:700}
 .gauge .val .pct{color:var(--muted);font-weight:400;margin-left:2px}
 .gauge .bar{
-  width:160px;height:2px;background:rgba(255,255,255,.08);margin-top:10px;position:relative;overflow:hidden;
+  width:160px;height:2px;background:rgba(20,24,28,0.08);margin-top:10px;position:relative;overflow:hidden;
 }
 .gauge .bar::after{
   content:"";position:absolute;left:0;top:0;height:100%;
@@ -161,10 +161,10 @@ h1{
   font-size:11px;
   letter-spacing:.08em;
   color:var(--muted);
-  background:rgba(14,20,24,0.6);
+  background:rgba(255,255,255,0.7);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border:1px solid var(--line);
+  border:1px solid var(--hair);
   padding:11px 18px;
   cursor:pointer;
   transition:all .25s;
@@ -172,11 +172,11 @@ h1{
   display:flex;
   align-items:center;
 }
-.replay:hover{color:var(--ink);border-color:rgba(255,255,255,.3)}
+.replay:hover{color:var(--ink);border-color:rgba(20,24,28,0.2)}
 .replay .dot{
   display:inline-block;width:6px;height:6px;border-radius:50%;
-  background:var(--cyan);margin-right:10px;
-  box-shadow:0 0 8px var(--cyan);
+  background:var(--accent);margin-right:10px;
+  box-shadow:0 0 8px rgba(27,123,255,.6);
 }
 .legend{
   position:absolute;
@@ -192,12 +192,12 @@ h1{
 }
 .legend .row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .legend .sw{width:10px;height:10px;border-radius:2px}
-.legend .sw.cyan{background:var(--cyan);box-shadow:0 0 6px rgba(52,225,255,.6)}
-.legend .sw.grey{background:#8a949b}
+.legend .sw.cyan{background:var(--accent);box-shadow:0 0 6px rgba(27,123,255,.5)}
+.legend .sw.grey{background:#9aa3a8}
 .legend .sw.red{background:var(--red)}
 @media (max-width: 900px){
   section{grid-template-columns:1fr}
-  .stage{min-height:62vh;border-right:none;border-bottom:1px solid var(--line);padding:20px}
+  .stage{min-height:62vh;border-right:none;border-bottom:1px solid var(--hair);padding:20px}
   canvas#filter{inset:20px;width:calc(100% - 40px);height:calc(100% - 40px)}
   .copy{padding:48px 24px;gap:22px}
   .readout{top:24px;left:24px}
@@ -254,6 +254,11 @@ h1{
   const airbar = document.getElementById('airbar');
   const replayBtn = document.getElementById('replay');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // light-stage palette
+  const BLUE = '27,123,255';
+  const RED  = '226,59,59';
+  const FIBER_GREY = '#9aa3a8';
 
   let W=0, H=0, DPR=1;
   let fibers=[];
@@ -356,22 +361,20 @@ h1{
 
     if(state==='charging'){
       const p = Math.min(1, stateT/1.3);
-      const e = p<1 ? 1-Math.pow(1-p,3) : 1; // easeOutCubic
+      const e = p<1 ? 1-Math.pow(1-p,3) : 1;
       fibers.forEach(f=> f.charge = e);
       if(stateT > 1.5){ state='loading'; stateT=0; }
       return;
     }
 
     if(state==='loading'){
-      // spawn smoke
-      const rate = 0.5; // particles per ~16ms
+      const rate = 0.5;
       let toSpawn = rate * dt * 60;
       while(toSpawn > 0){
         if(Math.random() < toSpawn) spawnParticle();
         toSpawn -= 1;
       }
 
-      // update particles
       for(let i=particles.length-1;i>=0;i--){
         const p = particles[i];
         if(p.caught){
@@ -387,7 +390,6 @@ h1{
         }
         p.x += p.vx * dt * 60;
         p.y += p.vy * dt * 60;
-        // subtle vertical drift toward center
         p.vy += (H/2 - p.y) * 0.000002 * dt * 60;
 
         for(let fi=0; fi<fibers.length; fi++){
@@ -410,11 +412,9 @@ h1{
         if(p.x > W + 12) particles.splice(i,1);
       }
 
-      // airflow resistance grows slowly
       const totalDep = deposits.length;
       airflow = Math.min(7, totalDep * 0.045);
 
-      // end condition
       const avg = fibers.reduce((s,f)=>s+f.charge,0)/fibers.length;
       if(avg < 0.05 && stateT > 7){
         state = 'dead';
@@ -432,7 +432,6 @@ h1{
         if(p.x > W + 12) particles.splice(i,1);
       }
       if(stateT > 3.8){
-        // restart cycle
         state = 'charging';
         stateT = 0;
         deposits = [];
@@ -447,17 +446,17 @@ h1{
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // ambient gradient
+    // ambient cool-white wash with faint blue/red tints
     const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,'rgba(52,225,255,0.025)');
+    bg.addColorStop(0,`rgba(${BLUE},0.035)`);
     bg.addColorStop(0.5,'rgba(0,0,0,0)');
-    bg.addColorStop(1,'rgba(226,59,59,0.015)');
+    bg.addColorStop(1,`rgba(${RED},0.02)`);
     ctx.fillStyle = bg;
     ctx.fillRect(0,0,W,H);
 
-    // flow direction indicators on left/right edges
+    // flow direction indicators
     ctx.save();
-    ctx.strokeStyle = 'rgba(154,167,173,0.18)';
+    ctx.strokeStyle = 'rgba(138,144,149,0.35)';
     ctx.lineWidth = 1;
     const arrowY = H*0.5;
     for(let i=0;i<4;i++){
@@ -473,8 +472,7 @@ h1{
     // edge labels
     ctx.save();
     ctx.font = "10px 'Space Mono', monospace";
-    ctx.fillStyle = 'rgba(154,173,0.5)';
-    ctx.fillStyle = 'rgba(154,167,173,0.45)';
+    ctx.fillStyle = 'rgba(138,144,149,0.75)';
     ctx.textAlign = 'left';
     ctx.fillText('SMOKE  →', 8, H*0.07);
     ctx.textAlign = 'right';
@@ -483,42 +481,42 @@ h1{
 
     // fibers
     fibers.forEach((f)=>{
-      // charge aura
+      // charge aura (blue)
       const auraA = f.charge * 0.55;
       if(auraA > 0.01){
         const ag = ctx.createLinearGradient(0, f.y - f.r*5, 0, f.y + f.r*5);
-        ag.addColorStop(0,'rgba(52,225,255,0)');
-        ag.addColorStop(0.5,`rgba(52,225,255,${auraA*0.32})`);
-        ag.addColorStop(1,'rgba(52,225,255,0)');
+        ag.addColorStop(0,`rgba(${BLUE},0)`);
+        ag.addColorStop(0.5,`rgba(${BLUE},${auraA*0.32})`);
+        ag.addColorStop(1,`rgba(${BLUE},0)`);
         ctx.fillStyle = ag;
         ctx.fillRect(f.x - 14, f.y - f.r*5, f.w + 28, f.r*10);
       }
 
-      // fiber body — soft rounded cylinder
+      // fiber body — mid grey rounded cylinder, shaded for light stage
       const fg = ctx.createLinearGradient(0, f.y - f.r, 0, f.y + f.r);
-      fg.addColorStop(0,'rgba(170,180,190,0.12)');
-      fg.addColorStop(0.45,'rgba(225,232,238,0.55)');
-      fg.addColorStop(0.55,'rgba(205,212,218,0.5)');
-      fg.addColorStop(1,'rgba(110,120,130,0.12)');
+      fg.addColorStop(0,'rgba(170,178,184,0.55)');
+      fg.addColorStop(0.45,'rgba(154,163,168,0.95)');
+      fg.addColorStop(0.55,'rgba(120,128,134,0.95)');
+      fg.addColorStop(1,'rgba(90,98,104,0.55)');
       ctx.fillStyle = fg;
       roundRect(ctx, f.x, f.y - f.r, f.w, f.r*2, f.r);
       ctx.fill();
 
       // edge
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.strokeStyle = 'rgba(20,24,28,0.18)';
       ctx.lineWidth = 1;
       roundRect(ctx, f.x, f.y - f.r, f.w, f.r*2, f.r);
       ctx.stroke();
 
       // top highlight
-      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(f.x + f.r, f.y - f.r + 1.5);
       ctx.lineTo(f.x + f.w - f.r, f.y - f.r + 1.5);
       ctx.stroke();
 
-      // charge marks
+      // charge marks (blue)
       f.marks.forEach((m, mi)=>{
         const x = f.x + m.ox * f.w;
         const wobble = Math.sin(timeAcc*1.4 + m.phase + mi) * 1.2;
@@ -526,9 +524,9 @@ h1{
         const a = f.charge;
         if(a < 0.02) return;
         ctx.save();
-        ctx.shadowColor = `rgba(52,225,255,${a*0.95})`;
+        ctx.shadowColor = `rgba(${BLUE},${a*0.95})`;
         ctx.shadowBlur = 10 * a;
-        ctx.fillStyle = `rgba(52,225,255,${0.9*a})`;
+        ctx.fillStyle = `rgba(${BLUE},${0.9*a})`;
         ctx.font = "bold 12px 'Space Mono', monospace";
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -537,9 +535,9 @@ h1{
       });
     });
 
-    // deposits (stuck smoke)
+    // deposits (stuck smoke) — dark grey on light
     deposits.forEach(d=>{
-      ctx.fillStyle = 'rgba(60,68,76,0.85)';
+      ctx.fillStyle = 'rgba(70,78,86,0.85)';
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.r*1.15, 0, Math.PI*2);
       ctx.fill();
@@ -549,40 +547,39 @@ h1{
       ctx.fill();
     });
 
-    // particles
+    // particles — soft grey smoke
     particles.forEach(p=>{
       if(p.caught){
         const a = 1 - p.caughtT/0.35;
-        // cyan absorption flash
-        ctx.fillStyle = `rgba(52,225,255,${0.5*a})`;
+        // blue absorption flash
+        ctx.fillStyle = `rgba(${BLUE},${0.5*a})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r*2.2*a, 0, Math.PI*2);
         ctx.fill();
-        ctx.fillStyle = `rgba(80,90,100,${0.75*a})`;
+        ctx.fillStyle = `rgba(90,98,104,${0.75*a})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
         ctx.fill();
       } else {
-        // soft smoke puff
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*2.4);
-        g.addColorStop(0, `rgba(160,170,180,${p.alpha*0.9})`);
-        g.addColorStop(0.5, `rgba(130,140,150,${p.alpha*0.4})`);
-        g.addColorStop(1, 'rgba(130,140,150,0)');
+        g.addColorStop(0, `rgba(150,158,165,${p.alpha*0.85})`);
+        g.addColorStop(0.5, `rgba(130,138,145,${p.alpha*0.4})`);
+        g.addColorStop(1, 'rgba(130,138,145,0)');
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r*2.4, 0, Math.PI*2);
         ctx.fill();
-        ctx.fillStyle = `rgba(110,120,130,${p.alpha*0.85})`;
+        ctx.fillStyle = `rgba(110,118,125,${p.alpha*0.8})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r*0.85, 0, Math.PI*2);
         ctx.fill();
       }
     });
 
-    // subtle vignette
-    const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.3, W/2, H/2, Math.max(W,H)*0.7);
+    // very subtle light vignette to focus center
+    const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.35, W/2, H/2, Math.max(W,H)*0.75);
     vg.addColorStop(0,'rgba(0,0,0,0)');
-    vg.addColorStop(1,'rgba(0,0,0,0.35)');
+    vg.addColorStop(1,'rgba(20,24,28,0.06)');
     ctx.fillStyle = vg;
     ctx.fillRect(0,0,W,H);
   }
