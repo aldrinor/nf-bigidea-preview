@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <title>Wildfire Smoke — Editorial Charts</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,31 +16,11 @@
     --red:#e23b3b;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-    font-family:'Space Grotesk',sans-serif;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    color:var(--ink);font-family:'Space Grotesk',sans-serif;
+    display:flex;align-items:center;justify-content:center;}
   body{padding:36px 40px 48px;}
-  .masthead{
-    max-width:1180px;margin:0 auto 28px;
-    border-top:2px solid var(--ink);
-    padding-top:14px;
-    display:flex;justify-content:space-between;align-items:baseline;
-    font-family:'Space Mono',monospace;font-size:10.5px;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
-  }
-  .masthead .brand{color:var(--ink);font-weight:700;letter-spacing:.18em;}
-  .deck{max-width:1180px;margin:0 auto 24px;}
-  .deck h1{font-family:'Space Grotesk',sans-serif;font-weight:600;
-    font-size:26px;margin:0 0 6px;letter-spacing:-0.01em;}
-  .deck p{font-family:'Space Mono',monospace;font-size:10.5px;
-    letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin:0;}
-  .grid{
-    max-width:1180px;margin:0 auto;
-    display:grid;grid-template-columns:1fr 1fr;gap:28px;
-  }
-  .cell{
-    background:transparent;
-    padding:0;
-  }
+  .cell{width:100%;max-width:620px;padding:0 12px;}
   .cell .label{
     font-family:'Space Mono',monospace;font-size:10px;
     letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
@@ -55,108 +37,100 @@
   .cell .source{
     font-family:'Space Mono',monospace;font-size:9.5px;
     letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-    margin:6px 0 0;
+    margin:10px 0 0;
   }
 </style>
 </head>
-<style>
- html,body{margin:0;padding:0;height:100%;background:#edf0f2;display:flex;align-items:center;justify-content:center;}
- .cell{width:100%;max-width:100%;max-width:620px;padding:0 12px;}
- .cell h2{font-size:18px;}
- svg{width:100%;height:auto;}
-</style>
-<body><div class="cell">
-    <div class="label"><span>FIG. 01 · MORTALITY-CLIMB</span><span class="tag">▲ TREND</span></div>
-    <h2>Annual U.S. deaths attributable to wildfire-smoke PM₂.₅</h2>
-    <svg viewBox="0 0 560 360" role="img" aria-label="Cumulative mortality line chart">
-      <!-- defs -->
-      <defs>
-        <pattern id="projdash" patternUnits="userSpaceOnUse" width="6" height="2">
-          <rect width="3" height="2" fill="#aab2b8"/>
-        </pattern>
-      </defs>
+<body>
+<div class="cell">
+  <div class="label"><span>FIG. 02 · MORTALITY CLIMB</span><span class="tag">▲ TREND</span></div>
+  <h2>Annual U.S. deaths attributable to wildfire-smoke PM₂.₅</h2>
+  <svg viewBox="0 0 600 360" role="img" aria-label="Annual mortality line chart, observed 2015-2025 and projected to 2050">
+    <defs>
       <style>
         .mono{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#828a90;}
         .mono-ink{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#1f2327;}
-        .gnum{font-family:'Space Grotesk',sans-serif;font-size:11px;fill:#828a90;}
-        .red{fill:#e23b3b;}
-        .ink{fill:#1f2327;}
+        .mono-bold{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#1f2327;font-weight:700;}
+        .red-bold{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#e23b3b;font-weight:700;}
       </style>
+    </defs>
 
-      <!-- faint gridlines -->
-      <g stroke="rgba(20,24,28,0.08)" stroke-width="1">
-        <line x1="60" y1="62"  x2="525" y2="62"/>
-        <line x1="60" y1="124" x2="525" y2="124"/>
-        <line x1="60" y1="186" x2="525" y2="186"/>
-        <line x1="60" y1="248" x2="525" y2="248"/>
-      </g>
-      <!-- y-axis labels -->
-      <g class="mono" text-anchor="end">
-        <text x="52" y="294">30k</text>
-        <text x="52" y="252">40k</text>
-        <text x="52" y="190">50k</text>
-        <text x="52" y="128">60k</text>
-        <text x="52" y="66">70k</text>
-      </g>
-      <!-- baseline -->
-      <line x1="60" y1="290" x2="525" y2="290" stroke="#1f2327" stroke-width="1"/>
+    <!-- faint gridlines (40k / 50k / 60k / 70k) -->
+    <g stroke="rgba(20,24,28,0.08)" stroke-width="1">
+      <line x1="66" y1="285.5" x2="556" y2="285.5"/>
+      <line x1="66" y1="213.5" x2="556" y2="213.5"/>
+      <line x1="66" y1="141" x2="556" y2="141"/>
+      <line x1="66" y1="68.5" x2="556" y2="68.5"/>
+    </g>
 
-      <!-- x ticks -->
-      <g class="mono" text-anchor="middle">
-        <text x="60"  y="312">2015</text>
-        <text x="191" y="312">2025</text>
-        <text x="323" y="312">2035</text>
-        <text x="454" y="312">2045</text>
-        <text x="525" y="312">2050</text>
-      </g>
-      <!-- minor ticks -->
-      <g stroke="#1f2327" stroke-width="1">
-        <line x1="60"  y1="290" x2="60"  y2="294"/>
-        <line x1="191" y1="290" x2="191" y2="294"/>
-        <line x1="323" y1="290" x2="323" y2="294"/>
-        <line x1="454" y1="290" x2="454" y2="294"/>
-        <line x1="525" y1="290" x2="525" y2="294"/>
-      </g>
+    <!-- y-axis labels -->
+    <g class="mono" text-anchor="end">
+      <text x="58" y="289">40k</text>
+      <text x="58" y="217">50k</text>
+      <text x="58" y="144.5">60k</text>
+      <text x="58" y="72">70k</text>
+    </g>
 
-      <!-- Observed segment (2015-2025): 38000 -> 41000 -> 43000 -->
-      <!-- 2015: x60 y246 ; 2020: x125.7 y229 ; 2025: x191 y218 -->
-      <polyline fill="none" stroke="#1f2327" stroke-width="2"
-        points="60,246 126,229 191,218"/>
+    <!-- axis-break indicator at origin (38k floor) -->
+    <g stroke="#1f2327" stroke-width="1" fill="none">
+      <polyline points="60,294 64,298 68,294 72,298"/>
+    </g>
+    <text class="mono" x="58" y="306" text-anchor="end" style="font-size:8.5px;letter-spacing:.06em;">≈38k</text>
 
-      <!-- Projected segment (2025-2050) DASHED -->
-      <!-- 2025: 191,218 ; 2035: 323,151 ; 2050: 525,62 -->
-      <polyline fill="none" stroke="#aab2b8" stroke-width="2" stroke-dasharray="5 4"
-        points="191,218 323,151 525,62"/>
+    <!-- baseline -->
+    <line x1="66" y1="300" x2="556" y2="300" stroke="#1f2327" stroke-width="1"/>
 
-      <!-- 2020 marker + label -->
-      <circle cx="126" cy="229" r="3" fill="#1f2327"/>
-      <g>
-        <line x1="126" y1="229" x2="126" y2="190" stroke="rgba(20,24,28,0.35)" stroke-width="1"/>
-        <text class="mono-ink" x="132" y="186">41,000 / YR</text>
-        <text class="mono" x="132" y="200">2011–2020 avg</text>
-      </g>
+    <!-- x ticks -->
+    <g class="mono" text-anchor="middle">
+      <text x="66" y="316">2015</text>
+      <text x="206" y="316">2025</text>
+      <text x="346" y="316">2035</text>
+      <text x="486" y="316">2045</text>
+      <text x="556" y="316">2050</text>
+    </g>
+    <g stroke="#1f2327" stroke-width="1">
+      <line x1="66" y1="300" x2="66" y2="304"/>
+      <line x1="206" y1="300" x2="206" y2="304"/>
+      <line x1="346" y1="300" x2="346" y2="304"/>
+      <line x1="486" y1="300" x2="486" y2="304"/>
+      <line x1="556" y1="300" x2="556" y2="304"/>
+    </g>
 
-      <!-- 2025 split marker -->
-      <circle cx="191" cy="218" r="3" fill="#1f2327"/>
-      <text class="mono" x="191" y="206" text-anchor="middle">projected →</text>
+    <!-- vertical divider at 2025 (observed | projected) -->
+    <line x1="206" y1="60" x2="206" y2="300" stroke="rgba(20,24,28,0.22)" stroke-width="1" stroke-dasharray="2 3"/>
+    <text class="mono" x="212" y="72" text-anchor="start">projected →</text>
+    <text class="mono" x="200" y="72" text-anchor="end">← observed</text>
 
-      <!-- 2050 RED endpoint -->
-      <circle cx="525" cy="62" r="5" fill="#e23b3b"/>
-      <circle cx="525" cy="62" r="9" fill="none" stroke="#e23b3b" stroke-width="1" opacity="0.35"/>
-      <g>
-        <text class="mono-ink" x="519" y="48" text-anchor="end" style="fill:#e23b3b;font-weight:700;">71,000 / YR</text>
-        <text class="mono" x="519" y="60" text-anchor="end">by 2050</text>
-      </g>
+    <!-- Observed segment (2015-2025): solid -->
+    <polyline fill="none" stroke="#1f2327" stroke-width="2.25"
+      points="66,293 136,278.5 206,264"/>
 
-      <!-- 2035 tick -->
-      <circle cx="323" cy="151" r="2.5" fill="#aab2b8"/>
-      <text class="mono" x="323" y="143" text-anchor="middle">~55,000</text>
+    <!-- Projected segment (2025-2050) DASHED -->
+    <polyline fill="none" stroke="#1f2327" stroke-width="2.25" stroke-dasharray="6 4"
+      points="206,264 346,177 556,61"/>
 
-      <!-- Callout block -->
-      <g transform="translate(258,330)">
-        <rect x="0" y="0" width="262" height="22" fill="#1f2327"/>
-        <text x="10" y="14.5" style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;fill:#edf0f2;">~1.9M cumulative deaths · 2026–2055</text>
-      </g>
-    </svg>
-    <p class="source">Source: Qiu et al., Nature, 2025</p>
-  </div></body></html>
+    <!-- 2020 marker + standardized annotation -->
+    <circle cx="136" cy="278.5" r="3" fill="#1f2327"/>
+    <line x1="136" y1="278.5" x2="150" y2="252" stroke="rgba(20,24,28,0.40)" stroke-width="1"/>
+    <text class="mono-bold" x="155" y="248">41,000 / YR</text>
+    <text class="mono" x="155" y="261">2011–2020 avg</text>
+
+    <!-- 2025 split marker: OPEN circle -->
+    <circle cx="206" cy="264" r="4" fill="#edf0f2" stroke="#1f2327" stroke-width="2"/>
+
+    <!-- 2035 waypoint tick (no annotation, keeps the climb legible) -->
+    <circle cx="346" cy="177" r="2.5" fill="#1f2327"/>
+
+    <!-- 2050 RED endpoint: small solid red dot, NO halo ring -->
+    <circle cx="556" cy="61" r="4" fill="#e23b3b"/>
+    <line x1="556" y1="61" x2="540" y2="42" stroke="rgba(20,24,28,0.40)" stroke-width="1"/>
+    <text class="red-bold" x="535" y="38" text-anchor="end">71,000 / YR</text>
+    <text class="mono" x="535" y="51" text-anchor="end">by 2050</text>
+
+    <!-- Footer metadata: 1.9M cumulative deaths (plain typeset, no fill block) -->
+    <text class="mono" x="66" y="340" text-anchor="start">1.9M cumulative deaths · 2026–2055</text>
+  </svg>
+  <p class="source">Source: Qiu et al., Nature, 2025</p>
+</div>
+</body>
+</html>

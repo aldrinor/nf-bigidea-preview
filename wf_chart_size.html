@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <title>Wildfire Smoke — Editorial Charts</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,117 +12,128 @@
     --ink:#1f2327;
     --muted:#828a90;
     --faint:#aab2b8;
-    --hair:rgba(20,24,28,0.12);
     --red:#e23b3b;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
     font-family:'Space Grotesk',sans-serif;}
-  body{padding:36px 40px 48px;}
-  .masthead{
-    max-width:1180px;margin:0 auto 28px;
-    border-top:2px solid var(--ink);
-    padding-top:14px;
-    display:flex;justify-content:space-between;align-items:baseline;
-    font-family:'Space Mono',monospace;font-size:10.5px;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
-  }
-  .masthead .brand{color:var(--ink);font-weight:700;letter-spacing:.18em;}
-  .deck{max-width:1180px;margin:0 auto 24px;}
-  .deck h1{font-family:'Space Grotesk',sans-serif;font-weight:600;
-    font-size:26px;margin:0 0 6px;letter-spacing:-0.01em;}
-  .deck p{font-family:'Space Mono',monospace;font-size:10.5px;
-    letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin:0;}
-  .grid{
-    max-width:1180px;margin:0 auto;
-    display:grid;grid-template-columns:1fr 1fr;gap:28px;
-  }
-  .cell{
-    background:transparent;
-    padding:0;
-  }
+  body{padding:40px 40px 56px;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .cell{width:100%;max-width:620px;padding:0 8px;}
   .cell .label{
     font-family:'Space Mono',monospace;font-size:10px;
     letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
-    margin:0 0 4px;display:flex;justify-content:space-between;
-    border-bottom:1px solid var(--hair);padding-bottom:8px;
+    margin:0 0 10px;display:flex;justify-content:space-between;
+    border-top:2px solid var(--ink);padding-top:12px;
   }
   .cell .label .tag{color:var(--red);font-weight:700;}
   .cell h2{
     font-family:'Space Grotesk',sans-serif;font-weight:600;
-    font-size:18px;margin:0 0 14px;letter-spacing:-0.005em;
-    line-height:1.2;
+    font-size:20px;margin:0 0 18px;letter-spacing:-0.01em;line-height:1.2;
   }
   .cell svg{display:block;width:100%;height:auto;}
   .cell .source{
     font-family:'Space Mono',monospace;font-size:9.5px;
-    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-    margin:6px 0 0;
+    letter-spacing:.10em;text-transform:uppercase;color:var(--muted);
+    margin:14px 0 0;
   }
 </style>
 </head>
-<style>
- html,body{margin:0;padding:0;height:100%;background:#edf0f2;display:flex;align-items:center;justify-content:center;}
- .cell{width:100%;max-width:100%;max-width:620px;padding:0 12px;}
- .cell h2{font-size:18px;}
- svg{width:100%;height:auto;}
-</style>
-<body><div class="cell">
-    <div class="label"><span>FIG. 04 · PARTICLE-SIZE</span><span class="tag">▲ SCALE</span></div>
-    <h2>PM₂.₅ sits at the edge of what the lung can hold back</h2>
-    <svg viewBox="0 0 560 360" role="img" aria-label="Particle size comparison circles">
+<body>
+  <div class="cell">
+    <div class="label"><span>FIG. 01 · PARTICLE SIZE</span><span class="tag">▲ SCALE</span></div>
+    <h2>PM2.5 sits at the edge of what the lung can hold back</h2>
+    <svg viewBox="0 0 600 360" role="img" aria-label="Particle size comparison: human hair shown at true scale with PM10 and PM2.5, plus a magnified inset loupe">
+      <defs>
+        <clipPath id="plot01">
+          <rect x="66" y="54" width="490" height="246"/>
+        </clipPath>
+        <clipPath id="loupe01">
+          <circle cx="400" cy="185" r="75"/>
+        </clipPath>
+      </defs>
       <style>
-        .mono{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#828a90;}
-        .mono-ink{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.10em;text-transform:uppercase;fill:#1f2327;}
+        .leader{fill:none;stroke:rgba(20,24,28,0.40);stroke-width:1;}
+        .leader-red{fill:none;stroke:rgba(226,59,59,0.55);stroke-width:1;}
+        .desc{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;fill:#828a90;}
+        .desc-red{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;fill:#e23b3b;font-weight:700;}
+        .val{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.04em;fill:#1f2327;}
+        .val-red{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.04em;fill:#e23b3b;}
+        .tick{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;fill:#828a90;text-transform:uppercase;}
+        .tick-ink{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;fill:#1f2327;font-weight:700;text-transform:uppercase;}
+        .take{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.10em;fill:#1f2327;font-weight:700;text-transform:uppercase;}
       </style>
 
-      <!-- Concentric circles, shared center.
-           Hair ~70 microns => r=120 (largest)
-           PM10 ~10 microns => r=120*10/70 = 17.14
-           PM2.5 ~2.5 microns => r=120*2.5/70 = 4.28
-      -->
-      <g transform="translate(190,182)">
-        <!-- hair -->
-        <circle r="120" fill="rgba(20,24,28,0.05)" stroke="#aab2b8" stroke-width="1.25"/>
-        <!-- pm10 -->
-        <circle r="17.14" fill="#828a90" fill-opacity="0.25" stroke="#1f2327" stroke-width="1.25"/>
-        <!-- pm2.5 red -->
-        <circle r="4.28" fill="#e23b3b"/>
-        <circle r="4.28" fill="none" stroke="#e23b3b" stroke-width="1" opacity="0.35" transform="scale(2.2)"/>
+      <!-- faint plot frame (shared system gridlines) -->
+      <line x1="66"  y1="54"  x2="556" y2="54"  stroke="rgba(20,24,28,0.08)" stroke-width="1"/>
+      <line x1="66"  y1="300" x2="556" y2="300" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
+      <line x1="66"  y1="54"  x2="66"  y2="300" stroke="rgba(20,24,28,0.08)" stroke-width="1"/>
+      <line x1="556" y1="54"  x2="556" y2="300" stroke="rgba(20,24,28,0.08)" stroke-width="1"/>
+
+      <!-- ============ LEFT HALF : TRUE SCALE ============ -->
+      <!-- HAIR ≈70 microns  ->  r = 92  (true-scale reference disc) -->
+      <g clip-path="url(#plot01)">
+        <circle cx="160" cy="185" r="92"
+                fill="rgba(20,24,28,0.05)" stroke="#aab2b8" stroke-width="1.25"/>
+        <!-- subtle inner ring to read as a cross-section -->
+        <circle cx="160" cy="185" r="84"
+                fill="none" stroke="rgba(20,24,28,0.06)" stroke-width="1"/>
       </g>
 
-      <!-- leader lines + labels -->
-      <!-- Hair: leader from outer ring top-right -->
-      <g>
-        <line x1="275" y1="97" x2="370" y2="60" stroke="rgba(20,24,28,0.45)" stroke-width="1"/>
-        <line x1="370" y1="60" x2="510" y2="60" stroke="rgba(20,24,28,0.45)" stroke-width="1"/>
-        <text class="mono-ink" x="378" y="55">Human hair</text>
-        <text class="mono" x="378" y="69">~70 microns</text>
-      </g>
-      <!-- PM10: leader from medium circle -->
-      <g>
-        <line x1="207" y1="170" x2="370" y2="150" stroke="rgba(20,24,28,0.45)" stroke-width="1"/>
-        <line x1="370" y1="150" x2="510" y2="150" stroke="rgba(20,24,28,0.45)" stroke-width="1"/>
-        <text class="mono-ink" x="378" y="145">PM10</text>
-        <text class="mono" x="378" y="159">under 10 microns</text>
-      </g>
-      <!-- PM2.5: leader from red dot -->
-      <g>
-        <line x1="194" y1="186" x2="370" y2="240" stroke="rgba(20,24,28,0.45)" stroke-width="1"/>
-        <line x1="370" y1="240" x2="510" y2="240" stroke="rgba(20,24,28,0.45)" stroke-width="1"/>
-        <text class="mono-ink" x="378" y="235" style="fill:#e23b3b;font-weight:700;">PM2.5</text>
-        <text class="mono" x="378" y="249">under 2.5 microns</text>
+      <!-- PM10 under 10 microns  ->  r = 92 * 10/70 = 13.14  (sits on hair edge) -->
+      <circle cx="265.14" cy="185" r="13.14"
+              fill="rgba(20,24,28,0.07)" stroke="#1f2327" stroke-width="1.25"/>
+
+      <!-- PM2.5 under 2.5 microns  ->  r = 92 * 2.5/70 = 3.29  (barely-visible red speck) -->
+      <circle cx="281.57" cy="185" r="3.29" fill="#e23b3b"/>
+
+      <!-- HAIR leader + label (orthogonal, right-angle) -->
+      <polyline class="leader" points="160,93 160,70 196,70"/>
+      <text class="desc" x="201" y="68">HUMAN HAIR</text>
+      <text class="val"  x="201" y="82">≈70 microns</text>
+
+      <!-- true-scale annotation tucked under the small cluster -->
+      <polyline class="leader-red" points="273,199 273,214"/>
+      <text class="tick" x="273" y="224" text-anchor="middle" fill="#e23b3b">TRUE SCALE</text>
+
+      <!-- ============ MAGNIFIER CONNECTOR (viewing cone) ============ -->
+      <polygon points="285,181 335,147.5 335,222.5 285,189"
+               fill="rgba(20,24,28,0.035)" stroke="none"/>
+      <line x1="285" y1="181" x2="335" y2="147.5" stroke="rgba(20,24,28,0.30)" stroke-width="1" stroke-dasharray="2 2"/>
+      <line x1="285" y1="189" x2="335" y2="222.5" stroke="rgba(20,24,28,0.30)" stroke-width="1" stroke-dasharray="2 2"/>
+
+      <!-- ============ RIGHT HALF : MAGNIFIED LOUPE ============ -->
+      <!-- loupe outer ring (lens) -->
+      <circle cx="400" cy="185" r="75"
+              fill="#ffffff" stroke="#1f2327" stroke-width="1.25"/>
+      <circle cx="400" cy="185" r="70"
+              fill="none" stroke="rgba(20,24,28,0.10)" stroke-width="1"/>
+
+      <!-- magnified contents (M ≈ 3.5×) : PM10 r=46, PM2.5 r=11.5  (ratio 4:1 preserved) -->
+      <g clip-path="url(#loupe01)">
+        <!-- PM10 -->
+        <circle cx="400" cy="160" r="46"
+                fill="rgba(20,24,28,0.07)" stroke="#1f2327" stroke-width="1.25"/>
+        <!-- PM2.5 (red accent) -->
+        <circle cx="400" cy="235" r="11.5" fill="#e23b3b"/>
       </g>
 
-      <!-- scale note -->
-      <line x1="40" y1="320" x2="525" y2="320" stroke="rgba(20,24,28,0.12)"/>
-      <text class="mono" x="40" y="335">circles drawn to true relative diameter</text>
-      <text class="mono" x="525" y="335" text-anchor="end">PM2.5 ≈ 1/28 of a hair</text>
+      <!-- magnification label -->
+      <text class="tick-ink" x="400" y="100" text-anchor="middle">MAGNIFIED ~3.5×</text>
 
-      <!-- bottom annotation -->
-      <g transform="translate(40,348)">
-        <text class="mono-ink" x="0" y="0">PM2.5 is small enough to reach deep in the lungs and cross into the blood.</text>
-      </g>
+      <!-- PM10 leader + label (exits loupe to the right) -->
+      <polyline class="leader" points="446,160 470,160"/>
+      <text class="desc" x="475" y="158">PM10</text>
+      <text class="val"  x="475" y="172">under 10 microns</text>
+
+      <!-- PM2.5 leader + label (RED — the one critical point) -->
+      <polyline class="leader-red" points="411.5,235 470,235"/>
+      <text class="desc-red" x="475" y="233">PM2.5</text>
+      <text class="val-red"  x="475" y="247">under 2.5 microns</text>
+
+      <!-- ============ TAKEAWAY, anchored to plot left edge ============ -->
+      <text class="take" x="66" y="322">PM2.5 ≈ 1/28 the width of a human hair — small enough to reach deep in the lungs.</text>
     </svg>
     <p class="source">Source: US EPA, PM Basics</p>
-  </div></body></html>
+  </div>
+</body>
+</html>

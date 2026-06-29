@@ -6,7 +6,7 @@
 <title>Where the smoke settles — wildfire PM and the lungs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#edf0f2; --ink:#1f2327; --muted:#6b7178;
@@ -23,17 +23,63 @@
     object-fit:contain;display:block;user-select:none;-webkit-user-drag:none}
   #lungCanvas{position:absolute;inset:0;width:100%;height:100%;
     pointer-events:none;transition:opacity .5s ease}
-  .hover-zone{position:absolute;border-radius:50%;cursor:help;z-index:3;
-    background:transparent}
-  .tooltip{position:absolute;z-index:10;background:var(--ink);color:#fff;
-    font-family:'Space Mono',monospace;font-size:10.5px;line-height:1.45;
-    padding:7px 10px;border-radius:3px;max-width:190px;min-width:120px;
-    pointer-events:none;opacity:0;
-    transform:translate(-50%,-100%) translateY(-10px);
-    transition:opacity .18s ease;white-space:normal;letter-spacing:.01em}
-  .tooltip.show{opacity:1}
-  .tooltip::after{content:'';position:absolute;left:50%;bottom:-4px;
-    transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:var(--ink)}
+
+  /* clickable regions */
+  .region{position:absolute;z-index:4;border-radius:50%;cursor:pointer;
+    background:transparent;border:0;padding:0;
+    transform:translate(-50%,-50%);outline:none}
+  .region:focus-visible{box-shadow:0 0 0 2px var(--red);border-radius:50%}
+  .region .marker{position:absolute;inset:0;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .region .ring{position:absolute;inset:0;border-radius:50%;
+    border:1px solid rgba(31,35,39,.18);background:rgba(31,35,39,.025);
+    transition:background .2s ease,border-color .2s ease,transform .2s ease}
+  .region:hover .ring{background:rgba(226,59,59,.06);border-color:rgba(226,59,59,.45)}
+  .region.active .ring{background:rgba(226,59,59,.10);border-color:rgba(226,59,59,.7)}
+  /* hollow red ring marker — reads as UI affordance, not a particle */
+  .region .pulse{position:absolute;left:50%;top:50%;width:14px;height:14px;
+    margin:-7px 0 0 -7px;border-radius:50%;
+    border:1.5px solid var(--red);background:transparent;
+    opacity:.8;animation:rgn-pulse 2.4s ease-out infinite}
+  .region .dot{position:absolute;left:50%;top:50%;width:14px;height:14px;
+    margin:-7px 0 0 -7px;border-radius:50%;
+    border:1.5px solid var(--red);background:var(--paper);
+    opacity:1}
+  @keyframes rgn-pulse{
+    0%{transform:scale(.7);opacity:.7}
+    70%{transform:scale(2.6);opacity:0}
+    100%{transform:scale(2.6);opacity:0}
+  }
+
+  .hint{position:absolute;left:10px;bottom:8px;z-index:5;
+    font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.06em;
+    color:var(--muted);background:rgba(255,255,255,.7);padding:3px 7px;
+    border-radius:2px;pointer-events:none;backdrop-filter:blur(2px)}
+
+  /* impact card */
+  .card-scrim{position:absolute;inset:0;z-index:8;background:rgba(237,240,242,0);
+    pointer-events:none;transition:background .25s ease}
+  .card-scrim.show{background:rgba(31,35,39,.18);pointer-events:auto}
+  .impact-card{position:absolute;z-index:9;background:var(--paper);
+    border:1px solid var(--line);border-left:3px solid var(--red);
+    border-radius:3px;padding:14px 16px 12px;width:78%;max-width:340px;
+    box-shadow:0 8px 28px rgba(31,35,39,.14);
+    opacity:0;transform:translateY(8px);pointer-events:none;
+    transition:opacity .28s ease,transform .28s ease}
+  .impact-card.show{opacity:1;transform:translateY(0);pointer-events:auto}
+  .impact-card .ic-label{font-family:'Space Mono',monospace;font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+    margin:0 0 8px;font-weight:700}
+  .impact-card .ic-body{font-family:'Space Grotesk',sans-serif;font-size:13px;
+    line-height:1.5;color:#2a2f34;margin:0 0 10px}
+  .impact-card .ic-cite{font-family:'Space Mono',monospace;font-size:9.5px;
+    letter-spacing:.04em;color:#4a4f55;margin:0 0 10px;font-weight:500}
+  .impact-card .ic-close{position:absolute;top:6px;right:6px;width:22px;height:22px;
+    border:0;background:transparent;cursor:pointer;border-radius:2px;
+    color:var(--muted);font-family:'Space Mono',monospace;font-size:14px;
+    display:flex;align-items:center;justify-content:center;line-height:1}
+  .impact-card .ic-close:hover{background:var(--bg);color:var(--ink)}
+
   .controls{display:flex;align-items:center;justify-content:space-between;
     margin-top:16px;gap:12px;flex-wrap:wrap}
   .replay-btn{font-family:'Space Mono',monospace;font-size:11px;
@@ -42,13 +88,14 @@
     cursor:pointer;border-radius:2px;transition:background .18s,color .18s}
   .replay-btn:hover{background:var(--ink);color:#fff}
   .replay-btn:active{transform:translateY(1px)}
+  .replay-btn:focus-visible{outline:2px solid var(--red);outline-offset:2px}
   .legend{display:flex;gap:14px;font-size:10px;color:var(--muted);letter-spacing:.08em;
     align-items:center;flex-wrap:wrap}
   .legend span{display:inline-flex;align-items:center;gap:6px}
   .dot{display:inline-block;width:7px;height:7px;border-radius:50%}
-  .dot.pm10{background:#c2362f}
+  .dot.pm10{background:#b23a2d}
   .dot.pm25{background:var(--ink);opacity:.85}
-  .dot.cross{background:linear-gradient(90deg, var(--ink) 0 50%, #c81e2d 50% 100%)}
+  .dot.cross{background:#ec1330}
 </style>
 </head>
 <body>
@@ -56,10 +103,21 @@
   <figure class="fig-frame" id="figFrame">
     <img src="assets/wf_lung.png" alt="Anatomical illustration of the lungs, airways and alveoli">
     <canvas id="lungCanvas"></canvas>
-    <div class="hover-zone" data-zone="upper"></div>
-    <div class="hover-zone" data-zone="deep"></div>
-    <div class="hover-zone" data-zone="blood"></div>
-    <div class="tooltip" id="tooltip"></div>
+
+    <button class="region" data-region="brain" aria-label="Brain — cognition impact" type="button"></button>
+    <button class="region" data-region="airway" aria-label="Upper airway impact" type="button"></button>
+    <button class="region" data-region="lungs" aria-label="Lungs — children impact" type="button"></button>
+    <button class="region" data-region="heart" aria-label="Heart and bloodstream impact" type="button"></button>
+
+    <div class="hint" id="hint">Tap a region to see the impact</div>
+
+    <div class="card-scrim" id="cardScrim"></div>
+    <article class="impact-card" id="impactCard" role="dialog" aria-modal="false" aria-labelledby="icLabel">
+      <button class="ic-close" id="icClose" aria-label="Close impact card" type="button">×</button>
+      <p class="ic-label" id="icLabel"></p>
+      <p class="ic-body" id="icBody"></p>
+      <p class="ic-cite" id="icCite"></p>
+    </article>
   </figure>
 
   <div class="controls">
@@ -74,36 +132,62 @@
 
 <script>
 /* ============================================================
-   Tunable airway waypoints (fractions of the image box; x→right, y→down)
+   Airway waypoints — anatomically traced through the illustration
+   (fractions of the image box; x→right, y→down)
    ============================================================ */
 const AIR = {
-  entry:     {x:0.76, y:0.25},
-  throat:    {x:0.62, y:0.40},
-  tracheaTop:{x:0.55, y:0.47},
-  carina:    {x:0.52, y:0.58},
-  leftDeep:  {x:0.30, y:0.74},
-  rightMid:  {x:0.62, y:0.66},
-  alveoli:   {x:0.70, y:0.85},   // tuned INTO the grape cluster (lower-right)
-  blood:     {x:0.60, y:0.74}    // pulmonary vessel toward the heart
+  entry:     {x:0.72, y:0.29},   // mouth/nose opening
+  pharynx:   {x:0.61, y:0.35},   // behind the jaw
+  larynx:    {x:0.53, y:0.42},   // top of the trachea
+  tracheaTop:{x:0.50, y:0.46},
+  tracheaMid:{x:0.495,y:0.51},   // straight DOWN the trachea tube
+  carina:    {x:0.49, y:0.55},   // the split
+  rightMid:  {x:0.58, y:0.64},   // right main bronchus
+  alveoli:   {x:0.70, y:0.84},   // the magnified grape cluster (lower-right)
+  leftDeep:  {x:0.34, y:0.66},   // left main bronchus into the left lung
+  blood:     {x:0.55, y:0.70}    // up a pulmonary vessel toward the heart
 };
-const UPPER_DEPOSIT = {x:0.54, y:0.52};
+const UPPER_DEPOSIT = {x:0.50, y:0.49};   // PM10 lodges along the trachea
 
-const TOOLTIPS = {
-  upper: "Larger PM10 is caught here — coughed or cleared.",
-  deep:  "Fine PM2.5 reaches the alveoli, where gas meets blood.",
-  blood: "The finest particles cross into the blood and travel body-wide."
+/* clickable regions — normalized centers + sizes (fraction of frame) */
+const REGIONS = {
+  brain:  {x:0.55, y:0.13, size:0.16,
+    label:"Brain — cognition",
+    body:"Children score lower on tests after a school-year of wildfire-smoke exposure.",
+    cite:"Stanford, Nature Sustainability, 2022"},
+  airway: {x:0.54, y:0.40, size:0.14,
+    label:"Upper airway",
+    body:"Coarse PM10 is trapped here — irritation and coughing as the body works to clear it.",
+    cite:"US EPA, Particulate Matter Basics"},
+  lungs:  {x:0.42, y:0.62, size:0.16,
+    label:"Lungs — children",
+    body:"Children show up to about ten times the rise in respiratory visits from wildfire PM2.5 versus equal-mass PM2.5 from other sources.",
+    cite:"UC San Diego, Pediatrics, 2021"},
+  heart:  {x:0.62, y:0.74, size:0.16,
+    label:"Heart & bloodstream",
+    body:"The finest PM2.5 crosses from the alveoli into the blood; the EPA finds a causal link to heart attack and stroke.",
+    cite:"US EPA, Integrated Science Assessment for PM, 2019"}
 };
 
 const INK        = '#1f2327';
-const PM10_RED   = '#c2362f';
-const BLOOD_RED  = '#c81e2d';
+const PM10_RED   = '#b23a2d';   // matte brick red — coarse, lodged
+const BLOOD_RED  = '#ec1330';   // bright arterial red — crossing into blood
 const MUTED      = '#6b7178';
 
 const canvas = document.getElementById('lungCanvas');
 const ctx    = canvas.getContext('2d');
 const frame  = document.getElementById('figFrame');
-const tipEl  = document.getElementById('tooltip');
 const btn    = document.getElementById('replayBtn');
+
+/* impact card elements */
+const cardEl    = document.getElementById('impactCard');
+const scrimEl   = document.getElementById('cardScrim');
+const icLabel   = document.getElementById('icLabel');
+const icBody    = document.getElementById('icBody');
+const icCite    = document.getElementById('icCite');
+const icClose   = document.getElementById('icClose');
+const hintEl    = document.getElementById('hint');
+let activeRegion = null;
 
 let dpr = 1, W = 0, H = 0;
 let particles = [];
@@ -121,20 +205,45 @@ function resize(){
   canvas.width  = Math.round(W * dpr);
   canvas.height = Math.round(H * dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  positionZones();
+  positionRegions();
+  positionCard();
 }
-function positionZones(){
-  const map = {upper:UPPER_DEPOSIT, deep:AIR.alveoli, blood:AIR.blood};
-  frame.querySelectorAll('.hover-zone').forEach(el=>{
-    const z = map[el.dataset.zone];
-    const s = el.dataset.zone==='upper' ? 24 : (el.dataset.zone==='deep' ? 20 : 16);
-    el.style.left = (z.x*100)+'%';
-    el.style.top  = (z.y*100)+'%';
+function positionRegions(){
+  frame.querySelectorAll('.region').forEach(el=>{
+    const r = REGIONS[el.dataset.region];
+    if(!r) return;
+    const s = r.size*100;
+    el.style.left = (r.x*100)+'%';
+    el.style.top  = (r.y*100)+'%';
     el.style.width = s+'%';
     el.style.height= s+'%';
-    el.style.marginLeft = (-s/2)+'%';
-    el.style.marginTop  = (-s/2)+'%';
+    // build marker once
+    if(!el.querySelector('.marker')){
+      const m = document.createElement('div'); m.className='marker';
+      const ring = document.createElement('div'); ring.className='ring';
+      const pulse = document.createElement('div'); pulse.className='pulse';
+      const dot = document.createElement('div'); dot.className='dot';
+      ring.appendChild(pulse); ring.appendChild(dot);
+      m.appendChild(ring);
+      el.appendChild(m);
+    }
   });
+}
+function positionCard(){
+  if(!activeRegion){ return; }
+  const r = REGIONS[activeRegion];
+  // place card to the side of the region, clamped within frame
+  const cardW = Math.min(340, W*0.78);
+  let leftPx = r.x*W + 24;
+  let topPx  = r.y*H - 30;
+  if(leftPx + cardW > W - 8) leftPx = r.x*W - cardW - 24;
+  if(leftPx < 8) leftPx = 8;
+  if(topPx < 8) topPx = 8;
+  // estimate card height ~ 150
+  if(topPx + 170 > H - 8) topPx = H - 178;
+  cardEl.style.left = leftPx + 'px';
+  cardEl.style.top  = topPx + 'px';
+  cardEl.style.width = cardW + 'px';
 }
 
 /* ---------- path math ---------- */
@@ -166,10 +275,11 @@ function hexRgba(hex,a){
   return 'rgba('+parseInt(h.substr(0,2),16)+','+parseInt(h.substr(2,2),16)+','+parseInt(h.substr(4,2),16)+','+a+')';
 }
 
+/* trachea position interpolating between tracheaTop and carina (vertical tube) */
 function tracheaAt(y){
   if(y <= AIR.tracheaTop.y){
-    const u = (y - AIR.throat.y) / (AIR.tracheaTop.y - AIR.throat.y);
-    return { x: AIR.throat.x + (AIR.tracheaTop.x - AIR.throat.x)*u, y };
+    const u = (y - AIR.larynx.y) / (AIR.tracheaTop.y - AIR.larynx.y);
+    return { x: AIR.larynx.x + (AIR.tracheaTop.x - AIR.larynx.x)*u, y };
   } else {
     const u = (y - AIR.tracheaTop.y) / (AIR.carina.y - AIR.tracheaTop.y);
     return { x: AIR.tracheaTop.x + (AIR.carina.x - AIR.tracheaTop.x)*u, y };
@@ -203,12 +313,13 @@ function jitterPoint(base,amp){
 }
 function spawnParticle(plan){
   if(plan.type==='pm10'){
-    const dy = 0.44 + Math.random()*0.12;
+    // PM10 travels entry→pharynx→larynx→tracheaTop, then lodges along the trachea near UPPER_DEPOSIT
+    const dy = UPPER_DEPOSIT.y + (Math.random()-0.5)*0.020;   // 0.48–0.50
     const base = tracheaAt(dy);
     const deposit = { x: base.x + (Math.random()-0.5)*0.010, y: dy + (Math.random()-0.5)*0.008 };
     return {
       type:'pm10',
-      path:[AIR.entry, AIR.throat, deposit],
+      path:[AIR.entry, AIR.pharynx, AIR.larynx, AIR.tracheaTop, deposit],
       t:0, speed:0.20+Math.random()*0.05,
       size:5+Math.random()*2,
       color:PM10_RED, baseAlpha:0.92, alpha:0.92,
@@ -219,12 +330,13 @@ function spawnParticle(plan){
   }
 
   if(plan.cross){
-    // crossing PM2.5 — travels to alveoli, pauses at the grapes, then crosses
-    const path = [AIR.entry, AIR.throat, AIR.tracheaTop, AIR.carina, AIR.rightMid,
+    // crossing PM2.5 — travels through the full airway to alveoli, pauses, then crosses to blood
+    const path = [AIR.entry, AIR.pharynx, AIR.larynx, AIR.tracheaTop,
+                  AIR.tracheaMid, AIR.carina, AIR.rightMid,
                   jitterPoint(AIR.alveoli,0.010)];
     return {
       type:'pm25', path, t:0, speed:0.40+Math.random()*0.08,
-      size:3.0+Math.random()*0.4,             // ~3px base; grows to ~7px on crossing
+      size:3.6+Math.random()*0.4,
       color:INK, baseAlpha:0.85, alpha:0.85,
       noiseAmp:0.0065, noiseSeed:Math.random()*1000, noiseFreq:22+Math.random()*8,
       lodged:false, lodgeTime:0, crossing:true,
@@ -235,8 +347,10 @@ function spawnParticle(plan){
 
   const goLeft = plan.goLeft;
   const path = goLeft
-    ? [AIR.entry, AIR.throat, AIR.tracheaTop, AIR.carina, jitterPoint(AIR.leftDeep,0.02)]
-    : [AIR.entry, AIR.throat, AIR.tracheaTop, AIR.carina, AIR.rightMid, jitterPoint(AIR.alveoli,0.014)];
+    ? [AIR.entry, AIR.pharynx, AIR.larynx, AIR.tracheaTop, AIR.tracheaMid,
+       AIR.carina, jitterPoint(AIR.leftDeep,0.02)]
+    : [AIR.entry, AIR.pharynx, AIR.larynx, AIR.tracheaTop, AIR.tracheaMid,
+       AIR.carina, AIR.rightMid, jitterPoint(AIR.alveoli,0.014)];
   return {
     type:'pm25', path, t:0, speed:0.42+Math.random()*0.12,
     size:2.5+Math.random()*1.0, color:INK, baseAlpha:0.85, alpha:0.85,
@@ -275,11 +389,10 @@ function update(dt, elapsed, now){
         p.t += p.speed * dt * breath;
         if(p.t >= 1){
           p.t = 1;
-          p.crossPhase = 'pulse';       // pause at the alveolar wall
+          p.crossPhase = 'pulse';
           p.crossPhaseStart = elapsed;
         }
       } else if(p.crossPhase==='pulse'){
-        // ~0.4s pause right at the grapes — touching the wall
         if(elapsed - p.crossPhaseStart > 0.40){
           p.crossPhase = 'glide';
           p.crossPhaseStart = elapsed;
@@ -294,7 +407,6 @@ function update(dt, elapsed, now){
           p.lodged = true;
         }
       } else if(p.crossPhase==='done'){
-        // linger ~1.5s as a bright red dot, then fade
         const since = elapsed - p.lodgeTime;
         if(since > 1.5){
           p.fade = Math.min(1, (since-1.5)/1.0);
@@ -374,7 +486,8 @@ function render(now){
 
 function drawHaze(){
   const paths = [
-    [AIR.entry, AIR.throat, AIR.tracheaTop, AIR.carina, AIR.rightMid, AIR.alveoli],
+    [AIR.entry, AIR.pharynx, AIR.larynx, AIR.tracheaTop, AIR.tracheaMid,
+     AIR.carina, AIR.rightMid, AIR.alveoli],
     [AIR.carina, AIR.leftDeep]
   ];
   ctx.lineCap='round'; ctx.lineJoin='round';
@@ -394,10 +507,9 @@ function drawHaze(){
 function drawParticle(p, now){
   if(p.type==='pm10'){ drawPM10(p); return; }
 
-  // PM2.5 — fading motion trail
   const tl = p.trail.length;
-  const trailColor = (p.crossing && (p.crossPhase==='glide' || p.crossPhase==='done' || p.crossPhase==='pulse'))
-    ? BLOOD_RED : INK;
+  const isBloodPhase = p.crossing && (p.crossPhase==='glide' || p.crossPhase==='done' || p.crossPhase==='pulse');
+  const trailColor = isBloodPhase ? BLOOD_RED : INK;
   for(let i=0;i<tl;i++){
     const tp = p.trail[i];
     const f = (i+1)/tl;
@@ -409,35 +521,43 @@ function drawParticle(p, now){
     ctx.fill();
   }
 
-  // head
   let color = p.color, size = p.size;
 
   if(p.crossing){
     if(p.crossPhase==='approach'){
-      color = INK; size = p.size;                    // ~3px ink
+      color = INK; size = p.size;
     } else if(p.crossPhase==='pulse'){
-      // FLIP to saturated arterial red AND GROW ~2× (3px → 7px)
       color = BLOOD_RED;
-      size = p.size * 2.3;                            // ~7px
-
-      // brief expanding bright-red RING — "breached the barrier"
+      size = p.size * 2.3;
       const since = (now/1000) - (cycleStart/1000) - p.crossPhaseStart;
       const pulseDur = 0.30;
       const pulse = Math.max(0, 1 - since/pulseDur);
       if(pulse > 0){
-        const ringR = size * (0.8 + (1-pulse)*3.8);  // expands outward
+        const ringR = size * (0.8 + (1-pulse)*3.8);
         ctx.strokeStyle = hexRgba(BLOOD_RED, 0.70*pulse);
         ctx.lineWidth = 2.2;
         ctx.beginPath(); ctx.arc(p.x, p.y, ringR, 0, Math.PI*2); ctx.stroke();
       }
     } else if(p.crossPhase==='glide'){
       color = BLOOD_RED;
-      size = p.size * 2.3;                            // ~7px while gliding to vessel
+      size = p.size * 2.3;
     } else {
-      // done — lingering bright red ~5px dot in the bloodstream
       color = BLOOD_RED;
-      size = p.size * 1.7;                            // ~5px, still larger than fine ink
+      size = p.size * 1.7;
     }
+  }
+
+  /* soft glow/halo for blood-crossing particles */
+  if(isBloodPhase){
+    const haloR = Math.max(1, size * 2.8);
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, haloR);
+    grad.addColorStop(0, hexRgba(BLOOD_RED, 0.35 * p.alpha));
+    grad.addColorStop(0.5, hexRgba(BLOOD_RED, 0.12 * p.alpha));
+    grad.addColorStop(1, hexRgba(BLOOD_RED, 0));
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, haloR, 0, Math.PI*2);
+    ctx.fill();
   }
 
   ctx.fillStyle = hexRgba(color, p.alpha);
@@ -446,7 +566,6 @@ function drawParticle(p, now){
   ctx.fill();
 }
 
-/* PM10 — solid, opaque, slightly irregular angular debris. No glow. */
 function drawPM10(p){
   const x = p.x, y = p.y;
   const size = Math.max(1, p.size);
@@ -465,7 +584,7 @@ function drawPM10(p){
   }
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = hexRgba('#7a1d18', p.alpha*0.5);
+  ctx.fillStyle = hexRgba('#7a2a22', p.alpha*0.5);
   ctx.beginPath();
   ctx.arc(x - size*0.22, y - size*0.22, Math.max(0.4, size*0.18), 0, Math.PI*2);
   ctx.fill();
@@ -508,22 +627,51 @@ io.observe(frame);
 /* ---------- replay ---------- */
 btn.addEventListener('click', startCycle);
 
-/* ---------- hover zones ---------- */
-frame.querySelectorAll('.hover-zone').forEach(el=>{
-  el.addEventListener('mouseenter', ()=>{
-    tipEl.textContent = TOOLTIPS[el.dataset.zone];
-    tipEl.classList.add('show');
-    positionTip(el);
+/* ---------- clickable regions + impact card ---------- */
+function openRegion(key){
+  const r = REGIONS[key];
+  if(!r) return;
+  // only one open at a time
+  frame.querySelectorAll('.region').forEach(el=>{
+    el.classList.toggle('active', el.dataset.region===key);
   });
-  el.addEventListener('mousemove', ()=> positionTip(el));
-  el.addEventListener('mouseleave', ()=> tipEl.classList.remove('show'));
-});
-function positionTip(zone){
-  const zr = zone.getBoundingClientRect();
-  const fr = frame.getBoundingClientRect();
-  tipEl.style.left = (zr.left - fr.left + zr.width/2) + 'px';
-  tipEl.style.top  = (zr.top  - fr.top) + 'px';
+  activeRegion = key;
+  icLabel.textContent = r.label;
+  icBody.textContent  = r.body;
+  icCite.textContent  = r.cite;
+  positionCard();
+  cardEl.classList.add('show');
+  scrimEl.classList.add('show');
+  hintEl.style.opacity = '0';
+  hintEl.style.transition = 'opacity .3s ease';
 }
+function closeRegion(){
+  activeRegion = null;
+  cardEl.classList.remove('show');
+  scrimEl.classList.remove('show');
+  frame.querySelectorAll('.region').forEach(el=>el.classList.remove('active'));
+  hintEl.style.opacity = '';
+}
+
+frame.querySelectorAll('.region').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const key = el.dataset.region;
+    if(activeRegion === key){ closeRegion(); return; }
+    openRegion(key);
+  });
+  el.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' || e.key===' '){
+      e.preventDefault();
+      el.click();
+    }
+  });
+});
+icClose.addEventListener('click', (e)=>{ e.stopPropagation(); closeRegion(); });
+scrimEl.addEventListener('click', closeRegion);
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape' && activeRegion) closeRegion();
+});
 
 /* ---------- resize ---------- */
 const ro = new ResizeObserver(()=> resize());

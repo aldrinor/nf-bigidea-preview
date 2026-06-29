@@ -92,6 +92,35 @@
   .loader .dot:nth-child(3){animation-delay:0.3s;}
   @keyframes pulse{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:0.9;transform:scale(1.1);}}
 
+  /* Click-to-activate overlay */
+  .map-overlay{
+    position:absolute;inset:0;z-index:800;
+    background:rgba(237,240,242,0.78);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:opacity 200ms ease;
+    font-family:'Space Mono',monospace;
+    text-align:center;
+  }
+  .map-overlay.hidden{opacity:0;pointer-events:none;}
+  .overlay-inner{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .crosshair{font-size:22px;color:var(--red);line-height:1;font-weight:700;}
+  .overlay-text{font-size:12px;color:var(--ink);letter-spacing:0.04em;}
+
+  /* Esc to exit hint */
+  .esc-hint{
+    position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:1000;
+    font-size:9px;color:var(--muted);letter-spacing:0.02em;
+    background:rgba(237,240,242,0.86);
+    backdrop-filter:blur(2px);
+    -webkit-backdrop-filter:blur(2px);
+    padding:5px 8px;border-radius:6px;
+    border:1px solid rgba(20,24,28,0.08);
+    opacity:0;pointer-events:none;
+    transition:opacity 200ms ease;
+  }
+  .esc-hint.visible{opacity:1;}
+
   /* Leaflet controls — keep them visible but restrained */
   .leaflet-control-zoom a{
     font-family:'Space Mono',monospace !important;
@@ -167,6 +196,15 @@
 <div id="app">
   <div id="map" role="img" aria-label="North America Wildfire Smoke and PM2.5 monitor map"></div>
 
+  <div class="map-overlay" id="map-overlay">
+    <div class="overlay-inner">
+      <div class="crosshair">+</div>
+      <div class="overlay-text" id="overlay-text">Click to explore the map</div>
+    </div>
+  </div>
+
+  <div class="esc-hint" id="esc-hint">Press Esc to exit</div>
+
   <div class="caption">
     <span id="caphead"><b>Near-real-time</b> · NOAA satellite smoke + EPA PM2.5 monitors · updated through the day</span><br>
     <span id="counts"></span><br>
@@ -194,10 +232,13 @@
   const statusEl = document.getElementById("status-text");
   const countsEl = document.getElementById("counts");
   const legendEl = document.getElementById("legend");
+  const mapOverlay = document.getElementById("map-overlay");
+  const overlayText = document.getElementById("overlay-text");
+  const escHint = document.getElementById("esc-hint");
 
   // ---- Map init ----
   const map = L.map('map', {
-    scrollWheelZoom: true,
+    scrollWheelZoom: false,
     zoomControl: true,
     worldCopyJump: false,
     attributionControl: true
@@ -565,6 +606,30 @@
     }, 120);
   }
   window.addEventListener("resize", onResize);
+
+  // ---- Overlay Activation Logic ----
+  function activateMap() {
+    mapOverlay.classList.add('hidden');
+    escHint.classList.add('visible');
+    map.scrollWheelZoom.enable();
+  }
+
+  function deactivateMap() {
+    mapOverlay.classList.remove('hidden');
+    escHint.classList.remove('visible');
+    overlayText.textContent = 'Click to explore the map';
+    map.scrollWheelZoom.disable();
+  }
+
+  mapOverlay.addEventListener('click', activateMap);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') deactivateMap();
+  });
+
+  window.addEventListener('message', e => {
+    if (e.data === 'wf-map-deactivate') deactivateMap();
+  });
 
   // init
   load();
