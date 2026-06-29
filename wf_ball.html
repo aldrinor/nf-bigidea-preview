@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The particle — Wildfire smoke carries a charge</title>
+<title>Wildfire Smoke carries a charge — NanoFlashing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#edf0f2;
-    --ink:#1f2327;
+    --ink:#1a1a1a;
     --muted:#8a9095;
     --accent:#1b7bff;
     --red:#e23b3b;
     --hair:rgba(20,24,28,0.08);
+    --stack:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -22,7 +23,7 @@
   html,body{
     background:var(--bg);
     color:var(--ink);
-    font-family:"Space Grotesk",system-ui,sans-serif;
+    font-family:var(--stack);
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
   }
@@ -38,9 +39,11 @@
     display:grid;
     grid-template-columns:42fr 58fr;
     align-items:center;
+    justify-items:start;
     gap:clamp(32px,5vw,80px);
     padding:clamp(40px,7vw,96px) clamp(24px,6vw,96px);
     background:var(--bg);
+    position:relative;
   }
 
   /* faint paper grain — barely there */
@@ -59,44 +62,28 @@
     z-index:2;
     display:flex;
     flex-direction:column;
+    justify-content:center;
     gap:28px;
     max-width:520px;
   }
 
-  .kicker{
-    font-family:"Space Mono",monospace;
-    font-size:12px;
-    letter-spacing:0.04em;
-    color:var(--muted);
-    font-weight:400;
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-  .kicker::before{
-    content:"";
-    width:28px;height:1px;
-    background:var(--muted);
-    opacity:0.6;
-  }
-
   .headline{
-    font-family:"Instrument Serif",serif;
-    font-weight:400;
-    font-size:clamp(40px,6vw,84px);
-    line-height:1.04;
-    letter-spacing:-0.01em;
-    color:var(--ink);
-    max-width:9.5ch;
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(28px,3.4vw,44px);
+    line-height:1.1;
+    letter-spacing:-0.022em;
+    color:#1a1a1a;
   }
+  .headline .line{ display:block; }
   .headline em{
-    color:var(--accent);
-    font-style:italic;
-    font-weight:400;
+    color:var(--red);
+    font-style:normal;
+    font-weight:700;
   }
 
   .body{
-    font-family:"Space Grotesk",sans-serif;
+    font-family:var(--stack);
     font-size:19px;
     line-height:1.55;
     color:var(--ink);
@@ -104,30 +91,51 @@
     font-weight:400;
   }
   .body sup a{
-    color:var(--accent);
+    color:var(--muted);
     text-decoration:none;
     font-family:"Space Mono",monospace;
     font-size:11px;
     padding:0 1px;
+    border-bottom:1px solid var(--hair);
   }
-  .body sup a:hover{ text-decoration:underline; }
+  .body sup a:hover{ color:var(--red); border-bottom-color:var(--red); }
 
-  .source{
+  .sources{
+    margin-top:8px;
+    padding-top:18px;
+    border-top:1px solid var(--hair);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
     font-family:"Space Mono",monospace;
     font-size:11px;
     color:var(--muted);
-    line-height:1.5;
-    padding-top:4px;
+    line-height:1.55;
+    max-width:440px;
   }
-  .source a{
-    color:var(--accent);
+  .sources .label{
+    letter-spacing:0.06em;
+    
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .sources a{
+    color:var(--muted);
     text-decoration:none;
-    border-bottom:1px solid rgba(27,123,255,0.25);
+    border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
   }
-  .source a:hover{ border-bottom-color:var(--accent); }
+  .sources a:hover{
+    color:var(--ink);
+    border-bottom-color:var(--hair);
+  }
+  .sources .src-num{
+    color:var(--muted);
+    margin-right:6px;
+  }
 
   .scroll-cue{
-    margin-top:24px;
+    margin-top:16px;
     display:flex;
     align-items:center;
     gap:14px;
@@ -164,6 +172,7 @@
     align-items:center;
     justify-content:center;
     min-height:60vh;
+    width:100%;
   }
 
   .video-frame{
@@ -237,10 +246,13 @@
 <body>
   <section class="hero">
     <div class="text">
-      <span class="kicker">The particle</span>
-      <h1 class="headline">Every speck of smoke carries a <em>charge</em></h1>
-      <p class="body">Wildfire smoke is mostly soot. The particles are minute — the freshest are only about 30 to 50 nanometres across, and most stay under 100<sup><a href="https://acp.copernicus.org/articles/10/8065/2010/" target="_blank" rel="noopener">1</a></sup> — small enough to ride deep into the lungs. And almost every one of them carries an electric charge.</p>
-      <p class="source"><a href="https://acp.copernicus.org/articles/10/8065/2010/" target="_blank" rel="noopener">Particle size: Hosseini et al., Atmospheric Chemistry and Physics, 2010.</a></p>
+      <h1 class="headline"><span class="line">Every speck of smoke</span><span class="line">carries a <em>charge</em></span></h1>
+      <p class="body">Wildfire smoke is mostly soot. The particles are minute — the freshest are only about 30 to 50 nanometres across, and most stay under 100<sup><a href="https://acp.copernicus.org/articles/10/8065/2010/" target="_blank" rel="noopener">1</a></sup> — small enough to ride deep into the lungs. And almost every one of them carries an electric charge<sup><a href="https://doi.org/10.1016/j.jclepro.2021.127831" target="_blank" rel="noopener">2</a></sup>.</p>
+      <div class="sources">
+        <span class="label">Sources</span>
+        <div><span class="src-num">1.</span><a href="https://acp.copernicus.org/articles/10/8065/2010/" target="_blank" rel="noopener">Particle size — Hosseini et al., Atmospheric Chemistry and Physics, 2010</a></div>
+        <div><span class="src-num">2.</span><a href="https://doi.org/10.1016/j.jclepro.2021.127831" target="_blank" rel="noopener">Carries an electric charge — Suhonen et al., Journal of Cleaner Production, 2021</a></div>
+      </div>
       <div class="scroll-cue" aria-hidden="true">
         <span class="line"></span>
         <span>Scroll to continue</span>
