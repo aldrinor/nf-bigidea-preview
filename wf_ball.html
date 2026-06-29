@@ -134,54 +134,54 @@
     margin-right:6px;
   }
 
+  /* minimal downward chevron — absolute bottom-center, decoupled from text column */
   .scroll-cue{
-    margin-top:16px;
-    display:flex;
-    align-items:center;
-    gap:14px;
-    font-family:"Space Mono",monospace;
-    font-size:11px;
-    color:var(--muted);
-  }
-  .scroll-cue .line{
-    position:relative;
-    width:64px;
-    height:1px;
-    background:var(--hair);
-    overflow:hidden;
-  }
-  .scroll-cue .line::after{
-    content:"";
     position:absolute;
-    top:0;left:-40%;
-    width:40%;height:100%;
-    background:var(--muted);
-    animation:travel 2.6s ease-in-out infinite;
+    bottom:clamp(20px,4vw,40px);
+    left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+    width:28px;
+    height:28px;
+    color:var(--ink);
+    pointer-events:none;
+    animation:bob 2.4s ease-in-out infinite;
   }
-  @keyframes travel{
-    0%{ left:-40%; }
-    60%{ left:100%; }
-    100%{ left:100%; }
+  .scroll-cue svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  @keyframes bob{
+    0%,100%{ transform:translate(-50%,0); opacity:0.78; }
+    50%{ transform:translate(-50%,6px); opacity:1; }
   }
 
-  /* particle / video column */
+  /* particle / video column — centers the video+scale group as one unit */
   .media{
     position:relative;
     z-index:1;
     display:flex;
     align-items:center;
     justify-content:center;
-    min-height:60vh;
     width:100%;
   }
 
   .video-frame{
     position:relative;
     width:min(560px,100%);
-    aspect-ratio:1/1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
     filter:
       drop-shadow(0 30px 60px rgba(20,24,28,0.08))
       drop-shadow(0 8px 24px rgba(27,123,255,0.06));
+  }
+
+  .video-frame .video-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
   }
 
   video{
@@ -204,13 +204,43 @@
   .reg.bl{ bottom:-2px;left:-2px;border-right:none;border-top:none; }
   .reg.br{ bottom:-2px;right:-2px;border-left:none;border-top:none; }
 
-  .caption{
-    position:absolute;
-    bottom:-28px;
-    right:0;
+  /* scientific size scale — replaces the old caption, part of centered flow */
+  .scale{
+    margin-top:22px;
+    width:min(320px,80%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
     font-family:"Space Mono",monospace;
+    color:var(--muted);
+  }
+  .scale .bar{
+    position:relative;
+    width:100%;
+    height:1px;
+    background:var(--muted);
+  }
+  .scale .bar::before,
+  .scale .bar::after{
+    content:"";
+    position:absolute;
+    top:-4px;
+    width:1px;
+    height:9px;
+    background:var(--muted);
+  }
+  .scale .bar::before{ left:0; }
+  .scale .bar::after{ right:0; }
+  .scale .label{
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--muted);
+  }
+  .scale .compare{
     font-size:10px;
     color:var(--muted);
+    opacity:0.85;
     letter-spacing:0.02em;
   }
 
@@ -218,11 +248,10 @@
     .hero{
       grid-template-columns:1fr;
       gap:24px;
-      padding:48px 24px 64px;
+      padding:48px 24px 96px;
       align-items:start;
     }
     .media{
-      min-height:auto;
       order:1;
     }
     .video-frame{
@@ -234,11 +263,12 @@
       gap:22px;
     }
     .headline{ max-width:none; }
-    .caption{ bottom:-22px; }
+    .scale{ width:min(280px,84%); margin-top:18px; }
+    .scroll-cue{ bottom:20px; }
   }
 
   @media (prefers-reduced-motion: reduce){
-    .scroll-cue .line::after{ animation:none; left:30%; }
+    .scroll-cue{ animation:none; opacity:0.7; }
     video{ }
   }
 </style>
@@ -253,21 +283,29 @@
         <div><span class="src-num">1.</span><a href="https://acp.copernicus.org/articles/10/8065/2010/" target="_blank" rel="noopener">Particle size — Hosseini et al., Atmospheric Chemistry and Physics, 2010</a></div>
         <div><span class="src-num">2.</span><a href="https://doi.org/10.1016/j.jclepro.2021.127831" target="_blank" rel="noopener">Carries an electric charge — Suhonen et al., Journal of Cleaner Production, 2021</a></div>
       </div>
-      <div class="scroll-cue" aria-hidden="true">
-        <span class="line"></span>
-        <span>Scroll to continue</span>
-      </div>
     </div>
 
     <div class="media">
       <div class="video-frame">
-        <span class="reg tl"></span>
-        <span class="reg tr"></span>
-        <span class="reg bl"></span>
-        <span class="reg br"></span>
-        <video poster="assets/videos/posters/Wildfire_Smoke_Particle.jpg" src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" autoplay loop muted playsinline preload="auto"></video>
-        <span class="caption">fig. 01 — charged soot, ~30–50 nm</span>
+        <div class="video-wrap">
+          <span class="reg tl"></span>
+          <span class="reg tr"></span>
+          <span class="reg bl"></span>
+          <span class="reg br"></span>
+          <video poster="assets/videos/posters/Wildfire_Smoke_Particle.jpg" src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" autoplay loop muted playsinline preload="auto"></video>
+        </div>
+        <div class="scale" aria-hidden="true">
+          <div class="bar"></div>
+          <div class="label">≈ 30–50 nm</div>
+          <div class="compare">a human hair ≈ 70,000 nm</div>
+        </div>
       </div>
+    </div>
+
+    <div class="scroll-cue" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </div>
   </section>
 </body>
