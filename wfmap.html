@@ -62,9 +62,9 @@ body {
   margin-bottom: 6px;
 }
 .chrome-top-left h2 {
-  font-family: 'Instrument Serif', serif;
-  font-weight: 400;
-  font-size: clamp(26px, 3.4vw, 44px);
+  font-family: -apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: clamp(24px, 3vw, 40px);
   line-height: 1.08;
   color: var(--ink);
   margin-bottom: 10px;
@@ -368,16 +368,16 @@ body {
     <div>
       <div class="kicker">Where it goes</div>
       <h2>Three years of <span class="accent">Wildfire</span> Smoke</h2>
-      <p class="caption">Smoke from western and Canadian wildfires drifts across the continent every year. Press play to watch it move, day by day, from 2023 to 2025 — or drag the timeline. The dots are live EPA air-quality monitors.</p>
+      <p class="caption">Smoke from western and Canadian wildfires drifts across the continent every year. Press play to watch it move, day by day, from 2024 to today — updated daily. Or drag the timeline. The dots are live EPA air-quality monitors.</p>
     </div>
   </div>
 
   <div class="chrome chrome-legend">
-    <div class="legend-title">Smoke density</div>
+    <div class="legend-title">Smoke Density</div>
     <div class="legend-gradient"></div>
     <div class="legend-labels">
-      <span>lighter</span>
-      <span>heavier</span>
+      <span>Lighter</span>
+      <span>Heavier</span>
     </div>
     <div class="legend-pm">
       <div class="legend-pm-item">
@@ -445,10 +445,12 @@ let smokeOverlay = null;
 const map = L.map('map', {
   zoomControl: false,
   scrollWheelZoom: true,
-  center: [42, -96],
+  center: [46, -97],
   zoom: 4,
   minZoom: 3,
-  maxZoom: 12
+  maxZoom: 12,
+  maxBounds: [[12, -150], [74, -48]],
+  maxBoundsViscosity: 0.85
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
 
