@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What the smoke does inside you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1418;
+    --ink:#eef2f4;
+    --muted:#9aa7ad;
+    --line:rgba(255,255,255,.12);
+    --cyan:#34e1ff;
+    --red:#e23b3b;
+    --serif:'Instrument Serif', Georgia, serif;
+    --sans:'Space Grotesk', system-ui, sans-serif;
+    --mono:'Space Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;overflow-x:hidden}
+
+  .section{
+    position:relative;
+    width:100%;
+    min-height:100vh;
+    padding:clamp(28px,4vw,56px) clamp(20px,5vw,80px);
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:clamp(20px,4vw,64px);
+    align-items:center;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 50%, rgba(52,225,255,.04), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(226,59,59,.03), transparent 60%),
+      var(--bg);
+  }
+
+  /* faint grid texture */
+  .section::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:80px 80px;
+    opacity:.25;
+    mask-image:radial-gradient(ellipse 70% 70% at 50% 50%, #000 30%, transparent 80%);
+    pointer-events:none;
+  }
+
+  /* ---------- TEXT ZONE ---------- */
+  .text-zone{
+    position:relative;
+    z-index:3;
+    max-width:560px;
+    padding-right:clamp(0px,2vw,24px);
+  }
+  .kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    color:var(--cyan);
+    margin-bottom:22px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+  }
+  .kicker::before{
+    content:"";
+    width:24px;height:1px;background:var(--cyan);display:inline-block;
+  }
+  .headline{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:clamp(34px,5vw,68px);
+    line-height:1.02;
+    letter-spacing:-0.01em;
+    margin-bottom:24px;
+    color:var(--ink);
+  }
+  .headline em{
+    font-style:italic;
+    color:var(--cyan);
+  }
+  .intro{
+    font-family:var(--sans);
+    font-size:clamp(15px,1.4vw,18px);
+    line-height:1.55;
+    color:var(--muted);
+    max-width:440px;
+    margin-bottom:36px;
+  }
+  .legend{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    border-top:1px solid var(--line);
+    padding-top:24px;
+    max-width:440px;
+  }
+  .legend-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.02em;
+  }
+  .legend-dot{
+    width:8px;height:8px;border-radius:50%;
+    flex-shrink:0;
+  }
+  .legend-dot.cyan{background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+  .legend-dot.red{background:var(--red);box-shadow:0 0 8px var(--red)}
+  .legend-dot.smoke{background:#5a6a72;box-shadow:0 0 6px #5a6a72}
+  .legend-hint{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--cyan);
+    margin-top:8px;
+    opacity:.85;
+    display:flex;align-items:center;gap:8px;
+  }
+  .legend-hint::before{
+    content:"→";
+    animation:hint 2.4s ease-in-out infinite;
+  }
+  @keyframes hint{
+    0%,100%{transform:translateX(0);opacity:.4}
+    50%{transform:translateX(4px);opacity:1}
+  }
+
+  /* ---------- BODY ZONE ---------- */
+  .body-zone{
+    position:relative;
+    z-index:2;
+    width:100%;
+    height:100%;
+    min-height:78vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .body-stage{
+    position:relative;
+    width:100%;
+    max-width:640px;
+    aspect-ratio:1 / 1.35;
+    margin:0 auto;
+  }
+  .body-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+    pointer-events:none;
+  }
+  .body-img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    mix-blend-mode:screen;
+    z-index:2;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+    filter:saturate(1.05) contrast(1.02);
+  }
+  /* chest glow */
+  .chest-glow{
+    position:absolute;
+    left:50%;top:36%;
+    transform:translate(-50%,-50%);
+    width:34%;
+    height:18%;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(52,225,255,.22), rgba(52,225,255,0) 70%);
+    z-index:3;
+    pointer-events:none;
+    animation:breathe 5s ease-in-out infinite;
+    mix-blend-mode:screen;
+  }
+  @keyframes breathe{
+    0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(1)}
+    50%{opacity:.85;transform:translate(-50%,-50%) scale(1.08)}
+  }
+
+  /* ---------- HOTSPOTS ---------- */
+  .hotspot{
+    position:absolute;
+    width:28px;height:28px;
+    transform:translate(-50%,-50%);
+    z-index:5;
+    background:transparent;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    display:block;
+  }
+  .hotspot:focus-visible{
+    outline:none;
+  }
+  .hotspot:focus-visible .ring{
+    box-shadow:0 0 0 3px rgba(52,225,255,.4), 0 0 24px rgba(52,225,255,.6);
+  }
+  .hotspot .ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1.5px solid var(--cyan);
+    background:rgba(52,225,255,.08);
+    transition:transform .25s ease, background .25s ease;
+  }
+  .hotspot .pulse{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1.5px solid var(--cyan);
+    animation:pulse 2.6s ease-out infinite;
+    opacity:0;
+  }
+  .hotspot .dot{
+    position:absolute;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    width:5px;height:5px;
+    border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 8px var(--cyan);
+  }
+  @keyframes pulse{
+    0%{transform:scale(1);opacity:.7}
+    100%{transform:scale(2.6);opacity:0}
+  }
+  .hotspot:hover .ring{
+    transform:scale(1.15);
+    background:rgba(52,225,255,.22);
+  }
+  .hotspot.active .ring{
+    background:rgba(52,225,255,.35);
+    border-color:var(--cyan);
+    box-shadow:0 0 0 2px rgba(52,225,255,.25), 0 0 20px rgba(52,225,255,.5);
+  }
+  .hotspot-label{
+    position:absolute;
+    left:50%;
+    top:calc(100% + 8px);
+    transform:translateX(-50%);
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--cyan);
+    white-space:nowrap;
+    opacity:0;
+    transition:opacity .2s ease;
+    pointer-events:none;
+    letter-spacing:.04em;
+  }
+  .hotspot:hover .hotspot-label,
+  .hotspot.active .hotspot-label{
+    opacity:1;
+  }
+
+  /* ---------- CARD ---------- */
+  .card{
+    position:fixed;
+    z-index:50;
+    width:min(420px, 92vw);
+    background:rgba(14,20,24,.92);
+    border:1px solid var(--line);
+    border-left:2px solid var(--cyan);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    padding:24px 26px 22px;
+    border-radius:2px;
+    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(52,225,255,.08);
+    opacity:0;
+    transform:translateY(12px) scale(.98);
+    transition:opacity .35s ease, transform .35s cubic-bezier(.2,.7,.2,1);
+    pointer-events:none;
+  }
+  .card.open{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+  }
+  .card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .card-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--cyan);
+  }
+  .card-close{
+    background:none;border:none;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:14px;
+    cursor:pointer;
+    line-height:1;
+    padding:4px;
+    transition:color .2s;
+  }
+  .card-close:hover{color:var(--ink)}
+  .card-body{
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    color:var(--ink);
+    margin-bottom:18px;
+  }
+  .card-sources{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+  .card-source{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--cyan);
+    text-decoration:none;
+    letter-spacing:.02em;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:opacity .2s;
+  }
+  .card-source::before{
+    content:"↗";
+    font-size:11px;
+  }
+  .card-source:hover{opacity:.7;text-decoration:underline}
+
+  /* backdrop for mobile sheet */
+  .card-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:49;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s;
+  }
+  .card-backdrop.open{opacity:1;pointer-events:auto}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 980px){
+    .section{
+      grid-template-columns:1fr;
+      grid-template-rows:auto auto;
+      padding:clamp(24px,5vw,40px) 20px;
+      gap:32px;
+    }
+    .text-zone{
+      order:2;
+      max-width:100%;
+    }
+    .body-zone{
+      order:1;
+      min-height:62vh;
+    }
+    .body-stage{
+      max-width:min(440px, 92vw);
+    }
+    .headline{font-size:clamp(30px,7vw,46px)}
+    /* card becomes bottom sheet */
+    .card{
+      left:0!important;
+      right:0!important;
+      top:auto!important;
+      bottom:0!important;
+      width:100%!important;
+      max-width:100%;
+      border-left:none;
+      border-top:2px solid var(--cyan);
+      border-radius:14px 14px 0 0;
+      transform:translateY(100%);
+      padding:24px 22px calc(24px + env(safe-area-inset-bottom));
+    }
+    .card.open{
+      transform:translateY(0);
+    }
+  }
+  @media (max-width: 520px){
+    .hotspot{width:32px;height:32px}
+    .legend{font-size:10px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .chest-glow,.hotspot .pulse,.legend-hint::before{animation:none}
+    .card{transition:opacity .2s}
+  }
+</style>
+</head>
+<body>
+
+<section class="section" id="section">
+
+  <!-- TEXT ZONE -->
+  <div class="text-zone">
+    <div class="kicker">In the body</div>
+    <h1 class="headline">What the smoke does <em>inside you</em></h1>
+    <p class="intro">The smallest particles don't stop at the lungs. They cross into the blood and reach the brain, the heart, the kidneys, even an unborn child. Tap a part of the body to see what researchers have measured.</p>
+
+    <div class="legend">
+      <div class="legend-row"><span class="legend-dot smoke"></span> Fine smoke particulate, drifting on a ~5s breath cycle</div>
+      <div class="legend-row"><span class="legend-dot cyan"></span> Tap a hotspot to read the documented impact</div>
+      <div class="legend-row"><span class="legend-dot red"></span> Trace metals &amp; toxins carried on the smallest particles</div>
+      <div class="legend-hint">Tap a part of the body</div>
+    </div>
+  </div>
+
+  <!-- BODY ZONE -->
+  <div class="body-zone">
+    <div class="body-stage" id="bodyStage">
+      <canvas class="body-canvas" id="smokeCanvas"></canvas>
+      <img class="body-img" src="assets/body/body_cool.png" alt="Anatomical figure showing internal organs" draggable="false">
+      <div class="chest-glow" aria-hidden="true"></div>
+
+      <!-- hotspots -->
+      <button class="hotspot" data-part="brain" style="left:50%;top:7%" aria-label="Brain impact">
+        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
+        <span class="hotspot-label">Brain</span>
+      </button>
+      <button class="hotspot" data-part="lungs" style="left:50%;top:34%" aria-label="Lungs impact">
+        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
+        <span class="hotspot-label">Lungs</span>
+      </button>
+      <button class="hotspot" data-part="heart" style="left:46%;top:36%" aria-label="Heart impact">
+        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
+        <span class="hotspot-label">Heart</span>
+      </button>
+      <button class="hotspot" data-part="kidneys" style="left:50%;top:50%" aria-label="Kidneys impact">
+        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
+        <span class="hotspot-label">Kidneys</span>
+      </button>
+      <button class="hotspot" data-part="bloodstream" style="left:62%;top:44%" aria-label="Bloodstream impact">
+        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
+        <span class="hotspot-label">Bloodstream</span>
+      </button>
+      <button class="hotspot" data-part="womb" style="left:50%;top:62%" aria-label="Pregnancy impact">
+        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
+        <span class="hotspot-label">Pregnancy</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CARD -->
+  <div class="card-backdrop" id="cardBackdrop"></div>
+  <aside class="card" id="card" role="dialog" aria-live="polite" aria-label="Body part impact">
+    <div class="card-head">
+      <span class="card-label" id="cardLabel">—</span>
+      <button class="card-close" id="cardClose" aria-label="Close">✕</button>
+    </div>
+    <p class="card-body" id="cardBody">—</p>
+    <div class="card-sources" id="cardSources"></div>
+  </aside>
+
+</section>
+
+<script>
+(function(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- DATA ---------- */
+  const DATA = {
+    brain:{
+      label:'Brain',
+      body:'Children scored lower on tests after a school year of wildfire smoke, and emergency visits for depression rise on smoky days. The finest particles can even reach the brain.',
+      links:[
+        {label:"Stanford, Nature Sustainability 2022", url:"https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf"},
+        {label:"JAMA Network Open 2025", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11971671/"}
+      ]
+    },
+    lungs:{
+      label:'Lungs',
+      body:'In children, wildfire smoke drove up to about ten times the rise in respiratory visits seen from ordinary PM2.5 — worst in the youngest.',
+      links:[
+        {label:"UC San Diego, Pediatrics 2021", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC9298841/"}
+      ]
+    },
+    heart:{
+      label:'Heart',
+      body:'The EPA finds a causal link between fine-particle pollution and heart attack and stroke.',
+      links:[
+        {label:"US EPA, Integrated Science Assessment 2019", url:"https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"}
+      ]
+    },
+    bloodstream:{
+      label:'Bloodstream',
+      body:'Fine particles cross from the lungs into the blood. After the 2025 Los Angeles fires, researchers found hexavalent chromium riding on the smallest particles miles downwind.',
+      links:[
+        {label:"US EPA ISA 2019", url:"https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"},
+        {label:"UC Davis, 2026", url:"https://www.ucdavis.edu/climate/news/chromium-6-nanosilver-detected-la-fire-cleanup-zones"}
+      ]
+    },
+    kidneys:{
+      label:'Kidneys',
+      body:'On smoky days, dialysis patients faced more than double the risk of dying that same day.',
+      links:[
+        {label:"Kidney International Reports, 2025", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12231018/"}
+      ]
+    },
+    womb:{
+      label:'Pregnancy',
+      body:'Higher wildfire-smoke exposure during pregnancy raised the odds of preterm birth.',
+      links:[
+        {label:"UC Berkeley & UCSF, Environment International 2024", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/"}
+      ]
+    }
+  };
+
+  /* ---------- CARD ---------- */
+  const card = document.getElementById('card');
+  const cardBackdrop = document.getElementById('cardBackdrop');
+  const cardLabel = document.getElementById('cardLabel');
+  const cardBody = document.getElementById('cardBody');
+  const cardSources = document.getElementById('cardSources');
+  const cardClose = document.getElementById('cardClose');
+  const hotspots = Array.from(document.querySelectorAll('.hotspot'));
+  let activePart = null;
+
+  function openCard(part, triggerEl){
+    const d = DATA[part];
+    if(!d) return;
+    activePart = part;
+    hotspots.forEach(h => h.classList.toggle('active', h.dataset.part===part));
+    cardLabel.textContent = d.label;
+    cardBody.textContent = d.body;
+    // clear previous links, then render this card's links
+    cardSources.innerHTML = '';
+    (d.links || []).forEach(function(s){
+      const a = document.createElement('a');
+      a.className = 'card-source';
+      a.href = s.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = s.label;
+      cardSources.appendChild(a);
+    });
+    positionCard(triggerEl);
+    card.classList.add('open');
+    cardBackdrop.classList.add('open');
+  }
+  function closeCard(){
+    activePart = null;
+    hotspots.forEach(h => h.classList.remove('active'));
+    card.classList.remove('open');
+    cardBackdrop.classList.remove('open');
+  }
+  function positionCard(trigger){
+    if(window.innerWidth <= 980) return; // bottom sheet on mobile
+    const rect = trigger.getBoundingClientRect();
+    const cardW = Math.min(420, window.innerWidth*0.4);
+    let left = rect.right + 18;
+    let top = rect.top - 20;
+    if(left + cardW > window.innerWidth - 20){
+      left = rect.left - cardW - 18;
+    }
+    if(left < 20) left = 20;
+    if(top < 20) top = 20;
+    if(top + 320 > window.innerHeight) top = window.innerHeight - 330;
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+    card.style.right = 'auto';
+    card.style.bottom = 'auto';
+  }
+
+  hotspots.forEach(h=>{
+    h.addEventListener('click', ()=>{
+      const part = h.dataset.part;
+      if(activePart === part){ closeCard(); return; }
+      openCard(part, h);
+    });
+  });
+  cardClose.addEventListener('click', closeCard);
+  cardBackdrop.addEventListener('click', closeCard);
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && activePart) closeCard();
+  });
+  window.addEventListener('resize', ()=>{
+    if(activePart){
+      const h = hotspots.find(x=>x.dataset.part===activePart);
+      if(h) positionCard(h);
+    }
+  });
+
+  /* ---------- SMOKE CANVAS ---------- */
+  const canvas = document.getElementById('smokeCanvas');
+  const ctx = canvas.getContext('2d');
+  const stage = document.getElementById('bodyStage');
+  let W=0, H=0, dpr=Math.min(window.devicePixelRatio||1, 2);
+
+  // breath cycle: 5s, inhale ~ 2s, exhale ~3s
+  const BREATH_MS = 5000;
+
+  function resize(){
+    const r = stage.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = W*dpr;
+    canvas.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // inhale target: nose/mouth area — roughly top-center of figure
+  function inhaleTarget(){
+    return { x: W*0.5, y: H*0.13 };
+  }
+
+  // particle pool
+  const particles = [];
+  const MAX_P = reduceMotion ? 40 : 120;
+
+  function spawnParticle(){
+    if(particles.length >= MAX_P) return;
+    // spawn from edges
+    const edge = Math.random();
+    let x,y;
+    const margin = 0.06;
+    if(edge < 0.5){
+      // left or right edge
+      if(Math.random()<0.5){
+        x = -W*margin + Math.random()*W*0.1;
+      } else {
+        x = W*(1+margin) - Math.random()*W*0.1;
+      }
+      y = Math.random()*H;
+    } else {
+      // top or bottom
+      x = Math.random()*W;
+      if(Math.random()<0.5){
+        y = -H*margin + Math.random()*H*0.1;
+      } else {
+        y = H*(1+margin) - Math.random()*H*0.1;
+      }
+    }
+    // bias toward upper area where the face is
+    const isRed = Math.random() < 0.06;
+    particles.push({
+      x, y,
+      vx:0, vy:0,
+      r: 0.6 + Math.random()*2.2,
+      life: 0,
+      maxLife: 6000 + Math.random()*4000,
+      red: isRed,
+      alpha: 0.15 + Math.random()*0.35,
+      drift: (Math.random()-0.5)*0.3
+    });
+  }
+
+  // breath phase: returns -1..1, where positive = inhale (drawing in)
+  function breathPhase(t){
+    // 5s cycle. Inhale first ~2s (sin up), exhale next ~3s
+    const cycle = (t % BREATH_MS) / BREATH_MS; // 0..1
+    // smooth inhale/exhale
+    // inhale strength: 0..1..0 over first 0.4 of cycle
+    if(cycle < 0.4){
+      const k = cycle/0.4;
+      return Math.sin(k*Math.PI); // 0->1->0
+    } else {
+      // gentle exhale, slight outward drift
+      const k = (cycle-0.4)/0.6;
+      return -0.15 * Math.sin(k*Math.PI);
+    }
+  }
+
+  let lastT = performance.now();
+  let startT = performance.now();
+
+  function frame(now){
+    const dt = Math.min(50, now - lastT);
+    lastT = now;
+    const t = now - startT;
+
+    ctx.clearRect(0,0,W,H);
+
+    // spawn
+    const spawnRate = reduceMotion ? 0.15 : 0.6;
+    if(Math.random() < spawnRate) spawnParticle();
+    if(Math.random() < spawnRate*0.5) spawnParticle();
+
+    const target = inhaleTarget();
+    const phase = breathPhase(t);
+    const inhaleStrength = Math.max(0, phase); // 0..1
+    const exhaleStrength = Math.max(0, -phase);
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.life += dt;
+
+      // direction toward target
+      const dx = target.x - p.x;
+      const dy = target.y - p.y;
+      const dist = Math.hypot(dx,dy) + 0.001;
+      const nx = dx/dist, ny = dy/dist;
+
+      // inhale pull — stronger when close
+      const pull = inhaleStrength * (0.4 + 0.6*(1 - Math.min(1, dist/(W*0.6))));
+      p.vx += nx * pull * 0.12;
+      p.vy += ny * pull * 0.12;
+
+      // exhale push (gentle, outward from target)
+      if(exhaleStrength > 0 && dist < W*0.4){
+        p.vx -= nx * exhaleStrength * 0.05;
+        p.vy -= ny * exhaleStrength * 0.05;
+      }
+
+      // ambient drift
+      p.vx += p.drift * 0.01;
+      p.vy += 0.005; // slight downward
+
+      // damping
+      p.vx *= 0.96;
+      p.vy *= 0.96;
+
+      p.x += p.vx * (dt/16);
+      p.y += p.vy * (dt/16);
+
+      // fade in/out
+      const lifeRatio = p.life / p.maxLife;
+      let fade = p.alpha;
+      if(lifeRatio < 0.1) fade *= lifeRatio/0.1;
+      if(lifeRatio > 0.7) fade *= (1 - (lifeRatio-0.7)/0.3);
+
+      // absorbed near target
+      const absorbed = dist < 14 && inhaleStrength > 0.3;
+
+      if(p.life > p.maxLife || absorbed || p.x < -W*0.2 || p.x > W*1.2 || p.y < -H*0.2 || p.y > H*1.2){
+        particles.splice(i,1);
+        continue;
+      }
+
+      // draw
+      const r = p.r * (1 + inhaleStrength*0.3);
+      if(p.red){
+        ctx.fillStyle = `rgba(226,59,59,${fade*0.9})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r*0.8, 0, Math.PI*2);
+        ctx.fill();
+        // glow
+        ctx.fillStyle = `rgba(226,59,59,${fade*0.15})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r*2.5, 0, Math.PI*2);
+        ctx.fill();
+      } else {
+        // cool grey smoke
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r*3);
+        g.addColorStop(0, `rgba(180,200,210,${fade*0.5})`);
+        g.addColorStop(0.5, `rgba(120,140,150,${fade*0.2})`);
+        g.addColorStop(1, `rgba(80,100,110,0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r*3, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    // subtle inhale glow at nose/mouth during inhale
+    if(inhaleStrength > 0.2){
+      const a = (inhaleStrength-0.2)/0.8 * 0.25;
+      const g = ctx.createRadialGradient(target.x, target.y, 0, target.x, target.y, 30);
+      g.addColorStop(0, `rgba(52,225,255,${a})`);
+      g.addColorStop(1, `rgba(52,225,255,0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(target.x, target.y, 30, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  if(reduceMotion){
+    // draw a single static frame
+    requestAnimationFrame((t)=>{ lastT=t; startT=t; frame(t); });
+  } else {
+    requestAnimationFrame((t)=>{ lastT=t; startT=t; frame(t); });
+  }
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The problem — A charge that fades under smoke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1418;
+  --ink:#eef2f4;
+  --muted:#9aa7ad;
+  --line:rgba(255,255,255,.12);
+  --cyan:#34e1ff;
+  --red:#e23b3b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Space Grotesk',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+section{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns: 1.15fr 1fr;
+  position:relative;
+  overflow:hidden;
+}
+.stage{
+  position:relative;
+  border-right:1px solid var(--line);
+  min-height:100vh;
+  padding: 40px;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(52,225,255,0.04), transparent 60%),
+    var(--bg);
+}
+canvas#filter{
+  position:absolute;
+  inset: 40px;
+  display:block;
+  width: calc(100% - 80px);
+  height: calc(100% - 80px);
+}
+.copy{
+  padding: 80px 64px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap: 28px;
+  max-width: 640px;
+}
+.kicker{
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:.04em;
+  display:flex;
+  align-items:center;
+}
+.kicker::before{
+  content:"";
+  display:inline-block;
+  width:24px;
+  height:1px;
+  background:var(--cyan);
+  margin-right:12px;
+}
+h1{
+  font-family:'Instrument Serif',serif;
+  font-weight:400;
+  font-size:clamp(34px,5vw,68px);
+  line-height:1.02;
+  letter-spacing:-0.01em;
+  color:var(--ink);
+}
+.body{
+  font-size:18px;
+  line-height:1.55;
+  color:var(--ink);
+  max-width:460px;
+  font-weight:300;
+}
+.source{
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  color:var(--cyan);
+  text-decoration:none;
+  letter-spacing:.02em;
+  width:fit-content;
+  border-bottom:1px solid rgba(52,225,255,.3);
+  padding-bottom:2px;
+  transition:border-color .2s, color .2s;
+  margin-top:4px;
+}
+.source:hover{border-color:var(--cyan)}
+.handoff{
+  border-left:2px solid var(--cyan);
+  padding: 16px 20px;
+  font-family:'Instrument Serif',serif;
+  font-style:italic;
+  font-size: 21px;
+  line-height:1.4;
+  color:var(--ink);
+  background:rgba(52,225,255,.04);
+  max-width:520px;
+  margin-top:8px;
+}
+.readout{
+  position:absolute;
+  top: 56px;
+  left: 56px;
+  font-family:'Space Mono',monospace;
+  pointer-events:none;
+  z-index:2;
+}
+.readout .label{
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:.1em;
+  margin-bottom:8px;
+}
+.readout .big{
+  font-size: 64px;
+  font-weight:700;
+  color:var(--cyan);
+  line-height:1;
+  transition:color .5s;
+  font-variant-numeric: tabular-nums;
+  display:inline-block;
+}
+.readout .big.dead{color:var(--red)}
+.readout .unit{font-size:16px;color:var(--muted);margin-left:6px;font-weight:400}
+.gauge{
+  position:absolute;
+  bottom: 56px;
+  left: 56px;
+  font-family:'Space Mono',monospace;
+  z-index:2;
+}
+.gauge .label{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px}
+.gauge .val{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:700}
+.gauge .val .pct{color:var(--muted);font-weight:400;margin-left:2px}
+.gauge .bar{
+  width:160px;height:2px;background:rgba(255,255,255,.08);margin-top:10px;position:relative;overflow:hidden;
+}
+.gauge .bar::after{
+  content:"";position:absolute;left:0;top:0;height:100%;
+  width:var(--w,0%);background:var(--ink);transition:width .4s ease-out;
+}
+.replay{
+  position:absolute;
+  bottom: 56px;
+  right: 56px;
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  letter-spacing:.08em;
+  color:var(--muted);
+  background:rgba(14,20,24,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border:1px solid var(--line);
+  padding:11px 18px;
+  cursor:pointer;
+  transition:all .25s;
+  z-index:2;
+  display:flex;
+  align-items:center;
+}
+.replay:hover{color:var(--ink);border-color:rgba(255,255,255,.3)}
+.replay .dot{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--cyan);margin-right:10px;
+  box-shadow:0 0 8px var(--cyan);
+}
+.legend{
+  position:absolute;
+  top:56px;
+  right:56px;
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+  letter-spacing:.06em;
+  text-align:right;
+  z-index:2;
+  line-height:1.7;
+}
+.legend .row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.legend .sw{width:10px;height:10px;border-radius:2px}
+.legend .sw.cyan{background:var(--cyan);box-shadow:0 0 6px rgba(52,225,255,.6)}
+.legend .sw.grey{background:#8a949b}
+.legend .sw.red{background:var(--red)}
+@media (max-width: 900px){
+  section{grid-template-columns:1fr}
+  .stage{min-height:62vh;border-right:none;border-bottom:1px solid var(--line);padding:20px}
+  canvas#filter{inset:20px;width:calc(100% - 40px);height:calc(100% - 40px)}
+  .copy{padding:48px 24px;gap:22px}
+  .readout{top:24px;left:24px}
+  .readout .big{font-size:42px}
+  .readout .unit{font-size:13px}
+  .gauge{bottom:24px;left:24px}
+  .gauge .bar{width:120px}
+  .replay{bottom:24px;right:24px;padding:9px 14px}
+  .legend{top:24px;right:24px}
+  .handoff{font-size:19px}
+}
+</style>
+</head>
+<body>
+<section>
+  <div class="stage">
+    <canvas id="filter"></canvas>
+
+    <div class="readout">
+      <div class="label">Cleaning power</div>
+      <div><span class="big" id="power">100</span><span class="unit">%</span></div>
+    </div>
+
+    <div class="legend">
+      <div class="row"><span>electrostatic charge</span><span class="sw cyan"></span></div>
+      <div class="row"><span>wildfire smoke</span><span class="sw grey"></span></div>
+      <div class="row"><span>charge lost</span><span class="sw red"></span></div>
+    </div>
+
+    <div class="gauge">
+      <div class="label">Airflow resistance</div>
+      <div class="val">+<span id="airflow">0</span><span class="pct">%</span></div>
+      <div class="bar" id="airbar"></div>
+    </div>
+
+    <button class="replay" id="replay"><span class="dot"></span>Replay</button>
+  </div>
+
+  <div class="copy">
+    <div class="kicker">The problem</div>
+    <h1>A charge that fades under smoke</h1>
+    <p class="body">Most high-grade air filters work by holding a static electric charge that pulls particles in. Wildfire smoke quietly kills it. In an EPA study, a charged filter lost about 95% of its cleaning power within a few hours of smoke — while the airflow barely changed, so nothing tells you it has stopped working.</p>
+    <a class="source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">Holder et al., EPA, Indoor Air 2022 ↗</a>
+    <div class="handoff">The question isn't whether a filter starts with a charge — it's whether the charge survives the smoke.</div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const canvas = document.getElementById('filter');
+  const ctx = canvas.getContext('2d');
+  const powerEl = document.getElementById('power');
+  const airflowEl = document.getElementById('airflow');
+  const airbar = document.getElementById('airbar');
+  const replayBtn = document.getElementById('replay');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let W=0, H=0, DPR=1;
+  let fibers=[];
+  let particles=[];
+  let deposits=[];
+  let state = 'charging';
+  let stateT = 0;
+  let lastT = 0;
+  let airflow = 0;
+  let timeAcc = 0;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    const rect = canvas.getBoundingClientRect();
+    W = Math.max(200, rect.width);
+    H = Math.max(200, rect.height);
+    canvas.width = W*DPR;
+    canvas.height = H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    setupFibers();
+  }
+
+  function setupFibers(){
+    const n = 5;
+    const margin = H*0.14;
+    const span = H - margin*2;
+    const newFibers = [];
+    for(let i=0;i<n;i++){
+      const y = margin + span*(i/(n-1));
+      const f = (fibers[i] || {});
+      newFibers.push({
+        y: y,
+        x: W*0.18,
+        w: W*0.64,
+        r: Math.max(7, Math.min(13, H*0.016)),
+        charge: f.charge || 0,
+        deposits: f.deposits || 0,
+        marks: [],
+      });
+    }
+    fibers = newFibers;
+    fibers.forEach((f)=>{
+      f.marks = [];
+      const count = 8;
+      for(let k=0;k<count;k++){
+        f.marks.push({
+          ox: (k+0.5)/count,
+          side: k%2===0 ? -1 : 1,
+          sym: k%3===0 ? '+' : '−',
+          phase: Math.random()*Math.PI*2,
+        });
+      }
+    });
+  }
+
+  function reset(){
+    state = reduced ? 'dead' : 'charging';
+    stateT = 0;
+    particles = [];
+    deposits = [];
+    airflow = 0;
+    fibers.forEach(f=>{f.charge = reduced ? 0.04 : 0; f.deposits=0;});
+    powerEl.classList.remove('dead');
+    if(reduced) seedEndState();
+  }
+
+  function seedEndState(){
+    for(let i=0;i<70;i++){
+      const fi = Math.floor(Math.random()*fibers.length);
+      const f = fibers[fi];
+      deposits.push({
+        x: f.x + Math.random()*f.w,
+        y: f.y + (Math.random()-0.5)*f.r*1.6,
+        fiberIdx: fi,
+        age: 0,
+        r: 1.5 + Math.random()*1.6,
+      });
+    }
+    airflow = 7;
+  }
+
+  function spawnParticle(){
+    const y = H*0.08 + Math.random()*H*0.84;
+    particles.push({
+      x: -8 - Math.random()*20,
+      y: y,
+      vx: 0.7 + Math.random()*0.6,
+      vy: (Math.random()-0.5)*0.18,
+      r: 1.5 + Math.random()*1.9,
+      caught: false,
+      caughtFiber: -1,
+      caughtT: 0,
+      alpha: 0.5 + Math.random()*0.28,
+    });
+  }
+
+  function update(dt){
+    stateT += dt;
+    timeAcc += dt;
+
+    if(state==='charging'){
+      const p = Math.min(1, stateT/1.3);
+      const e = p<1 ? 1-Math.pow(1-p,3) : 1; // easeOutCubic
+      fibers.forEach(f=> f.charge = e);
+      if(stateT > 1.5){ state='loading'; stateT=0; }
+      return;
+    }
+
+    if(state==='loading'){
+      // spawn smoke
+      const rate = 0.5; // particles per ~16ms
+      let toSpawn = rate * dt * 60;
+      while(toSpawn > 0){
+        if(Math.random() < toSpawn) spawnParticle();
+        toSpawn -= 1;
+      }
+
+      // update particles
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        if(p.caught){
+          p.caughtT += dt;
+          if(p.caughtT > 0.35){
+            const f = fibers[p.caughtFiber];
+            deposits.push({x:p.x, y:p.y, fiberIdx:p.caughtFiber, age:0, r:p.r});
+            f.deposits++;
+            f.charge = Math.max(0, f.charge - 0.014);
+            particles.splice(i,1);
+          }
+          continue;
+        }
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        // subtle vertical drift toward center
+        p.vy += (H/2 - p.y) * 0.000002 * dt * 60;
+
+        for(let fi=0; fi<fibers.length; fi++){
+          const f = fibers[fi];
+          if(p.x > f.x && p.x < f.x + f.w){
+            const dy = Math.abs(p.y - f.y);
+            if(dy < f.r + p.r + 0.5){
+              const captureProb = f.charge * 0.9;
+              if(Math.random() < captureProb){
+                p.caught = true;
+                p.caughtFiber = fi;
+                p.caughtT = 0;
+                p.vx = 0; p.vy = 0;
+                p.y = f.y + (p.y < f.y ? -1 : 1) * (f.r * 0.5);
+                break;
+              }
+            }
+          }
+        }
+        if(p.x > W + 12) particles.splice(i,1);
+      }
+
+      // airflow resistance grows slowly
+      const totalDep = deposits.length;
+      airflow = Math.min(7, totalDep * 0.045);
+
+      // end condition
+      const avg = fibers.reduce((s,f)=>s+f.charge,0)/fibers.length;
+      if(avg < 0.05 && stateT > 7){
+        state = 'dead';
+        stateT = 0;
+      }
+      return;
+    }
+
+    if(state==='dead'){
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        if(p.caught){ particles.splice(i,1); continue; }
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        if(p.x > W + 12) particles.splice(i,1);
+      }
+      if(stateT > 3.8){
+        // restart cycle
+        state = 'charging';
+        stateT = 0;
+        deposits = [];
+        fibers.forEach(f=>{f.charge = 0; f.deposits = 0;});
+        airflow = 0;
+        powerEl.classList.remove('dead');
+      }
+      return;
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // ambient gradient
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'rgba(52,225,255,0.025)');
+    bg.addColorStop(0.5,'rgba(0,0,0,0)');
+    bg.addColorStop(1,'rgba(226,59,59,0.015)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // flow direction indicators on left/right edges
+    ctx.save();
+    ctx.strokeStyle = 'rgba(154,167,173,0.18)';
+    ctx.lineWidth = 1;
+    const arrowY = H*0.5;
+    for(let i=0;i<4;i++){
+      const ax = 6 + i*9;
+      ctx.beginPath();
+      ctx.moveTo(ax, arrowY-5);
+      ctx.lineTo(ax+5, arrowY);
+      ctx.lineTo(ax, arrowY+5);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // edge labels
+    ctx.save();
+    ctx.font = "10px 'Space Mono', monospace";
+    ctx.fillStyle = 'rgba(154,173,0.5)';
+    ctx.fillStyle = 'rgba(154,167,173,0.45)';
+    ctx.textAlign = 'left';
+    ctx.fillText('SMOKE  →', 8, H*0.07);
+    ctx.textAlign = 'right';
+    ctx.fillText('→  DOWNSTREAM', W-8, H*0.07);
+    ctx.restore();
+
+    // fibers
+    fibers.forEach((f)=>{
+      // charge aura
+      const auraA = f.charge * 0.55;
+      if(auraA > 0.01){
+        const ag = ctx.createLinearGradient(0, f.y - f.r*5, 0, f.y + f.r*5);
+        ag.addColorStop(0,'rgba(52,225,255,0)');
+        ag.addColorStop(0.5,`rgba(52,225,255,${auraA*0.32})`);
+        ag.addColorStop(1,'rgba(52,225,255,0)');
+        ctx.fillStyle = ag;
+        ctx.fillRect(f.x - 14, f.y - f.r*5, f.w + 28, f.r*10);
+      }
+
+      // fiber body — soft rounded cylinder
+      const fg = ctx.createLinearGradient(0, f.y - f.r, 0, f.y + f.r);
+      fg.addColorStop(0,'rgba(170,180,190,0.12)');
+      fg.addColorStop(0.45,'rgba(225,232,238,0.55)');
+      fg.addColorStop(0.55,'rgba(205,212,218,0.5)');
+      fg.addColorStop(1,'rgba(110,120,130,0.12)');
+      ctx.fillStyle = fg;
+      roundRect(ctx, f.x, f.y - f.r, f.w, f.r*2, f.r);
+      ctx.fill();
+
+      // edge
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      roundRect(ctx, f.x, f.y - f.r, f.w, f.r*2, f.r);
+      ctx.stroke();
+
+      // top highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(f.x + f.r, f.y - f.r + 1.5);
+      ctx.lineTo(f.x + f.w - f.r, f.y - f.r + 1.5);
+      ctx.stroke();
+
+      // charge marks
+      f.marks.forEach((m, mi)=>{
+        const x = f.x + m.ox * f.w;
+        const wobble = Math.sin(timeAcc*1.4 + m.phase + mi) * 1.2;
+        const y = f.y + m.side * (f.r + 7) + wobble * f.charge;
+        const a = f.charge;
+        if(a < 0.02) return;
+        ctx.save();
+        ctx.shadowColor = `rgba(52,225,255,${a*0.95})`;
+        ctx.shadowBlur = 10 * a;
+        ctx.fillStyle = `rgba(52,225,255,${0.9*a})`;
+        ctx.font = "bold 12px 'Space Mono', monospace";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(m.sym, x, y);
+        ctx.restore();
+      });
+    });
+
+    // deposits (stuck smoke)
+    deposits.forEach(d=>{
+      ctx.fillStyle = 'rgba(60,68,76,0.85)';
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r*1.15, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(40,46,52,0.6)';
+      ctx.beginPath();
+      ctx.arc(d.x - d.r*0.3, d.y - d.r*0.3, d.r*0.5, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    // particles
+    particles.forEach(p=>{
+      if(p.caught){
+        const a = 1 - p.caughtT/0.35;
+        // cyan absorption flash
+        ctx.fillStyle = `rgba(52,225,255,${0.5*a})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r*2.2*a, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(80,90,100,${0.75*a})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fill();
+      } else {
+        // soft smoke puff
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*2.4);
+        g.addColorStop(0, `rgba(160,170,180,${p.alpha*0.9})`);
+        g.addColorStop(0.5, `rgba(130,140,150,${p.alpha*0.4})`);
+        g.addColorStop(1, 'rgba(130,140,150,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r*2.4, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(110,120,130,${p.alpha*0.85})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r*0.85, 0, Math.PI*2);
+        ctx.fill();
+      }
+    });
+
+    // subtle vignette
+    const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.3, W/2, H/2, Math.max(W,H)*0.7);
+    vg.addColorStop(0,'rgba(0,0,0,0)');
+    vg.addColorStop(1,'rgba(0,0,0,0.35)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    r = Math.min(r, h/2, w/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  function updateReadout(){
+    const avg = fibers.length ? (fibers.reduce((s,f)=>s+f.charge,0)/fibers.length) : 0;
+    const pct = Math.max(0, Math.round(avg*100));
+    powerEl.textContent = pct;
+    if(pct <= 15) powerEl.classList.add('dead');
+    else powerEl.classList.remove('dead');
+    airflowEl.textContent = Math.round(airflow);
+    airbar.style.setProperty('--w', (airflow/10*100) + '%');
+  }
+
+  function loop(t){
+    if(!lastT) lastT = t;
+    let dt = (t - lastT)/1000;
+    lastT = t;
+    if(dt > 0.05) dt = 0.05;
+    if(!reduced) update(dt);
+    draw();
+    updateReadout();
+    requestAnimationFrame(loop);
+  }
+
+  function init(){
+    resize();
+    reset();
+    requestAnimationFrame(loop);
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 120);
+  });
+  replayBtn.addEventListener('click', ()=>{
+    reset();
+  });
+  init();
+})();
+</script>
+</body>
+</html>

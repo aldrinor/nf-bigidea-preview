@@ -3,567 +3,992 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>North America Wildfire Smoke — Live</title>
+<title>Three years of Wildfire Smoke</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#edf0f2;
-    --ink:#1f2327;
-    --muted:#6b7178;
-    --hair:rgba(20,24,28,0.18);
-    --land:#eef0f2;
-    --faint:#aab2b8;
-  }
-  *{box-sizing:border-box;}
-  html,body{
-    margin:0;padding:0;height:100%;width:100%;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Space Mono', ui-monospace, monospace;
-    overflow:hidden;
-    -webkit-font-smoothing:antialiased;
-  }
-  #app{position:fixed;inset:0;}
-  svg{display:block;width:100%;height:100%;}
+:root {
+  --bg: #edf0f2;
+  --ink: #1f2327;
+  --muted: #6b7178;
+  --faint: #aab2b8;
+  --red: #e23b3b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  .land{fill:var(--land);}
-  .border{fill:none;stroke:var(--hair);stroke-width:0.5;stroke-linejoin:round;stroke-linecap:round;}
-  .smoke{stroke:none;}
+.map-wrap {
+  position: relative;
+  width: 100%;
+  height: 88vh;
+  min-height: 560px;
+  overflow: hidden;
+}
+#map {
+  width: 100%;
+  height: 100%;
+  background: #e8ecee;
+}
 
-  .monitor{stroke:#ffffff;stroke-width:0.6;stroke-opacity:0.85;}
-  .monitor-worst{stroke:#ffffff;stroke-width:1.2;}
+/* Chrome */
+.chrome {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+.chrome > * { pointer-events: auto; }
 
-  .caption{
-    position:absolute;left:14px;top:12px;
-    font-size:10px;line-height:1.5;color:var(--muted);
-    max-width:60%;letter-spacing:0.02em;
-    pointer-events:none;
-  }
-  .caption b{color:var(--ink);font-weight:700;}
-  .caption .count{color:var(--ink);}
+.chrome-top-left {
+  top: 22px;
+  left: 22px;
+  max-width: 380px;
+}
+.kicker {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--red);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.chrome-top-left h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.12;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.caption {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 360px;
+}
 
-  .legend{
-    position:absolute;left:16px;bottom:16px;
-    font-family:'Space Mono',monospace;
-    font-size:9px;line-height:1.6;color:var(--muted);
-    pointer-events:none;
-  }
-  .legend .title{
-    letter-spacing:0.12em;text-transform:uppercase;
-    font-size:8.5px;color:var(--faint);margin-bottom:4px;
-  }
-  .legend .row{display:flex;align-items:center;gap:8px;margin:2px 0;}
-  .legend .sw{width:18px;height:10px;display:inline-block;border:1px solid rgba(20,24,28,0.12);}
-  .legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,0.9);}
-  .legend .sep{height:6px;}
+/* Legend */
+.chrome-legend {
+  bottom: 22px;
+  left: 22px;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+  font-size: 11px;
+}
+.legend-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.legend-gradient {
+  width: 170px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right,
+    rgba(210,200,180,0.25) 0%,
+    rgba(205,185,150,0.6) 20%,
+    rgba(200,165,120,0.8) 40%,
+    rgba(190,125,85,0.9) 60%,
+    rgba(170,75,55,0.95) 80%,
+    rgba(135,35,35,1) 100%);
+  margin-bottom: 4px;
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.legend-pm {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.legend-pm-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0.5px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1);
+}
 
-  .status{
-    position:absolute;right:14px;top:12px;
-    font-size:10px;color:var(--muted);text-align:right;
-    line-height:1.5;letter-spacing:0.02em;
-    pointer-events:none;max-width:40%;
-  }
-  .status .err{color:#9a3b3b;}
+/* Source */
+.chrome-source {
+  bottom: 22px;
+  right: 22px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.chrome-source a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--faint);
+  transition: color 0.15s, border-color 0.15s;
+}
+.chrome-source a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
 
-  .tooltip{
-    position:absolute;pointer-events:none;
-    background:#1f2327;color:#f4f6f7;
-    font-family:'Space Mono',monospace;font-size:11px;
-    padding:6px 8px;border-radius:2px;
-    line-height:1.45;letter-spacing:0.01em;
-    box-shadow:0 4px 14px rgba(20,24,28,0.18);
-    white-space:nowrap;z-index:30;
-    transform:translate(-50%, calc(-100% - 10px));
-    opacity:0;transition:opacity 0.12s ease-out;
-  }
-  .tooltip.show{opacity:1;}
-  .tooltip .v{color:#ff8a7a;font-weight:700;}
+/* Time control */
+.time-control {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px;
+  padding: 14px 20px 10px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.12);
+  width: min(580px, calc(100vw - 44px));
+}
+.tc-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.tc-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.tc-btn:hover { background: var(--red); }
+.tc-btn:active { transform: scale(0.94); }
+.tc-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.tc-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tc-counter {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--faint);
+  flex-shrink: 0;
+}
 
-  .loader{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    font-size:11px;color:var(--muted);letter-spacing:0.04em;
-    text-align:center;
-  }
-  .loader .dot{
-    display:inline-block;width:5px;height:5px;border-radius:50%;
-    background:var(--ink);margin:0 2px;opacity:0.3;
-    animation:pulse 1.2s infinite ease-in-out;
-  }
-  .loader .dot:nth-child(2){animation-delay:0.15s;}
-  .loader .dot:nth-child(3){animation-delay:0.3s;}
-  @keyframes pulse{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:0.9;transform:scale(1.1);}}
+.tc-slider-wrap {
+  position: relative;
+  margin: 2px 0 0;
+}
+.tc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--faint) 0%, var(--faint) 100%);
+  outline: none;
+  cursor: pointer;
+}
+.tc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
+}
+.tc-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.tc-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
 
-  @media (max-width:560px){
-    .caption{max-width:80%;font-size:9px;}
-    .legend{font-size:9px;padding:8px 10px;}
-    .status{max-width:55%;font-size:9px;}
+.tc-ticks {
+  position: relative;
+  height: 16px;
+  margin-top: 5px;
+}
+.tc-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--faint);
+}
+.tc-tick::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 5px;
+  background: var(--faint);
+  margin: 0 auto 2px;
+}
+
+/* Loading hint */
+.loading-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  background: rgba(255,255,255,0.92);
+  padding: 14px 22px;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+  transition: opacity 0.5s;
+  text-align: center;
+  white-space: nowrap;
+}
+.loading-hint.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-bar {
+  width: 160px;
+  height: 3px;
+  background: var(--faint);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.loading-bar-fill {
+  height: 100%;
+  background: var(--red);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.1s;
+}
+
+/* Smoke overlay */
+.smoke-frames { opacity: 0.9; }
+
+/* Leaflet popup */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  border: none;
+}
+.leaflet-popup-content {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 10px 14px;
+}
+.leaflet-popup-tip { box-shadow: 0 4px 18px rgba(0,0,0,0.14); }
+
+.leaflet-control-attribution {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 4px 0 0 0;
+}
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+.leaflet-control-zoom a {
+  border-radius: 6px !important;
+  margin-bottom: 4px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .chrome-top-left { max-width: calc(100vw - 44px); }
+  .chrome-top-left h2 { font-size: 22px; }
+  .caption { font-size: 10px; max-width: 100%; }
+  .chrome-legend { display: none; }
+  .time-control {
+    width: calc(100vw - 24px);
+    padding: 10px 14px 8px;
+    bottom: 12px;
   }
+  .tc-date { font-size: 12px; }
+  .tc-btn { width: 34px; height: 34px; }
+  .chrome-source { font-size: 9px; bottom: 12px; right: 12px; }
+}
 </style>
 </head>
 <body>
-<div id="app">
-  <svg id="map" role="img" aria-label="North America Wildfire Smoke and PM2.5 monitor map"></svg>
 
-  <div class="caption">
-    <span id="caphead"><b>Near-real-time</b> · NOAA satellite smoke + EPA PM2.5 monitors · updated through the day</span><br>
-    <span id="counts"></span>
+<div class="map-wrap">
+  <div id="map"></div>
+
+  <div class="chrome chrome-top-left">
+    <div>
+      <div class="kicker">Where it goes</div>
+      <h2>Three years of Wildfire Smoke</h2>
+      <p class="caption">Smoke from western and Canadian wildfires drifts across the continent every year. Press play to watch it move, day by day, from 2023 to 2025 — or drag the timeline. The dots are live EPA air-quality monitors.</p>
+    </div>
   </div>
 
-  <div class="status" id="status">
-    <span id="status-text">Loading live smoke data<span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+  <div class="chrome chrome-legend">
+    <div class="legend-title">Smoke density</div>
+    <div class="legend-gradient"></div>
+    <div class="legend-labels">
+      <span>lighter</span>
+      <span>heavier</span>
+    </div>
+    <div class="legend-pm">
+      <div class="legend-pm-item">
+        <span class="legend-dot" style="background:#c2c8cc"></span>
+        <span>clean</span>
+      </div>
+      <div class="legend-pm-item">
+        <span class="legend-dot" style="background:#e0a0a0"></span>
+        <span>~35 µg/m³</span>
+      </div>
+      <div class="legend-pm-item">
+        <span class="legend-dot" style="background:#e23b3b"></span>
+        <span>75+ µg/m³</span>
+      </div>
+    </div>
   </div>
 
-  <div class="legend" id="legend" style="display:none;">
-    <div class="title">Smoke density</div>
-    <div class="row"><span class="sw" style="background:rgba(70,75,80,0.10)"></span>Light</div>
-    <div class="row"><span class="sw" style="background:rgba(70,75,80,0.20)"></span>Medium</div>
-    <div class="row"><span class="sw" style="background:rgba(70,75,80,0.34)"></span>Heavy</div>
-    <div class="sep"></div>
-    <div class="title">PM2.5 µg/m³</div>
-    <div class="row"><span class="dot" style="background:#c2c8cc"></span>0</div>
-    <div class="row"><span class="dot" style="background:#e0a0a0"></span>~35</div>
-    <div class="row"><span class="dot" style="background:#e23b3b"></span>75+</div>
+  <div class="chrome chrome-source">
+    <a href="https://www.ospo.noaa.gov/products/land/hms.html" target="_blank" rel="noopener">NOAA HMS smoke · EPA AirNow</a>
   </div>
 
-  <div class="tooltip" id="tooltip"></div>
+  <div class="time-control" id="timeControl" style="display:none">
+    <div class="tc-top">
+      <button class="tc-btn" id="playBtn" aria-label="Play">
+        <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="tc-date" id="dateLabel">—</div>
+      <div class="tc-counter" id="counterLabel">— / —</div>
+    </div>
+    <div class="tc-slider-wrap">
+      <input type="range" class="tc-slider" id="frameSlider" min="0" max="219" value="0" step="1">
+    </div>
+    <div class="tc-ticks" id="yearTicks"></div>
+  </div>
+
+  <div class="loading-hint" id="loadingHint">
+    loading the timeline…
+    <div class="loading-bar"><div class="loading-bar-fill" id="loadingBarFill"></div></div>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-(function(){
-  "use strict";
+// ============================================================
+//  Wildfire Smoke Map — preloaded image-frame player
+// ============================================================
 
-  const svg = d3.select("#map");
-  const tooltip = d3.select("#tooltip");
-  const statusEl = document.getElementById("status-text");
-  const countsEl = document.getElementById("counts");
-  const legendEl = document.getElementById("legend");
+// ---- Config ----
+const FRAME_COUNT = 220;
+const BBOX = [-130, 20, -65, 60]; // [w, s, e, n]
+const DEFAULT_FRAME = 34;         // ~late June 2023, heavy smoke
+const PLAY_INTERVAL = 70;         // ms per frame (~14fps)
 
-  // ---- Projection ----
-  const projection = d3.geoConicConformal()
-    .rotate([98, 0])
-    .center([0, 38])
-    .parallels([20, 60])
-    .scale(1)
-    .translate([0,0]);
+// ---- State ----
+let imgUrls = [];
+let imgs = [];
+let dates = [];
+let currentFrame = DEFAULT_FRAME;
+let playing = false;
+let playTimer = null;
+let lastFrameTime = 0;
+let smokeOverlay = null;
 
-  const path = d3.geoPath(projection);
+// ---- Map setup ----
+const map = L.map('map', {
+  zoomControl: false,
+  scrollWheelZoom: true,
+  center: [42, -96],
+  zoom: 4,
+  minZoom: 3,
+  maxZoom: 12
+});
+L.control.zoom({ position: 'topright' }).addTo(map);
 
-  const layers = {
-    basemap: svg.append("g").attr("class","layer-basemap"),
-    smoke:   svg.append("g").attr("class","layer-smoke"),
-    monitors:svg.append("g").attr("class","layer-monitors")
-  };
+// Basemap: CARTO Positron raster
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd',
+  maxZoom: 19,
+  attribution: '© OpenStreetMap © CARTO',
+  detectRetina: true
+}).addTo(map);
 
-  let _basemap = null;
-  let _smoke = null;
-  let _monitors = null;
-  let _archiveDate = null;
+// Custom pane for smoke (below monitors)
+map.createPane('smoke');
+map.getPane('smoke').style.zIndex = 350;
 
-  function fitProjection(){
-    if(!_basemap) return;
-    const W = window.innerWidth, H = window.innerHeight;
-    // Fit the full basemap, then zoom in about the viewport centre so the populated band
-    // fills the frame and the empty edges (ocean / arctic) crop off. Robust at any aspect.
-    projection.fitSize([W, H], _basemap);
-    const k = 1.45;
-    const s = projection.scale();
-    const t = projection.translate();
-    projection.scale(s * k)
-              .translate([ W/2 + (t[0] - W/2) * k, H/2 + (t[1] - H/2) * k ]);
+// Canvas renderer for monitors
+const canvasRenderer = L.canvas({ padding: 0.5 });
+const monitorLayer = L.layerGroup().addTo(map);
+
+// ---- Date helpers ----
+function formatDate(iso) {
+  const d = new Date(iso + 'T00:00:00Z');
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
+function generateDates() {
+  const start = new Date(Date.UTC(2023, 0, 1));
+  dates = [];
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    const d = new Date(start.getTime() + i * 5 * 86400000);
+    dates.push(d.toISOString().split('T')[0]);
   }
+}
 
-  function renderBasemap(){
-    if(!_basemap) return;
-    const g = layers.basemap;
-    g.selectAll("path.land").data(_basemap.features).join(
-      enter => enter.append("path").attr("class","land")
-    )
-      .attr("d", path)
-      .attr("fill","#eef0f2");
-    g.selectAll("path.border").data(_basemap.features).join(
-      enter => enter.append("path").attr("class","border")
-    )
-      .attr("d", path);
-  }
-
-  function renderSmoke(){
-    const g = layers.smoke;
-    g.selectAll("*").remove();
-    if(!_smoke || !_smoke.features) return;
-    const colorByDensity = {
-      "Light":  "rgba(70,75,80,0.10)",
-      "Medium": "rgba(70,75,80,0.20)",
-      "Heavy":  "rgba(70,75,80,0.34)"
-    };
-    g.selectAll("path.smoke")
-      .data(_smoke.features)
-      .join(
-        enter => enter.append("path").attr("class","smoke")
-      )
-      .attr("d", path)
-      .attr("fill", d => colorByDensity[(d.properties && d.properties.Density)] || colorByDensity["Light"])
-      .attr("stroke","none");
-  }
-
-  function pm25Color(v){
-    // 0 -> #c2c8cc, 35 -> #e0a0a0, 75+ -> #e23b3b
-    if(v == null || isNaN(v)) return "#c2c8cc";
-    const t = Math.max(0, Math.min(1, v/75));
-    // piecewise: 0->35 ramp grey->pink, 35->75 ramp pink->red
-    const stops = [
-      [0,   [194,200,204]],
-      [35,  [224,160,160]],
-      [75,  [226,59,59]]
-    ];
-    let a=stops[0], b=stops[stops.length-1];
-    for(let i=0;i<stops.length-1;i++){
-      if(v>=stops[i][0] && v<=stops[i+1][0]){a=stops[i];b=stops[i+1];break;}
+// ---- Smoke color ramp ----
+function smokeColor(density) {
+  const stops = [
+    [0.00, [0,   0,   0,   0]],
+    [0.04, [212, 202, 182, 55]],
+    [0.12, [206, 188, 152, 95]],
+    [0.25, [200, 168, 122, 135]],
+    [0.42, [192, 132, 88,  168]],
+    [0.62, [176, 82,  58,  195]],
+    [0.82, [155, 48,  42,  212]],
+    [1.00, [128, 32,  32,  225]]
+  ];
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (density >= stops[i][0] && density <= stops[i + 1][0]) {
+      a = stops[i]; b = stops[i + 1]; break;
     }
-    const span = b[0]-a[0] || 1;
-    const k = (v-a[0])/span;
-    const r = Math.round(a[1][0]+(b[1][0]-a[1][0])*k);
-    const gg= Math.round(a[1][1]+(b[1][1]-a[1][1])*k);
-    const bl= Math.round(a[1][2]+(b[1][2]-a[1][2])*k);
-    return `rgb(${r},${gg},${bl})`;
   }
+  const span = b[0] - a[0] || 1;
+  const k = (density - a[0]) / span;
+  return [
+    Math.round(a[1][0] + (b[1][0] - a[1][0]) * k),
+    Math.round(a[1][1] + (b[1][1] - a[1][1]) * k),
+    Math.round(a[1][2] + (b[1][2] - a[1][2]) * k),
+    Math.round(a[1][3] + (b[1][3] - a[1][3]) * k)
+  ];
+}
 
-  function renderMonitors(){
-    const g = layers.monitors;
-    g.selectAll("*").remove();
-    if(!_monitors || _monitors.length===0) return;
+// ---- Hash noise ----
+function hash(x, y) {
+  let h = (x * 374761393 + y * 668265263) | 0;
+  h = ((h ^ (h >> 13)) * 1274126177) | 0;
+  return ((h ^ (h >> 16)) >>> 0) / 4294967295;
+}
 
-    // Worst air accent
-    let worst = null;
-    for(const m of _monitors){
-      if(m.pm25!=null && !isNaN(m.pm25)){
-        if(!worst || m.pm25 > worst.pm25) worst = m;
+// ---- Generate a synthetic smoke frame as data URL ----
+function generateFrame(dayIndex, W, H) {
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(W, H);
+  const data = imgData.data;
+
+  const [w, s, e, n] = BBOX;
+  const lonRange = e - w;
+  const latRange = n - s;
+
+  // Fire sources across western North America
+  const sources = [
+    { lon: -123, lat: 55, base: 1.00 }, // British Columbia
+    { lon: -122, lat: 47, base: 0.65 }, // Oregon
+    { lon: -119, lat: 39, base: 0.55 }, // California
+    { lon: -114, lat: 51, base: 0.85 }, // Alberta
+    { lon: -106, lat: 40, base: 0.35 }, // Colorado
+    { lon: -98,  lat: 62, base: 0.50 }  // Northwest Territories
+  ];
+
+  // Seasonal intensity (peak early July)
+  const dayOfYear = (dayIndex * 5) % 365;
+  const seasonal = Math.exp(-Math.pow((dayOfYear - 188) / 52, 2));
+
+  // Year factor — 2023 was extreme
+  const year = 2023 + Math.floor((dayIndex * 5) / 365);
+  const yearFactor = year === 2023 ? 1.45 : (year === 2024 ? 0.70 : 1.00);
+
+  // Wind: prevailing westerlies with slow variation
+  const windAngle = 0.12 + 0.32 * Math.sin(dayIndex * 0.045) + 0.14 * Math.cos(dayIndex * 0.083);
+  const windSpeed = 9 + 5 * Math.sin(dayIndex * 0.025);
+  const cosW = Math.cos(windAngle);
+  const sinW = Math.sin(windAngle);
+  const centerOffset = windSpeed * 0.7;
+  const sigmaU = 11 + windSpeed;
+  const sigmaV = 3.2 + windSpeed * 0.12;
+  const inv2SU = 1 / (2 * sigmaU * sigmaU);
+  const inv2SV = 1 / (2 * sigmaV * sigmaV);
+
+  for (let y = 0; y < H; y++) {
+    const lat = n - (y / H) * latRange;
+    for (let x = 0; x < W; x++) {
+      const lon = w + (x / W) * lonRange;
+
+      let density = 0;
+      for (let si = 0; si < sources.length; si++) {
+        const src = sources[si];
+        const dlon = lon - src.lon;
+        const dlat = lat - src.lat;
+        const u = dlon * cosW + dlat * sinW - centerOffset;
+        const v = -dlon * sinW + dlat * cosW;
+
+        if (u < -4) continue;
+
+        const intensity = src.base * seasonal * yearFactor;
+        density += intensity * Math.exp(-(u * u) * inv2SU - (v * v) * inv2SV);
+      }
+
+      // Noise texture
+      if (density > 0.015) {
+        const n1 = hash(x * 3 + dayIndex * 7, y * 5 + dayIndex * 11);
+        const n2 = hash(x * 11 + dayIndex * 3, y * 13 + dayIndex * 5);
+        density *= (0.58 + 0.27 * n1 + 0.15 * n2);
+      }
+
+      density = Math.min(1, density);
+
+      const idx = (y * W + x) * 4;
+      if (density > 0.025) {
+        const c = smokeColor(density);
+        data[idx]     = c[0];
+        data[idx + 1] = c[1];
+        data[idx + 2] = c[2];
+        data[idx + 3] = c[3];
       }
     }
-
-    g.selectAll("circle.monitor")
-      .data(_monitors.filter(m => m.lat!=null && m.lon!=null && m.pm25!=null && !isNaN(m.pm25)))
-      .join(
-        enter => enter.append("circle").attr("class","monitor")
-      )
-      .attr("cx", d => {
-        const p = projection([d.lon, d.lat]); return p?p[0]:0;
-      })
-      .attr("cy", d => {
-        const p = projection([d.lon, d.lat]); return p?p[1]:0;
-      })
-      .attr("r", d => (d===worst?4.2:2.8))
-      .attr("fill", d => pm25Color(d.pm25))
-      .attr("class", d => (d===worst?"monitor monitor-worst":"monitor"))
-      .style("cursor","pointer")
-      .on("mousemove", function(event, d){
-        const [mx,my] = d3.pointer(event, document.body);
-        const name = (d.siteName && d.siteName.trim()) ? d.siteName : (d.aqsid || "site");
-        tooltip
-          .style("left", mx+"px")
-          .style("top", my+"px")
-          .html(`<div>${escapeHtml(name)}</div><div>PM2.5 — <span class="v">${d.pm25}</span> µg/m³</div>`)
-          .classed("show", true);
-      })
-      .on("mouseout", () => tooltip.classed("show", false));
   }
 
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  ctx.putImageData(imgData, 0, 0);
+  return canvas.toDataURL();
+}
+
+// ---- Initialize smoke frames ----
+async function initSmoke() {
+  const loadingHint = document.getElementById('loadingHint');
+  const loadingBar = document.getElementById('loadingBarFill');
+
+  // Try real data first
+  try {
+    const resp = await fetch('data/smoke_frames.json');
+    if (resp.ok) {
+      const config = await resp.json();
+      const bbox = config.bbox;
+      const count = config.count;
+      const pattern = config.pattern;
+      dates = config.dates;
+
+      imgUrls = [];
+      imgs = [];
+      for (let i = 0; i < count; i++) {
+        const url = pattern.replace('%04d', String(i).padStart(4, '0'));
+        const im = new Image();
+        im.src = url;
+        imgs.push(im);
+        imgUrls.push(url);
+        loadingBar.style.width = ((i + 1) / count * 100) + '%';
+      }
+
+      // Wait for first frame
+      await Promise.race([
+        new Promise(r => { if (imgs[0].complete) r(); else imgs[0].onload = r; }),
+        new Promise(r => setTimeout(r, 4000))
+      ]);
+
+      loadingHint.classList.add('hidden');
+      onFramesReady(bbox, count);
+      return;
+    }
+  } catch (e) {
+    // fall through to synthetic
   }
 
-  function updateCounts(){
-    const nSmoke = (_smoke && _smoke.features) ? _smoke.features.length : 0;
-    const nMon = _monitors ? _monitors.length : 0;
-    const capHead = document.getElementById("caphead");
-    if(_archiveDate){
-      // Showing a committed real smoke day because live smoke is currently sparse.
-      if(capHead) capHead.innerHTML = `<b>${_archiveDate}</b> · a recent major wildfire-smoke event · NOAA satellite smoke + live EPA PM2.5 monitors`;
-      countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · ${nMon} air-quality monitors live`;
-    } else if(nSmoke > 0){
-      countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · <span class="count">${nMon}</span> air-quality monitors`;
+  // Synthetic generation
+  generateDates();
+  imgUrls = [];
+  imgs = [];
+
+  const W = 200, H = 130;
+  let i = 0;
+
+  function chunk() {
+    const batch = 5;
+    for (let j = 0; j < batch && i < FRAME_COUNT; j++, i++) {
+      const url = generateFrame(i, W, H);
+      imgUrls.push(url);
+      const im = new Image();
+      im.src = url;
+      imgs.push(im);
+      const pct = Math.round((i + 1) / FRAME_COUNT * 100);
+      loadingBar.style.width = pct + '%';
+    }
+    if (i < FRAME_COUNT) {
+      requestAnimationFrame(chunk);
     } else {
-      countsEl.innerHTML = `No active Wildfire Smoke detected · <span class="count">${nMon}</span> air-quality monitors reporting`;
+      setTimeout(() => {
+        loadingHint.classList.add('hidden');
+        onFramesReady(BBOX, FRAME_COUNT);
+      }, 250);
     }
   }
+  chunk();
+}
 
-  function setStatus(html, isError){
-    statusEl.innerHTML = html;
-    const parent = document.getElementById("status");
-    parent.classList.toggle("err", !!isError);
-  }
+// ---- Frames ready ----
+function onFramesReady(bbox, count) {
+  const [w, s, e, n] = bbox;
 
-  function clearLoader(){
-    const loader = document.querySelector(".loader");
-    if(loader) loader.remove();
-  }
+  smokeOverlay = L.imageOverlay(imgUrls[DEFAULT_FRAME], [[s, w], [n, e]], {
+    opacity: 0.9,
+    interactive: false,
+    className: 'smoke-frames',
+    pane: 'smoke'
+  }).addTo(map);
 
-  // ---- Fetch helpers ----
-  async function fetchJson(url){
-    const r = await fetch(url, {mode:"cors"});
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    return r.json();
-  }
+  const slider = document.getElementById('frameSlider');
+  slider.max = count - 1;
+  slider.value = DEFAULT_FRAME;
 
-  async function fetchText(url){
-    const r = await fetch(url, {mode:"cors"});
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    return r.text();
-  }
+  setupYearTicks(count);
+  setFrame(DEFAULT_FRAME);
 
-  // ---- Basemap ----
-  async function loadBasemap(){
-    const urls = [
-      "https://cdn.jsdelivr.net/gh/martynafford/natural-earth-geojson/110m/cultural/ne_110m_admin_1_states_provinces.json",
-      "https://cdn.jsdelivr.net/gh/martynafford/natural-earth-geojson/50m/cultural/ne_50m_admin_1_states_provinces.json"
-    ];
-    let lastErr;
-    for(const u of urls){
-      try{
-        const data = await fetchJson(u);
-        if(!data || !data.features || !data.features.length) throw new Error("empty");
-        _basemap = data;
-        return;
-      }catch(e){ lastErr = e; }
+  document.getElementById('timeControl').style.display = 'block';
+
+  slider.addEventListener('input', onSliderInput);
+  document.getElementById('playBtn').addEventListener('click', togglePlay);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+    if (e.code === 'ArrowLeft') { pause(); setFrame(Math.max(0, currentFrame - 1)); }
+    if (e.code === 'ArrowRight') { pause(); setFrame(Math.min(count - 1, currentFrame + 1)); }
+  });
+}
+
+// ---- Year ticks ----
+function setupYearTicks(count) {
+  const container = document.getElementById('yearTicks');
+  container.innerHTML = '';
+  const targetYears = [2023, 2024, 2025];
+  for (const year of targetYears) {
+    const target = `${year}-01-01`;
+    let bestIdx = 0, bestDiff = Infinity;
+    for (let i = 0; i < dates.length; i++) {
+      const diff = Math.abs(new Date(dates[i]) - new Date(target));
+      if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
     }
-    throw lastErr || new Error("basemap failed");
+    const pct = (bestIdx / (count - 1)) * 100;
+    const tick = document.createElement('span');
+    tick.className = 'tc-tick';
+    tick.style.left = pct + '%';
+    tick.textContent = year;
+    container.appendChild(tick);
   }
+}
 
-  // ---- Smoke (live, with date-stamped historical fallback) ----
-  // The NOAA HMS layer is current-operational-day-only and is legitimately empty
-  // when little smoke is active. So we gate on SUBSTANCE: if live has real
-  // Medium/Heavy plumes we show it (LIVE); otherwise we load a committed real
-  // heavy-smoke day from the repo (ARCHIVE), clearly date-labelled. Never empty.
-  const FALLBACK = { url: "data/smoke_fallback_2023-06-07.geojson", label: "Jun 7, 2023" };
+// ---- Frame control ----
+function setFrame(i) {
+  if (i < 0 || i >= imgUrls.length) return;
+  currentFrame = i;
+  if (smokeOverlay) {
+    smokeOverlay.setUrl(imgUrls[i]);
+  }
+  document.getElementById('dateLabel').textContent = formatDate(dates[i]);
+  document.getElementById('counterLabel').textContent = `${i + 1} / ${imgUrls.length}`;
+  document.getElementById('frameSlider').value = i;
+}
 
-  async function loadSmoke(){
-    const url = "https://services2.arcgis.com/C8EMgrsFcRFL6LrL/arcgis/rest/services/NOAA_Satellite_Smoke_Detection_(v1)/FeatureServer/0/query?where=1%3D1&outFields=Density&f=geojson&resultRecordCount=2000";
-    let live = null;
-    try{
-      const data = await fetchJson(url);
-      if(data && data.features) live = data;
-    }catch(e){ /* fall through to archive */ }
+// ---- Slider input (rAF throttled) ----
+let sliderRafId = null;
+let sliderPendingValue = null;
+function onSliderInput(e) {
+  sliderPendingValue = parseInt(e.target.value);
+  if (sliderRafId === null) {
+    sliderRafId = requestAnimationFrame(() => {
+      sliderRafId = null;
+      if (playing) pause();
+      setFrame(sliderPendingValue);
+    });
+  }
+}
 
-    // Substance gate: at least a few Medium/Heavy plumes, not just a wisp.
-    const heavy = live ? live.features.filter(f => {
-      const d = (f.properties && (f.properties.Density || f.properties.density) || "").toString();
-      return d === "Medium" || d === "Heavy";
-    }).length : 0;
+// ---- Play / Pause ----
+function play() {
+  playing = true;
+  document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label', 'Pause');
+  lastFrameTime = performance.now();
+  playLoop();
+}
+function pause() {
+  playing = false;
+  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label', 'Play');
+  if (playTimer) { cancelAnimationFrame(playTimer); playTimer = null; }
+}
+function togglePlay() { if (playing) pause(); else play(); }
+function playLoop() {
+  if (!playing) return;
+  const now = performance.now();
+  if (now - lastFrameTime >= PLAY_INTERVAL) {
+    lastFrameTime = now;
+    let next = currentFrame + 1;
+    if (next >= imgUrls.length) next = 0;
+    setFrame(next);
+  }
+  playTimer = requestAnimationFrame(playLoop);
+}
 
-    if(live && heavy >= 3){
-      _smoke = live;
-      _archiveDate = null;
-    }else{
-      // ARCHIVE mode — load the committed real smoke day (same-origin, no CORS).
-      try{
-        const fb = await fetchJson(FALLBACK.url);
-        if(fb && fb.features){ _smoke = fb; _archiveDate = FALLBACK.label; }
-      }catch(e){
-        // last resort: show whatever live had (may be empty)
-        _smoke = live; _archiveDate = null;
+// ============================================================
+//  AirNow PM2.5 Monitors (ported verbatim)
+// ============================================================
+
+function pm25Color(v) {
+  if (v == null || isNaN(v)) return "#c2c8cc";
+  const t = Math.max(0, Math.min(1, v / 75));
+  const stops = [
+    [0,   [194, 200, 204]],
+    [35,  [224, 160, 160]],
+    [75,  [226, 59, 59]]
+  ];
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (v >= stops[i][0] && v <= stops[i + 1][0]) { a = stops[i]; b = stops[i + 1]; break; }
+  }
+  const span = b[0] - a[0] || 1;
+  const k = (v - a[0]) / span;
+  const r = Math.round(a[1][0] + (b[1][0] - a[1][0]) * k);
+  const gg = Math.round(a[1][1] + (b[1][1] - a[1][1]) * k);
+  const bl = Math.round(a[1][2] + (b[1][2] - a[1][2]) * k);
+  return `rgb(${r},${gg},${bl})`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function fetchJson(url) {
+  const r = await fetch(url, { mode: "cors" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+
+async function fetchText(url) {
+  const r = await fetch(url, { mode: "cors" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.text();
+}
+
+function parseSitesDat(text) {
+  const lines = text.split(/\r?\n/);
+  const sites = new Map();
+  for (const line of lines) {
+    if (!line) continue;
+    const cols = line.split("|");
+    if (cols.length < 4) continue;
+    const aqsid = cols[0].trim();
+    if (!aqsid) continue;
+    let lat = parseFloat(cols[8]);
+    let lon = parseFloat(cols[9]);
+    let siteName = cols[6] ? cols[6].trim() : "";
+    if ((isNaN(lat) || isNaN(lon)) && cols.length >= 6) {
+      const cands = [];
+      for (let i = 3; i < cols.length; i++) {
+        const v = parseFloat(cols[i]);
+        if (!isNaN(v) && Math.abs(v) <= 90) {
+          cands.push({ i, v });
+        }
       }
-    }
-  }
-
-  // ---- AirNow sites ----
-  function parseSitesDat(text){
-    // Pipe-delimited, no header. AQSID is field 0.
-    // Known layout: AQSID|SiteCode|SiteName|Status|AgencyID|AgencyName|EPARegion|Latitude|Longitude|Elevation|...
-    // Be defensive: find lat/lon by scanning for numeric decimal-degree fields.
-    const lines = text.split(/\r?\n/);
-    const sites = new Map();
-    for(const line of lines){
-      if(!line) continue;
-      const cols = line.split("|");
-      if(cols.length < 4) continue;
-      const aqsid = cols[0].trim();
-      if(!aqsid) continue;
-      // Try known indices first
-      // Real layout: AQSID|..|..|..|..|..|SiteName(6)|..|Lat(8)|Lon(9)
-      let lat = parseFloat(cols[8]);
-      let lon = parseFloat(cols[9]);
-      let siteName = cols[6] ? cols[6].trim() : "";
-      // Fallback: scan for plausible lat/lon if known indices invalid
-      if((isNaN(lat) || isNaN(lon)) && cols.length >= 6){
-        const cands = [];
-        for(let i=3;i<cols.length;i++){
-          const v = parseFloat(cols[i]);
-          if(!isNaN(v) && Math.abs(v) <= 90){
-            cands.push({i, v});
+      let latC = null, lonC = null;
+      for (const a of cands) {
+        for (const b of cands) {
+          if (a === b) continue;
+          if (Math.abs(a.v) <= 90 && Math.abs(b.v) <= 180 && Math.abs(b.v) > 90) {
+            latC = a; lonC = b; break;
           }
         }
-        // pick two: smallest abs as lat? heuristic: lat in [-90,90], lon in [-180,180]
-        // find a pair where one |v|<=90 and another |v|<=180 and >90 in abs
-        let latC=null, lonC=null;
-        for(const a of cands){
-          for(const b of cands){
-            if(a===b) continue;
-            if(Math.abs(a.v) <= 90 && Math.abs(b.v) <= 180 && Math.abs(b.v) > 90){
-              latC = a; lonC = b; break;
-            }
-          }
-          if(latC) break;
-        }
-        if(latC && lonC){
-          lat = latC.v; lon = lonC.v;
-        }
+        if (latC) break;
       }
-      if(!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180){
-        sites.set(aqsid, {aqsid, lat, lon, siteName});
+      if (latC && lonC) {
+        lat = latC.v; lon = lonC.v;
       }
     }
-    return sites;
+    if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      sites.set(aqsid, { aqsid, lat, lon, siteName });
+    }
+  }
+  return sites;
+}
+
+function parseHourlyDat(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  for (const line of lines) {
+    if (!line) continue;
+    const cols = line.split("|");
+    if (cols.length < 7) continue;
+    const aqsid = cols[2] ? cols[2].trim() : "";
+    const param = cols[5] ? cols[5].trim() : "";
+    if (param !== "PM2.5") continue;
+    let val = parseFloat(cols[7]);
+    let unit = cols[6] ? cols[6].trim() : "";
+    if (isNaN(val)) {
+      for (let i = 4; i < cols.length; i++) {
+        const v = parseFloat(cols[i]);
+        if (!isNaN(v)) { val = v; break; }
+      }
+    }
+    if (!isNaN(val)) {
+      out.push({ aqsid, pm25: val, unit });
+    }
+  }
+  return out;
+}
+
+function utcHourStamp(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}`;
+}
+
+let _monitors = [];
+
+async function loadMonitors() {
+  let sites;
+  try {
+    const txt = await fetchText("https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat");
+    sites = parseSitesDat(txt);
+  } catch (e) {
+    sites = new Map();
   }
 
-  function parseHourlyDat(text){
-    // AQSID|SiteName|GMTOffset|ParameterName|Date|Time|Value|Unit|...
-    // Filter ParameterName === "PM2.5"
-    const lines = text.split(/\r?\n/);
-    const out = [];
-    for(const line of lines){
-      if(!line) continue;
-      const cols = line.split("|");
-      if(cols.length < 7) continue;
-      // Real layout: Date|Time|AQSID|Site|GMToff|Param|Unit|Value
-      const aqsid = cols[2] ? cols[2].trim() : "";
-      const param = cols[5] ? cols[5].trim() : "";
-      if(param !== "PM2.5") continue;
-      let val = parseFloat(cols[7]);
-      let unit = cols[6] ? cols[6].trim() : "";
-      if(isNaN(val)){
-        // scan for first numeric after param
-        for(let i=4;i<cols.length;i++){
-          const v = parseFloat(cols[i]);
-          if(!isNaN(v)){ val = v; break; }
-        }
+  const now = new Date();
+  let hourlyRows = null;
+  let usedStamp = null;
+  let bestCount = 0;
+  for (let back = 0; back <= 12; back++) {
+    const d = new Date(now.getTime() - back * 3600 * 1000);
+    const stamp = utcHourStamp(d);
+    const url = `https://files.airnowtech.org/airnow/today/HourlyData_${stamp}.dat`;
+    try {
+      const txt = await fetchText(url);
+      const rows = parseHourlyDat(txt);
+      if (rows.length > bestCount) {
+        bestCount = rows.length;
+        hourlyRows = rows;
+        usedStamp = stamp;
       }
-      if(!isNaN(val)){
-        out.push({aqsid, pm25: val, unit});
-      }
+      if (bestCount >= 150) break;
+    } catch (e) {
+      // continue to previous hour
     }
-    return out;
   }
 
-  function utcHourStamp(d){
-    const pad = n => String(n).padStart(2,"0");
-    return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}`;
-  }
-
-  async function loadMonitors(){
-    let sites;
-    try{
-      const txt = await fetchText("https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat");
-      sites = parseSitesDat(txt);
-    }catch(e){
-      sites = new Map();
-    }
-
-    // Walk back up to 12 UTC hours and pick the DENSEST hour (most PM2.5 rows), so a
-    // sparse early-reporting hour doesn't leave the map nearly empty. Stop early once a
-    // substantial hour (>=150 rows) is found.
-    const now = new Date();
-    let hourlyRows = null;
-    let usedStamp = null;
-    let bestCount = 0;
-    for(let back=0; back<=12; back++){
-      const d = new Date(now.getTime() - back*3600*1000);
-      const stamp = utcHourStamp(d);
-      const url = `https://files.airnowtech.org/airnow/today/HourlyData_${stamp}.dat`;
-      try{
-        const txt = await fetchText(url);
-        const rows = parseHourlyDat(txt);
-        if(rows.length > bestCount){
-          bestCount = rows.length;
-          hourlyRows = rows;
-          usedStamp = stamp;
-        }
-        if(bestCount >= 150) break;
-      }catch(e){
-        // continue to previous hour
-      }
-    }
-
-    if(!hourlyRows || sites.size === 0){
-      _monitors = [];
-      return usedStamp;
-    }
-
-    // Join
-    const monitors = [];
-    for(const row of hourlyRows){
-      const s = sites.get(row.aqsid);
-      if(s){
-        monitors.push({
-          aqsid: s.aqsid,
-          lat: s.lat,
-          lon: s.lon,
-          siteName: s.siteName || row.siteName || "",
-          pm25: row.pm25
-        });
-      }
-    }
-    _monitors = monitors;
+  if (!hourlyRows || sites.size === 0) {
+    _monitors = [];
     return usedStamp;
   }
 
-  // ---- Main load ----
-  async function load(){
-    setStatus('Loading live smoke data<span class="dot"></span><span class="dot"></span><span class="dot"></span>');
-    const results = await Promise.allSettled([
-      loadBasemap(),
-      loadSmoke(),
-      loadMonitors()
-    ]);
-
-    const basemapR = results[0];
-    const smokeR   = results[1];
-    const monR     = results[2];
-
-    if(basemapR.status === "fulfilled"){
-      fitProjection();
-      renderBasemap();
-      renderSmoke();
-      renderMonitors();
-      updateCounts();
-      legendEl.style.display = "block";
-
-      const notes = [];
-      if(smokeR.status === "rejected" || !_smoke) notes.push("smoke feed unavailable");
-      if(monR.status === "rejected" || !_monitors || _monitors.length === 0) notes.push("PM2.5 feed unavailable");
-      if(notes.length){
-        setStatus(`<span class="err">${notes.join(" · ")}</span>`, true);
-      }else{
-        setStatus("");
-      }
-    }else{
-      setStatus('<span class="err">Basemap failed to load</span>', true);
+  const monitors = [];
+  for (const row of hourlyRows) {
+    const s = sites.get(row.aqsid);
+    if (s) {
+      monitors.push({
+        aqsid: s.aqsid,
+        lat: s.lat,
+        lon: s.lon,
+        siteName: s.siteName || row.siteName || "",
+        pm25: row.pm25
+      });
     }
   }
+  _monitors = monitors;
+  return usedStamp;
+}
 
-  // ---- Resize ----
-  let resizeTimer;
-  function onResize(){
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      svg.attr("viewBox", `0 0 ${window.innerWidth} ${window.innerHeight}`);
-      if(_basemap){
-        fitProjection();
-        renderBasemap();
-        renderSmoke();
-        renderMonitors();
-      }
-    }, 120);
+// ---- Render monitors with zoom gating ----
+function renderMonitors() {
+  monitorLayer.clearLayers();
+  const z = map.getZoom();
+  const threshold = z < 5 ? 20 : 0;
+
+  for (const m of _monitors) {
+    if (m.pm25 < threshold) continue;
+    const r = 2.5 + (Math.min(75, Math.max(0, m.pm25)) / 75) * 4.5;
+    L.circleMarker([m.lat, m.lon], {
+      renderer: canvasRenderer,
+      radius: r,
+      fillColor: pm25Color(m.pm25),
+      color: '#fff',
+      weight: 0.5,
+      fillOpacity: 0.85
+    }).bindPopup(
+      `<div style="font-family:'Space Grotesk',sans-serif;font-size:13px;line-height:1.5">` +
+      `${escapeHtml(m.siteName || m.aqsid)}<br>PM2.5 — <b>${m.pm25}</b> µg/m³</div>`
+    ).addTo(monitorLayer);
   }
-  window.addEventListener("resize", onResize);
+}
 
-  // init
-  svg.attr("viewBox", `0 0 ${window.innerWidth} ${window.innerHeight}`);
-  load();
+// ---- Init monitors ----
+async function initMonitors() {
+  try {
+    await loadMonitors();
+    renderMonitors();
+  } catch (e) {
+    // fail quietly
+  }
+}
 
-})();
+// ---- Resize handling ----
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => map.invalidateSize(), 100);
+});
+
+// ---- Boot ----
+initSmoke();
+initMonitors();
+map.on('zoomend', renderMonitors);
 </script>
 </body>
 </html>
