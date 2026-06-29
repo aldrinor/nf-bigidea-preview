@@ -1,808 +1,553 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>What the smoke does inside you</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#edf0f2;
     --ink:#1f2327;
     --muted:#8a9095;
-    --hair:rgba(20,24,28,0.08);
-    --accent:#1b7bff;
     --red:#e23b3b;
-    --panel:#0e1620;
-    --serif:'Instrument Serif', Georgia, serif;
-    --sans:'Space Grotesk', system-ui, sans-serif;
+    --hair:rgba(20,24,28,.08);
+    --sans:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
     --mono:'Space Mono', ui-monospace, monospace;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
-  body{min-height:100vh;overflow-x:hidden}
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
 
   .section{
-    position:relative;
-    width:100%;
     min-height:100vh;
-    padding:clamp(28px,4vw,56px) clamp(20px,5vw,80px);
-    display:grid;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:clamp(20px,4vw,64px);
-    align-items:center;
-    overflow:hidden;
-    background:
-      radial-gradient(ellipse 80% 60% at 30% 50%, rgba(27,123,255,.05), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(27,123,255,.03), transparent 60%),
-      var(--bg);
-  }
-
-  /* faint grid texture */
-  .section::before{
-    content:"";
-    position:absolute;inset:0;
-    background-image:
-      linear-gradient(var(--hair) 1px, transparent 1px),
-      linear-gradient(90deg, var(--hair) 1px, transparent 1px);
-    background-size:80px 80px;
-    opacity:.5;
-    mask-image:radial-gradient(ellipse 70% 70% at 50% 50%, #000 30%, transparent 80%);
-    pointer-events:none;
-  }
-
-  /* ---------- TEXT ZONE ---------- */
-  .text-zone{
+    width:100%;
+    padding:clamp(40px, 5.5vw, 88px) clamp(24px, 5vw, 96px) clamp(40px, 5vw, 80px);
+    display:flex;
+    flex-direction:column;
+    gap:clamp(24px, 3vw, 40px);
     position:relative;
-    z-index:3;
-    max-width:560px;
-    padding-right:clamp(0px,2vw,24px);
+    overflow:hidden;
   }
-  .kicker{
-    font-family:var(--mono);
-    font-size:12px;
-    letter-spacing:.04em;
-    color:var(--accent);
-    margin-bottom:22px;
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-  }
-  .kicker::before{
-    content:"";
-    width:24px;height:1px;background:var(--accent);display:inline-block;
-  }
-  .headline{
-    font-family:var(--serif);
-    font-weight:400;
-    font-size:clamp(34px,5vw,68px);
-    line-height:1.02;
-    letter-spacing:-0.01em;
-    margin-bottom:24px;
-    color:var(--ink);
-  }
-  .headline em{
-    font-style:italic;
-    color:var(--accent);
-  }
-  .intro{
-    font-family:var(--sans);
-    font-size:clamp(15px,1.4vw,18px);
-    line-height:1.55;
-    color:var(--muted);
-    max-width:440px;
-    margin-bottom:36px;
-  }
-  .legend{
+
+  /* ---- Header ---- */
+  .head{
     display:flex;
     flex-direction:column;
     gap:14px;
-    border-top:1px solid var(--hair);
-    padding-top:24px;
-    max-width:440px;
+    max-width:760px;
   }
-  .legend-row{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    font-family:var(--mono);
-    font-size:11px;
+  h1.headline{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:clamp(30px, 4.6vw, 56px);
+    line-height:1.04;
+    letter-spacing:-0.02em;
+    color:#1a1a1a;
+    margin:0;
+  }
+  h1.headline em{
+    font-style:normal;
+    color:var(--red);
+  }
+  .lede{
+    font-size:15px;
+    line-height:1.55;
     color:var(--muted);
-    letter-spacing:.02em;
-  }
-  .legend-dot{
-    width:8px;height:8px;border-radius:50%;
-    flex-shrink:0;
-  }
-  .legend-dot.cyan{background:var(--accent);box-shadow:0 0 12px rgba(27,123,255,.5)}
-  .legend-dot.red{background:var(--red);box-shadow:0 0 8px rgba(226,59,59,.5)}
-  .legend-dot.smoke{background:#8a9095;box-shadow:0 0 6px rgba(138,144,149,.5)}
-  .legend-hint{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--accent);
-    margin-top:8px;
-    opacity:.85;
-    display:flex;align-items:center;gap:8px;
-  }
-  .legend-hint::before{
-    content:"→";
-    animation:hint 2.4s ease-in-out infinite;
-  }
-  @keyframes hint{
-    0%,100%{transform:translateX(0);opacity:.4}
-    50%{transform:translateX(4px);opacity:1}
+    max-width:560px;
+    margin:0;
   }
 
-  /* ---------- BODY ZONE ---------- */
-  .body-zone{
-    position:relative;
-    z-index:2;
+  /* ---- Stage ---- */
+  .stage{
+    flex:1;
+    display:grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap:clamp(24px, 4vw, 64px);
+    align-items:start;
     width:100%;
-    height:100%;
-    min-height:78vh;
+  }
+
+  /* ---- Body column ---- */
+  .body-col{
+    position:relative;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:flex-start;
   }
-  .body-stage{
+  .body-wrap{
     position:relative;
-    width:100%;
-    max-width:640px;
-    aspect-ratio:1 / 1.35;
-    margin:0 auto;
-    background:var(--panel);
-    border-radius:18px;
-    overflow:hidden;
-    box-shadow:
-      inset 0 0 80px rgba(27,123,255,.08),
-      inset 0 0 0 1px rgba(255,255,255,.04),
-      0 24px 60px rgba(14,22,32,.18),
-      0 4px 16px rgba(14,22,32,.1);
+    height:clamp(440px, 62vh, 600px);
+    aspect-ratio:688 / 1024;
+    transform-origin:50% 38%;
+    animation:breathe 4.5s ease-in-out infinite;
+    will-change:transform, opacity;
   }
-  .body-canvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:1;
-    pointer-events:none;
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); opacity:.96; }
+    50%   { transform:scale(1.012); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .body-wrap{ animation:none; }
   }
   .body-img{
-    position:absolute;
-    inset:0;
     width:100%;
     height:100%;
     object-fit:contain;
-    mix-blend-mode:screen;
-    z-index:2;
+    display:block;
+    filter:drop-shadow(0 1px 0 rgba(20,24,28,.02));
     user-select:none;
     -webkit-user-drag:none;
-    pointer-events:none;
-    filter:saturate(1.05) contrast(1.02);
   }
-  /* chest glow */
-  .chest-glow{
+  /* Fallback silhouette if image missing */
+  .body-fallback{
     position:absolute;
-    left:50%;top:36%;
-    transform:translate(-50%,-50%);
-    width:34%;
-    height:18%;
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(27,123,255,.22), rgba(27,123,255,0) 70%);
-    z-index:3;
+    inset:0;
+    background:
+      radial-gradient(50% 12% at 50% 8%, rgba(20,24,28,.10) 40%, transparent 70%),
+      radial-gradient(38% 38% at 50% 52%, rgba(20,24,28,.06) 50%, transparent 75%);
+    border-radius:46% 46% 30% 30% / 18% 18% 12% 12%;
+    opacity:.0;
     pointer-events:none;
-    animation:breathe 5s ease-in-out infinite;
-    mix-blend-mode:screen;
   }
-  @keyframes breathe{
-    0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(1)}
-    50%{opacity:.85;transform:translate(-50%,-50%) scale(1.08)}
+  .body-img.broken{ opacity:0; }
+  .body-img.broken + .body-fallback{
+    opacity:.5;
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(20,24,28,.05) 100%),
+      radial-gradient(48% 14% at 50% 7%, rgba(20,24,28,.14) 55%, transparent 72%),
+      radial-gradient(22% 30% at 50% 38%, rgba(20,24,28,.08) 60%, transparent 80%),
+      radial-gradient(28% 40% at 50% 62%, rgba(20,24,28,.06) 55%, transparent 78%);
+    border:1px solid var(--hair);
   }
 
-  /* ---------- HOTSPOTS ---------- */
+  /* ---- Hotspots ---- */
   .hotspot{
     position:absolute;
-    width:28px;height:28px;
-    transform:translate(-50%,-50%);
-    z-index:5;
+    transform:translate(-50%, -50%);
+    width:18px;
+    height:18px;
+    border:0;
     background:transparent;
-    border:none;
     padding:0;
     cursor:pointer;
-    display:block;
+    z-index:3;
+    border-radius:50%;
+  }
+  .hotspot::before{
+    /* outer ring */
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1.5px solid var(--red);
+    background:transparent;
+    transition:transform .35s ease, background .35s ease, opacity .35s ease;
+  }
+  .hotspot::after{
+    /* center dot */
+    content:"";
+    position:absolute;
+    left:50%; top:50%;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--red);
+    transform:translate(-50%,-50%);
+    transition:transform .35s ease, opacity .35s ease;
+  }
+  .hotspot:hover::before,
+  .hotspot:focus-visible::before{
+    transform:scale(1.25);
+  }
+  .hotspot .label{
+    position:absolute;
+    left:50%;
+    top:calc(100% + 8px);
+    transform:translate(-50%, 4px);
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.02em;
+    color:var(--ink);
+    background:var(--bg);
+    padding:3px 7px;
+    border:1px solid var(--hair);
+    border-radius:3px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .hotspot:hover .label,
+  .hotspot:focus-visible .label{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+  .hotspot.active::before{
+    background:var(--red);
+    transform:scale(1.15);
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  .hotspot.active::after{
+    background:#fff;
+    transform:translate(-50%,-50%) scale(1.1);
+  }
+  @keyframes pulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(226,59,59,.32); }
+    50%   { box-shadow:0 0 0 9px rgba(226,59,59,0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hotspot.active::before{ animation:none; }
   }
   .hotspot:focus-visible{
     outline:none;
   }
-  .hotspot:focus-visible .ring{
-    box-shadow:0 0 0 3px rgba(27,123,255,.4), 0 0 24px rgba(27,123,255,.6);
-  }
-  .hotspot .ring{
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    border:1.5px solid var(--accent);
-    background:rgba(27,123,255,.08);
-    transition:transform .25s ease, background .25s ease;
-  }
-  .hotspot .pulse{
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    border:1.5px solid var(--accent);
-    animation:pulse 2.6s ease-out infinite;
-    opacity:0;
-  }
-  .hotspot .dot{
-    position:absolute;
-    left:50%;top:50%;
-    transform:translate(-50%,-50%);
-    width:5px;height:5px;
-    border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 8px var(--accent);
-  }
-  @keyframes pulse{
-    0%{transform:scale(1);opacity:.7}
-    100%{transform:scale(2.6);opacity:0}
-  }
-  .hotspot:hover .ring{
-    transform:scale(1.15);
-    background:rgba(27,123,255,.22);
-  }
-  .hotspot.active .ring{
-    background:rgba(27,123,255,.35);
-    border-color:var(--accent);
-    box-shadow:0 0 0 2px rgba(27,123,255,.25), 0 0 20px rgba(27,123,255,.5);
-  }
-  .hotspot-label{
-    position:absolute;
-    left:50%;
-    top:calc(100% + 8px);
-    transform:translateX(-50%);
-    font-family:var(--mono);
-    font-size:10px;
-    color:var(--accent);
-    white-space:nowrap;
-    opacity:0;
-    transition:opacity .2s ease;
-    pointer-events:none;
-    letter-spacing:.04em;
-  }
-  .hotspot:hover .hotspot-label,
-  .hotspot.active .hotspot-label{
-    opacity:1;
+  .hotspot:focus-visible::before{
+    box-shadow:0 0 0 3px rgba(226,59,59,.25);
   }
 
-  /* ---------- CARD ---------- */
-  .card{
-    position:fixed;
-    z-index:50;
-    width:min(420px, 92vw);
-    background:#f6f8f9;
-    border:1px solid var(--hair);
-    border-left:2px solid var(--accent);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    padding:24px 26px 22px;
-    border-radius:6px;
-    box-shadow:0 30px 80px rgba(14,22,32,.14), 0 0 0 1px rgba(27,123,255,.06);
-    opacity:0;
-    transform:translateY(12px) scale(.98);
-    transition:opacity .35s ease, transform .35s cubic-bezier(.2,.7,.2,1);
-    pointer-events:none;
-  }
-  .card.open{
-    opacity:1;
-    transform:translateY(0) scale(1);
-    pointer-events:auto;
-  }
-  .card-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:14px;
-  }
-  .card-label{
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.06em;
-    color:var(--accent);
-  }
-  .card-close{
-    background:none;border:none;
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:14px;
-    cursor:pointer;
-    line-height:1;
-    padding:4px;
-    transition:color .2s;
-  }
-  .card-close:hover{color:var(--ink)}
-  .card-body{
-    font-family:var(--sans);
-    font-size:15px;
-    line-height:1.55;
-    color:var(--ink);
-    margin-bottom:18px;
-  }
-  .card-sources{
+  /* ---- Card column ---- */
+  .card-col{
     display:flex;
     flex-direction:column;
-    gap:8px;
-    padding-top:14px;
-    border-top:1px solid var(--hair);
+    justify-content:flex-start;
+    align-items:flex-start;
+    padding-left:clamp(8px, 2vw, 24px);
+    padding-top:clamp(30px, 6vh, 70px);
+    height:100%;
   }
-  .card-source{
+  .card{
+    max-width:480px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    animation:cardIn .5s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to  { opacity:1; transform:translateY(0); }
+  }
+  .card .index{
     font-family:var(--mono);
     font-size:11px;
-    color:var(--accent);
-    text-decoration:none;
-    letter-spacing:.02em;
-    display:inline-flex;
+    color:var(--muted);
+    letter-spacing:.04em;
+    display:flex;
     align-items:center;
-    gap:6px;
-    transition:opacity .2s;
+    gap:10px;
   }
-  .card-source::before{
-    content:"↗";
+  .card .index .num{
+    color:var(--red);
+  }
+  .card .index .bar{
+    flex:1;
+    height:1px;
+    background:var(--hair);
+  }
+  .card h2{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:clamp(22px, 2.4vw, 28px);
+    line-height:1.15;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+    margin:0;
+  }
+  .card .impact{
+    font-family:var(--sans);
+    font-size:16.5px;
+    line-height:1.55;
+    color:var(--ink);
+    margin:0;
+  }
+  .card .source{
+    border-top:1px solid var(--hair);
+    padding-top:14px;
+    margin-top:4px;
+    font-family:var(--mono);
     font-size:11px;
+    color:var(--muted);
+    line-height:1.5;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:baseline;
   }
-  .card-source:hover{opacity:.7;text-decoration:underline}
-
-  /* backdrop for mobile sheet */
-  .card-backdrop{
-    position:fixed;
-    inset:0;
-    background:rgba(14,22,32,.35);
-    z-index:49;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .3s;
+  .card .source .src-label{ color:var(--muted); }
+  .card .source a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:border-color .2s ease, color .2s ease;
   }
-  .card-backdrop.open{opacity:1;pointer-events:auto}
+  .card .source a:hover{
+    color:var(--red);
+    border-bottom-color:var(--red);
+  }
 
-  /* ---------- RESPONSIVE ---------- */
-  @media (max-width: 980px){
-    .section{
-      grid-template-columns:1fr;
-      grid-template-rows:auto auto;
-      padding:clamp(24px,5vw,40px) 20px;
-      gap:32px;
+  /* ---- Organ selector chips (mobile-friendly, also keyboard nav aid) ---- */
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:28px;
+  }
+  .chip{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    background:transparent;
+    border:1px solid var(--hair);
+    border-radius:999px;
+    padding:6px 12px;
+    cursor:pointer;
+    transition:all .25s ease;
+  }
+  .chip:hover{ color:var(--ink); border-color:rgba(20,24,28,.18); }
+  .chip.active{
+    color:#fff;
+    background:var(--ink);
+    border-color:var(--ink);
+  }
+
+  /* ---- Footer caption ---- */
+  .footnote{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--muted);
+    letter-spacing:.02em;
+    margin-top:auto;
+    padding-top:24px;
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    border-top:1px solid var(--hair);
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 880px){
+    .stage{
+      grid-template-columns: 1fr;
+      gap:28px;
+      align-items:start;
     }
-    .text-zone{
-      order:2;
-      max-width:100%;
+    .body-col{ min-height:auto; justify-content:center; }
+    .body-wrap{
+      height:auto;
+      width:min(60%, 320px);
     }
-    .body-zone{
-      order:1;
-      min-height:62vh;
+    .card-col{
+      padding-left:0;
+      padding-top:0;
+      align-items:flex-start;
+      height:auto;
     }
-    .body-stage{
-      max-width:min(440px, 92vw);
-    }
-    .headline{font-size:clamp(30px,7vw,46px)}
-    /* card becomes bottom sheet */
-    .card{
-      left:0!important;
-      right:0!important;
-      top:auto!important;
-      bottom:0!important;
-      width:100%!important;
-      max-width:100%;
-      border-left:none;
-      border-top:2px solid var(--accent);
-      border-radius:14px 14px 0 0;
-      transform:translateY(100%);
-      padding:24px 22px calc(24px + env(safe-area-inset-bottom));
-    }
-    .card.open{
-      transform:translateY(0);
-    }
+    .card{ max-width:100%; }
   }
   @media (max-width: 520px){
-    .hotspot{width:32px;height:32px}
-    .legend{font-size:10px}
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .chest-glow,.hotspot .pulse,.legend-hint::before{animation:none}
-    .card{transition:opacity .2s}
+    .body-wrap{ width:min(72%, 300px); }
+    .hotspot .label{ font-size:10px; }
   }
 </style>
 </head>
 <body>
 
-<section class="section" id="section">
+<section class="section" aria-labelledby="sec-title">
 
-  <!-- TEXT ZONE -->
-  <div class="text-zone">
-    <div class="kicker">In the body</div>
-    <h1 class="headline">What the smoke does <em>inside you</em></h1>
-    <p class="intro">The smallest particles don't stop at the lungs. They cross into the blood and reach the brain, the heart, the kidneys, even an unborn child. Tap a part of the body to see what researchers have measured.</p>
+  <header class="head">
+    <h1 class="headline" id="sec-title">What the smoke does <em>inside you</em></h1>
+    <p class="lede">Wildfire smoke is no longer a seasonal nuisance. The particles it carries move through the body in ways scientists are still mapping — and the documented effects reach well beyond the lungs.</p>
+  </header>
 
-    <div class="legend">
-      <div class="legend-row"><span class="legend-dot smoke"></span> Fine smoke particulate, drifting on a ~5s breath cycle</div>
-      <div class="legend-row"><span class="legend-dot cyan"></span> Tap a hotspot to read the documented impact</div>
-      <div class="legend-row"><span class="legend-dot red"></span> Trace metals &amp; toxins carried on the smallest particles</div>
-      <div class="legend-hint">Tap a part of the body</div>
+  <div class="stage">
+
+    <!-- BODY -->
+    <div class="body-col">
+      <div class="body-wrap" id="bodyWrap">
+        <img
+          class="body-img"
+          id="bodyImg"
+          src="assets/body/body_premium.png"
+          alt="Human body showing the organs wildfire smoke harms"
+          draggable="false"
+        />
+        <div class="body-fallback" aria-hidden="true"></div>
+
+        <!-- Hotspots: top,left as % of body box -->
+        <button class="hotspot" data-organ="brain"       style="top:6%;  left:50%;" aria-label="Brain">
+          <span class="label">Brain</span>
+        </button>
+        <button class="hotspot" data-organ="bloodstream" style="top:22%; left:53%;" aria-label="Bloodstream">
+          <span class="label">Bloodstream</span>
+        </button>
+        <button class="hotspot" data-organ="lungs"       style="top:27%; left:50%;" aria-label="Lungs">
+          <span class="label">Lungs</span>
+        </button>
+        <button class="hotspot" data-organ="heart"       style="top:29%; left:47%;" aria-label="Heart">
+          <span class="label">Heart</span>
+        </button>
+        <button class="hotspot" data-organ="kidneys"     style="top:40%; left:50%;" aria-label="Kidneys">
+          <span class="label">Kidneys</span>
+        </button>
+        <button class="hotspot" data-organ="pregnancy"   style="top:50%; left:50%;" aria-label="Pregnancy">
+          <span class="label">Pregnancy</span>
+        </button>
+      </div>
     </div>
+
+    <!-- CARD -->
+    <div class="card-col">
+      <article class="card" id="card" aria-live="polite">
+        <!-- populated by JS -->
+      </article>
+
+      <div class="chips" id="chips" role="tablist" aria-label="Select organ">
+        <button class="chip" data-organ="default">Overview</button>
+        <button class="chip" data-organ="brain">Brain</button>
+        <button class="chip" data-organ="lungs">Lungs</button>
+        <button class="chip" data-organ="heart">Heart</button>
+        <button class="chip" data-organ="bloodstream">Bloodstream</button>
+        <button class="chip" data-organ="kidneys">Kidneys</button>
+        <button class="chip" data-organ="pregnancy">Pregnancy</button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- BODY ZONE -->
-  <div class="body-zone">
-    <div class="body-stage" id="bodyStage">
-      <canvas class="body-canvas" id="smokeCanvas"></canvas>
-      <img class="body-img" src="assets/body/body_cool.png" alt="Anatomical figure showing internal organs" draggable="false">
-      <div class="chest-glow" aria-hidden="true"></div>
-
-      <!-- hotspots -->
-      <button class="hotspot" data-part="brain" style="left:50%;top:7%" aria-label="Brain impact">
-        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
-        <span class="hotspot-label">Brain</span>
-      </button>
-      <button class="hotspot" data-part="lungs" style="left:50%;top:34%" aria-label="Lungs impact">
-        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
-        <span class="hotspot-label">Lungs</span>
-      </button>
-      <button class="hotspot" data-part="heart" style="left:46%;top:36%" aria-label="Heart impact">
-        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
-        <span class="hotspot-label">Heart</span>
-      </button>
-      <button class="hotspot" data-part="kidneys" style="left:50%;top:50%" aria-label="Kidneys impact">
-        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
-        <span class="hotspot-label">Kidneys</span>
-      </button>
-      <button class="hotspot" data-part="bloodstream" style="left:62%;top:44%" aria-label="Bloodstream impact">
-        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
-        <span class="hotspot-label">Bloodstream</span>
-      </button>
-      <button class="hotspot" data-part="womb" style="left:50%;top:62%" aria-label="Pregnancy impact">
-        <span class="ring"></span><span class="pulse"></span><span class="dot"></span>
-        <span class="hotspot-label">Pregnancy</span>
-      </button>
-    </div>
+  <div class="footnote">
+    <span>Sources peer-reviewed · links open in a new tab</span>
+    <span>PM 2.5 · coarse + fine particulate matter</span>
   </div>
-
-  <!-- CARD -->
-  <div class="card-backdrop" id="cardBackdrop"></div>
-  <aside class="card" id="card" role="dialog" aria-live="polite" aria-label="Body part impact">
-    <div class="card-head">
-      <span class="card-label" id="cardLabel">—</span>
-      <button class="card-close" id="cardClose" aria-label="Close">✕</button>
-    </div>
-    <p class="card-body" id="cardBody">—</p>
-    <div class="card-sources" id="cardSources"></div>
-  </aside>
 
 </section>
 
 <script>
-(function(){
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ---------- DATA ---------- */
+  // ---- Data (verified, do not alter) ----
   const DATA = {
-    brain:{
-      label:'Brain',
-      body:'Children scored lower on tests after a school year of wildfire smoke, and emergency visits for depression rise on smoky days. The finest particles can even reach the brain.',
-      links:[
-        {label:"Stanford, Nature Sustainability 2022", url:"https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf"},
-        {label:"JAMA Network Open 2025", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11971671/"}
-      ]
+    default: {
+      idx: "00",
+      name: "Wildfire Smoke",
+      impact: "Wildfire smoke is now tied to about 41,000 U.S. deaths a year — and on a high-warming path, about 71,000 by 2050.",
+      sourceLabel: "Qiu et al., Nature 2025",
+      sourceHref: "https://doi.org/10.1038/s41586-025-09611-w"
     },
-    lungs:{
-      label:'Lungs',
-      body:'In children, wildfire smoke drove up to about ten times the rise in respiratory visits seen from ordinary PM2.5 — worst in the youngest.',
-      links:[
-        {label:"UC San Diego, Pediatrics 2021", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC9298841/"}
-      ]
+    lungs: {
+      idx: "01",
+      name: "Lungs",
+      impact: "The coarse particles irritate the upper airway; the fine ones (PM 2.5) reach deep into the alveoli and slip across into the bloodstream.",
+      sourceLabel: "EPA Integrated Science Assessment, 2019",
+      sourceHref: "https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"
     },
-    heart:{
-      label:'Heart',
-      body:'The EPA finds a causal link between fine-particle pollution and heart attack and stroke.',
-      links:[
-        {label:"US EPA, Integrated Science Assessment 2019", url:"https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"}
-      ]
+    heart: {
+      idx: "02",
+      name: "Heart",
+      impact: "Once the fine particles are in the blood, they drive cardiovascular disease — the EPA judges the link causal.",
+      sourceLabel: "EPA Integrated Science Assessment, 2019",
+      sourceHref: "https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"
     },
-    bloodstream:{
-      label:'Bloodstream',
-      body:'Fine particles cross from the lungs into the blood. After the 2025 Los Angeles fires, researchers found hexavalent chromium riding on the smallest particles miles downwind.',
-      links:[
-        {label:"US EPA ISA 2019", url:"https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"},
-        {label:"UC Davis, 2026", url:"https://www.ucdavis.edu/climate/news/chromium-6-nanosilver-detected-la-fire-cleanup-zones"}
-      ]
+    brain: {
+      idx: "03",
+      name: "Brain",
+      impact: "The smallest particles can travel up the olfactory nerve toward the brain; a smoky school year measurably lowers children's test scores.",
+      sourceLabel: "Wen & Burke, Nature Sustainability, 2022",
+      sourceHref: "https://doi.org/10.1038/s41893-022-00956-y"
     },
-    kidneys:{
-      label:'Kidneys',
-      body:'On smoky days, dialysis patients faced more than double the risk of dying that same day.',
-      links:[
-        {label:"Kidney International Reports, 2025", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12231018/"}
-      ]
+    bloodstream: {
+      idx: "04",
+      name: "Bloodstream",
+      impact: "PM 2.5 crosses from the lungs into the blood and circulates through the whole body, driving systemic inflammation.",
+      sourceLabel: "EPA Integrated Science Assessment, 2019",
+      sourceHref: "https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"
     },
-    womb:{
-      label:'Pregnancy',
-      body:'Higher wildfire-smoke exposure during pregnancy raised the odds of preterm birth.',
-      links:[
-        {label:"UC Berkeley & UCSF, Environment International 2024", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/"}
-      ]
+    kidneys: {
+      idx: "05",
+      name: "Kidneys",
+      impact: "On heavy-smoke days, same-day mortality for people on dialysis rises about 139%.",
+      sourceLabel: "Kidney International Reports, 2025",
+      sourceHref: "https://pmc.ncbi.nlm.nih.gov/articles/PMC12231018/"
+    },
+    pregnancy: {
+      idx: "06",
+      name: "Pregnancy",
+      impact: "Wildfire-smoke exposure raises the odds of preterm birth about 3.4% for every 10 µg/m³.",
+      sourceLabel: "Environment International, 2024",
+      sourceHref: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11410054/"
     }
   };
 
-  /* ---------- CARD ---------- */
-  const card = document.getElementById('card');
-  const cardBackdrop = document.getElementById('cardBackdrop');
-  const cardLabel = document.getElementById('cardLabel');
-  const cardBody = document.getElementById('cardBody');
-  const cardSources = document.getElementById('cardSources');
-  const cardClose = document.getElementById('cardClose');
-  const hotspots = Array.from(document.querySelectorAll('.hotspot'));
-  let activePart = null;
+  const cardEl = document.getElementById('card');
+  const hotspots = document.querySelectorAll('.hotspot');
+  const chips = document.querySelectorAll('.chip');
 
-  function openCard(part, triggerEl){
-    const d = DATA[part];
+  function render(organ){
+    const d = DATA[organ];
     if(!d) return;
-    activePart = part;
-    hotspots.forEach(h => h.classList.toggle('active', h.dataset.part===part));
-    cardLabel.textContent = d.label;
-    cardBody.textContent = d.body;
-    // clear previous links, then render this card's links
-    cardSources.innerHTML = '';
-    (d.links || []).forEach(function(s){
-      const a = document.createElement('a');
-      a.className = 'card-source';
-      a.href = s.url;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = s.label;
-      cardSources.appendChild(a);
-    });
-    positionCard(triggerEl);
-    card.classList.add('open');
-    cardBackdrop.classList.add('open');
-  }
-  function closeCard(){
-    activePart = null;
-    hotspots.forEach(h => h.classList.remove('active'));
-    card.classList.remove('open');
-    cardBackdrop.classList.remove('open');
-  }
-  function positionCard(trigger){
-    if(window.innerWidth <= 980) return; // bottom sheet on mobile
-    const rect = trigger.getBoundingClientRect();
-    const cardW = Math.min(420, window.innerWidth*0.4);
-    let left = rect.right + 18;
-    let top = rect.top - 20;
-    if(left + cardW > window.innerWidth - 20){
-      left = rect.left - cardW - 18;
-    }
-    if(left < 20) left = 20;
-    if(top < 20) top = 20;
-    if(top + 320 > window.innerHeight) top = window.innerHeight - 330;
-    card.style.left = left + 'px';
-    card.style.top = top + 'px';
-    card.style.right = 'auto';
-    card.style.bottom = 'auto';
+    cardEl.style.animation = 'none';
+    // force reflow to restart animation
+    void cardEl.offsetWidth;
+    cardEl.style.animation = '';
+
+    cardEl.innerHTML = `
+      <div class="index">
+        <span class="num">${d.idx}</span>
+        <span>—</span>
+        <span>${organ === 'default' ? 'Overview' : d.name}</span>
+        <span class="bar"></span>
+      </div>
+      <h2>${d.name}</h2>
+      <p class="impact">${d.impact}</p>
+      <div class="source">
+        <span class="src-label">Source —</span>
+        <a href="${d.sourceHref}" target="_blank" rel="noopener noreferrer">${d.sourceLabel}</a>
+      </div>
+    `;
   }
 
-  hotspots.forEach(h=>{
-    h.addEventListener('click', ()=>{
-      const part = h.dataset.part;
-      if(activePart === part){ closeCard(); return; }
-      openCard(part, h);
+  function setActive(organ){
+    // hotspots
+    hotspots.forEach(h => {
+      h.classList.toggle('active', h.dataset.organ === organ);
+    });
+    // chips
+    chips.forEach(c => {
+      c.classList.toggle('active', c.dataset.organ === organ);
+    });
+    render(organ);
+  }
+
+  hotspots.forEach(h => {
+    h.addEventListener('click', () => setActive(h.dataset.organ));
+    h.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        setActive(h.dataset.organ);
+      }
     });
   });
-  cardClose.addEventListener('click', closeCard);
-  cardBackdrop.addEventListener('click', closeCard);
-  document.addEventListener('keydown', e=>{
-    if(e.key === 'Escape' && activePart) closeCard();
-  });
-  window.addEventListener('resize', ()=>{
-    if(activePart){
-      const h = hotspots.find(x=>x.dataset.part===activePart);
-      if(h) positionCard(h);
-    }
+
+  chips.forEach(c => {
+    c.addEventListener('click', () => setActive(c.dataset.organ));
   });
 
-  /* ---------- SMOKE CANVAS ---------- */
-  const canvas = document.getElementById('smokeCanvas');
-  const ctx = canvas.getContext('2d');
-  const stage = document.getElementById('bodyStage');
-  let W=0, H=0, dpr=Math.min(window.devicePixelRatio||1, 2);
+  // image fallback
+  const img = document.getElementById('bodyImg');
+  img.addEventListener('error', () => {
+    img.classList.add('broken');
+  });
 
-  // breath cycle: 5s, inhale ~ 2s, exhale ~3s
-  const BREATH_MS = 5000;
-
-  function resize(){
-    const r = stage.getBoundingClientRect();
-    W = r.width; H = r.height;
-    canvas.width = W*dpr;
-    canvas.height = H*dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // inhale target: nose/mouth area — roughly top-center of figure
-  function inhaleTarget(){
-    return { x: W*0.5, y: H*0.13 };
-  }
-
-  // particle pool
-  const particles = [];
-  const MAX_P = reduceMotion ? 40 : 120;
-
-  function spawnParticle(){
-    if(particles.length >= MAX_P) return;
-    // spawn from edges
-    const edge = Math.random();
-    let x,y;
-    const margin = 0.06;
-    if(edge < 0.5){
-      // left or right edge
-      if(Math.random()<0.5){
-        x = -W*margin + Math.random()*W*0.1;
-      } else {
-        x = W*(1+margin) - Math.random()*W*0.1;
-      }
-      y = Math.random()*H;
-    } else {
-      // top or bottom
-      x = Math.random()*W;
-      if(Math.random()<0.5){
-        y = -H*margin + Math.random()*H*0.1;
-      } else {
-        y = H*(1+margin) - Math.random()*H*0.1;
-      }
-    }
-    // bias toward upper area where the face is
-    const isRed = Math.random() < 0.06;
-    particles.push({
-      x, y,
-      vx:0, vy:0,
-      r: 0.6 + Math.random()*2.2,
-      life: 0,
-      maxLife: 6000 + Math.random()*4000,
-      red: isRed,
-      alpha: 0.15 + Math.random()*0.35,
-      drift: (Math.random()-0.5)*0.3
-    });
-  }
-
-  // breath phase: returns -1..1, where positive = inhale (drawing in)
-  function breathPhase(t){
-    // 5s cycle. Inhale first ~2s (sin up), exhale next ~3s
-    const cycle = (t % BREATH_MS) / BREATH_MS; // 0..1
-    // smooth inhale/exhale
-    // inhale strength: 0..1..0 over first 0.4 of cycle
-    if(cycle < 0.4){
-      const k = cycle/0.4;
-      return Math.sin(k*Math.PI); // 0->1->0
-    } else {
-      // gentle exhale, slight outward drift
-      const k = (cycle-0.4)/0.6;
-      return -0.15 * Math.sin(k*Math.PI);
-    }
-  }
-
-  let lastT = performance.now();
-  let startT = performance.now();
-
-  function frame(now){
-    const dt = Math.min(50, now - lastT);
-    lastT = now;
-    const t = now - startT;
-
-    ctx.clearRect(0,0,W,H);
-
-    // spawn
-    const spawnRate = reduceMotion ? 0.15 : 0.6;
-    if(Math.random() < spawnRate) spawnParticle();
-    if(Math.random() < spawnRate*0.5) spawnParticle();
-
-    const target = inhaleTarget();
-    const phase = breathPhase(t);
-    const inhaleStrength = Math.max(0, phase); // 0..1
-    const exhaleStrength = Math.max(0, -phase);
-
-    for(let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.life += dt;
-
-      // direction toward target
-      const dx = target.x - p.x;
-      const dy = target.y - p.y;
-      const dist = Math.hypot(dx,dy) + 0.001;
-      const nx = dx/dist, ny = dy/dist;
-
-      // inhale pull — stronger when close
-      const pull = inhaleStrength * (0.4 + 0.6*(1 - Math.min(1, dist/(W*0.6))));
-      p.vx += nx * pull * 0.12;
-      p.vy += ny * pull * 0.12;
-
-      // exhale push (gentle, outward from target)
-      if(exhaleStrength > 0 && dist < W*0.4){
-        p.vx -= nx * exhaleStrength * 0.05;
-        p.vy -= ny * exhaleStrength * 0.05;
-      }
-
-      // ambient drift
-      p.vx += p.drift * 0.01;
-      p.vy += 0.005; // slight downward
-
-      // damping
-      p.vx *= 0.96;
-      p.vy *= 0.96;
-
-      p.x += p.vx * (dt/16);
-      p.y += p.vy * (dt/16);
-
-      // fade in/out
-      const lifeRatio = p.life / p.maxLife;
-      let fade = p.alpha;
-      if(lifeRatio < 0.1) fade *= lifeRatio/0.1;
-      if(lifeRatio > 0.7) fade *= (1 - (lifeRatio-0.7)/0.3);
-
-      // absorbed near target
-      const absorbed = dist < 14 && inhaleStrength > 0.3;
-
-      if(p.life > p.maxLife || absorbed || p.x < -W*0.2 || p.x > W*1.2 || p.y < -H*0.2 || p.y > H*1.2){
-        particles.splice(i,1);
-        continue;
-      }
-
-      // draw
-      const r = p.r * (1 + inhaleStrength*0.3);
-      if(p.red){
-        ctx.fillStyle = `rgba(226,59,59,${fade*0.9})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r*0.8, 0, Math.PI*2);
-        ctx.fill();
-        // glow
-        ctx.fillStyle = `rgba(226,59,59,${fade*0.15})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r*2.5, 0, Math.PI*2);
-        ctx.fill();
-      } else {
-        // soft grey smoke
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r*3);
-        g.addColorStop(0, `rgba(180,200,210,${fade*0.5})`);
-        g.addColorStop(0.5, `rgba(120,140,150,${fade*0.2})`);
-        g.addColorStop(1, `rgba(80,100,110,0)`);
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r*3, 0, Math.PI*2);
-        ctx.fill();
-      }
-    }
-
-    // subtle inhale glow at nose/mouth during inhale
-    if(inhaleStrength > 0.2){
-      const a = (inhaleStrength-0.2)/0.8 * 0.25;
-      const g = ctx.createRadialGradient(target.x, target.y, 0, target.x, target.y, 30);
-      g.addColorStop(0, `rgba(27,123,255,${a})`);
-      g.addColorStop(1, `rgba(27,123,255,0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(target.x, target.y, 30, 0, Math.PI*2);
-      ctx.fill();
-    }
-
-    requestAnimationFrame(frame);
-  }
-
-  if(reduceMotion){
-    // draw a single static frame
-    requestAnimationFrame((t)=>{ lastT=t; startT=t; frame(t); });
-  } else {
-    requestAnimationFrame((t)=>{ lastT=t; startT=t; frame(t); });
-  }
-
-})();
+  // initial state
+  setActive('default');
 </script>
+
 </body>
 </html>
