@@ -3,639 +3,337 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The problem — A charge that fades under smoke</title>
+<title>A charge that fades under smoke</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#edf0f2;
-  --ink:#1f2327;
-  --muted:#8a9095;
-  --hair:rgba(20,24,28,0.08);
-  --accent:#1b7bff;
-  --red:#e23b3b;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:'Space Grotesk',sans-serif;
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
-}
-section{
-  min-height:100vh;
-  display:grid;
-  grid-template-columns: 1.15fr 1fr;
-  position:relative;
-  overflow:hidden;
-}
-.stage{
-  position:relative;
-  border-right:1px solid var(--hair);
-  min-height:100vh;
-  padding: 40px;
-  background:
-    radial-gradient(ellipse at 30% 50%, rgba(27,123,255,0.05), transparent 60%),
-    #f4f6f8;
-}
-canvas#filter{
-  position:absolute;
-  inset: 40px;
-  display:block;
-  width: calc(100% - 80px);
-  height: calc(100% - 40px);
-}
-.copy{
-  padding: 80px 64px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap: 28px;
-  max-width: 640px;
-}
-.kicker{
-  font-family:'Space Mono',monospace;
-  font-size:12px;
-  color:var(--muted);
-  letter-spacing:.04em;
-  display:flex;
-  align-items:center;
-}
-.kicker::before{
-  content:"";
-  display:inline-block;
-  width:24px;
-  height:1px;
-  background:var(--accent);
-  margin-right:12px;
-}
-h1{
-  font-family:'Instrument Serif',serif;
-  font-weight:400;
-  font-size:clamp(34px,5vw,68px);
-  line-height:1.02;
-  letter-spacing:-0.01em;
-  color:var(--ink);
-}
-.body{
-  font-size:18px;
-  line-height:1.55;
-  color:var(--ink);
-  max-width:460px;
-  font-weight:300;
-}
-.source{
-  font-family:'Space Mono',monospace;
-  font-size:12px;
-  color:var(--accent);
-  text-decoration:none;
-  letter-spacing:.02em;
-  width:fit-content;
-  border-bottom:1px solid rgba(27,123,255,.3);
-  padding-bottom:2px;
-  transition:border-color .2s, color .2s;
-  margin-top:4px;
-}
-.source:hover{border-color:var(--accent)}
-.handoff{
-  border-left:2px solid var(--accent);
-  padding: 16px 20px;
-  font-family:'Instrument Serif',serif;
-  font-style:italic;
-  font-size: 21px;
-  line-height:1.4;
-  color:var(--ink);
-  background:rgba(27,123,255,.05);
-  max-width:520px;
-  margin-top:8px;
-}
-.readout{
-  position:absolute;
-  top: 56px;
-  left: 56px;
-  font-family:'Space Mono',monospace;
-  pointer-events:none;
-  z-index:2;
-}
-.readout .label{
-  font-size:10px;
-  color:var(--muted);
-  letter-spacing:.1em;
-  margin-bottom:8px;
-}
-.readout .big{
-  font-size: 64px;
-  font-weight:700;
-  color:var(--accent);
-  line-height:1;
-  transition:color .5s;
-  font-variant-numeric: tabular-nums;
-  display:inline-block;
-}
-.readout .big.dead{color:var(--red)}
-.readout .unit{font-size:16px;color:var(--muted);margin-left:6px;font-weight:400}
-.gauge{
-  position:absolute;
-  bottom: 56px;
-  left: 56px;
-  font-family:'Space Mono',monospace;
-  z-index:2;
-}
-.gauge .label{font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px}
-.gauge .val{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:700}
-.gauge .val .pct{color:var(--muted);font-weight:400;margin-left:2px}
-.gauge .bar{
-  width:160px;height:2px;background:rgba(20,24,28,0.08);margin-top:10px;position:relative;overflow:hidden;
-}
-.gauge .bar::after{
-  content:"";position:absolute;left:0;top:0;height:100%;
-  width:var(--w,0%);background:var(--ink);transition:width .4s ease-out;
-}
-.replay{
-  position:absolute;
-  bottom: 56px;
-  right: 56px;
-  font-family:'Space Mono',monospace;
-  font-size:11px;
-  letter-spacing:.08em;
-  color:var(--muted);
-  background:rgba(255,255,255,0.7);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border:1px solid var(--hair);
-  padding:11px 18px;
-  cursor:pointer;
-  transition:all .25s;
-  z-index:2;
-  display:flex;
-  align-items:center;
-}
-.replay:hover{color:var(--ink);border-color:rgba(20,24,28,0.2)}
-.replay .dot{
-  display:inline-block;width:6px;height:6px;border-radius:50%;
-  background:var(--accent);margin-right:10px;
-  box-shadow:0 0 8px rgba(27,123,255,.6);
-}
-.legend{
-  position:absolute;
-  top:56px;
-  right:56px;
-  font-family:'Space Mono',monospace;
-  font-size:10px;
-  color:var(--muted);
-  letter-spacing:.06em;
-  text-align:right;
-  z-index:2;
-  line-height:1.7;
-}
-.legend .row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
-.legend .sw{width:10px;height:10px;border-radius:2px}
-.legend .sw.cyan{background:var(--accent);box-shadow:0 0 6px rgba(27,123,255,.5)}
-.legend .sw.grey{background:#9aa3a8}
-.legend .sw.red{background:var(--red)}
-@media (max-width: 900px){
-  section{grid-template-columns:1fr}
-  .stage{min-height:62vh;border-right:none;border-bottom:1px solid var(--hair);padding:20px}
-  canvas#filter{inset:20px;width:calc(100% - 40px);height:calc(100% - 40px)}
-  .copy{padding:48px 24px;gap:22px}
-  .readout{top:24px;left:24px}
-  .readout .big{font-size:42px}
-  .readout .unit{font-size:13px}
-  .gauge{bottom:24px;left:24px}
-  .gauge .bar{width:120px}
-  .replay{bottom:24px;right:24px;padding:9px 14px}
-  .legend{top:24px;right:24px}
-  .handoff{font-size:19px}
-}
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --muted:#8a9095;
+    --red:#e23b3b;
+    --hair:rgba(20,24,28,.08);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+  }
+
+  .mono{
+    font-family:'Space Mono', ui-monospace, monospace;
+  }
+
+  /* ---------- Section ---------- */
+  .fade-section{
+    position:relative;
+    min-height:100vh;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:clamp(40px, 7vh, 96px) clamp(24px, 5vw, 80px);
+    overflow:hidden;
+    background:var(--bg);
+  }
+
+  /* Faint vertical hairlines for premium restraint */
+  .fade-section::before,
+  .fade-section::after{
+    content:"";
+    position:absolute;
+    top:0;bottom:0;
+    width:1px;
+    background:var(--hair);
+    pointer-events:none;
+  }
+  .fade-section::before{left:clamp(24px,5vw,80px);}
+  .fade-section::after{right:clamp(24px,5vw,80px);}
+
+  /* ---------- Frame ---------- */
+  .frame{
+    width:100%;
+    max-width:1320px;
+    display:grid;
+    grid-template-columns:minmax(0, 56fr) minmax(0, 40fr);
+    gap:clamp(40px, 5vw, 80px);
+    align-items:center;
+    position:relative;
+  }
+
+  /* ---------- Video panel ---------- */
+  .video-panel{
+    position:relative;
+    width:100%;
+    min-width:0;
+    border-radius:20px;
+    overflow:hidden;
+    background:#11151a;
+    aspect-ratio:16/10;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 30px 60px -28px rgba(20,24,28,.35),
+      0 12px 24px -16px rgba(20,24,28,.18);
+  }
+
+  .video-panel video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  /* Subtle vignette to keep edges cinematic */
+  .video-panel::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(10,12,15,.35) 100%);
+    pointer-events:none;
+  }
+
+  /* ---------- Text column ---------- */
+  .text-col{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-width:0;
+    padding:clamp(8px, 2vh, 24px) 0;
+  }
+
+  .eyebrow{
+    font-family:'Space Mono', ui-monospace, monospace;
+    font-size:12px;
+    letter-spacing:.04em;
+    color:var(--muted);
+    margin-bottom:28px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .eyebrow .bar{
+    width:28px;height:1px;background:var(--ink);opacity:.4;
+  }
+
+  .headline{
+    font-weight:600;
+    color:#1a1a1a;
+    font-size:clamp(32px, 3.8vw, 52px);
+    line-height:1.06;
+    letter-spacing:-0.02em;
+    margin-bottom:36px;
+    max-width:14ch;
+  }
+  .headline em{
+    font-style:normal;
+    color:var(--red);
+  }
+
+  /* ---------- Stat block ---------- */
+  .stat{
+    display:flex;
+    align-items:flex-start;
+    gap:20px;
+    padding:24px 0 22px;
+    border-top:1px solid var(--hair);
+    border-bottom:1px solid var(--hair);
+    margin-bottom:32px;
+  }
+  .stat-number{
+    font-weight:600;
+    color:var(--red);
+    font-size:clamp(64px, 7vw, 104px);
+    line-height:.9;
+    letter-spacing:-0.04em;
+    flex-shrink:0;
+    font-feature-settings:"tnum" 1;
+  }
+  .stat-caption{
+    font-size:clamp(15px, 1.3vw, 17px);
+    line-height:1.45;
+    color:var(--ink);
+    padding-top:12px;
+    max-width:24ch;
+  }
+  .stat-caption .accent{color:var(--red); font-weight:600;}
+
+  /* ---------- Body ---------- */
+  .body{
+    font-size:17px;
+    line-height:1.6;
+    color:var(--ink);
+    max-width:52ch;
+    margin-bottom:28px;
+  }
+  .body .hl{color:var(--red); font-weight:600;}
+
+  /* ---------- Source ---------- */
+  .source{
+    font-family:'Space Mono', ui-monospace, monospace;
+    font-size:12px;
+    letter-spacing:.02em;
+    color:var(--muted);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    padding-bottom:3px;
+    border-bottom:1px solid var(--hair);
+    transition:color .25s ease, border-color .25s ease;
+    width:fit-content;
+  }
+  .source .arrow{
+    display:inline-block;
+    transition:transform .25s ease;
+  }
+  .source:hover{
+    color:var(--red);
+    border-bottom-color:var(--red);
+  }
+  .source:hover .arrow{
+    transform:translate(2px,-2px);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 920px){
+    .frame{
+      grid-template-columns:1fr;
+      gap:32px;
+    }
+    .video-panel{
+      aspect-ratio:16/10;
+    }
+    .text-col{
+      padding:0;
+    }
+    .headline{
+      max-width:none;
+    }
+    .stat-number{
+      font-size:clamp(60px, 16vw, 92px);
+    }
+  }
+
+  @media (max-width: 560px){
+    .fade-section{
+      padding:40px 20px;
+    }
+    .fade-section::before,
+    .fade-section::after{display:none;}
+    .video-panel{border-radius:14px;}
+    .stat{
+      flex-direction:column;
+      gap:10px;
+      padding:22px 0 20px;
+    }
+    .stat-caption{padding-top:0;}
+    .body{font-size:16px;}
+  }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .video-panel video{
+      display:none;
+    }
+    .video-panel{
+      background-size:cover;
+      background-position:center;
+      background-image:url('assets/videos/posters/frame2_discharge.jpg');
+    }
+    .source .arrow{transition:none;}
+  }
 </style>
 </head>
 <body>
-<section>
-  <div class="stage">
-    <canvas id="filter"></canvas>
 
-    <div class="readout">
-      <div class="label">Cleaning power</div>
-      <div><span class="big" id="power">100</span><span class="unit">%</span></div>
+<section class="fade-section" aria-labelledby="fade-headline">
+  <div class="frame">
+
+    <!-- VIDEO HERO -->
+    <figure class="video-panel" aria-label="Macro cinematic footage of filter fibers losing their electret charge under smoke">
+      <video
+        src="assets/videos/frame2_discharge.mp4"
+        poster="assets/videos/posters/frame2_discharge.jpg"
+        autoplay loop muted playsinline preload="auto"
+        aria-hidden="true">
+      </video>
+    </figure>
+
+    <!-- TEXT COLUMN -->
+    <div class="text-col">
+      <div class="eyebrow">
+        <span class="bar" aria-hidden="true"></span>
+        <span>Ordinary filters</span>
+      </div>
+
+      <h1 class="headline" id="fade-headline">
+        A charge that <em>fades</em> under smoke
+      </h1>
+
+      <div class="stat" role="group" aria-label="Key statistic">
+        <div class="stat-number" aria-label="approximately 95 percent">~95%</div>
+        <p class="stat-caption">
+          of its cleaning power — <span class="accent">gone in a few hours.</span>
+        </p>
+      </div>
+
+      <p class="body">
+        Pine smoke carries an oily, organic load that strips an electret filter's built-in
+        charge. In an EPA study, a charged filter lost about <span class="hl">95% of its
+        cleaning power</span> within hours of smoke — while the airflow barely changed,
+        so nothing warns you it has stopped working.
+      </p>
+
+      <a class="source"
+         href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/"
+         target="_blank"
+         rel="noopener noreferrer">
+        <span>Source — Holder et al., EPA, Indoor Air, 2022</span>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
     </div>
 
-    <div class="legend">
-      <div class="row"><span>electrostatic charge</span><span class="sw cyan"></span></div>
-      <div class="row"><span>wildfire smoke</span><span class="sw grey"></span></div>
-      <div class="row"><span>charge lost</span><span class="sw red"></span></div>
-    </div>
-
-    <div class="gauge">
-      <div class="label">Airflow resistance</div>
-      <div class="val">+<span id="airflow">0</span><span class="pct">%</span></div>
-      <div class="bar" id="airbar"></div>
-    </div>
-
-    <button class="replay" id="replay"><span class="dot"></span>Replay</button>
-  </div>
-
-  <div class="copy">
-    <div class="kicker">The problem</div>
-    <h1>A charge that fades under smoke</h1>
-    <p class="body">Most high-grade air filters work by holding a static electric charge that pulls particles in. Wildfire smoke quietly kills it. In an EPA study, a charged filter lost about 95% of its cleaning power within a few hours of smoke — while the airflow barely changed, so nothing tells you it has stopped working.</p>
-    <a class="source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">Holder et al., EPA, Indoor Air 2022 ↗</a>
-    <div class="handoff">The question isn't whether a filter starts with a charge — it's whether the charge survives the smoke.</div>
   </div>
 </section>
 
 <script>
-(function(){
-  const canvas = document.getElementById('filter');
-  const ctx = canvas.getContext('2d');
-  const powerEl = document.getElementById('power');
-  const airflowEl = document.getElementById('airflow');
-  const airbar = document.getElementById('airbar');
-  const replayBtn = document.getElementById('replay');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Defensive: pause video if it scrolls fully out of view, resume when back (saves cycles, keeps cinematic feel).
+  (function(){
+    const video = document.querySelector('.video-panel video');
+    if(!video) return;
+    if(!('IntersectionObserver' in window)) return;
 
-  // light-stage palette
-  const BLUE = '27,123,255';
-  const RED  = '226,59,59';
-  const FIBER_GREY = '#9aa3a8';
-
-  let W=0, H=0, DPR=1;
-  let fibers=[];
-  let particles=[];
-  let deposits=[];
-  let state = 'charging';
-  let stateT = 0;
-  let lastT = 0;
-  let airflow = 0;
-  let timeAcc = 0;
-
-  function resize(){
-    DPR = Math.min(window.devicePixelRatio||1, 2);
-    const rect = canvas.getBoundingClientRect();
-    W = Math.max(200, rect.width);
-    H = Math.max(200, rect.height);
-    canvas.width = W*DPR;
-    canvas.height = H*DPR;
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    setupFibers();
-  }
-
-  function setupFibers(){
-    const n = 5;
-    const margin = H*0.14;
-    const span = H - margin*2;
-    const newFibers = [];
-    for(let i=0;i<n;i++){
-      const y = margin + span*(i/(n-1));
-      const f = (fibers[i] || {});
-      newFibers.push({
-        y: y,
-        x: W*0.18,
-        w: W*0.64,
-        r: Math.max(7, Math.min(13, H*0.016)),
-        charge: f.charge || 0,
-        deposits: f.deposits || 0,
-        marks: [],
-      });
-    }
-    fibers = newFibers;
-    fibers.forEach((f)=>{
-      f.marks = [];
-      const count = 8;
-      for(let k=0;k<count;k++){
-        f.marks.push({
-          ox: (k+0.5)/count,
-          side: k%2===0 ? -1 : 1,
-          sym: k%3===0 ? '+' : '−',
-          phase: Math.random()*Math.PI*2,
-        });
-      }
-    });
-  }
-
-  function reset(){
-    state = reduced ? 'dead' : 'charging';
-    stateT = 0;
-    particles = [];
-    deposits = [];
-    airflow = 0;
-    fibers.forEach(f=>{f.charge = reduced ? 0.04 : 0; f.deposits=0;});
-    powerEl.classList.remove('dead');
-    if(reduced) seedEndState();
-  }
-
-  function seedEndState(){
-    for(let i=0;i<70;i++){
-      const fi = Math.floor(Math.random()*fibers.length);
-      const f = fibers[fi];
-      deposits.push({
-        x: f.x + Math.random()*f.w,
-        y: f.y + (Math.random()-0.5)*f.r*1.6,
-        fiberIdx: fi,
-        age: 0,
-        r: 1.5 + Math.random()*1.6,
-      });
-    }
-    airflow = 7;
-  }
-
-  function spawnParticle(){
-    const y = H*0.08 + Math.random()*H*0.84;
-    particles.push({
-      x: -8 - Math.random()*20,
-      y: y,
-      vx: 0.7 + Math.random()*0.6,
-      vy: (Math.random()-0.5)*0.18,
-      r: 1.5 + Math.random()*1.9,
-      caught: false,
-      caughtFiber: -1,
-      caughtT: 0,
-      alpha: 0.5 + Math.random()*0.28,
-    });
-  }
-
-  function update(dt){
-    stateT += dt;
-    timeAcc += dt;
-
-    if(state==='charging'){
-      const p = Math.min(1, stateT/1.3);
-      const e = p<1 ? 1-Math.pow(1-p,3) : 1;
-      fibers.forEach(f=> f.charge = e);
-      if(stateT > 1.5){ state='loading'; stateT=0; }
-      return;
-    }
-
-    if(state==='loading'){
-      const rate = 0.5;
-      let toSpawn = rate * dt * 60;
-      while(toSpawn > 0){
-        if(Math.random() < toSpawn) spawnParticle();
-        toSpawn -= 1;
-      }
-
-      for(let i=particles.length-1;i>=0;i--){
-        const p = particles[i];
-        if(p.caught){
-          p.caughtT += dt;
-          if(p.caughtT > 0.35){
-            const f = fibers[p.caughtFiber];
-            deposits.push({x:p.x, y:p.y, fiberIdx:p.caughtFiber, age:0, r:p.r});
-            f.deposits++;
-            f.charge = Math.max(0, f.charge - 0.014);
-            particles.splice(i,1);
-          }
-          continue;
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          if(video.paused && !video.readyState) return;
+          const p = video.play();
+          if(p && typeof p.catch === 'function') p.catch(()=>{});
+        } else {
+          if(!video.paused) video.pause();
         }
-        p.x += p.vx * dt * 60;
-        p.y += p.vy * dt * 60;
-        p.vy += (H/2 - p.y) * 0.000002 * dt * 60;
-
-        for(let fi=0; fi<fibers.length; fi++){
-          const f = fibers[fi];
-          if(p.x > f.x && p.x < f.x + f.w){
-            const dy = Math.abs(p.y - f.y);
-            if(dy < f.r + p.r + 0.5){
-              const captureProb = f.charge * 0.9;
-              if(Math.random() < captureProb){
-                p.caught = true;
-                p.caughtFiber = fi;
-                p.caughtT = 0;
-                p.vx = 0; p.vy = 0;
-                p.y = f.y + (p.y < f.y ? -1 : 1) * (f.r * 0.5);
-                break;
-              }
-            }
-          }
-        }
-        if(p.x > W + 12) particles.splice(i,1);
-      }
-
-      const totalDep = deposits.length;
-      airflow = Math.min(7, totalDep * 0.045);
-
-      const avg = fibers.reduce((s,f)=>s+f.charge,0)/fibers.length;
-      if(avg < 0.05 && stateT > 7){
-        state = 'dead';
-        stateT = 0;
-      }
-      return;
-    }
-
-    if(state==='dead'){
-      for(let i=particles.length-1;i>=0;i--){
-        const p = particles[i];
-        if(p.caught){ particles.splice(i,1); continue; }
-        p.x += p.vx * dt * 60;
-        p.y += p.vy * dt * 60;
-        if(p.x > W + 12) particles.splice(i,1);
-      }
-      if(stateT > 3.8){
-        state = 'charging';
-        stateT = 0;
-        deposits = [];
-        fibers.forEach(f=>{f.charge = 0; f.deposits = 0;});
-        airflow = 0;
-        powerEl.classList.remove('dead');
-      }
-      return;
-    }
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-
-    // ambient cool-white wash with faint blue/red tints
-    const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,`rgba(${BLUE},0.035)`);
-    bg.addColorStop(0.5,'rgba(0,0,0,0)');
-    bg.addColorStop(1,`rgba(${RED},0.02)`);
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,W,H);
-
-    // flow direction indicators
-    ctx.save();
-    ctx.strokeStyle = 'rgba(138,144,149,0.35)';
-    ctx.lineWidth = 1;
-    const arrowY = H*0.5;
-    for(let i=0;i<4;i++){
-      const ax = 6 + i*9;
-      ctx.beginPath();
-      ctx.moveTo(ax, arrowY-5);
-      ctx.lineTo(ax+5, arrowY);
-      ctx.lineTo(ax, arrowY+5);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // edge labels
-    ctx.save();
-    ctx.font = "10px 'Space Mono', monospace";
-    ctx.fillStyle = 'rgba(138,144,149,0.75)';
-    ctx.textAlign = 'left';
-    ctx.fillText('SMOKE  →', 8, H*0.07);
-    ctx.textAlign = 'right';
-    ctx.fillText('→  DOWNSTREAM', W-8, H*0.07);
-    ctx.restore();
-
-    // fibers
-    fibers.forEach((f)=>{
-      // charge aura (blue)
-      const auraA = f.charge * 0.55;
-      if(auraA > 0.01){
-        const ag = ctx.createLinearGradient(0, f.y - f.r*5, 0, f.y + f.r*5);
-        ag.addColorStop(0,`rgba(${BLUE},0)`);
-        ag.addColorStop(0.5,`rgba(${BLUE},${auraA*0.32})`);
-        ag.addColorStop(1,`rgba(${BLUE},0)`);
-        ctx.fillStyle = ag;
-        ctx.fillRect(f.x - 14, f.y - f.r*5, f.w + 28, f.r*10);
-      }
-
-      // fiber body — mid grey rounded cylinder, shaded for light stage
-      const fg = ctx.createLinearGradient(0, f.y - f.r, 0, f.y + f.r);
-      fg.addColorStop(0,'rgba(170,178,184,0.55)');
-      fg.addColorStop(0.45,'rgba(154,163,168,0.95)');
-      fg.addColorStop(0.55,'rgba(120,128,134,0.95)');
-      fg.addColorStop(1,'rgba(90,98,104,0.55)');
-      ctx.fillStyle = fg;
-      roundRect(ctx, f.x, f.y - f.r, f.w, f.r*2, f.r);
-      ctx.fill();
-
-      // edge
-      ctx.strokeStyle = 'rgba(20,24,28,0.18)';
-      ctx.lineWidth = 1;
-      roundRect(ctx, f.x, f.y - f.r, f.w, f.r*2, f.r);
-      ctx.stroke();
-
-      // top highlight
-      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(f.x + f.r, f.y - f.r + 1.5);
-      ctx.lineTo(f.x + f.w - f.r, f.y - f.r + 1.5);
-      ctx.stroke();
-
-      // charge marks (blue)
-      f.marks.forEach((m, mi)=>{
-        const x = f.x + m.ox * f.w;
-        const wobble = Math.sin(timeAcc*1.4 + m.phase + mi) * 1.2;
-        const y = f.y + m.side * (f.r + 7) + wobble * f.charge;
-        const a = f.charge;
-        if(a < 0.02) return;
-        ctx.save();
-        ctx.shadowColor = `rgba(${BLUE},${a*0.95})`;
-        ctx.shadowBlur = 10 * a;
-        ctx.fillStyle = `rgba(${BLUE},${0.9*a})`;
-        ctx.font = "bold 12px 'Space Mono', monospace";
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(m.sym, x, y);
-        ctx.restore();
       });
-    });
+    },{threshold:0.05});
 
-    // deposits (stuck smoke) — dark grey on light
-    deposits.forEach(d=>{
-      ctx.fillStyle = 'rgba(70,78,86,0.85)';
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r*1.15, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(40,46,52,0.6)';
-      ctx.beginPath();
-      ctx.arc(d.x - d.r*0.3, d.y - d.r*0.3, d.r*0.5, 0, Math.PI*2);
-      ctx.fill();
-    });
+    io.observe(video);
 
-    // particles — soft grey smoke
-    particles.forEach(p=>{
-      if(p.caught){
-        const a = 1 - p.caughtT/0.35;
-        // blue absorption flash
-        ctx.fillStyle = `rgba(${BLUE},${0.5*a})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r*2.2*a, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = `rgba(90,98,104,${0.75*a})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-        ctx.fill();
-      } else {
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*2.4);
-        g.addColorStop(0, `rgba(150,158,165,${p.alpha*0.85})`);
-        g.addColorStop(0.5, `rgba(130,138,145,${p.alpha*0.4})`);
-        g.addColorStop(1, 'rgba(130,138,145,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r*2.4, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = `rgba(110,118,125,${p.alpha*0.8})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r*0.85, 0, Math.PI*2);
-        ctx.fill();
-      }
-    });
-
-    // very subtle light vignette to focus center
-    const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.35, W/2, H/2, Math.max(W,H)*0.75);
-    vg.addColorStop(0,'rgba(0,0,0,0)');
-    vg.addColorStop(1,'rgba(20,24,28,0.06)');
-    ctx.fillStyle = vg;
-    ctx.fillRect(0,0,W,H);
-  }
-
-  function roundRect(ctx, x, y, w, h, r){
-    r = Math.min(r, h/2, w/2);
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-  }
-
-  function updateReadout(){
-    const avg = fibers.length ? (fibers.reduce((s,f)=>s+f.charge,0)/fibers.length) : 0;
-    const pct = Math.max(0, Math.round(avg*100));
-    powerEl.textContent = pct;
-    if(pct <= 15) powerEl.classList.add('dead');
-    else powerEl.classList.remove('dead');
-    airflowEl.textContent = Math.round(airflow);
-    airbar.style.setProperty('--w', (airflow/10*100) + '%');
-  }
-
-  function loop(t){
-    if(!lastT) lastT = t;
-    let dt = (t - lastT)/1000;
-    lastT = t;
-    if(dt > 0.05) dt = 0.05;
-    if(!reduced) update(dt);
-    draw();
-    updateReadout();
-    requestAnimationFrame(loop);
-  }
-
-  function init(){
-    resize();
-    reset();
-    requestAnimationFrame(loop);
-  }
-
-  let resizeTimer;
-  window.addEventListener('resize', ()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 120);
-  });
-  replayBtn.addEventListener('click', ()=>{
-    reset();
-  });
-  init();
-})();
+    // Respect reduced-motion: ensure poster-only mode
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      video.pause();
+      video.removeAttribute('autoplay');
+    }
+  })();
 </script>
+
 </body>
 </html>
