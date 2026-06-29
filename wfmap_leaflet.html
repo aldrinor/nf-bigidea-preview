@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>North America Wildfire Smoke —Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --muted:#6b7178;
+    --hair:rgba(20,24,28,0.18);
+    --land:#eef0f2;
+    --faint:#aab2b8;
+    --red:#e23b3b;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;width:100%;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Space Mono', ui-monospace, monospace;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{position:fixed;inset:0;}
+  #map{position:absolute;inset:0;width:100%;height:100%;background:var(--bg);}
+
+  /* Overlays above Leaflet panes */
+  .caption{
+    position:absolute;left:16px;top:14px;z-index:1000;
+    font-size:10px;line-height:1.5;color:var(--muted);
+    max-width:60%;letter-spacing:0.02em;
+    pointer-events:none;
+    background:rgba(237,240,242,0.86);
+    backdrop-filter:blur(2px);
+    -webkit-backdrop-filter:blur(2px);
+    padding:7px 10px;
+    border-radius:6px;
+    border:1px solid rgba(20,24,28,0.08);
+  }
+  .caption b{color:var(--ink);font-weight:700;}
+  .caption .count{color:var(--ink);}
+
+  .status{
+    position:relative;left:auto;top:auto;z-index:1000;
+    font-size:10px;color:var(--muted);text-align:left;
+    line-height:1.5;letter-spacing:0.02em;
+    pointer-events:none;max-width:100%;
+    margin-top:2px;
+    display:block;
+  }
+  .status .err{color:#9a3b3b;}
+
+  .legend{
+    position:absolute;left:16px;bottom:16px;z-index:1000;
+    font-family:'Space Mono',monospace;
+    font-size:9px;line-height:1.6;color:var(--muted);
+    pointer-events:none;
+    background:rgba(237,240,242,0.86);
+    backdrop-filter:blur(2px);
+    -webkit-backdrop-filter:blur(2px);
+    padding:8px;
+    border-radius:6px;
+    border:1px solid rgba(20,24,28,0.08);
+  }
+  .legend .title{
+    letter-spacing:0.12em;text-transform:uppercase;
+    font-size:8.5px;color:var(--faint);margin-bottom:4px;
+  }
+  .legend .row{display:flex;align-items:center;gap:8px;margin:2px 0;}
+  .legend .sw{width:18px;height:10px;display:inline-block;border:1px solid rgba(20,24,28,0.12);}
+  .legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,0.9);}
+  .legend .sep{height:6px;}
+
+  .loader{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    z-index:1000;
+    font-size:11px;color:var(--muted);letter-spacing:0.04em;
+    text-align:center;pointer-events:none;
+  }
+  .loader .dot{
+    display:inline-block;width:5px;height:5px;border-radius:50%;
+    background:var(--ink);margin:0 2px;opacity:0.3;
+    animation:pulse 1.2s infinite ease-in-out;
+  }
+  .loader .dot:nth-child(2){animation-delay:0.15s;}
+  .loader .dot:nth-child(3){animation-delay:0.3s;}
+  @keyframes pulse{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:0.9;transform:scale(1.1);}}
+
+  /* Leaflet controls — keep them visible but restrained */
+  .leaflet-control-zoom a{
+    font-family:'Space Mono',monospace !important;
+    color:var(--ink) !important;
+    background:#f4f6f7 !important;
+    border-color:rgba(20,24,28,0.18) !important;
+  }
+  .leaflet-control-zoom a:hover{background:#fff !important;color:var(--red) !important;}
+  .leaflet-bar{
+    border:1px solid rgba(20,24,28,0.18) !important;
+    box-shadow:0 2px 8px rgba(20,24,28,0.08) !important;
+    border-radius:6px !important;
+    overflow:hidden;
+  }
+  .leaflet-control-zoom a:first-child{
+    border-top-left-radius:6px !important;
+    border-top-right-radius:6px !important;
+  }
+  .leaflet-control-zoom a:last-child{
+    border-bottom-left-radius:6px !important;
+    border-bottom-right-radius:6px !important;
+  }
+  .leaflet-control-attribution{
+    background:rgba(237,240,242,0.85) !important;
+    color:var(--muted) !important;
+    font-family:'Space Mono',monospace !important;
+    font-size:8px !important;
+    padding:1px 5px !important;
+  }
+  .leaflet-control-attribution a{color:var(--muted) !important;}
+
+  /* Restyle popups to match brand */
+  .leaflet-popup-content-wrapper{
+    background:#1f2327 !important;
+    color:#f4f6f7 !important;
+    font-family:'Space Mono',monospace !important;
+    font-size:11px !important;
+    line-height:1.5 !important;
+    border-radius:3px !important;
+    box-shadow:0 6px 18px rgba(20,24,28,0.28) !important;
+    padding:8px 10px !important;
+  }
+  .leaflet-popup-content{margin:0 !important;}
+  .leaflet-popup-content .pname{color:#f4f6f7;font-weight:700;margin-bottom:2px;letter-spacing:0.01em;}
+  .leaflet-popup-content .pval{color:#ff8a7a;font-weight:700;}
+  .leaflet-popup-content .punit{color:#aab2b8;}
+  .leaflet-popup-tip{background:#1f2327 !important;}
+  .leaflet-popup-close-button{color:#6b7178 !important;}
+  .leaflet-popup-close-button:hover{color:#ff8a7a !important;}
+
+  /* Tooltip (Leaflet) restyle */
+  .leaflet-tooltip{
+    background:#1f2327 !important;
+    color:#f4f6f7 !important;
+    font-family:'Space Mono',monospace !important;
+    font-size:11px !important;
+    border:none !important;
+    border-radius:2px !important;
+    box-shadow:0 4px 14px rgba(20,24,28,0.18) !important;
+    padding:6px 8px !important;
+  }
+  .leaflet-tooltip .v{color:#ff8a7a;font-weight:700;}
+  .leaflet-tooltip-top:before{border-top-color:#1f2327 !important;}
+
+  @media (max-width:560px){
+    .caption{max-width:80%;font-size:9px;}
+    .legend{font-size:9px;}
+    .status{max-width:100%;font-size:9px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map" role="img" aria-label="North America Wildfire Smoke and PM2.5 monitor map"></div>
+
+  <div class="caption">
+    <span id="caphead"><b>Near-real-time</b> · NOAA satellite smoke + EPA PM2.5 monitors · updated through the day</span><br>
+    <span id="counts"></span><br>
+    <span class="status" id="status"><span id="status-text">Loading live smoke data<span class="dot"></span><span class="dot"></span><span class="dot"></span></span></span>
+  </div>
+
+  <div class="legend" id="legend" style="display:none;">
+    <div class="title">Smoke density</div>
+    <div class="row"><span class="sw" style="background:rgba(168,133,95,0.14)"></span>Light</div>
+    <div class="row"><span class="sw" style="background:rgba(168,133,95,0.28)"></span>Medium</div>
+    <div class="row"><span class="sw" style="background:rgba(168,133,95,0.42)"></span>Heavy</div>
+    <div class="sep"></div>
+    <div class="title">PM2.5 &micro;g/m&sup3;</div>
+    <div class="row"><span class="dot" style="background:#c2c8cc"></span>0</div>
+    <div class="row"><span class="dot" style="background:#e0a0a0"></span>~35</div>
+    <div class="row"><span class="dot" style="background:#e23b3b"></span>75+</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  const statusEl = document.getElementById("status-text");
+  const countsEl = document.getElementById("counts");
+  const legendEl = document.getElementById("legend");
+
+  // ---- Map init ----
+  const map = L.map('map', {
+    scrollWheelZoom: true,
+    zoomControl: true,
+    worldCopyJump: false,
+    attributionControl: true
+  }).setView([39.5, -98.35], 4);
+
+  // Move zoom control to top-right so it doesn't overlap the caption
+  map.zoomControl.setPosition('topright');
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap &copy; CARTO'
+  }).addTo(map);
+
+  // Smoke layer below monitors
+  const smokeLayer = L.layerGroup().addTo(map);
+  const monitorLayer = L.layerGroup().addTo(map);
+
+  let _smoke = null;
+  let _monitors = null;
+  let _archiveDate = null;
+  let _smokeGeoJSON = null;
+  let _monitorMarkers = [];
+
+  // ---- Data functions (preserved) ----
+  function pm25Color(v){
+    if(v == null || isNaN(v)) return "#c2c8cc";
+    const t = Math.max(0, Math.min(1, v/75));
+    const stops = [
+      [0,   [194,200,204]],
+      [35,  [224,160,160]],
+      [75,  [226,59,59]]
+    ];
+    let a=stops[0], b=stops[stops.length-1];
+    for(let i=0;i<stops.length-1;i++){
+      if(v>=stops[i][0] && v<=stops[i+1][0]){a=stops[i];b=stops[i+1];break;}
+    }
+    const span = b[0]-a[0] || 1;
+    const k = (v-a[0])/span;
+    const r = Math.round(a[1][0]+(b[1][0]-a[1][0])*k);
+    const gg= Math.round(a[1][1]+(b[1][1]-a[1][1])*k);
+    const bl= Math.round(a[1][2]+(b[1][2]-a[1][2])*k);
+    return `rgb(${r},${gg},${bl})`;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function fetchJson(url){
+    const r = await fetch(url, {mode:"cors"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json();
+  }
+
+  async function fetchText(url){
+    const r = await fetch(url, {mode:"cors"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.text();
+  }
+
+  const FALLBACK = { url: "data/smoke_fallback_2023-06-07.geojson", label: "Jun 7, 2023" };
+
+  async function loadSmoke(){
+    const url = "https://services2.arcgis.com/C8EMgrsFcRFL6LrL/arcgis/rest/services/NOAA_Satellite_Smoke_Detection_(v1)/FeatureServer/0/query?where=1%3D1&outFields=Density&f=geojson&resultRecordCount=2000";
+    let live = null;
+    try{
+      const data = await fetchJson(url);
+      if(data && data.features) live = data;
+    }catch(e){ /* fall through to archive */ }
+
+    const heavy = live ? live.features.filter(f => {
+      const d = (f.properties && (f.properties.Density || f.properties.density) || "").toString();
+      return d === "Medium" || d === "Heavy";
+    }).length : 0;
+
+    if(live && heavy >= 3){
+      _smoke = live;
+      _archiveDate = null;
+    }else{
+      try{
+        const fb = await fetchJson(FALLBACK.url);
+        if(fb && fb.features){ _smoke = fb; _archiveDate = FALLBACK.label; }
+      }catch(e){
+        _smoke = live; _archiveDate = null;
+      }
+    }
+  }
+
+  function parseSitesDat(text){
+    const lines = text.split(/\r?\n/);
+    const sites = new Map();
+    for(const line of lines){
+      if(!line) continue;
+      const cols = line.split("|");
+      if(cols.length < 4) continue;
+      const aqsid = cols[0].trim();
+      if(!aqsid) continue;
+      let lat = parseFloat(cols[8]);
+      let lon = parseFloat(cols[9]);
+      let siteName = cols[6] ? cols[6].trim() : "";
+      if((isNaN(lat) || isNaN(lon)) && cols.length >= 6){
+        const cands = [];
+        for(let i=3;i<cols.length;i++){
+          const v = parseFloat(cols[i]);
+          if(!isNaN(v) && Math.abs(v) <= 90){
+            cands.push({i, v});
+          }
+        }
+        let latC=null, lonC=null;
+        for(const a of cands){
+          for(const b of cands){
+            if(a===b) continue;
+            if(Math.abs(a.v) <= 90 && Math.abs(b.v) <= 180 && Math.abs(b.v) > 90){
+              latC = a; lonC = b; break;
+            }
+          }
+          if(latC) break;
+        }
+        if(latC && lonC){
+          lat = latC.v; lon = lonC.v;
+        }
+      }
+      if(!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180){
+        sites.set(aqsid, {aqsid, lat, lon, siteName});
+      }
+    }
+    return sites;
+  }
+
+  function parseHourlyDat(text){
+    const lines = text.split(/\r?\n/);
+    const out = [];
+    for(const line of lines){
+      if(!line) continue;
+      const cols = line.split("|");
+      if(cols.length < 7) continue;
+      const aqsid = cols[2] ? cols[2].trim() : "";
+      const param = cols[5] ? cols[5].trim() : "";
+      if(param !== "PM2.5") continue;
+      let val = parseFloat(cols[7]);
+      let unit = cols[6] ? cols[6].trim() : "";
+      if(isNaN(val)){
+        for(let i=4;i<cols.length;i++){
+          const v = parseFloat(cols[i]);
+          if(!isNaN(v)){ val = v; break; }
+        }
+      }
+      if(!isNaN(val)){
+        out.push({aqsid, pm25: val, unit});
+      }
+    }
+    return out;
+  }
+
+  function utcHourStamp(d){
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}`;
+  }
+
+  async function loadMonitors(){
+    let sites;
+    try{
+      const txt = await fetchText("https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat");
+      sites = parseSitesDat(txt);
+    }catch(e){
+      sites = new Map();
+    }
+
+    const now = new Date();
+    let hourlyRows = null;
+    let usedStamp = null;
+    let bestCount = 0;
+    for(let back=0; back<=12; back++){
+      const d = new Date(now.getTime() - back*3600*1000);
+      const stamp = utcHourStamp(d);
+      const url = `https://files.airnowtech.org/airnow/today/HourlyData_${stamp}.dat`;
+      try{
+        const txt = await fetchText(url);
+        const rows = parseHourlyDat(txt);
+        if(rows.length > bestCount){
+          bestCount = rows.length;
+          hourlyRows = rows;
+          usedStamp = stamp;
+        }
+        if(bestCount >= 150) break;
+      }catch(e){
+        // continue to previous hour
+      }
+    }
+
+    if(!hourlyRows || sites.size === 0){
+      _monitors = [];
+      return usedStamp;
+    }
+
+    const monitors = [];
+    for(const row of hourlyRows){
+      const s = sites.get(row.aqsid);
+      if(s){
+        monitors.push({
+          aqsid: s.aqsid,
+          lat: s.lat,
+          lon: s.lon,
+          siteName: s.siteName || row.siteName || "",
+          pm25: row.pm25
+        });
+      }
+    }
+    _monitors = monitors;
+    return usedStamp;
+  }
+
+  // ---- Rendering (Leaflet) ----
+  function renderSmoke(){
+    smokeLayer.clearLayers();
+    if(!_smoke || !_smoke.features) return;
+    _smokeGeoJSON = L.geoJSON(_smoke, {
+      style: f => {
+        const d = (f.properties && (f.properties.Density || f.properties.density) || '').toString();
+        const op = d==='Heavy'?0.42 : d==='Medium'?0.28 : 0.14;
+        return {stroke:false, fillColor:'#a8855f', fillOpacity:op};
+      },
+      pane: 'overlayPane'
+    });
+    _smokeGeoJSON.addTo(smokeLayer);
+  }
+
+  function renderMonitors(){
+    monitorLayer.clearLayers();
+    _monitorMarkers = [];
+    if(!_monitors || _monitors.length===0) return;
+
+    let worst = null;
+    for(const m of _monitors){
+      if(m.pm25!=null && !isNaN(m.pm25)){
+        if(!worst || m.pm25 > worst.pm25) worst = m;
+      }
+    }
+
+    for(const m of _monitors){
+      if(m.lat==null || m.lon==null || m.pm25==null || isNaN(m.pm25)) continue;
+      const isWorst = (m === worst);
+      const v = m.pm25;
+
+      // Scale dot by PM2.5 so clean air recedes and hazards pop
+      let radius, fillOpacity, weight;
+      if(isWorst){
+        radius = 8;
+        fillOpacity = 0.92;
+        weight = 1.2;
+      } else if(v >= 55){
+        radius = 6;
+        fillOpacity = 0.92;
+        weight = 0.6;
+      } else if(v >= 35){
+        radius = 4.5;
+        fillOpacity = 0.92;
+        weight = 0.6;
+      } else if(v >= 12){
+        radius = 3;
+        fillOpacity = 0.7;
+        weight = 0.6;
+      } else {
+        radius = 2.0;
+        fillOpacity = 0.42;
+        weight = 0; // no outline for clean dots — avoids grid texture
+      }
+
+      const marker = L.circleMarker([m.lat, m.lon], {
+        radius: radius,
+        fillColor: pm25Color(m.pm25),
+        color:'#fff',
+        weight: weight,
+        fillOpacity: fillOpacity,
+        pane:'markerPane'
+      });
+      const name = (m.siteName && m.siteName.trim()) ? m.siteName : (m.aqsid || "site");
+      const html = `<div class="pname">${escapeHtml(name)}</div>` +
+                   `<div>PM2.5 — <span class="pval">${m.pm25}</span> <span class="punit">&micro;g/m&sup3;</span></div>`;
+      marker.bindPopup(html, {closeButton:true, maxWidth:240, minWidth:140});
+      marker.bindTooltip(html, {direction:'top', offset:[0,-4], opacity:1});
+      marker.addTo(monitorLayer);
+      _monitorMarkers.push(marker);
+    }
+  }
+
+  function updateCounts(){
+    const nSmoke = (_smoke && _smoke.features) ? _smoke.features.length : 0;
+    const nMon = _monitors ? _monitors.length : 0;
+    const capHead = document.getElementById("caphead");
+    if(_archiveDate){
+      if(capHead) capHead.innerHTML = `<b>${_archiveDate}</b> · a recent major wildfire-smoke event · NOAA satellite smoke + live EPA PM2.5 monitors`;
+      countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · ${nMon} air-quality monitors live`;
+    } else if(nSmoke > 0){
+      countsEl.innerHTML = `<span class="count">${nSmoke}</span> smoke plumes · <span class="count">${nMon}</span> air-quality monitors`;
+    } else {
+      countsEl.innerHTML = `No active Wildfire Smoke detected · <span class="count">${nMon}</span> air-quality monitors reporting`;
+    }
+  }
+
+  function setStatus(html, isError){
+    statusEl.innerHTML = html;
+    const parent = document.getElementById("status");
+    if(isError) parent.classList.add("err"); else parent.classList.remove("err");
+  }
+
+  // ---- Main load ----
+  async function load(){
+    setStatus('Loading live smoke data<span class="dot"></span><span class="dot"></span><span class="dot"></span>');
+    const results = await Promise.allSettled([
+      loadSmoke(),
+      loadMonitors()
+    ]);
+
+    const smokeR = results[0];
+    const monR   = results[1];
+
+    renderSmoke();
+    renderMonitors();
+    updateCounts();
+    legendEl.style.display = "block";
+
+    const notes = [];
+    if(smokeR.status === "rejected" || !_smoke) notes.push("smoke feed unavailable");
+    if(monR.status === "rejected" || !_monitors || _monitors.length === 0) notes.push("PM2.5 feed unavailable");
+    if(notes.length){
+      setStatus(`<span class="err">${notes.join(" · ")}</span>`, true);
+    }else{
+      setStatus("");
+    }
+
+    // Fit bounds to smoke + monitor extent if reasonable, else keep US view
+    try{
+      let bounds = null;
+      if(_smoke && _smoke.features && _smoke.features.length){
+        const gj = L.geoJSON(_smoke);
+        const b = gj.getBounds();
+        if(b.isValid()) bounds = b;
+      }
+      if(_monitors && _monitors.length){
+        const mb = L.latLngBounds(
+          _monitors.filter(m => m.lat!=null && m.lon!=null).map(m => [m.lat, m.lon])
+        );
+        if(mb.isValid()){
+          bounds = bounds ? bounds.extend(mb) : mb;
+        }
+      }
+      if(bounds){
+        const padded = bounds.pad(0.08);
+        const z = map.getBoundsZoom(padded, false);
+        if(z >= 3 && z <= 9){
+          map.fitBounds(padded, {animate:false});
+        }
+      }
+    }catch(e){ /* keep default US view */ }
+  }
+
+  // ---- Resize ----
+  let resizeTimer;
+  function onResize(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      map.invalidateSize();
+    }, 120);
+  }
+  window.addEventListener("resize", onResize);
+
+  // init
+  load();
+
+})();
+</script>
+</body>
+</html>

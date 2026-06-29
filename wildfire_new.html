@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wildfire Smoke — NanoFlashing Science Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --muted:#828a90;
+    --faint:#aab2b8;
+    --hair:rgba(20,24,28,0.10);
+    --red:#e23b3b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--red);color:#fff}
+
+  /* Header */
+  header{
+    position:sticky;top:0;z-index:50;
+    height:54px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 6vw;
+    background:rgba(237,240,242,0.85);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--hair);
+  }
+  header img{height:22px;opacity:.9;display:block}
+  .meta{
+    font-family:'Space Mono',monospace;
+    font-size:11px;color:var(--muted);
+    letter-spacing:.02em;
+  }
+
+  /* Masthead */
+  .masthead{
+    max-width:1280px;margin:0 auto;
+    padding:12vh 6vw 8vh;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;letter-spacing:.08em;
+    color:var(--muted);text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:18px;
+  }
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--red);display:inline-block;
+  }
+  .masthead h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(30px,4.4vw,56px);
+    letter-spacing:-.02em;
+    line-height:1.05;
+    margin-bottom:18px;
+  }
+  .deck{
+    color:var(--muted);
+    opacity:.6;
+    font-size:17px;line-height:1.5;
+    max-width:640px;
+  }
+
+  /* Sections */
+  .sec{
+    max-width:1280px;margin:0 auto;
+    padding:9vh 6vw;
+    display:grid;
+    grid-template-columns:1.02fr 0.98fr;
+    gap:5vw;
+    align-items:center;
+  }
+  .sec--flip .text{order:2}
+  .sec--flip .fig{order:1}
+  .text{max-width:480px}
+  .kicker{
+    font-family:'Space Mono',monospace;
+    font-size:11px;letter-spacing:.06em;
+    color:var(--muted);
+    margin-bottom:14px;
+    text-transform:uppercase;
+  }
+  .text h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(24px,2.6vw,34px);
+    letter-spacing:-.01em;
+    line-height:1.15;
+    margin-bottom:20px;
+  }
+  .text p{
+    font-size:17px;line-height:1.6;
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+  sup a{color:var(--red);font-size:.7em;font-weight:500}
+  sup{font-family:'Space Mono',monospace;line-height:0}
+
+  .pullstat{
+    margin-top:28px;
+    padding-top:24px;
+    border-top:1px solid var(--hair);
+  }
+  .pullstat .num{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(40px,5vw,64px);
+    color:var(--red);
+    line-height:1;
+    letter-spacing:-.02em;
+    margin-bottom:10px;
+  }
+  .pullstat .cap{
+    font-family:'Space Mono',monospace;
+    font-size:12px;line-height:1.5;
+    color:var(--muted);
+    max-width:380px;
+  }
+
+  /* List in S3 */
+  .intro-line{
+    font-family:'Space Mono',monospace;
+    font-size:12px;color:var(--muted);
+    margin:22px 0 14px;
+    letter-spacing:.02em;
+  }
+  ul.assoc{
+    list-style:none;
+    display:flex;flex-direction:column;gap:12px;
+  }
+  ul.assoc li{
+    font-size:15px;line-height:1.5;
+    padding-left:0;
+  }
+  ul.assoc .lbl{
+    font-family:'Space Mono',monospace;
+    font-size:11px;color:var(--red);
+    letter-spacing:.04em;text-transform:uppercase;
+    display:block;margin-bottom:2px;
+  }
+
+  /* Handoff note */
+  .note{
+    margin-top:24px;
+    padding:18px 20px;
+    background:rgba(226,59,59,0.04);
+    border-left:3px solid var(--red);
+    border-radius:4px;
+    font-size:15px;line-height:1.55;
+    color:var(--ink);
+  }
+
+  /* Figure — consistent frame across all sections */
+  .fig{
+    width:100%;
+    border:1px solid var(--hair);
+    border-radius:8px;
+    background:var(--bg);
+    padding:10px;
+  }
+  .fig iframe{
+    width:100%;
+    border:none;
+    border-radius:4px;
+    background:var(--bg);
+    display:block;
+  }
+  .fig.map iframe{height:min(74vh,640px);min-height:420px}
+  .fig.lung iframe{height:min(78vh,720px);min-height:460px}
+  .fig.chart iframe{height:min(56vh,460px)}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* References */
+  .refs{
+    max-width:1280px;margin:0 auto;
+    padding:calc(9vh + 64px) 6vw 6vh;
+    border-top:1px solid var(--hair);
+  }
+  .refs .eyebrow{margin-bottom:18px}
+  .refs h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(24px,2.6vw,34px);
+    letter-spacing:-.01em;
+    margin-bottom:32px;
+  }
+  .refs ol{list-style:none;counter-reset:ref}
+  .refs li{
+    counter-increment:ref;
+    display:grid;
+    grid-template-columns:36px 1fr auto;
+    gap:16px;align-items:baseline;
+    padding:14px 0;
+    border-bottom:1px solid var(--hair);
+    font-size:14px;line-height:1.5;
+  }
+  .refs li::before{
+    content:counter(ref,decimal-leading-zero);
+    font-family:'Space Mono',monospace;
+    font-size:11px;color:var(--faint);
+  }
+  .refs li > span:first-child{display:none}
+  .cite{color:var(--ink)}
+  .src{color:var(--muted);font-style:italic}
+  .link{
+    font-family:'Space Mono',monospace;
+    font-size:11px;color:var(--muted);
+    white-space:nowrap;
+    transition:color .2s;
+  }
+  .link:hover{color:var(--red)}
+
+  /* Footer */
+  footer{
+    max-width:1280px;margin:0 auto;
+    padding:4vh 6vw;
+    border-top:1px solid var(--hair);
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:'Space Mono',monospace;
+    font-size:11px;color:var(--muted);
+    letter-spacing:.02em;
+  }
+  footer .right{display:flex;gap:24px;align-items:center}
+  .footer-title{text-transform:none;color:var(--ink)}
+
+  /* Responsive */
+  @media (max-width:860px){
+    header{padding:0 5vw}
+    header img{height:20px}
+    .meta{display:none}
+    .masthead{padding:8vh 5vw 5vh}
+    .sec{
+      grid-template-columns:1fr;
+      gap:32px;
+      padding:6vh 5vw;
+    }
+    .sec--flip .text{order:2}
+    .sec--flip .fig{order:1}
+    .text{max-width:100%}
+    .fig.map iframe{height:min(60vh,460px);min-height:340px}
+    .fig.lung iframe{height:min(60vh,520px);min-height:360px}
+    .refs{padding:calc(6vh + 48px) 5vw 4vh}
+    .refs li{grid-template-columns:28px 1fr;gap:10px}
+    .refs li .link{grid-column:2;margin-top:4px}
+    footer{flex-direction:column;gap:12px;align-items:flex-start}
+    footer .right{gap:16px;flex-wrap:wrap}
+  }
+  @media (max-width:480px){
+    .meta{display:none}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none'">
+  <div class="meta">Wildfire Smoke · Module 01 / 05</div>
+</header>
+
+<section class="masthead">
+  <div class="eyebrow">Air · Wildfire Smoke<span class="dot"></span></div>
+  <h1>Wildfire Smoke</h1>
+  <p class="deck">Where the smoke is, what it does in the body, and why a filter's charge matters.</p>
+</section>
+
+<!-- S1 — figure RIGHT -->
+<section class="sec">
+  <div class="text reveal">
+    <div class="kicker">01 — Where it is</div>
+    <h2>Smoke is no longer a regional problem</h2>
+    <p>A single large wildfire emits fine particles in enormous numbers, and prevailing winds carry them hundreds to thousands of kilometres. Smoke from fires in the West now reaches the eastern United States and Canada on a regular basis.</p>
+    <p>The map shows current wildfire smoke across North America, from NOAA satellite analysis and EPA air-quality monitors.<sup><a href="#ref-2">2</a></sup> Drag to pan, scroll to zoom from the continent down to your city, and click a monitor to see its measured air quality.</p>
+    <div class="pullstat">
+      <div class="num">95–100%</div>
+      <div class="cap">of the contiguous U.S. population was exposed to wildfire smoke at some point in a recent year.<sup><a href="#ref-3">3</a></sup></div>
+    </div>
+  </div>
+  <div class="fig map reveal">
+    <iframe src="wfmap_leaflet.html" loading="lazy" title="Wildfire smoke map"></iframe>
+  </div>
+</section>
+
+<!-- S2 — figure LEFT -->
+<section class="sec sec--flip">
+  <div class="text reveal">
+    <div class="kicker">02 — What it is</div>
+    <h2>Most of it is smaller than 2.5 microns</h2>
+    <p>Wildfire smoke is mostly soot — fine and ultrafine particles, most smaller than 2.5 micrometers across. A PM2.5 particle is roughly one-thirtieth the diameter of a human hair.<sup><a href="#ref-5">5</a></sup> Most of these particles carry an electric charge,<sup><a href="#ref-1">1</a></sup> which is how electrostatic air filters pull them from the air.</p>
+  </div>
+  <div class="fig chart reveal">
+    <iframe src="wf_chart_size.html" loading="lazy" title="Particle size chart"></iframe>
+  </div>
+</section>
+
+<!-- S3 — figure RIGHT -->
+<section class="sec">
+  <div class="text reveal">
+    <div class="kicker">03 — What it does</div>
+    <h2>Small enough to reach the blood</h2>
+    <p>Particles this small deposit deep in the lungs, and a fraction pass through the alveolar wall into the bloodstream.<sup><a href="#ref-6">6</a></sup> The smallest particles are the ones of greatest concern.</p>
+    <div class="intro-line">Documented associations with wildfire-smoke fine-particle exposure:</div>
+    <ul class="assoc">
+      <li><span class="lbl">Children</span>Up to about ten times the increase in pediatric respiratory visits seen with equal-mass PM2.5 from other sources. (UC San Diego, Pediatrics, 2021)<sup><a href="#ref-7">7</a></sup></li>
+      <li><span class="lbl">Pregnancy</span>Higher odds of preterm birth. (UC Berkeley &amp; UCSF, Environment International, 2024)<sup><a href="#ref-8">8</a></sup></li>
+      <li><span class="lbl">Cognition</span>Lower student test scores after a school-year of exposure. (Stanford, Nature Sustainability, 2022)<sup><a href="#ref-9">9</a></sup></li>
+      <li><span class="lbl">Cardiovascular</span>The EPA finds a causal relationship between fine-particle exposure and heart attack and stroke. (EPA, 2019)<sup><a href="#ref-6">6</a></sup></li>
+    </ul>
+  </div>
+  <div class="fig lung reveal">
+    <iframe src="wf_lung.html" loading="lazy" title="Animated lung"></iframe>
+  </div>
+</section>
+
+<!-- S4 — figure LEFT -->
+<section class="sec sec--flip">
+  <div class="text reveal">
+    <div class="kicker">04 — The toll</div>
+    <h2>A rising death toll</h2>
+    <p>Smoke-related fine-particle pollution is estimated to cause about 41,000 premature U.S. deaths per year (2011–2020 average), projected to reach about 71,000 per year by 2050 under a high-warming scenario — roughly 1.9 million cumulative deaths between 2026 and 2055.<sup><a href="#ref-4">4</a></sup></p>
+  </div>
+  <div class="fig chart reveal">
+    <iframe src="wf_chart_mortality.html" loading="lazy" title="Mortality chart"></iframe>
+  </div>
+</section>
+
+<!-- S5 — figure RIGHT -->
+<section class="sec">
+  <div class="text reveal">
+    <div class="kicker">05 — The filter problem</div>
+    <h2>A charge that fades under smoke</h2>
+    <p>Federal guidance recommends a MERV-13 or higher filter during smoke events.<sup><a href="#ref-11">11</a></sup> Many are electret media: they hold a manufactured static charge that adds to mechanical filtration.</p>
+    <p>In EPA testing, a charged filter's clean-air delivery rate fell about 95 percent after roughly 10 milligrams of smoke had deposited — a few hours of a moderate event — while airflow resistance rose only about 7 percent.<sup><a href="#ref-12">12</a></sup> Because the pressure barely changes, there is no clog and no usual sign that the filter is spent.</p>
+    <p>A filter can rate well as MERV with its charge intact, and markedly lower as MERV-A once that charge is neutralized (ASHRAE 52.2, Appendix J).<sup><a href="#ref-13">13</a></sup></p>
+    <div class="note">The question for any filter is therefore not whether it begins with a charge, but whether that charge persists under smoke loading.</div>
+    <div class="pullstat">
+      <div class="num">−95%</div>
+      <div class="cap">clean-air delivery after ~10 mg of smoke — while airflow resistance rose only about 7%.<sup><a href="#ref-12">12</a></sup></div>
+    </div>
+  </div>
+  <div class="fig chart reveal">
+    <iframe src="wf_chart_filter.html" loading="lazy" title="Filter CADR chart"></iframe>
+  </div>
+</section>
+
+<section class="refs" id="refs">
+  <div class="eyebrow">Sources<span class="dot"></span>13 references</div>
+  <h2>References</h2>
+  <ol>
+    <li id="ref-1"><span></span><span class="cite">Sorokin et al., <span class="src">Atmospheric Chemistry and Physics, 2003</span></span><a class="link" href="https://acp.copernicus.org/articles/3/325/2003/" target="_blank" rel="noopener">acp.copernicus.org ↗</a></li>
+    <li id="ref-2"><span></span><span class="cite">NOAA Hazard Mapping System; EPA AirNow</span><a class="link" href="https://www.ospo.noaa.gov/products/land/hms.html" target="_blank" rel="noopener">ospo.noaa.gov ↗</a></li>
+    <li id="ref-3"><span></span><span class="cite">Zhang et al., <span class="src">Environ. Sci. Technol.</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-4"><span></span><span class="cite">Qiu et al., <span class="src">Nature, 2025</span></span><a class="link" href="https://www.nature.com/articles/s41586-025-09611-w" target="_blank" rel="noopener">nature.com ↗</a></li>
+    <li id="ref-5"><span></span><span class="cite">US EPA, <span class="src">Particulate Matter Basics</span></span><a class="link" href="https://www.epa.gov/pm-pollution/particulate-matter-pm-basics" target="_blank" rel="noopener">epa.gov ↗</a></li>
+    <li id="ref-6"><span></span><span class="cite">US EPA, <span class="src">Integrated Science Assessment for PM, 2019</span></span><a class="link" href="https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease" target="_blank" rel="noopener">epa.gov ↗</a></li>
+    <li id="ref-7"><span></span><span class="cite">Aguilera et al., <span class="src">Pediatrics, 2021</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9298841/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-8"><span></span><span class="cite">Picciotto, Padula et al., <span class="src">Environment International, 2024</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-9"><span></span><span class="cite">Wen &amp; Burke, <span class="src">Nature Sustainability, 2022</span></span><a class="link" href="https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf" target="_blank" rel="noopener">web.stanford.edu ↗</a></li>
+    <li id="ref-10"><span></span><span class="cite">Kleeman et al. (UC Davis), <span class="src">Communications Earth &amp; Environment, 2026</span></span><a class="link" href="https://www.ucdavis.edu/climate/news/chromium-6-nanosilver-detected-la-fire-cleanup-zones" target="_blank" rel="noopener">ucdavis.edu ↗</a></li>
+    <li id="ref-11"><span></span><span class="cite">US EPA, <span class="src">Preparing for Smoke and Heat</span></span><a class="link" href="https://www.epa.gov/wildfire-smoke-course/preparing-smoke-and-heat" target="_blank" rel="noopener">epa.gov ↗</a></li>
+    <li id="ref-12"><span></span><span class="cite">Holder et al., <span class="src">Indoor Air, 2022</span></span><a class="link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov ↗</a></li>
+    <li id="ref-13"><span></span><span class="cite">ANSI/ASHRAE Standard 52.2, Appendix J</span><a class="link" href="https://www.hpac.com/iaq-ventilation/article/20925695/updated-standard-for-air-filter-testing" target="_blank" rel="noopener">hpac.com ↗</a></li>
+  </ol>
+</section>
+
+<footer>
+  <div>NanoFlashing · Science Desk</div>
+  <div class="right"><span>Module 01 / 05</span><span class="footer-title">Wildfire Smoke</span><span>2026</span></div>
+</footer>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var els = document.querySelectorAll('.reveal');
+    if(reduce || !('IntersectionObserver' in window)){
+      els.forEach(function(el){ el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+  })();
+</script>
+
+</body>
+</html>
