@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Three years of Wildfire Smoke</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070b10;
+    --panel:rgba(12,18,24,0.78);
+    --panel-edge:rgba(120,180,200,0.14);
+    --ink:#e8eef2;
+    --ink-dim:#8a9aa4;
+    --ink-faint:#56636b;
+    --cyan:#5fd4e6;
+    --red:#e23b3b;
+    --warm:#ff8a7a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;}
+  body{overflow-x:hidden;}
+
+  .stage{position:relative;width:100%;height:88vh;min-height:560px;overflow:hidden;background:#05080b;}
+  #map{position:absolute;inset:0;width:100%;height:100%;}
+
+  /* subtle vignette so the map edges feel intentional */
+  .stage::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    box-shadow:inset 0 0 180px 40px rgba(0,0,0,0.55);
+    z-index:5;
+  }
+
+  /* ---- top-left title ---- */
+  .titleblock{
+    position:absolute;top:22px;left:26px;z-index:20;pointer-events:none;
+    max-width:60vw;
+  }
+  .kicker{
+    font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.18em;
+    color:var(--cyan);margin:0 0 6px 0;
+  }
+  .kicker .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-right:8px;vertical-align:middle;box-shadow:0 0 8px var(--cyan);}
+  .title{
+    font-family:'Instrument Serif',serif;font-weight:400;
+    font-size:clamp(28px,4.2vw,52px);line-height:1.02;margin:0;
+    color:var(--ink);letter-spacing:-0.01em;
+  }
+  .title em{font-style:italic;color:var(--warm);}
+
+  /* ---- legend bottom-left ---- */
+  .legend{
+    position:absolute;left:26px;bottom:24px;z-index:20;
+    background:var(--panel);border:1px solid var(--panel-edge);
+    border-radius:10px;padding:12px 14px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    font-family:'Space Mono',monospace;font-size:12.5px;color:var(--ink-dim);
+    letter-spacing:0.02em;
+    max-width:240px;
+  }
+  .legend .lbl{color:var(--ink-dim);letter-spacing:0.02em;display:block;}
+  .legend .grad{
+    width:120px;height:8px;border-radius:4px;margin-top:5px;
+    background:linear-gradient(90deg, rgba(95,212,230,0.15) 0%, #5fd4e6 30%, #f4f1e8 55%, #e23b3b 100%);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+  .legend .scale-lbl{display:flex;justify-content:space-between;width:120px;margin-top:2px;color:var(--ink-faint);font-size:9.5px;letter-spacing:0.02em;}
+  .legend .pmkey{margin-top:10px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
+  .legend .pmrow{display:flex;align-items:center;gap:9px;}
+  .legend .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 6px rgba(0,0,0,0.4);}
+  .legend .pmhead{margin-bottom:3px;}
+
+  /* ---- source bottom-right ---- */
+  .source{
+    position:absolute;right:22px;bottom:22px;z-index:20;
+    font-family:'Space Mono',monospace;font-size:10.5px;color:var(--ink-faint);
+    letter-spacing:0.04em;
+  }
+  .source a{color:var(--ink-dim);text-decoration:none;border-bottom:1px solid rgba(120,180,200,0.2);}
+  .source a:hover{color:var(--cyan);border-color:var(--cyan);}
+
+  /* ---- time control bottom-center ---- */
+  .timebar{
+    position:absolute;left:50%;bottom:24px;transform:translateX(-50%);
+    z-index:25;width:min(680px,86vw);
+    background:rgba(8,11,14,0.72);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px;padding:14px 18px 12px;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .timebar .top{display:flex;align-items:center;gap:14px;}
+  .playbtn{
+    flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+    background:rgba(95,212,230,0.12);border:1px solid rgba(95,212,230,0.4);
+    color:var(--cyan);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .2s, transform .15s;
+  }
+  .playbtn:hover{background:rgba(95,212,230,0.22);}
+  .playbtn:active{transform:scale(0.94);}
+  .playbtn svg{width:13px;height:13px;fill:var(--cyan);}
+  .monthlabel{
+    font-family:'Space Mono',monospace;font-size:13px;color:var(--ink);
+    letter-spacing:0.02em;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .monthlabel .accent{color:var(--cyan);}
+  .monthlabel .sub{color:var(--ink-faint);font-size:10.5px;margin-left:8px;letter-spacing:0.06em;}
+
+  .sliderwrap{position:relative;height:22px;display:flex;align-items:center;}
+  .slider{
+    -webkit-appearance:none;appearance:none;width:100%;height:3px;
+    background:linear-gradient(90deg, rgba(95,212,230,0.5) 0%, rgba(95,212,230,0.5) var(--p,0%), rgba(255,255,255,0.08) var(--p,0%));
+    border-radius:3px;outline:none;cursor:pointer;margin:0;
+  }
+  .slider::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--cyan);border:2px solid #0a1014;cursor:grab;
+    box-shadow:0 0 0 1px var(--cyan), 0 0 12px rgba(95,212,230,0.6);
+    margin-top:0;
+  }
+  .slider::-moz-range-thumb{
+    width:14px;height:14px;border-radius:50%;background:var(--cyan);
+    border:2px solid #0a1014;cursor:grab;box-shadow:0 0 0 1px var(--cyan),0 0 12px rgba(95,212,230,0.6);
+  }
+  .slider::-webkit-slider-runnable-track{height:3px;background:transparent;}
+  .slider::-moz-range-track{height:3px;background:transparent;}
+
+  .ticks{
+    display:flex;justify-content:space-between;
+    font-family:'Space Mono',monospace;font-size:9.5px;color:var(--ink-faint);
+    letter-spacing:0.04em;margin-top:2px;
+  }
+
+  /* loading hint */
+  .hint{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    z-index:15;font-family:'Space Mono',monospace;font-size:11px;color:var(--ink-faint);
+    letter-spacing:0.08em;pointer-events:none;
+    transition:opacity .6s;
+  }
+  .hint.fade{opacity:0;}
+
+  /* MapLibre popup restyle */
+  .maplibregl-popup-content{
+    background:#0b1216 !important;
+    color:var(--ink);
+    border:1px solid rgba(95,212,230,0.25);
+    border-radius:8px;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    padding:10px 12px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.6);
+    line-height:1.5;
+  }
+  .maplibregl-popup-tip{display:none !important;}
+  .maplibregl-popup-anchor-top .maplibregl-popup-content,
+  .maplibregl-popup-anchor-bottom .maplibregl-popup-content{margin:0;}
+  .popup-name{color:var(--ink);margin-bottom:4px;letter-spacing:0.02em;}
+  .popup-val{color:var(--warm);font-weight:700;}
+  .popup-unit{color:var(--ink-faint);font-size:10px;margin-left:2px;}
+
+  .maplibregl-ctrl-group{background:#0b1216 !important;border:1px solid var(--panel-edge) !important;border-radius:8px !important;overflow:hidden;}
+  .maplibregl-ctrl-group button{background:#0b1216 !important;}
+  .maplibregl-ctrl-group button:hover{background:#13202a !important;}
+  .maplibregl-ctrl button .maplibregl-ctrl-icon{filter:invert(0.9) hue-rotate(180deg) brightness(1.1);}
+  .maplibregl-ctrl button{
+    width:32px !important;height:32px !important;
+  }
+  .maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon{background-image:none;}
+  .maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon{background-image:none;}
+  .maplibregl-ctrl button span{color:var(--ink-dim);font-family:'Space Mono',monospace;font-size:16px;font-weight:400;}
+
+  @media (max-width:680px){
+    .titleblock{top:16px;left:16px;}
+    .legend{left:14px;bottom:14px;padding:10px 12px;max-width:200px;}
+    .legend .grad,.legend .scale-lbl{width:96px;}
+    .source{right:14px;bottom:14px;font-size:9.5px;}
+    .timebar{width:92vw;bottom:14px;padding:12px 14px 10px;}
+    .stage{height:80vh;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div id="map"></div>
+
+  <div class="titleblock">
+    <p class="kicker"><span class="dot"></span>Where it goes</p>
+    <h1 class="title">Three years of <em>Wildfire Smoke</em></h1>
+  </div>
+
+  <div class="hint" id="hint">Loading smoke field…</div>
+
+  <div class="legend">
+    <span class="lbl">Smoke days, 2023–2025</span>
+    <div class="grad"></div>
+    <div class="scale-lbl"><span>less</span><span>more</span></div>
+    <div class="pmkey">
+      <span class="lbl pmhead">PM2.5 now · µg/m³</span>
+      <div class="pmrow"><span class="dot" style="background:#c2c8cc;"></span><span class="lbl">clean · 0</span></div>
+      <div class="pmrow"><span class="dot" style="background:#e0a0a0;"></span><span class="lbl">moderate · ~35</span></div>
+      <div class="pmrow"><span class="dot" style="background:#e23b3b;box-shadow:0 0 8px rgba(226,59,59,0.6);"></span><span class="lbl">heavy · 75+</span></div>
+    </div>
+  </div>
+
+  <div class="source">
+    <a href="https://www.ospo.noaa.gov/products/land/hms.html" target="_blank" rel="noopener">NOAA HMS smoke</a> · EPA AirNow
+  </div>
+
+  <div class="timebar">
+    <div class="top">
+      <button class="playbtn" id="playbtn" aria-label="Play months">
+        <svg viewBox="0 0 24 24" id="playicon"><path d="M6 4l14 8-14 8z"/></svg>
+      </button>
+      <div class="monthlabel" id="monthlabel">
+        <span class="accent">Smoke days</span><span class="sub">2023–2025 · all months</span>
+      </div>
+    </div>
+    <div class="sliderwrap">
+      <input type="range" min="0" max="36" value="0" step="1" class="slider" id="slider" />
+    </div>
+    <div class="ticks">
+      <span>2023</span><span>2024</span><span>2025</span><span>all</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Data helpers (ported verbatim from spec)
+   ============================================================ */
+function pm25Color(v){ if(v==null||isNaN(v)) return "#c2c8cc"; const stops=[[0,[194,200,204]],[35,[224,160,160]],[75,[226,59,59]]]; let a=stops[0],b=stops[2]; for(let i=0;i<2;i++){if(v>=stops[i][0]&&v<=stops[i+1][0]){a=stops[i];b=stops[i+1];break;}} const s=(b[0]-a[0])||1,k=(v-a[0])/s; const r=Math.round(a[1][0]+(b[1][0]-a[1][0])*k),g=Math.round(a[1][1]+(b[1][1]-a[1][1])*k),bl=Math.round(a[1][2]+(b[1][2]-a[1][2])*k); return `rgb(${r},${g},${bl})`; }
+async function fetchText(u){const r=await fetch(u,{mode:"cors"});if(!r.ok)throw new Error("HTTP "+r.status);return r.text();}
+function utcHourStamp(d){const p=n=>String(n).padStart(2,"0");return `${d.getUTCFullYear()}${p(d.getUTCMonth()+1)}${p(d.getUTCDate())}${p(d.getUTCHours())}`;}
+function parseSitesDat(text){const lines=text.split(/\r?\n/);const sites=new Map();for(const line of lines){if(!line)continue;const c=line.split("|");if(c.length<4)continue;const id=c[0].trim();if(!id)continue;let lat=parseFloat(c[8]),lon=parseFloat(c[9]),nm=c[6]?c[6].trim():"";if(!isNaN(lat)&&!isNaN(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)sites.set(id,{aqsid:id,lat,lon,siteName:nm});}return sites;}
+function parseHourlyDat(text){const lines=text.split(/\r?\n/);const out=[];for(const line of lines){if(!line)continue;const c=line.split("|");if(c.length<7)continue;const id=c[2]?c[2].trim():"";const param=c[5]?c[5].trim():"";if(param!=="PM2.5")continue;let val=parseFloat(c[7]);if(!isNaN(val))out.push({aqsid:id,pm25:val});}return out;}
+async function loadMonitors(){let sites;try{sites=parseSitesDat(await fetchText("https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat"));}catch(e){sites=new Map();}const now=new Date();let rows=null,best=0;for(let back=0;back<=12;back++){const d=new Date(now.getTime()-back*3600*1000);try{const t=await fetchText(`https://files.airnowtech.org/airnow/today/HourlyData_${utcHourStamp(d)}.dat`);const r=parseHourlyDat(t);if(r.length>best){best=r.length;rows=r;}if(best>=150)break;}catch(e){}}if(!rows||!sites.size)return[];const out=[];for(const r of rows){const s=sites.get(r.aqsid);if(s)out.push({lat:s.lat,lon:s.lon,siteName:s.siteName,pm25:r.pm25});}return out;}
+
+/* ============================================================
+   Map init
+   ============================================================ */
+const map = new maplibregl.Map({
+  container:'map',
+  style:'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+  center:[-98.5,41],
+  zoom:3.2,
+  pitch:0,
+  dragRotate:false,
+  scrollZoom:true,
+  attributionControl:false
+});
+
+map.addControl(new maplibregl.NavigationControl({showCompass:false, visualizePitch:false}), 'top-right');
+map.scrollZoom.enable();
+map.touchZoomRotate.enable();
+map.touchZoomRotate.disableRotation();
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+let smokeMonthly = null;     // raw monthly rings
+let smokeMeta = null;        // bbox / days
+let monitorSource = null;
+let popup = null;
+let playing = false;
+let playTimer = null;
+
+/* ============================================================
+   After base style loads: add smoke layers
+   ============================================================ */
+map.on('load', async () => {
+  // try to fetch meta + monthly in parallel; fail quietly
+  const metaP = fetch('data/smoke_freq_meta.json').then(r=>r.ok?r.json():null).catch(()=>null);
+  const monthlyP = fetch('data/smoke_monthly.json').then(r=>r.ok?r.json():null).catch(()=>null);
+
+  smokeMeta = await metaP;
+  smokeMonthly = await monthlyP;
+
+  // ---- frequency heatmap raster ----
+  if (smokeMeta && Array.isArray(smokeMeta.bbox) && smokeMeta.bbox.length===4) {
+    const [w,s,e,n] = smokeMeta.bbox;
+    map.addSource('smoke-freq', {
+      type:'image',
+      url:'data/smoke_freq.png',
+      coordinates:[
+        [w,n],[e,n],[e,s],[w,s]
+      ]
+    });
+    map.addLayer({
+      id:'smoke-freq',
+      type:'raster',
+      source:'smoke-freq',
+      paint:{
+        'raster-opacity':0.85,
+        'raster-resampling':'linear',
+        'raster-fade-duration':300
+      }
+    });
+  } else {
+    // fallback bbox if meta missing
+    const [w,s,e,n] = [-130,24,-60,56];
+    map.addSource('smoke-freq', {
+      type:'image',
+      url:'data/smoke_freq.png',
+      coordinates:[[w,n],[e,n],[e,s],[w,s]]
+    });
+    map.addLayer({
+      id:'smoke-freq', type:'raster', source:'smoke-freq',
+      paint:{'raster-opacity':0.85,'raster-resampling':'linear'}
+    });
+  }
+
+  // ---- monthly smoke fill (two stacked for soft blur feel) ----
+  map.addSource('smoke-month', {
+    type:'geojson',
+    data:{type:'FeatureCollection',features:[]}
+  });
+  // soft halo underneath
+  map.addLayer({
+    id:'smoke-month-halo',
+    type:'fill',
+    source:'smoke-month',
+    paint:{
+      'fill-color':'#6f8aa6',
+      'fill-opacity':0.18
+    },
+    layout:{visibility:'none'}
+  });
+  // main fill
+  map.addLayer({
+    id:'smoke-month-fill',
+    type:'fill',
+    source:'smoke-month',
+    paint:{
+      'fill-color':'#6f8aa6',
+      'fill-opacity':0.5
+    },
+    layout:{visibility:'none'}
+  });
+
+  // ---- PM2.5 monitors ----
+  // Zoom-gated: at continental view (zoom < 5) show only elevated (pm25 >= 35);
+  // at zoom >= 5 show the full live network. Click→popup works on all.
+  map.addSource('monitors', {
+    type:'geojson',
+    data:{type:'FeatureCollection',features:[]}
+  });
+  monitorSource = map.getSource('monitors');
+  map.addLayer({
+    id:'monitors',
+    type:'circle',
+    source:'monitors',
+    filter:[
+      'any',
+      ['>=', ['zoom'], 5],
+      ['>=', ['get','pm25'], 35]
+    ],
+    paint:{
+      'circle-radius':[
+        'interpolate',['linear'],['get','pm25'],
+        12,2,
+        35,4,
+        75,7,
+        150,9
+      ],
+      'circle-color':[
+        'interpolate',['linear'],['get','pm25'],
+        0,    'rgb(194,200,204)',
+        35,   'rgb(224,160,160)',
+        75,   'rgb(226,59,59)',
+        150,  'rgb(226,59,59)'
+      ],
+      'circle-stroke-color':'#0e1418',
+      'circle-stroke-width':0.5,
+      'circle-opacity':[
+        'step',['get','pm25'], 0.5, 35, 0.95
+      ],
+      'circle-blur':0.15
+    }
+  });
+
+  // popup on click
+  popup = new maplibregl.Popup({
+    closeButton:true, closeOnClick:true, maxWidth:'260px', offset:8
+  });
+  map.on('click','monitors', (e)=>{
+    const f = e.features && e.features[0];
+    if(!f) return;
+    const p = f.properties;
+    const val = (p.pm25!=null && !isNaN(p.pm25)) ? Number(p.pm25).toFixed(1) : '—';
+    const html = `
+      <div class="popup-name">${(p.siteName||'Monitoring site').replace(/</g,'&lt;')}</div>
+      <div>PM2.5 — <span class="popup-val">${val}</span><span class="popup-unit">µg/m³</span></div>
+    `;
+    popup.setLngLat(f.geometry.coordinates).setHTML(html).addTo(map);
+  });
+  map.on('mouseenter','monitors', ()=>map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave','monitors', ()=>map.getCanvas().style.cursor='');
+
+  // fade hint
+  const hint = document.getElementById('hint');
+  hint.classList.add('fade');
+  setTimeout(()=>hint.remove(), 700);
+
+  // load monitors quietly
+  loadMonitors().then(rows=>{
+    if(!rows || !rows.length) return;
+    const feats = rows.map(r=>({
+      type:'Feature',
+      geometry:{type:'Point',coordinates:[r.lon,r.lat]},
+      properties:{pm25:r.pm25, siteName:r.siteName||''}
+    }));
+    monitorSource.setData({type:'FeatureCollection',features:feats});
+  }).catch(()=>{});
+
+  // initial slider state
+  setMonth(0);
+});
+
+/* ============================================================
+   Time control
+   ============================================================ */
+const slider = document.getElementById('slider');
+const monthLabel = document.getElementById('monthlabel');
+const playbtn = document.getElementById('playbtn');
+const playicon = document.getElementById('playicon');
+
+function monthKeyFromIndex(i){
+  // i = 1..36 → 2023-01 .. 2025-12
+  const idx = i-1;
+  const y = 2023 + Math.floor(idx/12);
+  const m = idx % 12;
+  return {y, m, key:`${y}-${String(m+1).padStart(2,'0')}`};
+}
+
+function ringsToFeatures(rings){
+  if(!rings || !rings.length) return [];
+  return rings.map(ring=>{
+    // ensure closed ring
+    let coords = ring;
+    if(coords.length>=2){
+      const first = coords[0], last = coords[coords.length-1];
+      if(first[0]!==last[0] || first[1]!==last[1]) coords = coords.concat([first]);
+    }
+    return {
+      type:'Feature',
+      properties:{},
+      geometry:{type:'Polygon',coordinates:[coords]}
+    };
+  });
+}
+
+function setMonth(i){
+  // update slider fill
+  const pct = (i/36)*100;
+  slider.style.setProperty('--p', pct + '%');
+
+  if(i===0){
+    // all months → heatmap on, monthly off
+    if(map.getLayer('smoke-freq')) map.setLayoutProperty('smoke-freq','visibility','visible');
+    if(map.getLayer('smoke-month-fill')) map.setLayoutProperty('smoke-month-fill','visibility','none');
+    if(map.getLayer('smoke-month-halo')) map.setLayoutProperty('smoke-month-halo','visibility','none');
+    monthLabel.innerHTML = '<span class="accent">Smoke days</span><span class="sub">2023–2025 · all months</span>';
+  } else {
+    const {y,m,key} = monthKeyFromIndex(i);
+    if(map.getLayer('smoke-freq')) map.setLayoutProperty('smoke-freq','visibility','none');
+    if(map.getLayer('smoke-month-fill')) map.setLayoutProperty('smoke-month-fill','visibility','visible');
+    if(map.getLayer('smoke-month-halo')) map.setLayoutProperty('smoke-month-halo','visibility','visible');
+
+    if(smokeMonthly && smokeMonthly[key]){
+      const feats = ringsToFeatures(smokeMonthly[key]);
+      map.getSource('smoke-month').setData({type:'FeatureCollection',features:feats});
+    } else {
+      map.getSource('smoke-month').setData({type:'FeatureCollection',features:[]});
+    }
+    monthLabel.innerHTML = `<span class="accent">${MONTH_NAMES[m]} ${y}</span><span class="sub">monthly smoke · medium + heavy</span>`;
+  }
+}
+
+slider.addEventListener('input', ()=>{
+  const v = parseInt(slider.value,10);
+  setMonth(v);
+  if(playing) stopPlay();
+});
+
+function startPlay(){
+  playing = true;
+  playicon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  playbtn.setAttribute('aria-label','Pause');
+  const tick = ()=>{
+    let v = parseInt(slider.value,10);
+    v = (v+1) % 37;
+    slider.value = v;
+    setMonth(v);
+  };
+  playTimer = setInterval(tick, 700);
+}
+function stopPlay(){
+  playing = false;
+  playicon.innerHTML = '<path d="M6 4l14 8-14 8z"/>';
+  playbtn.setAttribute('aria-label','Play months');
+  if(playTimer){ clearInterval(playTimer); playTimer=null; }
+}
+playbtn.addEventListener('click', ()=>{
+  if(playing) stopPlay(); else startPlay();
+});
+
+/* ============================================================
+   Resize handling
+   ============================================================ */
+window.addEventListener('resize', ()=>{
+  if(map && map.resize) map.resize();
+});
+
+/* keyboard accessibility for slider already native */
+</script>
+</body>
+</html>
