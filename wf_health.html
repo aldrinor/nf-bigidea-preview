@@ -256,20 +256,21 @@
     animation:glowPulse 2.4s ease-in-out infinite;
   }
   @keyframes glowPulse{
-    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.85}
-    50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}
+    0%,100%{transform:translate(-50%,-50%) scale(var(--inv,1));opacity:0.85}
+    50%{transform:translate(-50%,-50%) scale(calc(var(--inv,1) * 1.15));opacity:1}
   }
 
   /* HOTSPOTS */
   .hotspots{position:absolute;inset:0;pointer-events:none;z-index:2}
   .hotspot{
     position:absolute;
-    transform:translate(-50%,-50%);
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--inv,1));
     width:18px;height:18px;
     border:0;background:transparent;
     padding:0;cursor:pointer;
     pointer-events:auto;
-    transition:opacity .4s ease, width .3s ease, height .3s ease;
+    transition:opacity .4s ease, width .3s ease, height .3s ease, transform .7s cubic-bezier(.16,1,.3,1);
   }
   .hotspot::before{
     content:"";
@@ -531,6 +532,7 @@
       targetScale = 1;
       targetX = restOffsetX();
       targetY = 0;
+      figure.style.setProperty('--inv', '1');
       applyTransform();
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         h.classList.remove('active','dimmed');
@@ -546,31 +548,26 @@
       // Compute zoom: scale up to 2.5, but clamp so figure width never exceeds area width
       const areaW = rightEl.clientWidth;
       const areaH = rightEl.clientHeight;
-      const figW = figure.offsetWidth || (areaH * 688 / 1024);
-      
+      const figW = figure.offsetWidth || (areaH * 688 / 962);
+
       let scale = 2.5;
       const maxScale = areaW / figW;
       if (scale > maxScale) scale = maxScale;
       if (scale < 1) scale = 1; // never shrink
-      
+
       targetScale = scale;
+      // Counter-scale the dots + labels so they keep a constant size when zoomed
+      figure.style.setProperty('--inv', (1/scale).toFixed(4));
       
-      // Translate to keep organ horizontally centered, vertically centered
-      const figRect = figure.getBoundingClientRect();
-      const fW = figRect.width;
-      const fH = figRect.height;
-      
-      // Center of organ in figure coordinates
-      const cx = d.ox * fW;
-      const cy = d.oy * fH;
-      
-      // Current center of figure in area
-      const figCenterX = fW / 2;
-      const figCenterY = fH / 2;
-      
-      // We want to move the organ point to the area center
-      targetX = (areaW / 2 - fW / 2) - (cx - figCenterX) * scale;
-      targetY = (areaH / 2 - fH / 2) - (cy - figCenterY) * scale;
+      // The organ is a fraction (ox,oy) of the figure box; the figure is flex-
+      // centered in the area. Use the UNSCALED box size (offset*, transform-free)
+      // so this is correct even when going organ -> organ. Place every organ on
+      // the SAME aligned column as the resting figure (and the hero particle),
+      // vertically centered, so the figure never jumps sideways between clicks.
+      const fW = figure.offsetWidth;
+      const fH = figure.offsetHeight;
+      targetX = restOffsetX() - (d.ox - 0.5) * fW * scale;
+      targetY = -(d.oy - 0.5) * fH * scale;
       
       applyTransform();
       
