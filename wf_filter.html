@@ -3,98 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wildfire Smoke — A Charge That Fades</title>
+<title>Wildfire smoke filters — when the filter quits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#8a9095;
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --headline-ink:#1a1a1a;
+    --muted:#8a9095;
     --accent:#1b7bff;
-    --red:#e23b3b; --hair:rgba(20,24,28,0.08);
+    --red:#e23b3b;
+    --hair:rgba(20,24,28,0.08);
     --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
     --mono:'Space Mono', ui-monospace, monospace;
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
-  html,body{ background:var(--bg); }
-  body{
-    font-family:var(--stack);
+
+  html, body{
+    background:var(--bg);
     color:var(--ink);
+    font-family:var(--stack);
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
   }
+
+  body{ min-height:100vh; }
 
   .section{
     min-height:100vh;
     background:var(--bg);
     display:grid;
     grid-template-columns:44% 56%;
-    gap:clamp(40px,5vw,80px);
+    gap:clamp(40px, 5vw, 80px);
     align-items:center;
-    padding:clamp(48px,7vw,96px) 0;
+    padding:clamp(48px, 8vh, 96px) clamp(24px, 4vw, 48px) clamp(48px, 8vh, 96px) 0;
   }
 
   .text-col{
-    padding-left:clamp(24px,6vw,96px);
-    padding-right:clamp(8px,1vw,16px);
+    padding-left:clamp(24px, 6vw, 96px);
+    padding-right:clamp(8px, 1.5vw, 24px);
+    max-width:680px;
   }
 
   .eyebrow{
-    font-family:var(--mono);
-    font-size:12px;
-    color:var(--muted);
-    letter-spacing:.04em;
     display:flex;
     align-items:center;
     gap:14px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.04em;
     margin-bottom:28px;
   }
+
   .eyebrow::before{
     content:"";
-    display:block;
     width:28px;
     height:1px;
     background:var(--hair);
+    flex-shrink:0;
   }
 
   .headline{
     font-family:var(--stack);
     font-weight:600;
     color:var(--headline-ink);
-    font-size:clamp(24px,2.7vw,34px);
-    line-height:1.32;
+    font-size:clamp(26px, 2.9vw, 38px);
+    line-height:1.22;
     letter-spacing:-0.022em;
     margin-bottom:36px;
-    max-width:18ch;
   }
+
   .headline em{
     color:var(--red);
     font-style:normal;
   }
 
   .stat-block{
-    border-top:1px solid var(--hair);
-    border-bottom:1px solid var(--hair);
-    padding:24px 0;
     display:flex;
-    align-items:center;
-    gap:24px;
+    align-items:flex-start;
+    gap:clamp(20px, 2.4vw, 36px);
     margin-bottom:36px;
+    padding-top:4px;
   }
-  .stat-number{
+
+  .stat-left{
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .big-number{
     font-family:var(--stack);
     font-weight:600;
     color:var(--red);
-    font-size:clamp(56px,6vw,96px);
-    line-height:.9;
+    font-size:clamp(60px, 6.5vw, 104px);
+    line-height:0.9;
     letter-spacing:-0.04em;
-    flex-shrink:0;
+    font-variant-numeric:tabular-nums;
   }
+
+  .chart-wrap{
+    width:220px;
+    height:90px;
+    position:relative;
+  }
+
+  .chart-wrap svg{
+    width:100%;
+    height:100%;
+    display:block;
+    overflow:visible;
+  }
+
   .stat-caption{
     font-family:var(--stack);
-    font-size:15px;
-    line-height:1.5;
+    font-size:clamp(17px, 1.5vw, 20px);
+    line-height:1.45;
     color:var(--ink);
-    max-width:30ch;
+    max-width:26ch;
+    padding-top:10px;
   }
 
   .body{
@@ -103,494 +135,327 @@
     line-height:1.55;
     color:var(--ink);
     max-width:46ch;
-    margin-bottom:28px;
   }
+
   .body a{
     color:inherit;
-    text-decoration:underline;
-    text-decoration-thickness:1px;
-    text-underline-offset:3px;
-    text-decoration-color:rgba(20,24,28,0.28);
-    transition:text-decoration-color .2s ease, color .2s ease;
+    text-decoration:none;
+    border-bottom:1px solid var(--hair);
+    transition:border-color 0.18s ease, color 0.18s ease;
+    padding-bottom:1px;
   }
+
   .body a:hover{
     color:var(--red);
-    text-decoration-color:var(--red);
+    border-bottom-color:var(--red);
   }
 
-  .source{
-    font-family:var(--mono);
-    font-size:12px;
-    color:var(--muted);
-    letter-spacing:.04em;
+  /* VIDEO COLUMN */
+  .video-col{
+    position:relative;
+    height:80vh;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding-right:clamp(24px, 6vw, 96px);
   }
-  .source a{
-    color:inherit;
-    text-decoration:none;
-    transition:color .2s ease;
-  }
-  .source a:hover{ color:var(--ink); }
 
-  .anim-col{
-    padding-right:clamp(24px,5vw,80px);
-    padding-left:clamp(8px,1vw,16px);
-  }
-  .anim-wrap{
+  .video-frame{
     position:relative;
     width:100%;
-    height:78vh;
-    max-height:760px;
+    height:100%;
+    background:#e8ebee;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
-  canvas{
-    display:block;
+
+  .video-frame video,
+  .video-frame img.poster{
+    position:absolute;
+    inset:0;
     width:100%;
     height:100%;
-  }
-  .caption{
-    font-family:var(--mono);
-    font-size:12px;
-    color:var(--muted);
-    letter-spacing:.04em;
-    margin-top:14px;
-    text-align:center;
-    transition:opacity .25s ease;
+    object-fit:contain;
+    background:#e8ebee;
   }
 
-  @media (max-width:880px){
+  .video-frame video{
+    opacity:0;
+    will-change:opacity;
+  }
+
+  .video-frame img.poster{
+    display:none;
+    opacity:1;
+  }
+
+  .video-col.reduce .video-frame video{ display:none; }
+  .video-col.reduce .video-frame img.poster{ display:block; }
+
+  .video-caption{
+    margin-top:18px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.04em;
+    text-align:center;
+    line-height:1.5;
+    max-width:42ch;
+  }
+
+  /* MOBILE */
+  @media (max-width: 880px){
     .section{
       grid-template-columns:1fr;
-      gap:48px;
-      padding:64px 0;
+      gap:clamp(36px, 7vw, 64px);
+      padding:clamp(40px, 8vh, 72px) clamp(24px, 6vw, 32px);
+      align-items:start;
     }
     .text-col{
-      padding-left:24px;
-      padding-right:24px;
+      padding-left:0;
+      padding-right:0;
+      max-width:none;
     }
-    .anim-col{
-      padding-left:24px;
-      padding-right:24px;
-    }
-    .anim-wrap{
+    .video-col{
       height:auto;
-      aspect-ratio:1/1;
-      max-height:none;
+      min-height:56vh;
+      padding-right:0;
     }
-    .headline{ max-width:none; }
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .caption{ transition:none; }
+    .video-frame{
+      min-height:50vh;
+    }
+    .stat-block{
+      flex-wrap:wrap;
+    }
+    .stat-caption{
+      flex-basis:100%;
+      padding-top:4px;
+    }
   }
 </style>
 </head>
 <body>
 
-<section class="section">
+<section class="section" id="smoke-section">
   <div class="text-col">
     <div class="eyebrow">Ordinary filters</div>
-    <h2 class="headline">A charge that <em>fades</em> under smoke</h2>
+    <h2 class="headline">The filter <em>quits</em> when the smoke arrives</h2>
 
     <div class="stat-block">
-      <div class="stat-number">~95%</div>
+      <div class="stat-left">
+        <div class="big-number" id="bigNumber">0%</div>
+        <div class="chart-wrap" aria-hidden="true">
+          <svg viewBox="0 0 220 90" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1b7bff" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#1b7bff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g class="grid">
+              <line x1="0" y1="10" x2="220" y2="10" stroke="rgba(20,24,28,0.05)" stroke-width="1"/>
+              <line x1="0" y1="50" x2="220" y2="50" stroke="rgba(20,24,28,0.05)" stroke-width="1"/>
+              <line x1="0" y1="85" x2="220" y2="85" stroke="rgba(20,24,28,0.05)" stroke-width="1"/>
+            </g>
+            <path id="areaPath" d="M 0 10 L 0 10 L 0 85 Z" fill="url(#areaGrad)"/>
+            <path id="linePath" d="M 0 10" fill="none" stroke="#1b7bff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
       <div class="stat-caption">of its cleaning power — gone after about an hour of smoke.</div>
     </div>
 
-    <p class="body">
-      Federal agencies tell Americans to fight wildfire smoke with a MERV-13 filter — but that rating is
-      measured on a clean, brand-new filter. Much of its filtering comes from a built-in electrostatic charge,
-      and smoke strips that charge as it builds up. In an EPA study, a MERV-13 air cleaner lost about
-      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">95% of its cleaning power</a>
-      after just 10 milligrams of smoke — about an hour's worth. The airflow barely changes, so
-      nothing warns you it has stopped working.
-    </p>
-
-    <div class="source">
-      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">EPA · Holder et al., Indoor Air (2022) ↗</a>
-    </div>
+    <p class="body">Federal agencies tell Americans to fight wildfire smoke with a MERV-13 filter — but that rating is measured on a clean, brand-new filter. Much of its filtering comes from a built-in electrostatic charge, and smoke strips that charge as it builds up. In an EPA study, a MERV-13 air cleaner lost about <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">95% of its cleaning power</a> after just 10 milligrams of smoke — about an hour's worth. <a href="https://healthybuildings.hsph.harvard.edu/protecting-your-health-from-wildfire-smoke-spotlight-on-filters/" target="_blank" rel="noopener">Harvard's Healthy Buildings team</a> reviewed the same data and told households to replace the filter after a wildfire.</p>
   </div>
 
-  <div class="anim-col">
-    <div class="anim-wrap">
-      <canvas id="filter-canvas" aria-label="Animated schematic of an electret filter losing its charge as smoke passes through"></canvas>
+  <div class="video-col" id="videoCol">
+    <div class="video-frame">
+      <video id="vidA" src="assets/videos/filter_charge.mp4" poster="assets/videos/posters/filter_charge.jpg" autoplay loop muted playsinline preload="auto"></video>
+      <video id="vidB" src="assets/videos/filter_charge.mp4" poster="assets/videos/posters/filter_charge.jpg" muted playsinline preload="auto"></video>
+      <img class="poster" src="assets/videos/posters/filter_charge.jpg" alt="An electret MERV-13 filter losing its charge under smoke.">
     </div>
-    <div class="caption" id="caption">Charged — capturing</div>
+    <div class="video-caption">An electret MERV-13 filter losing its charge under smoke.</div>
   </div>
 </section>
 
 <script>
 (function(){
-  const canvas = document.getElementById('filter-canvas');
-  const ctx = canvas.getContext('2d');
-  const captionEl = document.getElementById('caption');
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  'use strict';
 
-  let W = 0, H = 0, dpr = 1;
-  const NUM_FIBERS = 9;
-  const LOOP_MS = 14000;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Stage boundaries (fractions of loop)
-  const STAGE1_END = 0.35;
-  const STAGE2_END = 0.60;
+  // ---------- CHART + NUMBER ANIMATION ----------
+  // Sample points along the chart path: cleaning power over ~1 hour.
+  // Starts at 100% and plunges to ~5% with a smooth ease-out curve.
+  const POINTS = [
+    [0, 10], [22, 12], [44, 17], [66, 25], [88, 36],
+    [110, 49], [132, 62], [154, 73], [176, 81], [198, 85], [220, 86]
+  ];
+  const Y0 = 10;   // top (100% power)
+  const Y1 = 86;   // bottom (~5% power)
 
-  let fibers = [];
-  let particles = [];
-  let smoke = [];
-  let startTime = null;
-  let lastTime = 0;
-  let lastCaption = "";
-  let smokeFrontX = -Infinity;
-  let FX1 = 0, FX2 = 0, BY1 = 0, BY2 = 0;
-
-  function setupFibers(){
-    fibers = [];
-    const cx = W * 0.5;
-    const bandW = Math.max(140, Math.min(200, W * 0.22));
-    const bandH = H * 0.68;
-    const top = (H - bandH) / 2;
-    BY1 = top;
-    BY2 = top + bandH;
-    for(let i = 0; i < NUM_FIBERS; i++){
-      const x = cx - bandW/2 + (bandW / (NUM_FIBERS - 1)) * i;
-      fibers.push({
-        x: x,
-        yTop: top,
-        yBot: top + bandH,
-        charge: 1,
-        pulsePhase: Math.random() * Math.PI * 2
-      });
+  function buildPath(pts){
+    let d = 'M ' + pts[0][0] + ' ' + pts[0][1];
+    for(let i = 1; i < pts.length; i++){
+      d += ' L ' + pts[i][0] + ' ' + pts[i][1];
     }
-    FX1 = fibers[0].x;
-    FX2 = fibers[fibers.length - 1].x;
+    return d;
   }
-
-  function resize(){
-    const rect = canvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    W = rect.width;
-    H = rect.height;
-    setupFibers();
-    if(prefersReducedMotion) drawStill();
-  }
-
-  function spawnParticle(){
-    particles.push({
-      x: 0,
-      y: BY1 + Math.random() * (BY2 - BY1),
-      r: 3,
-      vx: W / 2.8,
-      vy: 0,
-      captured: false,
-      fiberIdx: -1,
-      captureT: 0,
-      captureTarget: { x: 0, y: 0 },
-      alpha: 1,
-      stage: -1
-    });
-  }
-
-  function spawnSmoke(){
-    const yCenter = H * 0.5 + (Math.random() - 0.5) * H * 0.08;
-    const ySpread = H * 0.5;
-    const count = 6;
-    for(let i = 0; i < count; i++){
-      smoke.push({
-        x: -80 - Math.random() * 160,
-        y: yCenter + (Math.random() - 0.5) * ySpread,
-        r: 90 + Math.random() * 110,
-        vx: 2.6 + Math.random() * 0.8,
-        alpha: 0.14 + Math.random() * 0.08,
-        life: 1
-      });
+  function buildArea(pts){
+    let d = 'M ' + pts[0][0] + ' ' + Y0;
+    for(let i = 0; i < pts.length; i++){
+      d += ' L ' + pts[i][0] + ' ' + pts[i][1];
     }
+    d += ' L ' + pts[pts.length - 1][0] + ' ' + Y1 + ' L ' + pts[0][0] + ' ' + Y1 + ' Z';
+    return d;
+  }
+  function subPoints(t){
+    const n = POINTS.length - 1;
+    const idx = t * n;
+    const i = Math.floor(idx);
+    const f = idx - i;
+    if(i >= n) return POINTS[n];
+    const a = POINTS[i], b = POINTS[i + 1];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+  }
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+  const linePath = document.getElementById('linePath');
+  const areaPath = document.getElementById('areaPath');
+  const bigNumber = document.getElementById('bigNumber');
+
+  function renderProgress(t){
+    const eased = easeOutCubic(t);
+    const p = subPoints(eased);
+    const pts = POINTS.slice();
+    pts[pts.length - 1] = p;
+    linePath.setAttribute('d', buildPath(pts));
+    areaPath.setAttribute('d', buildArea(pts));
+    const val = Math.round(eased * 95);
+    bigNumber.textContent = '~' + val + '%';
   }
 
-  function updateParticles(dt, stage, stageT){
-    for(let i = particles.length - 1; i >= 0; i--){
-      const p = particles[i];
+  function setFinal(){
+    linePath.setAttribute('d', buildPath(POINTS));
+    areaPath.setAttribute('d', buildArea(POINTS));
+    bigNumber.textContent = '~95%';
+  }
 
-      if(stage === 1){
-        // Charged — capture
-        if(!p.captured){
-          p.x += p.vx * dt;
+  if(reduceMotion){
+    setFinal();
+  } else {
+    const DURATION = 1600;
+    let started = false;
+    let startTime = null;
 
-          if(p.x >= FX1 && p.x <= FX2){
-            // Find nearest fiber
-            let nearestIdx = 0, nearestDist = Infinity;
-            for(let k = 0; k < fibers.length; k++){
-              const d = Math.abs(fibers[k].x - p.x);
-              if(d < nearestDist){ nearestDist = d; nearestIdx = k; }
+    function animate(ts){
+      if(startTime === null) startTime = ts;
+      const elapsed = ts - startTime;
+      const t = Math.min(elapsed / DURATION, 1);
+      renderProgress(t);
+      if(t < 1){
+        requestAnimationFrame(animate);
+      } else {
+        setFinal();
+      }
+    }
+
+    const io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting && !started){
+          started = true;
+          requestAnimationFrame(animate);
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.35 });
+    io.observe(document.getElementById('smoke-section'));
+  }
+
+  // ---------- VIDEO CROSSFADE LOOP ----------
+  const videoCol = document.getElementById('videoCol');
+  const vidA = document.getElementById('vidA');
+  const vidB = document.getElementById('vidB');
+
+  if(reduceMotion){
+    videoCol.classList.add('reduce');
+  } else {
+    let active = vidA;
+    let inactive = vidB;
+    let crossfading = false;
+    let crossfadeStart = 0;
+    const CROSSFADE_MS = 700;
+
+    function setInitial(){
+      active.style.opacity = '1';
+      inactive.style.opacity = '0';
+      try { inactive.pause(); } catch(e){}
+      try { inactive.currentTime = 0; } catch(e){}
+    }
+
+    function tick(){
+      requestAnimationFrame(tick);
+      if(crossfading){
+        const elapsed = performance.now() - crossfadeStart;
+        const t = Math.min(elapsed / CROSSFADE_MS, 1);
+        active.style.opacity = String(1 - t);
+        inactive.style.opacity = String(t);
+        if(t >= 1){
+          crossfading = false;
+          const tmp = active;
+          active = inactive;
+          inactive = tmp;
+          active.style.opacity = '1';
+          inactive.style.opacity = '0';
+          try { inactive.pause(); } catch(e){}
+        }
+        return;
+      }
+      if(active.readyState >= 2 && active.duration){
+        const remaining = active.duration - active.currentTime;
+        if(remaining <= 0.7 && remaining > 0){
+          try {
+            inactive.currentTime = 0;
+            const p = inactive.play();
+            if(p && typeof p.catch === 'function'){
+              p.catch(function(){});
             }
-            const f = fibers[nearestIdx];
-            const captureProb = 0.30 + f.charge * 0.55;
-            if(Math.random() < captureProb){
-              p.captured = true;
-              p.fiberIdx = nearestIdx;
-              p.captureT = 0;
-              const fy = f.yTop + Math.random() * (f.yBot - f.yTop);
-              p.captureTarget.x = f.x + (Math.random() - 0.5) * 3;
-              p.captureTarget.y = fy;
-              p.x = p.captureTarget.x;
-              p.y = p.captureTarget.y;
-            }
-          }
-        } else {
-          p.captureT += dt;
+          } catch(e){}
+          crossfading = true;
+          crossfadeStart = performance.now();
         }
-        if(p.x > W + 20){
-          particles.splice(i, 1);
+      }
+    }
+
+    function init(){
+      setInitial();
+      try {
+        const p = active.play();
+        if(p && typeof p.catch === 'function'){
+          p.catch(function(){ /* autoplay may be blocked; poster will show */ });
         }
-      } else if(stage === 2){
-        // Smoke is stripping — particles still in flight keep going, captured ones stay
-        if(!p.captured){
-          p.x += p.vx * dt;
-        } else {
-          p.captureT += dt;
-        }
-        if(p.x > W + 20){ particles.splice(i, 1); }
-      } else if(stage === 3){
-        // Discharged — pass through
-        p.x += p.vx * dt;
-        if(p.x > W + 20){ particles.splice(i, 1); }
-      }
-    }
-  }
-
-  function updateSmoke(dt){
-    smokeFrontX = -Infinity;
-    for(let i = smoke.length - 1; i >= 0; i--){
-      const s = smoke[i];
-      s.x += s.vx * dt;
-      if(s.x > smokeFrontX) smokeFrontX = s.x;
-      if(s.x > W + s.r + 30){
-        smoke.splice(i, 1);
-      }
-    }
-  }
-
-  function drawBackground(){
-    ctx.clearRect(0, 0, W, H);
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, 'rgba(237,240,242,0)');
-    g.addColorStop(1, 'rgba(20,24,28,0.015)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  function drawSmoke(){
-    for(const s of smoke){
-      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
-      grad.addColorStop(0, 'rgba(120,128,136,' + (s.alpha * s.life) + ')');
-      grad.addColorStop(0.55, 'rgba(120,128,136,' + (s.alpha * s.life * 0.45) + ')');
-      grad.addColorStop(1, 'rgba(120,128,136,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function drawFibers(time){
-    let totalCharge = 0;
-    for(const f of fibers){ totalCharge += f.charge; }
-    const avgCharge = totalCharge / fibers.length;
-
-    if(avgCharge > 0.02){
-      const pulse = 0.88 + 0.12 * Math.sin(time * 0.0028);
-      const first = fibers[0];
-      const last = fibers[fibers.length - 1];
-      const cx = (first.x + last.x) / 2;
-      const bandW = (last.x - first.x);
-      const bandH = first.yBot - first.yTop;
-      const haloW = Math.max(1, bandW * 0.9 + 70 * pulse);
-      const haloH = Math.max(1, bandH * 0.6);
-
-      const grad = ctx.createLinearGradient(cx - haloW, 0, cx + haloW, 0);
-      grad.addColorStop(0, 'rgba(27,123,255,0)');
-      grad.addColorStop(0.5, 'rgba(27,123,255,' + (0.30 * avgCharge * pulse) + ')');
-      grad.addColorStop(1, 'rgba(27,123,255,0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(cx - haloW, first.yTop - haloH * 0.15, haloW * 2, bandH + haloH * 0.3);
-
-      const bloomR = Math.max(1, bandW * 0.7);
-      const bloom = ctx.createRadialGradient(cx, (first.yTop + first.yBot)/2, 0, cx, (first.yTop + first.yBot)/2, bloomR);
-      bloom.addColorStop(0, 'rgba(27,123,255,' + (0.26 * avgCharge * pulse) + ')');
-      bloom.addColorStop(1, 'rgba(27,123,255,0)');
-      ctx.fillStyle = bloom;
-      ctx.fillRect(cx - bloomR, first.yTop - haloH * 0.15, bloomR * 2, bandH + haloH * 0.3);
-    }
-
-    for(const f of fibers){
-      if(f.charge > 0.02){
-        const pulse = 0.85 + 0.15 * Math.sin(time * 0.0028 + f.pulsePhase);
-        const haloR = Math.max(1, 16 * pulse);
-        const grad = ctx.createRadialGradient(f.x, (f.yTop + f.yBot)/2, 0, f.x, (f.yTop + f.yBot)/2, haloR);
-        grad.addColorStop(0, 'rgba(27,123,255,' + (0.32 * f.charge) + ')');
-        grad.addColorStop(0.5, 'rgba(27,123,255,' + (0.14 * f.charge) + ')');
-        grad.addColorStop(1, 'rgba(27,123,255,0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.ellipse(f.x, (f.yTop + f.yBot)/2, haloR, (f.yBot - f.yTop)/2 + haloR, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    for(const f of fibers){
-      ctx.strokeStyle = 'rgba(31,35,39,' + (0.28 + 0.04 * f.charge) + ')';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(f.x, f.yTop);
-      ctx.lineTo(f.x, f.yBot);
-      ctx.stroke();
-    }
-  }
-
-  function drawParticles(){
-    for(const p of particles){
-      ctx.fillStyle = 'rgba(31,35,39,0.65)';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function setCaption(text){
-    if(text !== lastCaption){
-      captionEl.style.opacity = '0';
-      setTimeout(() => {
-        captionEl.textContent = text;
-        captionEl.style.opacity = '1';
-      }, 180);
-      lastCaption = text;
-    }
-  }
-
-  function drawStill(){
-    drawBackground();
-    for(const f of fibers){ f.charge = 1; }
-    drawFibers(0);
-    particles = [];
-    for(let i = 0; i < 10; i++){
-      const f = fibers[Math.floor(Math.random() * fibers.length)];
-      particles.push({
-        x: f.x + (Math.random() - 0.5) * 2,
-        y: f.yTop + Math.random() * (f.yBot - f.yTop),
-        r: 3,
-        captured: true,
-        fiberIdx: fibers.indexOf(f),
-        captureT: 1,
-        captureTarget: { x: f.x, y: f.yTop },
-        alpha: 1,
-        stage: 1
-      });
-    }
-    for(let i = 0; i < 4; i++){
-      particles.push({
-        x: W * 0.1 + i * 30,
-        y: H * 0.3 + i * 40,
-        r: 3,
-        captured: false,
-        fiberIdx: -1,
-        captureT: 0,
-        captureTarget: { x: 0, y: 0 },
-        alpha: 1,
-        stage: 1
-      });
-    }
-    drawParticles();
-    setCaption('Charged — capturing');
-  }
-
-  function tick(now){
-    if(startTime === null){ startTime = now; lastTime = now; }
-    const dt = Math.min(0.05, (now - lastTime) / 1000);
-    lastTime = now;
-    const elapsed = (now - startTime) % LOOP_MS;
-    const t = elapsed / LOOP_MS;
-
-    let stage, stageT;
-    if(t < STAGE1_END){
-      stage = 1; stageT = t / STAGE1_END;
-    } else if(t < STAGE2_END){
-      stage = 2; stageT = (t - STAGE1_END) / (STAGE2_END - STAGE1_END);
-    } else {
-      stage = 3; stageT = (t - STAGE2_END) / (1 - STAGE2_END);
-    }
-
-    if(stage === 1){
-      const fadeIn = Math.min(1, stageT * 4);
-      for(const f of fibers){ f.charge = fadeIn; }
-    } else if(stage === 2){
-      const cx = W * 0.5;
-      const drain = Math.max(0, Math.min(1, (smokeFrontX - cx + W*0.1) / (W * 0.5)));
-      for(const f of fibers){ f.charge = Math.max(0, 1 - drain); }
-    } else {
-      const fadeBack = Math.max(0, (stageT - 0.85) / 0.15);
-      for(const f of fibers){ f.charge = fadeBack; }
-    }
-
-    // Maintain 40-60 particles alive at once
-    const targetCount = 50;
-    if(particles.length < targetCount){
-      const toSpawn = Math.min(2, targetCount - particles.length);
-      for(let i = 0; i < toSpawn; i++){
-        if(Math.random() < 0.7) spawnParticle();
-      }
-    }
-
-    // Clear captured deposits during/after smoke stage
-    if(stage === 2 && stageT > 0.3){
-      particles = particles.filter(p => !p.captured);
-    }
-
-    updateParticles(dt, stage, stageT);
-    updateSmoke(dt);
-
-    if(stage === 2){
-      if(smoke.length < 40 && Math.random() < 0.28) spawnSmoke();
-    }
-
-    drawBackground();
-    if(stage === 2 || smoke.length > 0){
-      drawSmoke();
-    }
-    drawFibers(now);
-    drawParticles();
-
-    if(stage === 1) setCaption('Charged — capturing');
-    else if(stage === 2) setCaption('Smoke strips the charge');
-    else setCaption('Discharged — particles pass through');
-
-    requestAnimationFrame(tick);
-  }
-
-  function init(){
-    resize();
-    if(prefersReducedMotion){
-      drawStill();
-    } else {
+      } catch(e){}
       requestAnimationFrame(tick);
     }
-  }
 
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      resize();
-      if(prefersReducedMotion) drawStill();
-    }, 120);
-  });
-
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(init);
-  } else {
-    init();
+    if(active.readyState >= 1){
+      init();
+    } else {
+      active.addEventListener('loadedmetadata', init, { once: true });
+      // Fallback in case metadata never fires
+      setTimeout(function(){
+        if(active.readyState < 1){
+          setInitial();
+          try { active.play(); } catch(e){}
+          requestAnimationFrame(tick);
+        }
+      }, 1200);
+    }
   }
 })();
 </script>
-
 </body>
 </html>
