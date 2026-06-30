@@ -67,17 +67,26 @@ body {
   font-size: clamp(26px, 3vw, 38px);
   line-height: 1.08;
   color: var(--ink);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   letter-spacing: -0.01em;
+  text-shadow: 0 1px 8px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.9);
 }
 .chrome-top-left h2 .accent { color: var(--accent); }
 .caption {
   font-family: var(--stack);
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.55;
-  color: var(--muted);
-  max-width: 360px;
+  color: var(--ink);
+  max-width: 340px;
+  text-shadow: 0 1px 6px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.95);
 }
+.caption a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(20,24,28,0.32);
+  transition: color .15s ease, border-color .15s ease;
+}
+.caption a:hover { color: var(--red); border-bottom-color: var(--red); }
 
 /* Legend */
 .chrome-legend {
@@ -366,9 +375,8 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <div class="kicker">Where it goes</div>
-      <h2>Three years of <span class="accent">Wildfire</span> Smoke</h2>
-      <p class="caption">Smoke from western and Canadian wildfires drifts across the continent every year. Press play to watch it move, day by day, from 2024 to today — updated daily. Or drag the timeline. The dots are live EPA air-quality monitors.</p>
+      <h2>It doesn't stay near the fire</h2>
+      <p class="caption">In June 2023, smoke from Canadian wildfires gave New York <a href="https://www.cnbc.com/2023/06/07/canadian-wildfire-smoke-nyc-residents-urged-to-stay-inside.html" target="_blank" rel="noopener">the worst air of any major city on Earth</a>. Most years, it reaches <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10543292/" target="_blank" rel="noopener">nearly every American</a>.</p>
     </div>
   </div>
 
