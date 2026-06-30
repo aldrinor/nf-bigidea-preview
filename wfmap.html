@@ -352,6 +352,10 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 1120px) {
+  /* lift the legend above the centered timeline so the timeline doesn't clip it */
+  .chrome-legend { bottom: 140px; }
+}
 @media (max-width: 700px) {
   .chrome-top-left { max-width: calc(100vw - 44px); }
   .chrome-top-left h2 { font-size: 24px; }
