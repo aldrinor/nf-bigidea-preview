@@ -681,7 +681,9 @@ async function initSmoke() {
 function onFramesReady(bbox, count) {
   const [w, s, e, n] = bbox;
 
-  smokeOverlay = L.imageOverlay(imgUrls[DEFAULT_FRAME], [[s, w], [n, e]], {
+  const startFrame = count - 1;  // open on the most recent day (today)
+
+  smokeOverlay = L.imageOverlay(imgUrls[startFrame], [[s, w], [n, e]], {
     opacity: 0.9,
     interactive: false,
     className: 'smoke-frames',
@@ -690,10 +692,10 @@ function onFramesReady(bbox, count) {
 
   const slider = document.getElementById('frameSlider');
   slider.max = count - 1;
-  slider.value = DEFAULT_FRAME;
+  slider.value = startFrame;
 
   setupYearTicks(count);
-  setFrame(DEFAULT_FRAME);
+  setFrame(startFrame);
 
   document.getElementById('timeControl').style.display = 'block';
 
