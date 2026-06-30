@@ -208,7 +208,6 @@
     aspect-ratio:688/962;
     max-width:100%;
     cursor:pointer;
-    overflow:hidden;
     flex-shrink:0;
   }
 
@@ -218,50 +217,42 @@
     height:100%;
     animation:breathe 4.5s ease-in-out infinite;
   }
-  .breathe-wrap.paused{animation-play-state:paused}
   @keyframes breathe{
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.012)}
   }
 
-  /* BODY IMG — handles the zoom transform */
+  /* BODY IMG — stays static, no zoom or crop */
   .body-img{
     width:100%;
     height:100%;
     object-fit:contain;
     display:block;
-    transform-origin:0 0;
-    transform:translate(0px, 0px) scale(1);
-    transition:transform .85s cubic-bezier(.16,1,.3,1);
   }
 
-  /* CENTER DOT — prominent red dot at organ centre */
-  .center-dot{
+  /* GLOW HALO — blooms over the selected organ */
+  .glow{
     position:absolute;
-    top:50%;
-    left:50%;
     transform:translate(-50%,-50%);
-    width:15px; height:15px;
+    width:120px; height:120px;
     border-radius:50%;
-    background:var(--red);
-    box-shadow:0 0 0 2.5px #fff, 0 0 14px 4px rgba(226,59,59,0.45);
+    background:radial-gradient(circle, rgba(226,59,59,0.28) 0%, rgba(226,59,59,0.08) 45%, transparent 70%);
     opacity:0;
     pointer-events:none;
-    transition:opacity .3s ease .5s, top .85s cubic-bezier(.16,1,.3,1), left .85s cubic-bezier(.16,1,.3,1);
-    z-index:5;
+    transition:opacity .4s ease;
+    z-index:1;
   }
-  .center-dot.show{
+  .glow.show{
     opacity:1;
-    animation:centerPulse 2.2s ease-in-out infinite;
+    animation:glowPulse 2.4s ease-in-out infinite;
   }
-  @keyframes centerPulse{
-    0%,100%{box-shadow:0 0 0 2.5px #fff, 0 0 14px 4px rgba(226,59,59,0.45)}
-    50%{box-shadow:0 0 0 2.5px #fff, 0 0 22px 8px rgba(226,59,59,0.25)}
+  @keyframes glowPulse{
+    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.85}
+    50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}
   }
 
   /* HOTSPOTS */
-  .hotspots{position:absolute;inset:0;pointer-events:none;transition:opacity .4s ease}
-  .hotspots.hidden{opacity:0;pointer-events:none}
+  .hotspots{position:absolute;inset:0;pointer-events:none;z-index:2}
   .hotspot{
     position:absolute;
     transform:translate(-50%,-50%);
@@ -312,6 +303,23 @@
   .hotspot:focus-visible{outline:none}
   .hotspot:focus-visible::after{border-color:var(--accent);animation:none;transform:scale(1.4);opacity:1}
 
+  /* ACTIVE STATE — solid red dot + white ring */
+  .hotspot.active{
+    width:26px; height:26px;
+    z-index:3;
+  }
+  .hotspot.active::before{
+    transform:scale(1);
+    box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--red), 0 0 12px 2px rgba(226,59,59,0.4);
+  }
+  .hotspot.active::after{
+    animation:pulse 1.8s ease-out infinite;
+    border-width:2px;
+  }
+  .hotspot.dimmed{
+    opacity:0.35;
+  }
+
   /* MOBILE */
   @media (max-width:880px){
     .grid{
@@ -332,8 +340,7 @@
 
   @media (prefers-reduced-motion:reduce){
     .breathe-wrap{animation:none}
-    .body-img{transition:transform .3s ease}
-    .center-dot{animation:none;transition:opacity .2s ease, top .3s ease, left .3s ease}
+    .glow{animation:none;transition:opacity .2s ease}
     .hotspot::after{animation:none}
     .card-inner{transition:opacity .2s ease}
   }
@@ -362,7 +369,7 @@
         <div class="breathe-wrap" id="breatheWrap">
           <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
         </div>
-        <div class="center-dot" id="centerDot"></div>
+        <div class="glow" id="glow"></div>
         <div class="hotspots" id="hotspots"></div>
       </div>
     </div>
@@ -440,9 +447,7 @@
   const hotspotsEl = document.getElementById('hotspots');
   const backBtn = document.getElementById('backBtn');
   const frame = document.getElementById('frame');
-  const breatheWrap = document.getElementById('breatheWrap');
-  const bodyImg = document.getElementById('bodyImg');
-  const centerDot = document.getElementById('centerDot');
+  const glow = document.getElementById('glow');
   const cardInner = document.getElementById('cardInner');
   const cardName = document.getElementById('cardName');
   const cardIntro = document.getElementById('cardIntro');
@@ -480,42 +485,19 @@
     ).join('');
   }
 
-  function applyZoom(key){
-    if(key === "overview"){
-      bodyImg.style.transformOrigin = '0 0';
-      bodyImg.style.transform = 'translate(0px, 0px) scale(1)';
-      breatheWrap.classList.remove('paused');
-      centerDot.classList.remove('show');
-      hotspotsEl.classList.remove('hidden');
-    } else {
-      const d = DATA[key];
-      const S = 1.9;                                  
-      const fw = frame.clientWidth, fh = frame.clientHeight;   
-      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-      const tx = clamp(fw/2 - d.ox * S * fw, -(S - 1) * fw, 0);
-      const ty = clamp(fh/2 - d.oy * S * fh, -(S - 1) * fh, 0);
-      bodyImg.style.transformOrigin = '0 0';
-      bodyImg.style.transform = `translate(${tx}px, ${ty}px) scale(${S})`;
-      
-      breatheWrap.classList.add('paused');
-      
-      const dotX = d.ox * S * fw + tx;
-      const dotY = d.oy * S * fh + ty;
-      centerDot.style.left = dotX + 'px';
-      centerDot.style.top  = dotY + 'px';
-      centerDot.classList.add('show');
-      hotspotsEl.classList.add('hidden');
-    }
-  }
-
   function setHighlight(key){
     if(key === "overview"){
       backBtn.classList.remove('show');
+      glow.classList.remove('show');
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         h.classList.remove('active','dimmed');
       });
     } else {
+      const d = DATA[key];
       backBtn.classList.add('show');
+      glow.style.left = (d.ox*100)+'%';
+      glow.style.top = (d.oy*100)+'%';
+      glow.classList.add('show');
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         if(h.dataset.key === key){
           h.classList.add('active');
@@ -538,7 +520,6 @@
     setTimeout(()=>{
       renderCard(current);
       setHighlight(current);
-      applyZoom(current);
       cardInner.classList.remove('leaving');
     }, 200);
     indexEl.querySelectorAll('.index-row').forEach(c=>{
@@ -601,7 +582,6 @@
   // Init
   renderCard('overview');
   setHighlight('overview');
-  applyZoom('overview');
 })();
 </script>
 </body>
