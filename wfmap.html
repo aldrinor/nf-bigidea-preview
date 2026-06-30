@@ -74,7 +74,7 @@ body {
 .chrome-top-left h2 .accent { color: var(--accent); }
 .caption {
   font-family: var(--stack);
-  font-size: 14.5px;
+  font-size: 19px;
   line-height: 1.55;
   color: var(--ink);
   max-width: 340px;
@@ -92,6 +92,7 @@ body {
 .chrome-legend {
   bottom: 22px;
   left: 22px;
+  min-width: 270px;
   background: rgba(255,255,255,0.88);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -102,12 +103,13 @@ body {
 }
 .legend-title {
   font-family: var(--stack);
-  font-size: 10px;
-  color: var(--muted);
-  margin-bottom: 6px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
 }
 .legend-gradient {
-  width: 170px;
+  width: 230px;
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(to right,
@@ -122,8 +124,8 @@ body {
   display: flex;
   justify-content: space-between;
   font-family: var(--stack);
-  font-size: 9px;
-  color: var(--muted);
+  font-size: 16px;
+  color: var(--ink);
   margin-bottom: 10px;
 }
 .legend-pm {
@@ -134,10 +136,10 @@ body {
 .legend-pm-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 7px;
   font-family: var(--stack);
-  font-size: 10px;
-  color: var(--muted);
+  font-size: 16px;
+  color: var(--ink);
 }
 .legend-dot {
   width: 9px;
@@ -152,7 +154,7 @@ body {
   bottom: 22px;
   right: 22px;
   font-family: var(--stack);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
 }
 .chrome-source a {
@@ -206,7 +208,7 @@ body {
 .tc-btn svg { width: 16px; height: 16px; fill: currentColor; }
 .tc-date {
   font-family: var(--stack);
-  font-size: 14px;
+  font-size: 18px;
   color: var(--ink);
   font-weight: 700;
   flex: 1;
@@ -216,8 +218,8 @@ body {
 }
 .tc-counter {
   font-family: var(--stack);
-  font-size: 11px;
-  color: var(--faint);
+  font-size: 16px;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
@@ -267,8 +269,8 @@ body {
   position: absolute;
   transform: translateX(-50%);
   font-family: var(--stack);
-  font-size: 10px;
-  color: var(--faint);
+  font-size: 16px;
+  color: var(--muted);
 }
 .tc-tick::before {
   content: '';
