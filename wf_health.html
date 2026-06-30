@@ -207,21 +207,11 @@
     aspect-ratio:688/1024;
     height:clamp(400px, 78vh, 820px);
     max-width:100%;
-    overflow:hidden;
-    border-radius:6px;
     cursor:pointer;
   }
-  .body-zoom{
+  .body-wrap{
     position:absolute;
     inset:0;
-    transform-origin:0 0;
-    transform:translate(0,0) scale(1);
-    transition:transform .95s cubic-bezier(.16,1,.3,1), -webkit-mask-image .6s ease, mask-image .6s ease;
-    will-change:transform;
-  }
-  .body-zoom.zoomed{
-    -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 0%, #000 30%, rgba(0,0,0,0.35) 48%, transparent 60%);
-    mask-image:radial-gradient(circle at 50% 50%, #000 0%, #000 30%, rgba(0,0,0,0.35) 48%, transparent 60%);
   }
   .body-img{
     width:100%;
@@ -235,7 +225,7 @@
     50%{transform:scale(1.012)}
   }
 
-  /* HOTSPOTS */
+  /* HOTSPOTS — always at real positions */
   .hotspots{position:absolute;inset:0;pointer-events:none;transition:opacity .4s ease}
   .hotspot{
     position:absolute;
@@ -244,7 +234,7 @@
     border:0;background:transparent;
     padding:0;cursor:pointer;
     pointer-events:auto;
-    transition:left .55s cubic-bezier(.16,1,.3,1), top .55s cubic-bezier(.16,1,.3,1), opacity .4s ease, width .3s ease, height .3s ease;
+    transition:opacity .4s ease, width .3s ease, height .3s ease;
   }
   .hotspot::before{
     content:"";
@@ -306,22 +296,21 @@
     100%{transform:scale(2.4);opacity:0}
   }
 
-  /* GLOW when zoomed */
+  /* GLOW at organ's real position */
   .glow{
     position:absolute;
-    left:50%;top:50%;
-    width:40%;height:40%;
     transform:translate(-50%,-50%) scale(0.6);
-    background:radial-gradient(circle, rgba(226,59,59,0.30) 0%, rgba(226,59,59,0.12) 35%, rgba(226,59,59,0) 70%);
+    width:90px;height:90px;
+    background:radial-gradient(circle, rgba(226,59,59,0.28) 0%, rgba(226,59,59,0.10) 40%, rgba(226,59,59,0) 72%);
     opacity:0;
     pointer-events:none;
-    transition:opacity .5s ease, transform .9s cubic-bezier(.16,1,.3,1);
+    transition:opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1);
     mix-blend-mode:multiply;
   }
   .glow.on{opacity:1;transform:translate(-50%,-50%) scale(1);animation:glowPulse 2.8s ease-in-out infinite}
   @keyframes glowPulse{
     0%,100%{transform:translate(-50%,-50%) scale(1)}
-    50%{transform:translate(-50%,-50%) scale(1.12)}
+    50%{transform:translate(-50%,-50%) scale(1.14)}
   }
 
   /* MOBILE */
@@ -343,7 +332,6 @@
 
   @media (prefers-reduced-motion:reduce){
     .body-img{animation:none}
-    .body-zoom{transition:transform .25s ease}
     .glow{transition:opacity .25s ease;animation:none}
     .hotspot::after{animation:none}
     .hotspot.active::after{animation:none}
@@ -374,11 +362,11 @@
         <button class="back-btn" id="backBtn" type="button" aria-label="Return to full body view">&lsaquo;</button>
       </div>
       <div class="frame" id="frame">
-        <div class="body-zoom" id="bodyZoom">
+        <div class="body-wrap">
           <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
         </div>
-        <div class="hotspots" id="hotspots"></div>
         <div class="glow" id="glow"></div>
+        <div class="hotspots" id="hotspots"></div>
       </div>
     </div>
   </div>
@@ -452,10 +440,6 @@
     kidneys:"Kidneys", pregnancy:"Reproduction", bloodstream:"Blood & cells"
   };
 
-  const ZOOM = 1.8;
-
-  const bodyZoom = document.getElementById('bodyZoom');
-  const bodyImg = document.getElementById('bodyImg');
   const hotspotsEl = document.getElementById('hotspots');
   const glow = document.getElementById('glow');
   const backBtn = document.getElementById('backBtn');
@@ -497,39 +481,26 @@
     ).join('');
   }
 
-  function setZoom(key){
-    const d = DATA[key];
+  function setHighlight(key){
     if(key === "overview"){
-      bodyZoom.classList.remove('zoomed');
-      bodyZoom.style.transform = 'translate(0,0) scale(1)';
-      bodyImg.style.animation = '';
       glow.classList.remove('on');
       backBtn.classList.remove('show');
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         h.classList.remove('active','dimmed');
-        h.style.left = h.dataset.ox+'%';
-        h.style.top = h.dataset.oy+'%';
       });
     } else {
-      const s = ZOOM;
-      const tx = (0.5 - s*d.ox)*100;
-      const ty = (0.5 - s*d.oy)*100;
-      bodyZoom.style.transform = 'translate('+tx+'%, '+ty+'%) scale('+s+')';
-      bodyZoom.classList.add('zoomed');
-      bodyImg.style.animation = 'none';
+      const d = DATA[key];
+      glow.style.left = (d.ox*100)+'%';
+      glow.style.top = (d.oy*100)+'%';
       glow.classList.add('on');
       backBtn.classList.add('show');
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         if(h.dataset.key === key){
           h.classList.add('active');
           h.classList.remove('dimmed');
-          h.style.left = '50%';
-          h.style.top = '50%';
         } else {
           h.classList.add('dimmed');
           h.classList.remove('active');
-          h.style.left = h.dataset.ox+'%';
-          h.style.top = h.dataset.oy+'%';
         }
       });
     }
@@ -544,7 +515,7 @@
     cardInner.classList.add('leaving');
     setTimeout(()=>{
       renderCard(current);
-      setZoom(current);
+      setHighlight(current);
       cardInner.classList.remove('leaving');
     }, 200);
     indexEl.querySelectorAll('.index-row').forEach(c=>{
@@ -562,8 +533,6 @@
     b.style.left = (d.ox*100)+'%';
     b.style.top = (d.oy*100)+'%';
     b.dataset.key = key;
-    b.dataset.ox = (d.ox*100)+'%';
-    b.dataset.oy = (d.oy*100)+'%';
     b.setAttribute('aria-label', 'Show impact on '+d.label);
     const lab = document.createElement('span');
     lab.className = 'label';
@@ -608,7 +577,7 @@
 
   // Init
   renderCard('overview');
-  setZoom('overview');
+  setHighlight('overview');
 })();
 </script>
 </body>
