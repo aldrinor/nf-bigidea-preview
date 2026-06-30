@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>What the smoke does inside you</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wildfire Smoke — Health Impact</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -11,295 +11,110 @@
   :root{
     --bg:#edf0f2;
     --ink:#1f2327;
+    --headline-ink:#1a1a1a;
     --muted:#8a9095;
+    --faint:#aab2b8;
+    --accent:#1b7bff;
     --red:#e23b3b;
-    --hair:rgba(20,24,28,.08);
-    --sans:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+    --hair:rgba(20,24,28,0.08);
+    --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
     --mono:'Space Mono', ui-monospace, monospace;
   }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased}
+  body{min-height:100vh}
 
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--sans);
-    -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
-  }
-
-  .section{
+  .health{
     min-height:100vh;
-    width:100%;
-    padding:clamp(40px, 5.5vw, 88px) clamp(24px, 5vw, 96px) clamp(40px, 5vw, 80px);
+    background:var(--bg);
+    padding:clamp(28px,5vh,64px) 0 clamp(20px,3vh,40px);
     display:flex;
     flex-direction:column;
-    gap:clamp(24px, 3vw, 40px);
-    position:relative;
-    overflow:hidden;
   }
 
-  /* ---- Header ---- */
-  .head{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    max-width:760px;
-  }
-  h1.headline{
-    font-family:var(--sans);
-    font-weight:600;
-    font-size:clamp(30px, 4.6vw, 56px);
-    line-height:1.04;
-    letter-spacing:-0.02em;
-    color:#1a1a1a;
-    margin:0;
-  }
-  h1.headline em{
-    font-style:normal;
-    color:var(--red);
-  }
-  .lede{
-    font-size:15px;
-    line-height:1.55;
-    color:var(--muted);
-    max-width:560px;
-    margin:0;
-  }
-
-  /* ---- Stage ---- */
-  .stage{
+  .grid{
     flex:1;
     display:grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap:clamp(24px, 4vw, 64px);
-    align-items:start;
-    width:100%;
-  }
-
-  /* ---- Body column ---- */
-  .body-col{
-    position:relative;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-  }
-  .body-wrap{
-    position:relative;
-    height:clamp(440px, 62vh, 600px);
-    aspect-ratio:688 / 1024;
-    transform-origin:50% 38%;
-    animation:breathe 4.5s ease-in-out infinite;
-    will-change:transform, opacity;
-  }
-  @keyframes breathe{
-    0%,100%{ transform:scale(1); opacity:.96; }
-    50%   { transform:scale(1.012); opacity:1; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .body-wrap{ animation:none; }
-  }
-  .body-img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    display:block;
-    filter:drop-shadow(0 1px 0 rgba(20,24,28,.02));
-    user-select:none;
-    -webkit-user-drag:none;
-  }
-  /* Fallback silhouette if image missing */
-  .body-fallback{
-    position:absolute;
-    inset:0;
-    background:
-      radial-gradient(50% 12% at 50% 8%, rgba(20,24,28,.10) 40%, transparent 70%),
-      radial-gradient(38% 38% at 50% 52%, rgba(20,24,28,.06) 50%, transparent 75%);
-    border-radius:46% 46% 30% 30% / 18% 18% 12% 12%;
-    opacity:.0;
-    pointer-events:none;
-  }
-  .body-img.broken{ opacity:0; }
-  .body-img.broken + .body-fallback{
-    opacity:.5;
-    background:
-      linear-gradient(180deg, transparent 0%, rgba(20,24,28,.05) 100%),
-      radial-gradient(48% 14% at 50% 7%, rgba(20,24,28,.14) 55%, transparent 72%),
-      radial-gradient(22% 30% at 50% 38%, rgba(20,24,28,.08) 60%, transparent 80%),
-      radial-gradient(28% 40% at 50% 62%, rgba(20,24,28,.06) 55%, transparent 78%);
-    border:1px solid var(--hair);
-  }
-
-  /* ---- Hotspots ---- */
-  .hotspot{
-    position:absolute;
-    transform:translate(-50%, -50%);
-    width:18px;
-    height:18px;
-    border:0;
-    background:transparent;
-    padding:0;
-    cursor:pointer;
-    z-index:3;
-    border-radius:50%;
-  }
-  .hotspot::before{
-    /* outer ring */
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    border:1.5px solid var(--red);
-    background:transparent;
-    transition:transform .35s ease, background .35s ease, opacity .35s ease;
-  }
-  .hotspot::after{
-    /* center dot */
-    content:"";
-    position:absolute;
-    left:50%; top:50%;
-    width:5px; height:5px;
-    border-radius:50%;
-    background:var(--red);
-    transform:translate(-50%,-50%);
-    transition:transform .35s ease, opacity .35s ease;
-  }
-  .hotspot:hover::before,
-  .hotspot:focus-visible::before{
-    transform:scale(1.25);
-  }
-  .hotspot .label{
-    position:absolute;
-    left:50%;
-    top:calc(100% + 8px);
-    transform:translate(-50%, 4px);
-    font-family:var(--mono);
-    font-size:10.5px;
-    letter-spacing:.02em;
-    color:var(--ink);
-    background:var(--bg);
-    padding:3px 7px;
-    border:1px solid var(--hair);
-    border-radius:3px;
-    white-space:nowrap;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .25s ease, transform .25s ease;
-  }
-  .hotspot:hover .label,
-  .hotspot:focus-visible .label{
-    opacity:1;
-    transform:translate(-50%, 0);
-  }
-  .hotspot.active::before{
-    background:var(--red);
-    transform:scale(1.15);
-    animation:pulse 2.2s ease-in-out infinite;
-  }
-  .hotspot.active::after{
-    background:#fff;
-    transform:translate(-50%,-50%) scale(1.1);
-  }
-  @keyframes pulse{
-    0%,100%{ box-shadow:0 0 0 0 rgba(226,59,59,.32); }
-    50%   { box-shadow:0 0 0 9px rgba(226,59,59,0); }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .hotspot.active::before{ animation:none; }
-  }
-  .hotspot:focus-visible{
-    outline:none;
-  }
-  .hotspot:focus-visible::before{
-    box-shadow:0 0 0 3px rgba(226,59,59,.25);
-  }
-
-  /* ---- Card column ---- */
-  .card-col{
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:flex-start;
-    padding-left:clamp(8px, 2vw, 24px);
-    padding-top:clamp(30px, 6vh, 70px);
-    height:100%;
-  }
-  .card{
-    max-width:480px;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-    animation:cardIn .5s cubic-bezier(.2,.7,.2,1) both;
-  }
-  @keyframes cardIn{
-    from{ opacity:0; transform:translateY(8px); }
-    to  { opacity:1; transform:translateY(0); }
-  }
-  .card .index{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:.04em;
-    display:flex;
+    grid-template-columns:44% 56%;
+    gap:clamp(20px,3vw,48px);
+    padding:0 clamp(24px,6vw,96px);
     align-items:center;
-    gap:10px;
+    width:100%;
   }
-  .card .index .num{
-    color:var(--red);
-  }
-  .card .index .bar{
-    flex:1;
-    height:1px;
-    background:var(--hair);
-  }
-  .card h2{
-    font-family:var(--sans);
-    font-weight:600;
-    font-size:clamp(22px, 2.4vw, 28px);
-    line-height:1.15;
-    letter-spacing:-0.01em;
-    color:var(--ink);
-    margin:0;
-  }
-  .card .impact{
-    font-family:var(--sans);
-    font-size:16.5px;
-    line-height:1.55;
-    color:var(--ink);
-    margin:0;
-  }
-  .card .source{
-    border-top:1px solid var(--hair);
-    padding-top:14px;
-    margin-top:4px;
+
+  /* LEFT */
+  .left{display:flex;flex-direction:column;justify-content:center;min-width:0}
+  .kicker{
     font-family:var(--mono);
     font-size:11px;
     color:var(--muted);
-    line-height:1.5;
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px;
-    align-items:baseline;
+    letter-spacing:0.04em;
+    margin-bottom:14px;
   }
-  .card .source .src-label{ color:var(--muted); }
-  .card .source a{
-    color:var(--ink);
-    text-decoration:none;
-    border-bottom:1px solid transparent;
-    transition:border-color .2s ease, color .2s ease;
+  h1.headline{
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(24px,2.7vw,34px);
+    line-height:1.12;
+    letter-spacing:-0.022em;
+    color:var(--headline-ink);
+    margin:0 0 clamp(22px,3vh,34px);
+    max-width:18ch;
   }
-  .card .source a:hover{
-    color:var(--red);
-    border-bottom-color:var(--red);
-  }
+  h1.headline em{font-style:normal;color:var(--red)}
 
-  /* ---- Organ selector chips (mobile-friendly, also keyboard nav aid) ---- */
+  .card{
+    min-height:230px;
+    position:relative;
+  }
+  .card-inner{
+    opacity:1;
+    transform:none;
+    transition:opacity .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
+  }
+  .card-inner.leaving{opacity:0;transform:translateY(8px)}
+  .card-name{
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(22px,2vw,28px);
+    line-height:1.15;
+    letter-spacing:-0.018em;
+    color:var(--headline-ink);
+    margin:0 0 14px;
+  }
+  .card-intro{
+    font-family:var(--stack);
+    font-size:19px;
+    line-height:1.55;
+    color:#5a6066;
+    font-weight:400;
+    margin:0 0 14px;
+    max-width:42ch;
+  }
+  .card-impacts p{
+    font-family:var(--stack);
+    font-size:19px;
+    line-height:1.55;
+    color:#1a1a1a;
+    font-weight:400;
+    margin:0 0 12px;
+    max-width:46ch;
+  }
+  .card-impacts p:last-child{margin-bottom:0}
+  .card-impacts a{
+    color:#1a1a1a;
+    text-decoration:none;
+    border-bottom:1px solid rgba(20,24,28,0.22);
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .card-impacts a:hover{color:var(--red);border-color:var(--red)}
+
+  /* CHIPS */
   .chips{
     display:flex;
     flex-wrap:wrap;
-    gap:6px;
-    margin-top:28px;
+    gap:8px;
+    margin-top:clamp(24px,3vh,34px);
   }
   .chip{
     font-family:var(--mono);
@@ -308,246 +123,397 @@
     background:transparent;
     border:1px solid var(--hair);
     border-radius:999px;
-    padding:6px 12px;
+    padding:7px 13px;
     cursor:pointer;
-    transition:all .25s ease;
+    transition:all .18s ease;
+    line-height:1;
   }
-  .chip:hover{ color:var(--ink); border-color:rgba(20,24,28,.18); }
-  .chip.active{
+  .chip:hover{color:var(--ink);border-color:rgba(20,24,28,0.22)}
+  .chip[aria-pressed="true"]{
     color:#fff;
-    background:var(--ink);
-    border-color:var(--ink);
+    background:var(--red);
+    border-color:var(--red);
+  }
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* RIGHT */
+  .right{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+  }
+  .frame{
+    position:relative;
+    aspect-ratio:688/1024;
+    height:clamp(420px, 84vh, 880px);
+    max-width:100%;
+    overflow:hidden;
+    border-radius:6px;
+  }
+  .body-zoom{
+    position:absolute;
+    inset:0;
+    transform-origin:0 0;
+    transform:translate(0,0) scale(1);
+    transition:transform .95s cubic-bezier(.16,1,.3,1);
+    will-change:transform;
+  }
+  .body-img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+    animation:breathe 4.5s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.012)}
   }
 
-  /* ---- Footer caption ---- */
+  /* HOTSPOTS */
+  .hotspots{position:absolute;inset:0;pointer-events:none;transition:opacity .4s ease}
+  .hotspots.hidden{opacity:0;pointer-events:none}
+  .hotspot{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:18px;height:18px;
+    border:0;background:transparent;
+    padding:0;cursor:pointer;
+    pointer-events:auto;
+  }
+  .hotspot::before{
+    content:"";
+    position:absolute;inset:0;
+    border-radius:50%;
+    background:var(--red);
+    transform:scale(0.38);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.6);
+  }
+  .hotspot::after{
+    content:"";
+    position:absolute;inset:0;
+    border-radius:50%;
+    border:1.5px solid var(--red);
+    animation:pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{transform:scale(0.5);opacity:0.9}
+    100%{transform:scale(1.9);opacity:0}
+  }
+  .hotspot:hover::before{transform:scale(0.5)}
+  .hotspot .label{
+    position:absolute;
+    left:50%;top:100%;
+    transform:translate(-50%,8px);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink);
+    background:var(--bg);
+    padding:3px 7px;
+    border:1px solid var(--hair);
+    border-radius:4px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  .hotspot:hover .label,.hotspot:focus-visible .label{opacity:1}
+  .hotspot:focus-visible{outline:none}
+  .hotspot:focus-visible::after{border-color:var(--accent);animation:none;transform:scale(1.4);opacity:1}
+
+  /* GLOW when zoomed */
+  .glow{
+    position:absolute;
+    left:50%;top:50%;
+    width:38%;height:38%;
+    transform:translate(-50%,-50%) scale(0.6);
+    background:radial-gradient(circle, rgba(226,59,59,0.32) 0%, rgba(226,59,59,0.14) 35%, rgba(226,59,59,0) 70%);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .5s ease, transform .9s cubic-bezier(.16,1,.3,1);
+    mix-blend-mode:multiply;
+  }
+  .glow.on{opacity:1;transform:translate(-50%,-50%) scale(1);animation:glowPulse 2.8s ease-in-out infinite}
+  @keyframes glowPulse{
+    0%,100%{transform:translate(-50%,-50%) scale(1)}
+    50%{transform:translate(-50%,-50%) scale(1.12)}
+  }
+
+  /* RESET */
+  .reset{
+    position:absolute;
+    top:14px;left:14px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink);
+    background:rgba(237,240,242,0.92);
+    border:1px solid var(--hair);
+    border-radius:999px;
+    padding:7px 13px;
+    cursor:pointer;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(-4px);
+    transition:opacity .3s ease, transform .3s ease;
+    backdrop-filter:blur(4px);
+  }
+  .reset.show{opacity:1;pointer-events:auto;transform:none}
+  .reset:hover{border-color:var(--red);color:var(--red)}
+  .reset:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* FOOTNOTE */
   .footnote{
     font-family:var(--mono);
-    font-size:10.5px;
+    font-size:11px;
     color:var(--muted);
-    letter-spacing:.02em;
-    margin-top:auto;
-    padding-top:24px;
-    display:flex;
-    justify-content:space-between;
-    gap:24px;
-    flex-wrap:wrap;
-    border-top:1px solid var(--hair);
+    text-align:center;
+    padding:clamp(16px,3vh,28px) clamp(24px,6vw,96px) 0;
+    letter-spacing:0.02em;
   }
 
-  /* ---- Responsive ---- */
-  @media (max-width: 880px){
-    .stage{
-      grid-template-columns: 1fr;
-      gap:28px;
+  /* MOBILE */
+  @media (max-width:880px){
+    .grid{
+      grid-template-columns:1fr;
+      gap:clamp(20px,4vh,40px);
+      padding:0 clamp(20px,6vw,32px);
       align-items:start;
     }
-    .body-col{ min-height:auto; justify-content:center; }
-    .body-wrap{
-      height:auto;
-      width:min(60%, 320px);
-    }
-    .card-col{
-      padding-left:0;
-      padding-top:0;
-      align-items:flex-start;
-      height:auto;
-    }
-    .card{ max-width:100%; }
+    .left{order:1}
+    .right{order:2}
+    .frame{height:clamp(360px,52vh,560px)}
+    .card{min-height:180px}
+    h1.headline{max-width:none}
   }
-  @media (max-width: 520px){
-    .body-wrap{ width:min(72%, 300px); }
-    .hotspot .label{ font-size:10px; }
+
+  @media (prefers-reduced-motion:reduce){
+    .body-img{animation:none}
+    .body-zoom{transition:transform .25s ease}
+    .glow{transition:opacity .25s ease;animation:none}
+    .hotspot::after{animation:none}
+    .card-inner{transition:opacity .2s ease}
   }
 </style>
 </head>
 <body>
+<section class="health" aria-labelledby="health-headline">
+  <div class="grid">
+    <div class="left">
+      <div class="kicker">Health impact · 03</div>
+      <h1 class="headline" id="health-headline">What the smoke does <em>inside you</em></h1>
 
-<section class="section" aria-labelledby="sec-title">
-
-  <header class="head">
-    <h1 class="headline" id="sec-title">What the smoke does <em>inside you</em></h1>
-    <p class="lede">Wildfire smoke is no longer a seasonal nuisance. The particles it carries move through the body in ways scientists are still mapping — and the documented effects reach well beyond the lungs.</p>
-  </header>
-
-  <div class="stage">
-
-    <!-- BODY -->
-    <div class="body-col">
-      <div class="body-wrap" id="bodyWrap">
-        <img
-          class="body-img"
-          id="bodyImg"
-          src="assets/body/body_premium.png"
-          alt="Human body showing the organs wildfire smoke harms"
-          draggable="false"
-        />
-        <div class="body-fallback" aria-hidden="true"></div>
-
-        <!-- Hotspots: top,left as % of body box -->
-        <button class="hotspot" data-organ="brain"       style="top:6%;  left:50%;" aria-label="Brain">
-          <span class="label">Brain</span>
-        </button>
-        <button class="hotspot" data-organ="bloodstream" style="top:22%; left:53%;" aria-label="Bloodstream">
-          <span class="label">Bloodstream</span>
-        </button>
-        <button class="hotspot" data-organ="lungs"       style="top:27%; left:50%;" aria-label="Lungs">
-          <span class="label">Lungs</span>
-        </button>
-        <button class="hotspot" data-organ="heart"       style="top:29%; left:47%;" aria-label="Heart">
-          <span class="label">Heart</span>
-        </button>
-        <button class="hotspot" data-organ="kidneys"     style="top:40%; left:50%;" aria-label="Kidneys">
-          <span class="label">Kidneys</span>
-        </button>
-        <button class="hotspot" data-organ="pregnancy"   style="top:50%; left:50%;" aria-label="Pregnancy">
-          <span class="label">Pregnancy</span>
-        </button>
+      <div class="card">
+        <div class="card-inner" id="cardInner" aria-live="polite">
+          <h2 class="card-name" id="cardName">Wildfire Smoke</h2>
+          <p class="card-intro" id="cardIntro">The ultrafine particles cross from the lungs into the bloodstream and reach organs throughout the body.</p>
+          <div class="card-impacts" id="cardImpacts"></div>
+        </div>
       </div>
+
+      <div class="chips" id="chips" role="group" aria-label="Select an organ"></div>
     </div>
 
-    <!-- CARD -->
-    <div class="card-col">
-      <article class="card" id="card" aria-live="polite">
-        <!-- populated by JS -->
-      </article>
-
-      <div class="chips" id="chips" role="tablist" aria-label="Select organ">
-        <button class="chip" data-organ="default">Overview</button>
-        <button class="chip" data-organ="brain">Brain</button>
-        <button class="chip" data-organ="lungs">Lungs</button>
-        <button class="chip" data-organ="heart">Heart</button>
-        <button class="chip" data-organ="bloodstream">Bloodstream</button>
-        <button class="chip" data-organ="kidneys">Kidneys</button>
-        <button class="chip" data-organ="pregnancy">Pregnancy</button>
+    <div class="right">
+      <div class="frame" id="frame">
+        <div class="body-zoom" id="bodyZoom">
+          <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
+        </div>
+        <div class="hotspots" id="hotspots"></div>
+        <div class="glow" id="glow"></div>
+        <button class="reset" id="reset" type="button" aria-label="Return to full body view">← Full body</button>
       </div>
     </div>
-
   </div>
 
-  <div class="footnote">
-    <span>Sources peer-reviewed · links open in a new tab</span>
-    <span>PM 2.5 · coarse + fine particulate matter</span>
-  </div>
-
+  <div class="footnote">Sources peer-reviewed · links open in a new tab</div>
 </section>
 
 <script>
-  // ---- Data (verified, do not alter) ----
+(function(){
   const DATA = {
-    default: {
-      idx: "00",
+    overview: {
       name: "Wildfire Smoke",
-      impact: "Wildfire smoke is now tied to about 41,000 U.S. deaths a year — and on a high-warming path, about 71,000 by 2050.",
-      sourceLabel: "Qiu et al., Nature 2025",
-      sourceHref: "https://doi.org/10.1038/s41586-025-09611-w"
-    },
-    lungs: {
-      idx: "01",
-      name: "Lungs",
-      impact: "The coarse particles irritate the upper airway; the fine ones (PM 2.5) reach deep into the alveoli and slip across into the bloodstream.",
-      sourceLabel: "EPA Integrated Science Assessment, 2019",
-      sourceHref: "https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"
-    },
-    heart: {
-      idx: "02",
-      name: "Heart",
-      impact: "Once the fine particles are in the blood, they drive cardiovascular disease — the EPA judges the link causal.",
-      sourceLabel: "EPA Integrated Science Assessment, 2019",
-      sourceHref: "https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"
+      intro: "The ultrafine particles cross from the lungs into the bloodstream and reach organs throughout the body.",
+      impacts: [
+        {text:"Wildfire smoke is projected to cause about [71,420 U.S. deaths a year by 2050] — up from around 41,000 today.", url:"https://pubmed.ncbi.nlm.nih.gov/40967551/"}
+      ],
+      ox:0.5, oy:0.5
     },
     brain: {
-      idx: "03",
-      name: "Brain",
-      impact: "The smallest particles can travel up the olfactory nerve toward the brain; a smoky school year measurably lowers children's test scores.",
-      sourceLabel: "Wen & Burke, Nature Sustainability, 2022",
-      sourceHref: "https://doi.org/10.1038/s41893-022-00956-y"
+      name:"Brain & mind",
+      impacts:[
+        {text:"On smoky days, emergency visits for [depression rose about 15%], and for other mood disorders about 29%.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11971671/"},
+        {text:"A smoky school year measurably [lowers children's test scores].", url:"https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf"}
+      ],
+      ox:0.50, oy:0.07, label:"Brain"
     },
-    bloodstream: {
-      idx: "04",
-      name: "Bloodstream",
-      impact: "PM 2.5 crosses from the lungs into the blood and circulates through the whole body, driving systemic inflammation.",
-      sourceLabel: "EPA Integrated Science Assessment, 2019",
-      sourceHref: "https://www.epa.gov/air-research/clinical-outcomes-related-particulate-matter-exposure-and-cardiovascular-disease"
+    lungs: {
+      name:"Lungs",
+      impacts:[
+        {text:"These fine particles are up to [10 times more harmful] to the lungs than ordinary pollution.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC7935892/"},
+        {text:"They are a [Group 1 carcinogen] — the WHO's highest evidence tier — and long-term exposure raises lung-cancer deaths about 8% per increment.", url:"https://www.iarc.who.int/news-events/iarc-outdoor-air-pollution-a-leading-environmental-cause-of-cancer-deaths/"},
+        {text:"After lung-cancer surgery, a wildfire within three months raised the risk of death [43%].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC10375383/"}
+      ],
+      ox:0.50, oy:0.26, label:"Lungs"
+    },
+    heart: {
+      name:"Heart",
+      impacts:[
+        {text:"On dense-smoke days, cardiac emergencies in older adults rose [about 15%], and strokes about 22%.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC6015400/"},
+        {text:"Heavy-smoke days carried up to a [70% higher risk] of cardiac arrest outside the hospital.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC7428528/"},
+        {text:"Across 22 million people, each small rise in long-term exposure raised new [heart-failure risk 1.4%].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12367337/"}
+      ],
+      ox:0.48, oy:0.29, label:"Heart"
     },
     kidneys: {
-      idx: "05",
-      name: "Kidneys",
-      impact: "On heavy-smoke days, same-day mortality for people on dialysis rises about 139%.",
-      sourceLabel: "Kidney International Reports, 2025",
-      sourceHref: "https://pmc.ncbi.nlm.nih.gov/articles/PMC12231018/"
+      name:"Kidneys",
+      impacts:[
+        {text:"Among dialysis patients, smoke particles were linked to [4% more deaths the same day] and 7% over the following month.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC7460895/"}
+      ],
+      ox:0.50, oy:0.40, label:"Kidneys"
     },
     pregnancy: {
-      idx: "06",
-      name: "Pregnancy",
-      impact: "Wildfire-smoke exposure raises the odds of preterm birth about 3.4% for every 10 µg/m³.",
-      sourceLabel: "Environment International, 2024",
-      sourceHref: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11410054/"
+      name:"The unborn",
+      impacts:[
+        {text:"Each small rise in exposure during pregnancy raised the odds of [preterm birth 1.3%] across 5.1 million births.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/"},
+        {text:"The first study of its kind tied third-trimester smoke to [higher odds of autism].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12874521/"}
+      ],
+      ox:0.50, oy:0.50, label:"The unborn"
+    },
+    bloodstream: {
+      name:"Blood & cells",
+      impacts:[
+        {text:"Exposure changed [DNA at 94 sites] across 133 disease-linked genes and left toxic metals in immune cells.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12696577/"},
+        {text:"When buildings burn, the smoke carried carcinogenic [chromium-6 nanoparticles] up to 6–9 miles downwind.", url:"https://www.ucdavis.edu/news/researchers-find-carcinogenic-chromium-6-palisades-altadena-fire-cleanup-zones"}
+      ],
+      ox:0.53, oy:0.33, label:"Blood & cells"
     }
   };
 
-  const cardEl = document.getElementById('card');
-  const hotspots = document.querySelectorAll('.hotspot');
-  const chips = document.querySelectorAll('.chip');
+  const ORDER = ["overview","brain","lungs","heart","kidneys","pregnancy","bloodstream"];
+  const CHIP_LABELS = {
+    overview:"Overview", brain:"Brain", lungs:"Lungs", heart:"Heart",
+    kidneys:"Kidneys", pregnancy:"The unborn", bloodstream:"Blood & cells"
+  };
 
-  function render(organ){
-    const d = DATA[organ];
-    if(!d) return;
-    cardEl.style.animation = 'none';
-    // force reflow to restart animation
-    void cardEl.offsetWidth;
-    cardEl.style.animation = '';
+  const ZOOM = 2.45;
 
-    cardEl.innerHTML = `
-      <div class="index">
-        <span class="num">${d.idx}</span>
-        <span>—</span>
-        <span>${organ === 'default' ? 'Overview' : d.name}</span>
-        <span class="bar"></span>
-      </div>
-      <h2>${d.name}</h2>
-      <p class="impact">${d.impact}</p>
-      <div class="source">
-        <span class="src-label">Source —</span>
-        <a href="${d.sourceHref}" target="_blank" rel="noopener noreferrer">${d.sourceLabel}</a>
-      </div>
-    `;
+  const bodyZoom = document.getElementById('bodyZoom');
+  const bodyImg = document.getElementById('bodyImg');
+  const hotspotsEl = document.getElementById('hotspots');
+  const glow = document.getElementById('glow');
+  const resetBtn = document.getElementById('reset');
+  const cardInner = document.getElementById('cardInner');
+  const cardName = document.getElementById('cardName');
+  const cardIntro = document.getElementById('cardIntro');
+  const cardImpacts = document.getElementById('cardImpacts');
+  const chipsEl = document.getElementById('chips');
+
+  let current = "overview";
+
+  function linkify(text, url){
+    const m = text.match(/\[(.+?)\]/);
+    if(!m) return text;
+    const idx = text.indexOf(m[0]);
+    const pre = text.slice(0, idx);
+    const post = text.slice(idx + m[0].length);
+    return pre + '<a href="'+url+'" target="_blank" rel="noopener">'+m[1]+'</a>' + post;
   }
 
-  function setActive(organ){
-    // hotspots
-    hotspots.forEach(h => {
-      h.classList.toggle('active', h.dataset.organ === organ);
-    });
-    // chips
-    chips.forEach(c => {
-      c.classList.toggle('active', c.dataset.organ === organ);
-    });
-    render(organ);
+  function renderCard(key){
+    const d = DATA[key];
+    cardName.textContent = d.name;
+    if(d.intro){
+      cardIntro.style.display = '';
+      cardIntro.textContent = d.intro;
+    } else {
+      cardIntro.style.display = 'none';
+    }
+    cardImpacts.innerHTML = d.impacts.map(im =>
+      '<p>'+linkify(im.text, im.url)+'</p>'
+    ).join('');
   }
 
-  hotspots.forEach(h => {
-    h.addEventListener('click', () => setActive(h.dataset.organ));
-    h.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter' || e.key === ' '){
-        e.preventDefault();
-        setActive(h.dataset.organ);
-      }
+  function setZoom(key){
+    const d = DATA[key];
+    if(key === "overview"){
+      bodyZoom.style.setProperty('--s', 1);
+      bodyZoom.style.transform = 'translate(0,0) scale(1)';
+      bodyImg.style.animation = '';
+      hotspotsEl.classList.remove('hidden');
+      glow.classList.remove('on');
+      resetBtn.classList.remove('show');
+    } else {
+      const s = ZOOM;
+      const tx = (0.5 - s*d.ox)*100;
+      const ty = (0.5 - s*d.oy)*100;
+      bodyZoom.style.transform = 'translate('+tx+'%, '+ty+'%) scale('+s+')';
+      bodyImg.style.animation = 'none';
+      hotspotsEl.classList.add('hidden');
+      glow.classList.add('on');
+      resetBtn.classList.add('show');
+    }
+  }
+
+  function select(key, force){
+    if(current === key && !force){
+      // toggle back to overview
+      current = "overview";
+    } else {
+      current = key;
+    }
+    // animate card
+    cardInner.classList.add('leaving');
+    setTimeout(()=>{
+      renderCard(current);
+      setZoom(current);
+      cardInner.classList.remove('leaving');
+    }, 200);
+    // update chips
+    chipsEl.querySelectorAll('.chip').forEach(c=>{
+      c.setAttribute('aria-pressed', c.dataset.key === current ? 'true' : 'false');
     });
+  }
+
+  // Build hotspots
+  ORDER.forEach(key=>{
+    if(key === "overview") return;
+    const d = DATA[key];
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'hotspot';
+    b.style.left = (d.ox*100)+'%';
+    b.style.top = (d.oy*100)+'%';
+    b.setAttribute('aria-label', 'Show impact on '+d.label);
+    b.dataset.key = key;
+    const lab = document.createElement('span');
+    lab.className = 'label';
+    lab.textContent = d.label;
+    b.appendChild(lab);
+    b.addEventListener('click', ()=>select(key));
+    hotspotsEl.appendChild(b);
   });
 
-  chips.forEach(c => {
-    c.addEventListener('click', () => setActive(c.dataset.organ));
+  // Build chips
+  ORDER.forEach(key=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.dataset.key = key;
+    b.textContent = CHIP_LABELS[key];
+    b.setAttribute('aria-pressed', key === 'overview' ? 'true' : 'false');
+    b.addEventListener('click', ()=>select(key));
+    chipsEl.appendChild(b);
   });
 
-  // image fallback
-  const img = document.getElementById('bodyImg');
-  img.addEventListener('error', () => {
-    img.classList.add('broken');
-  });
+  resetBtn.addEventListener('click', ()=>select('overview', true));
 
-  // initial state
-  setActive('default');
+  // Init
+  renderCard('overview');
+  setZoom('overview');
+})();
 </script>
-
 </body>
 </html>
