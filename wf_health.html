@@ -102,35 +102,62 @@
   }
   .card-impacts a:hover{color:var(--red);border-color:var(--red)}
 
-  /* CHIPS — equal width */
-  .chips{
+  /* ANATOMY INDEX — vertical selector */
+  .index{
+    margin-top:clamp(26px,3.5vh,38px);
     display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-top:clamp(24px,3vh,34px);
+    flex-direction:column;
+    border-top:1px solid var(--hair);
   }
-  .chip{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted);
+  .index-row{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    width:100%;
+    padding:13px 6px 13px 14px;
     background:transparent;
-    border:1px solid var(--hair);
-    border-radius:999px;
-    width:132px;
-    text-align:center;
-    padding:8px 10px;
+    border:0;
+    border-bottom:1px solid var(--hair);
     cursor:pointer;
-    transition:all .18s ease;
-    line-height:1;
-    white-space:nowrap;
+    text-align:left;
+    position:relative;
+    transition:background .18s ease, color .18s ease;
+    font-family:var(--stack);
   }
-  .chip:hover{color:var(--ink);border-color:rgba(20,24,28,0.22)}
-  .chip[aria-pressed="true"]{
-    color:#fff;
+  .index-row::before{
+    content:"";
+    position:absolute;
+    left:0; top:50%;
+    transform:translateY(-50%) scaleY(0);
+    width:3px;
+    height:60%;
     background:var(--red);
-    border-color:var(--red);
+    border-radius:2px;
+    transition:transform .22s cubic-bezier(.16,1,.3,1);
   }
-  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .index-row .idx{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+    width:26px;
+    flex:0 0 26px;
+    letter-spacing:0.02em;
+    transition:color .18s ease;
+  }
+  .index-row .nm{
+    font-family:var(--stack);
+    font-size:17px;
+    font-weight:500;
+    color:var(--ink);
+    letter-spacing:-0.005em;
+    transition:color .18s ease;
+  }
+  .index-row:hover{background:rgba(20,24,28,0.035)}
+  .index-row:hover .nm{color:var(--red)}
+  .index-row[aria-pressed="true"] .nm{color:var(--red)}
+  .index-row[aria-pressed="true"] .idx{color:var(--red)}
+  .index-row[aria-pressed="true"]::before{transform:translateY(-50%) scaleY(1)}
+  .index-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
   /* RIGHT */
   .right{
@@ -189,12 +216,12 @@
     inset:0;
     transform-origin:0 0;
     transform:translate(0,0) scale(1);
-    transition:transform .95s cubic-bezier(.16,1,.3,1);
+    transition:transform .95s cubic-bezier(.16,1,.3,1), -webkit-mask-image .6s ease, mask-image .6s ease;
     will-change:transform;
   }
   .body-zoom.zoomed{
-    -webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, #000 46%, rgba(0,0,0,0.6) 62%, transparent 90%);
-    mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, #000 46%, rgba(0,0,0,0.6) 62%, transparent 90%);
+    -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 0%, #000 30%, rgba(0,0,0,0.35) 48%, transparent 60%);
+    mask-image:radial-gradient(circle at 50% 50%, #000 0%, #000 30%, rgba(0,0,0,0.35) 48%, transparent 60%);
   }
   .body-img{
     width:100%;
@@ -263,17 +290,20 @@
   .hotspot.dimmed{opacity:0.16}
   .hotspot.dimmed::after{animation:none;opacity:0}
   .hotspot.active{
-    width:28px;height:28px;
+    width:30px;height:30px;
   }
   .hotspot.active::before{
-    transform:scale(0.62);
-    box-shadow:0 0 0 2px rgba(255,255,255,0.85), 0 0 14px 3px rgba(226,59,59,0.55);
+    transform:scale(0.55);
+    background:var(--red);
+    box-shadow:0 0 0 2.5px #fff, 0 0 16px 4px rgba(226,59,59,0.5);
   }
   .hotspot.active::after{
-    animation:none;
+    animation:pulseStrong 2.2s ease-out infinite;
     border-width:2px;
-    opacity:0.55;
-    transform:scale(1.7);
+  }
+  @keyframes pulseStrong{
+    0%{transform:scale(0.7);opacity:0.85}
+    100%{transform:scale(2.4);opacity:0}
   }
 
   /* GLOW when zoomed */
@@ -307,7 +337,8 @@
     .frame{height:clamp(360px,52vh,560px)}
     .card{min-height:180px}
     h1.headline{max-width:none}
-    .chip{width:116px}
+    .index-row{padding:11px 6px 11px 14px}
+    .index-row .nm{font-size:16px}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -315,6 +346,7 @@
     .body-zoom{transition:transform .25s ease}
     .glow{transition:opacity .25s ease;animation:none}
     .hotspot::after{animation:none}
+    .hotspot.active::after{animation:none}
     .hotspot{transition:opacity .25s ease}
     .card-inner{transition:opacity .2s ease}
   }
@@ -334,7 +366,7 @@
         </div>
       </div>
 
-      <div class="chips" id="chips" role="group" aria-label="Select an organ"></div>
+      <div class="index" id="index" role="group" aria-label="Select an organ"></div>
     </div>
 
     <div class="right">
@@ -397,12 +429,12 @@
       ox:0.50, oy:0.40, label:"Kidneys"
     },
     pregnancy: {
-      name:"The unborn",
+      name:"Reproduction",
       impacts:[
         {text:"Each small rise in exposure during pregnancy raised the odds of [preterm birth 1.3%] across 5.1 million births.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11410054/"},
         {text:"The first study of its kind tied third-trimester smoke to [higher odds of autism].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12874521/"}
       ],
-      ox:0.50, oy:0.50, label:"The unborn"
+      ox:0.50, oy:0.50, label:"Reproduction"
     },
     bloodstream: {
       name:"Blood & cells",
@@ -415,12 +447,12 @@
   };
 
   const ORDER = ["overview","brain","lungs","heart","kidneys","pregnancy","bloodstream"];
-  const CHIP_LABELS = {
+  const INDEX_LABELS = {
     overview:"Overview", brain:"Brain", lungs:"Lungs", heart:"Heart",
-    kidneys:"Kidneys", pregnancy:"The unborn", bloodstream:"Blood & cells"
+    kidneys:"Kidneys", pregnancy:"Reproduction", bloodstream:"Blood & cells"
   };
 
-  const ZOOM = 1.7;
+  const ZOOM = 1.8;
 
   const bodyZoom = document.getElementById('bodyZoom');
   const bodyImg = document.getElementById('bodyImg');
@@ -432,7 +464,7 @@
   const cardName = document.getElementById('cardName');
   const cardIntro = document.getElementById('cardIntro');
   const cardImpacts = document.getElementById('cardImpacts');
-  const chipsEl = document.getElementById('chips');
+  const indexEl = document.getElementById('index');
 
   let current = "overview";
 
@@ -515,7 +547,7 @@
       setZoom(current);
       cardInner.classList.remove('leaving');
     }, 200);
-    chipsEl.querySelectorAll('.chip').forEach(c=>{
+    indexEl.querySelectorAll('.index-row').forEach(c=>{
       c.setAttribute('aria-pressed', c.dataset.key === current ? 'true' : 'false');
     });
   }
@@ -544,16 +576,23 @@
     hotspotsEl.appendChild(b);
   });
 
-  // Build chips
-  ORDER.forEach(key=>{
+  // Build anatomy index
+  ORDER.forEach((key, i)=>{
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'chip';
+    b.className = 'index-row';
     b.dataset.key = key;
-    b.textContent = CHIP_LABELS[key];
     b.setAttribute('aria-pressed', key === 'overview' ? 'true' : 'false');
+    const idx = document.createElement('span');
+    idx.className = 'idx';
+    idx.textContent = String(i+1).padStart(2,'0');
+    const nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = INDEX_LABELS[key];
+    b.appendChild(idx);
+    b.appendChild(nm);
     b.addEventListener('click', ()=>select(key));
-    chipsEl.appendChild(b);
+    indexEl.appendChild(b);
   });
 
   backBtn.addEventListener('click', (e)=>{
