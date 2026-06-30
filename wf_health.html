@@ -218,9 +218,8 @@
     transform-origin:center center;
     transition:transform .7s cubic-bezier(.16,1,.3,1);
     will-change:transform;
-    animation:breathe 4.5s ease-in-out infinite;
   }
-  .figure.zoomed{
+  .figure.zoomed .body-img{
     animation:none;
   }
   @keyframes breathe{
@@ -237,6 +236,7 @@
     pointer-events:none;
     -webkit-user-drag:none;
     user-select:none;
+    animation:breathe 4.5s ease-in-out infinite;
   }
 
   /* GLOW HALO — blooms over the selected organ */
@@ -509,13 +509,27 @@
     figure.style.transform = `translate(${targetX}px, ${targetY}px) scale(${targetScale})`;
   }
 
+  // Horizontal offset so the resting figure lines up with the particle on the
+  // sibling hero page (centered in the right 54% column of a 46/54 grid with
+  // clamp(24px,6vw,96px) padding + clamp(32px,5vw,80px) gap). 0 when stacked.
+  function restOffsetX(){
+    const aw = rightEl.clientWidth;
+    const vw = window.innerWidth;
+    if (vw <= 880) return 0;
+    const padX = Math.min(96, Math.max(24, 0.06*vw));
+    const gap  = Math.min(80, Math.max(32, 0.05*vw));
+    const innerW = vw - 2*padX - gap;
+    const anchorX = padX + innerW*0.46 + gap + innerW*0.54/2;
+    return anchorX - aw/2;
+  }
+
   function setHighlight(key){
     if(key === "overview"){
       backBtn.classList.remove('show');
       glow.classList.remove('show');
       figure.classList.remove('zoomed');
       targetScale = 1;
-      targetX = 0;
+      targetX = restOffsetX();
       targetY = 0;
       applyTransform();
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
@@ -641,11 +655,9 @@
     if(current !== 'overview') select('overview', true);
   });
 
-  // Recalculate zoom on resize
+  // Recalculate position/zoom on resize (rest offset is width-dependent)
   window.addEventListener('resize', () => {
-    if (current !== 'overview') {
-      setHighlight(current);
-    }
+    setHighlight(current);
   });
 
   // Init
