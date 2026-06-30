@@ -456,9 +456,13 @@ let lastFrameTime = 0;
 let smokeOverlay = null;
 
 // ---- Map setup ----
+// Standalone: scroll wheel zooms the map (natural gesture).
+// Embedded in the scroll-story deck (wildfire.html): wheel advances the section,
+// so zoom there uses the +/- buttons, double-click, or pinch instead.
+const isEmbedded = window.self !== window.top;
 const map = L.map('map', {
   zoomControl: false,
-  scrollWheelZoom: false,
+  scrollWheelZoom: !isEmbedded,
   center: [46, -97],
   zoom: 4,
   minZoom: 3,
@@ -729,18 +733,27 @@ function onFramesReady(bbox, count) {
 function setupYearTicks(count) {
   const container = document.getElementById('yearTicks');
   container.innerHTML = '';
-  const targetYears = [2023, 2024, 2025];
-  for (const year of targetYears) {
-    const target = `${year}-01-01`;
+  if (!dates.length) return;
+  // Derive the year range from the actual data so ticks always match (e.g. 2024–2026).
+  const firstYear = new Date(dates[0] + 'T00:00:00Z').getUTCFullYear();
+  const lastYear = new Date(dates[dates.length - 1] + 'T00:00:00Z').getUTCFullYear();
+  const placed = [];
+  for (let year = firstYear; year <= lastYear; year++) {
+    const target = Date.UTC(year, 0, 1);
     let bestIdx = 0, bestDiff = Infinity;
     for (let i = 0; i < dates.length; i++) {
-      const diff = Math.abs(new Date(dates[i]) - new Date(target));
+      const diff = Math.abs(new Date(dates[i] + 'T00:00:00Z').getTime() - target);
       if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
     }
     const pct = (bestIdx / (count - 1)) * 100;
+    if (placed.some(p => Math.abs(p - pct) < 4)) continue; // avoid two labels stacking
+    placed.push(pct);
     const tick = document.createElement('span');
     tick.className = 'tc-tick';
-    tick.style.left = pct + '%';
+    // Keep edge labels fully inside the control rather than clipped by translateX(-50%).
+    if (pct <= 2) { tick.style.left = '0'; tick.style.transform = 'none'; }
+    else if (pct >= 98) { tick.style.left = '100%'; tick.style.transform = 'translateX(-100%)'; }
+    else { tick.style.left = pct + '%'; }
     tick.textContent = year;
     container.appendChild(tick);
   }
