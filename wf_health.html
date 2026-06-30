@@ -629,13 +629,9 @@
     b.className = 'index-row';
     b.dataset.key = key;
     b.setAttribute('aria-pressed', key === 'overview' ? 'true' : 'false');
-    const idx = document.createElement('span');
-    idx.className = 'idx';
-    idx.textContent = String(i+1).padStart(2,'0');
     const nm = document.createElement('span');
     nm.className = 'nm';
     nm.textContent = INDEX_LABELS[key];
-    b.appendChild(idx);
     b.appendChild(nm);
     b.addEventListener('click', ()=>select(key));
     indexEl.appendChild(b);
