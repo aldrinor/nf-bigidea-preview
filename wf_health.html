@@ -27,7 +27,6 @@
   .health{
     min-height:100vh;
     background:var(--bg);
-    padding:clamp(28px,5vh,64px) 0 clamp(20px,3vh,40px);
     display:flex;
     flex-direction:column;
   }
@@ -40,10 +39,11 @@
     padding:0 clamp(24px,6vw,96px);
     align-items:center;
     width:100%;
+    min-height:0;
   }
 
   /* LEFT */
-  .left{display:flex;flex-direction:column;justify-content:center;min-width:0}
+  .left{display:flex;flex-direction:column;justify-content:center;min-width:0;max-height:100vh}
   h1.headline{
     font-family:var(--stack);
     font-weight:600;
@@ -168,21 +168,20 @@
     justify-content:center;
     min-width:0;
     width:100%;
+    height:100vh;
+    max-height:100vh;
   }
-  .back-row{
-    width:100%;
-    display:flex;
-    justify-content:flex-start;
-    padding-left:4px;
-    min-height:56px;
-    align-items:center;
-  }
+  
   .back-btn{
+    position:absolute;
+    top:16px;
+    left:16px;
+    z-index:20;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    width:48px;
-    height:48px;
+    width:44px;
+    height:44px;
     border-radius:50%;
     border:1px solid var(--hair);
     background:rgba(237,240,242,0.9);
@@ -204,21 +203,13 @@
 
   .frame{
     position:relative;
+    height:100%;
+    width:auto;
     aspect-ratio:688/1024;
-    height:clamp(400px, 78vh, 820px);
     max-width:100%;
     cursor:pointer;
-  }
-
-  /* BODY WRAP — handles the circular clip (porthole) */
-  .body-wrap{
-    position:absolute;
-    inset:0;
-    clip-path:circle(9999px at 50% 50%);
-    transition:clip-path .85s cubic-bezier(.16,1,.3,1);
-  }
-  .body-wrap.porthole{
-    clip-path:circle(var(--r,240px) at 50% 50%);
+    overflow:hidden;
+    flex-shrink:0;
   }
 
   /* BREATHE WRAP — idle animation on its own layer */
@@ -239,32 +230,16 @@
     height:100%;
     object-fit:contain;
     display:block;
-    transform-origin:var(--ox,50%) var(--oy,50%);
-    transform:translate(var(--tx,0), var(--ty,0)) scale(var(--sc,1));
+    transform-origin:0 0;
+    transform:translate(0px, 0px) scale(1);
     transition:transform .85s cubic-bezier(.16,1,.3,1);
   }
-
-  /* PORTHOLE RING — crisp thin ring around the circle */
-  .porthole-ring{
-    position:absolute;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    width:calc(var(--r,240px) * 2);
-    height:calc(var(--r,240px) * 2);
-    border-radius:50%;
-    border:1.5px solid rgba(20,24,28,0.12);
-    box-shadow:0 2px 20px rgba(0,0,0,0.06);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .4s ease .4s;
-    z-index:3;
-  }
-  .porthole-ring.show{opacity:1}
 
   /* CENTER DOT — prominent red dot at organ centre */
   .center-dot{
     position:absolute;
-    top:50%; left:50%;
+    top:50%;
+    left:50%;
     transform:translate(-50%,-50%);
     width:15px; height:15px;
     border-radius:50%;
@@ -272,7 +247,7 @@
     box-shadow:0 0 0 2.5px #fff, 0 0 14px 4px rgba(226,59,59,0.45);
     opacity:0;
     pointer-events:none;
-    transition:opacity .3s ease .5s;
+    transition:opacity .3s ease .5s, top .85s cubic-bezier(.16,1,.3,1), left .85s cubic-bezier(.16,1,.3,1);
     z-index:5;
   }
   .center-dot.show{
@@ -344,10 +319,11 @@
       gap:clamp(20px,4vh,40px);
       padding:0 clamp(20px,6vw,32px);
       align-items:start;
+      min-height:auto;
     }
-    .left{order:1}
-    .right{order:2}
-    .frame{height:clamp(360px,52vh,560px)}
+    .left{order:1;max-height:none}
+    .right{order:2;height:auto;max-height:none}
+    .frame{height:clamp(400px, 68vh, 680px)}
     .card{min-height:180px}
     h1.headline{max-width:none}
     .index-row{padding:11px 6px 11px 14px}
@@ -357,12 +333,9 @@
   @media (prefers-reduced-motion:reduce){
     .breathe-wrap{animation:none}
     .body-img{transition:transform .3s ease}
-    .body-wrap{transition:clip-path .3s ease}
-    .center-dot{animation:none}
+    .center-dot{animation:none;transition:opacity .2s ease, top .3s ease, left .3s ease}
     .hotspot::after{animation:none}
     .card-inner{transition:opacity .2s ease}
-    .porthole-ring{transition:opacity .2s ease}
-    .center-dot{transition:opacity .2s ease}
   }
 </style>
 </head>
@@ -384,16 +357,11 @@
     </div>
 
     <div class="right">
-      <div class="back-row">
-        <button class="back-btn" id="backBtn" type="button" aria-label="Return to full body view">&lsaquo;</button>
-      </div>
+      <button class="back-btn" id="backBtn" type="button" aria-label="Return to full body view">&lsaquo;</button>
       <div class="frame" id="frame">
-        <div class="body-wrap" id="bodyWrap">
-          <div class="breathe-wrap" id="breatheWrap">
-            <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
-          </div>
+        <div class="breathe-wrap" id="breatheWrap">
+          <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
         </div>
-        <div class="porthole-ring" id="portholeRing"></div>
         <div class="center-dot" id="centerDot"></div>
         <div class="hotspots" id="hotspots"></div>
       </div>
@@ -472,10 +440,8 @@
   const hotspotsEl = document.getElementById('hotspots');
   const backBtn = document.getElementById('backBtn');
   const frame = document.getElementById('frame');
-  const bodyWrap = document.getElementById('bodyWrap');
   const breatheWrap = document.getElementById('breatheWrap');
   const bodyImg = document.getElementById('bodyImg');
-  const portholeRing = document.getElementById('portholeRing');
   const centerDot = document.getElementById('centerDot');
   const cardInner = document.getElementById('cardInner');
   const cardName = document.getElementById('cardName');
@@ -514,32 +480,29 @@
     ).join('');
   }
 
-  function updatePortholeSize(){
-    const rect = frame.getBoundingClientRect();
-    const r = Math.min(rect.width * 0.48, rect.height * 0.39, 260);
-    frame.style.setProperty('--r', Math.round(r) + 'px');
-  }
-
   function applyZoom(key){
     if(key === "overview"){
-      bodyImg.classList.remove('zoomed');
-      bodyWrap.classList.remove('porthole');
+      bodyImg.style.transformOrigin = '0 0';
+      bodyImg.style.transform = 'translate(0px, 0px) scale(1)';
       breatheWrap.classList.remove('paused');
-      portholeRing.classList.remove('show');
       centerDot.classList.remove('show');
       hotspotsEl.classList.remove('hidden');
     } else {
       const d = DATA[key];
-      const ox = d.ox, oy = d.oy;
-      bodyImg.style.setProperty('--ox', (ox * 100) + '%');
-      bodyImg.style.setProperty('--oy', (oy * 100) + '%');
-      bodyImg.style.setProperty('--tx', ((0.5 - ox) * 100) + '%');
-      bodyImg.style.setProperty('--ty', ((0.5 - oy) * 100) + '%');
-      bodyImg.style.setProperty('--sc', '2.2');
-      bodyImg.classList.add('zoomed');
-      bodyWrap.classList.add('porthole');
+      const S = 1.9;                                  
+      const fw = frame.clientWidth, fh = frame.clientHeight;   
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      const tx = clamp(fw/2 - d.ox * S * fw, -(S - 1) * fw, 0);
+      const ty = clamp(fh/2 - d.oy * S * fh, -(S - 1) * fh, 0);
+      bodyImg.style.transformOrigin = '0 0';
+      bodyImg.style.transform = `translate(${tx}px, ${ty}px) scale(${S})`;
+      
       breatheWrap.classList.add('paused');
-      portholeRing.classList.add('show');
+      
+      const dotX = d.ox * S * fw + tx;
+      const dotY = d.oy * S * fh + ty;
+      centerDot.style.left = dotX + 'px';
+      centerDot.style.top  = dotY + 'px';
       centerDot.classList.add('show');
       hotspotsEl.classList.add('hidden');
     }
@@ -635,11 +598,7 @@
     if(current !== 'overview') select('overview', true);
   });
 
-  // Resize handler
-  window.addEventListener('resize', updatePortholeSize);
-
   // Init
-  updatePortholeSize();
   renderCard('overview');
   setHighlight('overview');
   applyZoom('overview');
