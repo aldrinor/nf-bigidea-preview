@@ -400,7 +400,7 @@ body {
     <div class="legend-pm">
       <div class="legend-pm-item">
         <span class="legend-dot" style="background:#c2c8cc"></span>
-        <span>clean</span>
+        <span>Clean</span>
       </div>
       <div class="legend-pm-item">
         <span class="legend-dot" style="background:#e0a0a0"></span>
@@ -790,6 +790,9 @@ function onSliderInput(e) {
 // ---- Play / Pause ----
 function play() {
   playing = true;
+  // If we're already at the last frame (today), restart from the beginning so play
+  // runs the whole timeline once and then stops on today.
+  if (currentFrame >= imgUrls.length - 1) setFrame(0);
   document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
   document.getElementById('playBtn').setAttribute('aria-label', 'Pause');
   lastFrameTime = performance.now();
@@ -808,7 +811,7 @@ function playLoop() {
   if (now - lastFrameTime >= PLAY_INTERVAL) {
     lastFrameTime = now;
     let next = currentFrame + 1;
-    if (next >= imgUrls.length) next = 0;
+    if (next >= imgUrls.length) { pause(); return; }  // stop on today; do not loop
     setFrame(next);
   }
   playTimer = requestAnimationFrame(playLoop);
