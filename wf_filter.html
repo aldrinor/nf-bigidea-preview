@@ -3,457 +3,442 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wildfire smoke filters — when the filter quits</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Ordinary filters quit when the smoke arrives</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#edf0f2;
-    --ink:#1f2327;
-    --headline-ink:#1a1a1a;
-    --muted:#8a9095;
-    --accent:#1b7bff;
-    --red:#e23b3b;
-    --hair:rgba(20,24,28,0.08);
-    --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
-    --mono:'Space Mono', ui-monospace, monospace;
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* === Background video stack === */
+.video-stack{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  overflow:hidden;
+  background:var(--bg);
+}
+.video-stack video,
+.video-stack img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.video-stack img.poster{
+  opacity:0;
+  z-index:3;
+}
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* === Left readability scrim === */
+.scrim{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(to right,
+    var(--bg) 0%,
+    var(--bg) 22%,
+    rgba(237,240,242,0.72) 42%,
+    rgba(237,240,242,0) 60%);
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:0.04em;
+  margin-bottom:22px;
+  display:flex;
+  align-items:center;
+  font-weight:400;
+}
+.eyebrow::before{
+  content:"";
+  display:inline-block;
+  width:28px;
+  height:1px;
+  background:var(--hair);
+  margin-right:12px;
+  flex-shrink:0;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size:clamp(28px, 3vw, 40px);
+  line-height:1.18;
+  letter-spacing:-0.022em;
+  margin-bottom:34px;
+}
+.headline em{
+  color:var(--red);
+  font-style:normal;
+  font-weight:600;
+}
+
+/* === Stat block === */
+.stat-block{
+  display:flex;
+  align-items:flex-start;
+  gap:24px;
+  margin-bottom:8px;
+}
+.stat-left{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:0;
+  flex-shrink:0;
+}
+.big-number{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--red);
+  font-size:clamp(56px, 6vw, 96px);
+  line-height:0.9;
+  letter-spacing:-0.04em;
+  font-variant-numeric:tabular-nums;
+  margin-bottom:14px;
+}
+.chart-wrap{
+  width:100%;
+  max-width:320px;
+}
+.chart-title{
+  font-family:var(--mono);
+  font-size:10.5px;
+  color:var(--muted);
+  margin-bottom:6px;
+  font-weight:400;
+}
+.chart-svg{
+  width:100%;
+  height:auto;
+  display:block;
+  overflow:visible;
+}
+.chart-svg .axis{ stroke:var(--hair); stroke-width:1; }
+.chart-svg .axis-label{
+  font-family:var(--mono);
+  font-size:9px;
+  fill:var(--muted);
+}
+.chart-svg .data-line{
+  stroke:var(--accent);
+  stroke-width:1.6;
+  fill:none;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+.chart-svg .data-area{ opacity:0; }
+
+.caption{
+  font-size:clamp(17px, 1.5vw, 20px);
+  line-height:1.45;
+  color:var(--ink);
+  max-width:26ch;
+  padding-top:6px;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width:46ch;
+  font-size:19px;
+  line-height:1.55;
+  margin-top:32px;
+  color:var(--ink);
+}
+.body-text a{
+  color:inherit;
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.55);
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.body-text a:hover{
+  color:var(--red);
+  border-bottom-color:var(--red);
+}
+
+/* === Mobile === */
+@media (max-width: 880px){
+  .scrim{
+    background:linear-gradient(to right,
+      var(--bg) 0%,
+      var(--bg) 30%,
+      rgba(237,240,242,0.88) 55%,
+      rgba(237,240,242,0.6) 80%,
+      rgba(237,240,242,0.6) 100%);
   }
-
-  *{ box-sizing:border-box; margin:0; padding:0; }
-
-  html, body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--stack);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
-
-  body{ min-height:100vh; }
-
-  .section{
-    min-height:100vh;
-    background:var(--bg);
-    display:grid;
-    grid-template-columns:44% 56%;
-    gap:clamp(40px, 5vw, 80px);
-    align-items:center;
-    padding:clamp(48px, 8vh, 96px) clamp(24px, 4vw, 48px) clamp(48px, 8vh, 96px) 0;
-  }
-
   .text-col{
-    padding-left:clamp(24px, 6vw, 96px);
-    padding-right:clamp(8px, 1.5vw, 24px);
-    max-width:680px;
+    max-width:none;
+    width:100%;
+    padding-left:clamp(24px, 6vw, 32px);
+    padding-right:clamp(24px, 6vw, 32px);
   }
-
-  .eyebrow{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:0.04em;
-    margin-bottom:28px;
-  }
-
-  .eyebrow::before{
-    content:"";
-    width:28px;
-    height:1px;
-    background:var(--hair);
-    flex-shrink:0;
-  }
-
-  .headline{
-    font-family:var(--stack);
-    font-weight:600;
-    color:var(--headline-ink);
-    font-size:clamp(26px, 2.9vw, 38px);
-    line-height:1.22;
-    letter-spacing:-0.022em;
-    margin-bottom:36px;
-  }
-
-  .headline em{
-    color:var(--red);
-    font-style:normal;
-  }
-
   .stat-block{
-    display:flex;
-    align-items:flex-start;
-    gap:clamp(20px, 2.4vw, 36px);
-    margin-bottom:36px;
-    padding-top:4px;
-  }
-
-  .stat-left{
-    flex-shrink:0;
-    display:flex;
     flex-direction:column;
     gap:14px;
   }
-
-  .big-number{
-    font-family:var(--stack);
-    font-weight:600;
-    color:var(--red);
-    font-size:clamp(60px, 6.5vw, 104px);
-    line-height:0.9;
-    letter-spacing:-0.04em;
-    font-variant-numeric:tabular-nums;
+  .caption{
+    padding-top:0;
+    max-width:40ch;
   }
-
-  .chart-wrap{
-    width:220px;
-    height:90px;
-    position:relative;
-  }
-
-  .chart-wrap svg{
-    width:100%;
-    height:100%;
-    display:block;
-    overflow:visible;
-  }
-
-  .stat-caption{
-    font-family:var(--stack);
-    font-size:clamp(17px, 1.5vw, 20px);
-    line-height:1.45;
-    color:var(--ink);
-    max-width:26ch;
-    padding-top:10px;
-  }
-
-  .body{
-    font-family:var(--stack);
-    font-size:19px;
-    line-height:1.55;
-    color:var(--ink);
-    max-width:46ch;
-  }
-
-  .body a{
-    color:inherit;
-    text-decoration:none;
-    border-bottom:1px solid var(--hair);
-    transition:border-color 0.18s ease, color 0.18s ease;
-    padding-bottom:1px;
-  }
-
-  .body a:hover{
-    color:var(--red);
-    border-bottom-color:var(--red);
-  }
-
-  /* VIDEO COLUMN */
-  .video-col{
-    position:relative;
-    height:80vh;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding-right:clamp(24px, 6vw, 96px);
-  }
-
-  .video-frame{
-    position:relative;
-    width:100%;
-    height:100%;
-    background:#e8ebee;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-
-  .video-frame video,
-  .video-frame img.poster{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    background:#e8ebee;
-  }
-
-  .video-frame video{
-    opacity:0;
-    will-change:opacity;
-  }
-
-  .video-frame img.poster{
-    display:none;
-    opacity:1;
-  }
-
-  .video-col.reduce .video-frame video{ display:none; }
-  .video-col.reduce .video-frame img.poster{ display:block; }
-
-  .video-caption{
-    margin-top:18px;
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:0.04em;
-    text-align:center;
-    line-height:1.5;
-    max-width:42ch;
-  }
-
-  /* MOBILE */
-  @media (max-width: 880px){
-    .section{
-      grid-template-columns:1fr;
-      gap:clamp(36px, 7vw, 64px);
-      padding:clamp(40px, 8vh, 72px) clamp(24px, 6vw, 32px);
-      align-items:start;
-    }
-    .text-col{
-      padding-left:0;
-      padding-right:0;
-      max-width:none;
-    }
-    .video-col{
-      height:auto;
-      min-height:56vh;
-      padding-right:0;
-    }
-    .video-frame{
-      min-height:50vh;
-    }
-    .stat-block{
-      flex-wrap:wrap;
-    }
-    .stat-caption{
-      flex-basis:100%;
-      padding-top:4px;
-    }
-  }
+  .body-text{ font-size:17px; }
+}
 </style>
 </head>
 <body>
 
-<section class="section" id="smoke-section">
+<section id="section">
+  <div class="video-stack" id="videoStack">
+    <video id="videoA" src="assets/videos/filter_fabric.mp4"
+           poster="assets/videos/posters/filter_fabric.jpg"
+           autoplay loop muted playsinline preload="auto"
+           style="opacity:1; z-index:1;"></video>
+    <video id="videoB" src="assets/videos/filter_fabric.mp4"
+           poster="assets/videos/posters/filter_fabric.jpg"
+           autoplay loop muted playsinline preload="auto"
+           style="opacity:0; z-index:2;"></video>
+    <img class="poster" src="assets/videos/posters/filter_fabric.jpg" alt="">
+  </div>
+
+  <div class="scrim"></div>
+
   <div class="text-col">
     <div class="eyebrow">Ordinary filters</div>
-    <h2 class="headline">The filter <em>quits</em> when the smoke arrives</h2>
+
+    <h1 class="headline">
+      The filter <em>quits</em><br>
+      when the smoke arrives
+    </h1>
 
     <div class="stat-block">
       <div class="stat-left">
-        <div class="big-number" id="bigNumber">0%</div>
-        <div class="chart-wrap" aria-hidden="true">
-          <svg viewBox="0 0 220 90" preserveAspectRatio="none">
+        <div class="big-number" id="bigNumber">~0%</div>
+        <div class="chart-wrap">
+          <div class="chart-title">Cleaning power as smoke builds up</div>
+          <svg class="chart-svg" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
             <defs>
-              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#1b7bff" stop-opacity="0.18"/>
+              <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1b7bff" stop-opacity="0.16"/>
                 <stop offset="100%" stop-color="#1b7bff" stop-opacity="0"/>
               </linearGradient>
             </defs>
-            <g class="grid">
-              <line x1="0" y1="10" x2="220" y2="10" stroke="rgba(20,24,28,0.05)" stroke-width="1"/>
-              <line x1="0" y1="50" x2="220" y2="50" stroke="rgba(20,24,28,0.05)" stroke-width="1"/>
-              <line x1="0" y1="85" x2="220" y2="85" stroke="rgba(20,24,28,0.05)" stroke-width="1"/>
-            </g>
-            <path id="areaPath" d="M 0 10 L 0 10 L 0 85 Z" fill="url(#areaGrad)"/>
-            <path id="linePath" d="M 0 10" fill="none" stroke="#1b7bff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Y axis -->
+            <line class="axis" x1="34" y1="18" x2="34" y2="118"/>
+            <!-- X axis (baseline) -->
+            <line class="axis" x1="34" y1="118" x2="284" y2="118"/>
+
+            <!-- Y labels -->
+            <text class="axis-label" x="30" y="22" text-anchor="end">100%</text>
+            <text class="axis-label" x="30" y="121" text-anchor="end">0%</text>
+
+            <!-- X tick labels -->
+            <text class="axis-label" x="34" y="132" text-anchor="middle">0</text>
+            <text class="axis-label" x="159" y="132" text-anchor="middle">5 mg</text>
+            <text class="axis-label" x="284" y="132" text-anchor="middle">10 mg</text>
+
+            <!-- Area fill -->
+            <path class="data-area" id="dataArea"
+                  d="M 34 18 L 46.5 18.5 L 59 19 L 71.5 19.8 L 84 20.8 L 96.5 22.3 L 109 24.3 L 121.5 27 L 134 30.5 L 146.5 34.8 L 159 40 L 171.5 46 L 184 52.8 L 196.5 60 L 209 67.5 L 221.5 75.3 L 234 83 L 246.5 90.3 L 259 97 L 271.5 103 L 284 108 L 284 118 L 34 118 Z"
+                  fill="url(#areaFill)"/>
+
+            <!-- Data line -->
+            <path class="data-line" id="dataLine"
+                  d="M 34 18 L 46.5 18.5 L 59 19 L 71.5 19.8 L 84 20.8 L 96.5 22.3 L 109 24.3 L 121.5 27 L 134 30.5 L 146.5 34.8 L 159 40 L 171.5 46 L 184 52.8 L 196.5 60 L 209 67.5 L 221.5 75.3 L 234 83 L 246.5 90.3 L 259 97 L 271.5 103 L 284 108"/>
           </svg>
         </div>
       </div>
-      <div class="stat-caption">of its cleaning power — gone after about an hour of smoke.</div>
+
+      <p class="caption">of its cleaning power — gone after about an hour of smoke.</p>
     </div>
 
-    <p class="body">Federal agencies tell Americans to fight wildfire smoke with a MERV-13 filter — but that rating is measured on a clean, brand-new filter. Much of its filtering comes from a built-in electrostatic charge, and smoke strips that charge as it builds up. In an EPA study, a MERV-13 air cleaner lost about <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">95% of its cleaning power</a> after just 10 milligrams of smoke — about an hour's worth. <a href="https://healthybuildings.hsph.harvard.edu/protecting-your-health-from-wildfire-smoke-spotlight-on-filters/" target="_blank" rel="noopener">Harvard's Healthy Buildings team</a> reviewed the same data and told households to replace the filter after a wildfire.</p>
-  </div>
-
-  <div class="video-col" id="videoCol">
-    <div class="video-frame">
-      <video id="vidA" src="assets/videos/filter_charge.mp4" poster="assets/videos/posters/filter_charge.jpg" autoplay loop muted playsinline preload="auto"></video>
-      <video id="vidB" src="assets/videos/filter_charge.mp4" poster="assets/videos/posters/filter_charge.jpg" muted playsinline preload="auto"></video>
-      <img class="poster" src="assets/videos/posters/filter_charge.jpg" alt="An electret MERV-13 filter losing its charge under smoke.">
-    </div>
-    <div class="video-caption">An electret MERV-13 filter losing its charge under smoke.</div>
+    <p class="body-text">
+      Federal agencies tell Americans to fight wildfire smoke with a MERV-13 filter — but that rating is measured on a clean, brand-new filter. Much of its filtering comes from a built-in electrostatic charge, and smoke strips that charge as it builds up. In an EPA study, a MERV-13 air cleaner lost about <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9828579/" target="_blank" rel="noopener">95% of its cleaning power</a> after just 10 milligrams of smoke — about an hour's worth. <a href="https://healthybuildings.hsph.harvard.edu/protecting-your-health-from-wildfire-smoke-spotlight-on-filters/" target="_blank" rel="noopener">Harvard's Healthy Buildings team</a> reviewed the same data and urged households to replace the filter after a wildfire.
+    </p>
   </div>
 </section>
 
 <script>
 (function(){
-  'use strict';
-
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // ---------- CHART + NUMBER ANIMATION ----------
-  // Sample points along the chart path: cleaning power over ~1 hour.
-  // Starts at 100% and plunges to ~5% with a smooth ease-out curve.
-  const POINTS = [
-    [0, 10], [22, 12], [44, 17], [66, 25], [88, 36],
-    [110, 49], [132, 62], [154, 73], [176, 81], [198, 85], [220, 86]
-  ];
-  const Y0 = 10;   // top (100% power)
-  const Y1 = 86;   // bottom (~5% power)
-
-  function buildPath(pts){
-    let d = 'M ' + pts[0][0] + ' ' + pts[0][1];
-    for(let i = 1; i < pts.length; i++){
-      d += ' L ' + pts[i][0] + ' ' + pts[i][1];
-    }
-    return d;
-  }
-  function buildArea(pts){
-    let d = 'M ' + pts[0][0] + ' ' + Y0;
-    for(let i = 0; i < pts.length; i++){
-      d += ' L ' + pts[i][0] + ' ' + pts[i][1];
-    }
-    d += ' L ' + pts[pts.length - 1][0] + ' ' + Y1 + ' L ' + pts[0][0] + ' ' + Y1 + ' Z';
-    return d;
-  }
-  function subPoints(t){
-    const n = POINTS.length - 1;
-    const idx = t * n;
-    const i = Math.floor(idx);
-    const f = idx - i;
-    if(i >= n) return POINTS[n];
-    const a = POINTS[i], b = POINTS[i + 1];
-    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
-  }
-  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
-
-  const linePath = document.getElementById('linePath');
-  const areaPath = document.getElementById('areaPath');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const videoStack = document.getElementById('videoStack');
+  const videoA = document.getElementById('videoA');
+  const videoB = document.getElementById('videoB');
+  const dataLine = document.getElementById('dataLine');
+  const dataArea = document.getElementById('dataArea');
   const bigNumber = document.getElementById('bigNumber');
 
-  function renderProgress(t){
-    const eased = easeOutCubic(t);
-    const p = subPoints(eased);
-    const pts = POINTS.slice();
-    pts[pts.length - 1] = p;
-    linePath.setAttribute('d', buildPath(pts));
-    areaPath.setAttribute('d', buildArea(pts));
-    const val = Math.round(eased * 95);
-    bigNumber.textContent = '~' + val + '%';
+  /* ---------- Crossfade loop ---------- */
+  if (reducedMotion) {
+    videoStack.classList.add('reduced');
+  } else {
+    let active = videoA;
+    let inactive = videoB;
+    let crossfading = false;
+    const CROSSFADE_DURATION = 700; // ms
+    const TRIGGER_THRESHOLD = 0.7;  // s remaining
+
+    function crossfadeLoop(){
+      if (crossfading) return;
+      const t = active.currentTime;
+      const d = active.duration;
+      if (isFinite(d) && d > 0 && (d - t) <= TRIGGER_THRESHOLD) {
+        crossfading = true;
+        const start = performance.now();
+        inactive.currentTime = 0;
+        inactive.play().catch(()=>{});
+
+        function step(now){
+          const p = Math.min(1, (now - start) / CROSSFADE_DURATION);
+          const e = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2; // easeInOutQuad
+          active.style.opacity = String(1 - e);
+          inactive.style.opacity = String(e);
+          if (p < 1) {
+            requestAnimationFrame(step);
+          } else {
+            // swap
+            const tmp = active; active = inactive; inactive = tmp;
+            active.style.opacity = '1';
+            inactive.style.opacity = '0';
+            crossfading = false;
+          }
+        }
+        requestAnimationFrame(step);
+      }
+    }
+
+    // Kick off playback
+    try { videoA.play(); } catch(e){}
+    try { videoB.pause(); videoB.currentTime = 0; } catch(e){}
+
+    videoA.addEventListener('timeupdate', crossfadeLoop);
+    videoB.addEventListener('timeupdate', crossfadeLoop);
+
+    // Safety: if a video ends without timeupdate firing fast enough, also listen to 'ended'
+    videoA.addEventListener('ended', crossfadeLoop);
+    videoB.addEventListener('ended', crossfadeLoop);
+  }
+
+  /* ---------- Chart + number animation ---------- */
+  // Compute the total length of the data line for stroke-dash animation
+  let lineLength = 0;
+  try {
+    lineLength = dataLine.getTotalLength();
+  } catch(e) {
+    lineLength = 320; // fallback
+  }
+
+  function setInitial(){
+    dataLine.style.strokeDasharray = lineLength + ' ' + lineLength;
+    dataLine.style.strokeDashoffset = String(lineLength);
+    dataArea.style.opacity = '0';
+    bigNumber.textContent = '~0%';
   }
 
   function setFinal(){
-    linePath.setAttribute('d', buildPath(POINTS));
-    areaPath.setAttribute('d', buildArea(POINTS));
+    dataLine.style.strokeDasharray = '';
+    dataLine.style.strokeDashoffset = '0';
+    dataArea.style.opacity = '1';
     bigNumber.textContent = '~95%';
   }
 
-  if(reduceMotion){
-    setFinal();
-  } else {
-    const DURATION = 1600;
-    let started = false;
-    let startTime = null;
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
 
-    function animate(ts){
-      if(startTime === null) startTime = ts;
-      const elapsed = ts - startTime;
-      const t = Math.min(elapsed / DURATION, 1);
-      renderProgress(t);
-      if(t < 1){
-        requestAnimationFrame(animate);
+  function animateChartAndNumber(){
+    const DURATION = 1600;
+    const start = performance.now();
+
+    function step(now){
+      const p = Math.min(1, (now - start) / DURATION);
+      const e = easeOutCubic(p);
+
+      // (a) draw line left-to-right
+      dataLine.style.strokeDashoffset = String(lineLength * (1 - e));
+
+      // (b) fade/grow area fill
+      dataArea.style.opacity = String(e);
+
+      // (c) count big number 0 -> 95
+      const n = Math.round(e * 95);
+      bigNumber.textContent = '~' + n + '%';
+
+      if (p < 1) {
+        requestAnimationFrame(step);
       } else {
-        setFinal();
+        dataLine.style.strokeDasharray = '';
+        dataLine.style.strokeDashoffset = '0';
+        dataArea.style.opacity = '1';
+        bigNumber.textContent = '~95%';
       }
     }
 
-    const io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if(e.isIntersecting && !started){
-          started = true;
-          requestAnimationFrame(animate);
-          io.disconnect();
+    requestAnimationFrame(step);
+  }
+
+  if (reducedMotion) {
+    setFinal();
+  } else {
+    setInitial();
+    const io = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateChartAndNumber();
+          observer.disconnect();
         }
       });
     }, { threshold: 0.35 });
-    io.observe(document.getElementById('smoke-section'));
-  }
-
-  // ---------- VIDEO CROSSFADE LOOP ----------
-  const videoCol = document.getElementById('videoCol');
-  const vidA = document.getElementById('vidA');
-  const vidB = document.getElementById('vidB');
-
-  if(reduceMotion){
-    videoCol.classList.add('reduce');
-  } else {
-    let active = vidA;
-    let inactive = vidB;
-    let crossfading = false;
-    let crossfadeStart = 0;
-    const CROSSFADE_MS = 700;
-
-    function setInitial(){
-      active.style.opacity = '1';
-      inactive.style.opacity = '0';
-      try { inactive.pause(); } catch(e){}
-      try { inactive.currentTime = 0; } catch(e){}
-    }
-
-    function tick(){
-      requestAnimationFrame(tick);
-      if(crossfading){
-        const elapsed = performance.now() - crossfadeStart;
-        const t = Math.min(elapsed / CROSSFADE_MS, 1);
-        active.style.opacity = String(1 - t);
-        inactive.style.opacity = String(t);
-        if(t >= 1){
-          crossfading = false;
-          const tmp = active;
-          active = inactive;
-          inactive = tmp;
-          active.style.opacity = '1';
-          inactive.style.opacity = '0';
-          try { inactive.pause(); } catch(e){}
-        }
-        return;
-      }
-      if(active.readyState >= 2 && active.duration){
-        const remaining = active.duration - active.currentTime;
-        if(remaining <= 0.7 && remaining > 0){
-          try {
-            inactive.currentTime = 0;
-            const p = inactive.play();
-            if(p && typeof p.catch === 'function'){
-              p.catch(function(){});
-            }
-          } catch(e){}
-          crossfading = true;
-          crossfadeStart = performance.now();
-        }
-      }
-    }
-
-    function init(){
-      setInitial();
-      try {
-        const p = active.play();
-        if(p && typeof p.catch === 'function'){
-          p.catch(function(){ /* autoplay may be blocked; poster will show */ });
-        }
-      } catch(e){}
-      requestAnimationFrame(tick);
-    }
-
-    if(active.readyState >= 1){
-      init();
-    } else {
-      active.addEventListener('loadedmetadata', init, { once: true });
-      // Fallback in case metadata never fires
-      setTimeout(function(){
-        if(active.readyState < 1){
-          setInitial();
-          try { active.play(); } catch(e){}
-          requestAnimationFrame(tick);
-        }
-      }, 1200);
-    }
+    io.observe(document.getElementById('section'));
   }
 })();
 </script>
