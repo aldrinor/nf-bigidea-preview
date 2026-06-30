@@ -209,24 +209,84 @@
     max-width:100%;
     cursor:pointer;
   }
+
+  /* BODY WRAP — handles the circular clip (porthole) */
   .body-wrap{
     position:absolute;
     inset:0;
+    clip-path:circle(9999px at 50% 50%);
+    transition:clip-path .85s cubic-bezier(.16,1,.3,1);
   }
-  .body-img{
+  .body-wrap.porthole{
+    clip-path:circle(var(--r,240px) at 50% 50%);
+  }
+
+  /* BREATHE WRAP — idle animation on its own layer */
+  .breathe-wrap{
     width:100%;
     height:100%;
-    object-fit:contain;
-    display:block;
     animation:breathe 4.5s ease-in-out infinite;
   }
+  .breathe-wrap.paused{animation-play-state:paused}
   @keyframes breathe{
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.012)}
   }
 
-  /* HOTSPOTS — always at real positions */
+  /* BODY IMG — handles the zoom transform */
+  .body-img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+    transform-origin:var(--ox,50%) var(--oy,50%);
+    transform:translate(var(--tx,0), var(--ty,0)) scale(var(--sc,1));
+    transition:transform .85s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* PORTHOLE RING — crisp thin ring around the circle */
+  .porthole-ring{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:calc(var(--r,240px) * 2);
+    height:calc(var(--r,240px) * 2);
+    border-radius:50%;
+    border:1.5px solid rgba(20,24,28,0.12);
+    box-shadow:0 2px 20px rgba(0,0,0,0.06);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .4s ease .4s;
+    z-index:3;
+  }
+  .porthole-ring.show{opacity:1}
+
+  /* CENTER DOT — prominent red dot at organ centre */
+  .center-dot{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:15px; height:15px;
+    border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 0 2.5px #fff, 0 0 14px 4px rgba(226,59,59,0.45);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease .5s;
+    z-index:5;
+  }
+  .center-dot.show{
+    opacity:1;
+    animation:centerPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes centerPulse{
+    0%,100%{box-shadow:0 0 0 2.5px #fff, 0 0 14px 4px rgba(226,59,59,0.45)}
+    50%{box-shadow:0 0 0 2.5px #fff, 0 0 22px 8px rgba(226,59,59,0.25)}
+  }
+
+  /* HOTSPOTS */
   .hotspots{position:absolute;inset:0;pointer-events:none;transition:opacity .4s ease}
+  .hotspots.hidden{opacity:0;pointer-events:none}
   .hotspot{
     position:absolute;
     transform:translate(-50%,-50%);
@@ -277,42 +337,6 @@
   .hotspot:focus-visible{outline:none}
   .hotspot:focus-visible::after{border-color:var(--accent);animation:none;transform:scale(1.4);opacity:1}
 
-  .hotspot.dimmed{opacity:0.16}
-  .hotspot.dimmed::after{animation:none;opacity:0}
-  .hotspot.active{
-    width:30px;height:30px;
-  }
-  .hotspot.active::before{
-    transform:scale(0.55);
-    background:var(--red);
-    box-shadow:0 0 0 2.5px #fff, 0 0 16px 4px rgba(226,59,59,0.5);
-  }
-  .hotspot.active::after{
-    animation:pulseStrong 2.2s ease-out infinite;
-    border-width:2px;
-  }
-  @keyframes pulseStrong{
-    0%{transform:scale(0.7);opacity:0.85}
-    100%{transform:scale(2.4);opacity:0}
-  }
-
-  /* GLOW at organ's real position */
-  .glow{
-    position:absolute;
-    transform:translate(-50%,-50%) scale(0.6);
-    width:90px;height:90px;
-    background:radial-gradient(circle, rgba(226,59,59,0.28) 0%, rgba(226,59,59,0.10) 40%, rgba(226,59,59,0) 72%);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1);
-    mix-blend-mode:multiply;
-  }
-  .glow.on{opacity:1;transform:translate(-50%,-50%) scale(1);animation:glowPulse 2.8s ease-in-out infinite}
-  @keyframes glowPulse{
-    0%,100%{transform:translate(-50%,-50%) scale(1)}
-    50%{transform:translate(-50%,-50%) scale(1.14)}
-  }
-
   /* MOBILE */
   @media (max-width:880px){
     .grid{
@@ -331,12 +355,14 @@
   }
 
   @media (prefers-reduced-motion:reduce){
-    .body-img{animation:none}
-    .glow{transition:opacity .25s ease;animation:none}
+    .breathe-wrap{animation:none}
+    .body-img{transition:transform .3s ease}
+    .body-wrap{transition:clip-path .3s ease}
+    .center-dot{animation:none}
     .hotspot::after{animation:none}
-    .hotspot.active::after{animation:none}
-    .hotspot{transition:opacity .25s ease}
     .card-inner{transition:opacity .2s ease}
+    .porthole-ring{transition:opacity .2s ease}
+    .center-dot{transition:opacity .2s ease}
   }
 </style>
 </head>
@@ -362,10 +388,13 @@
         <button class="back-btn" id="backBtn" type="button" aria-label="Return to full body view">&lsaquo;</button>
       </div>
       <div class="frame" id="frame">
-        <div class="body-wrap">
-          <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
+        <div class="body-wrap" id="bodyWrap">
+          <div class="breathe-wrap" id="breatheWrap">
+            <img class="body-img" id="bodyImg" src="assets/body/body_premium.png" alt="Anatomical figure showing organs affected by wildfire smoke" draggable="false">
+          </div>
         </div>
-        <div class="glow" id="glow"></div>
+        <div class="porthole-ring" id="portholeRing"></div>
+        <div class="center-dot" id="centerDot"></div>
         <div class="hotspots" id="hotspots"></div>
       </div>
     </div>
@@ -384,12 +413,12 @@
       ox:0.5, oy:0.5
     },
     brain: {
-      name:"Brain & mind",
+      name:"Brain & Mind",
       impacts:[
         {text:"On smoky days, emergency visits for [depression rose about 15%], and for other mood disorders about 29%.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11971671/"},
         {text:"A smoky school year measurably [lowers children's test scores].", url:"https://web.stanford.edu/~mburke/papers/WenBurke2022_smokelearning.pdf"}
       ],
-      ox:0.50, oy:0.07, label:"Brain"
+      ox:0.50, oy:0.07, label:"Brain & Mind"
     },
     lungs: {
       name:"Lungs",
@@ -425,25 +454,29 @@
       ox:0.50, oy:0.50, label:"Reproduction"
     },
     bloodstream: {
-      name:"Blood & cells",
+      name:"Blood & Cells",
       impacts:[
         {text:"Exposure changed [DNA at 94 sites] across 133 disease-linked genes and left toxic metals in immune cells.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12696577/"},
         {text:"When buildings burn, the smoke carried carcinogenic [chromium-6 nanoparticles] up to 6–9 miles downwind.", url:"https://www.ucdavis.edu/news/researchers-find-carcinogenic-chromium-6-palisades-altadena-fire-cleanup-zones"}
       ],
-      ox:0.53, oy:0.33, label:"Blood & cells"
+      ox:0.53, oy:0.33, label:"Blood & Cells"
     }
   };
 
   const ORDER = ["overview","brain","lungs","heart","kidneys","pregnancy","bloodstream"];
   const INDEX_LABELS = {
-    overview:"Overview", brain:"Brain", lungs:"Lungs", heart:"Heart",
-    kidneys:"Kidneys", pregnancy:"Reproduction", bloodstream:"Blood & cells"
+    overview:"Overview", brain:"Brain & Mind", lungs:"Lungs", heart:"Heart",
+    kidneys:"Kidneys", pregnancy:"Reproduction", bloodstream:"Blood & Cells"
   };
 
   const hotspotsEl = document.getElementById('hotspots');
-  const glow = document.getElementById('glow');
   const backBtn = document.getElementById('backBtn');
   const frame = document.getElementById('frame');
+  const bodyWrap = document.getElementById('bodyWrap');
+  const breatheWrap = document.getElementById('breatheWrap');
+  const bodyImg = document.getElementById('bodyImg');
+  const portholeRing = document.getElementById('portholeRing');
+  const centerDot = document.getElementById('centerDot');
   const cardInner = document.getElementById('cardInner');
   const cardName = document.getElementById('cardName');
   const cardIntro = document.getElementById('cardIntro');
@@ -481,18 +514,44 @@
     ).join('');
   }
 
+  function updatePortholeSize(){
+    const rect = frame.getBoundingClientRect();
+    const r = Math.min(rect.width * 0.48, rect.height * 0.39, 260);
+    frame.style.setProperty('--r', Math.round(r) + 'px');
+  }
+
+  function applyZoom(key){
+    if(key === "overview"){
+      bodyImg.classList.remove('zoomed');
+      bodyWrap.classList.remove('porthole');
+      breatheWrap.classList.remove('paused');
+      portholeRing.classList.remove('show');
+      centerDot.classList.remove('show');
+      hotspotsEl.classList.remove('hidden');
+    } else {
+      const d = DATA[key];
+      const ox = d.ox, oy = d.oy;
+      bodyImg.style.setProperty('--ox', (ox * 100) + '%');
+      bodyImg.style.setProperty('--oy', (oy * 100) + '%');
+      bodyImg.style.setProperty('--tx', ((0.5 - ox) * 100) + '%');
+      bodyImg.style.setProperty('--ty', ((0.5 - oy) * 100) + '%');
+      bodyImg.style.setProperty('--sc', '2.2');
+      bodyImg.classList.add('zoomed');
+      bodyWrap.classList.add('porthole');
+      breatheWrap.classList.add('paused');
+      portholeRing.classList.add('show');
+      centerDot.classList.add('show');
+      hotspotsEl.classList.add('hidden');
+    }
+  }
+
   function setHighlight(key){
     if(key === "overview"){
-      glow.classList.remove('on');
       backBtn.classList.remove('show');
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         h.classList.remove('active','dimmed');
       });
     } else {
-      const d = DATA[key];
-      glow.style.left = (d.ox*100)+'%';
-      glow.style.top = (d.oy*100)+'%';
-      glow.classList.add('on');
       backBtn.classList.add('show');
       hotspotsEl.querySelectorAll('.hotspot').forEach(h=>{
         if(h.dataset.key === key){
@@ -516,6 +575,7 @@
     setTimeout(()=>{
       renderCard(current);
       setHighlight(current);
+      applyZoom(current);
       cardInner.classList.remove('leaving');
     }, 200);
     indexEl.querySelectorAll('.index-row').forEach(c=>{
@@ -575,9 +635,14 @@
     if(current !== 'overview') select('overview', true);
   });
 
+  // Resize handler
+  window.addEventListener('resize', updatePortholeSize);
+
   // Init
+  updatePortholeSize();
   renderCard('overview');
   setHighlight('overview');
+  applyZoom('overview');
 })();
 </script>
 </body>
