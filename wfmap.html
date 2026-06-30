@@ -55,9 +55,9 @@ body {
    50% - 181px; anchoring the map block's top there aligns the two headlines
    regardless of how many lines each wraps to. Tracks viewport height. */
 .chrome-top-left {
-  top: calc(50% - 181px);
+  top: calc(50% - 155px);
   left: clamp(24px, 6vw, 96px);
-  max-width: 520px;
+  max-width: 720px;
 }
 .kicker {
   font-family: var(--stack);
@@ -69,7 +69,7 @@ body {
 .chrome-top-left h2 {
   font-family: var(--stack);
   font-weight: 600;
-  font-size: clamp(26px, 3vw, 38px);
+  font-size: clamp(24px, 2.7vw, 34px);
   line-height: 1.12;
   color: #1a1a1a;
   margin-bottom: 28px;
@@ -86,9 +86,9 @@ body {
   text-shadow: 0 1px 6px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.95);
 }
 .caption a {
-  color: var(--ink);
+  color: #1a1a1a;
   text-decoration: none;
-  border-bottom: 1px solid rgba(20,24,28,0.32);
+  border-bottom: 1px solid rgba(20,24,28,0.22);
   transition: color .15s ease, border-color .15s ease;
 }
 .caption a:hover { color: var(--red); border-bottom-color: var(--red); }
@@ -114,15 +114,14 @@ body {
   margin-bottom: 8px;
 }
 .legend-gradient {
-  width: 230px;
+  width: 100%;
   height: 8px;
   border-radius: 4px;
   background: linear-gradient(to right,
-    rgba(120,128,136,0) 0%,
-    rgba(120,128,136,0.25) 25%,
-    rgba(110,118,126,0.5) 50%,
-    rgba(95,102,110,0.75) 75%,
-    rgba(70,76,84,0.95) 100%);
+    rgba(150,156,162,0.55) 0%,
+    rgba(126,133,140,0.7) 32%,
+    rgba(98,105,113,0.85) 62%,
+    rgba(56,62,70,1) 100%);
   margin-bottom: 4px;
 }
 .legend-labels {
@@ -184,7 +183,7 @@ body {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 14px;
-  padding: 14px 20px 10px;
+  padding: 16px 22px 18px;
   box-shadow: 0 4px 28px rgba(0,0,0,0.12);
   width: min(580px, calc(100vw - 44px));
 }
@@ -267,8 +266,8 @@ body {
 
 .tc-ticks {
   position: relative;
-  height: 16px;
-  margin-top: 5px;
+  height: 24px;
+  margin-top: 7px;
 }
 .tc-tick {
   position: absolute;
@@ -424,7 +423,6 @@ body {
         <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
       </button>
       <div class="tc-date" id="dateLabel">—</div>
-      <div class="tc-counter" id="counterLabel">— / —</div>
     </div>
     <div class="tc-slider-wrap">
       <input type="range" class="tc-slider" id="frameSlider" min="0" max="219" value="0" step="1">
@@ -772,7 +770,6 @@ function setFrame(i) {
     smokeOverlay.setUrl(imgUrls[i]);
   }
   document.getElementById('dateLabel').textContent = formatDate(dates[i]);
-  document.getElementById('counterLabel').textContent = `${i + 1} / ${imgUrls.length}`;
   document.getElementById('frameSlider').value = i;
 }
 
