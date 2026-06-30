@@ -128,16 +128,9 @@ section{
 /* === Stat block === */
 .stat-block{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   gap:24px;
   margin-bottom:8px;
-}
-.stat-left{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  min-width:0;
-  flex-shrink:0;
 }
 .big-number{
   font-family:var(--stack);
@@ -147,39 +140,7 @@ section{
   line-height:0.9;
   letter-spacing:-0.04em;
   font-variant-numeric:tabular-nums;
-  margin-bottom:14px;
 }
-.chart-wrap{
-  width:100%;
-  max-width:320px;
-}
-.chart-title{
-  font-family:var(--mono);
-  font-size:10.5px;
-  color:var(--muted);
-  margin-bottom:6px;
-  font-weight:400;
-}
-.chart-svg{
-  width:100%;
-  height:auto;
-  display:block;
-  overflow:visible;
-}
-.chart-svg .axis{ stroke:var(--hair); stroke-width:1; }
-.chart-svg .axis-label{
-  font-family:var(--mono);
-  font-size:9px;
-  fill:var(--muted);
-}
-.chart-svg .data-line{
-  stroke:var(--accent);
-  stroke-width:1.6;
-  fill:none;
-  stroke-linejoin:round;
-  stroke-linecap:round;
-}
-.chart-svg .data-area{ opacity:0; }
 
 .caption{
   font-size:clamp(17px, 1.5vw, 20px);
@@ -227,6 +188,7 @@ section{
   .stat-block{
     flex-direction:column;
     gap:14px;
+    align-items:flex-start;
   }
   .caption{
     padding-top:0;
@@ -240,15 +202,15 @@ section{
 
 <section id="section">
   <div class="video-stack" id="videoStack">
-    <video id="videoA" src="assets/videos/filter_fabric.mp4"
-           poster="assets/videos/posters/filter_fabric.jpg"
+    <video id="videoA" src="assets/videos/filter_fibers.mp4"
+           poster="assets/videos/posters/filter_fibers.jpg"
            autoplay loop muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
-    <video id="videoB" src="assets/videos/filter_fabric.mp4"
-           poster="assets/videos/posters/filter_fabric.jpg"
+    <video id="videoB" src="assets/videos/filter_fibers.mp4"
+           poster="assets/videos/posters/filter_fibers.jpg"
            autoplay loop muted playsinline preload="auto"
            style="opacity:0; z-index:2;"></video>
-    <img class="poster" src="assets/videos/posters/filter_fabric.jpg" alt="">
+    <img class="poster" src="assets/videos/posters/filter_fibers.jpg" alt="">
   </div>
 
   <div class="scrim"></div>
@@ -262,44 +224,7 @@ section{
     </h1>
 
     <div class="stat-block">
-      <div class="stat-left">
-        <div class="big-number" id="bigNumber">~0%</div>
-        <div class="chart-wrap">
-          <div class="chart-title">Cleaning power as smoke builds up</div>
-          <svg class="chart-svg" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-            <defs>
-              <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#1b7bff" stop-opacity="0.16"/>
-                <stop offset="100%" stop-color="#1b7bff" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-
-            <!-- Y axis -->
-            <line class="axis" x1="34" y1="18" x2="34" y2="118"/>
-            <!-- X axis (baseline) -->
-            <line class="axis" x1="34" y1="118" x2="284" y2="118"/>
-
-            <!-- Y labels -->
-            <text class="axis-label" x="30" y="22" text-anchor="end">100%</text>
-            <text class="axis-label" x="30" y="121" text-anchor="end">0%</text>
-
-            <!-- X tick labels -->
-            <text class="axis-label" x="34" y="132" text-anchor="middle">0</text>
-            <text class="axis-label" x="159" y="132" text-anchor="middle">5 mg</text>
-            <text class="axis-label" x="284" y="132" text-anchor="middle">10 mg</text>
-
-            <!-- Area fill -->
-            <path class="data-area" id="dataArea"
-                  d="M 34 18 L 46.5 18.5 L 59 19 L 71.5 19.8 L 84 20.8 L 96.5 22.3 L 109 24.3 L 121.5 27 L 134 30.5 L 146.5 34.8 L 159 40 L 171.5 46 L 184 52.8 L 196.5 60 L 209 67.5 L 221.5 75.3 L 234 83 L 246.5 90.3 L 259 97 L 271.5 103 L 284 108 L 284 118 L 34 118 Z"
-                  fill="url(#areaFill)"/>
-
-            <!-- Data line -->
-            <path class="data-line" id="dataLine"
-                  d="M 34 18 L 46.5 18.5 L 59 19 L 71.5 19.8 L 84 20.8 L 96.5 22.3 L 109 24.3 L 121.5 27 L 134 30.5 L 146.5 34.8 L 159 40 L 171.5 46 L 184 52.8 L 196.5 60 L 209 67.5 L 221.5 75.3 L 234 83 L 246.5 90.3 L 259 97 L 271.5 103 L 284 108"/>
-          </svg>
-        </div>
-      </div>
-
+      <div class="big-number" id="bigNumber">~0%</div>
       <p class="caption">of its cleaning power — gone after about an hour of smoke.</p>
     </div>
 
@@ -315,8 +240,6 @@ section{
   const videoStack = document.getElementById('videoStack');
   const videoA = document.getElementById('videoA');
   const videoB = document.getElementById('videoB');
-  const dataLine = document.getElementById('dataLine');
-  const dataArea = document.getElementById('dataArea');
   const bigNumber = document.getElementById('bigNumber');
 
   /* ---------- Crossfade loop ---------- */
@@ -370,32 +293,10 @@ section{
     videoB.addEventListener('ended', crossfadeLoop);
   }
 
-  /* ---------- Chart + number animation ---------- */
-  // Compute the total length of the data line for stroke-dash animation
-  let lineLength = 0;
-  try {
-    lineLength = dataLine.getTotalLength();
-  } catch(e) {
-    lineLength = 320; // fallback
-  }
-
-  function setInitial(){
-    dataLine.style.strokeDasharray = lineLength + ' ' + lineLength;
-    dataLine.style.strokeDashoffset = String(lineLength);
-    dataArea.style.opacity = '0';
-    bigNumber.textContent = '~0%';
-  }
-
-  function setFinal(){
-    dataLine.style.strokeDasharray = '';
-    dataLine.style.strokeDashoffset = '0';
-    dataArea.style.opacity = '1';
-    bigNumber.textContent = '~95%';
-  }
-
+  /* ---------- Number animation ---------- */
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
 
-  function animateChartAndNumber(){
+  function animateNumber(){
     const DURATION = 1600;
     const start = performance.now();
 
@@ -403,22 +304,13 @@ section{
       const p = Math.min(1, (now - start) / DURATION);
       const e = easeOutCubic(p);
 
-      // (a) draw line left-to-right
-      dataLine.style.strokeDashoffset = String(lineLength * (1 - e));
-
-      // (b) fade/grow area fill
-      dataArea.style.opacity = String(e);
-
-      // (c) count big number 0 -> 95
+      // count big number 0 -> 95
       const n = Math.round(e * 95);
       bigNumber.textContent = '~' + n + '%';
 
       if (p < 1) {
         requestAnimationFrame(step);
       } else {
-        dataLine.style.strokeDasharray = '';
-        dataLine.style.strokeDashoffset = '0';
-        dataArea.style.opacity = '1';
         bigNumber.textContent = '~95%';
       }
     }
@@ -427,13 +319,13 @@ section{
   }
 
   if (reducedMotion) {
-    setFinal();
+    bigNumber.textContent = '~95%';
   } else {
-    setInitial();
+    bigNumber.textContent = '~0%';
     const io = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          animateChartAndNumber();
+          animateNumber();
           observer.disconnect();
         }
       });
