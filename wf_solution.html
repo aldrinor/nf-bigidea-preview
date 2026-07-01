@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures the smoke</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>NanoFlashing captures real wildfire smoke</title>
 <style>
 :root{
   --bg:#edf0f2;
@@ -47,7 +46,6 @@ section{
   flex-direction:column;
   justify-content:center;
   align-items:flex-start;
-  flex:0 0 auto;
   max-width:min(48%, 620px);
   padding-left:clamp(24px, 6vw, 96px);
   padding-right:24px;
@@ -57,10 +55,13 @@ section{
   font-family:var(--stack);
   font-weight:600;
   color:var(--headline-ink);
-  font-size:clamp(28px, 3vw, 40px);
-  line-height:1.15;
+  font-size:clamp(22px, 2.2vw, 31px);
+  line-height:1.18;
   letter-spacing:-0.022em;
-  margin-bottom:30px;
+  margin-bottom:28px;
+}
+.headline > span{
+  display:block;
 }
 .headline em{
   color:var(--accent);
@@ -68,161 +69,202 @@ section{
   font-weight:600;
 }
 
-/* === Stats row === */
-.stats-row{
-  display:flex;
-  align-items:flex-start;
-  gap:clamp(20px, 2.4vw, 36px);
-  margin-bottom:26px;
-  flex-wrap:wrap;
-}
-.stat{
+/* === Stat block === */
+.stat-block{
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
+  gap:6px;
+  margin-bottom:22px;
 }
-.stat .num{
+.stat-row{
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+.big-number{
   font-family:var(--stack);
   font-weight:700;
-  font-size:clamp(40px, 4.6vw, 72px);
+  font-size:clamp(52px, 6vw, 92px);
   line-height:0.95;
   letter-spacing:-0.03em;
   font-variant-numeric:tabular-nums;
+  flex-shrink:0;
 }
-.stat.primary .num{
-  color:var(--accent);
-}
-.stat.secondary .num{
-  color:var(--ink);
-  font-size:clamp(32px, 3.4vw, 52px);
-}
-.stat.secondary .num .over{
-  color:var(--muted);
-  font-size:0.5em;
-  font-weight:700;
-  margin-right:0.18em;
-  letter-spacing:0;
-}
-.stat .cap{
+.big-number.accent{ color:var(--accent); }
+.big-number.ink{ color:var(--ink); }
+
+.caption{
   font-family:var(--stack);
-  font-size:15px;
+  font-size:clamp(16px, 1.5vw, 19px);
   line-height:1.4;
   color:var(--ink);
-  max-width:26ch;
-  margin-top:10px;
+  max-width:24ch;
+  padding-top:4px;
 }
 
-/* === Mechanism paragraph === */
-.mechanism{
-  font-family:var(--stack);
+/* === Body paragraph === */
+.body-text{
+  max-width:46ch;
   font-size:19px;
   line-height:1.55;
   color:var(--ink);
-  max-width:46ch;
-  margin-bottom:18px;
+  margin-bottom:22px;
 }
 
-/* === Source line === */
-.source{
+/* === Advocacy link === */
+.advocacy-link{
   font-family:var(--stack);
-  font-size:13px;
-  line-height:1.45;
-  color:var(--muted);
-  max-width:46ch;
+  font-size:16px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
 }
 
 /* === Chart column === */
 .chart-col{
-  position:relative;
-  z-index:2;
   flex:1 1 0;
   min-width:0;
   height:100vh;
   display:flex;
   flex-direction:column;
-  align-items:center;
   justify-content:center;
-  padding:clamp(16px, 2vh, 28px) clamp(16px, 2.2vw, 48px);
-}
-.chart-frame{
+  align-items:stretch;
+  padding:clamp(24px, 4vh, 56px) clamp(24px, 3vw, 48px) clamp(20px, 3vh, 36px);
   position:relative;
-  width:100%;
-  max-width:none;
-  height:auto;
-  max-height:min(84vh, 660px);
+  z-index:2;
+}
+.chart-container{
+  flex:1 1 auto;
+  min-height:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
+  width:100%;
 }
-.chart-frame svg{
+.chart-container svg,
+.chart-container > svg{
   width:100%;
   height:auto;
+  max-height:100%;
   display:block;
-  max-height:min(84vh, 660px);
 }
 .chart-caption{
   font-family:var(--stack);
   font-size:12px;
+  line-height:1.45;
   color:var(--muted);
-  margin-top:14px;
   text-align:center;
-  line-height:1.4;
+  margin-top:14px;
+  max-width:42ch;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 /* === Mobile === */
 @media (max-width: 880px){
   section{
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;
+    align-items:stretch;
+    min-height:100vh;
+    max-height:100vh;
     overflow:hidden;
   }
   .text-col{
-    width:100%;
     max-width:none;
-    padding-left:clamp(20px, 6vw, 32px);
-    padding-right:clamp(20px, 6vw, 32px);
-    padding-top:3vh;
-    padding-bottom:1vh;
+    width:100%;
+    padding-left:clamp(20px, 5vw, 28px);
+    padding-right:clamp(20px, 5vw, 28px);
+    padding-top:clamp(16px, 3vh, 28px);
+    padding-bottom:8px;
+    flex:0 0 auto;
   }
   .headline{
-    font-size:clamp(22px, 5.4vw, 30px);
+    font-size:clamp(22px, 5vw, 30px);
     margin-bottom:14px;
   }
-  .stats-row{
-    gap:18px;
+  .stat-block{
+    gap:4px;
     margin-bottom:14px;
   }
-  .stat .num{ font-size:34px; }
-  .stat.secondary .num{ font-size:26px; }
-  .stat .cap{ font-size:13px; max-width:none; }
-  .mechanism{ font-size:17px; max-width:none; margin-bottom:10px; }
-  .source{ font-size:11px; max-width:none; }
+  .stat-row{
+    gap:16px;
+  }
+  .big-number{
+    font-size:clamp(40px, 11vw, 60px);
+  }
+  .caption{
+    font-size:clamp(13px, 3vw, 15px);
+    max-width:none;
+  }
+  .body-text{
+    font-size:14px;
+    line-height:1.5;
+    margin-bottom:14px;
+  }
+  .advocacy-link{
+    font-size:14px;
+  }
   .chart-col{
-    width:100%;
+    flex:1 1 0;
+    min-height:0;
     height:auto;
-    flex:0 1 auto;
-    padding:6px 16px 14px;
+    padding:6px clamp(16px, 4vw, 24px) clamp(12px, 2vh, 20px);
   }
-  .chart-frame{
-    max-height:34vh;
-    max-width:100%;
+  .chart-caption{
+    font-size:10.5px;
+    margin-top:8px;
   }
-  .chart-caption{ font-size:11px; margin-top:8px; }
 }
 
-@media (max-width: 880px) and (max-height: 680px){
-  .text-col{ padding-top:2vh; }
-  .headline{ margin-bottom:10px; }
-  .stats-row{ margin-bottom:10px; }
-  .mechanism{ margin-bottom:8px; }
+/* === Short screens (1366×768 etc.) === */
+@media (max-height: 760px) and (min-width: 881px){
+  .headline{
+    font-size:clamp(26px, 2.6vw, 34px);
+    margin-bottom:22px;
+  }
+  .big-number{
+    font-size:clamp(46px, 5.2vw, 72px);
+  }
+  .stat-block{
+    gap:4px;
+    margin-bottom:18px;
+  }
+  .body-text{
+    font-size:17px;
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+  .chart-col{
+    padding:24px 32px 24px;
+  }
 }
-
-@media (max-height: 700px) and (min-width: 881px){
-  .headline{ margin-bottom:22px; }
-  .stats-row{ margin-bottom:20px; }
-  .mechanism{ font-size:18px; margin-bottom:14px; }
-  .chart-frame{ max-height:min(66vh, 480px); }
+@media (max-height: 680px) and (min-width: 881px){
+  .headline{
+    font-size:clamp(22px, 2.2vw, 28px);
+    margin-bottom:16px;
+  }
+  .big-number{
+    font-size:clamp(38px, 4.4vw, 58px);
+  }
+  .stat-block{
+    margin-bottom:14px;
+  }
+  .body-text{
+    font-size:15px;
+    line-height:1.45;
+    margin-bottom:14px;
+  }
+  .chart-caption{
+    font-size:11px;
+    margin-top:10px;
+  }
 }
 </style>
 </head>
@@ -231,32 +273,32 @@ section{
 <section id="section">
   <div class="text-col">
     <h1 class="headline">
-      NanoFlashing <em>captures</em> the smoke, down to the smallest particle.
+      <span>NanoFlashing</span>
+      <span><em>captures</em> real wildfire smoke</span>
+      <span>down to the ultrafine particle</span>
     </h1>
 
-    <div class="stats-row">
-      <div class="stat primary">
-        <div class="num">75.4%</div>
-        <div class="cap">captured in one pass, real wildfire smoke</div>
+    <div class="stat-block">
+      <div class="stat-row">
+        <div class="big-number accent">75.4%</div>
+        <p class="caption">captured in one pass, real wildfire smoke</p>
       </div>
-      <div class="stat secondary">
-        <div class="num"><span class="over">over</span>90%</div>
-        <div class="cap">of the ultrafine 16–34 nm particles</div>
+      <div class="stat-row">
+        <div class="big-number ink">&gt;90%</div>
+        <p class="caption">of the ultrafine 16–34 nm particles</p>
       </div>
     </div>
 
-    <p class="mechanism">
-      NanoFlashing builds a permanent positive polarity — a fixed positive charge — into the filter surface. Smoke is negatively charged, so it is captured and retained by physical action, and the charge never wears off (full strength after a two-year aging test).
+    <p class="body-text">
+      NanoFlashing is a permanent positive polarity — a fixed positive charge engineered into the filter surface. Wildfire smoke is electrically charged, so NanoFlashing captures and retains it, like a permanent magnet — by physical action, with no power and no chemicals.
     </p>
 
-    <p class="source">
-      Peer-reviewed ASM journal · 31 scientists, 16 institutes · proven in 441 facilities, 7 countries.
-    </p>
+    <a class="advocacy-link" href="#advocacy">Advocacy →</a>
   </div>
 
   <div class="chart-col">
-    <div class="chart-frame">
-      <svg class="chart" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid meet" aria-label="Single-pass capture of wildfire smoke by particle size">
+    <div class="chart-container">
+      <svg class="chart" viewBox="0 0 640 500" preserveAspectRatio="xMidYMid meet" aria-label="Single-pass capture of wildfire smoke by particle size">
           <!-- 16-34 nm band -->
           <rect x="80" y="40" width="65.5" height="320" fill="rgba(27,123,255,0.07)"/>
 
@@ -269,7 +311,7 @@ section{
           </g>
 
           <!-- Y tick labels + left ticks -->
-          <g font-family="var(--mono)" font-size="10" fill="#828a90">
+          <g font-family="var(--stack)" font-size="10" fill="#828a90">
             <line x1="76" y1="40" x2="80" y2="40" stroke="#828a90" stroke-width="1"/>
             <text x="72" y="40" text-anchor="end" dominant-baseline="middle">100</text>
             <line x1="76" y1="120" x2="80" y2="120" stroke="#828a90" stroke-width="1"/>
@@ -283,13 +325,13 @@ section{
           </g>
 
           <!-- Y axis title (rotated) -->
-          <text x="28" y="200" font-family="var(--mono)" font-size="10" fill="#828a90" text-anchor="middle" transform="rotate(-90 28 200)">Smoke captured (%)</text>
+          <text x="28" y="200" font-family="var(--stack)" font-size="10" fill="#828a90" text-anchor="middle" transform="rotate(-90 28 200)">Smoke captured (%)</text>
 
           <!-- Baseline -->
           <line x1="80" y1="360" x2="620" y2="360" stroke="#1f2327" stroke-width="1"/>
 
           <!-- X tick marks + labels -->
-          <g font-family="var(--mono)" font-size="10" fill="#828a90">
+          <g font-family="var(--stack)" font-size="10" fill="#828a90">
             <line x1="80" y1="360" x2="80" y2="364" stroke="#828a90" stroke-width="1"/>
             <text x="80" y="376" text-anchor="middle">16</text>
             <line x1="145.5" y1="360" x2="145.5" y2="364" stroke="#828a90" stroke-width="1"/>
@@ -303,11 +345,11 @@ section{
           </g>
 
           <!-- X axis title -->
-          <text x="350" y="398" font-family="var(--mono)" font-size="10" fill="#828a90" text-anchor="middle">Particle size (nm)</text>
+          <text x="350" y="398" font-family="var(--stack)" font-size="10" fill="#828a90" text-anchor="middle">Particle size (nm)</text>
 
           <!-- 75.4% average reference line (dotted, different from grey dashed) -->
           <line x1="80" y1="118.7" x2="620" y2="118.7" stroke="rgba(20,24,28,0.28)" stroke-width="1" stroke-dasharray="1 4"/>
-          <text x="616" y="113" font-family="var(--mono)" font-size="10" fill="#828a90" text-anchor="end">75.4% average</text>
+          <text x="616" y="113" font-family="var(--stack)" font-size="10" fill="#828a90" text-anchor="end">75.4% average</text>
 
           <!-- GREY reference line (ordinary filter) - drawn BEFORE blue -->
           <path class="grey-line" d="M 80,344 L 103.3,344 L 145.5,340.8 L 186.7,337.6 L 244.9,334.4 L 323.6,334.4 L 402.3,334.4 L 481.6,331.2 L 560.9,331.2 L 620,328"
@@ -349,31 +391,71 @@ section{
             <circle class="data-dot" cx="620" cy="112" r="3.5" data-nm="500" data-pct="80"/>
           </g>
 
-          <!-- "over 90% captured" annotation with leader line -->
+          <!-- ">90% captured" annotation with leader line -->
           <g>
             <line x1="153" y1="55" x2="129" y2="66" stroke="#1f2327" stroke-width="1"/>
-            <text x="158" y="52" font-family="var(--mono)" font-size="10" fill="#1f2327" text-anchor="start">over 90% captured</text>
+            <text x="158" y="52" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="start">&gt;90% captured</text>
           </g>
 
           <!-- Legend -->
           <g>
             <!-- Row 1: NanoFlashing -->
             <line x1="408" y1="258" x2="432" y2="258" stroke="#1b7bff" stroke-width="2.5"/>
-            <text x="438" y="258" font-family="var(--mono)" font-size="10" fill="#1f2327" dominant-baseline="middle">NanoFlashing, after smoke</text>
+            <text x="438" y="258" font-family="var(--stack)" font-size="10" fill="#1f2327" dominant-baseline="middle">NanoFlashing, after smoke</text>
 
             <!-- Row 2: ordinary filter -->
             <line x1="408" y1="278" x2="432" y2="278" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
-            <text x="438" y="278" font-family="var(--mono)" font-size="10" fill="#1f2327" dominant-baseline="middle">ordinary filter, after smoke</text>
+            <text x="438" y="278" font-family="var(--stack)" font-size="10" fill="#1f2327" dominant-baseline="middle">ordinary filter, after smoke</text>
 
             <!-- Source note -->
-            <text x="408" y="296" font-family="var(--mono)" font-size="8.5" fill="#828a90">Lehtimaki &amp; Heinonen, 1994</text>
+            <text x="408" y="296" font-family="var(--stack)" font-size="8.5" fill="#828a90">Lehtimaki &amp; Heinonen, 1994</text>
           </g>
 
           <!-- Chart title: BOTH lines are measured after smoke (the fair comparison) -->
           <text x="80" y="22" font-family="var(--stack)" font-size="14" fill="#1f2327">Single-pass capture, measured <tspan font-weight="700">after smoke</tspan></text>
+
+          <!-- Ultrafine bracket -->
+          <g>
+            <line x1="80" y1="418" x2="323" y2="418" stroke="rgba(20,24,28,0.25)" stroke-width="1"/>
+            <line x1="201.5" y1="415" x2="201.5" y2="421" stroke="rgba(20,24,28,0.25)" stroke-width="1"/>
+            <text x="201.5" y="414" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle" dominant-baseline="alphabetic">ultrafine — the smallest, what ordinary filters miss</text>
+          </g>
+
+          <!-- Pollutant size scale -->
+          <g>
+            <!-- Wildfire smoke -->
+            <line x1="210" y1="360" x2="210" y2="422" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
+            <circle cx="210" cy="442" r="20" fill="none" stroke="rgba(20,24,28,0.12)" stroke-width="1"/>
+            <clipPath id="clip-wildfire">
+              <circle cx="210" cy="442" r="20"/>
+            </clipPath>
+            <image href="assets/videos/posters/Wildfire_Smoke_Particle.jpg" x="190" y="422" width="40" height="40" clip-path="url(#clip-wildfire)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="210" y="474" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle">wildfire smoke</text>
+            <text x="210" y="486" font-family="var(--stack)" font-size="9" fill="#828a90" text-anchor="middle">~40 nm</text>
+
+            <!-- Virus -->
+            <line x1="323" y1="360" x2="323" y2="422" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
+            <circle cx="323" cy="442" r="20" fill="none" stroke="rgba(20,24,28,0.12)" stroke-width="1"/>
+            <clipPath id="clip-virus">
+              <circle cx="323" cy="442" r="20"/>
+            </clipPath>
+            <image href="assets/videos/posters/Virus.jpg" x="303" y="422" width="40" height="40" clip-path="url(#clip-virus)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="323" y="474" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle">virus</text>
+            <text x="323" y="486" font-family="var(--stack)" font-size="9" fill="#828a90" text-anchor="middle">~100 nm</text>
+
+            <!-- Bacteria -->
+            <line x1="545" y1="360" x2="545" y2="422" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
+            <circle cx="545" cy="442" r="20" fill="none" stroke="rgba(20,24,28,0.12)" stroke-width="1"/>
+            <clipPath id="clip-bacteria">
+              <circle cx="545" cy="442" r="20"/>
+            </clipPath>
+            <image href="assets/videos/posters/Bacteria.jpg" x="525" y="422" width="40" height="40" clip-path="url(#clip-bacteria)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="545" y="474" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle">bacteria</text>
+            <text x="545" y="486" font-family="var(--stack)" font-size="9" fill="#828a90" text-anchor="middle">~400 nm</text>
+          </g>
         </svg>
     </div>
-    <div class="chart-caption">fig. 01 — after smoke, NanoFlashing keeps its charge; an ordinary filter has lost it.</div>
+    <p class="chart-caption">after smoke, NanoFlashing keeps its charge; an ordinary filter has lost it.</p>
   </div>
 </section>
 
