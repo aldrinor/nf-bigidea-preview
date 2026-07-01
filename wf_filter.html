@@ -38,15 +38,18 @@ section{
   background:var(--bg);
 }
 
-/* === Background video stack === */
+/* === Background video block (right side) === */
 .video-stack{
   position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
   z-index:0;
   overflow:hidden;
   background:var(--bg);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
 }
 .video-stack video,
 .video-stack img{
@@ -64,15 +67,18 @@ section{
 .video-stack.reduced video{ opacity:0 !important; }
 .video-stack.reduced img.poster{ opacity:1; }
 
-/* === Drifting grey smoke overlay === */
+/* === Drifting grey smoke overlay (right block) === */
 .smoke{
   position:absolute;
-  inset:0;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
   z-index:1;
   pointer-events:none;
   overflow:hidden;
-  -webkit-mask-image:linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,1) 100%);
-  mask-image:linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,1) 100%);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
 }
 .smoke span{
   position:absolute;
@@ -135,19 +141,6 @@ section{
   .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
   .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
   .smoke .s4{ opacity:0.55; }
-}
-
-/* === Left readability scrim === */
-.scrim{
-  position:absolute;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  background:linear-gradient(to right,
-    var(--bg) 0%,
-    var(--bg) 22%,
-    rgba(237,240,242,0.72) 42%,
-    rgba(237,240,242,0) 60%);
 }
 
 /* === Text column === */
@@ -244,13 +237,26 @@ section{
 
 /* === Mobile === */
 @media (max-width: 880px){
+  section{
+    overflow-x:hidden;
+  }
+  .video-stack,
+  .smoke{
+    width:100%;
+    max-width:100%;
+    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+    mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+  }
   .scrim{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
     background:linear-gradient(to right,
       var(--bg) 0%,
-      var(--bg) 30%,
-      rgba(237,240,242,0.88) 55%,
-      rgba(237,240,242,0.6) 80%,
-      rgba(237,240,242,0.6) 100%);
+      rgba(237,240,242,0.88) 35%,
+      rgba(237,240,242,0.45) 65%,
+      rgba(237,240,242,0.2) 100%);
   }
   .text-col{
     max-width:none;
@@ -265,9 +271,12 @@ section{
   }
   .caption{
     padding-top:0;
-    max-width:40ch;
+    max-width:none;
   }
-  .body-text{ font-size:17px; }
+  .body-text{
+    font-size:17px;
+    max-width:none;
+  }
 }
 </style>
 </head>
@@ -277,12 +286,8 @@ section{
   <div class="video-stack" id="videoStack">
     <video id="videoA" src="assets/videos/filter_media_v2.mp4"
            poster="assets/videos/posters/filter_media_v2.jpg"
-           autoplay loop muted playsinline preload="auto"
+           autoplay muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
-    <video id="videoB" src="assets/videos/filter_media_v2.mp4"
-           poster="assets/videos/posters/filter_media_v2.jpg"
-           autoplay loop muted playsinline preload="auto"
-           style="opacity:0; z-index:2;"></video>
     <img class="poster" src="assets/videos/posters/filter_media_v2.jpg" alt="">
   </div>
 
@@ -319,58 +324,13 @@ section{
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const videoStack = document.getElementById('videoStack');
   const videoA = document.getElementById('videoA');
-  const videoB = document.getElementById('videoB');
   const bigNumber = document.getElementById('bigNumber');
 
-  /* ---------- Crossfade loop ---------- */
+  /* ---------- Reduced motion: show poster, hide video ---------- */
   if (reducedMotion) {
     videoStack.classList.add('reduced');
   } else {
-    let active = videoA;
-    let inactive = videoB;
-    let crossfading = false;
-    const CROSSFADE_DURATION = 700; // ms
-    const TRIGGER_THRESHOLD = 0.7;  // s remaining
-
-    function crossfadeLoop(){
-      if (crossfading) return;
-      const t = active.currentTime;
-      const d = active.duration;
-      if (isFinite(d) && d > 0 && (d - t) <= TRIGGER_THRESHOLD) {
-        crossfading = true;
-        const start = performance.now();
-        inactive.currentTime = 0;
-        inactive.play().catch(()=>{});
-
-        function step(now){
-          const p = Math.min(1, (now - start) / CROSSFADE_DURATION);
-          const e = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2; // easeInOutQuad
-          active.style.opacity = String(1 - e);
-          inactive.style.opacity = String(e);
-          if (p < 1) {
-            requestAnimationFrame(step);
-          } else {
-            // swap
-            const tmp = active; active = inactive; inactive = tmp;
-            active.style.opacity = '1';
-            inactive.style.opacity = '0';
-            crossfading = false;
-          }
-        }
-        requestAnimationFrame(step);
-      }
-    }
-
-    // Kick off playback
     try { videoA.play(); } catch(e){}
-    try { videoB.pause(); videoB.currentTime = 0; } catch(e){}
-
-    videoA.addEventListener('timeupdate', crossfadeLoop);
-    videoB.addEventListener('timeupdate', crossfadeLoop);
-
-    // Safety: if a video ends without timeupdate firing fast enough, also listen to 'ended'
-    videoA.addEventListener('ended', crossfadeLoop);
-    videoB.addEventListener('ended', crossfadeLoop);
   }
 
   /* ---------- Number animation ---------- */
