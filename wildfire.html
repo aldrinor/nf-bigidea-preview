@@ -1,27 +1,47 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Wildfire Smoke — NanoFlashing</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--screenH:100vh}
-html,body{height:100%;background:#edf0f2;overflow:hidden;overscroll-behavior:none}
+html,body{background:#edf0f2}
+body{font-family:'Space Mono',monospace}
+
+/* DECK MODE (Desktop / Large screens) */
+html.deck-mode,body.deck-mode{height:100%;overflow:hidden;overscroll-behavior:none}
+body.deck-mode .deck{position:relative;width:100%;transform:translateY(0);will-change:transform}
+body.deck-mode .deck.smooth{transition:transform 720ms cubic-bezier(.7,0,.2,1)}
+body.deck-mode .screen{height:var(--screenH);width:100%;overflow:hidden}
+body.deck-mode .screen iframe{width:100%;height:100%;border:0;display:block}
+
+/* FLOW MODE (Phones / Short screens) */
+html.flow-mode,body.flow-mode{height:auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:auto}
+body.flow-mode .deck{transform:none;position:relative;width:100%}
+body.flow-mode .screen{height:auto;min-height:100vh;min-height:100dvh;overflow:visible}
+body.flow-mode .screen iframe{width:100%;border:0;display:block}
+
+/* Shared */
 header{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;
 padding:16px 30px;background:linear-gradient(180deg,rgba(237,240,242,0.92),rgba(237,240,242,0));pointer-events:none}
 header a{pointer-events:auto;display:inline-flex}
 header img{height:50px;width:auto;opacity:.95;display:block}
 header .meta{font-family:'Space Mono',monospace;font-size:12px;color:#8a9095;letter-spacing:.04em}
-.deck{position:relative;width:100%;transform:translateY(0);will-change:transform}
-.deck.smooth{transition:transform 720ms cubic-bezier(.7,0,.2,1)}
-.screen{height:var(--screenH);width:100%;overflow:hidden}
-.screen iframe{width:100%;height:100%;border:0;display:block}
-/* page-progress dots */
+
 #dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:101;display:flex;flex-direction:column;gap:11px}
 #dots button{width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;background:rgba(20,24,28,.22);transition:background .3s,transform .3s}
 #dots button.on{background:#1f2327;transform:scale(1.35)}
+
+body.flow-mode #dots{display:none}
+
 @media(max-width:700px){header img{height:38px}header{padding:12px 16px}#dots{right:10px}}
-@media(prefers-reduced-motion:reduce){.deck.smooth{transition:none}html,body{overflow-y:auto}}
-</style></head>
-<body>
+@media(prefers-reduced-motion:reduce){.deck.smooth{transition:none}}
+</style>
+</head>
+<body class="deck-mode">
 <header><a href="index.html" aria-label="NanoFlashing home"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none'"></a></header>
 <div class="deck" id="deck">
   <section class="screen"><iframe data-src="wf_ball.html" loading="eager" title="Charged particle" allow="autoplay"></iframe></section>
@@ -35,46 +55,204 @@ header .meta{font-family:'Space Mono',monospace;font-size:12px;color:#8a9095;let
 (function(){
   var deck=document.getElementById('deck');
   var frames=[].slice.call(document.querySelectorAll('.screen iframe'));
-  // ONE stable URL: load each section fresh on every page load so a normal refresh always shows the latest
-  var __t=Date.now();
-  frames.forEach(function(f){ f.src=f.getAttribute('data-src')+'?t='+__t; });
+  var dotsWrap=document.getElementById('dots'), dots=[];
   var N=frames.length, idx=0, locked=false;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduce) return; // native scroll for reduced-motion users
+  var DECK=matchMedia('(min-width:900px) and (min-height:600px) and (pointer:fine)');
+  var isDeck=false;
+  var observers=[], intervalTimers=[];
+
+  // Cache-bust so refresh always shows the latest
+  var __t=Date.now();
+  frames.forEach(function(f){ f.src=f.getAttribute('data-src')+'?t='+__t; });
+
   function setH(){
     document.documentElement.style.setProperty('--screenH', window.innerHeight+'px');
-    deck.classList.remove('smooth');
-    deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';
-    requestAnimationFrame(function(){ deck.classList.add('smooth'); });
+    if(isDeck){
+      deck.classList.remove('smooth');
+      deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';
+      requestAnimationFrame(function(){ deck.classList.add('smooth'); });
+    }
   }
-  setH(); window.addEventListener('resize',setH); window.addEventListener('orientationchange',setH);
-  // progress dots
-  var dotsWrap=document.getElementById('dots'), dots=[];
-  for(var i=0;i<N;i++){ (function(i){ var b=document.createElement('button');
-    b.setAttribute('aria-label','Go to section '+(i+1)); b.addEventListener('click',function(){go(i);});
-    dotsWrap.appendChild(b); dots.push(b); })(i); }
-  function apply(){ deck.classList.add('smooth'); deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';
-    for(var i=0;i<N;i++) dots[i].className = i===idx?'on':''; }
-  function go(i){ i=Math.max(0,Math.min(N-1,i)); if(i===idx) return; idx=i; apply();
-    locked=true; setTimeout(function(){locked=false;}, 780); }
-  function wheel(e){ if(locked){ e.preventDefault(); return; }
-    if(e.deltaY>16){ e.preventDefault(); go(idx+1); } else if(e.deltaY<-16){ e.preventDefault(); go(idx-1); } }
+
+  function measureFrame(f){
+    try{
+      var d=f.contentDocument;
+      if(!d || !d.documentElement) return;
+      var h=Math.max(d.documentElement.scrollHeight, d.body ? d.body.scrollHeight : 0);
+      if(!h || h<1) return;
+      var minH=window.innerHeight;
+      if(h<minH) h=minH;
+      f.style.height=h+'px';
+    }catch(e){}
+  }
+
+  function setupObserver(f){
+    try{
+      var d=f.contentDocument;
+      if(!d || !d.documentElement) return;
+      var ro=new ResizeObserver(function(){ measureFrame(f); });
+      ro.observe(d.documentElement);
+      if(d.body) ro.observe(d.body);
+      observers.push(ro);
+    }catch(e){}
+  }
+
+  function setupInterval(f){
+    var start=Date.now();
+    var timer=setInterval(function(){
+      measureFrame(f);
+      if(Date.now()-start>10000 && intervalTimers.indexOf(timer)>-1){
+        clearInterval(timer);
+        intervalTimers.splice(intervalTimers.indexOf(timer), 1);
+      }
+    }, 800);
+    intervalTimers.push(timer);
+  }
+
+  function apply(){
+    if(!isDeck) return;
+    deck.classList.add('smooth');
+    deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';
+    for(var i=0;i<N;i++) dots[i].className = i===idx?'on':'';
+  }
+
+  function go(i){
+    if(!isDeck) return;
+    i=Math.max(0,Math.min(N-1,i));
+    if(i===idx) return;
+    idx=i; apply();
+    locked=true; setTimeout(function(){locked=false;}, 780);
+  }
+
+  function wheel(e){
+    if(!isDeck) return;
+    if(locked){ e.preventDefault(); return; }
+    if(e.deltaY>16){ e.preventDefault(); go(idx+1); }
+    else if(e.deltaY<-16){ e.preventDefault(); go(idx-1); }
+  }
+
   var ty=null;
-  function ts(e){ ty=(e.touches?e.touches[0]:e).clientY; }
-  function te(e){ if(ty==null) return; var y=(e.changedTouches?e.changedTouches[0]:e).clientY, dy=ty-y; ty=null;
-    if(locked) return; if(dy>44) go(idx+1); else if(dy<-44) go(idx-1); }
+  function ts(e){ if(!isDeck) return; ty=(e.touches?e.touches[0]:e).clientY; }
+  function te(e){
+    if(!isDeck) return;
+    if(ty==null) return;
+    var y=(e.changedTouches?e.changedTouches[0]:e).clientY, dy=ty-y; ty=null;
+    if(locked) return;
+    if(dy>44) go(idx+1);
+    else if(dy<-44) go(idx-1);
+  }
+
+  function keydown(e){
+    if(!isDeck) return;
+    if(locked) return;
+    if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); go(idx+1); }
+    else if(e.key==='ArrowUp'||e.key==='PageUp'){ e.preventDefault(); go(idx-1); }
+  }
+
+  function attachFrameEvents(f){
+    try{
+      var w=f.contentWindow; if(!w) return;
+      w.addEventListener('wheel',wheel,{passive:false});
+      w.addEventListener('touchstart',ts,{passive:true});
+      w.addEventListener('touchend',te,{passive:true});
+    }catch(e){}
+  }
+
+  function clearFlow(){
+    observers.forEach(function(ro){ try{ro.disconnect();}catch(e){} });
+    observers=[];
+    intervalTimers.forEach(function(t){ clearInterval(t); });
+    intervalTimers=[];
+    frames.forEach(function(f){
+      f.style.height='';
+      try{
+        var w=f.contentWindow;
+        if(w){
+          w.removeEventListener('wheel',wheel);
+          w.removeEventListener('touchstart',ts);
+          w.removeEventListener('touchend',te);
+        }
+      }catch(e){}
+    });
+  }
+
+  function setupFlow(){
+    frames.forEach(function(f){
+      measureFrame(f);
+      setupObserver(f);
+      setupInterval(f);
+    });
+  }
+
+  function applyMode(){
+    var newIsDeck = DECK.matches && !reduce;
+    if(newIsDeck===isDeck && isDeck){
+      setH(); return;
+    }
+    if(newIsDeck===isDeck && !isDeck){
+      frames.forEach(function(f){ measureFrame(f); });
+      return;
+    }
+
+    isDeck=newIsDeck;
+
+    if(isDeck){
+      document.documentElement.classList.remove('flow-mode');
+      document.documentElement.classList.add('deck-mode');
+      document.body.classList.remove('flow-mode');
+      document.body.classList.add('deck-mode');
+      clearFlow();
+      window.scrollTo(0,0);
+      deck.style.transform='';
+      setH();
+      apply();
+    } else {
+      document.documentElement.classList.remove('deck-mode');
+      document.documentElement.classList.add('flow-mode');
+      document.body.classList.remove('deck-mode');
+      document.body.classList.add('flow-mode');
+      deck.classList.remove('smooth');
+      deck.style.transform='none';
+      window.scrollTo(0,0);
+      setupFlow();
+    }
+  }
+
+  // Build progress dots
+  for(var i=0;i<N;i++){
+    (function(i){
+      var b=document.createElement('button');
+      b.setAttribute('aria-label','Go to section '+(i+1));
+      b.addEventListener('click',function(){go(i);});
+      dotsWrap.appendChild(b); dots.push(b);
+    })(i);
+  }
+
+  // Global listeners
   window.addEventListener('wheel',wheel,{passive:false});
   window.addEventListener('touchstart',ts,{passive:true});
   window.addEventListener('touchend',te,{passive:true});
-  window.addEventListener('keydown',function(e){ if(locked) return;
-    if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); go(idx+1); }
-    else if(e.key==='ArrowUp'||e.key==='PageUp'){ e.preventDefault(); go(idx-1); } });
-  // forward wheel/touch from inside same-origin iframes so wheeling over a section still pages
-  function attach(f){ try{ var w=f.contentWindow; if(!w) return;
-    w.addEventListener('wheel',wheel,{passive:false}); w.addEventListener('touchstart',ts,{passive:true}); w.addEventListener('touchend',te,{passive:true}); }catch(e){} }
-  frames.forEach(function(f){ f.addEventListener('load',function(){attach(f);});
-    try{ if(f.contentDocument && f.contentDocument.readyState==='complete') attach(f); }catch(e){} });
-  deck.classList.add('smooth'); apply();
+  window.addEventListener('keydown',keydown);
+  window.addEventListener('resize', applyMode);
+  window.addEventListener('orientationchange', applyMode);
+
+  // Iframe load listeners
+  frames.forEach(function(f){
+    f.addEventListener('load', function(){
+      if(isDeck){
+        attachFrameEvents(f);
+      } else {
+        measureFrame(f);
+        setupObserver(f);
+        setupInterval(f);
+      }
+    });
+  });
+
+  // Init
+  applyMode();
 })();
 </script>
-</body></html>
+</body>
+</html>
