@@ -298,162 +298,164 @@ section{
 
   <div class="chart-col">
     <div class="chart-container">
-      <svg class="chart" viewBox="0 0 640 500" preserveAspectRatio="xMidYMid meet" aria-label="Single-pass capture of wildfire smoke by particle size">
-          <!-- 16-34 nm band -->
-          <rect x="80" y="40" width="65.5" height="320" fill="rgba(27,123,255,0.07)"/>
+      <svg viewBox="0 0 680 500" xmlns="http://www.w3.org/2000/svg" font-family="var(--stack), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" text-rendering="geometricPrecision">
+  <defs>
+    <clipPath id="clip-wildfire"><circle cx="0" cy="0" r="16"/></clipPath>
+    <clipPath id="clip-virus"><circle cx="0" cy="0" r="16"/></clipPath>
+    <clipPath id="clip-bacteria"><circle cx="0" cy="0" r="16"/></clipPath>
+    <pattern id="bg-pattern" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="#edf0f2"/>
+    </pattern>
+  </defs>
 
-          <!-- Gridlines -->
-          <g stroke="rgba(20,24,28,0.06)" stroke-width="1">
-            <line x1="80" y1="40" x2="620" y2="40"/>
-            <line x1="80" y1="120" x2="620" y2="120"/>
-            <line x1="80" y1="200" x2="620" y2="200"/>
-            <line x1="80" y1="280" x2="620" y2="280"/>
-          </g>
+  <rect width="680" height="500" fill="url(#bg-pattern)"/>
 
-          <!-- Y tick labels + left ticks -->
-          <g font-family="var(--stack)" font-size="10" fill="#828a90">
-            <line x1="76" y1="40" x2="80" y2="40" stroke="#828a90" stroke-width="1"/>
-            <text x="72" y="40" text-anchor="end" dominant-baseline="middle">100</text>
-            <line x1="76" y1="120" x2="80" y2="120" stroke="#828a90" stroke-width="1"/>
-            <text x="72" y="120" text-anchor="end" dominant-baseline="middle">75</text>
-            <line x1="76" y1="200" x2="80" y2="200" stroke="#828a90" stroke-width="1"/>
-            <text x="72" y="200" text-anchor="end" dominant-baseline="middle">50</text>
-            <line x1="76" y1="280" x2="80" y2="280" stroke="#828a90" stroke-width="1"/>
-            <text x="72" y="280" text-anchor="end" dominant-baseline="middle">25</text>
-            <line x1="76" y1="360" x2="80" y2="360" stroke="#828a90" stroke-width="1"/>
-            <text x="72" y="360" text-anchor="end" dominant-baseline="middle">0</text>
-          </g>
+  <!-- ============ TOP SIZE-SCALE ============ -->
+  <!-- Wildfire Smoke ~40 nm -->
+  <g>
+    <line x1="231" y1="84" x2="231" y2="150" stroke="rgba(20,24,28,0.15)" stroke-width="1" stroke-dasharray="1 4"/>
+    <text x="231" y="34" text-anchor="middle" font-size="10" fill="#0f1419" font-weight="600">Wildfire Smoke</text>
+    <text x="231" y="46" text-anchor="middle" font-size="9" fill="#5a6470">~40 nm</text>
+    <image href="assets/videos/posters/Wildfire_Smoke_Particle.jpg" x="215" y="52" width="32" height="32" clip-path="url(#clip-wildfire)" preserveAspectRatio="xMidYMid slice"/>
+    <circle cx="231" cy="68" r="16" fill="none" stroke="#c8ced3" stroke-width="1"/>
+  </g>
 
-          <!-- Y axis title (rotated) -->
-          <text x="28" y="200" font-family="var(--stack)" font-size="10" fill="#828a90" text-anchor="middle" transform="rotate(-90 28 200)">Smoke captured (%)</text>
+  <!-- Cr6 <56 nm (staggered lower, offset, no photo, red diamond marker) -->
+  <g>
+    <line x1="282" y1="120" x2="282" y2="150" stroke="rgba(20,24,28,0.15)" stroke-width="1" stroke-dasharray="1 4"/>
+    <text x="282" y="70" text-anchor="middle" font-size="10" fill="#0f1419" font-weight="600">Cr6</text>
+    <text x="282" y="82" text-anchor="middle" font-size="9" fill="#5a6470">&lt;56 nm</text>
+    <text x="282" y="94" text-anchor="middle" font-size="8" fill="#8a929a">2025 LA fires</text>
+    <g transform="translate(282, 108)">
+      <path d="M 0 -7 L 7 0 L 0 7 L -7 0 Z" fill="#e23b3b"/>
+    </g>
+  </g>
 
-          <!-- Baseline -->
-          <line x1="80" y1="360" x2="620" y2="360" stroke="#1f2327" stroke-width="1"/>
+  <!-- Virus ~100 nm -->
+  <g>
+    <line x1="370" y1="84" x2="370" y2="150" stroke="rgba(20,24,28,0.15)" stroke-width="1" stroke-dasharray="1 4"/>
+    <text x="370" y="34" text-anchor="middle" font-size="10" fill="#0f1419" font-weight="600">Virus</text>
+    <text x="370" y="46" text-anchor="middle" font-size="9" fill="#5a6470">~100 nm</text>
+    <image href="assets/videos/posters/Virus.jpg" x="354" y="52" width="32" height="32" clip-path="url(#clip-virus)" preserveAspectRatio="xMidYMid slice"/>
+    <circle cx="370" cy="68" r="16" fill="none" stroke="#c8ced3" stroke-width="1"/>
+  </g>
 
-          <!-- X tick marks + labels -->
-          <g font-family="var(--stack)" font-size="10" fill="#828a90">
-            <line x1="80" y1="360" x2="80" y2="364" stroke="#828a90" stroke-width="1"/>
-            <text x="80" y="376" text-anchor="middle">16</text>
-            <line x1="145.5" y1="360" x2="145.5" y2="364" stroke="#828a90" stroke-width="1"/>
-            <text x="145.5" y="376" text-anchor="middle">34</text>
-            <line x1="323.6" y1="360" x2="323.6" y2="364" stroke="#828a90" stroke-width="1"/>
-            <text x="323.6" y="376" text-anchor="middle">100</text>
-            <line x1="481.6" y1="360" x2="481.6" y2="364" stroke="#828a90" stroke-width="1"/>
-            <text x="481.6" y="376" text-anchor="middle">300</text>
-            <line x1="620" y1="360" x2="620" y2="364" stroke="#828a90" stroke-width="1"/>
-            <text x="620" y="376" text-anchor="middle">604</text>
-          </g>
+  <!-- Bacteria ~400 nm -->
+  <g>
+    <line x1="560" y1="84" x2="560" y2="150" stroke="rgba(20,24,28,0.15)" stroke-width="1" stroke-dasharray="1 4"/>
+    <text x="560" y="34" text-anchor="middle" font-size="10" fill="#0f1419" font-weight="600">Bacteria</text>
+    <text x="560" y="46" text-anchor="middle" font-size="9" fill="#5a6470">~400 nm</text>
+    <image href="assets/videos/posters/Bacteria.jpg" x="544" y="52" width="32" height="32" clip-path="url(#clip-bacteria)" preserveAspectRatio="xMidYMid slice"/>
+    <circle cx="560" cy="68" r="16" fill="none" stroke="#c8ced3" stroke-width="1"/>
+  </g>
 
-          <!-- X axis title -->
-          <text x="350" y="398" font-family="var(--stack)" font-size="10" fill="#828a90" text-anchor="middle">Particle size (nm)</text>
+  <!-- ============ PLOT ============ -->
+  <!-- Gridlines -->
+  <g stroke="#d4dae0" stroke-width="1">
+    <line x1="90" y1="150" x2="650" y2="150"/>
+    <line x1="90" y1="220" x2="650" y2="220"/>
+    <line x1="90" y1="290" x2="650" y2="290"/>
+    <line x1="90" y1="360" x2="650" y2="360"/>
+    <line x1="90" y1="430" x2="650" y2="430"/>
+  </g>
 
-          <!-- 75.4% average reference line (dotted, different from grey dashed) -->
-          <line x1="80" y1="118.7" x2="620" y2="118.7" stroke="rgba(20,24,28,0.28)" stroke-width="1" stroke-dasharray="1 4"/>
-          <text x="616" y="113" font-family="var(--stack)" font-size="10" fill="#828a90" text-anchor="end">75.4% average</text>
+  <!-- Y-axis tick labels -->
+  <g font-size="10" fill="#5a6470" text-anchor="end">
+    <text x="82" y="150" dominant-baseline="middle">100</text>
+    <text x="82" y="220" dominant-baseline="middle">75</text>
+    <text x="82" y="290" dominant-baseline="middle">50</text>
+    <text x="82" y="360" dominant-baseline="middle">25</text>
+    <text x="82" y="430" dominant-baseline="middle">0</text>
+  </g>
 
-          <!-- GREY reference line (ordinary filter) - drawn BEFORE blue -->
-          <path class="grey-line" d="M 80,344 L 103.3,344 L 145.5,340.8 L 186.7,337.6 L 244.9,334.4 L 323.6,334.4 L 402.3,334.4 L 481.6,331.2 L 560.9,331.2 L 620,328"
-                stroke="#aab2b8" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+  <!-- X-axis tick marks -->
+  <g stroke="#5a6470" stroke-width="1">
+    <line x1="90" y1="430" x2="90" y2="434"/>
+    <line x1="204" y1="430" x2="204" y2="434"/>
+    <line x1="370" y1="430" x2="370" y2="434"/>
+    <line x1="537" y1="430" x2="537" y2="434"/>
+    <line x1="650" y1="430" x2="650" y2="434"/>
+  </g>
 
-          <!-- Grey hollow dots -->
-          <g class="grey-dots" fill="none" stroke="#aab2b8" stroke-width="1.2">
-            <circle cx="80" cy="344" r="2.5"/>
-            <circle cx="103.3" cy="344" r="2.5"/>
-            <circle cx="145.5" cy="340.8" r="2.5"/>
-            <circle cx="186.7" cy="337.6" r="2.5"/>
-            <circle cx="244.9" cy="334.4" r="2.5"/>
-            <circle cx="323.6" cy="334.4" r="2.5"/>
-            <circle cx="402.3" cy="334.4" r="2.5"/>
-            <circle cx="481.6" cy="331.2" r="2.5"/>
-            <circle cx="560.9" cy="331.2" r="2.5"/>
-            <circle cx="620" cy="328" r="2.5"/>
-          </g>
+  <!-- X-axis tick labels -->
+  <g font-size="10" fill="#5a6470" text-anchor="middle">
+    <text x="90" y="446">16</text>
+    <text x="204" y="446">34</text>
+    <text x="370" y="446">100</text>
+    <text x="537" y="446">300</text>
+    <text x="650" y="446">604</text>
+  </g>
 
-          <!-- BLUE area fill under curve -->
-          <path class="area-fill" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112 L 620,360 L 80,360 Z"
-                fill="rgba(27,123,255,0.08)"/>
+  <!-- Axis lines -->
+  <line x1="90" y1="150" x2="90" y2="430" stroke="#0f1419" stroke-width="1"/>
+  <line x1="90" y1="430" x2="650" y2="430" stroke="#0f1419" stroke-width="1"/>
 
-          <!-- BLUE NanoFlashing curve (hero) - drawn LAST, on top -->
-          <path class="blue-line" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112"
-                stroke="#1b7bff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Axis titles -->
+  <text x="32" y="290" text-anchor="middle" font-size="11" fill="#0f1419" transform="rotate(-90 32 290)">Particulate Filtration Efficiency (%)</text>
+  <text x="370" y="476" text-anchor="middle" font-size="11" fill="#0f1419">Particle Size (nm)</text>
 
-          <!-- Blue data dots with white stroke -->
-          <g class="blue-dots" fill="#1b7bff" stroke="#edf0f2" stroke-width="2">
-            <circle class="data-dot" cx="80" cy="52.8" r="3.5" data-nm="16" data-pct="96"/>
-            <circle class="data-dot" cx="103.3" cy="62.4" r="3.5" data-nm="24" data-pct="93"/>
-            <circle class="data-dot" cx="145.5" cy="72" r="3.5" data-nm="34" data-pct="90"/>
-            <circle class="data-dot" cx="186.7" cy="92" r="3.5" data-nm="50" data-pct="85"/>
-            <circle class="data-dot" cx="244.9" cy="118.4" r="3.5" data-nm="80" data-pct="77"/>
-            <circle class="data-dot" cx="323.6" cy="154.4" r="3.5" data-nm="120" data-pct="68"/>
-            <circle class="data-dot" cx="402.3" cy="183.2" r="3.5" data-nm="180" data-pct="62"/>
-            <circle class="data-dot" cx="481.6" cy="179.2" r="3.5" data-nm="260" data-pct="63"/>
-            <circle class="data-dot" cx="560.9" cy="144" r="3.5" data-nm="380" data-pct="72"/>
-            <circle class="data-dot" cx="620" cy="112" r="3.5" data-nm="500" data-pct="80"/>
-          </g>
+  <!-- 16-34 nm shaded zone -->
+  <rect x="90" y="150" width="114" height="280" fill="rgba(27,123,255,0.06)"/>
+  <text x="147" y="166" text-anchor="middle" font-size="9" fill="#1b7bff" font-weight="600">&gt;90% captured</text>
 
-          <!-- ">90% captured" annotation with leader line -->
-          <g>
-            <line x1="153" y1="55" x2="129" y2="66" stroke="#1f2327" stroke-width="1"/>
-            <text x="158" y="52" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="start">&gt;90% captured</text>
-          </g>
+  <!-- 75.4% average dotted line -->
+  <line x1="90" y1="219" x2="650" y2="219" stroke="#0f1419" stroke-width="1" stroke-dasharray="1 3" opacity="0.5"/>
+  <text x="440" y="213" text-anchor="middle" font-size="9" fill="#5a6470">75.4% average</text>
 
-          <!-- Legend -->
-          <g>
-            <!-- Row 1: NanoFlashing -->
-            <line x1="408" y1="258" x2="432" y2="258" stroke="#1b7bff" stroke-width="2.5"/>
-            <text x="438" y="258" font-family="var(--stack)" font-size="10" fill="#1f2327" dominant-baseline="middle">NanoFlashing, after smoke</text>
+  <!-- HEPA reference at 300 nm -->
+  <line x1="537" y1="150" x2="537" y2="430" stroke="rgba(20,24,28,0.35)" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="533" y="395" text-anchor="end" font-size="9" fill="#0f1419" font-weight="600">HEPA rated at 0.3 µm</text>
+  <text x="533" y="407" text-anchor="end" font-size="8" fill="#5a6470">its hardest size — far bigger than these ultrafine threats</text>
 
-            <!-- Row 2: ordinary filter -->
-            <line x1="408" y1="278" x2="432" y2="278" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
-            <text x="438" y="278" font-family="var(--stack)" font-size="10" fill="#1f2327" dominant-baseline="middle">ordinary filter, after smoke</text>
+  <!-- Ordinary filter (dashed grey reference) -->
+  <path d="M 90 416 L 120 416 L 204 413 L 251 410 L 314 408 L 370 408 L 422 408 L 486 405 L 537 405 L 590 402 L 650 402"
+        fill="none" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="#edf0f2" stroke="#aab2b8" stroke-width="1.2">
+    <circle cx="90" cy="416" r="2.5"/>
+    <circle cx="120" cy="416" r="2.5"/>
+    <circle cx="204" cy="413" r="2.5"/>
+    <circle cx="251" cy="410" r="2.5"/>
+    <circle cx="314" cy="408" r="2.5"/>
+    <circle cx="370" cy="408" r="2.5"/>
+    <circle cx="422" cy="408" r="2.5"/>
+    <circle cx="486" cy="405" r="2.5"/>
+    <circle cx="537" cy="405" r="2.5"/>
+    <circle cx="590" cy="402" r="2.5"/>
+    <circle cx="650" cy="402" r="2.5"/>
+  </g>
 
-            <!-- Source note -->
-            <text x="408" y="296" font-family="var(--stack)" font-size="8.5" fill="#828a90">Lehtimaki &amp; Heinonen, 1994</text>
-          </g>
+  <!-- NanoFlashing HERO curve -->
+  <path d="M 90 161 L 120 169 L 204 178 L 251 192 L 314 214 L 370 240 L 422 256 L 486 254 L 537 228 L 590 206 L 650 192 L 650 430 L 90 430 Z"
+        fill="rgba(27,123,255,0.08)"/>
+  <path d="M 90 161 L 120 169 L 204 178 L 251 192 L 314 214 L 370 240 L 422 256 L 486 254 L 537 228 L 590 206 L 650 192"
+        fill="none" stroke="#1b7bff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="#1b7bff">
+    <circle cx="90" cy="161" r="3"/>
+    <circle cx="120" cy="169" r="3"/>
+    <circle cx="204" cy="178" r="3"/>
+    <circle cx="251" cy="192" r="3"/>
+    <circle cx="314" cy="214" r="3"/>
+    <circle cx="370" cy="240" r="3"/>
+    <circle cx="422" cy="256" r="3"/>
+    <circle cx="486" cy="254" r="3"/>
+    <circle cx="537" cy="228" r="3"/>
+    <circle cx="590" cy="206" r="3"/>
+    <circle cx="650" cy="192" r="3"/>
+  </g>
 
-          <!-- Chart title: BOTH lines are measured after smoke (the fair comparison) -->
-          <text x="80" y="22" font-family="var(--stack)" font-size="14" fill="#1f2327">Single-pass capture, measured <tspan font-weight="700">after smoke</tspan></text>
-
-          <!-- Ultrafine bracket -->
-          <g>
-            <line x1="80" y1="418" x2="323" y2="418" stroke="rgba(20,24,28,0.25)" stroke-width="1"/>
-            <line x1="201.5" y1="415" x2="201.5" y2="421" stroke="rgba(20,24,28,0.25)" stroke-width="1"/>
-            <text x="201.5" y="414" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle" dominant-baseline="alphabetic">ultrafine — the smallest, what ordinary filters miss</text>
-          </g>
-
-          <!-- Pollutant size scale -->
-          <g>
-            <!-- Wildfire smoke -->
-            <line x1="210" y1="360" x2="210" y2="422" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
-            <circle cx="210" cy="442" r="20" fill="none" stroke="rgba(20,24,28,0.12)" stroke-width="1"/>
-            <clipPath id="clip-wildfire">
-              <circle cx="210" cy="442" r="20"/>
-            </clipPath>
-            <image href="assets/videos/posters/Wildfire_Smoke_Particle.jpg" x="190" y="422" width="40" height="40" clip-path="url(#clip-wildfire)" preserveAspectRatio="xMidYMid slice"/>
-            <text x="210" y="474" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle">wildfire smoke</text>
-            <text x="210" y="486" font-family="var(--stack)" font-size="9" fill="#828a90" text-anchor="middle">~40 nm</text>
-
-            <!-- Virus -->
-            <line x1="323" y1="360" x2="323" y2="422" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
-            <circle cx="323" cy="442" r="20" fill="none" stroke="rgba(20,24,28,0.12)" stroke-width="1"/>
-            <clipPath id="clip-virus">
-              <circle cx="323" cy="442" r="20"/>
-            </clipPath>
-            <image href="assets/videos/posters/Virus.jpg" x="303" y="422" width="40" height="40" clip-path="url(#clip-virus)" preserveAspectRatio="xMidYMid slice"/>
-            <text x="323" y="474" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle">virus</text>
-            <text x="323" y="486" font-family="var(--stack)" font-size="9" fill="#828a90" text-anchor="middle">~100 nm</text>
-
-            <!-- Bacteria -->
-            <line x1="545" y1="360" x2="545" y2="422" stroke="rgba(20,24,28,0.18)" stroke-width="1"/>
-            <circle cx="545" cy="442" r="20" fill="none" stroke="rgba(20,24,28,0.12)" stroke-width="1"/>
-            <clipPath id="clip-bacteria">
-              <circle cx="545" cy="442" r="20"/>
-            </clipPath>
-            <image href="assets/videos/posters/Bacteria.jpg" x="525" y="422" width="40" height="40" clip-path="url(#clip-bacteria)" preserveAspectRatio="xMidYMid slice"/>
-            <text x="545" y="474" font-family="var(--stack)" font-size="10" fill="#1f2327" text-anchor="middle">bacteria</text>
-            <text x="545" y="486" font-family="var(--stack)" font-size="9" fill="#828a90" text-anchor="middle">~400 nm</text>
-          </g>
-        </svg>
+  <!-- Legend -->
+  <g transform="translate(90, 492)">
+    <line x1="0" y1="-4" x2="20" y2="-4" stroke="#1b7bff" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="10" cy="-4" r="3" fill="#1b7bff"/>
+    <text x="26" y="-4" font-size="10" fill="#0f1419" dominant-baseline="middle">NanoFlashing</text>
+    
+    <line x1="140" y1="-4" x2="160" y2="-4" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="150" cy="-4" r="2.5" fill="#edf0f2" stroke="#aab2b8" stroke-width="1.2"/>
+    <text x="166" y="-4" font-size="10" fill="#0f1419" dominant-baseline="middle">Ordinary filter, after smoke</text>
+    
+    <text x="320" y="-4" font-size="8" fill="#8a929a" dominant-baseline="middle">Lehtimaki &amp; Heinonen, 1994</text>
+  </g>
+</svg>
     </div>
     <p class="chart-caption">after smoke, NanoFlashing keeps its charge; an ordinary filter has lost it.</p>
   </div>
