@@ -364,11 +364,10 @@
     .card-inner{transition:opacity .2s ease}
   }
 
-/* wfhealth_landscape_v1 — landscape-phone 2-col */
+/* wfhealth_landscape_v2 — landscape-phone 2-col */
 @media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
    .grid{ grid-template-columns:46% 54%; align-items:center; }
-   .left{ order:1; max-height:100vh; overflow-y:auto; padding:10px clamp(16px,4vw,30px);
-          justify-content:flex-start; }
+   .left{ order:1; display:block; max-height:100vh; overflow-y:auto; padding:10px clamp(16px,4vw,30px); }
    .right{ order:2; position:relative; height:100vh; max-height:100vh; }
    .figure{ height:100%; }
    h1.headline{ font-size:clamp(16px,2.8vw,21px); line-height:1.15; margin:8px 0 8px; max-width:none; }
