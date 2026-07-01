@@ -376,6 +376,68 @@ body {
   .tc-btn { width: 34px; height: 34px; }
   .chrome-source { font-size: 9px; bottom: 12px; right: 12px; }
 }
+
+/* wfmap_shortscreen_v1 — short/landscape height fix (legend overlap) */
+@media (max-height: 520px) {
+  .chrome-legend {
+    display: none;
+  }
+
+  .chrome-top-left {
+    top: 14px;
+    max-width: min(54vw, 440px);
+  }
+
+  .chrome-top-left h2 {
+    font-size: clamp(17px, 2.6vw, 22px);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .caption {
+    font-size: 13px;
+    line-height: 1.45;
+    max-width: min(52vw, 420px);
+  }
+
+  .time-control {
+    bottom: 10px;
+    padding: 8px 14px;
+  }
+
+  .tc-date {
+    font-size: 13px;
+  }
+
+  .tc-ticks {
+    height: 16px;
+    margin-top: 4px;
+  }
+
+  .tc-tick {
+    font-size: 12px;
+  }
+
+  .tc-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chrome-source {
+    bottom: 10px;
+    font-size: 10px;
+  }
+}
+
+@media (max-height: 430px) {
+  .caption {
+    font-size: 12px;
+  }
+
+  .time-control {
+    bottom: 8px;
+  }
+}
 </style>
 </head>
 <body>
