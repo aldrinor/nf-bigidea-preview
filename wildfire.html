@@ -59,7 +59,7 @@ body.flow-mode #dots{display:none}
   var N=frames.length, idx=0, locked=false;
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var DECK=matchMedia('(min-width:900px) and (min-height:600px) and (pointer:fine)');
-  var isDeck=false;
+  var isDeck=null;
   var observers=[], intervalTimers=[];
 
   // Cache-bust so refresh always shows the latest
@@ -207,6 +207,7 @@ body.flow-mode #dots{display:none}
       deck.style.transform='';
       setH();
       apply();
+      frames.forEach(attachFrameEvents);
     } else {
       document.documentElement.classList.remove('deck-mode');
       document.documentElement.classList.add('flow-mode');
