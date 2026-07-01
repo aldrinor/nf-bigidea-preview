@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v23_circles -->
+<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v27_sizelines -->
 <style>
 :root{
   --bg:#edf0f2;
@@ -114,7 +114,7 @@ section{
 /* === Advocacy link === */
 .advocacy-link{
   font-family:var(--stack);
-  font-size:16px;
+  font-size:19px;
   color:var(--accent);
   text-decoration:none;
   border-bottom:1px solid rgba(27,123,255,0.5);
@@ -298,45 +298,33 @@ section{
 
   <div class="chart-col">
     <div class="chart-container">
-      <svg viewBox="0 0 680 528" xmlns="http://www.w3.org/2000/svg" font-family="var(--stack), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" text-rendering="geometricPrecision">
+      <svg viewBox="0 0 680 528" xmlns="http://www.w3.org/2000/svg" font-family="var(--stack)" text-rendering="geometricPrecision">
   <defs>
     <pattern id="bg-pattern" width="6" height="6" patternUnits="userSpaceOnUse">
       <rect width="6" height="6" fill="#edf0f2"/>
     </pattern>
   </defs>
 
-  <rect width="680" height="500" fill="url(#bg-pattern)"/>
+  <rect width="680" height="528" fill="url(#bg-pattern)"/>
 
-  <!-- ============ TOP SIZE-SCALE ============ -->
-  <!-- Wildfire Smoke ~40 nm -->
-  <g>
-    <foreignObject x="153" y="30" width="44" height="44"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Wildfire_Smoke_Particle.jpg" style="width:44px;height:44px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Wildfire_Smoke_Particle_flashloop_c2.mp4" type="video/mp4"/></video></foreignObject>
-    <text x="175" y="88" text-anchor="middle" font-size="11" fill="#1f2327" font-weight="600">Wildfire Smoke</text>
-    <text x="175" y="100" text-anchor="middle" font-size="9" fill="#8a9095">~40 nm</text>
-  </g>
-
-  <!-- Cr6 <56 nm -->
-  <g>
-    <foreignObject x="308" y="30" width="44" height="44"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Cr6.jpg" style="width:44px;height:44px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Cr6_flashloop.mp4" type="video/mp4"/></video></foreignObject>
-    <text x="330" y="88" text-anchor="middle" font-size="11" fill="#1f2327" font-weight="600">Cr6</text>
-    <text x="330" y="100" text-anchor="middle" font-size="9" fill="#8a9095">&lt;56 nm</text>
-    <text x="330" y="112" text-anchor="middle" font-size="9" fill="#8a9095">hexavalent chromium</text>
-    <text x="330" y="124" text-anchor="middle" font-size="9" fill="#8a9095">2025 LA fires</text>
-  </g>
-
-  <!-- Virus ~100 nm -->
-  <g>
-    <foreignObject x="463" y="30" width="44" height="44"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Virus.jpg" style="width:44px;height:44px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Virus_flashloop_c2.mp4" type="video/mp4"/></video></foreignObject>
-    <text x="485" y="88" text-anchor="middle" font-size="11" fill="#1f2327" font-weight="600">Virus</text>
-    <text x="485" y="100" text-anchor="middle" font-size="9" fill="#8a9095">~100 nm</text>
-  </g>
-
-  <!-- Bacteria ~400 nm -->
-  <g>
-    <foreignObject x="618" y="30" width="44" height="44"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Bacteria.jpg" style="width:44px;height:44px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Bacteria_flashloop_c2.mp4" type="video/mp4"/></video></foreignObject>
-    <text x="640" y="88" text-anchor="middle" font-size="11" fill="#1f2327" font-weight="600">Bacteria</text>
-    <text x="640" y="100" text-anchor="middle" font-size="9" fill="#8a9095">~400 nm</text>
-  </g>
+  <!-- ============ TOP SIZE-SCALE (even-spaced chips, diagonal line to true size) ============ -->
+  <line x1="175" y1="96" x2="231" y2="150" stroke="rgba(20,24,28,0.20)" stroke-width="1"/><circle cx="231" cy="150" r="2" fill="#8a9095"/>
+  <line x1="330" y1="96" x2="283" y2="150" stroke="rgba(20,24,28,0.20)" stroke-width="1"/><circle cx="283" cy="150" r="2" fill="#8a9095"/>
+  <line x1="485" y1="96" x2="373" y2="150" stroke="rgba(20,24,28,0.20)" stroke-width="1"/><circle cx="373" cy="150" r="2" fill="#8a9095"/>
+  <line x1="640" y1="96" x2="586" y2="150" stroke="rgba(20,24,28,0.20)" stroke-width="1"/><circle cx="586" cy="150" r="2" fill="#8a9095"/>
+  <foreignObject x="152" y="49" width="46" height="46"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Wildfire_Smoke_Particle_chip.jpg" style="width:46px;height:46px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Wildfire_Smoke_Particle_chip.mp4" type="video/mp4"/></video></foreignObject>
+  <foreignObject x="307" y="49" width="46" height="46"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Cr6.jpg" style="width:46px;height:46px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Cr6_flashloop.mp4" type="video/mp4"/></video></foreignObject>
+  <foreignObject x="462" y="49" width="46" height="46"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Virus_chip.jpg" style="width:46px;height:46px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Virus_chip.mp4" type="video/mp4"/></video></foreignObject>
+  <foreignObject x="617" y="49" width="46" height="46"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Bacteria_chip.jpg" style="width:46px;height:46px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)"><source src="assets/videos/Bacteria_chip.mp4" type="video/mp4"/></video></foreignObject>
+  <text x="175" y="30" text-anchor="middle" font-family="var(--stack)" font-size="11" fill="#1f2327" font-weight="600">Wildfire Smoke</text>
+  <text x="175" y="42" text-anchor="middle" font-family="var(--stack)" font-size="9" fill="#8a9095">~40 nm</text>
+  <text x="330" y="18" text-anchor="middle" font-family="var(--stack)" font-size="11" fill="#1f2327" font-weight="600">Hexavalent Chromium</text>
+  <text x="330" y="30" text-anchor="middle" font-family="var(--stack)" font-size="9" fill="#8a9095">Found in 2025 LA Fires</text>
+  <text x="330" y="42" text-anchor="middle" font-family="var(--stack)" font-size="9" fill="#8a9095">&lt;56 nm</text>
+  <text x="485" y="30" text-anchor="middle" font-family="var(--stack)" font-size="11" fill="#1f2327" font-weight="600">Virus</text>
+  <text x="485" y="42" text-anchor="middle" font-family="var(--stack)" font-size="9" fill="#8a9095">~100 nm</text>
+  <text x="640" y="30" text-anchor="middle" font-family="var(--stack)" font-size="11" fill="#1f2327" font-weight="600">Bacteria</text>
+  <text x="640" y="42" text-anchor="middle" font-family="var(--stack)" font-size="9" fill="#8a9095">~400 nm</text>
 
   <!-- ============ PLOT ============ -->
   <!-- Gridlines -->
@@ -348,13 +336,23 @@ section{
     <line x1="90" y1="430" x2="650" y2="430"/>
   </g>
 
+  <!-- Y-axis line + outward tick marks -->
+  <line x1="90" y1="150" x2="90" y2="430" stroke="#1f2327" stroke-width="1"/>
+  <g stroke="#1f2327" stroke-width="1">
+    <line x1="86" y1="150" x2="90" y2="150"/>
+    <line x1="86" y1="220" x2="90" y2="220"/>
+    <line x1="86" y1="290" x2="90" y2="290"/>
+    <line x1="86" y1="360" x2="90" y2="360"/>
+    <line x1="86" y1="430" x2="90" y2="430"/>
+  </g>
+
   <!-- Y-axis tick labels -->
   <g font-size="11" fill="#8a9095" text-anchor="end">
-    <text x="82" y="150" dominant-baseline="middle">100</text>
-    <text x="82" y="220" dominant-baseline="middle">75</text>
-    <text x="82" y="290" dominant-baseline="middle">50</text>
-    <text x="82" y="360" dominant-baseline="middle">25</text>
-    <text x="82" y="430" dominant-baseline="middle">0</text>
+    <text x="80" y="150" dominant-baseline="middle">100</text>
+    <text x="80" y="220" dominant-baseline="middle">75</text>
+    <text x="80" y="290" dominant-baseline="middle">50</text>
+    <text x="80" y="360" dominant-baseline="middle">25</text>
+    <text x="80" y="430" dominant-baseline="middle">0</text>
   </g>
 
   <!-- X-axis tick marks -->
@@ -375,8 +373,7 @@ section{
     <text x="650" y="446">604</text>
   </g>
 
-  <!-- Axis lines -->
-  <line x1="90" y1="150" x2="90" y2="430" stroke="#1f2327" stroke-width="1"/>
+  <!-- X-axis line -->
   <line x1="90" y1="430" x2="650" y2="430" stroke="#1f2327" stroke-width="1"/>
 
   <!-- Axis titles -->
@@ -435,7 +432,7 @@ section{
   <g transform="translate(90, 498)" font-family="var(--stack)">
     <line x1="0" y1="0" x2="20" y2="0" stroke="#1b7bff" stroke-width="2.5" stroke-linecap="round"/>
     <circle cx="10" cy="0" r="3" fill="#1b7bff"/>
-    <a href="#advocacy"><text x="26" y="0" font-size="11" fill="#1f2327" dominant-baseline="middle" text-decoration="underline">NanoFlashing Efficiency after Real Wildfire Smoke</text></a>
+    <text x="26" y="0" font-size="11" fill="#1f2327" dominant-baseline="middle">NanoFlashing Efficiency after Real Wildfire Smoke</text>
     <line x1="0" y1="18" x2="20" y2="18" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
     <circle cx="10" cy="18" r="2.5" fill="#edf0f2" stroke="#aab2b8" stroke-width="1.2"/>
     <a href="https://doi.org/10.1016/0360-1323(94)90033-7" target="_blank" rel="noopener"><text x="26" y="18" font-size="11" fill="#1f2327" dominant-baseline="middle" text-decoration="underline">Conventional Air Filter after Biomass Smoke</text></a>
