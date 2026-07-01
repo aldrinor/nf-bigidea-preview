@@ -438,6 +438,35 @@ body {
     bottom: 8px;
   }
 }
+
+/* wfmap_scrim_v1 — frosted panel behind story text on phones */
+@media (max-width: 880px) {
+  .chrome-top-left {
+    background: rgba(237, 240, 242, 0.86);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 16px rgba(20, 24, 28, 0.10);
+    max-width: calc(100vw - 32px);
+    left: 16px;
+    right: 16px;
+    top: 76px;
+  }
+
+  .chrome-top-left h2 {
+    text-shadow: none;
+    font-size: clamp(22px, 6vw, 28px);
+    margin-bottom: 10px;
+  }
+
+  .caption {
+    text-shadow: none;
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: none;
+  }
+}
 </style>
 </head>
 <body>
