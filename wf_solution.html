@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing — captures the smoke</title>
+<title>NanoFlashing Air Filter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -20,438 +20,585 @@
     --stack:-apple-system, system-ui, 'Space Grotesk', sans-serif;
     --mono:'Space Mono', ui-monospace, monospace;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);overflow-x:hidden;}
-  body{
+
+  *,*::before,*::after{box-sizing:border-box;}
+
+  html,body{
+    margin:0;padding:0;
+    background:var(--bg);
+    color:var(--ink);
     font-family:var(--stack);
-    font-size:17px;
-    line-height:1.5;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
   }
 
-  .section{
+  .page{
     min-height:100vh;
     display:flex;
     flex-direction:column;
-    padding:clamp(40px,5.5vh,72px) clamp(24px,6vw,96px) 0;
+    padding:48px 56px 0 56px;
   }
-  .main{
+
+  .grid{
     flex:1;
     display:grid;
     grid-template-columns:42fr 58fr;
-    gap:clamp(40px,5vw,84px);
-    align-items:center;
-    width:100%;
-    max-width:1500px;
-    margin:0 auto;
+    column-gap:64px;
+    align-items:stretch;
   }
 
-  /* LEFT */
-  .left{padding-right:clamp(8px,1vw,16px);}
+  /* LEFT COLUMN */
+  .left{
+    display:flex;
+    flex-direction:column;
+    padding-top:2px;
+  }
+
   .kicker{
     font-family:var(--mono);
-    font-size:12px;
-    letter-spacing:0.14em;
     color:var(--muted);
-    margin:0 0 18px;
-    text-transform:none;
+    font-size:11px;
+    letter-spacing:0.16em;
+    margin:0 0 14px 0;
+    line-height:1;
   }
+
   .headline{
     font-family:var(--stack);
     font-weight:600;
-    font-size:clamp(30px,3.4vw,46px);
+    font-size:clamp(30px, 3.4vw, 46px);
     line-height:1.12;
     color:var(--headline-ink);
-    margin:0 0 24px;
+    margin:0 0 40px 0;
     letter-spacing:-0.012em;
     max-width:18ch;
   }
-  .stats{display:flex;flex-direction:column;gap:18px;margin-bottom:22px;}
-  .stat{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;}
-  .stat .num{
-    font-family:var(--mono);
-    font-weight:700;
-    font-size:clamp(52px,6vw,92px);
-    line-height:1;
-    letter-spacing:-0.03em;
-  }
-  .stat.s1 .num{color:var(--accent);}
-  .stat.s2 .num{color:var(--ink);font-size:clamp(42px,4.8vw,72px);}
-  .stat .label{
-    font-family:var(--stack);
-    font-size:15px;
-    line-height:1.42;
-    color:var(--ink);
-    max-width:30ch;
-    padding-bottom:6px;
-  }
-  .mechanism{
-    font-family:var(--stack);
-    font-size:19px;
-    line-height:1.5;
-    color:var(--ink);
-    max-width:46ch;
-    margin:0 0 14px;
-  }
-  .citation{
-    font-family:var(--mono);
-    font-size:11.5px;
-    line-height:1.5;
-    color:var(--muted);
-    max-width:46ch;
-    margin:0;
+
+  .stats{
+    display:flex;
+    align-items:flex-end;
+    gap:48px;
+    margin-bottom:32px;
+    min-height:90px;
   }
 
-  /* RIGHT */
-  .right{display:flex;flex-direction:column;align-items:stretch;}
-  .figure-wrap{width:100%;}
+  .stat{display:flex;flex-direction:column;}
+
+  .stat-1 .num{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:clamp(52px, 6vw, 90px);
+    line-height:1;
+    color:var(--accent);
+    letter-spacing:-0.04em;
+    margin:0;
+  }
+  .stat-1 .num .pct{
+    font-size:0.55em;
+    font-weight:400;
+    margin-left:0.04em;
+    vertical-align:0.08em;
+    opacity:0.7;
+  }
+  .stat-1 .label{
+    font-family:var(--stack);
+    font-size:13px;
+    color:var(--ink);
+    margin-top:14px;
+    line-height:1.4;
+    max-width:24ch;
+  }
+
+  .stat-2{
+    padding-bottom:8px;
+  }
+  .stat-2 .num{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:62px;
+    line-height:1;
+    color:var(--ink);
+    letter-spacing:-0.03em;
+    margin:0;
+    display:inline-flex;
+    align-items:baseline;
+    gap:0.22em;
+  }
+  .stat-2 .num .qual{
+    font-size:0.4em;
+    color:var(--muted);
+    font-weight:400;
+    letter-spacing:0;
+  }
+  .stat-2 .num .pct{
+    font-size:0.55em;
+    font-weight:400;
+    margin-left:0.04em;
+    vertical-align:0.08em;
+    opacity:0.7;
+  }
+  .stat-2 .label{
+    font-family:var(--stack);
+    font-size:13px;
+    color:var(--ink);
+    margin-top:14px;
+    line-height:1.4;
+    max-width:24ch;
+  }
+
+  .divider{
+    height:1px;
+    background:var(--hair);
+    margin:0 0 32px 0;
+    width:100%;
+  }
+
+  .mechanism{
+    font-family:var(--stack);
+    font-size:18px;
+    line-height:1.55;
+    color:var(--ink);
+    max-width:46ch;
+    margin:0 0 24px 0;
+  }
+
+  .citation{
+    font-family:var(--mono);
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.5;
+    margin:0;
+    max-width:46ch;
+  }
+
+  /* RIGHT COLUMN */
+  .right{
+    display:flex;
+    flex-direction:column;
+    padding-top:2px;
+  }
+
   .figure-title{
     font-family:var(--mono);
-    font-size:11.5px;
-    color:var(--muted);
-    margin:0 0 14px;
-    letter-spacing:0.02em;
-    text-align:left;
+    color:var(--ink);
+    font-size:11px;
+    letter-spacing:0.16em;
+    margin:0 0 24px 0;
+    line-height:1;
   }
-  .chart-svg{width:100%;height:auto;display:block;overflow:visible;}
-  .method-caption{
+
+  .chart-wrap{
+    width:100%;
+    position:relative;
+  }
+
+  svg.chart{
+    width:100%;
+    height:auto;
+    display:block;
+    overflow:visible;
+  }
+
+  .method{
+    font-family:var(--mono);
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.5;
+    margin:20px 0 0 0;
+    max-width:60ch;
+  }
+
+  /* TOOLTIP */
+  .tooltip{
+    position:absolute;
+    pointer-events:none;
+    background:var(--ink);
+    color:#fff;
     font-family:var(--mono);
     font-size:11px;
-    color:var(--muted);
-    margin:14px 0 0;
-    line-height:1.55;
-    text-align:left;
+    padding:5px 9px;
+    border-radius:3px;
+    white-space:nowrap;
+    transform:translate(-50%, calc(-100% - 12px));
+    opacity:0;
+    transition:opacity 0.15s ease;
+    z-index:10;
+    letter-spacing:0.02em;
   }
+  .tooltip::after{
+    content:'';
+    position:absolute;
+    left:50%;
+    bottom:-4px;
+    transform:translateX(-50%);
+    border:4px solid transparent;
+    border-top-color:var(--ink);
+    border-bottom:0;
+  }
+  .tooltip.show{opacity:1;}
 
   /* BOTTOM STRIP */
   .strip{
-    width:100%;
-    max-width:1500px;
-    margin:0 auto;
-    padding:20px 0 22px;
+    margin-top:48px;
+    margin-left:-56px;
+    margin-right:-56px;
+    padding:18px 56px;
     border-top:1px solid var(--hair);
+    display:flex;
+    align-items:center;
+    gap:10px;
     font-family:var(--mono);
-    font-size:11px;
     color:var(--muted);
-    letter-spacing:0.04em;
-    text-align:center;
-  }
-
-  /* SVG bits */
-  .axis-title{font-family:var(--mono);font-size:11px;fill:var(--muted);}
-  .tick-label{font-family:var(--mono);font-size:10.5px;fill:var(--muted);}
-  .gridline{stroke:var(--hair);stroke-width:1;}
-  .baseline{stroke:var(--ink);stroke-width:1.2;}
-  .axis-line{stroke:var(--hair);stroke-width:1;}
-  .curve{
-    fill:none;
-    stroke:var(--accent);
-    stroke-width:2.5;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-  }
-  .area-fill{fill:rgba(27,123,255,0.08);}
-  .dot{fill:var(--accent);stroke:var(--bg);stroke-width:1.5;}
-  .dot-hit{fill:transparent;stroke:none;cursor:pointer;}
-  .annotation-text{font-family:var(--mono);font-size:10.5px;fill:var(--ink);}
-  .annotation-text-muted{font-family:var(--mono);font-size:10.5px;fill:var(--muted);}
-  .ref-line{stroke:var(--accent);stroke-width:1;stroke-dasharray:4 4;fill:none;}
-  .region-band{fill:rgba(27,123,255,0.07);}
-  .leader-line{stroke:var(--ink);stroke-width:0.75;opacity:0.5;}
-
-  /* Tooltip */
-  .tooltip{
-    position:fixed;
-    pointer-events:none;
-    background:#fff;
-    border:1px solid var(--hair);
-    padding:7px 11px;
-    font-family:var(--mono);
     font-size:11px;
-    color:var(--ink);
-    opacity:0;
-    transform:translate(-50%,-130%);
-    transition:opacity .14s ease;
-    white-space:nowrap;
-    z-index:50;
-    border-radius:2px;
+    line-height:1.5;
   }
-  .tooltip.show{opacity:1;}
-  .tooltip .tt-size{color:var(--muted);margin-right:8px;}
-  .tooltip .tt-val{color:var(--accent);font-weight:700;}
+  .strip .mark{
+    width:4px;
+    height:4px;
+    background:var(--accent);
+    flex-shrink:0;
+  }
 
-  /* Mobile */
-  @media (max-width:880px){
-    .section{padding:40px 22px 0;}
-    .main{
-      grid-template-columns:1fr;
-      gap:36px;
-      align-items:stretch;
-    }
-    .left{padding-right:0;}
-    .headline{margin-bottom:28px;max-width:none;}
-    .stats{margin-bottom:28px;}
-    .stat{flex-direction:row;align-items:baseline;gap:18px;}
-    .stat .num{font-size:clamp(48px,11vw,68px);}
-    .stat.s2 .num{font-size:clamp(38px,9vw,56px);}
-    .stat .label{font-size:14.5px;max-width:none;flex:1;padding-bottom:4px;}
-    .mechanism{font-size:17.5px;max-width:none;}
-    .citation{max-width:none;}
-    .method-caption{max-width:none;}
-    .strip{padding:20px 0 22px;}
+  /* ANIMATION CLASSES */
+  .blue-line{
+    stroke-dasharray:1700;
+    stroke-dashoffset:1700;
   }
-  @media (max-width:480px){
-    .stat{flex-wrap:wrap;}
-    .stat .label{flex-basis:100%;padding-bottom:0;}
+  .area-fill, .blue-dot, .grey-dot{
+    opacity:0;
+  }
+  .stat-1 .num, .stat-2 .num{
+    opacity:0;
+  }
+
+  /* MOBILE */
+  @media (max-width: 880px){
+    .page{padding:32px 24px 0 24px;}
+    .grid{
+      grid-template-columns:1fr;
+      column-gap:0;
+      row-gap:40px;
+    }
+    .left{padding-top:0;}
+    .right{padding-top:0;}
+    .headline{margin-bottom:32px;}
+    .stats{gap:32px;flex-wrap:wrap;}
+    .stat-2{padding-bottom:0;}
+    .stat-2 .num{font-size:54px;}
+    .strip{
+      margin-left:-24px;
+      margin-right:-24px;
+      padding:16px 24px;
+    }
+    .mechanism{font-size:16px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .blue-line{
+      stroke-dasharray:none;
+      stroke-dashoffset:0;
+    }
+    .area-fill, .blue-dot, .grey-dot{
+      opacity:1;
+    }
+    .stat-1 .num, .stat-2 .num{
+      opacity:1;
+    }
   }
 </style>
 </head>
 <body>
 
-<section class="section">
-  <div class="main">
-
+<div class="page">
+  <div class="grid">
     <div class="left">
-      <p class="kicker">NanoFlashing Air Filter</p>
+      <div class="kicker">NanoFlashing Air Filter</div>
       <h1 class="headline">NanoFlashing captures the smoke, down to the smallest particle.</h1>
 
       <div class="stats">
-        <div class="stat s1">
-          <span class="num" data-target="75.4" data-decimals="1">0.0%</span>
-          <span class="label">captured in a single pass — real wildfire smoke.</span>
+        <div class="stat stat-1">
+          <div class="num" id="stat1" data-target="75.4">0<span class="pct">%</span></div>
+          <div class="label">Captured in one pass — real wildfire smoke.</div>
         </div>
-        <div class="stat s2">
-          <span class="num" data-target="90" data-decimals="0" data-prefix="over ">over 0%</span>
-          <span class="label">of the ultrafine particles, 16–34 nm — the smallest, most harmful ones.</span>
+        <div class="stat stat-2">
+          <div class="num" id="stat2" data-target="90"><span class="qual">over</span>0<span class="pct">%</span></div>
+          <div class="label">Of the ultrafine 16–34 nm particles.</div>
         </div>
       </div>
 
-      <p class="mechanism">NanoFlashing gives the filter a permanent positive polarity — a fixed positive charge built into the surface. Wildfire smoke carries a negative charge, so NanoFlashing captures and retains it, by physical action. The charge is part of the surface, so it does not wear off. In a two-year aging test, it stayed at full strength.</p>
+      <div class="divider"></div>
+
+      <p class="mechanism">The filter carries a permanent positive polarity — a fixed positive charge built into its surface. Smoke is negatively charged, so NanoFlashing captures and retains it, by physical action. The charge is part of the surface, so it never wears off — a two-year aging test confirmed full strength.</p>
 
       <p class="citation">Published in a peer-reviewed ASM journal — 31 scientists across 16 research institutes.</p>
     </div>
 
     <div class="right">
-      <div class="figure-wrap">
-        <p class="figure-title">Single-pass capture of wildfire smoke, by particle size · NanoFlashing</p>
+      <div class="figure-title">Fig. 1 · Single-pass capture of wildfire smoke, by particle size</div>
 
-        <svg class="chart-svg" viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NanoFlashing single-pass capture curve by particle size">
-          <!-- 16–34 nm region band -->
-          <rect class="region-band" x="80" y="40" width="65.5" height="320"/>
+      <div class="chart-wrap" id="chartWrap">
+        <svg class="chart" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid meet" aria-label="Single-pass capture of wildfire smoke by particle size">
+          <!-- 16-34 nm band -->
+          <rect x="80" y="40" width="65.5" height="320" fill="rgba(27,123,255,0.07)"/>
 
-          <!-- Horizontal gridlines + Y tick labels -->
-          <g>
-            <line class="gridline" x1="80" y1="40"  x2="620" y2="40"/>
-            <line class="gridline" x1="80" y1="120" x2="620" y2="120"/>
-            <line class="gridline" x1="80" y1="200" x2="620" y2="200"/>
-            <line class="gridline" x1="80" y1="280" x2="620" y2="280"/>
-            <text class="tick-label" x="72" y="40"  text-anchor="end" dominant-baseline="middle">100</text>
-            <text class="tick-label" x="72" y="120" text-anchor="end" dominant-baseline="middle">75</text>
-            <text class="tick-label" x="72" y="200" text-anchor="end" dominant-baseline="middle">50</text>
-            <text class="tick-label" x="72" y="280" text-anchor="end" dominant-baseline="middle">25</text>
-            <text class="tick-label" x="72" y="360" text-anchor="end" dominant-baseline="middle">0</text>
+          <!-- Gridlines -->
+          <g stroke="rgba(20,24,28,0.06)" stroke-width="1">
+            <line x1="80" y1="40" x2="620" y2="40"/>
+            <line x1="80" y1="120" x2="620" y2="120"/>
+            <line x1="80" y1="200" x2="620" y2="200"/>
+            <line x1="80" y1="280" x2="620" y2="280"/>
           </g>
+
+          <!-- Y tick labels + left ticks -->
+          <g font-family="var(--mono)" font-size="10" fill="#828a90">
+            <line x1="76" y1="40" x2="80" y2="40" stroke="#828a90" stroke-width="1"/>
+            <text x="72" y="40" text-anchor="end" dominant-baseline="middle">100</text>
+            <line x1="76" y1="120" x2="80" y2="120" stroke="#828a90" stroke-width="1"/>
+            <text x="72" y="120" text-anchor="end" dominant-baseline="middle">75</text>
+            <line x1="76" y1="200" x2="80" y2="200" stroke="#828a90" stroke-width="1"/>
+            <text x="72" y="200" text-anchor="end" dominant-baseline="middle">50</text>
+            <line x1="76" y1="280" x2="80" y2="280" stroke="#828a90" stroke-width="1"/>
+            <text x="72" y="280" text-anchor="end" dominant-baseline="middle">25</text>
+            <line x1="76" y1="360" x2="80" y2="360" stroke="#828a90" stroke-width="1"/>
+            <text x="72" y="360" text-anchor="end" dominant-baseline="middle">0</text>
+          </g>
+
+          <!-- Y axis title (rotated) -->
+          <text x="28" y="200" font-family="var(--mono)" font-size="10" fill="#828a90" text-anchor="middle" transform="rotate(-90 28 200)">Smoke captured (%)</text>
 
           <!-- Baseline -->
-          <line class="baseline" x1="80" y1="360" x2="620" y2="360"/>
-
-          <!-- X axis line -->
-          <line class="axis-line" x1="80" y1="360" x2="620" y2="360"/>
+          <line x1="80" y1="360" x2="620" y2="360" stroke="#1f2327" stroke-width="1"/>
 
           <!-- X tick marks + labels -->
+          <g font-family="var(--mono)" font-size="10" fill="#828a90">
+            <line x1="80" y1="360" x2="80" y2="364" stroke="#828a90" stroke-width="1"/>
+            <text x="80" y="376" text-anchor="middle">16</text>
+            <line x1="145.5" y1="360" x2="145.5" y2="364" stroke="#828a90" stroke-width="1"/>
+            <text x="145.5" y="376" text-anchor="middle">34</text>
+            <line x1="323.6" y1="360" x2="323.6" y2="364" stroke="#828a90" stroke-width="1"/>
+            <text x="323.6" y="376" text-anchor="middle">100</text>
+            <line x1="481.6" y1="360" x2="481.6" y2="364" stroke="#828a90" stroke-width="1"/>
+            <text x="481.6" y="376" text-anchor="middle">300</text>
+            <line x1="620" y1="360" x2="620" y2="364" stroke="#828a90" stroke-width="1"/>
+            <text x="620" y="376" text-anchor="middle">604</text>
+          </g>
+
+          <!-- X axis title -->
+          <text x="350" y="398" font-family="var(--mono)" font-size="10" fill="#828a90" text-anchor="middle">Particle size (nm)</text>
+
+          <!-- 75.4% average reference line (dotted, different from grey dashed) -->
+          <line x1="80" y1="118.7" x2="620" y2="118.7" stroke="rgba(20,24,28,0.28)" stroke-width="1" stroke-dasharray="1 4"/>
+          <text x="616" y="113" font-family="var(--mono)" font-size="10" fill="#828a90" text-anchor="end">75.4% average</text>
+
+          <!-- GREY reference line (ordinary filter) - drawn BEFORE blue -->
+          <path class="grey-line" d="M 80,344 L 103.3,344 L 145.5,340.8 L 186.7,337.6 L 244.9,334.4 L 323.6,334.4 L 402.3,334.4 L 481.6,331.2 L 560.9,331.2 L 620,328"
+                stroke="#aab2b8" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+
+          <!-- Grey hollow dots -->
+          <g class="grey-dots" fill="none" stroke="#aab2b8" stroke-width="1.2">
+            <circle cx="80" cy="344" r="2.5"/>
+            <circle cx="103.3" cy="344" r="2.5"/>
+            <circle cx="145.5" cy="340.8" r="2.5"/>
+            <circle cx="186.7" cy="337.6" r="2.5"/>
+            <circle cx="244.9" cy="334.4" r="2.5"/>
+            <circle cx="323.6" cy="334.4" r="2.5"/>
+            <circle cx="402.3" cy="334.4" r="2.5"/>
+            <circle cx="481.6" cy="331.2" r="2.5"/>
+            <circle cx="560.9" cy="331.2" r="2.5"/>
+            <circle cx="620" cy="328" r="2.5"/>
+          </g>
+
+          <!-- BLUE area fill under curve -->
+          <path class="area-fill" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112 L 620,360 L 80,360 Z"
+                fill="rgba(27,123,255,0.08)"/>
+
+          <!-- BLUE NanoFlashing curve (hero) - drawn LAST, on top -->
+          <path class="blue-line" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112"
+                stroke="#1b7bff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Blue data dots with white stroke -->
+          <g class="blue-dots" fill="#1b7bff" stroke="#edf0f2" stroke-width="2">
+            <circle class="data-dot" cx="80" cy="52.8" r="3.5" data-nm="16" data-pct="96"/>
+            <circle class="data-dot" cx="103.3" cy="62.4" r="3.5" data-nm="24" data-pct="93"/>
+            <circle class="data-dot" cx="145.5" cy="72" r="3.5" data-nm="34" data-pct="90"/>
+            <circle class="data-dot" cx="186.7" cy="92" r="3.5" data-nm="50" data-pct="85"/>
+            <circle class="data-dot" cx="244.9" cy="118.4" r="3.5" data-nm="80" data-pct="77"/>
+            <circle class="data-dot" cx="323.6" cy="154.4" r="3.5" data-nm="120" data-pct="68"/>
+            <circle class="data-dot" cx="402.3" cy="183.2" r="3.5" data-nm="180" data-pct="62"/>
+            <circle class="data-dot" cx="481.6" cy="179.2" r="3.5" data-nm="260" data-pct="63"/>
+            <circle class="data-dot" cx="560.9" cy="144" r="3.5" data-nm="380" data-pct="72"/>
+            <circle class="data-dot" cx="620" cy="112" r="3.5" data-nm="500" data-pct="80"/>
+          </g>
+
+          <!-- "over 90% captured" annotation with leader line -->
           <g>
-            <line class="axis-line" x1="80"    y1="360" x2="80"    y2="364"/>
-            <line class="axis-line" x1="145.5" y1="360" x2="145.5" y2="364"/>
-            <line class="axis-line" x1="323.6" y1="360" x2="323.6" y2="364"/>
-            <line class="axis-line" x1="481.6" y1="360" x2="481.6" y2="364"/>
-            <line class="axis-line" x1="620"   y1="360" x2="620"   y2="364"/>
-            <text class="tick-label" x="80"    y="375" text-anchor="middle">16</text>
-            <text class="tick-label" x="145.5" y="375" text-anchor="middle">34</text>
-            <text class="tick-label" x="323.6" y="375" text-anchor="middle">100</text>
-            <text class="tick-label" x="481.6" y="375" text-anchor="middle">300</text>
-            <text class="tick-label" x="620"   y="375" text-anchor="middle">604</text>
-          </g>
-
-          <!-- Axis titles -->
-          <text class="axis-title" x="350" y="402" text-anchor="middle">Particle size (nm)</text>
-          <text class="axis-title" transform="translate(26,200) rotate(-90)" text-anchor="middle">Smoke captured (%)</text>
-
-          <!-- 75.4% reference line -->
-          <line class="ref-line" x1="80" y1="118.7" x2="620" y2="118.7"/>
-          <text class="annotation-text" x="350" y="112" text-anchor="middle">75.4% average</text>
-
-          <!-- 16–34 nm annotation -->
-          <text class="annotation-text" x="112.8" y="135" text-anchor="middle">over 90% captured</text>
-          <line class="leader-line" x1="112.8" y1="138" x2="112.8" y2="72"/>
-
-          <!-- Ordinary electret filter reference (Lehtimäki & Heinonen, 1994) -->
-          <g id="refFilter">
-            <path d="M 80,344 L 103.3,344 L 145.5,340.8 L 186.7,337.6 L 244.9,334.4 L 323.6,334.4 L 402.3,334.4 L 481.6,331.2 L 560.9,331.2 L 620,328" stroke="#aab2b8" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
-            <circle cx="80"    cy="344"   r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="103.3" cy="344"   r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="145.5" cy="340.8" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="186.7" cy="337.6" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="244.9" cy="334.4" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="323.6" cy="334.4" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="402.3" cy="334.4" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="481.6" cy="331.2" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="560.9" cy="331.2" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-            <circle cx="620"   cy="328"   r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
-          </g>
-
-          <!-- Area fill -->
-          <path class="area-fill" id="areaFill" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112 L 620,360 L 80,360 Z" style="opacity:0;"/>
-
-          <!-- Curve -->
-          <path class="curve" id="curve" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112"/>
-
-          <!-- Dots -->
-          <g id="dots" style="opacity:0;">
-            <circle class="dot" cx="80"    cy="52.8"  r="4"/>
-            <circle class="dot" cx="103.3" cy="62.4"  r="4"/>
-            <circle class="dot" cx="145.5" cy="72"    r="4"/>
-            <circle class="dot" cx="186.7" cy="92"    r="4"/>
-            <circle class="dot" cx="244.9" cy="118.4" r="4"/>
-            <circle class="dot" cx="323.6" cy="154.4" r="4"/>
-            <circle class="dot" cx="402.3" cy="183.2" r="4"/>
-            <circle class="dot" cx="481.6" cy="179.2" r="4"/>
-            <circle class="dot" cx="560.9" cy="144"   r="4"/>
-            <circle class="dot" cx="620"   cy="112"   r="4"/>
-
-            <!-- Invisible hit targets for tooltip -->
-            <circle class="dot-hit" cx="80"    cy="52.8"  r="14" data-size="16"  data-val="96"/>
-            <circle class="dot-hit" cx="103.3" cy="62.4"  r="14" data-size="24"  data-val="93"/>
-            <circle class="dot-hit" cx="145.5" cy="72"    r="14" data-size="34"  data-val="90"/>
-            <circle class="dot-hit" cx="186.7" cy="92"    r="14" data-size="50"  data-val="85"/>
-            <circle class="dot-hit" cx="244.9" cy="118.4" r="14" data-size="80"  data-val="77"/>
-            <circle class="dot-hit" cx="323.6" cy="154.4" r="14" data-size="120" data-val="68"/>
-            <circle class="dot-hit" cx="402.3" cy="183.2" r="14" data-size="180" data-val="62"/>
-            <circle class="dot-hit" cx="481.6" cy="179.2" r="14" data-size="260" data-val="63"/>
-            <circle class="dot-hit" cx="560.9" cy="144"   r="14" data-size="380" data-val="72"/>
-            <circle class="dot-hit" cx="620"   cy="112"   r="14" data-size="500" data-val="80"/>
+            <line x1="153" y1="55" x2="129" y2="66" stroke="#1f2327" stroke-width="1"/>
+            <text x="158" y="52" font-family="var(--mono)" font-size="10" fill="#1f2327" text-anchor="start">over 90% captured</text>
           </g>
 
           <!-- Legend -->
-          <g id="legend" font-family="Space Mono" font-size="10" fill="#1f2327">
-            <line x1="430" y1="258" x2="452" y2="258" stroke="#1b7bff" stroke-width="2.5"/>
-            <text x="458" y="258" dominant-baseline="middle">NanoFlashing</text>
-            <line x1="430" y1="278" x2="452" y2="278" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
-            <text x="458" y="278" dominant-baseline="middle">ordinary filter, after smoke</text>
-            <text x="430" y="293" font-family="Space Mono" font-size="8.5" fill="#828a90">ordinary-filter data: Lehtimäki &amp; Heinonen, 1994</text>
+          <g>
+            <!-- Row 1: NanoFlashing -->
+            <line x1="408" y1="258" x2="432" y2="258" stroke="#1b7bff" stroke-width="2.5"/>
+            <text x="438" y="258" font-family="var(--mono)" font-size="10" fill="#1f2327" dominant-baseline="middle">NanoFlashing</text>
+
+            <!-- Row 2: ordinary filter -->
+            <line x1="408" y1="278" x2="432" y2="278" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <text x="438" y="278" font-family="var(--mono)" font-size="10" fill="#1f2327" dominant-baseline="middle">ordinary filter, after smoke</text>
+
+            <!-- Source note -->
+            <text x="408" y="296" font-family="var(--mono)" font-size="8.5" fill="#828a90">Lehtimaki &amp; Heinonen, 1994</text>
           </g>
         </svg>
 
-        <p class="method-caption">Independent lab test · real pine-needle wildfire smoke · one pass · measured 16–604 nm · method available on request.</p>
+        <div class="tooltip" id="tooltip"></div>
       </div>
-    </div>
 
+      <p class="method">Independent lab test · real pine-needle wildfire smoke · one pass · measured 16–604 nm · method available on request.</p>
+    </div>
   </div>
 
-  <div class="strip">Proven in 441 facilities across 7 countries since 2020 · independently measured.</div>
-</section>
-
-<div class="tooltip" id="tooltip">
-  <span class="tt-size"></span><span class="tt-val"></span>
+  <div class="strip">
+    <span class="mark"></span>
+    <span>Proven in 441 facilities across 7 countries since 2020 · independently measured.</span>
+  </div>
 </div>
 
 <script>
-(function(){
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const curve = document.getElementById('curve');
-  const area  = document.getElementById('areaFill');
-  const dots  = document.getElementById('dots');
-  const stats = document.querySelectorAll('.stat .num');
+  (function(){
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function showFinal(){
-    curve.style.strokeDashoffset = 0;
-    area.style.opacity = 1;
-    dots.style.opacity = 1;
-    stats.forEach(el => {
-      const target = parseFloat(el.dataset.target);
-      const dec = parseInt(el.dataset.decimals || '0', 10);
-      const prefix = el.dataset.prefix || '';
-      el.textContent = prefix + target.toFixed(dec) + '%';
-    });
-  }
-
-  function animate(){
-    // Curve draw
-    const len = curve.getTotalLength();
-    curve.style.strokeDasharray = len;
-    curve.style.strokeDashoffset = len;
-    curve.getBoundingClientRect();
-    curve.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
-    requestAnimationFrame(() => { curve.style.strokeDashoffset = 0; });
-
-    // Area fade
-    area.style.transition = 'opacity 0.7s ease 0.55s';
-    setTimeout(() => { area.style.opacity = 1; }, 50);
-
-    // Dots fade
-    dots.style.transition = 'opacity 0.5s ease 1.15s';
-    setTimeout(() => { dots.style.opacity = 1; }, 50);
-
-    // Stat counters
-    stats.forEach(el => {
-      const target = parseFloat(el.dataset.target);
-      const dec = parseInt(el.dataset.decimals || '0', 10);
-      const prefix = el.dataset.prefix || '';
+    // ---- Count-up for stat numbers ----
+    function countUp(el, target, duration){
       const start = performance.now();
-      const dur = 1500;
-      function tick(now){
-        const t = Math.min(1, (now - start) / dur);
+      const isFloat = !Number.isInteger(target);
+      const pctNode = el.querySelector('.pct');
+      const qualNode = el.querySelector('.qual');
+      const qualHtml = qualNode ? qualNode.outerHTML : '';
+
+      function frame(now){
+        const t = Math.min((now - start) / duration, 1);
         const eased = 1 - Math.pow(1 - t, 3);
         const v = target * eased;
-        el.textContent = prefix + v.toFixed(dec) + '%';
-        if (t < 1) requestAnimationFrame(tick);
-        else el.textContent = prefix + target.toFixed(dec) + '%';
+        const display = isFloat ? v.toFixed(1) : Math.round(v).toString();
+        el.innerHTML = qualHtml + display + '<span class="pct">%</span>';
+        if(t < 1) requestAnimationFrame(frame);
       }
-      requestAnimationFrame(tick);
-    });
-  }
+      requestAnimationFrame(frame);
+    }
 
-  // Tooltip
-  const tooltip = document.getElementById('tooltip');
-  const ttSize = tooltip.querySelector('.tt-size');
-  const ttVal  = tooltip.querySelector('.tt-val');
-  const hits = document.querySelectorAll('.dot-hit');
+    // ---- SVG line draw animation ----
+    function animateLine(path, duration){
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+      path.getBoundingClientRect();
+      path.style.transition = 'stroke-dashoffset ' + duration + 'ms cubic-bezier(0.4, 0, 0.2, 1)';
+      requestAnimationFrame(() => {
+        path.style.strokeDashoffset = '0';
+      });
+    }
 
-  hits.forEach(h => {
-    h.addEventListener('mouseenter', () => {
-      ttSize.textContent = h.dataset.size + ' nm  ·';
-      ttVal.textContent  = h.dataset.val + '%';
-      tooltip.classList.add('show');
-    });
-    h.addEventListener('mousemove', e => {
-      tooltip.style.left = e.clientX + 'px';
-      tooltip.style.top  = e.clientY + 'px';
-    });
-    h.addEventListener('mouseleave', () => {
-      tooltip.classList.remove('show');
-    });
-  });
+    function fadeIn(el, delay, duration){
+      el.style.transition = 'opacity ' + duration + 'ms ease';
+      el.style.transitionDelay = delay + 'ms';
+      requestAnimationFrame(() => { el.style.opacity = '1'; });
+    }
 
-  // Trigger
-  if (reduce){
-    showFinal();
-  } else {
-    const sec = document.querySelector('.section');
-    if ('IntersectionObserver' in window){
+    function runIntro(){
+      const stat1 = document.getElementById('stat1');
+      const stat2 = document.getElementById('stat2');
+      const blueLine = document.querySelector('.blue-line');
+      const areaFill = document.querySelector('.area-fill');
+      const blueDots = document.querySelectorAll('.blue-dot, .blue-dots circle');
+      const greyDots = document.querySelectorAll('.grey-dot, .grey-dots circle');
+
+      if(reduceMotion){
+        // Static final state
+        stat1.innerHTML = '75.4<span class="pct">%</span>';
+        stat2.innerHTML = '<span class="qual">over</span>90<span class="pct">%</span>';
+        stat1.style.opacity = '1';
+        stat2.style.opacity = '1';
+        blueLine.style.strokeDasharray = 'none';
+        blueLine.style.strokeDashoffset = '0';
+        areaFill.style.opacity = '1';
+        blueDots.forEach(d => d.style.opacity = '1');
+        greyDots.forEach(d => d.style.opacity = '1');
+        return;
+      }
+
+      // Animate blue line drawing
+      animateLine(blueLine, 1400);
+
+      // Fade in area fill + dots after line draws
+      fadeIn(areaFill, 1100, 500);
+      blueDots.forEach((d, i) => {
+        d.style.transition = 'opacity 400ms ease';
+        d.style.transitionDelay = (1150 + i * 60) + 'ms';
+        requestAnimationFrame(() => { d.style.opacity = '1'; });
+      });
+      greyDots.forEach((d) => {
+        d.style.transition = 'opacity 400ms ease';
+        d.style.transitionDelay = '200ms';
+        requestAnimationFrame(() => { d.style.opacity = '1'; });
+      });
+
+      // Count up numbers
+      const t1 = parseFloat(stat1.dataset.target);
+      const t2 = parseInt(stat2.dataset.target, 10);
+      stat1.style.opacity = '1';
+      stat2.style.opacity = '1';
+      countUp(stat1, t1, 1400);
+      countUp(stat2, t2, 1400);
+    }
+
+    // Trigger on view
+    const section = document.querySelector('.page');
+    if('IntersectionObserver' in window){
       const io = new IntersectionObserver((entries) => {
-        entries.forEach(en => {
-          if (en.isIntersecting){
-            animate();
+        entries.forEach(e => {
+          if(e.isIntersecting){
+            runIntro();
             io.disconnect();
           }
         });
-      }, { threshold: 0.25 });
-      io.observe(sec);
+      }, { threshold: 0.15 });
+      io.observe(section);
     } else {
-      animate();
+      runIntro();
     }
-  }
-})();
+
+    // ---- Tooltip on blue data points ----
+    const tooltip = document.getElementById('tooltip');
+    const chartWrap = document.getElementById('chartWrap');
+    const dots = document.querySelectorAll('.data-dot');
+
+    dots.forEach(dot => {
+      dot.style.cursor = 'pointer';
+      dot.addEventListener('mouseenter', () => {
+        const nm = dot.dataset.nm;
+        const pct = dot.dataset.pct;
+        tooltip.textContent = nm + ' nm · ' + pct + '%';
+        tooltip.classList.add('show');
+        positionTooltip(dot);
+      });
+      dot.addEventListener('mousemove', () => positionTooltip(dot));
+      dot.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('show');
+      });
+    });
+
+    function positionTooltip(dot){
+      const wrapRect = chartWrap.getBoundingClientRect();
+      const dotRect = dot.getBoundingClientRect();
+      const x = dotRect.left + dotRect.width / 2 - wrapRect.left;
+      const y = dotRect.top + dotRect.height / 2 - wrapRect.top;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    }
+  })();
 </script>
+
 </body>
 </html>
