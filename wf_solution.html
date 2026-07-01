@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures the smoke, down to the smallest particle</title>
+<title>NanoFlashing captures the smoke</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -53,22 +53,14 @@ section{
   padding-right:24px;
 }
 
-.kicker{
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:0.08em;
-  color:var(--muted);
-  margin-bottom:18px;
-}
-
 .headline{
   font-family:var(--stack);
   font-weight:600;
   color:var(--headline-ink);
-  font-size:clamp(26px, 2.6vw, 40px);
+  font-size:clamp(28px, 2.8vw, 42px);
   line-height:1.15;
   letter-spacing:-0.022em;
-  margin-bottom:26px;
+  margin-bottom:30px;
 }
 .headline em{
   color:var(--accent);
@@ -76,107 +68,102 @@ section{
   font-weight:600;
 }
 
-/* === Stat row === */
-.stat-row{
+/* === Stats row === */
+.stats-row{
   display:flex;
-  gap:40px;
-  margin-bottom:22px;
   align-items:flex-start;
+  gap:clamp(20px, 2.4vw, 36px);
+  margin-bottom:26px;
+  flex-wrap:wrap;
 }
 .stat{
   display:flex;
   flex-direction:column;
-  gap:6px;
+  align-items:flex-start;
 }
 .stat .num{
-  font-family:var(--mono);
+  font-family:var(--stack);
   font-weight:700;
-  font-size:clamp(22px, 2.2vw, 30px);
-  line-height:1;
-  letter-spacing:-0.02em;
-  color:var(--ink);
+  font-size:clamp(40px, 4.6vw, 72px);
+  line-height:0.95;
+  letter-spacing:-0.03em;
   font-variant-numeric:tabular-nums;
 }
-.stat .num .pct{
-  font-size:0.7em;
-  margin-left:1px;
+.stat.primary .num{
+  color:var(--accent);
 }
-.stat.accent .num{ color:var(--accent); }
-.stat .num .over{
-  font-family:var(--mono);
-  font-weight:400;
-  font-size:0.6em;
-  color:var(--muted);
-  margin-right:4px;
-  vertical-align:0.18em;
-}
-.stat .lbl{
-  font-family:var(--mono);
-  font-size:10.5px;
-  line-height:1.4;
-  color:var(--muted);
-  max-width:22ch;
-  letter-spacing:0.01em;
-}
-
-/* === Body paragraph === */
-.body-text{
-  max-width:44ch;
-  font-size:clamp(15px, 1.05vw, 17px);
-  line-height:1.5;
-  margin-bottom:16px;
+.stat.secondary .num{
   color:var(--ink);
+  font-size:clamp(32px, 3.4vw, 52px);
+}
+.stat.secondary .num .over{
+  color:var(--muted);
+  font-size:0.5em;
+  font-weight:700;
+  margin-right:0.18em;
+  letter-spacing:0;
+}
+.stat .cap{
+  font-family:var(--stack);
+  font-size:15px;
+  line-height:1.4;
+  color:var(--ink);
+  max-width:24ch;
+  margin-top:10px;
 }
 
-.source{
-  font-family:var(--mono);
-  font-size:10.5px;
+/* === Mechanism paragraph === */
+.mechanism{
+  font-family:var(--stack);
+  font-size:17px;
   line-height:1.5;
+  color:var(--ink);
+  max-width:44ch;
+  margin-bottom:18px;
+}
+
+/* === Source line === */
+.source{
+  font-family:var(--stack);
+  font-size:13px;
+  line-height:1.45;
   color:var(--muted);
-  letter-spacing:0.01em;
-  max-width:46ch;
+  max-width:48ch;
 }
 
 /* === Chart column === */
 .chart-col{
   position:relative;
-  z-index:3;
+  z-index:2;
   width:56%;
-  height:100%;
+  height:100vh;
   display:flex;
   flex-direction:column;
+  align-items:center;
   justify-content:center;
-  align-items:stretch;
-  padding:clamp(24px, 4vh, 48px) clamp(24px, 4vw, 64px) clamp(20px, 3vh, 36px);
+  padding:clamp(20px, 3vh, 40px) clamp(20px, 2vw, 40px) clamp(16px, 2.4vh, 28px);
 }
-
 .chart-frame{
   position:relative;
-  flex:1 1 auto;
-  min-height:0;
+  width:100%;
+  max-width:640px;
+  height:100%;
+  max-height:min(70vh, 560px);
   border:1px solid rgba(20,24,28,0.06);
+  border-radius:2px;
   background:rgba(255,255,255,0.35);
-  padding:14px;
   display:flex;
   align-items:center;
   justify-content:center;
+  overflow:hidden;
 }
-.chart-frame > svg,
-.chart-frame > img{
-  max-width:100%;
-  max-height:100%;
-  width:auto;
-  height:auto;
-  display:block;
-}
-
-.caption{
-  font-family:var(--mono);
-  font-size:10.5px;
+.chart-caption{
+  font-family:var(--stack);
+  font-size:12px;
   color:var(--muted);
-  margin-top:12px;
-  text-align:left;
-  letter-spacing:0.01em;
+  margin-top:14px;
+  text-align:center;
+  line-height:1.4;
 }
 
 /* === Mobile === */
@@ -184,33 +171,54 @@ section{
   section{
     flex-direction:column;
     justify-content:center;
-    padding:14px 0;
+    overflow:hidden;
   }
   .text-col{
     width:100%;
     max-width:none;
-    padding-left:clamp(20px, 6vw, 28px);
-    padding-right:clamp(20px, 6vw, 28px);
+    padding-left:clamp(20px, 6vw, 32px);
+    padding-right:clamp(20px, 6vw, 32px);
+    padding-top:3vh;
+    padding-bottom:1vh;
   }
-  .kicker{ margin-bottom:10px; }
-  .headline{ margin-bottom:14px; }
-  .stat-row{
-    gap:24px;
-    margin-bottom:12px;
+  .headline{
+    font-size:clamp(22px, 5.4vw, 30px);
+    margin-bottom:14px;
   }
-  .body-text{ margin-bottom:10px; }
+  .stats-row{
+    gap:18px;
+    margin-bottom:14px;
+  }
+  .stat .num{ font-size:34px; }
+  .stat.secondary .num{ font-size:26px; }
+  .stat .cap{ font-size:13px; max-width:none; }
+  .mechanism{ font-size:14px; max-width:none; margin-bottom:10px; }
+  .source{ font-size:11px; max-width:none; }
   .chart-col{
     width:100%;
     height:auto;
-    flex:0 0 auto;
-    padding:0 clamp(20px, 6vw, 28px);
-    margin-top:6px;
+    flex:0 1 auto;
+    padding:6px 16px 14px;
   }
   .chart-frame{
-    height:30vh;
-    min-height:160px;
+    max-height:34vh;
+    max-width:100%;
   }
-  .caption{ margin-top:8px; }
+  .chart-caption{ font-size:11px; margin-top:8px; }
+}
+
+@media (max-width: 880px) and (max-height: 680px){
+  .text-col{ padding-top:2vh; }
+  .headline{ margin-bottom:10px; }
+  .stats-row{ margin-bottom:10px; }
+  .mechanism{ margin-bottom:8px; }
+}
+
+@media (max-height: 700px) and (min-width: 881px){
+  .headline{ margin-bottom:22px; }
+  .stats-row{ margin-bottom:20px; }
+  .mechanism{ font-size:16px; margin-bottom:14px; }
+  .chart-frame{ max-height:min(66vh, 480px); }
 }
 </style>
 </head>
@@ -218,23 +226,22 @@ section{
 
 <section id="section">
   <div class="text-col">
-    <div class="kicker">NanoFlashing Air Filter</div>
     <h1 class="headline">
       NanoFlashing <em>captures</em> the smoke, down to the smallest particle.
     </h1>
 
-    <div class="stat-row">
-      <div class="stat accent">
-        <div class="num">75.4<span class="pct">%</span></div>
-        <div class="lbl">captured in one pass, real wildfire smoke</div>
+    <div class="stats-row">
+      <div class="stat primary">
+        <div class="num">75.4%</div>
+        <div class="cap">captured in one pass, real wildfire smoke</div>
       </div>
-      <div class="stat">
-        <div class="num"><span class="over">over</span>90<span class="pct">%</span></div>
-        <div class="lbl">of the ultrafine 16–34 nm particles</div>
+      <div class="stat secondary">
+        <div class="num"><span class="over">over</span>90%</div>
+        <div class="cap">of the ultrafine 16–34 nm particles</div>
       </div>
     </div>
 
-    <p class="body-text">
+    <p class="mechanism">
       NanoFlashing builds a permanent positive polarity — a fixed positive charge — into the filter surface. Smoke is negatively charged, so it is captured and retained by physical action, and the charge never wears off (full strength after a two-year aging test).
     </p>
 
@@ -359,7 +366,7 @@ section{
           </g>
         </svg>
     </div>
-    <div class="caption">fig. 01 — single-pass capture · real wildfire smoke</div>
+    <div class="chart-caption">fig. 01 — single-pass capture, real wildfire smoke</div>
   </div>
 </section>
 
