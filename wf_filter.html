@@ -64,11 +64,84 @@ section{
 .video-stack.reduced video{ opacity:0 !important; }
 .video-stack.reduced img.poster{ opacity:1; }
 
+/* === Drifting grey smoke overlay === */
+.smoke{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,1) 100%);
+  mask-image:linear-gradient(to right, transparent 0%, transparent 30%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,1) 100%);
+}
+.smoke span{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  filter:blur(50px);
+  mix-blend-mode:normal;
+  will-change:transform, opacity;
+}
+.smoke .s1{
+  width:70vw; height:65vh;
+  top:-15vh; right:-12vw;
+  background:radial-gradient(circle at 50% 50%, rgba(208,212,216,0.85), rgba(208,212,216,0.45) 50%, transparent 75%);
+  animation:drift1 24s ease-in-out infinite;
+}
+.smoke .s2{
+  width:60vw; height:60vh;
+  top:15vh; right:-6vw;
+  background:radial-gradient(circle at 50% 50%, rgba(216,220,224,0.8), rgba(216,220,224,0.4) 55%, transparent 78%);
+  animation:drift2 32s ease-in-out infinite;
+}
+.smoke .s3{
+  width:50vw; height:50vh;
+  top:45vh; right:4vw;
+  background:radial-gradient(circle at 50% 50%, rgba(200,205,210,0.75), rgba(200,205,210,0.35) 55%, transparent 80%);
+  animation:drift3 28s ease-in-out infinite;
+}
+.smoke .s4{
+  width:40vw; height:45vh;
+  top:5vh; right:22vw;
+  background:radial-gradient(circle at 50% 50%, rgba(222,225,229,0.7), rgba(222,225,229,0.3) 60%, transparent 82%);
+  animation:drift4 38s ease-in-out infinite;
+}
+@keyframes drift1{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+  35%  { transform:translate3d(-8vw,4vh,0) scale(1.1); opacity:1; }
+  70%  { transform:translate3d(-4vw,-3vh,0) scale(1.05); opacity:0.7; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+}
+@keyframes drift2{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+  30%  { transform:translate3d(-6vw,-4vh,0) scale(1.12); opacity:0.95; }
+  65%  { transform:translate3d(-10vw,3vh,0) scale(1.06); opacity:0.6; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+}
+@keyframes drift3{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+  40%  { transform:translate3d(-7vw,-5vh,0) scale(1.14); opacity:0.9; }
+  75%  { transform:translate3d(-3vw,4vh,0) scale(1.08); opacity:0.5; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+}
+@keyframes drift4{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+  50%  { transform:translate3d(-9vw,3vh,0) scale(1.1); opacity:0.85; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+}
+@media (prefers-reduced-motion: reduce){
+  .smoke span{ animation:none !important; }
+  .smoke .s1{ opacity:0.8; transform:translate3d(-4vw,0,0); }
+  .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
+  .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
+  .smoke .s4{ opacity:0.55; }
+}
+
 /* === Left readability scrim === */
 .scrim{
   position:absolute;
   inset:0;
-  z-index:1;
+  z-index:2;
   pointer-events:none;
   background:linear-gradient(to right,
     var(--bg) 0%,
@@ -80,7 +153,7 @@ section{
 /* === Text column === */
 .text-col{
   position:relative;
-  z-index:2;
+  z-index:3;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -202,15 +275,22 @@ section{
 
 <section id="section">
   <div class="video-stack" id="videoStack">
-    <video id="videoA" src="assets/videos/filter_fibers.mp4"
-           poster="assets/videos/posters/filter_fibers.jpg"
+    <video id="videoA" src="assets/videos/filter_media_v2.mp4"
+           poster="assets/videos/posters/filter_media_v2.jpg"
            autoplay loop muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
-    <video id="videoB" src="assets/videos/filter_fibers.mp4"
-           poster="assets/videos/posters/filter_fibers.jpg"
+    <video id="videoB" src="assets/videos/filter_media_v2.mp4"
+           poster="assets/videos/posters/filter_media_v2.jpg"
            autoplay loop muted playsinline preload="auto"
            style="opacity:0; z-index:2;"></video>
-    <img class="poster" src="assets/videos/posters/filter_fibers.jpg" alt="">
+    <img class="poster" src="assets/videos/posters/filter_media_v2.jpg" alt="">
+  </div>
+
+  <div class="smoke" aria-hidden="true">
+    <span class="s1"></span>
+    <span class="s2"></span>
+    <span class="s3"></span>
+    <span class="s4"></span>
   </div>
 
   <div class="scrim"></div>
