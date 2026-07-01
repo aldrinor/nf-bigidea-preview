@@ -298,7 +298,7 @@ section{
 
   <div class="chart-col">
     <div class="chart-container">
-      <svg viewBox="0 0 680 500" xmlns="http://www.w3.org/2000/svg" font-family="var(--stack), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" text-rendering="geometricPrecision">
+      <svg viewBox="0 0 680 528" xmlns="http://www.w3.org/2000/svg" font-family="var(--stack), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" text-rendering="geometricPrecision">
   <defs>
     <clipPath id="clip-wildfire"><circle cx="231" cy="68" r="16"/></clipPath>
     <clipPath id="clip-virus"><circle cx="370" cy="68" r="16"/></clipPath>
@@ -396,16 +396,15 @@ section{
 
   <!-- 16-34 nm shaded zone -->
   <rect x="90" y="150" width="114" height="280" fill="rgba(27,123,255,0.06)"/>
-  <text x="147" y="166" text-anchor="middle" font-size="9" fill="#1b7bff" font-weight="600">&gt;90% captured</text>
+  <text x="147" y="156" text-anchor="middle" font-size="9" fill="#1b7bff" font-weight="600">&gt;90% Captured</text>
 
   <!-- 75.4% average dotted line -->
   <line x1="90" y1="219" x2="650" y2="219" stroke="#1f2327" stroke-width="1" stroke-dasharray="1 3" opacity="0.5"/>
-  <text x="440" y="213" text-anchor="middle" font-size="9" fill="#8a9095">75.4% average</text>
+  <text x="440" y="213" text-anchor="middle" font-size="9" fill="#8a9095">75.4% Average</text>
 
   <!-- HEPA reference at 300 nm -->
   <line x1="537" y1="150" x2="537" y2="430" stroke="rgba(20,24,28,0.35)" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="533" y="300" text-anchor="end" font-size="9" fill="#1f2327" font-weight="600">HEPA rated at 0.3 µm</text>
-  <text x="533" y="312" text-anchor="end" font-size="9" fill="#8a9095">its hardest size — far bigger than these ultrafine threats</text>
+  <text x="533" y="300" text-anchor="end" font-size="9" fill="#1f2327" font-weight="600">HEPA Rated Only at 0.3 µm / 300 nm</text>
 
   <!-- Ordinary filter (dashed grey reference) -->
   <path d="M 90 416 L 120 416 L 204 413 L 251 410 L 314 408 L 370 408 L 422 408 L 486 405 L 537 405 L 590 402 L 650 402"
@@ -444,20 +443,16 @@ section{
   </g>
 
   <!-- Legend -->
-  <g transform="translate(90, 492)">
-    <line x1="0" y1="-4" x2="20" y2="-4" stroke="#1b7bff" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="10" cy="-4" r="3" fill="#1b7bff"/>
-    <text x="26" y="-4" font-size="11" fill="#1f2327" dominant-baseline="middle">NanoFlashing</text>
-    
-    <line x1="140" y1="-4" x2="160" y2="-4" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <circle cx="150" cy="-4" r="2.5" fill="#edf0f2" stroke="#aab2b8" stroke-width="1.2"/>
-    <text x="166" y="-4" font-size="11" fill="#1f2327" dominant-baseline="middle">Ordinary filter, after smoke</text>
-    
-    <text x="320" y="-4" font-size="9" fill="#8a9095" dominant-baseline="middle">Lehtimaki &amp; Heinonen, 1994</text>
+  <g transform="translate(90, 498)" font-family="var(--stack)">
+    <line x1="0" y1="0" x2="20" y2="0" stroke="#1b7bff" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="10" cy="0" r="3" fill="#1b7bff"/>
+    <a href="#advocacy"><text x="26" y="0" font-size="11" fill="#1f2327" dominant-baseline="middle" text-decoration="underline">NanoFlashing Efficiency after Real Wildfire Smoke</text></a>
+    <line x1="0" y1="18" x2="20" y2="18" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="10" cy="18" r="2.5" fill="#edf0f2" stroke="#aab2b8" stroke-width="1.2"/>
+    <a href="https://doi.org/10.1016/0360-1323(94)90033-7" target="_blank" rel="noopener"><text x="26" y="18" font-size="11" fill="#1f2327" dominant-baseline="middle" text-decoration="underline">Conventional Air Filter after Biomass Smoke</text></a>
   </g>
 </svg>
     </div>
-    <p class="chart-caption">after smoke, NanoFlashing keeps its charge; an ordinary filter has lost it.</p>
   </div>
 </section>
 
