@@ -363,6 +363,23 @@
     .hotspot::after{animation:none}
     .card-inner{transition:opacity .2s ease}
   }
+
+/* wfhealth_landscape_v1 — landscape-phone 2-col */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+   .grid{ grid-template-columns:46% 54%; align-items:center; }
+   .left{ order:1; max-height:100vh; overflow-y:auto; padding:10px clamp(16px,4vw,30px);
+          justify-content:flex-start; }
+   .right{ order:2; position:relative; height:100vh; max-height:100vh; }
+   .figure{ height:100%; }
+   h1.headline{ font-size:clamp(16px,2.8vw,21px); line-height:1.15; margin:8px 0 8px; max-width:none; }
+   .card{ min-height:0; }
+   .card-name{ font-size:clamp(16px,2vw,20px); margin-bottom:6px; }
+   .card-intro{ font-size:13px; line-height:1.45; margin-bottom:8px; }
+   .card-impacts p{ font-size:13px; line-height:1.45; margin-bottom:7px; }
+   .index{ margin-top:10px; }
+   .index-row{ padding:7px 6px 7px 12px; }
+   .index-row .nm{ font-size:14px; }
+}
 </style>
 </head>
 <body>

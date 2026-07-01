@@ -269,6 +269,48 @@
     .scroll-cue{ animation:none; opacity:0.7; }
     video{ }
   }
+
+/* wfball_landscape_v1 — landscape-phone 2-col */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+  .hero {
+    grid-template-columns: 44fr 56fr;
+    gap: clamp(16px, 3vw, 30px);
+    padding: 14px clamp(18px, 4vw, 36px);
+    align-items: center;
+  }
+  .text {
+    order: 1;
+    max-width: none;
+    gap: 12px;
+  }
+  .media {
+    order: 2;
+  }
+  .video-frame {
+    width: min(300px, 44vw);
+  }
+  .headline {
+    font-size: clamp(17px, 3vw, 23px);
+    line-height: 1.16;
+    max-width: none;
+  }
+  .scale {
+    margin-top: 10px;
+    width: min(230px, 92%);
+  }
+  .scale .label {
+    font-size: 17px;
+  }
+  .scale .compare {
+    font-size: 13px;
+  }
+  .sources {
+    display: none;
+  }
+  .scroll-cue {
+    display: none;
+  }
+}
 </style>
 </head>
 <body>
