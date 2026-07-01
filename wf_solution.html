@@ -3,187 +3,431 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing — Built to stay charged</title>
+<title>NanoFlashing — captures the smoke</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500&family=Space+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#edf0f2;
     --ink:#1f2327;
-    --muted:#8a9095;
+    --headline-ink:#1a1a1a;
+    --muted:#828a90;
+    --faint:#aab2b8;
     --accent:#1b7bff;
-    --hair:rgba(20,24,28,0.08);
+    --red:#e23b3b;
+    --hair:rgba(20,24,28,0.10);
+    --stack:-apple-system, system-ui, 'Space Grotesk', sans-serif;
+    --mono:'Space Mono', ui-monospace, monospace;
   }
-
-  *{box-sizing:border-box;margin:0;padding:0;}
-
-  html,body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:"Space Grotesk",system-ui,sans-serif;
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);overflow-x:hidden;}
+  body{
+    font-family:var(--stack);
+    font-size:17px;
+    line-height:1.5;
     -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
+    -moz-osx-font-smoothing:grayscale;
   }
 
-  .solution{
-    position:relative;
+  .section{
     min-height:100vh;
     display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:clamp(64px,12vh,140px) clamp(24px,6vw,80px);
-    overflow:hidden;
-    isolation:isolate;
-  }
-
-  /* faint cool-blue radial glow behind the logo */
-  .solution::before{
-    content:"";
-    position:absolute;
-    left:50%;
-    top:52%;
-    transform:translate(-50%,-50%);
-    width:min(720px,90vw);
-    height:min(720px,90vw);
-    background:radial-gradient(circle at center,
-      rgba(27,123,255,0.14) 0%,
-      rgba(27,123,255,0.06) 38%,
-      rgba(27,123,255,0) 68%);
-    pointer-events:none;
-    z-index:0;
-  }
-
-  .stack{
-    position:relative;
-    z-index:1;
-    max-width:640px;
-    margin:0 auto;
-    text-align:center;
-    display:flex;
     flex-direction:column;
+    padding:clamp(40px,5.5vh,72px) clamp(24px,6vw,96px) 0;
+  }
+  .main{
+    flex:1;
+    display:grid;
+    grid-template-columns:42fr 58fr;
+    gap:clamp(40px,5vw,84px);
     align-items:center;
-    gap:0;
+    width:100%;
+    max-width:1500px;
+    margin:0 auto;
   }
 
+  /* LEFT */
+  .left{padding-right:clamp(8px,1vw,16px);}
   .kicker{
-    font-family:"Space Mono",monospace;
-    font-size:13px;
-    letter-spacing:0.02em;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
     color:var(--muted);
-    margin-bottom:28px;
+    margin:0 0 18px;
+    text-transform:none;
   }
-
   .headline{
-    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    font-family:var(--stack);
     font-weight:600;
-    font-size:clamp(30px,4.6vw,58px);
-    line-height:1.06;
-    color:#1a1a1a;
-    letter-spacing:-0.022em;
-    margin-bottom:22px;
+    font-size:clamp(30px,3.4vw,46px);
+    line-height:1.12;
+    color:var(--headline-ink);
+    margin:0 0 24px;
+    letter-spacing:-0.012em;
+    max-width:18ch;
   }
-
-  .headline em{
-    font-style:normal;
+  .stats{display:flex;flex-direction:column;gap:18px;margin-bottom:22px;}
+  .stat{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;}
+  .stat .num{
+    font-family:var(--mono);
     font-weight:700;
-    color:var(--accent);
+    font-size:clamp(52px,6vw,92px);
+    line-height:1;
+    letter-spacing:-0.03em;
   }
-
-  .lede{
-    font-family:"Space Grotesk",sans-serif;
-    font-size:18px;
-    line-height:1.55;
+  .stat.s1 .num{color:var(--accent);}
+  .stat.s2 .num{color:var(--ink);font-size:clamp(42px,4.8vw,72px);}
+  .stat .label{
+    font-family:var(--stack);
+    font-size:15px;
+    line-height:1.42;
+    color:var(--ink);
+    max-width:30ch;
+    padding-bottom:6px;
+  }
+  .mechanism{
+    font-family:var(--stack);
+    font-size:19px;
+    line-height:1.5;
+    color:var(--ink);
+    max-width:46ch;
+    margin:0 0 14px;
+  }
+  .citation{
+    font-family:var(--mono);
+    font-size:11.5px;
+    line-height:1.5;
     color:var(--muted);
-    max-width:520px;
-    margin:0 auto 64px;
+    max-width:46ch;
+    margin:0;
   }
 
-  .logo-link{
-    display:inline-block;
-    text-decoration:none;
-    color:inherit;
-    line-height:0;
-    transition:transform .35s cubic-bezier(.2,.7,.2,1);
-    position:relative;
+  /* RIGHT */
+  .right{display:flex;flex-direction:column;align-items:stretch;}
+  .figure-wrap{width:100%;}
+  .figure-title{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+    margin:0 0 14px;
+    letter-spacing:0.02em;
+    text-align:left;
+  }
+  .chart-svg{width:100%;height:auto;display:block;overflow:visible;}
+  .method-caption{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    margin:14px 0 0;
+    line-height:1.55;
+    text-align:left;
   }
 
-  .logo-link::after{
-    content:"";
-    position:absolute;
-    left:12%;
-    right:12%;
-    bottom:-6px;
-    height:1px;
-    background:var(--accent);
-    transform:scaleX(0);
-    transform-origin:center;
+  /* BOTTOM STRIP */
+  .strip{
+    width:100%;
+    max-width:1500px;
+    margin:0 auto;
+    padding:20px 0 22px;
+    border-top:1px solid var(--hair);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.04em;
+    text-align:center;
+  }
+
+  /* SVG bits */
+  .axis-title{font-family:var(--mono);font-size:11px;fill:var(--muted);}
+  .tick-label{font-family:var(--mono);font-size:10.5px;fill:var(--muted);}
+  .gridline{stroke:var(--hair);stroke-width:1;}
+  .baseline{stroke:var(--ink);stroke-width:1.2;}
+  .axis-line{stroke:var(--hair);stroke-width:1;}
+  .curve{
+    fill:none;
+    stroke:var(--accent);
+    stroke-width:2.5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .area-fill{fill:rgba(27,123,255,0.08);}
+  .dot{fill:var(--accent);stroke:var(--bg);stroke-width:1.5;}
+  .dot-hit{fill:transparent;stroke:none;cursor:pointer;}
+  .annotation-text{font-family:var(--mono);font-size:10.5px;fill:var(--ink);}
+  .annotation-text-muted{font-family:var(--mono);font-size:10.5px;fill:var(--muted);}
+  .ref-line{stroke:var(--accent);stroke-width:1;stroke-dasharray:4 4;fill:none;}
+  .region-band{fill:rgba(27,123,255,0.07);}
+  .leader-line{stroke:var(--ink);stroke-width:0.75;opacity:0.5;}
+
+  /* Tooltip */
+  .tooltip{
+    position:fixed;
+    pointer-events:none;
+    background:#fff;
+    border:1px solid var(--hair);
+    padding:7px 11px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink);
     opacity:0;
-    transition:transform .35s cubic-bezier(.2,.7,.2,1),opacity .35s ease;
+    transform:translate(-50%,-130%);
+    transition:opacity .14s ease;
+    white-space:nowrap;
+    z-index:50;
+    border-radius:2px;
   }
+  .tooltip.show{opacity:1;}
+  .tooltip .tt-size{color:var(--muted);margin-right:8px;}
+  .tooltip .tt-val{color:var(--accent);font-weight:700;}
 
-  .logo-link:hover{
-    transform:scale(1.03);
+  /* Mobile */
+  @media (max-width:880px){
+    .section{padding:40px 22px 0;}
+    .main{
+      grid-template-columns:1fr;
+      gap:36px;
+      align-items:stretch;
+    }
+    .left{padding-right:0;}
+    .headline{margin-bottom:28px;max-width:none;}
+    .stats{margin-bottom:28px;}
+    .stat{flex-direction:row;align-items:baseline;gap:18px;}
+    .stat .num{font-size:clamp(48px,11vw,68px);}
+    .stat.s2 .num{font-size:clamp(38px,9vw,56px);}
+    .stat .label{font-size:14.5px;max-width:none;flex:1;padding-bottom:4px;}
+    .mechanism{font-size:17.5px;max-width:none;}
+    .citation{max-width:none;}
+    .method-caption{max-width:none;}
+    .strip{padding:20px 0 22px;}
   }
-
-  .logo-link:hover::after{
-    transform:scaleX(1);
-    opacity:.7;
-  }
-
-  .logo-link img{
-    display:block;
-    height:clamp(48px,9vw,110px);
-    width:auto;
-    opacity:.92;
-    transition:filter .35s ease;
-  }
-
-  .logo-link:hover img{
-    filter:drop-shadow(0 0 18px rgba(27,123,255,0.18));
-  }
-
-  .cta{
-    display:inline-block;
-    margin-top:36px;
-    font-family:"Space Mono",monospace;
-    font-size:13px;
-    color:var(--accent);
-    text-decoration:none;
-    letter-spacing:0.01em;
-    transition:opacity .25s ease,transform .25s ease;
-  }
-
-  .cta:hover{
-    opacity:.75;
-    transform:translateX(3px);
-  }
-
-  @media (max-width:640px){
-    .lede{ margin-bottom:52px; font-size:17px; }
-    .kicker{ margin-bottom:22px; }
+  @media (max-width:480px){
+    .stat{flex-wrap:wrap;}
+    .stat .label{flex-basis:100%;padding-bottom:0;}
   }
 </style>
 </head>
 <body>
 
-<section class="solution">
-  <div class="stack">
-    <p class="kicker">The answer</p>
+<section class="section">
+  <div class="main">
 
-    <h1 class="headline">Built to stay <em>charged</em></h1>
+    <div class="left">
+      <p class="kicker">NanoFlashing Air Filter</p>
+      <h1 class="headline">NanoFlashing captures the smoke, down to the smallest particle.</h1>
 
-    <p class="lede">NanoFlashing makes a material that holds its charge — so it keeps capturing what an ordinary filter lets through once its charge is gone.</p>
+      <div class="stats">
+        <div class="stat s1">
+          <span class="num" data-target="75.4" data-decimals="1">0.0%</span>
+          <span class="label">captured in a single pass — real wildfire smoke.</span>
+        </div>
+        <div class="stat s2">
+          <span class="num" data-target="90" data-decimals="0" data-prefix="over ">over 0%</span>
+          <span class="label">of the ultrafine particles, 16–34 nm — the smallest, most harmful ones.</span>
+        </div>
+      </div>
 
-    <a class="logo-link" href="#">
-      <img src="assets/brand/nanoflashing_black.svg"
-           alt="NanoFlashing"
-           onerror="this.style.display='none'">
-    </a>
+      <p class="mechanism">NanoFlashing gives the filter a permanent positive polarity — a fixed positive charge built into the surface. Wildfire smoke carries a negative charge, so NanoFlashing captures and retains it, by physical action. The charge is part of the surface, so it does not wear off. In a two-year aging test, it stayed at full strength.</p>
 
-    <a class="cta" href="#">Explore the platform →</a>
+      <p class="citation">Published in a peer-reviewed ASM journal — 31 scientists across 16 research institutes.</p>
+    </div>
+
+    <div class="right">
+      <div class="figure-wrap">
+        <p class="figure-title">Single-pass capture of wildfire smoke, by particle size · NanoFlashing</p>
+
+        <svg class="chart-svg" viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NanoFlashing single-pass capture curve by particle size">
+          <!-- 16–34 nm region band -->
+          <rect class="region-band" x="80" y="40" width="65.5" height="320"/>
+
+          <!-- Horizontal gridlines + Y tick labels -->
+          <g>
+            <line class="gridline" x1="80" y1="40"  x2="620" y2="40"/>
+            <line class="gridline" x1="80" y1="120" x2="620" y2="120"/>
+            <line class="gridline" x1="80" y1="200" x2="620" y2="200"/>
+            <line class="gridline" x1="80" y1="280" x2="620" y2="280"/>
+            <text class="tick-label" x="72" y="40"  text-anchor="end" dominant-baseline="middle">100</text>
+            <text class="tick-label" x="72" y="120" text-anchor="end" dominant-baseline="middle">75</text>
+            <text class="tick-label" x="72" y="200" text-anchor="end" dominant-baseline="middle">50</text>
+            <text class="tick-label" x="72" y="280" text-anchor="end" dominant-baseline="middle">25</text>
+            <text class="tick-label" x="72" y="360" text-anchor="end" dominant-baseline="middle">0</text>
+          </g>
+
+          <!-- Baseline -->
+          <line class="baseline" x1="80" y1="360" x2="620" y2="360"/>
+
+          <!-- X axis line -->
+          <line class="axis-line" x1="80" y1="360" x2="620" y2="360"/>
+
+          <!-- X tick marks + labels -->
+          <g>
+            <line class="axis-line" x1="80"    y1="360" x2="80"    y2="364"/>
+            <line class="axis-line" x1="145.5" y1="360" x2="145.5" y2="364"/>
+            <line class="axis-line" x1="323.6" y1="360" x2="323.6" y2="364"/>
+            <line class="axis-line" x1="481.6" y1="360" x2="481.6" y2="364"/>
+            <line class="axis-line" x1="620"   y1="360" x2="620"   y2="364"/>
+            <text class="tick-label" x="80"    y="375" text-anchor="middle">16</text>
+            <text class="tick-label" x="145.5" y="375" text-anchor="middle">34</text>
+            <text class="tick-label" x="323.6" y="375" text-anchor="middle">100</text>
+            <text class="tick-label" x="481.6" y="375" text-anchor="middle">300</text>
+            <text class="tick-label" x="620"   y="375" text-anchor="middle">604</text>
+          </g>
+
+          <!-- Axis titles -->
+          <text class="axis-title" x="350" y="402" text-anchor="middle">Particle size (nm)</text>
+          <text class="axis-title" transform="translate(26,200) rotate(-90)" text-anchor="middle">Smoke captured (%)</text>
+
+          <!-- 75.4% reference line -->
+          <line class="ref-line" x1="80" y1="118.7" x2="620" y2="118.7"/>
+          <text class="annotation-text" x="350" y="112" text-anchor="middle">75.4% average</text>
+
+          <!-- 16–34 nm annotation -->
+          <text class="annotation-text" x="112.8" y="135" text-anchor="middle">over 90% captured</text>
+          <line class="leader-line" x1="112.8" y1="138" x2="112.8" y2="72"/>
+
+          <!-- Area fill -->
+          <path class="area-fill" id="areaFill" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112 L 620,360 L 80,360 Z" style="opacity:0;"/>
+
+          <!-- Curve -->
+          <path class="curve" id="curve" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112"/>
+
+          <!-- Dots -->
+          <g id="dots" style="opacity:0;">
+            <circle class="dot" cx="80"    cy="52.8"  r="4"/>
+            <circle class="dot" cx="103.3" cy="62.4"  r="4"/>
+            <circle class="dot" cx="145.5" cy="72"    r="4"/>
+            <circle class="dot" cx="186.7" cy="92"    r="4"/>
+            <circle class="dot" cx="244.9" cy="118.4" r="4"/>
+            <circle class="dot" cx="323.6" cy="154.4" r="4"/>
+            <circle class="dot" cx="402.3" cy="183.2" r="4"/>
+            <circle class="dot" cx="481.6" cy="179.2" r="4"/>
+            <circle class="dot" cx="560.9" cy="144"   r="4"/>
+            <circle class="dot" cx="620"   cy="112"   r="4"/>
+
+            <!-- Invisible hit targets for tooltip -->
+            <circle class="dot-hit" cx="80"    cy="52.8"  r="14" data-size="16"  data-val="96"/>
+            <circle class="dot-hit" cx="103.3" cy="62.4"  r="14" data-size="24"  data-val="93"/>
+            <circle class="dot-hit" cx="145.5" cy="72"    r="14" data-size="34"  data-val="90"/>
+            <circle class="dot-hit" cx="186.7" cy="92"    r="14" data-size="50"  data-val="85"/>
+            <circle class="dot-hit" cx="244.9" cy="118.4" r="14" data-size="80"  data-val="77"/>
+            <circle class="dot-hit" cx="323.6" cy="154.4" r="14" data-size="120" data-val="68"/>
+            <circle class="dot-hit" cx="402.3" cy="183.2" r="14" data-size="180" data-val="62"/>
+            <circle class="dot-hit" cx="481.6" cy="179.2" r="14" data-size="260" data-val="63"/>
+            <circle class="dot-hit" cx="560.9" cy="144"   r="14" data-size="380" data-val="72"/>
+            <circle class="dot-hit" cx="620"   cy="112"   r="14" data-size="500" data-val="80"/>
+          </g>
+        </svg>
+
+        <p class="method-caption">Independent lab test · real pine-needle wildfire smoke · one pass · measured 16–604 nm · method available on request.</p>
+      </div>
+    </div>
+
   </div>
+
+  <div class="strip">Proven in 441 facilities across 7 countries since 2020 · independently measured.</div>
 </section>
 
+<div class="tooltip" id="tooltip">
+  <span class="tt-size"></span><span class="tt-val"></span>
+</div>
+
+<script>
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const curve = document.getElementById('curve');
+  const area  = document.getElementById('areaFill');
+  const dots  = document.getElementById('dots');
+  const stats = document.querySelectorAll('.stat .num');
+
+  function showFinal(){
+    curve.style.strokeDashoffset = 0;
+    area.style.opacity = 1;
+    dots.style.opacity = 1;
+    stats.forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      const dec = parseInt(el.dataset.decimals || '0', 10);
+      const prefix = el.dataset.prefix || '';
+      el.textContent = prefix + target.toFixed(dec) + '%';
+    });
+  }
+
+  function animate(){
+    // Curve draw
+    const len = curve.getTotalLength();
+    curve.style.strokeDasharray = len;
+    curve.style.strokeDashoffset = len;
+    curve.getBoundingClientRect();
+    curve.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
+    requestAnimationFrame(() => { curve.style.strokeDashoffset = 0; });
+
+    // Area fade
+    area.style.transition = 'opacity 0.7s ease 0.55s';
+    setTimeout(() => { area.style.opacity = 1; }, 50);
+
+    // Dots fade
+    dots.style.transition = 'opacity 0.5s ease 1.15s';
+    setTimeout(() => { dots.style.opacity = 1; }, 50);
+
+    // Stat counters
+    stats.forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      const dec = parseInt(el.dataset.decimals || '0', 10);
+      const prefix = el.dataset.prefix || '';
+      const start = performance.now();
+      const dur = 1500;
+      function tick(now){
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const v = target * eased;
+        el.textContent = prefix + v.toFixed(dec) + '%';
+        if (t < 1) requestAnimationFrame(tick);
+        else el.textContent = prefix + target.toFixed(dec) + '%';
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  // Tooltip
+  const tooltip = document.getElementById('tooltip');
+  const ttSize = tooltip.querySelector('.tt-size');
+  const ttVal  = tooltip.querySelector('.tt-val');
+  const hits = document.querySelectorAll('.dot-hit');
+
+  hits.forEach(h => {
+    h.addEventListener('mouseenter', () => {
+      ttSize.textContent = h.dataset.size + ' nm  ·';
+      ttVal.textContent  = h.dataset.val + '%';
+      tooltip.classList.add('show');
+    });
+    h.addEventListener('mousemove', e => {
+      tooltip.style.left = e.clientX + 'px';
+      tooltip.style.top  = e.clientY + 'px';
+    });
+    h.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
+    });
+  });
+
+  // Trigger
+  if (reduce){
+    showFinal();
+  } else {
+    const sec = document.querySelector('.section');
+    if ('IntersectionObserver' in window){
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (en.isIntersecting){
+            animate();
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(sec);
+    } else {
+      animate();
+    }
+  }
+})();
+</script>
 </body>
 </html>
