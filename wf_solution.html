@@ -285,6 +285,21 @@
           <text class="annotation-text" x="112.8" y="135" text-anchor="middle">over 90% captured</text>
           <line class="leader-line" x1="112.8" y1="138" x2="112.8" y2="72"/>
 
+          <!-- Ordinary electret filter reference (Lehtimäki & Heinonen, 1994) -->
+          <g id="refFilter">
+            <path d="M 80,344 L 103.3,344 L 145.5,340.8 L 186.7,337.6 L 244.9,334.4 L 323.6,334.4 L 402.3,334.4 L 481.6,331.2 L 560.9,331.2 L 620,328" stroke="#aab2b8" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+            <circle cx="80"    cy="344"   r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="103.3" cy="344"   r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="145.5" cy="340.8" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="186.7" cy="337.6" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="244.9" cy="334.4" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="323.6" cy="334.4" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="402.3" cy="334.4" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="481.6" cy="331.2" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="560.9" cy="331.2" r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+            <circle cx="620"   cy="328"   r="2.5" fill="none" stroke="#aab2b8" stroke-width="1"/>
+          </g>
+
           <!-- Area fill -->
           <path class="area-fill" id="areaFill" d="M 80,52.8 L 103.3,62.4 L 145.5,72 L 186.7,92 L 244.9,118.4 L 323.6,154.4 L 402.3,183.2 L 481.6,179.2 L 560.9,144 L 620,112 L 620,360 L 80,360 Z" style="opacity:0;"/>
 
@@ -315,6 +330,15 @@
             <circle class="dot-hit" cx="481.6" cy="179.2" r="14" data-size="260" data-val="63"/>
             <circle class="dot-hit" cx="560.9" cy="144"   r="14" data-size="380" data-val="72"/>
             <circle class="dot-hit" cx="620"   cy="112"   r="14" data-size="500" data-val="80"/>
+          </g>
+
+          <!-- Legend -->
+          <g id="legend" font-family="Space Mono" font-size="10" fill="#1f2327">
+            <line x1="430" y1="258" x2="452" y2="258" stroke="#1b7bff" stroke-width="2.5"/>
+            <text x="458" y="258" dominant-baseline="middle">NanoFlashing</text>
+            <line x1="430" y1="278" x2="452" y2="278" stroke="#aab2b8" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <text x="458" y="278" dominant-baseline="middle">ordinary filter, after smoke</text>
+            <text x="430" y="293" font-family="Space Mono" font-size="8.5" fill="#828a90">ordinary-filter data: Lehtimäki &amp; Heinonen, 1994</text>
           </g>
         </svg>
 
