@@ -64,9 +64,23 @@ body.flow-mode header{position:absolute;background:none}
   var isDeck=null;
   var observers=[], intervalTimers=[];
 
+  // Tell each iframe whether its section is active, so per-section media
+  // (e.g. the filter discharge video) plays FROM THE START only on arrival.
+  var flowIO=null;
+  function signalActive(a){
+    for(var i=0;i<frames.length;i++){
+      try{ if(frames[i].contentWindow) frames[i].contentWindow.postMessage({type: i===a?'nf-active':'nf-inactive'}, '*'); }catch(e){}
+    }
+  }
+
   // Cache-bust so refresh always shows the latest
   var __t=Date.now();
-  frames.forEach(function(f){ f.src=f.getAttribute('data-src')+'?t='+__t; });
+  frames.forEach(function(f,i){
+    f.addEventListener('load', function(){
+      try{ if(f.contentWindow && isDeck) f.contentWindow.postMessage({type: i===idx?'nf-active':'nf-inactive'}, '*'); }catch(e){}
+    });
+    f.src=f.getAttribute('data-src')+'?t='+__t;
+  });
 
   function setH(){
     document.documentElement.style.setProperty('--screenH', window.innerHeight+'px');
@@ -117,6 +131,7 @@ body.flow-mode header{position:absolute;background:none}
     deck.classList.add('smooth');
     deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';
     for(var i=0;i<N;i++) dots[i].className = i===idx?'on':'';
+    signalActive(idx);
   }
 
   function go(i){
@@ -162,6 +177,7 @@ body.flow-mode header{position:absolute;background:none}
   }
 
   function clearFlow(){
+    if(flowIO){ try{flowIO.disconnect();}catch(e){} flowIO=null; }
     observers.forEach(function(ro){ try{ro.disconnect();}catch(e){} });
     observers=[];
     intervalTimers.forEach(function(t){ clearInterval(t); });
@@ -185,6 +201,13 @@ body.flow-mode header{position:absolute;background:none}
       setupObserver(f);
       setupInterval(f);
     });
+    // In flow mode, activate a section's media when it's centred in the viewport.
+    if('IntersectionObserver' in window){
+      flowIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){ if(en.isIntersecting){ var fi=frames.indexOf(en.target); if(fi>=0) signalActive(fi); } });
+      }, {rootMargin:'-45% 0px -45% 0px', threshold:0});
+      frames.forEach(function(f){ flowIO.observe(f); });
+    }
   }
 
   function applyMode(){

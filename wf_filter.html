@@ -275,7 +275,7 @@ section{
   <div class="video-stack" id="videoStack">
     <video id="videoA" src="assets/videos/filter_media_v2.mp4"
            poster="assets/videos/posters/filter_media_v2.jpg"
-           autoplay muted playsinline preload="auto"
+           muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
     <img class="poster" src="assets/videos/posters/filter_media_v2.jpg" alt="">
   </div>
@@ -319,12 +319,18 @@ section{
   const videoA = document.getElementById('videoA');
   const bigNumber = document.getElementById('bigNumber');
 
-  /* ---------- Reduced motion: show poster, hide video ---------- */
+  /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
   if (reducedMotion) {
     videoStack.classList.add('reduced');
-  } else {
-    try { videoA.play(); } catch(e){}
   }
+  const isEmbedded = window.self !== window.top;
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = '~0%';
+    animateNumber();
+  }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} }
 
   /* ---------- Number animation ---------- */
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
@@ -355,15 +361,20 @@ section{
     bigNumber.textContent = '~95%';
   } else {
     bigNumber.textContent = '~0%';
-    const io = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateNumber();
-          observer.disconnect();
-        }
+    if (isEmbedded) {
+      // In the deck: play the discharge video + count only when this section becomes active.
+      window.addEventListener('message', function(e){
+        if (!e.data) return;
+        if (e.data.type === 'nf-active') startFilter();
+        else if (e.data.type === 'nf-inactive') stopFilter();
       });
-    }, { threshold: 0.35 });
-    io.observe(document.getElementById('section'));
+    } else {
+      // Standalone: start from the top when it scrolls into view.
+      const io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById('section'));
+    }
   }
 })();
 </script>
