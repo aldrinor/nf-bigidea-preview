@@ -46,6 +46,7 @@
 </style>
 </head>
 <body>
+<!-- bigidea_charge_v2 -->
 <canvas id="scene"></canvas>
 <div class="scrim"></div>
 <div class="hero">
@@ -53,7 +54,7 @@
     <svg class="sym" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#1b7bff" stroke-width="2"/><rect x="7" y="11" width="10" height="2" rx="1" fill="#1b7bff"/></svg>
     The Big Idea
   </div>
-  <h1>Most pollutants carry a <span class="chg">negative charge.</span></h1>
+  <h1>Most harmful pollutants<br>carry an <span class="chg">electric charge.</span></h1>
   <p class="sub">Clean-looking air is full of them — drifting, invisible, charged. Move your cursor to scan.</p>
 </div>
 <div class="readout">
@@ -188,8 +189,8 @@ function draw(t){
   // tethered label
   const lx=x+R*0.86, ly=y-R*0.86;
   ctx.strokeStyle='rgba(27,123,255,.55)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+R*0.7,y-R*0.7); ctx.lineTo(lx,ly); ctx.stroke();
-  ctx.font='700 12px "Space Mono",monospace'; ctx.fillStyle='#2a2622'; ctx.textBaseline='middle';
-  ctx.fillText(s.name.toUpperCase(), lx+6, ly);
+  ctx.font='700 22px "Space Mono",monospace'; ctx.fillStyle='#2a2622'; ctx.textBaseline='middle';
+  ctx.fillText(s.name, lx+6, ly);
 }
 resize(); requestAnimationFrame(tick);
 </script>
