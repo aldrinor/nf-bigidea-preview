@@ -439,7 +439,7 @@ body {
   }
 }
 
-/* wfmap_scrim_v1 wfmap_realdata_v2 — frosted panel behind story text on phones */
+/* wfmap_scrim_v1 wfmap_realdata_v3 — frosted panel behind story text on phones */
 @media (max-width: 880px) {
   .chrome-top-left {
     background: rgba(237, 240, 242, 0.86);
@@ -588,17 +588,25 @@ function renderAq(arr){ lastAq = arr; aqLayer.clearLayers(); if (!arr) return;
     L.circleMarker([lat,lon], { renderer:canvasRenderer, radius:rad, fillColor:pm25Color(v), color:'#fff', weight:0.5, fillOpacity:0.85 })
       .bindPopup('<div style="font-family:var(--stack);font-size:13px;line-height:1.5">PM2.5 &mdash; <b>'+escapeHtml(v)+'</b> µg/m³</div>').addTo(aqLayer); } }
 
+const DAY=86400000;
+let times=[], firstTime=0, lastTime=0, totalDays=0;
+function ymdToTime(ymd){ return Date.UTC(+ymd.slice(0,4), +ymd.slice(4,6)-1, +ymd.slice(6,8)); }
+function dayOf(i){ return Math.round((times[i]-firstTime)/DAY); }               // true-time position (days) of a date
+function nearestIndexForDay(day){ const t=firstTime+day*DAY; let lo=0,hi=times.length-1;
+  while(lo<hi){ const mid=(lo+hi)>>1; if(times[mid]<t) lo=mid+1; else hi=mid; }
+  if(lo>0 && Math.abs(times[lo-1]-t)<=Math.abs(times[lo]-t)) lo--; return lo; }
+
 async function setDate(i){ i=Math.max(0,Math.min(dates.length-1,i)); currentIndex=i;
   const ymd=dates[i];
   document.getElementById('dateLabel').textContent = formatDate(ymd);
-  document.getElementById('frameSlider').value = i;
+  document.getElementById('frameSlider').value = dayOf(i);   // handle sits at the date's TRUE time position
   const req = ++reqSeq;
   const both = await Promise.all([getSmoke(ymd), getAq(ymd)]);
   if (req !== reqSeq) return;           // a newer request superseded this one
   renderSmoke(both[0]); renderAq(both[1]); }
 
 let rafId=null, pendingVal=null;
-function onSliderInput(e){ pendingVal=parseInt(e.target.value);
+function onSliderInput(e){ pendingVal=nearestIndexForDay(parseInt(e.target.value));   // slider is in days (true time) -> nearest data date
   document.getElementById('dateLabel').textContent = formatDate(dates[pendingVal]);   // instant label
   if (rafId===null){ rafId=requestAnimationFrame(function(){ rafId=null; if(playing)pause(); setDate(pendingVal); }); } }
 
@@ -617,10 +625,9 @@ function playLoop(){ if(!playing) return; const now=performance.now();
 
 function setupYearTicks(){ const container=document.getElementById('yearTicks'); container.innerHTML='';
   if (!dates.length) return;
-  const firstYear=+dates[0].slice(0,4), lastYear=+dates[dates.length-1].slice(0,4), placed=[];
-  for (let year=firstYear; year<=lastYear; year++){ const target=year*10000+101; if (target < (+dates[0])) continue; let best=0,bd=Infinity;
-    for (let k=0;k<dates.length;k++){ const diff=Math.abs((+dates[k])-target); if(diff<bd){bd=diff;best=k;} }
-    const pct=(best/(dates.length-1))*100; if (placed.some(function(p){return Math.abs(p-pct)<4;})) continue; placed.push(pct);
+  const firstYear=+dates[0].slice(0,4), lastYear=+dates[dates.length-1].slice(0,4), placed=[], span=(lastTime-firstTime)||1;
+  for (let year=firstYear; year<=lastYear; year++){ const yt=Date.UTC(year,0,1); if (yt < firstTime || yt > lastTime) continue;
+    const pct=(yt-firstTime)/span*100; if (placed.some(function(p){return Math.abs(p-pct)<4;})) continue; placed.push(pct);   // TRUE-time position -> years evenly spaced
     const tick=document.createElement('span'); tick.className='tc-tick';
     if (pct<=2){ tick.style.left='0'; tick.style.transform='none'; }
     else if (pct>=98){ tick.style.left='100%'; tick.style.transform='translateX(-100%)'; }
@@ -637,8 +644,9 @@ async function boot(){ const loadingHint=document.getElementById('loadingHint'),
     const m = await resp.json();
     dates = m.dates || [];
     if (!dates.length) throw new Error('no dates');
+    times = dates.map(ymdToTime); firstTime=times[0]; lastTime=times[times.length-1]; totalDays=Math.max(1, Math.round((lastTime-firstTime)/DAY));
     if (loadingBar) loadingBar.style.width='100%';
-    const slider=document.getElementById('frameSlider'); slider.min=0; slider.max=dates.length-1; slider.value=dates.length-1; slider.step=1;
+    const slider=document.getElementById('frameSlider'); slider.min=0; slider.max=totalDays; slider.value=totalDays; slider.step=1;   // slider is TRUE TIME in days
     setupYearTicks();
     document.getElementById('timeControl').style.display='block';
     await setDate(dates.length-1);                       // open on the most recent day
