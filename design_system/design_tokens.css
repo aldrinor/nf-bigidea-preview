@@ -1,0 +1,183 @@
+/* ============================================================================
+   NanoFlashing — LOCKED DESIGN TOKENS + BASE COMPONENT STYLES
+   ----------------------------------------------------------------------------
+   Locked 2026-07-02 by Yin. Canonical reference implementation = wf_solution.html
+   (the wildfire "answer" section). Every new page/section MUST inherit these
+   tokens and follow this type scale, color rules, and casing rules.
+
+   DO NOT re-skin, recolor, or invent new tokens without Yin's sign-off.
+   Only one accent (blue #1b7bff). Light theme only. See DESIGN_TEMPLATE.md.
+   ============================================================================ */
+
+:root{
+  /* ---- Color (LOCKED) ---- */
+  --bg:#edf0f2;            /* cool off-white background — the whole site */
+  --ink:#1f2327;           /* primary text */
+  --headline-ink:#1a1a1a;  /* headlines (slightly darker) */
+  --muted:#8a9095;         /* secondary / captions / axis / dust particles */
+  --accent:#1b7bff;        /* THE one accent — blue. good/hero. never cyan */
+  --red:#e23b3b;           /* bad/failing element ONLY, used sparingly */
+  --hair:rgba(20,24,28,0.08); /* hairlines / faint gridlines */
+
+  /* ---- Type families (LOCKED) ---- */
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif; /* headings, body, labels */
+  --mono:'Space Mono', ui-monospace, monospace;  /* number/size/measurement tokens */
+}
+
+/* Color rule: GOOD = blue (--accent). BAD = red (--red), sparingly.
+   Casing rule: headings / titles / labels / axis-titles / legends = Title Case.
+                body / passages = sentence case. NEVER all-caps.
+                Only acronyms/units stay capital: MERV, HEPA, PM 2.5, nm, µm, EPA, NOAA, CADR, ASHRAE. */
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* ---- Section shell: two-column, one full screen (deck section) ---- */
+section{
+  position:relative;            /* required: hosts the absolute dust canvas (z-index:1) */
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  max-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* ---- Text column (left) ---- */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size:clamp(24px, 2.7vw, 34px);
+  line-height:1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:28px;
+}
+.headline > span{ display:block; }
+.headline em{ color:var(--accent); font-style:normal; font-weight:600; }  /* accent word */
+
+/* ---- Big stat numbers ---- */
+.stat-block{ display:flex; flex-direction:column; gap:6px; margin-bottom:22px; }
+.stat-row{ display:flex; align-items:center; gap:22px; }
+.big-number{
+  font-family:var(--stack);
+  font-weight:700;
+  font-size:clamp(52px, 6vw, 92px);
+  line-height:0.95;
+  letter-spacing:-0.03em;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+  width:2.95em;      /* right-align the numbers so their % signs line up */
+  text-align:right;
+}
+.big-number.accent{ color:var(--accent); }
+.big-number.ink{ color:var(--ink); }
+
+.caption{
+  font-family:var(--stack);
+  font-size:clamp(16px, 1.5vw, 19px);
+  line-height:1.4;
+  color:var(--ink);
+  max-width:24ch;
+  padding-top:4px;
+}
+
+/* ---- Body paragraph ---- */
+.body-text{
+  max-width:440px;
+  font-size:19px;
+  line-height:1.55;
+  color:#1a1a1a;
+  margin-bottom:22px;
+}
+
+/* ---- Link (WSJ-style underline) ---- */
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
+
+/* ---- Chart column (right) ---- */
+.chart-col{
+  flex:1 1 0;
+  min-width:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:stretch;
+  padding:clamp(24px, 4vh, 56px) clamp(24px, 3vw, 48px) clamp(20px, 3vh, 36px);
+  position:relative;
+  z-index:2;
+}
+.chart-container{ flex:0 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; width:100%; }
+.chart-container svg,
+.chart-container > svg{ width:100%; height:auto; max-height:72vh; display:block; }
+.chart-caption{
+  font-family:var(--stack);
+  font-size:12px; line-height:1.45; color:var(--muted);
+  text-align:center; margin-top:14px; max-width:42ch; margin-left:auto; margin-right:auto;
+}
+
+/* ============================ RESPONSIVE ============================ */
+
+/* Phone / narrow: stack to one column */
+@media (max-width: 880px){
+  section{ flex-direction:column; justify-content:flex-start; align-items:stretch; min-height:100vh; max-height:none; overflow:visible; }
+  .text-col{ max-width:none; width:100%; align-items:stretch; padding-left:clamp(20px,5vw,28px); padding-right:clamp(20px,5vw,28px); padding-top:clamp(20px,4vh,32px); padding-bottom:8px; flex:0 0 auto; }
+  .headline{ font-size:clamp(26px,6.5vw,34px); line-height:1.18; margin-bottom:clamp(18px,3vh,24px); color:var(--headline-ink); }
+  .stat-block{ gap:clamp(18px,3vh,26px); margin-bottom:clamp(20px,3vh,28px); }
+  .stat-row{ flex-direction:column; align-items:flex-start; gap:6px; width:100%; }
+  .big-number{ font-size:clamp(44px,12vw,64px); line-height:1; width:auto; text-align:left; }
+  .caption{ font-size:clamp(13px,3.2vw,15px); line-height:1.45; max-width:none; width:100%; color:var(--muted); white-space:normal; word-break:break-word; overflow-wrap:anywhere; }
+  .body-text{ font-size:16px; line-height:1.6; margin-bottom:clamp(16px,2.5vh,22px); color:var(--ink); }
+  .advocacy-link{ font-size:16px; line-height:1.4; margin-bottom:clamp(8px,1.5vh,14px); }
+  .chart-col{ flex:0 0 auto; min-height:0; height:auto; padding:4px clamp(16px,4vw,24px) clamp(20px,3vh,32px); }
+  .chart-col svg{ width:100%; height:auto; display:block; }
+  .chart-caption{ font-size:11px; line-height:1.4; margin-top:10px; }
+}
+
+/* Short landscape screens (1366×768 etc.) */
+@media (max-height: 760px) and (min-width: 881px){
+  .headline{ font-size:clamp(26px, 2.6vw, 34px); margin-bottom:22px; }
+  .big-number{ font-size:clamp(46px, 5.2vw, 72px); }
+  .stat-block{ gap:4px; margin-bottom:18px; }
+  .body-text{ font-size:17px; line-height:1.5; margin-bottom:18px; }
+  .chart-col{ padding:24px 32px 24px; }
+}
+@media (max-height: 680px) and (min-width: 881px){
+  .headline{ font-size:clamp(22px, 2.2vw, 28px); margin-bottom:16px; }
+  .big-number{ font-size:clamp(38px, 4.4vw, 58px); }
+  .stat-block{ margin-bottom:14px; }
+  .body-text{ font-size:16px; line-height:1.45; margin-bottom:14px; }
+  .chart-caption{ font-size:11px; margin-top:10px; }
+}
+
+/* Full-section particle canvas (dust-capture effect layer) */
+#nf-dust-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; }
