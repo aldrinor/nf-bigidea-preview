@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v54_capture_effect -->
+<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v55_dust -->
 <style>
 :root{
   --bg:#edf0f2;
@@ -423,7 +423,6 @@ section{
 
     <!-- X axis title (Title Case), pulled down to match the y-axis title gap -->
     <text x="370" y="492" font-size="15" fill="#1f2327" text-anchor="middle">Particle Size (nm)</text>
-    <g id="capture-layer"></g>
   </svg>
     </div>
   </div>
@@ -443,276 +442,427 @@ section{
   });
 })();
 </script>
+<style>
+  #nf-dust-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; }
+</style>
 <script>
-/* === NanoFlashing capture effect (plays on deck arrival / scroll-in) === */
-(function(){
-  var SVGNS = 'http://www.w3.org/2000/svg';
+(function () {
+  'use strict';
+
+  // ---------- Environment detection ----------
+  var embedded = false;
+  try { embedded = (window.self !== window.top); } catch (e) { embedded = true; }
+
+  // ---------- DOM refs ----------
   var section = document.getElementById('section');
-  var nfCurve = document.getElementById('nf-curve');
-  var layer = document.getElementById('capture-layer');
-  if(!nfCurve || !layer || !section) return;
+  var curve = document.getElementById('nf-curve');
+  if (!section || !curve) return;
 
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var isMobile = window.matchMedia('(max-width: 880px)').matches || window.innerWidth <= 880;
+  var canvas = document.createElement('canvas');
+  canvas.id = 'nf-dust-canvas';
+  if (section.firstChild) section.insertBefore(canvas, section.firstChild);
+  else section.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
 
-  /* Deterministic PRNG (mulberry32) — fixed seed for reproducible frames */
-  var seed = 0x9e3779b9;
-  function rand(){
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  }
-
-  /* Sample curve targets evenly along the blue path */
-  var totalLen = nfCurve.getTotalLength();
-  var fracs = [0.05,0.14,0.23,0.32,0.41,0.50,0.59,0.68,0.77,0.86,0.95];
-  var allTargets = fracs.map(function(f){
-    var p = nfCurve.getPointAtLength(f * totalLen);
-    return { x: p.x, y: p.y };
-  });
-
-  /* Mobile uses indices 0,2,3,5,7,8,10 of the 11-point list */
-  var mobileIdx = [0,2,3,5,7,8,10];
-  var targets = isMobile
-    ? mobileIdx.map(function(i){ return allTargets[i]; })
-    : allTargets.slice();
-
+  // ---------- State ----------
+  var dpr = 1, W = 0, H = 0;
   var particles = [];
-  var halos = [];
-  var rafId = null;
-  var hasRun = false;
+  var targets = [];
+  var glowPoints = [];
+  var glowIdx = 0;
+  var hasFired = false;
+  var running = false;
+  var rafId = 0;
+  var lastT = 0;
+  var absorbT0 = 0;
+  var A = 0;
+  var reduced = false;
+  var resizeT = 0;
 
-  function lerp(a,b,t){ return a + (b-a)*t; }
+  var MAX_P = 950, MIN_P = 200;
+  var isMobile = (window.innerWidth <= 880) || (section.clientWidth <= 880);
+  var targetCount = isMobile ? MIN_P : 800;
 
-  /* Magnetic ease: slow drift → accelerate near curve → soft snap-stop */
-  function magneticEase(t){
-    if(t < 0.85){ var k = t/0.85; return 0.85 * (k*k*k); }
-    var s = (t-0.85)/0.15;
-    return 0.85 + 0.15 * (s*s*(3-2*s));
+  // ---------- Sprite pre-render (soft grey discs, baked blur) ----------
+  var sprites = [];
+  function makeSprite(radius, blur, alpha) {
+    var size = Math.max(10, Math.ceil(radius * 2 + blur * 4));
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var cx = c.getContext('2d');
+    var r = size / 2;
+    var g = cx.createRadialGradient(r, r, 0, r, r, r);
+    g.addColorStop(0, 'rgba(180,187,192,' + (alpha * 0.9) + ')');
+    g.addColorStop(0.3, 'rgba(138,144,149,' + (alpha * 0.5) + ')');
+    g.addColorStop(0.7, 'rgba(138,144,149,' + (alpha * 0.15) + ')');
+    g.addColorStop(1, 'rgba(138,144,149,0)');
+    cx.fillStyle = g;
+    cx.fillRect(0, 0, size, size);
+    return c;
+  }
+  function buildSprites() {
+    sprites = [
+      makeSprite(0.8, 2.0, 0.85),
+      makeSprite(1.6, 3.5, 0.85),
+      makeSprite(2.8, 5.0, 0.85),
+      makeSprite(4.2, 6.5, 0.85)
+    ];
   }
 
-  function createParticle(opts){
-    var g = document.createElementNS(SVGNS, 'g');
-    g.setAttribute('class','nf-particle');
+  // ---------- Resize / layout ----------
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    W = section.clientWidth;
+    H = section.clientHeight;
+    canvas.width = Math.max(1, Math.floor(W * dpr));
+    canvas.height = Math.max(1, Math.floor(H * dpr));
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#edf0f2';
+    ctx.fillRect(0, 0, W, H);
+    computeTargets();
+  }
 
-    var ring = document.createElementNS(SVGNS, 'circle');
-    ring.setAttribute('r','3.2');
-    ring.setAttribute('fill','none');
-    ring.setAttribute('stroke','#e23b3b');
-    ring.setAttribute('stroke-width','0.6');
-    ring.setAttribute('opacity','0.2');
+  function computeTargets() {
+    targets.length = 0;
+    glowPoints.length = 0;
+    var rect = canvas.getBoundingClientRect();
+    var total, i, pt, svgPt, m, x, y;
+    try {
+      total = curve.getTotalLength();
+      svgPt = curve.ownerSVGElement.createSVGPoint();
+      m = curve.getScreenCTM();
+      if (!m || !isFinite(total) || total <= 0) return;
+      var N = 120;
+      for (i = 0; i <= N; i++) {
+        pt = curve.getPointAtLength((i / N) * total);
+        svgPt.x = pt.x; svgPt.y = pt.y;
+        var sp = svgPt.matrixTransform(m);
+        x = sp.x - rect.left;
+        y = sp.y - rect.top;
+        if (x > -60 && x < W + 60 && y > -60 && y < H + 60) {
+          targets.push({ x: x, y: y, glow: 0 });
+          if (i % 4 === 0) glowPoints.push({ x: x, y: y, glow: 0 });
+        }
+      }
+    } catch (e) { /* SVG not ready */ }
+  }
 
-    var dot = document.createElementNS(SVGNS, 'circle');
-    dot.setAttribute('r','2');
-    dot.setAttribute('fill','#8a9095');
-
-    g.appendChild(ring);
-    g.appendChild(dot);
-    g.setAttribute('transform','translate(' + opts.x0.toFixed(2) + ',' + opts.y0.toFixed(2) + ')');
-    layer.appendChild(g);
-
+  // ---------- Particle ----------
+  function makeParticle(initial) {
+    var layer = Math.random();
+    var spriteIdx, r, a, vx, vy;
+    if (layer < 0.35) {
+      spriteIdx = 0; r = 0.6 + Math.random() * 0.8; a = 0.16 + Math.random() * 0.12;
+    } else if (layer < 0.75) {
+      spriteIdx = 1; r = 1.2 + Math.random() * 1.2; a = 0.26 + Math.random() * 0.14;
+    } else if (layer < 0.90) {
+      spriteIdx = 2; r = 2.0 + Math.random() * 1.6; a = 0.30 + Math.random() * 0.14;
+    } else {
+      spriteIdx = 3; r = 3.0 + Math.random() * 2.0; a = 0.30 + Math.random() * 0.18;
+    }
+    vx = (Math.random() - 0.5) * 0.25;
+    vy = (Math.random() - 0.5) * 0.25;
     return {
-      g:g, dot:dot, ring:ring,
-      x0:opts.x0, y0:opts.y0,
-      tx:opts.tx, ty:opts.ty,
-      captured:opts.captured,
-      start:opts.start, dur:opts.dur,
-      state:'pending',
-      settleStart:0, settleDur:0,
-      x:opts.x0, y:opts.y0,
-      removed:false
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: vx, vy: vy,
+      r: r, baseA: a, a: a,
+      sprite: sprites[spriteIdx],
+      phase: Math.random() * Math.PI * 2,
+      freq: 0.0006 + Math.random() * 0.0014,
+      amp: 0.04 + Math.random() * 0.10,
+      tx: 0, ty: 0, hasT: false, dist: 9999, d0: 0, fade: 0
     };
   }
 
-  function spawnHalo(x,y){
-    var c = document.createElementNS(SVGNS,'circle');
-    c.setAttribute('cx', x.toFixed(2));
-    c.setAttribute('cy', y.toFixed(2));
-    c.setAttribute('r','2');
-    c.setAttribute('fill','none');
-    c.setAttribute('stroke','#1b7bff');
-    c.setAttribute('stroke-width','1');
-    c.setAttribute('opacity','0.6');
-    c.setAttribute('class','nf-halo');
-    layer.appendChild(c);
-    halos.push({ el:c, start:performance.now(), dur:500, x:x, y:y, removed:false });
+  function assignTarget(p) {
+    if (targets.length === 0) { p.hasT = false; return; }
+    var bestD = Infinity, bi = 0, dx, dy, d2;
+    for (var i = 0; i < targets.length; i++) {
+      dx = targets[i].x - p.x;
+      dy = targets[i].y - p.y;
+      d2 = dx * dx + dy * dy;
+      if (d2 < bestD) { bestD = d2; bi = i; }
+    }
+    p.tx = targets[bi].x;
+    p.ty = targets[bi].y;
+    p.hasT = true;
+    p.dist = Math.sqrt(bestD);
+    p.d0 = Math.max(20, p.dist);
   }
 
-  function startLoop(){
-    if(rafId !== null) return;
+  function initParticles() {
+    particles.length = 0;
+    for (var i = 0; i < targetCount; i++) particles.push(makeParticle(true));
+  }
+
+  // ---------- Loop ----------
+  function loop(t) {
+    if (!running) return;
     rafId = requestAnimationFrame(loop);
-  }
-  function stopLoop(){
-    if(rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
-  }
+    var dt = lastT ? Math.min((t - lastT) / 16.67, 3) : 1;
+    lastT = t;
 
-  function loop(now){
-    var anyMoving = false;
+    if (reduced) return;
 
-    for(var i=0;i<particles.length;i++){
+    if (absorbT0 && t - absorbT0 > 700) {
+      var el = (t - absorbT0 - 700) / 2300;
+      A = el >= 1 ? 1 : (el < 0.5 ? 4 * el * el * el : 1 - Math.pow(-2 * el + 2, 3) / 2);
+    }
+
+    // (a) translucent bg trail-wash over the whole canvas
+    var K = 0.28 + A * 0.24;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(237,240,242,' + K + ')';
+    ctx.fillRect(0, 0, W, H);
+
+    // (b) local bg wipe stroke along the curve polyline — erases dust near the line
+    if (targets.length > 1) {
+      ctx.strokeStyle = 'rgba(237,240,242,0.7)';
+      ctx.lineWidth = 46;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(targets[0].x, targets[0].y);
+      for (var ti = 1; ti < targets.length; ti++) {
+        ctx.lineTo(targets[ti].x, targets[ti].y);
+      }
+      ctx.stroke();
+    }
+
+    // (c) draw all dust particles
+    ctx.globalCompositeOperation = 'source-over';
+    var alive = 0;
+    var respawnBudget = 0;
+
+    for (var i = 0; i < particles.length; i++) {
       var p = particles[i];
-      if(p.removed) continue;
+      if (p.fade >= 1) continue;
+      alive++;
 
-      if(p.state === 'pending'){
-        if(now >= p.start){
-          p.state = 'moving';
-        } else {
-          anyMoving = true;
-          continue;
-        }
+      // Organic flow field (curl)
+      var fx = Math.cos(p.y * p.freq + t * 0.00018 + p.phase);
+      var fy = Math.sin(p.x * p.freq + t * 0.00015 + p.phase * 1.3);
+      p.vx += fx * p.amp * dt;
+      p.vy += fy * p.amp * dt;
+
+      // Strong pull + rightward bias during draw-in
+      if (A > 0.02 && targets.length) {
+        if (!p.hasT || p.dist < 22) assignTarget(p);
+        var dx = p.tx - p.x;
+        var dy = p.ty - p.y;
+        var d = Math.sqrt(dx * dx + dy * dy) || 0.001;
+        p.dist = d;
+        var pull = A * A * 0.28;
+        if (d < 40) pull *= (0.35 + d / 40 * 0.65);
+        p.vx += (dx / d) * pull * dt;
+        p.vy += (dy / d) * pull * dt;
+        p.vx += A * 0.04 * dt;
       }
 
-      if(p.state === 'moving'){
-        var t = (now - p.start) / p.dur;
-        if(t >= 1){
-          t = 1;
-          p.state = 'settling';
-          p.settleStart = now;
-          p.settleDur = 140;
-          p.x = p.tx; p.y = p.ty;
-          p.g.setAttribute('transform','translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')');
-          if(p.captured){
-            spawnHalo(p.tx, p.ty);
-          }
-        } else {
-          var e = magneticEase(t);
-          p.x = lerp(p.x0, p.tx, e);
-          p.y = lerp(p.y0, p.ty, e);
-          p.g.setAttribute('transform','translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')');
-          if(!p.captured){
-            var fo = 1 - (t * t);
-            if(fo < 0) fo = 0;
-            p.g.setAttribute('opacity', fo.toFixed(3));
-          }
-          anyMoving = true;
-        }
-      }
+      // Damping
+      p.vx *= 0.99; p.vy *= 0.99;
+      var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      var maxSp = 2.0;
+      if (sp > maxSp) { p.vx = p.vx / sp * maxSp; p.vy = p.vy / sp * maxSp; }
 
-      if(p.state === 'settling'){
-        var st = (now - p.settleStart) / p.settleDur;
-        if(st >= 1){
-          p.state = 'done';
-          if(p.captured){
-            p.dot.setAttribute('stroke','#1b7bff');
-            p.dot.setAttribute('stroke-width','0.5');
-            p.ring.setAttribute('opacity','0');
-          } else {
-            p.g.setAttribute('opacity','0');
-            p.g.remove();
-            p.removed = true;
-          }
-        } else {
-          p.g.setAttribute('transform','translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')');
-          anyMoving = true;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+
+      // Recycle offscreen
+      if (p.x < -30) p.x = W + 20;
+      else if (p.x > W + 30) p.x = -20;
+      if (p.y < -30) p.y = H + 20;
+      else if (p.y > H + 30) p.y = -20;
+
+      // Widen kill-zone: begin fade at progress>0.60 OR d<48; force invisible at d<28
+      var progress = 1 - p.dist / p.d0;
+      if (progress > 0.60 || p.dist < 48) {
+        var fadeK = Math.max(0, (1 - p.dist / 48));
+        if (progress > 0.60) fadeK = Math.max(fadeK, (progress - 0.60) / 0.15);
+        p.fade = Math.min(1, p.fade + fadeK * 0.25 * dt);
+        if (A > 0.25 && glowPoints.length && p.dist < 30) {
+          glowIdx = (glowIdx + 1) % glowPoints.length;
+          glowPoints[glowIdx].glow = Math.min(0.6, glowPoints[glowIdx].glow + 0.05);
         }
       }
+      // Force fully invisible within 28px so no particle center is drawn near the curve
+      if (p.dist < 28) p.fade = 1;
+
+      // Alpha: fade + left-column restraint
+      var aa = p.baseA * (1 - p.fade);
+      if (p.x < W * 0.45) aa *= 0.62;
+      if (aa <= 0.004) continue;
+
+      ctx.globalAlpha = aa;
+      var sz = p.r * 7.5;
+      ctx.drawImage(p.sprite, p.x - sz / 2, p.y - sz / 2, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+
+    // (d) whisper blue absorption glow LAST — sits in the clean margin at the filter line
+    if (A > 0.15 && glowPoints.length) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (var gi = 0; gi < glowPoints.length; gi++) {
+        var gp = glowPoints[gi];
+        var g = gp.glow;
+        if (g > 0.005) {
+          ctx.globalAlpha = g * 0.25;
+          ctx.fillStyle = '#1b7bff';
+          ctx.beginPath();
+          ctx.arc(gp.x, gp.y, 9, 0, Math.PI * 2);
+          ctx.fill();
+          gp.glow *= 0.92;
+        } else {
+          gp.glow = 0;
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
     }
 
-    for(var j=0;j<halos.length;j++){
-      var h = halos[j];
-      if(h.removed) continue;
-      var ht = (now - h.start) / h.dur;
-      if(ht >= 1){
-        h.el.remove();
-        h.removed = true;
-      } else {
-        var r = lerp(2, 3.6, ht);
-        var op = lerp(0.6, 0, ht);
-        h.el.setAttribute('r', r.toFixed(2));
-        h.el.setAttribute('opacity', op.toFixed(3));
-        anyMoving = true;
+    // Living trickle
+    if (A >= 1) {
+      respawnBudget += 0.015 * dt;
+      while (respawnBudget >= 1 && alive < targetCount) {
+        respawnBudget--;
+        var np = makeParticle(false);
+        np.baseA *= 0.7;
+        particles.push(np);
+        alive++;
+        if (particles.length > MAX_P) {
+          for (var k = 0; k < particles.length; k++) {
+            if (particles[k].fade >= 1) { particles.splice(k, 1); break; }
+          }
+        }
       }
-    }
-
-    if(anyMoving){
-      rafId = requestAnimationFrame(loop);
     } else {
-      rafId = null;
+      if (particles.length > targetCount * 1.1) {
+        for (var j = 0; j < particles.length; j++) {
+          if (particles[j].fade >= 1) { particles.splice(j, 1); j--; }
+        }
+      }
     }
   }
 
-  function buildAndFire(){
-    if(hasRun) return;
-    hasRun = true;
-
-    if(reduced){
-      /* Static proof: place captured dots directly on targets */
-      for(var i=0;i<targets.length;i++){
-        var tgt = targets[i];
-        var g = document.createElementNS(SVGNS,'g');
-        var dot = document.createElementNS(SVGNS,'circle');
-        dot.setAttribute('r','2');
-        dot.setAttribute('fill','#8a9095');
-        dot.setAttribute('stroke','#1b7bff');
-        dot.setAttribute('stroke-width','0.5');
-        g.appendChild(dot);
-        g.setAttribute('transform','translate(' + tgt.x.toFixed(2) + ',' + tgt.y.toFixed(2) + ')');
-        layer.appendChild(g);
-      }
-      return;
+  // ---------- Static frame for reduced motion ----------
+  function drawStatic() {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#edf0f2';
+    ctx.fillRect(0, 0, W, H);
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var aa = p.baseA * 0.55;
+      if (p.x < W * 0.45) aa *= 0.62;
+      ctx.globalAlpha = aa;
+      var sz = p.r * 7.5;
+      ctx.drawImage(p.sprite, p.x - sz / 2, p.y - sz / 2, sz, sz);
     }
-
-    var capturedCount = targets.length;
-    var escaperCount = isMobile ? 1 : 2;
-    var count = capturedCount + escaperCount;
-
-    for(var idx=0; idx<count; idx++){
-      var isEscaper = idx >= capturedCount;
-      var sx = 110 + rand() * 510;
-      var sy = 150 + rand() * 55;
-      var tx, ty, captured;
-
-      if(isEscaper){
-        tx = 300 + rand() * 320;
-        ty = 402 + rand() * 14;
-        captured = false;
-      } else {
-        var tgt2 = targets[idx];
-        tx = tgt2.x;
-        ty = tgt2.y;
-        captured = true;
-      }
-
-      var startDelay = idx * 55;
-      var dur = 700 + rand() * 300;
-
-      var particle = createParticle({
-        x0: sx, y0: sy,
-        tx: tx, ty: ty,
-        captured: captured,
-        start: performance.now() + startDelay,
-        dur: dur
-      });
-      particles.push(particle);
-    }
-
-    startLoop();
+    ctx.globalAlpha = 1;
   }
 
-  function fire(){ buildAndFire(); }
+  // ---------- Start / Stop ----------
+  function start() {
+    if (hasFired) return;
+    hasFired = true;
+    if (reduced) { drawStatic(); return; }
+    if (!running) {
+      running = true;
+      lastT = 0;
+      absorbT0 = performance.now();
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
 
-  var embedded = false;
-  try { embedded = (window.self !== window.top); } catch(e){ embedded = true; }
+  // ---------- Triggers ----------
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    reduced = true;
+  }
 
-  if (embedded) {
-    // Inside the deck: play once when the parent signals this section is active
-    // (an iframe always sees its own content as visible, so we don't self-trigger).
-    window.addEventListener('message', function(e){
-      if(e && e.data && e.data.type === 'nf-active'){ fire(); }
-      else if(e && e.data && e.data.type === 'nf-inactive'){ stopLoop(); }
-    });
-  } else {
-    // Standalone: play on scroll-into-view.
-    var observer = new IntersectionObserver(function(entries){
-      for(var i=0;i<entries.length;i++){
-        var entry = entries[i];
-        if(entry.isIntersecting && entry.intersectionRatio >= 0.4){ fire(); }
-        else if(!entry.isIntersecting){ stopLoop(); }
+  buildSprites();
+  resize();
+  initParticles();
+  if (reduced) drawStatic();
+
+  // IO: pause when scrolled away (standalone AND embedded)
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      var e = entries[0];
+      if (!e) return;
+      if (reduced) return;
+      if (e.isIntersecting) {
+        if (embedded) {
+          if (hasFired && !running) {
+            running = true; lastT = 0;
+            rafId = requestAnimationFrame(loop);
+          }
+        } else {
+          if (e.intersectionRatio >= 0.4) start();
+          else if (hasFired && running) {
+            running = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = 0;
+          }
+        }
+      } else if (hasFired && running) {
+        running = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = 0;
       }
     }, { threshold: [0, 0.4, 1] });
-    observer.observe(section);
+    io.observe(section);
   }
+
+  // Visibility pause
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop();
+    else if (hasFired && !reduced && !running) {
+      running = true; lastT = 0;
+      rafId = requestAnimationFrame(loop);
+    }
+  });
+
+  // Embedded: parent-driven start/stop
+  if (embedded) {
+    window.addEventListener('message', function (ev) {
+      var d = ev.data || {};
+      if (d.type === 'nf-active') start();
+      else if (d.type === 'nf-inactive') stop();
+    });
+  }
+
+  // Standalone: start on scroll-into-view (embedded uses the parent nf-active above).
+  if (!embedded) {
+    var _io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.4) start();
+        else if (!entries[i].isIntersecting) stop();
+      }
+    }, { threshold: [0, 0.4, 1] });
+    _io.observe(section);
+  }
+
+  // Debounced resize
+  window.addEventListener('resize', function () {
+    if (resizeT) clearTimeout(resizeT);
+    resizeT = setTimeout(function () {
+      resize();
+      var nm = (window.innerWidth <= 880) || (section.clientWidth <= 880);
+      var nt = nm ? MIN_P : 800;
+      if (Math.abs(nt - targetCount) > 50) {
+        targetCount = nt;
+        while (particles.length < targetCount) particles.push(makeParticle(false));
+      }
+      if (reduced) drawStatic();
+    }, 180);
+  });
 })();
 </script>
 </body>
