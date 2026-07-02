@@ -36,7 +36,7 @@
     flex:1;
     display:grid;
     grid-template-columns:44% 56%;
-    align-items:center;
+    align-items:start;
     width:100%;
     min-height:0;
   }
@@ -45,10 +45,10 @@
   .left{
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;                 /* top-anchored so the passage never shifts vertically */
     min-width:0;
     max-height:100vh;
-    padding:0 clamp(24px,6vw,96px);
+    padding:clamp(20px,3vh,40px) clamp(24px,6vw,96px) clamp(20px,3vh,36px);
     z-index:10;
     position:relative;
   }
@@ -67,6 +67,7 @@
   .card{
     min-height:230px;
     position:relative;
+    flex-shrink:0;
   }
   .card-inner{
     opacity:1;
@@ -116,6 +117,7 @@
     display:flex;
     flex-direction:column;
     border-top:1px solid var(--hair);
+    flex-shrink:0;
   }
   .index-row{
     display:flex;
@@ -738,9 +740,12 @@
     setHighlight(current);
   });
 
-  // Init
-  renderCard('overview');
-  setHighlight('overview');
+  // Init (UAT: ?organ=KEY preselects an organ for verification)
+  const _uat = new URLSearchParams(location.search).get('organ');
+  const _init = (_uat && DATA[_uat]) ? _uat : 'overview';
+  current = _init;
+  renderCard(_init);
+  setHighlight(_init);
 })();
 </script>
 </body>
