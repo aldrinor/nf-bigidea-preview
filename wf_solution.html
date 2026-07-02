@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v41_glmpolish -->
+<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v42_callout -->
 <style>
 :root{
   --bg:#edf0f2;
@@ -329,20 +329,27 @@ section{
 
   <rect width="680" height="528" fill="url(#bg-pattern)"/>
 
-  <!-- TOP SIZE-SCALE (tiered elbow callouts, larger) -->
+  <!-- TOP SIZE-SCALE (annotation band above plot; size = x-position only) -->
   <g font-family="var(--stack)" text-rendering="geometricPrecision">
+
+  <!-- Faint size baseline + short vertical size ticks (entirely above y=150, lowest point y=126) -->
+  <line x1="90" y1="124" x2="650" y2="124" stroke="#b4bbc0" stroke-width="0.8" opacity="0.55" shape-rendering="crispEdges"/>
+  <g stroke="#8a9095" stroke-width="1" shape-rendering="crispEdges">
+    <line x1="113" y1="118" x2="113" y2="126"/>
+    <line x1="128" y1="118" x2="128" y2="126"/>
+    <line x1="170" y1="118" x2="170" y2="126"/>
+    <line x1="456" y1="118" x2="456" y2="126"/>
+  </g>
+
+  <!-- Single-elbow leaders from each label/thumbnail to its own size tick (no crossings, separated) -->
   <g stroke="#b4bbc0" stroke-width="1" fill="none" shape-rendering="crispEdges">
-    <path d="M113,150 L113,-14 L172,-14"/>
-    <path d="M128,150 L128,48 L172,48"/>
-    <path d="M170,150 L170,110 L172,110"/>
-    <path d="M456,150 L456,110 L438,110"/>
+    <path d="M113,118 L113,18 L175,18"/>
+    <path d="M128,118 L128,80 L175,80"/>
+    <path d="M170,118 L170,115 L175,115"/>
+    <path d="M456,118 L456,80 L438,80"/>
   </g>
-  <g fill="#8a9095">
-    <circle cx="113" cy="150" r="2.5"/>
-    <circle cx="128" cy="150" r="2.5"/>
-    <circle cx="170" cy="150" r="2.5"/>
-    <circle cx="456" cy="150" r="2.5"/>
-  </g>
+
+  <!-- Label texts -->
   <g paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">
     <text x="220" y="-1" font-size="20" font-weight="600" fill="#1f2327">Wildfire Smoke</text>
     <text x="220" y="16" font-size="15" font-family="var(--mono)" fill="#8a9095">~40 nm</text>
@@ -354,6 +361,8 @@ section{
     <text x="486" y="123" font-size="20" font-weight="600" fill="#1f2327">Bacteria</text>
     <text x="486" y="140" font-size="15" font-family="var(--mono)" fill="#8a9095">~400 nm</text>
   </g>
+
+  <!-- Thumbnails (radial-masked videos) -->
   <foreignObject x="175" y="-29" width="40" height="40"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Wildfire_Smoke_Particle_chip.jpg" style="width:40px;height:40px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 72%,transparent 96%);mask:radial-gradient(circle at 50% 50%,#000 72%,transparent 96%)"><source src="assets/videos/Wildfire_Smoke_Particle_chip.mp4" type="video/mp4"/></video></foreignObject>
   <foreignObject x="175" y="33" width="40" height="40"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Cr6.jpg" style="width:40px;height:40px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 72%,transparent 96%);mask:radial-gradient(circle at 50% 50%,#000 72%,transparent 96%)"><source src="assets/videos/Cr6_flashloop.mp4" type="video/mp4"/></video></foreignObject>
   <foreignObject x="175" y="95" width="40" height="40"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Virus_chip.jpg" style="width:40px;height:40px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 72%,transparent 96%);mask:radial-gradient(circle at 50% 50%,#000 72%,transparent 96%)"><source src="assets/videos/Virus_chip.mp4" type="video/mp4"/></video></foreignObject>
@@ -416,9 +425,13 @@ section{
 
   <!-- 16-34 nm shaded zone -->
   <rect x="90" y="150" width="17.1" height="280" fill="rgba(27,123,255,0.06)"/>
-  <path d="M 100 150 L 100 167 L 114 167" fill="none" stroke="#1b7bff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="100" cy="150" r="2" fill="#1b7bff"/>
-  <text x="118" y="171" text-anchor="start" font-size="13" fill="#1b7bff" font-weight="600" paint-order="stroke" stroke="#edf0f2" stroke-width="3" stroke-linejoin="round">&gt;90% captured (16–34 nm)</text>
+  <!-- highlight the exact 16-34 nm stretch ON the blue curve + endpoint markers -->
+  <path d="M 90 161 L 93.3 169 L 107.1 178" fill="none" stroke="#1b7bff" stroke-width="6" stroke-linecap="round" opacity="0.30"/>
+  <circle cx="90" cy="161" r="4" fill="none" stroke="#1b7bff" stroke-width="1.6"/>
+  <circle cx="107.1" cy="178" r="4" fill="none" stroke="#1b7bff" stroke-width="1.6"/>
+  <!-- pointer from the curve stretch to the label -->
+  <path d="M 107.1 178 L 116 174" fill="none" stroke="#1b7bff" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="119" y="178" text-anchor="start" font-size="13" fill="#1b7bff" font-weight="600" paint-order="stroke" stroke="#edf0f2" stroke-width="3" stroke-linejoin="round">&gt;90% captured (16–34 nm)</text>
 
   <!-- 75.4% average dotted line -->
   <line x1="90" y1="219" x2="650" y2="219" stroke="#1f2327" stroke-width="1" stroke-dasharray="1 3" opacity="0.5"/>
@@ -465,13 +478,13 @@ section{
   </g>
 
   <!-- Legend -->
-  <g transform="translate(90, 498)" font-family="var(--stack)">
+  <g transform="translate(208, 490)" font-family="var(--stack)">
     <line x1="0" y1="0" x2="20" y2="0" stroke="#1b7bff" stroke-width="2.5" stroke-linecap="round"/>
     <circle cx="10" cy="0" r="3" fill="#1b7bff"/>
     <text x="26" y="0" font-size="15" fill="#1f2327" dominant-baseline="middle">NanoFlashing — after real wildfire smoke</text>
-    <line x1="0" y1="18" x2="20" y2="18" stroke="#e23b3b" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <circle cx="10" cy="18" r="2.5" fill="#edf0f2" stroke="#e23b3b" stroke-width="1.2"/>
-    <a href="https://doi.org/10.1016/0360-1323(94)90033-7" target="_blank" rel="noopener"><text x="26" y="18" font-size="15" fill="#1f2327" dominant-baseline="middle" text-decoration="underline">Conventional filter — after smoke exposure</text></a>
+    <line x1="0" y1="30" x2="20" y2="30" stroke="#e23b3b" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="10" cy="30" r="2.5" fill="#edf0f2" stroke="#e23b3b" stroke-width="1.2"/>
+    <a href="https://doi.org/10.1016/0360-1323(94)90033-7" target="_blank" rel="noopener"><text x="26" y="30" font-size="15" fill="#1f2327" dominant-baseline="middle" text-decoration="underline">Conventional filter — after smoke exposure</text></a>
   </g>
 </svg>
     </div>
