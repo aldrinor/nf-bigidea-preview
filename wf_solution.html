@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v53_titlecase -->
+<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v54_capture_effect -->
 <style>
 :root{
   --bg:#edf0f2;
@@ -366,10 +366,10 @@ section{
     </g>
 
     <!-- Conventional red dashed line -->
-    <path d="M 90 416 L 93.3 416 L 107.1 413 L 118.8 410 L 140.9 408 L 170 408 L 208.9 408 L 279.1 405 L 360.5 405 L 471.7 402 L 650 402" fill="none" stroke="#e23b3b" stroke-width="1.5" stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="conv-curve" d="M 90 416 L 93.3 416 L 107.1 413 L 118.8 410 L 140.9 408 L 170 408 L 208.9 408 L 279.1 405 L 360.5 405 L 471.7 402 L 650 402" fill="none" stroke="#e23b3b" stroke-width="1.5" stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"/>
 
     <!-- NanoFlashing blue line -->
-    <path d="M 90 161 L 93.3 169 L 107.1 178 L 118.8 192 L 140.9 214 L 170 240 L 208.9 256 L 279.1 254 L 360.5 228 L 471.7 206 L 650 192" fill="none" stroke="#1b7bff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="nf-curve" d="M 90 161 L 93.3 169 L 107.1 178 L 118.8 192 L 140.9 214 L 170 240 L 208.9 256 L 279.1 254 L 360.5 228 L 471.7 206 L 650 192" fill="none" stroke="#1b7bff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
 
     <!-- Direct end-labels (two-line, Title Case); red label is the source hyperlink -->
     <circle cx="649" cy="192" r="3" fill="#1b7bff"/>
@@ -423,6 +423,7 @@ section{
 
     <!-- X axis title (Title Case), pulled down to match the y-axis title gap -->
     <text x="370" y="492" font-size="15" fill="#1f2327" text-anchor="middle">Particle Size (nm)</text>
+    <g id="capture-layer"></g>
   </svg>
     </div>
   </div>
@@ -440,6 +441,278 @@ section{
     v.addEventListener('play', apply);
     apply();
   });
+})();
+</script>
+<script>
+/* === NanoFlashing capture effect (plays on deck arrival / scroll-in) === */
+(function(){
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var section = document.getElementById('section');
+  var nfCurve = document.getElementById('nf-curve');
+  var layer = document.getElementById('capture-layer');
+  if(!nfCurve || !layer || !section) return;
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isMobile = window.matchMedia('(max-width: 880px)').matches || window.innerWidth <= 880;
+
+  /* Deterministic PRNG (mulberry32) — fixed seed for reproducible frames */
+  var seed = 0x9e3779b9;
+  function rand(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+
+  /* Sample curve targets evenly along the blue path */
+  var totalLen = nfCurve.getTotalLength();
+  var fracs = [0.05,0.14,0.23,0.32,0.41,0.50,0.59,0.68,0.77,0.86,0.95];
+  var allTargets = fracs.map(function(f){
+    var p = nfCurve.getPointAtLength(f * totalLen);
+    return { x: p.x, y: p.y };
+  });
+
+  /* Mobile uses indices 0,2,3,5,7,8,10 of the 11-point list */
+  var mobileIdx = [0,2,3,5,7,8,10];
+  var targets = isMobile
+    ? mobileIdx.map(function(i){ return allTargets[i]; })
+    : allTargets.slice();
+
+  var particles = [];
+  var halos = [];
+  var rafId = null;
+  var hasRun = false;
+
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  /* Magnetic ease: slow drift → accelerate near curve → soft snap-stop */
+  function magneticEase(t){
+    if(t < 0.85){ var k = t/0.85; return 0.85 * (k*k*k); }
+    var s = (t-0.85)/0.15;
+    return 0.85 + 0.15 * (s*s*(3-2*s));
+  }
+
+  function createParticle(opts){
+    var g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('class','nf-particle');
+
+    var ring = document.createElementNS(SVGNS, 'circle');
+    ring.setAttribute('r','3.2');
+    ring.setAttribute('fill','none');
+    ring.setAttribute('stroke','#e23b3b');
+    ring.setAttribute('stroke-width','0.6');
+    ring.setAttribute('opacity','0.2');
+
+    var dot = document.createElementNS(SVGNS, 'circle');
+    dot.setAttribute('r','2');
+    dot.setAttribute('fill','#8a9095');
+
+    g.appendChild(ring);
+    g.appendChild(dot);
+    g.setAttribute('transform','translate(' + opts.x0.toFixed(2) + ',' + opts.y0.toFixed(2) + ')');
+    layer.appendChild(g);
+
+    return {
+      g:g, dot:dot, ring:ring,
+      x0:opts.x0, y0:opts.y0,
+      tx:opts.tx, ty:opts.ty,
+      captured:opts.captured,
+      start:opts.start, dur:opts.dur,
+      state:'pending',
+      settleStart:0, settleDur:0,
+      x:opts.x0, y:opts.y0,
+      removed:false
+    };
+  }
+
+  function spawnHalo(x,y){
+    var c = document.createElementNS(SVGNS,'circle');
+    c.setAttribute('cx', x.toFixed(2));
+    c.setAttribute('cy', y.toFixed(2));
+    c.setAttribute('r','2');
+    c.setAttribute('fill','none');
+    c.setAttribute('stroke','#1b7bff');
+    c.setAttribute('stroke-width','1');
+    c.setAttribute('opacity','0.6');
+    c.setAttribute('class','nf-halo');
+    layer.appendChild(c);
+    halos.push({ el:c, start:performance.now(), dur:500, x:x, y:y, removed:false });
+  }
+
+  function startLoop(){
+    if(rafId !== null) return;
+    rafId = requestAnimationFrame(loop);
+  }
+  function stopLoop(){
+    if(rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  function loop(now){
+    var anyMoving = false;
+
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      if(p.removed) continue;
+
+      if(p.state === 'pending'){
+        if(now >= p.start){
+          p.state = 'moving';
+        } else {
+          anyMoving = true;
+          continue;
+        }
+      }
+
+      if(p.state === 'moving'){
+        var t = (now - p.start) / p.dur;
+        if(t >= 1){
+          t = 1;
+          p.state = 'settling';
+          p.settleStart = now;
+          p.settleDur = 140;
+          p.x = p.tx; p.y = p.ty;
+          p.g.setAttribute('transform','translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')');
+          if(p.captured){
+            spawnHalo(p.tx, p.ty);
+          }
+        } else {
+          var e = magneticEase(t);
+          p.x = lerp(p.x0, p.tx, e);
+          p.y = lerp(p.y0, p.ty, e);
+          p.g.setAttribute('transform','translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')');
+          if(!p.captured){
+            var fo = 1 - (t * t);
+            if(fo < 0) fo = 0;
+            p.g.setAttribute('opacity', fo.toFixed(3));
+          }
+          anyMoving = true;
+        }
+      }
+
+      if(p.state === 'settling'){
+        var st = (now - p.settleStart) / p.settleDur;
+        if(st >= 1){
+          p.state = 'done';
+          if(p.captured){
+            p.dot.setAttribute('stroke','#1b7bff');
+            p.dot.setAttribute('stroke-width','0.5');
+            p.ring.setAttribute('opacity','0');
+          } else {
+            p.g.setAttribute('opacity','0');
+            p.g.remove();
+            p.removed = true;
+          }
+        } else {
+          p.g.setAttribute('transform','translate(' + p.x.toFixed(2) + ',' + p.y.toFixed(2) + ')');
+          anyMoving = true;
+        }
+      }
+    }
+
+    for(var j=0;j<halos.length;j++){
+      var h = halos[j];
+      if(h.removed) continue;
+      var ht = (now - h.start) / h.dur;
+      if(ht >= 1){
+        h.el.remove();
+        h.removed = true;
+      } else {
+        var r = lerp(2, 3.6, ht);
+        var op = lerp(0.6, 0, ht);
+        h.el.setAttribute('r', r.toFixed(2));
+        h.el.setAttribute('opacity', op.toFixed(3));
+        anyMoving = true;
+      }
+    }
+
+    if(anyMoving){
+      rafId = requestAnimationFrame(loop);
+    } else {
+      rafId = null;
+    }
+  }
+
+  function buildAndFire(){
+    if(hasRun) return;
+    hasRun = true;
+
+    if(reduced){
+      /* Static proof: place captured dots directly on targets */
+      for(var i=0;i<targets.length;i++){
+        var tgt = targets[i];
+        var g = document.createElementNS(SVGNS,'g');
+        var dot = document.createElementNS(SVGNS,'circle');
+        dot.setAttribute('r','2');
+        dot.setAttribute('fill','#8a9095');
+        dot.setAttribute('stroke','#1b7bff');
+        dot.setAttribute('stroke-width','0.5');
+        g.appendChild(dot);
+        g.setAttribute('transform','translate(' + tgt.x.toFixed(2) + ',' + tgt.y.toFixed(2) + ')');
+        layer.appendChild(g);
+      }
+      return;
+    }
+
+    var capturedCount = targets.length;
+    var escaperCount = isMobile ? 1 : 2;
+    var count = capturedCount + escaperCount;
+
+    for(var idx=0; idx<count; idx++){
+      var isEscaper = idx >= capturedCount;
+      var sx = 110 + rand() * 510;
+      var sy = 150 + rand() * 55;
+      var tx, ty, captured;
+
+      if(isEscaper){
+        tx = 300 + rand() * 320;
+        ty = 402 + rand() * 14;
+        captured = false;
+      } else {
+        var tgt2 = targets[idx];
+        tx = tgt2.x;
+        ty = tgt2.y;
+        captured = true;
+      }
+
+      var startDelay = idx * 55;
+      var dur = 700 + rand() * 300;
+
+      var particle = createParticle({
+        x0: sx, y0: sy,
+        tx: tx, ty: ty,
+        captured: captured,
+        start: performance.now() + startDelay,
+        dur: dur
+      });
+      particles.push(particle);
+    }
+
+    startLoop();
+  }
+
+  function fire(){ buildAndFire(); }
+
+  var embedded = false;
+  try { embedded = (window.self !== window.top); } catch(e){ embedded = true; }
+
+  if (embedded) {
+    // Inside the deck: play once when the parent signals this section is active
+    // (an iframe always sees its own content as visible, so we don't self-trigger).
+    window.addEventListener('message', function(e){
+      if(e && e.data && e.data.type === 'nf-active'){ fire(); }
+      else if(e && e.data && e.data.type === 'nf-inactive'){ stopLoop(); }
+    });
+  } else {
+    // Standalone: play on scroll-into-view.
+    var observer = new IntersectionObserver(function(entries){
+      for(var i=0;i<entries.length;i++){
+        var entry = entries[i];
+        if(entry.isIntersecting && entry.intersectionRatio >= 0.4){ fire(); }
+        else if(!entry.isIntersecting){ stopLoop(); }
+      }
+    }, { threshold: [0, 0.4, 1] });
+    observer.observe(section);
+  }
 })();
 </script>
 </body>
