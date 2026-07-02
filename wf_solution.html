@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v37_tiered2 -->
+<title>NanoFlashing captures real wildfire smoke</title><!-- specimens_v38_tierbig -->
 <style>
 :root{
   --bg:#edf0f2;
@@ -329,56 +329,35 @@ section{
 
   <rect width="680" height="528" fill="url(#bg-pattern)"/>
 
-  <!-- TOP SIZE-SCALE -->
-<circle cx="113" cy="150" r="2.5" fill="#8a9095"/>
-<circle cx="128" cy="150" r="2.5" fill="#8a9095"/>
-<circle cx="170" cy="150" r="2.5" fill="#8a9095"/>
-<circle cx="456" cy="150" r="2.5" fill="#8a9095"/>
-
-<polyline points="113,150 113,11 190,11" fill="none" stroke="#aab2b8" stroke-width="1"/>
-<polyline points="128,150 128,63 190,63" fill="none" stroke="#aab2b8" stroke-width="1"/>
-<polyline points="170,150 170,117 190,117" fill="none" stroke="#aab2b8" stroke-width="1"/>
-<line x1="456" y1="150" x2="456" y2="117" fill="none" stroke="#aab2b8" stroke-width="1"/>
-
-<g>
-  <foreignObject x="190" y="-1" width="24" height="24">
-    <video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Wildfire_Smoke_Particle_chip.jpg" style="width:24px;height:24px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)">
-      <source src="assets/videos/Wildfire_Smoke_Particle_chip.mp4" type="video/mp4"/>
-    </video>
-  </foreignObject>
-  <text x="220" y="11" font-family="var(--stack)" font-size="15" font-weight="600" fill="#1f2327" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">Wildfire Smoke</text>
-  <text x="220" y="27" font-family="var(--mono)" font-size="11" fill="#8a9095" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">~40 nm</text>
-</g>
-
-<g>
-  <foreignObject x="190" y="51" width="24" height="24">
-    <video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Cr6.jpg" style="width:24px;height:24px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)">
-      <source src="assets/videos/Cr6_flashloop.mp4" type="video/mp4"/>
-    </video>
-  </foreignObject>
-  <text x="220" y="63" font-family="var(--stack)" font-size="15" font-weight="600" fill="#1f2327" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">Hexavalent Chromium</text>
-  <text x="220" y="79" font-family="var(--stack)" font-size="11" font-weight="400" fill="#8a9095" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">Found in 2025 LA Fires</text>
-  <text x="220" y="95" font-family="var(--mono)" font-size="11" fill="#8a9095" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">&lt;56 nm</text>
-</g>
-
-<g>
-  <foreignObject x="190" y="105" width="24" height="24">
-    <video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Virus_chip.jpg" style="width:24px;height:24px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)">
-      <source src="assets/videos/Virus_chip.mp4" type="video/mp4"/>
-    </video>
-  </foreignObject>
-  <text x="220" y="117" font-family="var(--stack)" font-size="15" font-weight="600" fill="#1f2327" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">Virus</text>
-  <text x="220" y="133" font-family="var(--mono)" font-size="11" fill="#8a9095" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">~100 nm</text>
-</g>
-
-<g>
-  <foreignObject x="444" y="105" width="24" height="24">
-    <video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Bacteria_chip.jpg" style="width:24px;height:24px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%);mask:radial-gradient(circle at 50% 50%,#000 58%,transparent 76%)">
-      <source src="assets/videos/Bacteria_chip.mp4" type="video/mp4"/>
-    </video>
-  </foreignObject>
-  <text x="474" y="117" font-family="var(--stack)" font-size="15" font-weight="600" fill="#1f2327" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">Bacteria</text>
-  <text x="474" y="133" font-family="var(--mono)" font-size="11" fill="#8a9095" paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">~400 nm</text>
+  <!-- TOP SIZE-SCALE (tiered elbow callouts, larger) -->
+  <g font-family="var(--stack)" text-rendering="geometricPrecision">
+  <g stroke="#aab2b8" stroke-width="1" fill="none" shape-rendering="crispEdges">
+    <path d="M113,150 L113,-14 M113,-14 L190,-14"/>
+    <path d="M128,150 L128,48 M128,48 L190,48"/>
+    <path d="M170,150 L170,110 M170,110 L190,110"/>
+    <path d="M456,150 L456,110"/>
+  </g>
+  <g fill="#8a9095">
+    <circle cx="113" cy="150" r="2.5"/>
+    <circle cx="128" cy="150" r="2.5"/>
+    <circle cx="170" cy="150" r="2.5"/>
+    <circle cx="456" cy="150" r="2.5"/>
+  </g>
+  <g paint-order="stroke" stroke="#edf0f2" stroke-width="2.6" stroke-linejoin="round">
+    <text x="220" y="-1" font-size="18" font-weight="600" fill="#1f2327">Wildfire Smoke</text>
+    <text x="220" y="16" font-size="13" font-family="var(--mono)" fill="#8a9095">~40 nm</text>
+    <text x="220" y="61" font-size="18" font-weight="600" fill="#1f2327">Hexavalent Chromium</text>
+    <text x="220" y="78" font-size="13" font-family="var(--mono)" fill="#8a9095">&lt;56 nm</text>
+    <text x="220" y="92" font-size="13" font-family="var(--mono)" fill="#8a9095">Found in 2025 LA Fires</text>
+    <text x="220" y="123" font-size="18" font-weight="600" fill="#1f2327">Virus</text>
+    <text x="220" y="140" font-size="13" font-family="var(--mono)" fill="#8a9095">~100 nm</text>
+    <text x="486" y="123" font-size="18" font-weight="600" fill="#1f2327">Bacteria</text>
+    <text x="486" y="140" font-size="13" font-family="var(--mono)" fill="#8a9095">~400 nm</text>
+  </g>
+  <foreignObject x="175" y="-29" width="30" height="30"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Wildfire_Smoke_Particle_chip.jpg" style="width:30px;height:30px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%)"><source src="assets/videos/Wildfire_Smoke_Particle_chip.mp4" type="video/mp4"/></video></foreignObject>
+  <foreignObject x="175" y="33" width="30" height="30"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Cr6.jpg" style="width:30px;height:30px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%)"><source src="assets/videos/Cr6_flashloop.mp4" type="video/mp4"/></video></foreignObject>
+  <foreignObject x="175" y="95" width="30" height="30"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Virus_chip.jpg" style="width:30px;height:30px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%)"><source src="assets/videos/Virus_chip.mp4" type="video/mp4"/></video></foreignObject>
+  <foreignObject x="441" y="95" width="30" height="30"><video xmlns="http://www.w3.org/1999/xhtml" autoplay loop muted playsinline preload="auto" poster="assets/videos/posters/Bacteria_chip.jpg" style="width:30px;height:30px;object-fit:cover;display:block;-webkit-mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%);mask:radial-gradient(circle at 50% 50%,#000 60%,transparent 78%)"><source src="assets/videos/Bacteria_chip.mp4" type="video/mp4"/></video></foreignObject>
 </g>
 
   <!-- ============ PLOT ============ -->
