@@ -1,0 +1,36 @@
+name: Daily wildfire-map data update
+
+on:
+  schedule:
+    # ~11:40 UTC daily — after NOAA HMS + AirNow settle the prior day
+    - cron: "40 11 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wfmap-daily
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Ingest recent real smoke + air quality
+        run: python scripts/wfmap_ingest.py --days 5
+      - name: Commit + push if data changed
+        run: |
+          git config user.name "wfmap-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/wfmap
+          if git diff --cached --quiet; then
+            echo "No data changes today."
+          else
+            git commit -m "Daily wfmap data update (auto)"
+            git push
+          fi

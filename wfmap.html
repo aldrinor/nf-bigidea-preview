@@ -439,7 +439,7 @@ body {
   }
 }
 
-/* wfmap_scrim_v1 wfmap_realdata_v1 — frosted panel behind story text on phones */
+/* wfmap_scrim_v1 wfmap_realdata_v2 — frosted panel behind story text on phones */
 @media (max-width: 880px) {
   .chrome-top-left {
     background: rgba(237, 240, 242, 0.86);
@@ -618,7 +618,7 @@ function playLoop(){ if(!playing) return; const now=performance.now();
 function setupYearTicks(){ const container=document.getElementById('yearTicks'); container.innerHTML='';
   if (!dates.length) return;
   const firstYear=+dates[0].slice(0,4), lastYear=+dates[dates.length-1].slice(0,4), placed=[];
-  for (let year=firstYear; year<=lastYear; year++){ const target=year*10000+101; let best=0,bd=Infinity;
+  for (let year=firstYear; year<=lastYear; year++){ const target=year*10000+101; if (target < (+dates[0])) continue; let best=0,bd=Infinity;
     for (let k=0;k<dates.length;k++){ const diff=Math.abs((+dates[k])-target); if(diff<bd){bd=diff;best=k;} }
     const pct=(best/(dates.length-1))*100; if (placed.some(function(p){return Math.abs(p-pct)<4;})) continue; placed.push(pct);
     const tick=document.createElement('span'); tick.className='tc-tick';
