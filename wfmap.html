@@ -439,7 +439,7 @@ body {
   }
 }
 
-/* wfmap_scrim_v1 — frosted panel behind story text on phones */
+/* wfmap_scrim_v1 wfmap_realdata_v1 — frosted panel behind story text on phones */
 @media (max-width: 880px) {
   .chrome-top-left {
     background: rgba(237, 240, 242, 0.86);
@@ -530,594 +530,128 @@ body {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ============================================================
-//  Wildfire Smoke Map — preloaded image-frame player
+//  Wildfire Smoke Map — REAL data (NOAA HMS smoke polygons + AirNow PM2.5), per date
 // ============================================================
-
-// ---- Config ----
-const FRAME_COUNT = 220;
-const BBOX = [-130, 20, -65, 60]; // [w, s, e, n]
-const DEFAULT_FRAME = 34;         // ~late June 2023, heavy smoke
-const PLAY_INTERVAL = 70;         // ms per frame (~14fps)
-
-// ---- State ----
-let imgUrls = [];
-let imgs = [];
-let dates = [];
-let currentFrame = DEFAULT_FRAME;
-let playing = false;
-let playTimer = null;
-let lastFrameTime = 0;
-let smokeOverlay = null;
-
-// ---- Map setup ----
-// Standalone: scroll wheel zooms the map (natural gesture).
-// Embedded in the scroll-story deck (wildfire.html): wheel advances the section,
-// so zoom there uses the +/- buttons, double-click, or pinch instead.
+const BASE = 'data/wfmap/';
 const isEmbedded = window.self !== window.top;
+
 const map = L.map('map', {
-  zoomControl: false,
-  scrollWheelZoom: !isEmbedded,
-  center: [46, -97],
-  zoom: 4,
-  minZoom: 3,
-  maxZoom: 12,
-  maxBounds: [[12, -150], [74, -48]],
-  maxBoundsViscosity: 0.85
+  zoomControl: false, scrollWheelZoom: !isEmbedded,
+  center: [46, -97], zoom: 4, minZoom: 3, maxZoom: 12,
+  maxBounds: [[12, -150], [74, -48]], maxBoundsViscosity: 0.85
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
-
-// Basemap: CARTO Positron raster
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  subdomains: 'abcd',
-  maxZoom: 19,
-  attribution: '© OpenStreetMap © CARTO',
-  detectRetina: true
+  subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO', detectRetina: true
 }).addTo(map);
-
-// Custom pane for smoke (below monitors)
-map.createPane('smoke');
-map.getPane('smoke').style.zIndex = 350;
-
-// Canvas renderer for monitors
+map.createPane('smoke'); map.getPane('smoke').style.zIndex = 350;
 const canvasRenderer = L.canvas({ padding: 0.5 });
-const monitorLayer = L.layerGroup().addTo(map);
+const aqLayer = L.layerGroup().addTo(map);
+let smokeLayer = null;
 
-// ---- Date helpers ----
-function formatDate(iso) {
-  const d = new Date(iso + 'T00:00:00Z');
-  const months = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December'];
-  return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-}
+let dates = [], currentIndex = 0, playing = false, playTimer = null, lastFrameTime = 0, reqSeq = 0, lastAq = null;
+const smokeCache = {}, aqCache = {};
+const PLAY_INTERVAL = 130;
 
-function generateDates() {
-  const start = new Date(Date.UTC(2023, 0, 1));
-  dates = [];
-  for (let i = 0; i < FRAME_COUNT; i++) {
-    const d = new Date(start.getTime() + i * 5 * 86400000);
-    dates.push(d.toISOString().split('T')[0]);
-  }
-}
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+function isoFromYmd(d){ return d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8); }
+function formatDate(ymd){ const d = new Date(isoFromYmd(ymd)+'T00:00:00Z'); return d.getUTCDate()+' '+MONTHS[d.getUTCMonth()]+' '+d.getUTCFullYear(); }
 
-// ---- Smoke color ramp (diffusing grey) ----
-function smokeColor(density) {
-  const stops = [
-    [0.00, [0,   0,   0,   0]],
-    [0.04, [120, 128, 136, 40]],
-    [0.12, [115, 123, 131, 80]],
-    [0.25, [108, 116, 124, 120]],
-    [0.42, [98,  106, 114, 155]],
-    [0.62, [85,  92,  100, 180]],
-    [0.82, [68,  74,  82,  205]],
-    [1.00, [50,  55,  62,  225]]
-  ];
-  let a = stops[0], b = stops[stops.length - 1];
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (density >= stops[i][0] && density <= stops[i + 1][0]) {
-      a = stops[i]; b = stops[i + 1]; break;
-    }
-  }
-  const span = b[0] - a[0] || 1;
-  const k = (density - a[0]) / span;
-  return [
-    Math.round(a[1][0] + (b[1][0] - a[1][0]) * k),
-    Math.round(a[1][1] + (b[1][1] - a[1][1]) * k),
-    Math.round(a[1][2] + (b[1][2] - a[1][2]) * k),
-    Math.round(a[1][3] + (b[1][3] - a[1][3]) * k)
-  ];
-}
+// smoke fill by density 1/2/3 (light -> heavy grey, matching the smoke look)
+const SMOKE_FILL = { 1:'rgba(122,130,138,0.30)', 2:'rgba(92,99,107,0.46)', 3:'rgba(56,62,70,0.66)' };
+function smokeStyle(f){ const d=(f.properties&&f.properties.density)||1; return { stroke:false, fill:true, fillColor: SMOKE_FILL[d]||SMOKE_FILL[1], fillOpacity:1, interactive:false }; }
 
-// ---- Hash noise ----
-function hash(x, y) {
-  let h = (x * 374761393 + y * 668265263) | 0;
-  h = ((h ^ (h >> 13)) * 1274126177) | 0;
-  return ((h ^ (h >> 16)) >>> 0) / 4294967295;
-}
-
-// ---- Generate a synthetic smoke frame as data URL ----
-function generateFrame(dayIndex, W, H) {
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const imgData = ctx.createImageData(W, H);
-  const data = imgData.data;
-
-  const [w, s, e, n] = BBOX;
-  const lonRange = e - w;
-  const latRange = n - s;
-
-  // Fire sources across western North America
-  const sources = [
-    { lon: -123, lat: 55, base: 1.00 }, // British Columbia
-    { lon: -122, lat: 47, base: 0.65 }, // Oregon
-    { lon: -119, lat: 39, base: 0.55 }, // California
-    { lon: -114, lat: 51, base: 0.85 }, // Alberta
-    { lon: -106, lat: 40, base: 0.35 }, // Colorado
-    { lon: -98,  lat: 62, base: 0.50 }  // Northwest Territories
-  ];
-
-  // Seasonal intensity (peak early July)
-  const dayOfYear = (dayIndex * 5) % 365;
-  const seasonal = Math.exp(-Math.pow((dayOfYear - 188) / 52, 2));
-
-  // Year factor — 2023 was extreme
-  const year = 2023 + Math.floor((dayIndex * 5) / 365);
-  const yearFactor = year === 2023 ? 1.45 : (year === 2024 ? 0.70 : 1.00);
-
-  // Wind: prevailing westerlies with slow variation
-  const windAngle = 0.12 + 0.32 * Math.sin(dayIndex * 0.045) + 0.14 * Math.cos(dayIndex * 0.083);
-  const windSpeed = 9 + 5 * Math.sin(dayIndex * 0.025);
-  const cosW = Math.cos(windAngle);
-  const sinW = Math.sin(windAngle);
-  const centerOffset = windSpeed * 0.7;
-  const sigmaU = 11 + windSpeed;
-  const sigmaV = 3.2 + windSpeed * 0.12;
-  const inv2SU = 1 / (2 * sigmaU * sigmaU);
-  const inv2SV = 1 / (2 * sigmaV * sigmaV);
-
-  for (let y = 0; y < H; y++) {
-    const lat = n - (y / H) * latRange;
-    for (let x = 0; x < W; x++) {
-      const lon = w + (x / W) * lonRange;
-
-      let density = 0;
-      for (let si = 0; si < sources.length; si++) {
-        const src = sources[si];
-        const dlon = lon - src.lon;
-        const dlat = lat - src.lat;
-        const u = dlon * cosW + dlat * sinW - centerOffset;
-        const v = -dlon * sinW + dlat * cosW;
-
-        if (u < -4) continue;
-
-        const intensity = src.base * seasonal * yearFactor;
-        density += intensity * Math.exp(-(u * u) * inv2SU - (v * v) * inv2SV);
-      }
-
-      // Noise texture
-      if (density > 0.015) {
-        const n1 = hash(x * 3 + dayIndex * 7, y * 5 + dayIndex * 11);
-        const n2 = hash(x * 11 + dayIndex * 3, y * 13 + dayIndex * 5);
-        density *= (0.58 + 0.27 * n1 + 0.15 * n2);
-      }
-
-      density = Math.min(1, density);
-
-      const idx = (y * W + x) * 4;
-      if (density > 0.025) {
-        const c = smokeColor(density);
-        data[idx]     = c[0];
-        data[idx + 1] = c[1];
-        data[idx + 2] = c[2];
-        data[idx + 3] = c[3];
-      }
-    }
-  }
-
-  ctx.putImageData(imgData, 0, 0);
-  return canvas.toDataURL();
-}
-
-// ---- Initialize smoke frames ----
-async function initSmoke() {
-  const loadingHint = document.getElementById('loadingHint');
-  const loadingBar = document.getElementById('loadingBarFill');
-
-  // Try real data first
-  try {
-    const resp = await fetch('data/smoke_frames.json');
-    if (resp.ok) {
-      const config = await resp.json();
-      const bbox = config.bbox;
-      const count = config.count;
-      const pattern = config.pattern;
-      dates = config.dates;
-
-      imgUrls = [];
-      imgs = [];
-      for (let i = 0; i < count; i++) {
-        const url = pattern.replace('%04d', String(i).padStart(4, '0'));
-        const im = new Image();
-        im.src = url;
-        imgs.push(im);
-        imgUrls.push(url);
-        loadingBar.style.width = ((i + 1) / count * 100) + '%';
-      }
-
-      // Wait for first frame
-      await Promise.race([
-        new Promise(r => { if (imgs[0].complete) r(); else imgs[0].onload = r; }),
-        new Promise(r => setTimeout(r, 4000))
-      ]);
-
-      loadingHint.classList.add('hidden');
-      onFramesReady(bbox, count);
-      return;
-    }
-  } catch (e) {
-    // fall through to synthetic
-  }
-
-  // Synthetic generation
-  generateDates();
-  imgUrls = [];
-  imgs = [];
-
-  const W = 200, H = 130;
-  let i = 0;
-
-  function chunk() {
-    const batch = 5;
-    for (let j = 0; j < batch && i < FRAME_COUNT; j++, i++) {
-      const url = generateFrame(i, W, H);
-      imgUrls.push(url);
-      const im = new Image();
-      im.src = url;
-      imgs.push(im);
-      const pct = Math.round((i + 1) / FRAME_COUNT * 100);
-      loadingBar.style.width = pct + '%';
-    }
-    if (i < FRAME_COUNT) {
-      requestAnimationFrame(chunk);
-    } else {
-      setTimeout(() => {
-        loadingHint.classList.add('hidden');
-        onFramesReady(BBOX, FRAME_COUNT);
-      }, 250);
-    }
-  }
-  chunk();
-}
-
-// ---- Frames ready ----
-function onFramesReady(bbox, count) {
-  const [w, s, e, n] = bbox;
-
-  const startFrame = count - 1;  // open on the most recent day (today)
-
-  smokeOverlay = L.imageOverlay(imgUrls[startFrame], [[s, w], [n, e]], {
-    opacity: 0.9,
-    interactive: false,
-    className: 'smoke-frames',
-    pane: 'smoke'
-  }).addTo(map);
-
-  const slider = document.getElementById('frameSlider');
-  slider.max = count - 1;
-  slider.value = startFrame;
-
-  setupYearTicks(count);
-  setFrame(startFrame);
-
-  document.getElementById('timeControl').style.display = 'block';
-
-  slider.addEventListener('input', onSliderInput);
-  document.getElementById('playBtn').addEventListener('click', togglePlay);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return;
-    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-    if (e.code === 'ArrowLeft') { pause(); setFrame(Math.max(0, currentFrame - 1)); }
-    if (e.code === 'ArrowRight') { pause(); setFrame(Math.min(count - 1, currentFrame + 1)); }
-  });
-}
-
-// ---- Year ticks ----
-function setupYearTicks(count) {
-  const container = document.getElementById('yearTicks');
-  container.innerHTML = '';
-  if (!dates.length) return;
-  // Derive the year range from the actual data so ticks always match (e.g. 2024–2026).
-  const firstYear = new Date(dates[0] + 'T00:00:00Z').getUTCFullYear();
-  const lastYear = new Date(dates[dates.length - 1] + 'T00:00:00Z').getUTCFullYear();
-  const placed = [];
-  for (let year = firstYear; year <= lastYear; year++) {
-    const target = Date.UTC(year, 0, 1);
-    let bestIdx = 0, bestDiff = Infinity;
-    for (let i = 0; i < dates.length; i++) {
-      const diff = Math.abs(new Date(dates[i] + 'T00:00:00Z').getTime() - target);
-      if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
-    }
-    const pct = (bestIdx / (count - 1)) * 100;
-    if (placed.some(p => Math.abs(p - pct) < 4)) continue; // avoid two labels stacking
-    placed.push(pct);
-    const tick = document.createElement('span');
-    tick.className = 'tc-tick';
-    // Keep edge labels fully inside the control rather than clipped by translateX(-50%).
-    if (pct <= 2) { tick.style.left = '0'; tick.style.transform = 'none'; }
-    else if (pct >= 98) { tick.style.left = '100%'; tick.style.transform = 'translateX(-100%)'; }
-    else { tick.style.left = pct + '%'; }
-    tick.textContent = year;
-    container.appendChild(tick);
-  }
-}
-
-// ---- Frame control ----
-function setFrame(i) {
-  if (i < 0 || i >= imgUrls.length) return;
-  currentFrame = i;
-  if (smokeOverlay) {
-    smokeOverlay.setUrl(imgUrls[i]);
-  }
-  document.getElementById('dateLabel').textContent = formatDate(dates[i]);
-  document.getElementById('frameSlider').value = i;
-}
-
-// ---- Slider input (rAF throttled) ----
-let sliderRafId = null;
-let sliderPendingValue = null;
-function onSliderInput(e) {
-  sliderPendingValue = parseInt(e.target.value);
-  if (sliderRafId === null) {
-    sliderRafId = requestAnimationFrame(() => {
-      sliderRafId = null;
-      if (playing) pause();
-      setFrame(sliderPendingValue);
-    });
-  }
-}
-
-// ---- Play / Pause ----
-function play() {
-  playing = true;
-  // If we're already at the last frame (today), restart from the beginning so play
-  // runs the whole timeline once and then stops on today.
-  if (currentFrame >= imgUrls.length - 1) setFrame(0);
-  document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
-  document.getElementById('playBtn').setAttribute('aria-label', 'Pause');
-  lastFrameTime = performance.now();
-  playLoop();
-}
-function pause() {
-  playing = false;
-  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
-  document.getElementById('playBtn').setAttribute('aria-label', 'Play');
-  if (playTimer) { cancelAnimationFrame(playTimer); playTimer = null; }
-}
-function togglePlay() { if (playing) pause(); else play(); }
-function playLoop() {
-  if (!playing) return;
-  const now = performance.now();
-  if (now - lastFrameTime >= PLAY_INTERVAL) {
-    lastFrameTime = now;
-    let next = currentFrame + 1;
-    if (next >= imgUrls.length) { pause(); return; }  // stop on today; do not loop
-    setFrame(next);
-  }
-  playTimer = requestAnimationFrame(playLoop);
-}
-
-// ============================================================
-//  AirNow PM2.5 Monitors (ported verbatim)
-// ============================================================
-
-function pm25Color(v) {
+function pm25Color(v){
   if (v == null || isNaN(v)) return "#c2c8cc";
-  const t = Math.max(0, Math.min(1, v / 75));
-  const stops = [
-    [0,   [194, 200, 204]],
-    [35,  [224, 160, 160]],
-    [75,  [226, 59, 59]]
-  ];
-  let a = stops[0], b = stops[stops.length - 1];
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (v >= stops[i][0] && v <= stops[i + 1][0]) { a = stops[i]; b = stops[i + 1]; break; }
-  }
-  const span = b[0] - a[0] || 1;
-  const k = (v - a[0]) / span;
-  const r = Math.round(a[1][0] + (b[1][0] - a[1][0]) * k);
-  const gg = Math.round(a[1][1] + (b[1][1] - a[1][1]) * k);
-  const bl = Math.round(a[1][2] + (b[1][2] - a[1][2]) * k);
-  return `rgb(${r},${gg},${bl})`;
+  const stops = [[0,[194,200,204]],[35,[224,160,160]],[75,[226,59,59]]];
+  let a=stops[0], b=stops[stops.length-1];
+  for (let i=0;i<stops.length-1;i++){ if (v>=stops[i][0] && v<=stops[i+1][0]){ a=stops[i]; b=stops[i+1]; break; } }
+  const span=(b[0]-a[0])||1, k=(v-a[0])/span;
+  const r=Math.round(a[1][0]+(b[1][0]-a[1][0])*k), g=Math.round(a[1][1]+(b[1][1]-a[1][1])*k), bl=Math.round(a[1][2]+(b[1][2]-a[1][2])*k);
+  return 'rgb('+r+','+g+','+bl+')';
 }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+async function getSmoke(ymd){ if (smokeCache[ymd]!==undefined) return smokeCache[ymd];
+  try{ const r=await fetch(BASE+'smoke/'+ymd+'.geojson'); const g=r.ok?await r.json():null; smokeCache[ymd]=g; return g; }catch(e){ smokeCache[ymd]=null; return null; } }
+async function getAq(ymd){ if (aqCache[ymd]!==undefined) return aqCache[ymd];
+  try{ const r=await fetch(BASE+'aq/'+ymd+'.json'); const a=r.ok?await r.json():null; aqCache[ymd]=a; return a; }catch(e){ aqCache[ymd]=null; return null; } }
+
+function renderSmoke(geojson){ if (smokeLayer){ map.removeLayer(smokeLayer); smokeLayer=null; }
+  if (!geojson || !geojson.features || !geojson.features.length) return;
+  smokeLayer = L.geoJSON(geojson, { pane:'smoke', style: smokeStyle, interactive:false }).addTo(map); }
+function renderAq(arr){ lastAq = arr; aqLayer.clearLayers(); if (!arr) return;
+  const z=map.getZoom(), threshold = z<5 ? 20 : 0;
+  for (let n=0;n<arr.length;n++){ const p=arr[n], lat=p[0], lon=p[1], v=p[2];
+    if (v==null || v<threshold) continue;
+    const rad = 2.5 + (Math.min(75,Math.max(0,v))/75)*4.5;
+    L.circleMarker([lat,lon], { renderer:canvasRenderer, radius:rad, fillColor:pm25Color(v), color:'#fff', weight:0.5, fillOpacity:0.85 })
+      .bindPopup('<div style="font-family:var(--stack);font-size:13px;line-height:1.5">PM2.5 &mdash; <b>'+escapeHtml(v)+'</b> µg/m³</div>').addTo(aqLayer); } }
+
+async function setDate(i){ i=Math.max(0,Math.min(dates.length-1,i)); currentIndex=i;
+  const ymd=dates[i];
+  document.getElementById('dateLabel').textContent = formatDate(ymd);
+  document.getElementById('frameSlider').value = i;
+  const req = ++reqSeq;
+  const both = await Promise.all([getSmoke(ymd), getAq(ymd)]);
+  if (req !== reqSeq) return;           // a newer request superseded this one
+  renderSmoke(both[0]); renderAq(both[1]); }
+
+let rafId=null, pendingVal=null;
+function onSliderInput(e){ pendingVal=parseInt(e.target.value);
+  document.getElementById('dateLabel').textContent = formatDate(dates[pendingVal]);   // instant label
+  if (rafId===null){ rafId=requestAnimationFrame(function(){ rafId=null; if(playing)pause(); setDate(pendingVal); }); } }
+
+function play(){ playing=true; if (currentIndex>=dates.length-1) setDate(0);
+  document.getElementById('playIcon').innerHTML='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label','Pause');
+  lastFrameTime=performance.now(); playLoop(); }
+function pause(){ playing=false;
+  document.getElementById('playIcon').innerHTML='<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label','Play');
+  if (playTimer){ cancelAnimationFrame(playTimer); playTimer=null; } }
+function togglePlay(){ if(playing)pause(); else play(); }
+function playLoop(){ if(!playing) return; const now=performance.now();
+  if (now-lastFrameTime>=PLAY_INTERVAL){ lastFrameTime=now; const next=currentIndex+1; if(next>=dates.length){ pause(); return; } setDate(next); }
+  playTimer=requestAnimationFrame(playLoop); }
+
+function setupYearTicks(){ const container=document.getElementById('yearTicks'); container.innerHTML='';
+  if (!dates.length) return;
+  const firstYear=+dates[0].slice(0,4), lastYear=+dates[dates.length-1].slice(0,4), placed=[];
+  for (let year=firstYear; year<=lastYear; year++){ const target=year*10000+101; let best=0,bd=Infinity;
+    for (let k=0;k<dates.length;k++){ const diff=Math.abs((+dates[k])-target); if(diff<bd){bd=diff;best=k;} }
+    const pct=(best/(dates.length-1))*100; if (placed.some(function(p){return Math.abs(p-pct)<4;})) continue; placed.push(pct);
+    const tick=document.createElement('span'); tick.className='tc-tick';
+    if (pct<=2){ tick.style.left='0'; tick.style.transform='none'; }
+    else if (pct>=98){ tick.style.left='100%'; tick.style.transform='translateX(-100%)'; }
+    else { tick.style.left=pct+'%'; }
+    tick.textContent=year; container.appendChild(tick); } }
+
+let resizeTimer=null;
+window.addEventListener('resize', function(){ if(resizeTimer)clearTimeout(resizeTimer); resizeTimer=setTimeout(function(){map.invalidateSize();},100); });
+map.on('zoomend', function(){ renderAq(lastAq); });
+
+async function boot(){ const loadingHint=document.getElementById('loadingHint'), loadingBar=document.getElementById('loadingBarFill');
+  try{
+    const resp = await fetch(BASE+'manifest.json');
+    const m = await resp.json();
+    dates = m.dates || [];
+    if (!dates.length) throw new Error('no dates');
+    if (loadingBar) loadingBar.style.width='100%';
+    const slider=document.getElementById('frameSlider'); slider.min=0; slider.max=dates.length-1; slider.value=dates.length-1; slider.step=1;
+    setupYearTicks();
+    document.getElementById('timeControl').style.display='block';
+    await setDate(dates.length-1);                       // open on the most recent day
+    loadingHint.classList.add('hidden');
+    slider.addEventListener('input', onSliderInput);
+    document.getElementById('playBtn').addEventListener('click', togglePlay);
+    document.addEventListener('keydown', function(e){ if(e.target.tagName==='INPUT') return;
+      if (e.code==='Space'){ e.preventDefault(); togglePlay(); }
+      if (e.code==='ArrowLeft'){ pause(); setDate(Math.max(0,currentIndex-1)); }
+      if (e.code==='ArrowRight'){ pause(); setDate(Math.min(dates.length-1,currentIndex+1)); } });
+  }catch(e){ if(loadingHint) loadingHint.textContent='could not load the map data'; }
 }
-
-async function fetchJson(url) {
-  const r = await fetch(url, { mode: "cors" });
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return r.json();
-}
-
-async function fetchText(url) {
-  const r = await fetch(url, { mode: "cors" });
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return r.text();
-}
-
-function parseSitesDat(text) {
-  const lines = text.split(/\r?\n/);
-  const sites = new Map();
-  for (const line of lines) {
-    if (!line) continue;
-    const cols = line.split("|");
-    if (cols.length < 4) continue;
-    const aqsid = cols[0].trim();
-    if (!aqsid) continue;
-    let lat = parseFloat(cols[8]);
-    let lon = parseFloat(cols[9]);
-    let siteName = cols[6] ? cols[6].trim() : "";
-    if ((isNaN(lat) || isNaN(lon)) && cols.length >= 6) {
-      const cands = [];
-      for (let i = 3; i < cols.length; i++) {
-        const v = parseFloat(cols[i]);
-        if (!isNaN(v) && Math.abs(v) <= 90) {
-          cands.push({ i, v });
-        }
-      }
-      let latC = null, lonC = null;
-      for (const a of cands) {
-        for (const b of cands) {
-          if (a === b) continue;
-          if (Math.abs(a.v) <= 90 && Math.abs(b.v) <= 180 && Math.abs(b.v) > 90) {
-            latC = a; lonC = b; break;
-          }
-        }
-        if (latC) break;
-      }
-      if (latC && lonC) {
-        lat = latC.v; lon = lonC.v;
-      }
-    }
-    if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
-      sites.set(aqsid, { aqsid, lat, lon, siteName });
-    }
-  }
-  return sites;
-}
-
-function parseHourlyDat(text) {
-  const lines = text.split(/\r?\n/);
-  const out = [];
-  for (const line of lines) {
-    if (!line) continue;
-    const cols = line.split("|");
-    if (cols.length < 7) continue;
-    const aqsid = cols[2] ? cols[2].trim() : "";
-    const param = cols[5] ? cols[5].trim() : "";
-    if (param !== "PM2.5") continue;
-    let val = parseFloat(cols[7]);
-    let unit = cols[6] ? cols[6].trim() : "";
-    if (isNaN(val)) {
-      for (let i = 4; i < cols.length; i++) {
-        const v = parseFloat(cols[i]);
-        if (!isNaN(v)) { val = v; break; }
-      }
-    }
-    if (!isNaN(val)) {
-      out.push({ aqsid, pm25: val, unit });
-    }
-  }
-  return out;
-}
-
-function utcHourStamp(d) {
-  const pad = n => String(n).padStart(2, "0");
-  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}`;
-}
-
-let _monitors = [];
-
-async function loadMonitors() {
-  let sites;
-  try {
-    const txt = await fetchText("https://files.airnowtech.org/airnow/today/monitoring_site_locations.dat");
-    sites = parseSitesDat(txt);
-  } catch (e) {
-    sites = new Map();
-  }
-
-  const now = new Date();
-  let hourlyRows = null;
-  let usedStamp = null;
-  let bestCount = 0;
-  for (let back = 0; back <= 12; back++) {
-    const d = new Date(now.getTime() - back * 3600 * 1000);
-    const stamp = utcHourStamp(d);
-    const url = `https://files.airnowtech.org/airnow/today/HourlyData_${stamp}.dat`;
-    try {
-      const txt = await fetchText(url);
-      const rows = parseHourlyDat(txt);
-      if (rows.length > bestCount) {
-        bestCount = rows.length;
-        hourlyRows = rows;
-        usedStamp = stamp;
-      }
-      if (bestCount >= 150) break;
-    } catch (e) {
-      // continue to previous hour
-    }
-  }
-
-  if (!hourlyRows || sites.size === 0) {
-    _monitors = [];
-    return usedStamp;
-  }
-
-  const monitors = [];
-  for (const row of hourlyRows) {
-    const s = sites.get(row.aqsid);
-    if (s) {
-      monitors.push({
-        aqsid: s.aqsid,
-        lat: s.lat,
-        lon: s.lon,
-        siteName: s.siteName || row.siteName || "",
-        pm25: row.pm25
-      });
-    }
-  }
-  _monitors = monitors;
-  return usedStamp;
-}
-
-// ---- Render monitors with zoom gating ----
-function renderMonitors() {
-  monitorLayer.clearLayers();
-  const z = map.getZoom();
-  const threshold = z < 5 ? 20 : 0;
-
-  for (const m of _monitors) {
-    if (m.pm25 < threshold) continue;
-    const r = 2.5 + (Math.min(75, Math.max(0, m.pm25)) / 75) * 4.5;
-    L.circleMarker([m.lat, m.lon], {
-      renderer: canvasRenderer,
-      radius: r,
-      fillColor: pm25Color(m.pm25),
-      color: '#fff',
-      weight: 0.5,
-      fillOpacity: 0.85
-    }).bindPopup(
-      `<div style="font-family:var(--stack);font-size:13px;line-height:1.5">` +
-      `${escapeHtml(m.siteName || m.aqsid)}<br>PM2.5 — <b>${m.pm25}</b> µg/m³</div>`
-    ).addTo(monitorLayer);
-  }
-}
-
-// ---- Init monitors ----
-async function initMonitors() {
-  try {
-    await loadMonitors();
-    renderMonitors();
-  } catch (e) {
-    // fail quietly
-  }
-}
-
-// ---- Resize handling ----
-let resizeTimer = null;
-window.addEventListener('resize', () => {
-  if (resizeTimer) clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => map.invalidateSize(), 100);
-});
-
-// ---- Boot ----
-initSmoke();
-initMonitors();
-map.on('zoomend', renderMonitors);
+boot();
 </script>
 </body>
 </html>
