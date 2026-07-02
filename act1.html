@@ -144,7 +144,7 @@
 </style>
 </head>
 <body>
-<!-- act1_electric_v1 -->
+<!-- act1_electric_v2 -->
 <canvas id="scene"></canvas>
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
@@ -153,7 +153,7 @@
 </div>
 <div class="tag" id="tag">
   <div class="name" id="t-name">—</div>
-  <div class="whisper">Negatively Charged</div>
+  <div class="whisper">Electrically Charged</div>
 </div>
 <div class="detail-screen" aria-hidden="true"></div>
 <video class="detail-vid" id="detailVid" muted loop playsinline preload="auto"></video>
@@ -183,7 +183,7 @@ const SPECS=[
   {key:'Pollen',                  name:'Pollen',          rate:1.0},
 ];
 SPECS.forEach(s=>{
-  const im=new Image(); im.src='assets/charged/'+s.key+'_charged.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
+  const im=new Image(); im.src='assets/glow/'+s.key+'_glow.png'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
   const v=document.createElement('video');
   v.src='assets/videos/'+s.key+'_flashloop_c2.mp4';
   v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
