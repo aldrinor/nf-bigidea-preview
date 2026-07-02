@@ -439,7 +439,7 @@ body {
   }
 }
 
-/* wfmap_scrim_v1 wfmap_realdata_v3 — frosted panel behind story text on phones */
+/* wfmap_scrim_v1 wfmap_realdata_v4 — frosted panel behind story text on phones */
 @media (max-width: 880px) {
   .chrome-top-left {
     background: rgba(237, 240, 242, 0.86);
@@ -572,10 +572,11 @@ function pm25Color(v){
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
 
-async function getSmoke(ymd){ if (smokeCache[ymd]!==undefined) return smokeCache[ymd];
-  try{ const r=await fetch(BASE+'smoke/'+ymd+'.geojson'); const g=r.ok?await r.json():null; smokeCache[ymd]=g; return g; }catch(e){ smokeCache[ymd]=null; return null; } }
-async function getAq(ymd){ if (aqCache[ymd]!==undefined) return aqCache[ymd];
-  try{ const r=await fetch(BASE+'aq/'+ymd+'.json'); const a=r.ok?await r.json():null; aqCache[ymd]=a; return a; }catch(e){ aqCache[ymd]=null; return null; } }
+function tfetch(u){ const c=new AbortController(); const t=setTimeout(function(){c.abort();}, 15000); return fetch(u,{signal:c.signal}).finally(function(){clearTimeout(t);}); }
+async function getSmoke(ymd){ if (smokeCache[ymd]) return smokeCache[ymd];
+  try{ const r=await tfetch(BASE+'smoke/'+ymd+'.geojson'); if(!r.ok) return null; const g=await r.json(); smokeCache[ymd]=g; return g; }catch(e){ return null; } }
+async function getAq(ymd){ if (aqCache[ymd]) return aqCache[ymd];
+  try{ const r=await tfetch(BASE+'aq/'+ymd+'.json'); if(!r.ok) return null; const a=await r.json(); aqCache[ymd]=a; return a; }catch(e){ return null; } }
 
 function renderSmoke(geojson){ if (smokeLayer){ map.removeLayer(smokeLayer); smokeLayer=null; }
   if (!geojson || !geojson.features || !geojson.features.length) return;
@@ -649,8 +650,8 @@ async function boot(){ const loadingHint=document.getElementById('loadingHint'),
     const slider=document.getElementById('frameSlider'); slider.min=0; slider.max=totalDays; slider.value=totalDays; slider.step=1;   // slider is TRUE TIME in days
     setupYearTicks();
     document.getElementById('timeControl').style.display='block';
-    await setDate(dates.length-1);                       // open on the most recent day
-    loadingHint.classList.add('hidden');
+    loadingHint.classList.add('hidden');                 // show the map UI right away
+    setDate(dates.length-1);                             // fill the newest day async (do not block the UI)
     slider.addEventListener('input', onSliderInput);
     document.getElementById('playBtn').addEventListener('click', togglePlay);
     document.addEventListener('keydown', function(e){ if(e.target.tagName==='INPUT') return;
