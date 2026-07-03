@@ -493,26 +493,26 @@
       ox:0.5, oy:0.5
     },
     lungs: {
-      name:"Lungs & Airways",
+      name:"Lungs",
       impacts:[
         {text:"Bacteria are a leading cause of pneumonia; bacterial [pneumonia is about 15% of hospital infections].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC8296088/"},
         {text:"In intensive care, [ventilator-associated pneumonia] from inhaled and aspirated bacteria is among the most common and serious.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC8296088/"}
       ],
-      ox:0.45, oy:0.25, label:"Lungs & Airways"
+      ox:0.45, oy:0.25, label:"Lungs"
     },
     bloodstream: {
-      name:"Bloodstream",
+      name:"Blood & Cells",
       impacts:[
         {text:"Bacteria that reach the blood can trigger [sepsis \u2014 the body's life-threatening response to infection].", url:"https://www.who.int/news-room/fact-sheets/detail/sepsis"},
         {text:"Bloodstream infections are among the [most dangerous healthcare-associated infections].", url:"https://psnet.ahrq.gov/primer/health-care-associated-infections"}
       ],
-      ox:0.52, oy:0.15, label:"Bloodstream"
+      ox:0.52, oy:0.15, label:"Blood & Cells"
     }
   };
 
   const ORDER = ["overview","lungs","bloodstream"];
   const INDEX_LABELS = {
-    overview:"Overview", lungs:"Lungs & Airways", bloodstream:"Bloodstream"
+    overview:"Overview", lungs:"Lungs", bloodstream:"Blood & Cells"
   };
 
   const hotspotsEl = document.getElementById('hotspots');

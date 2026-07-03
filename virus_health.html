@@ -493,12 +493,12 @@
       ox:0.5, oy:0.5
     },
     lungs: {
-      name:"Lungs & Airways",
+      name:"Lungs",
       impacts:[
         {text:"Respiratory viruses like flu and COVID inflame the lungs; severe cases bring [pneumonia and hospitalization].", url:"https://pubmed.ncbi.nlm.nih.gov/38104583/"},
         {text:"In children, early [RSV infection raises the risk of later asthma].", url:"https://pubmed.ncbi.nlm.nih.gov/37086744/"}
       ],
-      ox:0.45, oy:0.25, label:"Lungs & Airways"
+      ox:0.45, oy:0.25, label:"Lungs"
     },
     heart: {
       name:"Heart",
@@ -509,18 +509,18 @@
       ox:0.53, oy:0.29, label:"Heart"
     },
     brain: {
-      name:"Brain",
+      name:"Brain & Mind",
       impacts:[
         {text:"COVID is linked to [lasting neurological and cognitive effects].", url:"https://doi.org/10.1038/s41591-022-02001-z"},
         {text:"A two-year study of 1.28 million people found [raised risk of several brain and mental-health conditions].", url:"https://pubmed.ncbi.nlm.nih.gov/35987197/"}
       ],
-      ox:0.50, oy:0.07, label:"Brain"
+      ox:0.50, oy:0.07, label:"Brain & Mind"
     }
   };
 
   const ORDER = ["overview","lungs","heart","brain"];
   const INDEX_LABELS = {
-    overview:"Overview", lungs:"Lungs & Airways", heart:"Heart", brain:"Brain"
+    overview:"Overview", lungs:"Lungs", heart:"Heart", brain:"Brain & Mind"
   };
 
   const hotspotsEl = document.getElementById('hotspots');

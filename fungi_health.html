@@ -485,11 +485,11 @@
   const DATA = {
     overview: {
       name: "",
-      intro: "Mold spreads through the air as spores small enough to breathe deep into the lungs. Your body treats them as an invader \u2014 and that reaction reaches the eyes, nose, lungs, skin, immune system, and even the mind.",
+      intro: "Mold spreads through the air as spores small enough to breathe deep into the lungs, and the body treats them as an invader \u2014 a reaction that reaches the nose, the lungs, the skin, and even the mind.",
       impacts: [
-        {text:"Dampness and mold drive an estimated [21% of U.S. asthma \u2014 about 4.6 million cases a year].", url:"https://pubmed.ncbi.nlm.nih.gov/17542835/"},
-        {text:"The WHO found a damp building raises asthma and breathing problems [by about 30 to 50%].", url:"https://www.ncbi.nlm.nih.gov/books/NBK143940/"},
-        {text:"The asthma, bronchitis, and allergy they cause cost the U.S. about [$22 billion a year].", url:"https://pubmed.ncbi.nlm.nih.gov/27313630/"}
+        {text:"A Lawrence Berkeley National Lab meta-analysis (Fisk) tied home dampness and mold to [21% of U.S. asthma \u2014 about 4.6 million cases a year].", url:"https://pubmed.ncbi.nlm.nih.gov/17542835/"},
+        {text:"The World Health Organization\u2019s review found a damp, moldy building raises asthma and breathing problems [by about 30 to 50%].", url:"https://www.ncbi.nlm.nih.gov/books/NBK143940/"},
+        {text:"A 2016 analysis (Mudarri) put the U.S. asthma, bronchitis, and allergic rhinitis burden from dampness and mold at [about $22 billion a year].", url:"https://pubmed.ncbi.nlm.nih.gov/27313630/"}
       ],
       ox:0.5, oy:0.5
     },
@@ -500,54 +500,46 @@
       ],
       ox:0.50, oy:0.045, label:"Brain & Mind"
     },
-    eyes_nose: {
-      name:"Eyes, Nose & Throat",
+    nose_sinuses: {
+      name:"Nose & Sinuses",
       impacts:[
-        {text:"Mold sets off [allergic rhinitis] \u2014 the sneezing, congestion, and runny nose the National Academies tie to damp air with sufficient evidence.", url:"https://www.ncbi.nlm.nih.gov/books/NBK215639/"},
-        {text:"Spores redden the eyes into [itchy, watery allergic conjunctivitis] and irritate the nose and throat.", url:"https://www.mayoclinic.org/diseases-conditions/mold-allergy/symptoms-causes/syc-20351519"},
-        {text:"They drive [chronic and allergic fungal sinusitis] \u2014 long-lasting sinus disease \u2014 and rhinitis alone costs about $3.7 billion a year.", url:"https://www.atsjournals.org/doi/10.1513/pats.200909-098AL"}
+        {text:"The U.S. National Academies found sufficient evidence that damp, moldy air drives [allergic rhinitis \u2014 the congestion, sneezing, and runny nose of hay fever].", url:"https://www.ncbi.nlm.nih.gov/books/NBK215639/"},
+        {text:"The Mayo Clinic links mold allergy to [itchy, watery, red eyes] and an irritated nose and throat.", url:"https://www.mayoclinic.org/diseases-conditions/mold-allergy/symptoms-causes/syc-20351519"},
+        {text:"The American Thoracic Society describes mold-driven [chronic and allergic fungal sinusitis] \u2014 long-lasting sinus disease that can require surgery.", url:"https://www.atsjournals.org/doi/10.1513/pats.200909-098AL"}
       ],
-      ox:0.52, oy:0.085, label:"Eyes, Nose & Throat"
-    },
-    immune: {
-      name:"Immune & Infection",
-      impacts:[
-        {text:"In weakened immune systems, [Aspergillus mold invades the lungs and spreads] \u2014 over 2 million invasive cases a year worldwide, most of them fatal.", url:"https://www.cdc.gov/aspergillosis/statistics/index.html"},
-        {text:"[Chronic pulmonary aspergillosis], a fungus growing inside the lungs, kills about 340,000 people a year worldwide.", url:"https://pubmed.ncbi.nlm.nih.gov/38224705/"},
-        {text:"Mold in a hospital's air was tied to [14 infections and six deaths at Seattle Children\u2019s Hospital].", url:"https://www.seattletimes.com/seattle-news/times-watchdog/mold-infections-at-seattle-childrens-hospital-tied-to-14-illnesses-six-deaths-since-2001/"}
-      ],
-      ox:0.56, oy:0.17, label:"Immune & Infection"
+      ox:0.52, oy:0.085, label:"Nose & Sinuses"
     },
     lungs: {
-      name:"Lungs & Airways",
+      name:"Lungs",
       impacts:[
-        {text:"The National Academies found [sufficient evidence] linking damp, moldy air to asthma attacks, cough, wheeze, and hypersensitivity pneumonitis \u2014 the lungs inflaming as an allergic response.", url:"https://www.ncbi.nlm.nih.gov/books/NBK215639/"},
-        {text:"Damp buildings are also consistently linked to [shortness of breath, bronchitis, reduced lung function, and respiratory infections].", url:"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3114807/"},
-        {text:"About [4.8 million people worldwide] develop an allergic lung reaction to Aspergillus mold (ABPA) that scars the airways.", url:"https://pubmed.ncbi.nlm.nih.gov/23210682/"}
+        {text:"The U.S. National Academies found sufficient evidence tying damp, moldy air to asthma attacks, cough, wheeze, and [hypersensitivity pneumonitis] — the lungs inflaming as an allergic response.", url:"https://www.ncbi.nlm.nih.gov/books/NBK215639/"},
+        {text:"A global estimate (Denning) found [about 4.8 million people worldwide] develop an allergic lung reaction to Aspergillus (ABPA) that scars the airways.", url:"https://pubmed.ncbi.nlm.nih.gov/23210682/"},
+        {text:"A meta-analysis (Quansah) found mold in the home makes a child [30 to 70% more likely to develop asthma] \u2014 not just worsen it, but develop it new.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC3492391/"}
       ],
-      ox:0.43, oy:0.255, label:"Lungs & Airways"
+      ox:0.44, oy:0.25, label:"Lungs"
+    },
+    immune: {
+      name:"Immune System",
+      impacts:[
+        {text:"The CDC reports that in people with weak immune systems, inhaled [Aspergillus can invade the lungs and spread] \u2014 more than 2 million invasive cases a year worldwide, most of them fatal.", url:"https://www.cdc.gov/aspergillosis/statistics/index.html"},
+        {text:"A global review (Denning) estimated [chronic pulmonary aspergillosis], a fungus growing inside the lungs, kills about 340,000 people a year.", url:"https://pubmed.ncbi.nlm.nih.gov/38224705/"},
+        {text:"A Seattle Times investigation tied mold in the air system to [14 infections and six deaths at Seattle Children\u2019s Hospital].", url:"https://www.seattletimes.com/seattle-news/times-watchdog/mold-infections-at-seattle-childrens-hospital-tied-to-14-illnesses-six-deaths-since-2001/"}
+      ],
+      ox:0.56, oy:0.17, label:"Immune System"
     },
     skin: {
       name:"Skin",
       impacts:[
-        {text:"Mold is linked to [eczema and atopic dermatitis] flaring \u2014 the skin inflaming as an allergic response.", url:"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3114807/"},
-        {text:"Contact or exposure can bring on [dry, itchy skin and rashes].", url:"https://www.mayoclinic.org/diseases-conditions/mold-allergy/symptoms-causes/syc-20351519"}
+        {text:"A Berkeley review of the evidence (Mendell) linked mold and dampness to [eczema and atopic dermatitis] flaring.", url:"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3114807/"},
+        {text:"The Mayo Clinic lists mold allergy among triggers of [dry, itchy skin and rashes].", url:"https://www.mayoclinic.org/diseases-conditions/mold-allergy/symptoms-causes/syc-20351519"}
       ],
       ox:0.30, oy:0.45, label:"Skin"
-    },
-    children: {
-      name:"Children",
-      impacts:[
-        {text:"Mold in the home makes a child [30 to 70% more likely to develop asthma] \u2014 not just worsen it, but develop it new.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC3492391/"},
-        {text:"Children in damp homes also face [markedly more respiratory infections] and are the most susceptible overall.", url:"https://www.ncbi.nlm.nih.gov/books/NBK143940/"}
-      ],
-      ox:0.57, oy:0.275, label:"Children"
     }
   };
 
-  const ORDER = ["overview","eyes_nose","lungs","immune","skin","children","brain"];
+  const ORDER = ["overview","brain","nose_sinuses","lungs","immune","skin"];
   const INDEX_LABELS = {
-    overview:"Overview", eyes_nose:"Eyes, Nose & Throat", lungs:"Lungs & Airways", immune:"Immune & Infection", skin:"Skin", children:"Children", brain:"Brain & Mind"
+    overview:"Overview", brain:"Brain & Mind", nose_sinuses:"Nose & Sinuses", lungs:"Lungs", immune:"Immune System", skin:"Skin"
   };
 
   const hotspotsEl = document.getElementById('hotspots');
