@@ -494,6 +494,7 @@ const PLAY_INTERVAL = 700;
 
 const realMonth = new Date().getMonth(); // 0=Jan .. 11=Dec
 let currentMonth = realMonth;
+let loopStart = realMonth;   // the month a play-tour started from; tour rests back here
 let playing = false;
 let playTimer = null;
 let stateLayer = null;
@@ -577,8 +578,7 @@ function play(){
   playing = true;
   document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
   document.getElementById('playBtn').setAttribute('aria-label','Pause');
-  currentMonth = 0;
-  recolor(currentMonth);
+  loopStart = currentMonth;   // tour the whole year from here, then rest back here
   playTimer = setTimeout(playLoop, PLAY_INTERVAL);
 }
 function pause(){
@@ -590,11 +590,9 @@ function pause(){
 function togglePlay(){ if (playing) pause(); else play(); }
 function playLoop(){
   if (!playing) return;
-  if (currentMonth >= realMonth) {
-    pause();
-    return;
-  }
-  recolor(currentMonth + 1);
+  const next = (currentMonth + 1) % 12;   // wrap through the full year
+  recolor(next);
+  if (next === loopStart) { pause(); return; }  // completed the year — rest on the start (current) month
   playTimer = setTimeout(playLoop, PLAY_INTERVAL);
 }
 
@@ -678,13 +676,21 @@ window.addEventListener('resize', function(){
   resizeTimer = setTimeout(function(){ map.invalidateSize(); fitUS(); }, 100);
 });
 
-// Autoplay on load — respect prefers-reduced-motion
+// Open on the CURRENT month (strong, in-season) — not January — then tour the year once.
+recolor(currentMonth);
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  currentMonth = 0;
-  recolor(currentMonth);
   play();
-} else {
-  recolor(currentMonth);
+}
+
+// Embedded in the deck wrapper: pause the seasonal tour when scrolled away, resume when active.
+if (isEmbedded) {
+  window.addEventListener('message', function(ev){
+    const d = ev.data || {};
+    if (d.type === 'nf-inactive') { pause(); }
+    else if (d.type === 'nf-active') {
+      if (!playing && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) play();
+    }
+  });
 }
 </script>
 </body>
