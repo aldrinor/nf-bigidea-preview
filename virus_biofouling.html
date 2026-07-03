@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The air system spreads the virus it caught — NanoFlashing</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* === Background video block (right side) === */
+.video-stack{
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
+  z-index:0;
+  overflow:hidden;
+  background:var(--bg);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.video-stack video,
+.video-stack img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.video-stack img.poster{
+  opacity:0;
+  z-index:3;
+}
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* === Drifting grey smoke overlay (right block) === */
+.smoke{
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.smoke span{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  filter:blur(50px);
+  mix-blend-mode:normal;
+  will-change:transform, opacity;
+}
+.smoke .s1{
+  width:70vw; height:65vh;
+  top:-15vh; right:-12vw;
+  background:radial-gradient(circle at 50% 50%, rgba(180,194,172,0.85), rgba(180,194,172,0.45) 50%, transparent 75%);
+  animation:drift1 24s ease-in-out infinite;
+}
+.smoke .s2{
+  width:60vw; height:60vh;
+  top:15vh; right:-6vw;
+  background:radial-gradient(circle at 50% 50%, rgba(188,200,178,0.8), rgba(188,200,178,0.4) 55%, transparent 78%);
+  animation:drift2 32s ease-in-out infinite;
+}
+.smoke .s3{
+  width:50vw; height:50vh;
+  top:45vh; right:4vw;
+  background:radial-gradient(circle at 50% 50%, rgba(174,188,166,0.75), rgba(174,188,166,0.35) 55%, transparent 80%);
+  animation:drift3 28s ease-in-out infinite;
+}
+.smoke .s4{
+  width:40vw; height:45vh;
+  top:5vh; right:22vw;
+  background:radial-gradient(circle at 50% 50%, rgba(192,202,182,0.7), rgba(192,202,182,0.3) 60%, transparent 82%);
+  animation:drift4 38s ease-in-out infinite;
+}
+@keyframes drift1{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+  35%  { transform:translate3d(-8vw,4vh,0) scale(1.1); opacity:1; }
+  70%  { transform:translate3d(-4vw,-3vh,0) scale(1.05); opacity:0.7; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+}
+@keyframes drift2{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+  30%  { transform:translate3d(-6vw,-4vh,0) scale(1.12); opacity:0.95; }
+  65%  { transform:translate3d(-10vw,3vh,0) scale(1.06); opacity:0.6; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+}
+@keyframes drift3{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+  40%  { transform:translate3d(-7vw,-5vh,0) scale(1.14); opacity:0.9; }
+  75%  { transform:translate3d(-3vw,4vh,0) scale(1.08); opacity:0.5; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+}
+@keyframes drift4{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+  50%  { transform:translate3d(-9vw,3vh,0) scale(1.1); opacity:0.85; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+}
+@media (prefers-reduced-motion: reduce){
+  .smoke span{ animation:none !important; }
+  .smoke .s1{ opacity:0.8; transform:translate3d(-4vw,0,0); }
+  .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
+  .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
+  .smoke .s4{ opacity:0.55; }
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:34px;
+}
+.headline em{
+  color:var(--red);
+  font-style:normal;
+  font-weight:600;
+}
+
+/* === Stat block === */
+.stat-block{
+  display:flex;
+  align-items:center;
+  gap:24px;
+  margin-bottom:8px;
+}
+.big-number{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--red);
+  font-size:clamp(56px, 6vw, 96px);
+  line-height:0.9;
+  letter-spacing:-0.04em;
+  font-variant-numeric:tabular-nums;
+}
+
+.caption{
+  font-size:clamp(17px, 1.5vw, 20px);
+  line-height:1.45;
+  color:var(--ink);
+  max-width:26ch;
+  padding-top:6px;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width: 440px;
+  font-size:19px;
+  line-height:1.55;
+  margin-top:32px;
+  color: #1a1a1a;
+}
+.body-text a{
+  color:inherit;
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.55);
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.body-text a:hover{
+  color:var(--red);
+  border-bottom-color:var(--red);
+}
+
+/* === Mobile === */
+@media (max-width: 880px){
+  section{
+    overflow-x:hidden;
+  }
+  .video-stack,
+  .smoke{
+    width:100%;
+    max-width:100%;
+    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+    mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+  }
+  .scrim{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:linear-gradient(to right,
+      var(--bg) 0%,
+      rgba(237,240,242,0.88) 35%,
+      rgba(237,240,242,0.45) 65%,
+      rgba(237,240,242,0.2) 100%);
+  }
+  .text-col{
+    max-width:none;
+    width:100%;
+    padding-left:clamp(24px, 6vw, 32px);
+    padding-right:clamp(24px, 6vw, 32px);
+  }
+  .stat-block{
+    flex-direction:column;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .caption{
+    padding-top:0;
+    max-width:none;
+  }
+  .body-text{
+    font-size:16px;
+    max-width:none;
+    margin-bottom:12px;
+  }
+  .body-text:last-child{ margin-bottom:0; }
+  .scrim{
+    background:linear-gradient(to right,
+      rgba(237,240,242,0.96) 0%,
+      rgba(237,240,242,0.82) 40%,
+      rgba(237,240,242,0.4) 72%,
+      rgba(237,240,242,0.1) 100%);
+  }
+}
+</style>
+</head>
+<body>
+
+<section id="section">
+  <div class="video-stack" id="videoStack">
+    <video id="videoA" src="assets/videos/filter_media_v2.mp4"
+           poster="assets/videos/posters/filter_media_v2.jpg"
+           muted playsinline preload="auto"
+           style="opacity:1; z-index:1;"></video>
+    <img class="poster" src="assets/videos/posters/filter_media_v2.jpg" alt="">
+  </div>
+
+  <div class="smoke" aria-hidden="true">
+    <span class="s1"></span>
+    <span class="s2"></span>
+    <span class="s3"></span>
+    <span class="s4"></span>
+  </div>
+
+  <div class="scrim"></div>
+
+  <div class="text-col">
+    <h1 class="headline">
+      The filter holds the virus —<br>
+      the air <em>system</em> spreads it
+    </h1>
+
+    <div class="stat-block">
+      <div class="big-number" id="bigNumber">~0%</div>
+      <p class="caption">virus infections on the Diamond Princess, spread through the ship’s shared air.</p>
+    </div>
+
+    <p class="body-text">
+      An ordinary filter can catch virus, but it does not destroy it — and it does nothing to stop a system that keeps recirculating the air.
+    </p>
+    <p class="body-text">
+      Outbreak teams have traced airborne virus through the ventilation itself: in one restaurant, <a href="https://pubmed.ncbi.nlm.nih.gov/32240078/" target="_blank" rel="noopener">SARS-CoV-2 moved table to table along the air-conditioning stream</a>. One contaminated flow reaches every seat downwind.
+    </p>
+    <p class="body-text">
+      On the quarantined ship Diamond Princess, <a href="https://pubmed.ncbi.nlm.nih.gov/33536312/" target="_blank" rel="noopener">712 people were infected</a> as aerosols spread through the shared air — the load an ordinary filter holds but never takes out of play.
+    </p>
+  </div>
+</section>
+
+<script>
+(function(){
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const videoStack = document.getElementById('videoStack');
+  const videoA = document.getElementById('videoA');
+  const bigNumber = document.getElementById('bigNumber');
+
+  /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
+  if (reducedMotion) {
+    videoStack.classList.add('reduced');
+  }
+  const isEmbedded = window.self !== window.top;
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = '0';
+    animateNumber();
+  }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} }
+
+  /* ---------- Number animation ---------- */
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+
+  function animateNumber(){
+    const DURATION = 1600;
+    const start = performance.now();
+
+    function step(now){
+      const p = Math.min(1, (now - start) / DURATION);
+      const e = easeOutCubic(p);
+
+      // count big number 0 -> 95
+      const n = Math.round(e * 712);
+      bigNumber.textContent = n.toLocaleString();
+
+      if (p < 1) {
+        requestAnimationFrame(step);
+      } else {
+        bigNumber.textContent = '712';
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  if (reducedMotion) {
+    bigNumber.textContent = '712';
+  } else {
+    bigNumber.textContent = '0';
+    if (isEmbedded) {
+      // In the deck: play the discharge video + count only when this section becomes active.
+      window.addEventListener('message', function(e){
+        if (!e.data) return;
+        if (e.data.type === 'nf-active') startFilter();
+        else if (e.data.type === 'nf-inactive') stopFilter();
+      });
+    } else {
+      // Standalone: start from the top when it scrolls into view.
+      const io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById('section'));
+    }
+  }
+})();
+</script>
+</body>
+</html>
