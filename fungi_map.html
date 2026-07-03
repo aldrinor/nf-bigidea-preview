@@ -423,7 +423,6 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <div class="kicker">Mold across North America</div>
       <h2>Mold reaches every region — <span class="em">and it swells with the season</span></h2>
       <p class="caption">Outdoor mold is everywhere, and it swells through summer to a peak in <a href="https://www.epa.gov/mold/mold-and-health" target="_blank" rel="noopener">late summer and fall</a>. About <a href="https://pubmed.ncbi.nlm.nih.gov/17542835/" target="_blank" rel="noopener">half of U.S. homes</a> already have a mold or dampness problem.</p>
     </div>
@@ -435,20 +434,6 @@ body {
     <div class="legend-labels">
       <span>Lower</span>
       <span>Higher</span>
-    </div>
-    <div class="legend-pm">
-      <div class="legend-pm-item">
-        <span class="legend-dot" style="background:#f3c8c2"></span>
-        <span>Low</span>
-      </div>
-      <div class="legend-pm-item">
-        <span class="legend-dot" style="background:#e5584c"></span>
-        <span>High</span>
-      </div>
-      <div class="legend-pm-item">
-        <span class="legend-dot" style="background:#e23b3b"></span>
-        <span>Very High</span>
-      </div>
     </div>
   </div>
 
@@ -497,7 +482,8 @@ for (const fips in MOLD.scores) {
 const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const PLAY_INTERVAL = 700;
 
-let currentMonth = 7;            // August — peak season
+const realMonth = new Date().getMonth(); // 0=Jan .. 11=Dec
+let currentMonth = realMonth;
 let playing = false;
 let playTimer = null;
 let stateLayer = null;
@@ -581,7 +567,9 @@ function play(){
   playing = true;
   document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
   document.getElementById('playBtn').setAttribute('aria-label','Pause');
-  playLoop();
+  currentMonth = 0;
+  recolor(currentMonth);
+  playTimer = setTimeout(playLoop, PLAY_INTERVAL);
 }
 function pause(){
   playing = false;
@@ -592,7 +580,11 @@ function pause(){
 function togglePlay(){ if (playing) pause(); else play(); }
 function playLoop(){
   if (!playing) return;
-  recolor((currentMonth + 1) % 12);
+  if (currentMonth >= realMonth) {
+    pause();
+    return;
+  }
+  recolor(currentMonth + 1);
   playTimer = setTimeout(playLoop, PLAY_INTERVAL);
 }
 
@@ -676,7 +668,11 @@ window.addEventListener('resize', function(){
 
 // Autoplay on load — respect prefers-reduced-motion
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  currentMonth = 0;
+  recolor(currentMonth);
   play();
+} else {
+  recolor(currentMonth);
 }
 </script>
 </body>
