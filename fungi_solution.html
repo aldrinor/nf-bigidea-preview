@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing captures the mold and destroys what is alive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  max-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size:clamp(24px, 2.7vw, 34px);
+  line-height:1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:28px;
+}
+.headline > span{
+  display:block;
+}
+.headline em{
+  color:var(--accent);
+  font-style:normal;
+  font-weight:600;
+}
+
+/* === Stat block === */
+.stat-block{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:22px;
+}
+.stat-row{
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+.big-number{
+  font-family:var(--stack);
+  font-weight:700;
+  font-size:clamp(52px, 6vw, 92px);
+  line-height:0.95;
+  letter-spacing:-0.03em;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+  width:2.95em;
+  text-align:right;
+}
+.big-number.accent{ color:var(--accent); }
+.big-number.ink{ color:var(--ink); }
+
+.caption{
+  font-family:var(--stack);
+  font-size:clamp(16px, 1.5vw, 19px);
+  line-height:1.4;
+  color:var(--ink);
+  max-width:24ch;
+  padding-top:4px;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width:440px;
+  font-size:19px;
+  line-height:1.55;
+  color:#1a1a1a;
+  margin-bottom:22px;
+}
+
+/* === Advocacy link === */
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+
+/* === Chart column === */
+.chart-col{
+  flex:1 1 0;
+  min-width:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:stretch;
+  padding:clamp(24px, 4vh, 56px) clamp(24px, 3vw, 48px) clamp(20px, 3vh, 36px);
+  position:relative;
+  z-index:2;
+}
+
+.chart-group{
+  display:flex;
+  flex-direction:column;
+  gap:clamp(20px, 3vh, 32px);
+  width:100%;
+  max-width:620px;
+  margin:0 auto;
+}
+
+/* === Antimicrobial table === */
+.table-block{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.table-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.02em;
+  color:var(--muted);
+}
+.amr-table{
+  width:100%;
+  border-collapse:collapse;
+  font-family:var(--stack);
+}
+.amr-table tr{
+  border-top:1px solid var(--hair);
+}
+.amr-table tr:last-child{
+  border-bottom:1px solid var(--hair);
+}
+.amr-table td{
+  padding:clamp(12px, 1.6vh, 18px) 4px;
+  vertical-align:middle;
+  font-size:clamp(14px, 1.2vw, 17px);
+  line-height:1.35;
+}
+.amr-table td.org{
+  color:var(--ink);
+  font-weight:400;
+}
+.amr-table td.org .paren{
+  color:var(--muted);
+}
+.amr-table td.result{
+  text-align:right;
+  color:var(--ink);
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.amr-table td.result .fig{
+  color:var(--accent);
+  font-weight:600;
+}
+.table-foot{
+  font-family:var(--stack);
+  font-size:12px;
+  line-height:1.45;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* === BAMS field-proof card === */
+.bams-card{
+  background:rgba(255,255,255,0.5);
+  border:1px solid var(--hair);
+  border-radius:12px;
+  padding:clamp(18px, 2.4vh, 26px) clamp(18px, 2vw, 28px);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.bams-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.02em;
+  color:var(--muted);
+}
+.bams-split{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+}
+.bams-side{
+  flex:1 1 0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:2px clamp(12px, 1.6vw, 22px);
+}
+.bams-side:first-child{
+  padding-left:0;
+}
+.bams-side:last-child{
+  padding-right:0;
+}
+.bams-divider{
+  width:1px;
+  background:var(--hair);
+  flex:0 0 auto;
+}
+.bams-figure{
+  font-family:var(--stack);
+  font-weight:600;
+  font-size:clamp(28px, 3.4vw, 44px);
+  line-height:1;
+  letter-spacing:-0.02em;
+  font-variant-numeric:tabular-nums;
+}
+.bams-figure.blue{ color:var(--accent); }
+.bams-figure.red{ color:var(--red); }
+.bams-caption{
+  font-family:var(--stack);
+  font-size:clamp(11px, 0.95vw, 13px);
+  line-height:1.4;
+  color:var(--muted);
+  max-width:24ch;
+}
+.bams-foot{
+  font-family:var(--stack);
+  font-size:12px;
+  line-height:1.45;
+  color:var(--muted);
+}
+
+/* === Mobile === */
+@media (max-width: 880px){
+  section{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    min-height:100vh;
+    max-height:none;
+    overflow:visible;
+  }
+  .text-col{
+    max-width:none;
+    width:100%;
+    align-items:stretch;
+    padding-left:clamp(20px,5vw,28px);
+    padding-right:clamp(20px,5vw,28px);
+    padding-top:clamp(20px,4vh,32px);
+    padding-bottom:8px;
+    flex:0 0 auto;
+  }
+  .headline{
+    font-size:clamp(26px,6.5vw,34px);
+    line-height:1.18;
+    margin-bottom:clamp(18px,3vh,24px);
+    color:var(--headline-ink);
+  }
+  .stat-block{
+    gap:clamp(18px,3vh,26px);
+    margin-bottom:clamp(20px,3vh,28px);
+  }
+  .stat-row{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    width:100%;
+  }
+  .big-number{
+    font-size:clamp(44px,12vw,64px);
+    line-height:1;
+    width:auto;
+    text-align:left;
+  }
+  .caption{
+    font-size:clamp(13px,3.2vw,15px);
+    line-height:1.45;
+    max-width:none;
+    width:100%;
+    color:var(--muted);
+    white-space:normal;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.6;
+    margin-bottom:clamp(16px,2.5vh,22px);
+    color:var(--ink);
+  }
+  .advocacy-link{
+    font-size:16px;
+    line-height:1.4;
+    margin-bottom:clamp(8px,1.5vh,14px);
+  }
+  .chart-col{
+    flex:0 0 auto;
+    min-height:0;
+    height:auto;
+    padding:4px clamp(16px,4vw,24px) clamp(20px,3vh,32px);
+  }
+  .chart-group{
+    max-width:none;
+    gap:20px;
+  }
+  .amr-table td{
+    font-size:14px;
+    padding:11px 2px;
+  }
+  .amr-table td.result{
+    white-space:normal;
+    text-align:right;
+  }
+  .bams-figure{
+    font-size:clamp(26px, 8vw, 36px);
+  }
+  .bams-side{
+    padding:2px 10px;
+  }
+}
+
+/* === Short screens (1366×768 etc.) === */
+@media (max-height: 760px) and (min-width: 881px){
+  .headline{
+    font-size:clamp(26px, 2.6vw, 34px);
+    margin-bottom:22px;
+  }
+  .big-number{
+    font-size:clamp(46px, 5.2vw, 72px);
+  }
+  .stat-block{
+    gap:4px;
+    margin-bottom:18px;
+  }
+  .body-text{
+    font-size:17px;
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+  .chart-col{
+    padding:24px 32px 24px;
+  }
+  .amr-table td{
+    padding:10px 4px;
+  }
+  .bams-figure{
+    font-size:clamp(26px, 3vw, 38px);
+  }
+}
+@media (max-height: 680px) and (min-width: 881px){
+  .headline{
+    font-size:clamp(22px, 2.2vw, 28px);
+    margin-bottom:16px;
+  }
+  .big-number{
+    font-size:clamp(38px, 4.4vw, 58px);
+  }
+  .stat-block{
+    margin-bottom:14px;
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.45;
+    margin-bottom:14px;
+  }
+  .amr-table td{
+    padding:8px 4px;
+    font-size:14px;
+  }
+  .bams-figure{
+    font-size:clamp(24px, 2.8vw, 32px);
+  }
+  .chart-group{
+    gap:18px;
+  }
+  .bams-card{
+    padding:14px 18px;
+    gap:10px;
+  }
+}
+</style>
+</head>
+<body>
+
+<section id="section">
+  <div class="text-col">
+    <h1 class="headline">
+      <span>NanoFlashing</span>
+      <span><em>captures</em> the mold</span>
+      <span>and destroys what is alive</span>
+    </h1>
+
+    <div class="stat-block">
+      <div class="stat-row">
+        <div class="big-number accent">99.7%</div>
+        <p class="caption">of airborne Aspergillus mold captured at the media</p>
+      </div>
+      <div class="stat-row">
+        <div class="big-number accent">98.7%</div>
+        <p class="caption">of those captured spores destroyed — viability gone</p>
+      </div>
+    </div>
+
+    <p class="body-text">
+      NanoFlashing carries a permanent positive charge. It pulls the negatively charged spore onto the fiber and destroys the living cell on contact — by physical action, not chemistry. Nothing is left alive in the media to grow or shed back.
+    </p>
+
+    <a class="advocacy-link" href="#evidence">Evidence &rarr;</a>
+  </div>
+
+  <div class="chart-col">
+    <div class="chart-group">
+
+      <div class="table-block">
+        <div class="table-label">At the Media, Against Named Organisms</div>
+        <table class="amr-table">
+          <tbody>
+            <tr>
+              <td class="org">Aspergillus fumigatus <span class="paren">(mold)</span></td>
+              <td class="result"><span class="fig">99.7%</span> captured · <span class="fig">98.7%</span> viability ↓</td>
+            </tr>
+            <tr>
+              <td class="org">Candida albicans <span class="paren">(yeast)</span></td>
+              <td class="result"><span class="fig">99.9%</span></td>
+            </tr>
+            <tr>
+              <td class="org">Staphylococcus aureus</td>
+              <td class="result"><span class="fig">98–99×</span> reduction</td>
+            </tr>
+            <tr>
+              <td class="org">Escherichia coli</td>
+              <td class="result"><span class="fig">50×</span> reduction</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="table-foot">Mass General / Harvard · captured and destroyed by physical action, not chemistry.</p>
+      </div>
+
+      <div class="bams-card">
+        <div class="bams-label">Independent Field Proof · BAMS</div>
+        <div class="bams-split">
+          <div class="bams-side">
+            <div class="bams-figure blue">−95.44%</div>
+            <div class="bams-caption">living airborne particles at the NanoFlashing vent</div>
+          </div>
+          <div class="bams-divider"></div>
+          <div class="bams-side">
+            <div class="bams-figure red">+2,092%</div>
+            <div class="bams-caption">at the ordinary filter beside it</div>
+          </div>
+        </div>
+        <p class="bams-foot">Two identical hospital air-handling towers, 12 months side by side · p&lt;0.001.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
