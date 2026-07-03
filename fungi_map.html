@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mold across North America — NanoFlashing</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #edf0f2;
+  --ink: #1f2327;
+  --muted: #8a9095;
+  --faint: #aab2b8;
+  --accent: #1b7bff;
+  --red: #e23b3b;
+  --hair: rgba(20,24,28,0.08);
+  --stack: -apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--stack);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.map-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+#map {
+  width: 100%;
+  height: 100%;
+  background: #e8ecee;
+}
+
+/* Chrome */
+.chrome {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+.chrome > * { pointer-events: auto; }
+
+.chrome-top-left {
+  top: calc(50% - 162px);
+  left: clamp(24px, 6vw, 96px);
+  max-width: 720px;
+}
+.kicker {
+  font-family: var(--stack);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.chrome-top-left h2 {
+  font-family: var(--stack);
+  font-weight: 600;
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
+  color: #1a1a1a;
+  margin-bottom: 28px;
+  letter-spacing: -0.022em;
+  text-shadow: 0 1px 8px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.9);
+}
+.chrome-top-left h2 .accent { color: var(--accent); }
+.chrome-top-left h2 .em { color: var(--red); font-weight: 700; }
+.caption {
+  font-family: var(--stack);
+  font-size: 19px;
+  line-height: 1.55;
+  color: #1a1a1a;
+  max-width: 440px;
+  text-shadow: 0 1px 6px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.95);
+}
+.caption a {
+  color: #1a1a1a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(20,24,28,0.22);
+  transition: color .15s ease, border-color .15s ease;
+}
+.caption a:hover { color: var(--red); border-bottom-color: var(--red); }
+
+/* Legend */
+.chrome-legend {
+  bottom: 22px;
+  left: 22px;
+  min-width: 270px;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+  font-size: 11px;
+}
+.legend-title {
+  font-family: var(--stack);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.legend-gradient {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right,
+    #f6e2df 0%,
+    #f3c8c2 21.4%,
+    #ec8b81 45.7%,
+    #e5584c 71.4%,
+    #e23b3b 97.1%);
+  margin-bottom: 4px;
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.legend-pm {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.legend-pm-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0.5px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1);
+}
+.legend-note {
+  font-family: var(--stack);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* Source */
+.chrome-source {
+  bottom: 22px;
+  right: 22px;
+  max-width: 320px;
+  text-align: right;
+  font-family: var(--stack);
+  font-size: 12px;
+  color: var(--muted);
+}
+.chrome-source a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--hair);
+  transition: color 0.15s, border-color 0.15s;
+}
+.chrome-source a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Time control */
+.time-control {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px;
+  padding: 16px 22px 18px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.12);
+  width: min(580px, calc(100vw - 44px));
+}
+.tc-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.tc-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.tc-btn:hover { background: #c92f2f; }
+.tc-btn:active { transform: scale(0.94); }
+.tc-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.tc-date {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tc-counter {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.tc-slider-wrap {
+  position: relative;
+  margin: 2px 0 0;
+}
+.tc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--faint);
+  outline: none;
+  cursor: pointer;
+}
+.tc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
+}
+.tc-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.tc-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
+
+.tc-ticks {
+  position: relative;
+  height: 24px;
+  margin-top: 7px;
+}
+.tc-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+}
+.tc-tick::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 5px;
+  background: var(--faint);
+  margin: 0 auto 2px;
+}
+
+/* Leaflet popup */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  border: none;
+}
+.leaflet-popup-content {
+  font-family: var(--stack);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 10px 14px;
+}
+.leaflet-popup-tip { box-shadow: 0 4px 18px rgba(0,0,0,0.14); }
+
+.leaflet-control-attribution {
+  font-family: var(--stack);
+  font-size: 9px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 4px 0 0 0;
+}
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+.leaflet-control-zoom a {
+  border-radius: 6px !important;
+  margin-bottom: 4px;
+  font-family: var(--stack);
+  font-weight: 500;
+}
+
+/* Leaflet tooltip */
+.leaflet-tooltip {
+  font-family: var(--stack);
+  font-size: 12px;
+  background: rgba(31, 35, 39, 0.92);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+.leaflet-tooltip-top:before { border-top-color: rgba(31,35,39,0.92); }
+.leaflet-tooltip-bottom:before { border-bottom-color: rgba(31,35,39,0.92); }
+.leaflet-tooltip-left:before { border-left-color: rgba(31,35,39,0.92); }
+.leaflet-tooltip-right:before { border-right-color: rgba(31,35,39,0.92); }
+
+/* Responsive */
+@media (max-width: 1120px) {
+  .chrome-legend { bottom: 140px; }
+}
+@media (max-width: 700px) {
+  .chrome-top-left { max-width: calc(100vw - 44px); }
+  .chrome-top-left h2 { font-size: 24px; }
+  .caption { font-size: 16px; max-width: 100%; }
+  .chrome-legend { display: none; }
+  .time-control {
+    width: calc(100vw - 24px);
+    padding: 10px 14px 8px;
+    bottom: 12px;
+  }
+  .tc-date { font-size: 12px; }
+  .tc-btn { width: 34px; height: 34px; }
+  .chrome-source { font-size: 9px; bottom: 12px; right: 12px; }
+}
+
+@media (max-height: 520px) {
+  .chrome-legend { display: none; }
+  .chrome-top-left {
+    top: 14px;
+    max-width: min(54vw, 440px);
+  }
+  .chrome-top-left h2 {
+    font-size: clamp(17px, 2.6vw, 22px);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .caption {
+    font-size: 13px;
+    line-height: 1.45;
+    max-width: min(52vw, 420px);
+  }
+  .time-control {
+    bottom: 10px;
+    padding: 8px 14px;
+  }
+  .tc-date { font-size: 13px; }
+  .tc-ticks { height: 16px; margin-top: 4px; }
+  .tc-tick { font-size: 12px; }
+  .tc-btn { width: 32px; height: 32px; }
+  .chrome-source { bottom: 10px; font-size: 10px; }
+}
+
+@media (max-height: 430px) {
+  .caption { font-size: 12px; }
+  .time-control { bottom: 8px; }
+}
+
+@media (max-width: 880px) {
+  .chrome-top-left {
+    background: rgba(237, 240, 242, 0.86);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 16px rgba(20, 24, 28, 0.10);
+    max-width: calc(100vw - 32px);
+    left: 16px;
+    right: 16px;
+    top: 76px;
+  }
+  .chrome-top-left h2 {
+    text-shadow: none;
+    font-size: clamp(22px, 6vw, 28px);
+    margin-bottom: 10px;
+  }
+  .caption {
+    text-shadow: none;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="map-wrap">
+  <div id="map"></div>
+
+  <div class="chrome chrome-top-left">
+    <div>
+      <div class="kicker">Mold across North America</div>
+      <h2>Mold reaches every region — <span class="em">and it swells with the season</span></h2>
+      <p class="caption">Outdoor mold is everywhere, and it swells through summer to a peak in <a href="https://www.epa.gov/mold/mold-and-health" target="_blank" rel="noopener">late summer and fall</a>. About <a href="https://pubmed.ncbi.nlm.nih.gov/17542835/" target="_blank" rel="noopener">half of U.S. homes</a> already have a mold or dampness problem.</p>
+    </div>
+  </div>
+
+  <div class="chrome chrome-legend">
+    <div class="legend-title">Mold Level</div>
+    <div class="legend-gradient"></div>
+    <div class="legend-labels">
+      <span>Lower</span>
+      <span>Higher</span>
+    </div>
+    <div class="legend-pm">
+      <div class="legend-pm-item">
+        <span class="legend-dot" style="background:#f3c8c2"></span>
+        <span>Low</span>
+      </div>
+      <div class="legend-pm-item">
+        <span class="legend-dot" style="background:#e5584c"></span>
+        <span>High</span>
+      </div>
+      <div class="legend-pm-item">
+        <span class="legend-dot" style="background:#e23b3b"></span>
+        <span>Very High</span>
+      </div>
+    </div>
+    <div class="legend-note">U.S. shown · Canada data coming.</div>
+  </div>
+
+  <div class="chrome chrome-source" id="chromeSource"></div>
+
+  <div class="time-control" id="timeControl">
+    <div class="tc-top">
+      <button class="tc-btn" id="playBtn" aria-label="Play">
+        <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="tc-date" id="dateLabel">August</div>
+      <div class="tc-counter" id="tcCounter">8 / 12</div>
+    </div>
+    <div class="tc-slider-wrap">
+      <input type="range" class="tc-slider" id="frameSlider" min="0" max="11" value="7" step="1">
+    </div>
+    <div class="tc-ticks" id="monthTicks"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="moldData.js"></script>
+<script>
+// ============================================================
+//  Mold across North America — choropleth by state, seasonal pulse
+// ============================================================
+const isEmbedded = window.self !== window.top;
+
+const map = L.map('map', {
+  zoomControl: false, scrollWheelZoom: !isEmbedded,
+  center: [46, -97], zoom: 4, minZoom: 3, maxZoom: 12,
+  maxBounds: [[12, -150], [74, -48]], maxBoundsViscosity: 0.85
+});
+L.control.zoom({ position: 'topright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO', detectRetina: true
+}).addTo(map);
+
+const MOLD = window.MOLD;
+const scoreByName = {};
+for (const fips in MOLD.scores) {
+  const s = MOLD.scores[fips];
+  scoreByName[s.n] = s.s;
+}
+
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PLAY_INTERVAL = 700;
+
+let currentMonth = 7;            // August — peak season
+let playing = false;
+let playTimer = null;
+let stateLayer = null;
+let openTooltipLayer = null;
+
+const RAMP_STOPS = [[0,'#f6e2df'],[15,'#f3c8c2'],[32,'#ec8b81'],[50,'#e5584c'],[68,'#e23b3b']];
+const NO_DATA_COLOR = '#d7dbde';
+
+function hexToRgb(h){ h = h.replace('#',''); return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
+function rgbToHex(r,g,b){
+  return '#' + [r,g,b].map(function(x){
+    const s = Math.max(0, Math.min(255, Math.round(x))).toString(16);
+    return s.length < 2 ? '0'+s : s;
+  }).join('');
+}
+
+function scoreColor(v){
+  if (v == null || isNaN(v)) return NO_DATA_COLOR;
+  if (v <= 0) return RAMP_STOPS[0][1];
+  if (v >= 68) return RAMP_STOPS[RAMP_STOPS.length-1][1];
+  let a = RAMP_STOPS[0], b = RAMP_STOPS[RAMP_STOPS.length-1];
+  for (let i=0;i<RAMP_STOPS.length-1;i++){
+    if (v >= RAMP_STOPS[i][0] && v <= RAMP_STOPS[i+1][0]){ a = RAMP_STOPS[i]; b = RAMP_STOPS[i+1]; break; }
+  }
+  const span = (b[0]-a[0]) || 1;
+  const k = (v-a[0])/span;
+  const ca = hexToRgb(a[1]), cb = hexToRgb(b[1]);
+  return rgbToHex(ca[0]+(cb[0]-ca[0])*k, ca[1]+(cb[1]-ca[1])*k, ca[2]+(cb[2]-ca[2])*k);
+}
+
+function levelBand(v){
+  if (v == null) return 'No Data';
+  const bands = MOLD.meta.levelBands;
+  for (let i=0;i<bands.length;i++){
+    const lo = bands[i][0], hi = bands[i][1], word = bands[i][2];
+    if (v >= lo && v < hi) return word;
+  }
+  return bands[bands.length-1][2];
+}
+
+function adjustedScore(stateName, month){
+  const base = scoreByName[stateName];
+  if (base == null) return null;
+  const factor = MOLD.season.index[month];
+  return Math.round(base * factor);
+}
+
+function styleFor(stateName, month){
+  const v = adjustedScore(stateName, month);
+  const fill = (v == null) ? NO_DATA_COLOR : scoreColor(v);
+  const op  = (v == null) ? 0.35 : 0.78;
+  return { fillColor: fill, fillOpacity: op, weight: 1, color: '#ffffff' };
+}
+
+function tooltipText(stateName, month){
+  const v = adjustedScore(stateName, month);
+  if (v == null) return stateName + ' · No Data';
+  return stateName + ' · ' + levelBand(v) + ' · ' + v;
+}
+
+function recolor(month){
+  month = Math.max(0, Math.min(11, month|0));
+  currentMonth = month;
+  document.getElementById('dateLabel').textContent = MONTHS_FULL[month];
+  document.getElementById('frameSlider').value = month;
+  document.getElementById('tcCounter').textContent = (month+1) + ' / 12';
+  if (!stateLayer) return;
+  stateLayer.eachLayer(function(layer){
+    const name = layer.feature && layer.feature.properties && layer.feature.properties.name;
+    const v = adjustedScore(name, month);
+    const fill = (v == null) ? NO_DATA_COLOR : scoreColor(v);
+    const op  = (v == null) ? 0.35 : 0.78;
+    layer.setStyle({ fillColor: fill, fillOpacity: op });
+    if (layer === openTooltipLayer){
+      try { layer.setTooltipContent(tooltipText(name, month)); } catch(e){}
+    }
+  });
+}
+
+function play(){
+  playing = true;
+  document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label','Pause');
+  playLoop();
+}
+function pause(){
+  playing = false;
+  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label','Play');
+  if (playTimer){ clearTimeout(playTimer); playTimer = null; }
+}
+function togglePlay(){ if (playing) pause(); else play(); }
+function playLoop(){
+  if (!playing) return;
+  recolor((currentMonth + 1) % 12);
+  playTimer = setTimeout(playLoop, PLAY_INTERVAL);
+}
+
+function setupMonthTicks(){
+  const container = document.getElementById('monthTicks');
+  container.innerHTML = '';
+  const ticks = [['Jan',0],['Apr',3],['Jul',6],['Oct',9]];
+  for (let i=0;i<ticks.length;i++){
+    const label = ticks[i][0], idx = ticks[i][1];
+    const pct = idx / 11 * 100;
+    const tick = document.createElement('span');
+    tick.className = 'tc-tick';
+    if (pct <= 2){ tick.style.left = '0'; tick.style.transform = 'none'; }
+    else if (pct >= 98){ tick.style.left = '100%'; tick.style.transform = 'translateX(-100%)'; }
+    else { tick.style.left = pct + '%'; }
+    tick.textContent = label;
+    container.appendChild(tick);
+  }
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
+
+async function loadStates(){
+  try {
+    const resp = await fetch('https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json');
+    const geo = await resp.json();
+    stateLayer = L.geoJSON(geo, {
+      filter: function(feature){
+        const name = feature.properties.name;
+        return name !== 'Alaska' && name !== 'Hawaii';
+      },
+      style: function(feature){ return styleFor(feature.properties.name, currentMonth); },
+      onEachFeature: function(feature, layer){
+        const name = feature.properties.name;
+        layer.bindTooltip(tooltipText(name, currentMonth), { sticky: true, direction: 'top', opacity: 1 });
+        layer.on('mouseover', function(){
+          try { layer.bringToFront(); } catch(e){}
+          layer.setStyle({ weight: 2, color: '#1f2327' });
+          openTooltipLayer = layer;
+        });
+        layer.on('mouseout', function(){
+          layer.setStyle({ weight: 1, color: '#ffffff' });
+          if (layer === openTooltipLayer) openTooltipLayer = null;
+        });
+      }
+    }).addTo(map);
+    recolor(currentMonth);
+  } catch (e) {
+    // leave the basemap clean — no states drawn
+  }
+}
+
+// Source link — built from MOLD.meta, linking the words "World Population Review" if present
+(function buildSource(){
+  const el = document.getElementById('chromeSource');
+  el.innerHTML = 'Source — <a href="https://worldpopulationreview.com/state-rankings/mold-count-by-state" target="_blank" rel="noopener">World Population Review</a> · EPA · AAAAI';
+})();
+
+setupMonthTicks();
+recolor(currentMonth);
+loadStates();
+
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+document.getElementById('frameSlider').addEventListener('input', function(e){
+  if (playing) pause();
+  recolor(parseInt(e.target.value, 10));
+});
+
+document.addEventListener('keydown', function(e){
+  if (e.target && e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space'){ e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowLeft'){ pause(); recolor((currentMonth + 11) % 12); }
+  if (e.code === 'ArrowRight'){ pause(); recolor((currentMonth + 1) % 12); }
+});
+
+let resizeTimer = null;
+window.addEventListener('resize', function(){
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){ map.invalidateSize(); }, 100);
+});
+
+// Autoplay on load — respect prefers-reduced-motion
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  play();
+}
+</script>
+</body>
+</html>
