@@ -456,7 +456,7 @@
 <section class="health" aria-labelledby="health-headline">
   <div class="grid">
     <div class="left">
-      <h1 class="headline" id="health-headline">What the mold does <em>inside you</em></h1>
+      <h1 class="headline" id="health-headline">What mold does <em>inside you</em></h1>
 
       <div class="card">
         <div class="card-inner" id="cardInner" aria-live="polite">
@@ -485,42 +485,58 @@
   const DATA = {
     overview: {
       name: "",
-      intro: "Mold spreads through the air as spores small enough to breathe deep into the lungs. Your body treats them as an invader, and that reaction is what harms you.",
+      intro: "Mold spreads through the air as spores small enough to breathe deep into the lungs. Your body treats them as an invader \u2014 and that reaction reaches from the sinuses to the lungs to the mind.",
       impacts: [
-        {text:"The EPA links breathing indoor mold to [allergic reactions and asthma attacks].", url:"https://www.epa.gov/mold/mold-and-health"},
-        {text:"Researchers estimate mold drives about [4.6 million asthma cases a year] in the United States.", url:"https://pubmed.ncbi.nlm.nih.gov/17542835/"}
+        {text:"Dampness and mold drive an estimated [21% of U.S. asthma \u2014 about 4.6 million cases a year].", url:"https://pubmed.ncbi.nlm.nih.gov/17542835/"},
+        {text:"The asthma, bronchitis, and allergy they cause cost the U.S. about [$22 billion a year].", url:"https://pubmed.ncbi.nlm.nih.gov/27313630/"}
       ],
       ox:0.5, oy:0.5
+    },
+    brain: {
+      name:"Brain & Mind",
+      impacts:[
+        {text:"A Brown University study of nearly 6,000 adults across eight European cities found a moldy home was linked to [about 40% higher odds of depression].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC1994167/"}
+      ],
+      ox:0.50, oy:0.045, label:"Brain & Mind"
     },
     sinuses: {
       name:"Nose & Sinuses",
       impacts:[
-        {text:"Inhaled mold inflames the nose and sinuses \u2014 the [sneezing, congestion, and runny nose] of an allergic reaction.", url:"https://www.epa.gov/mold/mold-and-health"},
-        {text:"Mold-driven allergy and sinus disease are part of an [estimated 4.6 million asthma and allergy cases a year] tied to damp, moldy air.", url:"https://pubmed.ncbi.nlm.nih.gov/17542835/"}
+        {text:"The National Academies found [sufficient evidence] that damp, moldy air drives upper-airway trouble \u2014 nasal congestion, a runny nose, and sneezing.", url:"https://www.ncbi.nlm.nih.gov/books/NBK215639/"},
+        {text:"Mold-driven [allergic rhinitis alone costs about $3.7 billion a year] in the United States.", url:"https://pubmed.ncbi.nlm.nih.gov/27313630/"}
       ],
-      ox:0.50, oy:0.075, label:"Nose & Sinuses"
+      ox:0.50, oy:0.095, label:"Nose & Sinuses"
+    },
+    immune: {
+      name:"Immune & Infection",
+      impacts:[
+        {text:"In people with weak immune systems, inhaled [Aspergillus mold can invade the lungs and spread through the body] \u2014 an infection that is hard to treat and often fatal.", url:"https://www.cdc.gov/aspergillosis/statistics/index.html"},
+        {text:"Mold in a hospital's air systems was tied to [14 infections and six deaths at Seattle Children\u2019s Hospital].", url:"https://www.seattletimes.com/seattle-news/times-watchdog/mold-infections-at-seattle-childrens-hospital-tied-to-14-illnesses-six-deaths-since-2001/"}
+      ],
+      ox:0.55, oy:0.165, label:"Immune & Infection"
     },
     lungs: {
       name:"Lungs & Airways",
       impacts:[
-        {text:"Mold spores set off [asthma attacks and wheezing]; the EPA lists mold as a recognized asthma trigger.", url:"https://www.epa.gov/mold/mold-and-health"},
-        {text:"The National Academies found [sufficient evidence linking damp, moldy indoor air to asthma symptoms, cough, and wheeze], and to hypersensitivity pneumonitis \u2014 the lungs inflaming as an allergic response.", url:"https://nap.nationalacademies.org/catalog/11011/damp-indoor-spaces-and-health"}
+        {text:"The National Academies found [sufficient evidence] linking damp, moldy air to cough, wheeze, and asthma attacks, and to hypersensitivity pneumonitis \u2014 the lungs inflaming as an allergic response.", url:"https://www.ncbi.nlm.nih.gov/books/NBK215639/"},
+        {text:"The WHO's review found a damp building raises asthma and respiratory symptoms [by about 30 to 50%], including a 50% jump in current asthma.", url:"https://www.ncbi.nlm.nih.gov/books/NBK143940/"},
+        {text:"About [4.8 million people worldwide] develop an allergic lung reaction to Aspergillus mold that inflames and scars the airways.", url:"https://pubmed.ncbi.nlm.nih.gov/23210682/"}
       ],
-      ox:0.45, oy:0.25, label:"Lungs & Airways"
+      ox:0.43, oy:0.255, label:"Lungs & Airways"
     },
-    immune: {
-      name:"Immune System",
+    children: {
+      name:"Children",
       impacts:[
-        {text:"In people with weak immune systems, inhaled Aspergillus mold can invade the lungs and spread through the body \u2014 an infection that is [hard to treat and can be fatal].", url:"https://www.seattletimes.com/seattle-news/times-watchdog/mold-infections-at-seattle-childrens-hospital-tied-to-14-illnesses-six-deaths-since-2001/"},
-        {text:"Mold in a hospital's air systems was tied to [14 infections and six deaths at Seattle Children\u2019s Hospital].", url:"https://www.seattletimes.com/seattle-news/times-watchdog/mold-infections-at-seattle-childrens-hospital-tied-to-14-illnesses-six-deaths-since-2001/"}
+        {text:"Mold in the home makes a child [30 to 70% more likely to develop asthma] \u2014 not just worsen it, but develop it new.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC3492391/"},
+        {text:"Children in damp homes also face [markedly higher rates of respiratory infections], with risk up to several times higher.", url:"https://www.ncbi.nlm.nih.gov/books/NBK143940/"}
       ],
-      ox:0.53, oy:0.18, label:"Immune System"
+      ox:0.57, oy:0.275, label:"Children"
     }
   };
 
-  const ORDER = ["overview","sinuses","lungs","immune"];
+  const ORDER = ["overview","sinuses","lungs","children","immune","brain"];
   const INDEX_LABELS = {
-    overview:"Overview", sinuses:"Nose & Sinuses", lungs:"Lungs & Airways", immune:"Immune System"
+    overview:"Overview", sinuses:"Nose & Sinuses", lungs:"Lungs & Airways", children:"Children", immune:"Immune & Infection", brain:"Brain & Mind"
   };
 
   const hotspotsEl = document.getElementById('hotspots');
