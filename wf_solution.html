@@ -677,7 +677,7 @@ section{
       if (p.y < -30) p.y = H + 20;
       else if (p.y > H + 30) p.y = -20;
 
-      // Widen kill-zone: begin fade at progress>0.60 OR d<48; force invisible at d<28
+      // Widen fade-zone: begin fade at progress>0.60 OR d<48; force invisible at d<28
       var progress = 1 - p.dist / p.d0;
       if (progress > 0.60 || p.dist < 48) {
         var fadeK = Math.max(0, (1 - p.dist / 48));
