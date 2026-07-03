@@ -423,7 +423,7 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <h2>Mold reaches every region — <span class="em">and it swells with the season</span></h2>
+      <h2>Mold reaches every region —<br><span class="em">and it swells with the season</span></h2>
       <p class="caption">Outdoor mold is everywhere, and it swells through summer to a peak in <a href="https://www.epa.gov/mold/mold-and-health" target="_blank" rel="noopener">late summer and fall</a>. About <a href="https://pubmed.ncbi.nlm.nih.gov/17542835/" target="_blank" rel="noopener">half of U.S. homes</a> already have a mold or dampness problem.</p>
     </div>
   </div>
@@ -464,13 +464,23 @@ const isEmbedded = window.self !== window.top;
 
 const map = L.map('map', {
   zoomControl: false, scrollWheelZoom: !isEmbedded,
-  center: [46, -97], zoom: 4, minZoom: 3, maxZoom: 12,
-  maxBounds: [[12, -150], [74, -48]], maxBoundsViscosity: 0.85
+  minZoom: 3, maxZoom: 12,
+  maxBounds: [[8, -140], [62, -52]], maxBoundsViscosity: 0.85
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO', detectRetina: true
 }).addTo(map);
+
+const US_BOUNDS = L.latLngBounds([[24.4, -124.8], [49.4, -66.9]]);
+function fitUS(){
+  const w = window.innerWidth;
+  if (w > 820){
+    map.fitBounds(US_BOUNDS, { paddingTopLeft: [Math.min(520, w*0.40), 40], paddingBottomRight: [40, 160] });
+  } else {
+    map.fitBounds(US_BOUNDS, { paddingTopLeft: [16, 210], paddingBottomRight: [16, 150] });
+  }
+}
 
 const MOLD = window.MOLD;
 const scoreByName = {};
@@ -632,8 +642,10 @@ async function loadStates(){
       }
     }).addTo(map);
     recolor(currentMonth);
+    fitUS();
   } catch (e) {
     // leave the basemap clean — no states drawn
+    fitUS();
   }
 }
 
@@ -663,7 +675,7 @@ document.addEventListener('keydown', function(e){
 let resizeTimer = null;
 window.addEventListener('resize', function(){
   if (resizeTimer) clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(function(){ map.invalidateSize(); }, 100);
+  resizeTimer = setTimeout(function(){ map.invalidateSize(); fitUS(); }, 100);
 });
 
 // Autoplay on load — respect prefers-reduced-motion
