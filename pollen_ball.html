@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pollen breaks into pieces you inhale — NanoFlashing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#edf0f2;
+    --ink:#1a1a1a;
+    --muted:#8a9095;
+    --accent:#1b7bff;
+    --red:#e23b3b;
+    --hair:rgba(20,24,28,0.08);
+    --stack:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--stack);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  body{
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  .hero{
+    min-height:100vh;
+    width:100%;
+    display:grid;
+    grid-template-columns:46fr 54fr;
+    align-items:center;
+    justify-items:start;
+    gap:clamp(32px,5vw,80px);
+    padding:clamp(40px,7vw,96px) clamp(24px,6vw,96px);
+    background:var(--bg);
+    position:relative;
+  }
+
+  /* faint paper grain — barely there */
+  .hero::before{
+    content:"";
+    position:absolute;inset:0;
+    background:
+      radial-gradient(1200px 700px at 80% 30%, rgba(27,123,255,0.04), transparent 60%),
+      radial-gradient(900px 600px at 10% 90%, rgba(20,24,28,0.025), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .text{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:28px;
+    max-width:720px;
+  }
+
+  .headline{
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(24px,2.7vw,34px);
+    line-height:1.32;
+    letter-spacing:-0.022em;
+    color:#1a1a1a;
+  }
+  .headline .line{ display:block; }
+  .headline em{
+    color:var(--red);
+    font-style:normal;
+    font-weight:700;
+  }
+
+  .body{
+    font-family:var(--stack);
+    font-size:19px;
+    line-height:1.55;
+    color:var(--ink);
+    max-width:440px;
+    font-weight:400;
+  }
+  .body a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid rgba(20,24,28,0.22);
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .body a:hover{ color:var(--red); border-bottom-color:var(--red); }
+
+  .sources{
+    margin-top:8px;
+    padding-top:18px;
+    border-top:1px solid var(--hair);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-family:"Space Mono",monospace;
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.55;
+    max-width:440px;
+  }
+  .sources .label{
+    letter-spacing:0.06em;
+    
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .sources a{
+    color:var(--muted);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .sources a:hover{
+    color:var(--ink);
+    border-bottom-color:var(--hair);
+  }
+  .sources .src-num{
+    color:var(--muted);
+    margin-right:6px;
+  }
+
+  /* minimal downward chevron — absolute bottom-center, decoupled from text column */
+  .scroll-cue{
+    position:absolute;
+    bottom:clamp(20px,4vw,40px);
+    left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+    width:28px;
+    height:28px;
+    color:var(--ink);
+    pointer-events:none;
+    animation:bob 2.4s ease-in-out infinite;
+  }
+  .scroll-cue svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  @keyframes bob{
+    0%,100%{ transform:translate(-50%,0); opacity:0.78; }
+    50%{ transform:translate(-50%,6px); opacity:1; }
+  }
+
+  /* particle / video column — centers the video+scale group as one unit */
+  .media{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+  }
+
+  .video-frame{
+    position:relative;
+    width:min(560px,100%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    filter:
+      drop-shadow(0 30px 60px rgba(20,24,28,0.08))
+      drop-shadow(0 8px 24px rgba(27,123,255,0.06));
+  }
+
+  .video-frame .video-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
+  }
+
+  video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    -webkit-mask-image:radial-gradient(circle at center, #000 60%, transparent 78%);
+            mask-image:radial-gradient(circle at center, #000 60%, transparent 78%);
+  }
+
+  /* tiny corner registration marks — editorial, restrained */
+  .reg{
+    position:absolute;
+    width:14px;height:14px;
+    border:1px solid var(--hair);
+  }
+  .reg.tl{ top:-2px;left:-2px;border-right:none;border-bottom:none; }
+  .reg.tr{ top:-2px;right:-2px;border-left:none;border-bottom:none; }
+  .reg.bl{ bottom:-2px;left:-2px;border-right:none;border-top:none; }
+  .reg.br{ bottom:-2px;right:-2px;border-left:none;border-top:none; }
+
+  /* scientific size scale — replaces the old caption, part of centered flow */
+  .scale{
+    margin-top:22px;
+    width:min(320px,80%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    font-family:var(--stack);
+    color:var(--muted);
+  }
+  .scale .bar{
+    position:relative;
+    width:100%;
+    height:1px;
+    background:var(--muted);
+  }
+  .scale .bar::before,
+  .scale .bar::after{
+    content:"";
+    position:absolute;
+    top:-4px;
+    width:1px;
+    height:9px;
+    background:var(--muted);
+  }
+  .scale .bar::before{ left:0; }
+  .scale .bar::after{ right:0; }
+  .scale .label{
+    font-size:22px;
+    letter-spacing:0.01em;
+    color:var(--ink);
+    font-weight:500;
+  }
+  .scale .compare{
+    font-size:16px;
+    color:var(--ink);
+    letter-spacing:0.01em;
+  }
+
+  @media (max-width:860px){
+  .hero{
+    grid-template-columns:1fr;
+    gap:0;
+    padding:40px 22px 88px;
+    align-items:stretch;
+    min-height:auto;
+    display:flex;
+    flex-direction:column;
+  }
+  .text{
+    order:1;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .headline{
+    max-width:none;
+    font-size:clamp(26px,7vw,34px);
+    line-height:1.12;
+    letter-spacing:-0.02em;
+    margin:0 0 4px;
+  }
+  .sources{ display:none; }
+  .media{
+    order:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:6px 0 4px;
+  }
+  .video-frame{
+    width:64vw;
+    height:64vw;
+    max-width:280px;
+    max-height:280px;
+    aspect-ratio:1/1;
+  }
+  .scale{
+    width:min(200px,52vw);
+    margin-top:14px;
+  }
+  .scroll-cue{ display:none; }
+}
+
+  @media (prefers-reduced-motion: reduce){
+    .scroll-cue{ animation:none; opacity:0.7; }
+    video{ }
+  }
+
+/* wfball_landscape_v1 — landscape-phone 2-col */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+  .hero {
+    grid-template-columns: 44fr 56fr;
+    gap: clamp(16px, 3vw, 30px);
+    padding: 14px clamp(18px, 4vw, 36px);
+    align-items: center;
+  }
+  .text {
+    order: 1;
+    max-width: none;
+    gap: 12px;
+  }
+  .media {
+    order: 2;
+  }
+  .video-frame {
+    width: min(300px, 44vw);
+  }
+  .headline {
+    font-size: clamp(17px, 3vw, 23px);
+    line-height: 1.16;
+    max-width: none;
+  }
+  .scale {
+    margin-top: 10px;
+    width: min(230px, 92%);
+  }
+  .scale .label {
+    font-size: 17px;
+  }
+  .scale .compare {
+    font-size: 13px;
+  }
+  .sources {
+    display: none;
+  }
+  .scroll-cue {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="text">
+      <h1 class="headline"><span class="line">Pollen breaks into pieces you inhale —</span><span class="line">and it's <em>negatively charged</em></span></h1>
+      <p class="body">Seasonal allergies now hit <a href="https://www.cdc.gov/nchs/products/databriefs/db545.htm" target="_blank" rel="noopener">about one in four US adults</a> — roughly 67 million people — and a warming climate is making pollen seasons <a href="https://www.cdc.gov/climate-health/php/effects/allergens-and-pollen.html" target="_blank" rel="noopener">start earlier and last longer</a>. In humidity and storms, whole grains <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8046208/" target="_blank" rel="noopener">burst into fragments under 2.5 microns</a> that slip past the nose and reach deep into the lungs. And every grain <a href="https://www.sciencedirect.com/science/article/abs/pii/S1352231006010764" target="_blank" rel="noopener">carries a negative charge</a>.</p>
+    </div>
+
+    <div class="media">
+      <div class="video-frame">
+        <div class="video-wrap">
+          <span class="reg tl"></span>
+          <span class="reg tr"></span>
+          <span class="reg bl"></span>
+          <span class="reg br"></span>
+          <video poster="assets/videos/posters/Pollen.jpg" src="assets/videos/Pollen_flashloop_c2.mp4" autoplay loop muted playsinline preload="auto"></video>
+        </div>
+        <div class="scale" aria-hidden="true">
+          <div class="bar"></div>
+          <div class="label">10 to 100 µm</div>
+          <div class="compare">Bursts into fragments under 2.5 µm</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-cue" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </section>
+</body>
+</html>
