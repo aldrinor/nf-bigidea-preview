@@ -1,502 +1,477 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing captures the mold and destroys what is alive</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The study behind NanoFlashing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#edf0f2;
-  --ink:#1f2327;
-  --headline-ink:#1a1a1a;
-  --muted:#8a9095;
-  --accent:#1b7bff;
-  --red:#e23b3b;
-  --hair:rgba(20,24,28,0.08);
-  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
-  --mono:'Space Mono', ui-monospace, monospace;
-}
-
-*{box-sizing:border-box;margin:0;padding:0;}
-
-html,body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:var(--stack);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-section{
-  position:relative;
-  display:flex;
-  align-items:center;
-  min-height:100vh;
-  max-height:100vh;
-  width:100%;
-  overflow:hidden;
-  background:var(--bg);
-}
-
-/* === Text column === */
-.text-col{
-  position:relative;
-  z-index:3;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:flex-start;
-  max-width:min(48%, 620px);
-  padding-left:clamp(24px, 6vw, 96px);
-  padding-right:24px;
-}
-
-.headline{
-  font-family:var(--stack);
-  font-weight:600;
-  color:var(--headline-ink);
-  font-size:clamp(24px, 2.7vw, 34px);
-  line-height:1.32;
-  letter-spacing:-0.022em;
-  margin-bottom:28px;
-}
-.headline > span{
-  display:block;
-}
-.headline em{
-  color:var(--accent);
-  font-style:normal;
-  font-weight:600;
-}
-
-/* === Stat block === */
-.stat-block{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  margin-bottom:22px;
-}
-.stat-row{
-  display:flex;
-  align-items:center;
-  gap:22px;
-}
-.big-number{
-  font-family:var(--stack);
-  font-weight:700;
-  font-size:clamp(52px, 6vw, 92px);
-  line-height:0.95;
-  letter-spacing:-0.03em;
-  font-variant-numeric:tabular-nums;
-  flex-shrink:0;
-  width:2.95em;
-  text-align:right;
-}
-.big-number.accent{ color:var(--accent); }
-.big-number.ink{ color:var(--ink); }
-
-.caption{
-  font-family:var(--stack);
-  font-size:clamp(16px, 1.5vw, 19px);
-  line-height:1.4;
-  color:var(--ink);
-  max-width:24ch;
-  padding-top:4px;
-}
-
-/* === Body paragraph === */
-.body-text{
-  max-width:440px;
-  font-size:19px;
-  line-height:1.55;
-  color:#1a1a1a;
-  margin-bottom:22px;
-}
-
-/* === Advocacy link === */
-.advocacy-link{
-  font-family:var(--stack);
-  font-size:19px;
-  color:var(--accent);
-  text-decoration:none;
-  border-bottom:1px solid rgba(27,123,255,0.5);
-  padding-bottom:2px;
-  transition:color 0.18s ease, border-color 0.18s ease;
-}
-.advocacy-link:hover{
-  color:var(--ink);
-  border-bottom-color:var(--ink);
-}
-
-/* === Chart column === */
-.chart-col{
-  flex:1 1 0;
-  min-width:0;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:stretch;
-  padding:clamp(24px, 4vh, 56px) clamp(24px, 3vw, 48px) clamp(20px, 3vh, 36px);
-  position:relative;
-  z-index:2;
-}
-
-.chart-group{
-  display:flex;
-  flex-direction:column;
-  gap:clamp(20px, 3vh, 32px);
-  width:100%;
-  max-width:620px;
-  margin:0 auto;
-}
-
-/* === Antimicrobial table === */
-.table-block{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.table-label{
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:0.02em;
-  color:var(--muted);
-}
-.amr-table{
-  width:100%;
-  border-collapse:collapse;
-  font-family:var(--stack);
-}
-.amr-table tr{
-  border-top:1px solid var(--hair);
-}
-.amr-table tr:last-child{
-  border-bottom:1px solid var(--hair);
-}
-.amr-table td{
-  padding:clamp(12px, 1.6vh, 18px) 4px;
-  vertical-align:middle;
-  font-size:clamp(14px, 1.2vw, 17px);
-  line-height:1.35;
-}
-.amr-table td.org{
-  color:var(--ink);
-  font-weight:400;
-}
-.amr-table td.org .paren{
-  color:var(--muted);
-}
-.amr-table td.result{
-  text-align:right;
-  color:var(--ink);
-  font-weight:600;
-  font-variant-numeric:tabular-nums;
-  white-space:nowrap;
-}
-.amr-table td.result .fig{
-  color:var(--accent);
-  font-weight:600;
-}
-.table-foot{
-  font-family:var(--stack);
-  font-size:12px;
-  line-height:1.45;
-  color:var(--muted);
-  margin-top:4px;
-}
-
-/* === BAMS field-proof card === */
-.bams-card{
-  background:rgba(255,255,255,0.5);
-  border:1px solid var(--hair);
-  border-radius:12px;
-  padding:clamp(18px, 2.4vh, 26px) clamp(18px, 2vw, 28px);
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.bams-label{
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:0.02em;
-  color:var(--muted);
-}
-.bams-split{
-  display:flex;
-  align-items:stretch;
-  gap:0;
-}
-.bams-side{
-  flex:1 1 0;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  padding:2px clamp(12px, 1.6vw, 22px);
-}
-.bams-side:first-child{
-  padding-left:0;
-}
-.bams-side:last-child{
-  padding-right:0;
-}
-.bams-divider{
-  width:1px;
-  background:var(--hair);
-  flex:0 0 auto;
-}
-.bams-figure{
-  font-family:var(--stack);
-  font-weight:600;
-  font-size:clamp(28px, 3.4vw, 44px);
-  line-height:1;
-  letter-spacing:-0.02em;
-  font-variant-numeric:tabular-nums;
-}
-.bams-figure.blue{ color:var(--accent); }
-.bams-figure.red{ color:var(--red); }
-.bams-caption{
-  font-family:var(--stack);
-  font-size:clamp(11px, 0.95vw, 13px);
-  line-height:1.4;
-  color:var(--muted);
-  max-width:24ch;
-}
-.bams-foot{
-  font-family:var(--stack);
-  font-size:12px;
-  line-height:1.45;
-  color:var(--muted);
-}
-
-/* === Mobile === */
-@media (max-width: 880px){
-  section{
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:stretch;
-    min-height:100vh;
-    max-height:none;
-    overflow:visible;
+  :root{
+    --bg:#edf0f2;
+    --ink:#1a1a1a;
+    --blue:#1b7bff;                 /* used EXACTLY once: the study link */
+    --red:#e23b3b;                  /* retired from the figure — alive dots are now neutral charcoal; no red renders */
+    --ink-82:rgba(26,26,26,.82);
+    --ink-64:rgba(26,26,26,.64);    /* secondary ink */
+    --ink-46:rgba(26,26,26,.46);    /* muted / labels */
+    --dead:rgba(26,26,26,.14);      /* killed / inert spore dots */
+    --hair:rgba(26,26,26,.12);
+    --hair-soft:rgba(26,26,26,.08);
+    --sans:'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono:'Space Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   }
-  .text-col{
-    max-width:none;
-    width:100%;
-    align-items:stretch;
-    padding-left:clamp(20px,5vw,28px);
-    padding-right:clamp(20px,5vw,28px);
-    padding-top:clamp(20px,4vh,32px);
-    padding-bottom:8px;
-    flex:0 0 auto;
-  }
-  .headline{
-    font-size:clamp(26px,6.5vw,34px);
-    line-height:1.18;
-    margin-bottom:clamp(18px,3vh,24px);
-    color:var(--headline-ink);
-  }
-  .stat-block{
-    gap:clamp(18px,3vh,26px);
-    margin-bottom:clamp(20px,3vh,28px);
-  }
-  .stat-row{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:6px;
-    width:100%;
-  }
-  .big-number{
-    font-size:clamp(44px,12vw,64px);
-    line-height:1;
-    width:auto;
-    text-align:left;
-  }
-  .caption{
-    font-size:clamp(13px,3.2vw,15px);
-    line-height:1.45;
-    max-width:none;
-    width:100%;
-    color:var(--muted);
-    white-space:normal;
-    word-break:break-word;
-    overflow-wrap:anywhere;
-  }
-  .body-text{
-    font-size:16px;
-    line-height:1.6;
-    margin-bottom:clamp(16px,2.5vh,22px);
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
     color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
   }
-  .advocacy-link{
-    font-size:16px;
-    line-height:1.4;
-    margin-bottom:clamp(8px,1.5vh,14px);
-  }
-  .chart-col{
-    flex:0 0 auto;
-    min-height:0;
-    height:auto;
-    padding:4px clamp(16px,4vw,24px) clamp(20px,3vh,32px);
-  }
-  .chart-group{
-    max-width:none;
-    gap:20px;
-  }
-  .amr-table td{
-    font-size:14px;
-    padding:11px 2px;
-  }
-  .amr-table td.result{
-    white-space:normal;
-    text-align:right;
-  }
-  .bams-figure{
-    font-size:clamp(26px, 8vw, 36px);
-  }
-  .bams-side{
-    padding:2px 10px;
-  }
-}
 
-/* === Short screens (1366×768 etc.) === */
-@media (max-height: 760px) and (min-width: 881px){
-  .headline{
-    font-size:clamp(26px, 2.6vw, 34px);
-    margin-bottom:22px;
+  /* ---- full-bleed stage: fits 1440x900 with no scroll ---- */
+  .stage{
+    width:100vw;
+    height:100vh;
+    min-height:640px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    padding:34px 60px 30px;
   }
-  .big-number{
-    font-size:clamp(46px, 5.2vw, 72px);
+
+  /* ---- masthead running head (WSJ feel, grafted from direction A) ---- */
+  .masthead{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--hair);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.03em;
+    color:var(--ink-46);
   }
-  .stat-block{
-    gap:4px;
-    margin-bottom:18px;
+  .masthead .lead{color:var(--ink-64)}
+
+  /* ---- two-column editorial body, vertically centred ---- */
+  .body{
+    flex:1;
+    display:grid;
+    grid-template-columns:minmax(440px,43%) 1fr;
+    column-gap:60px;
+    align-items:center;
+    padding-top:6px;
   }
-  .body-text{
-    font-size:17px;
+
+  /* =====================  LEFT COLUMN — the finding  ===================== */
+  .col-left{display:flex;flex-direction:column;justify-content:center;max-width:600px}
+
+  .kicker{
+    font-family:var(--mono);
+    font-size:11.5px;
+    line-height:1.6;
+    letter-spacing:.015em;
+    color:var(--ink-64);
+    margin-bottom:20px;
+  }
+  .kicker .src{color:var(--ink-82)}
+
+  h1{
+    font-weight:300;
+    font-size:clamp(21px,1.85vw,27px);
+    line-height:1.2;
+    letter-spacing:-.012em;
+    max-width:19ch;
+    text-wrap:balance;
+    margin-bottom:15px;
+  }
+  h1 em{font-style:normal;font-weight:500}      /* hierarchy from weight, never colour */
+
+  .dek{
+    font-size:14.5px;
     line-height:1.5;
-    margin-bottom:18px;
+    color:var(--ink-82);
+    max-width:44ch;
+    margin-bottom:24px;
   }
-  .chart-col{
-    padding:24px 32px 24px;
+  .dek .num{font-family:var(--mono);font-size:.9em;font-variant-numeric:tabular-nums}
+  .dek strong{font-weight:500;color:var(--ink)}
+
+  /* ---- method walkthrough: "show the experiment" (spine, from direction C) ---- */
+  .method{position:relative;margin-bottom:22px}
+  .method::before{
+    content:'';position:absolute;left:11px;top:16px;bottom:16px;
+    width:1px;background:var(--hair);
   }
-  .amr-table td{
-    padding:10px 4px;
+  .step{
+    display:grid;grid-template-columns:22px 1fr;column-gap:15px;
+    align-items:start;padding:6px 0;
   }
-  .bams-figure{
-    font-size:clamp(26px, 3vw, 38px);
+  .step .no{
+    width:22px;height:22px;border-radius:50%;
+    border:1px solid var(--hair);background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:10px;color:var(--ink-46); /* NOT blue: blue is reserved */
+    position:relative;z-index:1;
   }
-}
-@media (max-height: 680px) and (min-width: 881px){
-  .headline{
-    font-size:clamp(22px, 2.2vw, 28px);
-    margin-bottom:16px;
+  .step .lbl{font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:.02em;margin-bottom:2px}
+  .step .txt{font-size:12.5px;line-height:1.42;color:var(--ink-64)}
+  .step .txt b{color:var(--ink);font-weight:500}
+  .step .txt i{font-style:italic}
+
+  .rule{height:1px;background:var(--hair);margin:2px 0 16px}
+
+  .prov{
+    font-family:var(--mono);font-size:11px;line-height:1.7;
+    color:var(--ink-46);font-variant-numeric:tabular-nums;margin-bottom:14px;
   }
-  .big-number{
-    font-size:clamp(38px, 4.4vw, 58px);
+  .prov .authors{color:var(--ink);letter-spacing:.01em}
+  .prov i{font-style:italic}
+
+  .limits{font-size:12.5px;line-height:1.5;color:var(--ink-64);max-width:46ch;margin-bottom:22px}
+  .limits b{font-weight:500;color:var(--ink)}
+  .limits i{font-style:italic}
+
+  /* ---- the SINGLE blue element on the whole page ---- */
+  .study-link{
+    display:inline-flex;align-items:baseline;gap:9px;
+    text-decoration:none;color:var(--blue);
+    font-size:15px;font-weight:500;
+    border-bottom:1px solid rgba(27,123,255,.32);
+    padding-bottom:2px;width:max-content;
+    transition:gap .18s ease, border-color .18s ease;
   }
-  .stat-block{
-    margin-bottom:14px;
+  .study-link:hover{gap:13px;border-color:var(--blue)}
+  .study-link .arw{font-family:var(--mono);font-size:14px}
+  .study-link .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-46);font-weight:400;letter-spacing:.02em}
+
+  /* =====================  RIGHT COLUMN — the figure (hero)  ===================== */
+  .col-right{display:flex;flex-direction:column;justify-content:center;max-width:648px}
+
+  .fig-head{
+    font-family:var(--mono);font-size:11px;letter-spacing:.03em;
+    color:var(--ink-64);padding-bottom:16px;
   }
-  .body-text{
-    font-size:16px;
-    line-height:1.45;
-    margin-bottom:14px;
+  .fig-head b{color:var(--ink-82);font-weight:400}
+
+  .panels{display:grid;grid-template-columns:1fr 1fr;column-gap:30px}
+
+  .panel .p-name{font-size:14.5px;font-weight:500;line-height:1.1;letter-spacing:-.01em}
+  .panel .p-sub{font-family:var(--mono);font-size:10.5px;color:var(--ink-64);margin-top:3px}
+  .panel .p-sub.charged{color:var(--ink-64)}
+  .panel .p-verdict{font-family:var(--sans);font-size:16px;font-weight:500;color:var(--ink);line-height:1.2;margin-top:8px}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(40,1fr);gap:2.5px;
+    margin:13px 0 11px;width:100%;
   }
-  .amr-table td{
-    padding:8px 4px;
-    font-size:14px;
+  .dot{width:100%;aspect-ratio:1/1;border-radius:50%}
+  .dot.dead{background:var(--dead)}
+  .dot.alive{background:rgba(26,26,26,.60)}
+
+  .p-denom{font-family:var(--mono);font-size:10px;color:var(--ink-64);line-height:1.45}
+  .p-stat{font-family:var(--mono);font-size:12px;line-height:1.35;margin-top:6px;font-variant-numeric:tabular-nums}
+  .p-stat.dead{color:var(--ink-46)}
+  .p-stat.alive{color:var(--ink)}
+  .p-stat.alive b{color:var(--ink);font-weight:700}
+
+  /* ---- foot: legend ---- */
+  .fig-foot{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:28px;
+    margin-top:20px;padding-top:14px;border-top:1px solid var(--hair);
   }
-  .bams-figure{
-    font-size:clamp(24px, 2.8vw, 32px);
+
+  .legend{display:flex;gap:18px;flex-shrink:0}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;color:var(--ink-46)}
+  .swatch{width:8px;height:8px;border-radius:50%}
+  .swatch.alive{background:rgba(26,26,26,.60)}
+  .swatch.dead{background:var(--dead)}
+
+  .caption{
+    font-family:var(--mono);font-size:10.5px;line-height:1.65;
+    color:var(--ink-64);letter-spacing:.01em;font-variant-numeric:tabular-nums;
+    margin-top:16px;padding-top:13px;border-top:1px solid var(--hair);
   }
-  .chart-group{
-    gap:18px;
+  .caption b{color:var(--ink-64);font-weight:400}
+  .caption i{font-style:italic}
+
+  /* ---- graceful shrink so nothing clips on shorter viewports ---- */
+  @media (max-height:840px){
+    .stage{padding:24px 52px}
+    .method{margin-bottom:16px}
+    h1{margin-bottom:11px}
+    .dek{margin-bottom:18px}
+    .step{padding:4px 0}
   }
-  .bams-card{
-    padding:14px 18px;
-    gap:10px;
+
+  /* ============================================================
+     SHORT DESKTOP #1 — 1366x768 class laptops.
+     Keeps the two-column desktop layout; trims the left column's
+     type/spacing (the height driver) so the full slide still fits
+     100vh with no internal scroll. Guarded to min-width:881px so
+     it never touches the mobile / flow-mode stack.
+     ============================================================ */
+  @media (max-height:760px) and (min-width:881px){
+    .stage{padding:22px 52px 22px}
+    .masthead{padding-bottom:10px}
+    h1{font-size:clamp(20px,1.7vw,25px);margin-bottom:9px}
+    .kicker{margin-bottom:14px}
+    .dek{font-size:14px;margin-bottom:14px}
+    .method{margin-bottom:12px}
+    .step{padding:3px 0}
+    .rule{margin:2px 0 12px}
+    .prov{margin-bottom:10px}
+    .limits{margin-bottom:16px}
+    .study-link{font-size:14px}
+    .col-right{max-width:610px;justify-self:center}
+    .fig-head{padding-bottom:12px}
+    .grid{margin:11px 0 9px}
+    .fig-foot{margin-top:14px;padding-top:12px}
+    .caption{margin-top:12px;padding-top:11px}
   }
-}
+
+  /* ============================================================
+     SHORT DESKTOP #2 — 1280x800 (and shorter real viewports after
+     browser chrome). Compresses further and shrinks the figure a
+     touch (narrower figure column => smaller dots), still keeping
+     the desktop two-column layout on one 100vh screen.
+     ============================================================ */
+  @media (max-height:680px) and (min-width:881px){
+    .stage{padding:16px 48px 16px}
+    .masthead{padding-bottom:8px}
+    h1{font-size:clamp(18px,1.5vw,22px);margin-bottom:7px}
+    .kicker{font-size:11px;line-height:1.5;margin-bottom:10px}
+    .dek{font-size:13px;line-height:1.45;margin-bottom:11px}
+    .method{margin-bottom:9px}
+    .method::before{top:12px;bottom:12px}
+    .step{padding:2px 0}
+    .step .txt{font-size:12px;line-height:1.38}
+    .rule{margin:2px 0 10px}
+    .prov{font-size:10.5px;line-height:1.55;margin-bottom:8px}
+    .limits{font-size:12px;line-height:1.45;margin-bottom:12px}
+    .study-link{font-size:13.5px}
+    .col-right{max-width:568px;justify-self:center}
+    .fig-head{padding-bottom:9px}
+    .grid{margin:8px 0 7px}
+    .fig-foot{margin-top:10px;padding-top:9px}
+    .caption{font-size:10px;line-height:1.55;margin-top:9px;padding-top:8px}
+  }
+
+  /* ============================================================
+     MOBILE / FLOW MODE — narrow screens (matches sibling's 880px).
+     The deck measures scrollHeight and sizes the iframe to it, then
+     the page scrolls, so here the stage MUST become natural height
+     and show everything: no 100vh lock, no overflow clip. The two
+     columns stack (text, then figure) and the two dot-grid panels
+     stack full width so each 1,000-dot grid stays legible ~390px.
+     ============================================================ */
+  @media (max-width:880px){
+    .stage{
+      width:100%;
+      height:auto;
+      min-height:100vh;
+      overflow:visible;
+      flex-direction:column;
+      padding:24px 20px 30px;
+    }
+
+    /* running head: allow it to wrap instead of overflowing */
+    .masthead{
+      flex-wrap:wrap;
+      gap:2px 12px;
+      font-size:10px;
+      line-height:1.5;
+      padding-bottom:10px;
+    }
+
+    /* body: one column — text first, then the figure below it */
+    .body{
+      grid-template-columns:1fr;
+      row-gap:30px;
+      align-items:stretch;
+      padding-top:20px;
+    }
+    .col-left{max-width:none;width:100%}
+    .col-right{max-width:none;width:100%}
+
+    /* type scale down to comfortable mobile sizes */
+    h1{
+      font-size:clamp(21px,5.6vw,25px);
+      max-width:none;
+      margin-bottom:14px;
+    }
+    .kicker{font-size:11px;margin-bottom:16px}
+    .dek{font-size:14px;max-width:none;margin-bottom:20px}
+    .method{margin-bottom:18px}
+    .step{padding:5px 0}
+    .step .txt{font-size:12.5px}
+    .prov{margin-bottom:14px}
+    .limits{font-size:12.5px;max-width:none;margin-bottom:20px}
+
+    /* figure header + panels */
+    .fig-head{padding-bottom:14px}
+
+    /* the two dot-grid panels stack: one full-width grid, then the other */
+    .panels{
+      grid-template-columns:1fr;
+      row-gap:26px;
+    }
+    /* keep 1,000 dots + 40 columns; dots just get smaller and never scroll sideways */
+    .grid{max-width:100%}
+  }
 </style>
 </head>
 <body>
+  <main class="stage">
 
-<section id="section">
-  <div class="text-col">
-    <h1 class="headline">
-      <span>NanoFlashing</span>
-      <span><em>captures</em> the mold</span>
-      <span>and destroys what is alive</span>
-    </h1>
+    <!-- ===== masthead running head ===== -->
+    <header class="masthead">
+      <span class="lead">The study behind NanoFlashing</span>
+      <span>Fig. 1 &nbsp;&middot;&nbsp; spore viability by filter &nbsp;&middot;&nbsp; wind tunnel, breathing speed</span>
+    </header>
 
-    <div class="stat-block">
-      <div class="stat-row">
-        <div class="big-number accent">94%</div>
-        <p class="caption">of airborne Aspergillus mold captured at the media</p>
-      </div>
-      <div class="stat-row">
-        <div class="big-number accent">99%</div>
-        <p class="caption">of the spores it catches destroyed — viability gone</p>
-      </div>
-    </div>
+    <div class="body">
 
-    <p class="body-text">
-      NanoFlashing carries a permanent positive charge. It pulls the negatively charged spore onto the fiber and destroys the living cell on contact — by physical action, not chemistry. Nothing is left alive in the media to grow or shed back.
-    </p>
+      <!-- ============== LEFT: the finding ============== -->
+      <section class="col-left">
+        <p class="kicker">
+          <span class="src">Mansour Lab &middot; Massachusetts General Hospital &amp; Harvard Medical School</span><br>
+          Wind-tunnel study &middot; submitted for peer review, not yet certified
+        </p>
 
-    <a class="advocacy-link" href="#evidence">Evidence &rarr;</a>
-  </div>
+        <h1>An ordinary filter traps mold and leaves it alive. A positively charged filter killed almost all it caught.</h1>
 
-  <div class="chart-col">
-    <div class="chart-group">
+        <p class="dek">
+          Of the live spores the charged filter caught, just <span class="num">0.76%</span> were still alive afterward &mdash; about <span class="num">8 in every 1,000</span>. Run the same test on an ordinary, uncharged filter and <strong>the mold it trapped stayed alive.</strong>
+        </p>
 
-      <div class="table-block">
-        <div class="table-label">At the Media, Against Named Organisms</div>
-        <table class="amr-table">
-          <tbody>
-            <tr>
-              <td class="org">Aspergillus fumigatus <span class="paren">(mold)</span></td>
-              <td class="result"><span class="fig">94%</span> captured · <span class="fig">99%</span> viability ↓</td>
-            </tr>
-            <tr>
-              <td class="org">Candida albicans <span class="paren">(yeast)</span></td>
-              <td class="result"><span class="fig">99.9%</span></td>
-            </tr>
-            <tr>
-              <td class="org">Staphylococcus aureus</td>
-              <td class="result"><span class="fig">98–99×</span> reduction</td>
-            </tr>
-            <tr>
-              <td class="org">Escherichia coli</td>
-              <td class="result"><span class="fig">50×</span> reduction</td>
-            </tr>
-          </tbody>
-        </table>
-        <p class="table-foot">Mass General / Harvard · captured and destroyed by physical action, not chemistry.</p>
-      </div>
-
-      <div class="bams-card">
-        <div class="bams-label">Independent Field Proof · BAMS</div>
-        <div class="bams-split">
-          <div class="bams-side">
-            <div class="bams-figure blue">−95.44%</div>
-            <div class="bams-caption">living airborne particles at the NanoFlashing vent</div>
+        <!-- method walkthrough -->
+        <div class="method">
+          <div class="step">
+            <span class="no">01</span>
+            <div>
+              <p class="lbl">Aerosolize</p>
+              <p class="txt">Live <i>Aspergillus</i> spores are released dry, the way they actually travel in air &mdash; <b>not wetted first,</b> as most filter tests do.</p>
+            </div>
           </div>
-          <div class="bams-divider"></div>
-          <div class="bams-side">
-            <div class="bams-figure red">+2,092%</div>
-            <div class="bams-caption">at the ordinary filter beside it</div>
+          <div class="step">
+            <span class="no">02</span>
+            <div>
+              <p class="lbl">Draw through</p>
+              <p class="txt">The spore-laden air passes through the filter at <b>0.97 m/s</b> &mdash; about the speed of a quiet breath.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="no">03</span>
+            <div>
+              <p class="lbl">Culture the catch</p>
+              <p class="txt">The captured spores are cultured to count how many survive. A second, <b>uncharged</b> filter is run identically as the control.</p>
+            </div>
           </div>
         </div>
-        <p class="bams-foot">Two identical hospital air-handling towers, 12 months side by side · p&lt;0.001.</p>
-      </div>
+
+        <div class="rule"></div>
+
+        <p class="prov">
+          <span class="authors">Jusuf &middot; Chen &middot; Or &middot; Gong &middot; Sze &middot; Mansour</span><br>
+          n&nbsp;=&nbsp;3 &middot; p&nbsp;&lt;&nbsp;0.001 &middot; 0.97 m/s &middot; NIH-funded &middot; GLP-level &middot; live airborne <i>Aspergillus</i> &middot; 94% captured (double-layer)
+        </p>
+
+        <p class="limits">
+          <b>What it shows, and what it doesn&rsquo;t.</b> One mold species (<i>Aspergillus</i>), one laboratory,
+          three runs; submitted for peer review and not yet certified. It measures what the filter did to
+          spores in a wind tunnel &mdash; not a claim about human health.
+        </p>
+
+        <!--
+          SINGLE blue element on the page. PRE-SHIP BLOCKER: href MUST resolve to the live,
+          downloadable preprint / methods PDF (with a visible DOI) before this page is public.
+          No DOI is printed here because none has been personally verified (never cite an unfetched source).
+          A dead or "coming soon" link leaves the whole page reading as marketing.
+        -->
+        <a class="study-link" href="#" rel="noopener">
+          Read the full study
+          <span class="arw">&rarr;</span>
+          <span class="meta">method, data &amp; statistics (PDF)</span>
+        </a>
+      </section>
+
+      <!-- ============== RIGHT: the paired unit dot-grid (hero) ============== -->
+      <section class="col-right">
+        <p class="fig-head"><b>Were the caught spores still alive?</b> &nbsp;&middot;&nbsp; each dot is one spore the filter caught &mdash; a solid dot is one still alive</p>
+
+        <div class="panels">
+          <!-- Panel A: ordinary / uncharged control -->
+          <div class="panel">
+            <p class="p-name">Ordinary filter</p>
+            <p class="p-sub">uncharged control</p>
+            <p class="p-verdict">Stayed alive</p>
+            <div class="grid" id="gridA" role="img" aria-label="Of 1,000 spores the ordinary filter caught, the trapped mold stayed alive."></div>
+            <p class="p-denom">per 1,000 spores this filter caught</p>
+            <p class="p-stat dead">1,000 of 1,000 caught spores</p>
+          </div>
+          <!-- Panel B: charged / NanoFlashing -->
+          <div class="panel">
+            <p class="p-name">Charged filter</p>
+            <p class="p-sub charged">NanoFlashing</p>
+            <p class="p-verdict">Nearly all killed</p>
+            <div class="grid" id="gridB" role="img" aria-label="Of 1,000 spores the charged filter caught, about 8 were still alive."></div>
+            <p class="p-denom">per 1,000 spores this filter caught</p>
+            <p class="p-stat alive"><b>992 killed</b> &middot; 8 still alive (0.76%)</p>
+          </div>
+        </div>
+
+        <div class="fig-foot">
+          <div class="legend">
+            <span><i class="swatch alive"></i> still alive</span>
+            <span><i class="swatch dead"></i> killed</span>
+          </div>
+        </div>
+
+        <p class="caption">
+          <b>Viability of captured spores.</b> 0.76% of caught spores still viable on the charged filter,
+          versus no significant kill on the uncharged control &middot; 94% captured &middot;
+          n&nbsp;=&nbsp;3 &middot; p&nbsp;&lt;&nbsp;0.001 &middot; Mansour Lab, MGH &amp; Harvard Medical School &middot;
+          submitted for peer review. Per-run values are reported in the full study.
+        </p>
+      </section>
 
     </div>
-  </div>
-</section>
+  </main>
 
+  <script>
+    // One dot = one caught spore. 1,000 dots per panel => each dot = 0.1%, so 0.76% renders as
+    // ~8 visible survivors (7.6 rounds to 8). This is the Datawrapper granularity rule: a 100-dot
+    // waffle would round 0.76% into a lie. Capture (94%) is kept OUT of the grid and lives only in
+    // prose/caption, so the two bases (captured vs. still-alive-of-captured) never get conflated.
+    (function () {
+      var TOTAL = 1000;
+
+      function buildGrid(id, aliveIndices) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var alive = {};
+        if (aliveIndices) { for (var k = 0; k < aliveIndices.length; k++) { alive[aliveIndices[k]] = 1; } }
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < TOTAL; i++) {
+          var d = document.createElement('span');
+          // no index list => whole field alive (control: trapped mold stayed alive)
+          d.className = 'dot ' + ((!aliveIndices || alive[i]) ? 'alive' : 'dead');
+          frag.appendChild(d);
+        }
+        el.appendChild(frag);
+      }
+
+      // Panel A (ordinary filter): the caught mold stayed alive -> full field of alive marks.
+      buildGrid('gridA', null);
+      // Panel B (charged filter): ~8 survivors of 1,000, spread deterministically (not clustered).
+      buildGrid('gridB', [63, 187, 291, 388, 502, 631, 744, 906]);
+    })();
+  </script>
 </body>
 </html>
