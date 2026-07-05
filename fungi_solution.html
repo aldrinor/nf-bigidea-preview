@@ -342,6 +342,16 @@ section{
   const FLASH_MAX_RADIUS = 20;  // px — small, only noticeable if you're looking at the spot
   const FLASH_PEAK_ALPHA = 0.5; // restrained peak — soft glow, not a bright stamp
 
+  // Visible depth of the fabric face (from the slab's top edge down to its
+  // bottom edge), measured in the safe middle region away from the slab's
+  // left/right corners where it tapers to nothing. Roughly constant across x.
+  // Switched at the same 880px breakpoint as the other calibrated values.
+  // topSurfaceYFrac(xFrac) marks the NEAR edge of the landing zone (where a
+  // falling speck first reaches the surface); FACE_DEPTH_YFRAC is how much
+  // further down into the face a speck can still land. A speck's final
+  // landing yFrac is picked uniformly across that whole depth.
+  const FACE_DEPTH_YFRAC = (window.innerWidth <= 880) ? 0.509 : 0.502;
+
   let specks = [];
   let flashes = [];
   let dustRunning = false;
@@ -472,10 +482,17 @@ section{
 
     const r = 0.8 + Math.random() * 0.9; // 0.8–~1.7px — finer dust/grain
 
-    // Compute this speck's landing yFrac ONCE from its own xFrac using the
-    // tilted top-surface plane. The speck only falls straight down (x is
-    // fixed), so its target landing y is fixed at spawn time.
-    const landYFrac = topSurfaceYFrac(xFrac);
+    // Compute this speck's landing yFrac ONCE from its own xFrac. The speck
+    // only falls straight down (x is fixed), so its target landing y is
+    // fixed at spawn time. topSurfaceYFrac(xFrac) marks the NEAR edge of the
+    // landing zone — the entry line a falling speck first reaches — NOT the
+    // only landing point. The whole visible fabric face extends well past
+    // that line, down to the slab's bottom edge, so pick a random depth INTO
+    // the face: some specks land close to the top rim, some deep into the
+    // face, most in between. This matches how real dust settles across a
+    // whole surface (and how the video's own mold growth already covers the
+    // whole grey area, not just a thin band along the top).
+    const landYFrac = topSurfaceYFrac(xFrac) + Math.random() * FACE_DEPTH_YFRAC;
 
     // Fall speed proportional to the actual travel distance at spawn time,
     // so the speck lands in 1.2–2.2s regardless of viewport height.
@@ -557,8 +574,9 @@ section{
       s.y += s.speed * dt;
 
       // Per-speck landing y, computed once at spawn from this speck's own
-      // xFrac via topSurfaceYFrac(). Specks stop right at the true tilted
-      // top-surface line for their x position, not a shared flat height.
+      // xFrac via topSurfaceYFrac() plus a random depth into the face.
+      // Specks stop somewhere across the whole visible fabric surface, not
+      // just at the front rim.
       const landY = rect.top + s.landYFrac * rect.height;
 
       if (s.y >= landY){
