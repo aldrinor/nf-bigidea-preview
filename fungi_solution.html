@@ -76,29 +76,7 @@ section{
   z-index:2;
 }
 
-/* === NanoFlashing nameplate — a single quiet word on the clean blue half === */
-.nf-nameplate{
-  position:absolute;
-  z-index:5;
-  pointer-events:none;
-  font-family:var(--stack);
-  font-weight:500;
-  font-size:clamp(15px, 1.4vw, 18px);
-  letter-spacing:-0.01em;
-  line-height:1;
-  color:#33383d;
-  white-space:nowrap;
-  /* tucked into the clean background whitespace just outside the slab's
-     lower-left edge — tied to the blue half by proximity, never overlapping
-     the fabric texture. Solid muted ink at full opacity so the word reads
-     clearly at a glance without shouting. */
-  top:62%;
-  left:3%;
-  transform:translate(0, 0);
-}
-@media (max-width:880px){
-  .nf-nameplate{ top:64%; left:4%; font-size:14px; color:#33383d; }
-}
+/* nameplate removed — the headline and logo already name NanoFlashing */
 
 /* === Text column === */
 .text-col{
@@ -268,7 +246,6 @@ section{
            style="opacity:1; z-index:1;"></video>
     <canvas id="nfDustCanvas"></canvas>
     <img class="poster" src="assets/videos/posters/mold_answer.jpg?v=1" alt="">
-    <span class="nf-nameplate" aria-hidden="true">NanoFlashing</span>
   </div>
 
   <div class="scrim"></div>
