@@ -88,13 +88,13 @@ section{
   line-height:1;
   color:var(--ink);
   white-space:nowrap;
-  /* anchored to the lower area of the clean blue (left) half of the slab */
-  top:62%;
-  left:14%;
+  /* anchored to the upper-center of the clean blue (left) half of the slab */
+  top:38%;
+  left:38%;
   transform:translate(-50%, 0);
 }
 @media (max-width:880px){
-  .nf-nameplate{ top:60%; left:18%; font-size:14px; }
+  .nf-nameplate{ top:40%; left:42%; font-size:14px; }
 }
 
 /* === Text column === */
@@ -360,9 +360,9 @@ section{
   const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to its landing yFrac
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
   const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
-  const FLASH_DURATION = 260;   // ms — quick, quiet pulse, not a dramatic flare
-  const FLASH_MAX_RADIUS = 20;  // px — small, only noticeable if you're looking at the spot
-  const FLASH_PEAK_ALPHA = 0.5; // restrained peak — soft glow, not a bright stamp
+  const FLASH_DURATION = 170;   // ms — quick faint glint, not a dramatic flare
+  const FLASH_MAX_RADIUS = 9;   // px — small, barely registers
+  const FLASH_PEAK_ALPHA = 0.20;// faint shimmer, never blooms
 
   // Visible depth of the fabric face (from the slab's top edge down to its
   // bottom edge), measured in the safe middle region away from the slab's
@@ -467,24 +467,22 @@ section{
     const rect = videoStack.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
-    // Spawn somewhere above the slab. Use a yFrac in [0.02, SPAWN_YFRAC_MAX].
-    const yFrac = 0.02 + Math.random() * (SPAWN_YFRAC_MAX - 0.02);
-    const y = rect.top + yFrac * rect.height;
+    // FIRST pick the landing point ON the slab face, THEN spawn above it at
+    // the same x. Because x is chosen from the slab's silhouette at the
+    // LANDING row (not the high spawn row, where the edges extrapolate far
+    // too wide), every speck is guaranteed to land on the slab — none can
+    // fall into the empty background beside it.
+    const mobileSpawn = window.innerWidth <= 880;
+    const landYLo = mobileSpawn ? 0.32 : 0.30;
+    const landYHi = mobileSpawn ? 0.62 : 0.64;
+    const landYFrac = landYLo + Math.random() * (landYHi - landYLo);
 
-    // Horizontal span at this height: keep specks within the slab's actual
-    // silhouette. The slab is a tilted diamond — its left/right edges are
-    // themselves diagonal lines that shift with height, exactly like the
-    // internal blue/grey boundary. Anchor the spawn ranges to those real
-    // edges (with a small margin so specks stay visibly on the fabric, away
-    // from its very edge) instead of the old fixed 0.04 / 0.96 margins that
-    // assumed the slab spans almost the full container width.
-    const bxFrac = boundaryXFrac(yFrac);
-    const leftEdge = leftEdgeXFrac(yFrac);
-    const rightEdge = rightEdgeXFrac(yFrac);
+    const bxFrac = boundaryXFrac(landYFrac);
+    const leftEdge = leftEdgeXFrac(landYFrac);
+    const rightEdge = rightEdgeXFrac(landYFrac);
     const EDGE_MARGIN = 0.018; // fraction of container width
 
-    // Allow specks across most of the slab width; pick a side first so we
-    // get a balanced mix on both halves.
+    // Pick a side first so we get a balanced mix on both halves.
     const onBlue = Math.random() < 0.5;
     let xFrac;
     if (onBlue){
@@ -500,21 +498,14 @@ section{
       const hi = rightEdge - EDGE_MARGIN;
       xFrac = lo + Math.random() * Math.max(0.005, (hi - lo));
     }
+
+    // Spawn above the slab at the SAME x as the landing point. The speck
+    // only falls straight down, so it lands exactly on the chosen point.
+    const yFrac = 0.02 + Math.random() * (SPAWN_YFRAC_MAX - 0.02);
+    const y = rect.top + yFrac * rect.height;
     const x = rect.left + xFrac * rect.width;
 
     const r = 0.9 + Math.random() * 2.1; // 0.9–~3.0px — organic spore flecks, wider size range
-
-    // Compute this speck's landing yFrac ONCE from its own xFrac. The speck
-    // only falls straight down (x is fixed), so its target landing y is
-    // fixed at spawn time. topSurfaceYFrac(xFrac) marks the NEAR edge of the
-    // landing zone — the entry line a falling speck first reaches — NOT the
-    // only landing point. The whole visible fabric face extends well past
-    // that line, down to the slab's bottom edge, so pick a random depth INTO
-    // the face: some specks land close to the top rim, some deep into the
-    // face, most in between. This matches how real dust settles across a
-    // whole surface (and how the video's own mold growth already covers the
-    // whole grey area, not just a thin band along the top).
-    const landYFrac = topSurfaceYFrac(xFrac) + Math.random() * FACE_DEPTH_YFRAC;
 
     // Fall speed proportional to the actual travel distance at spawn time,
     // so the speck lands in 1.2–2.2s regardless of viewport height.
@@ -699,34 +690,17 @@ section{
 
       if (alpha <= 0.005) continue;
 
-      // Core glow — smooth six-stop radial gradient: near-white center
-      // fading gradually through pale blue into the blue fabric. Each
-      // stop is a small step in both color and alpha so the falloff reads
-      // as a soft round glow, not a flat bright disc with a hard edge.
+      // Faint quick blue glint — a single soft blue radial, no near-white
+      // core, no shockwave ring. Just enough to register a neutralized
+      // spore without blooming.
       const grad = dctx.createRadialGradient(lx, ly, 0, lx, ly, r);
-      grad.addColorStop(0,    'rgba(255,255,255,' + alpha.toFixed(3) + ')');
-      grad.addColorStop(0.12, 'rgba(248,251,255,' + (alpha * 0.86).toFixed(3) + ')');
-      grad.addColorStop(0.30, 'rgba(205,226,255,' + (alpha * 0.66).toFixed(3) + ')');
-      grad.addColorStop(0.50, 'rgba(140,180,255,' + (alpha * 0.46).toFixed(3) + ')');
-      grad.addColorStop(0.75, 'rgba(27,123,255,'  + (alpha * 0.24).toFixed(3) + ')');
-      grad.addColorStop(1,    'rgba(27,123,255,0)');
+      grad.addColorStop(0,   'rgba(160,200,255,' + alpha.toFixed(3) + ')');
+      grad.addColorStop(0.5, 'rgba(27,123,255,'  + (alpha * 0.5).toFixed(3) + ')');
+      grad.addColorStop(1,   'rgba(27,123,255,0)');
       dctx.beginPath();
       dctx.arc(lx, ly, r, 0, Math.PI * 2);
       dctx.fillStyle = grad;
       dctx.fill();
-
-      // Outer shockwave rim — thin bright ring at ~1.4x core radius.
-      // Low alpha keeps it restrained; shrinks with the core as the flash
-      // fades out.
-      const ringR = Math.max(0.5, r * 1.4);
-      const ringAlpha = alpha * 0.32;
-      if (ringAlpha > 0.01){
-        dctx.beginPath();
-        dctx.arc(lx, ly, ringR, 0, Math.PI * 2);
-        dctx.lineWidth = 1.2;
-        dctx.strokeStyle = 'rgba(220,238,255,' + ringAlpha.toFixed(3) + ')';
-        dctx.stroke();
-      }
     }
 
     // Continue if anything is still alive OR we're still allowed to spawn
