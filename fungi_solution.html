@@ -334,13 +334,14 @@ section{
      in the first ~4s land while the clip is still visibly growing.
   */
   const VIDEO_DURATION = 6.04;   // seconds — slab clip length
-  const SPAWN_RATE = 3.0;        // specks per second (busier falling dust; ~18 spawns across the 6s clip)
+  const SPAWN_RATE = 9.0;        // specks per second — denser ambient dust so a still frame reads as busy
   const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to LAND_YFRAC
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
   const LAND_YFRAC = 0.5;        // y-fraction within rect where specks "land"
   const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
-  const FLASH_DURATION = 340;   // ms
-  const FLASH_MAX_RADIUS = 22;  // px
+  const FLASH_DURATION = 420;   // ms — slightly longer so the held plateau is readable
+  const FLASH_MAX_RADIUS = 42;  // px — real pulse of light, not a pinprick
+  const FLASH_PEAK_ALPHA = 0.72; // bright-but-soft white core at peak (trimmed ~18% from 0.88)
 
   let specks = [];
   let flashes = [];
@@ -456,7 +457,9 @@ section{
     const fallDurationSec = FALL_DURATION_MIN + Math.random() * (FALL_DURATION_MAX - FALL_DURATION_MIN);
     const speed = travelDistance / fallDurationSec;
 
-    const alpha = 0.42 + Math.random() * 0.22;
+    // Slightly higher alpha band so fine specks register in a still frame;
+    // density still comes from quantity, not size.
+    const alpha = 0.4 + Math.random() * 0.22;
 
     specks.push({
       x: x, y: y,
@@ -487,6 +490,26 @@ section{
     // clear canvas
     const rect = videoStack.getBoundingClientRect();
     dctx.clearRect(0, 0, rect.width, rect.height);
+  }
+
+  // Flash envelope: quick ramp up (first 15%), hold near-peak through the
+  // middle 50%, ease out over the final 35%. Returns {radiusFrac, alphaFrac}.
+  // radiusFrac grows a touch during the ease-out so the shockwave expands as
+  // it fades, reading as a real pulse rather than a static blob.
+  function flashEnvelope(t){
+    if (t < 0.15){
+      const u = t / 0.15;
+      const ease = 1 - Math.pow(1 - u, 2); // ease-out quad
+      return { radiusFrac: ease, alphaFrac: ease };
+    } else if (t < 0.65){
+      // held plateau — tiny radius breathing so it doesn't feel frozen
+      const u = (t - 0.15) / 0.5; // 0..1 across plateau
+      return { radiusFrac: 1.0 + 0.04 * u, alphaFrac: 1.0 };
+    } else {
+      const u = (t - 0.65) / 0.35; // 0..1 across ease-out
+      const ease = 1 - Math.pow(1 - u, 2); // ease-out quad for alpha
+      return { radiusFrac: 1.04 + 0.36 * u, alphaFrac: 1.0 - ease };
+    }
   }
 
   function dustTick(now){
@@ -564,27 +587,54 @@ section{
       dctx.fill();
     }
 
-    // flashes — soft radial glow with a bright near-white core so it reads
-    // as an actual spark of light against the pale blue fabric, not just a
-    // same-hue opacity blur.
+    // flashes — a real pulse of light: bright near-white core, soft blue
+    // halo, and a thin shockwave rim that expands as the flash fades.
+    // Envelope: 15% ramp up, 50% held near-peak plateau, 35% ease out.
+    //
+    // Gradient: six closely-spaced stops so the white core fades into the
+    // blue halo gradually (no hard "stamped circle" edge). The fully-bright
+    // core is pulled in earlier (drops off by ~10% of radius instead of
+    // holding flat to 18%), so more of the shape is soft falloff and less
+    // of it is a flat bright disc. Overall radius and duration unchanged.
     for (let i = 0; i < flashes.length; i++){
       const f = flashes[i];
-      const t = (now - f.start) / f.duration; // 0..1
-      // ease-out for radius growth, fade alpha
-      const ease = 1 - Math.pow(1 - t, 2);
-      const r = f.maxR * ease;
-      const alpha = 0.7 * (1 - t);
+      const t = Math.min(1, Math.max(0, (now - f.start) / f.duration));
+      const env = flashEnvelope(t);
+      const r = Math.max(0.5, f.maxR * env.radiusFrac);
+      const alpha = FLASH_PEAK_ALPHA * env.alphaFrac;
       const lx = f.x - rect.left;
       const ly = f.y - rect.top;
-      const grad = dctx.createRadialGradient(lx, ly, 0, lx, ly, Math.max(0.5, r));
-      grad.addColorStop(0,    'rgba(220,240,255,' + alpha.toFixed(3) + ')');
-      grad.addColorStop(0.35, 'rgba(27,123,255,'  + alpha.toFixed(3) + ')');
-      grad.addColorStop(0.7,  'rgba(27,123,255,'  + (alpha * 0.3).toFixed(3) + ')');
+
+      if (alpha <= 0.005) continue;
+
+      // Core glow — smooth six-stop radial gradient: near-white center
+      // fading gradually through pale blue into the blue fabric. Each
+      // stop is a small step in both color and alpha so the falloff reads
+      // as a soft round glow, not a flat bright disc with a hard edge.
+      const grad = dctx.createRadialGradient(lx, ly, 0, lx, ly, r);
+      grad.addColorStop(0,    'rgba(255,255,255,' + alpha.toFixed(3) + ')');
+      grad.addColorStop(0.12, 'rgba(248,251,255,' + (alpha * 0.86).toFixed(3) + ')');
+      grad.addColorStop(0.30, 'rgba(205,226,255,' + (alpha * 0.66).toFixed(3) + ')');
+      grad.addColorStop(0.50, 'rgba(140,180,255,' + (alpha * 0.46).toFixed(3) + ')');
+      grad.addColorStop(0.75, 'rgba(27,123,255,'  + (alpha * 0.24).toFixed(3) + ')');
       grad.addColorStop(1,    'rgba(27,123,255,0)');
       dctx.beginPath();
-      dctx.arc(lx, ly, Math.max(0.5, r), 0, Math.PI * 2);
+      dctx.arc(lx, ly, r, 0, Math.PI * 2);
       dctx.fillStyle = grad;
       dctx.fill();
+
+      // Outer shockwave rim — thin bright ring at ~1.4x core radius.
+      // Expands slightly during the ease-out so it reads as a propagating
+      // edge rather than a static stroke. Low alpha keeps it restrained.
+      const ringR = Math.max(0.5, r * 1.4);
+      const ringAlpha = alpha * 0.32;
+      if (ringAlpha > 0.01){
+        dctx.beginPath();
+        dctx.arc(lx, ly, ringR, 0, Math.PI * 2);
+        dctx.lineWidth = 1.2;
+        dctx.strokeStyle = 'rgba(220,238,255,' + ringAlpha.toFixed(3) + ')';
+        dctx.stroke();
+      }
     }
 
     // Continue if anything is still alive OR we're still allowed to spawn
