@@ -334,7 +334,7 @@ section{
      in the first ~4s land while the clip is still visibly growing.
   */
   const VIDEO_DURATION = 6.04;   // seconds — slab clip length
-  const SPAWN_RATE = 1.0;        // specks per second (restrained; ~6 spawns across the 6s clip → ~4–6 landings during the clip)
+  const SPAWN_RATE = 3.0;        // specks per second (busier falling dust; ~18 spawns across the 6s clip)
   const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to LAND_YFRAC
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
   const LAND_YFRAC = 0.5;        // y-fraction within rect where specks "land"
@@ -448,7 +448,7 @@ section{
     }
     const x = rect.left + xFrac * rect.width;
 
-    const r = 1.5 + Math.random() * 1.4; // 1.5–~2.9px
+    const r = 0.8 + Math.random() * 0.9; // 0.8–~1.7px — finer dust/grain
 
     // Fall speed proportional to the actual travel distance at spawn time,
     // so the speck lands in 1.2–2.2s regardless of viewport height.
@@ -456,7 +456,7 @@ section{
     const fallDurationSec = FALL_DURATION_MIN + Math.random() * (FALL_DURATION_MAX - FALL_DURATION_MIN);
     const speed = travelDistance / fallDurationSec;
 
-    const alpha = 0.32 + Math.random() * 0.22;
+    const alpha = 0.42 + Math.random() * 0.22;
 
     specks.push({
       x: x, y: y,
