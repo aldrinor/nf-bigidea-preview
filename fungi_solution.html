@@ -76,51 +76,25 @@ section{
   z-index:2;
 }
 
-/* === Slab annotation legend (frosted, matches site legend language) === */
-.nf-legend{
+/* === NanoFlashing nameplate — a single quiet word on the clean blue half === */
+.nf-nameplate{
   position:absolute;
   z-index:5;
   pointer-events:none;
-  top:20px;
-  right:20px;
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-  padding:9px 12px;
-  background:rgba(255,255,255,0.9);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid rgba(20,24,28,0.06);
-  border-radius:9px;
-  box-shadow:0 2px 14px rgba(0,0,0,0.08);
   font-family:var(--stack);
-  font-size:14px;
-  font-weight:600;
+  font-weight:500;
+  font-size:clamp(15px, 1.4vw, 18px);
+  letter-spacing:-0.01em;
+  line-height:1;
   color:var(--ink);
-  line-height:1.25;
   white-space:nowrap;
+  /* anchored to the lower area of the clean blue (left) half of the slab */
+  top:62%;
+  left:14%;
+  transform:translate(-50%, 0);
 }
-.nf-legend__row{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  line-height:1.25;
-}
-.nf-legend__dot{
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  border:0.5px solid #fff;
-  box-shadow:0 0 0 0.5px rgba(0,0,0,0.1);
-  flex:0 0 auto;
-}
-.nf-legend__dot--blue{ background:#1b7bff; }
-.nf-legend__dot--grey{ background:#8a9095; }
-.nf-legend__dot--dark{ background:#2a2f34; }
 @media (max-width:880px){
-  .nf-legend{ top:12px; right:12px; padding:10px 12px; font-size:12px; gap:7px; max-width:calc(100% - 24px); }
-  .nf-legend__row{ gap:7px; }
-  .nf-legend__dot{ width:8px; height:8px; }
+  .nf-nameplate{ top:60%; left:18%; font-size:14px; }
 }
 
 /* === Text column === */
@@ -291,20 +265,7 @@ section{
            style="opacity:1; z-index:1;"></video>
     <canvas id="nfDustCanvas"></canvas>
     <img class="poster" src="assets/videos/posters/mold_answer.jpg?v=1" alt="">
-    <div class="nf-legend" aria-hidden="true">
-      <div class="nf-legend__row">
-        <span class="nf-legend__dot nf-legend__dot--blue"></span>
-        <span class="nf-legend__label">NanoFlashing Material</span>
-      </div>
-      <div class="nf-legend__row">
-        <span class="nf-legend__dot nf-legend__dot--grey"></span>
-        <span class="nf-legend__label">Conventional Material</span>
-      </div>
-      <div class="nf-legend__row">
-        <span class="nf-legend__dot nf-legend__dot--dark"></span>
-        <span class="nf-legend__label">Airborne mold spores</span>
-      </div>
-    </div>
+    <span class="nf-nameplate" aria-hidden="true">NanoFlashing</span>
   </div>
 
   <div class="scrim"></div>
@@ -541,7 +502,7 @@ section{
     }
     const x = rect.left + xFrac * rect.width;
 
-    const r = 0.8 + Math.random() * 0.9; // 0.8–~1.7px — finer dust/grain
+    const r = 0.9 + Math.random() * 2.1; // 0.9–~3.0px — organic spore flecks, wider size range
 
     // Compute this speck's landing yFrac ONCE from its own xFrac. The speck
     // only falls straight down (x is fixed), so its target landing y is
@@ -563,14 +524,27 @@ section{
 
     // Slightly higher alpha band so fine specks register in a still frame;
     // density still comes from quantity, not size.
-    const alpha = 0.4 + Math.random() * 0.22;
+    const alpha = 0.34 + Math.random() * 0.22;
 
-    specks.push({
-      x: x, y: y,
-      r: r, speed: speed, alpha: alpha,
-      landYFrac: landYFrac,
-      rectTop: rect.top, rectHeight: rect.height, rectLeft: rect.left, rectWidth: rect.width
-    });
+    // Occasional 2–3 speck clusters read as organic spore groupings, not
+    // lone dust pixels. ~22% of spawns become a small cluster.
+    const isCluster = Math.random() < 0.22;
+    const clusterOffsets = isCluster
+      ? (Math.random() < 0.5
+          ? [{dx:0,dy:0},{dx:1.6,dy:0.6},{dx:-1.2,dy:1.4}]
+          : [{dx:0,dy:0},{dx:2.0,dy:-0.8}])
+      : [{dx:0,dy:0}];
+
+    for (let ci = 0; ci < clusterOffsets.length; ci++){
+      const co = clusterOffsets[ci];
+      specks.push({
+        x: x + co.dx, y: y + co.dy,
+        r: r * (0.7 + Math.random() * 0.5),
+        speed: speed, alpha: alpha,
+        landYFrac: landYFrac,
+        rectTop: rect.top, rectHeight: rect.height, rectLeft: rect.left, rectWidth: rect.width
+      });
+    }
   }
 
   function startDust(){
@@ -684,14 +658,27 @@ section{
     // Render
     dctx.clearRect(0, 0, rect.width, rect.height);
 
-    // specks (relative to rect)
+    // specks (relative to rect) — soft fuzzy organic flecks: a faint halo
+    // via radial gradient + a tighter inner core. Desaturated grey-green
+    // (~#7c8466) rhymes with the grown mold on the grey half, so falling
+    // particles read as mold spores, not black dust.
     for (let i = 0; i < specks.length; i++){
       const s = specks[i];
       const lx = s.x - rect.left;
       const ly = s.y - rect.top;
+      const haloR = Math.max(0.6, s.r * 2.4);
+      const halo = dctx.createRadialGradient(lx, ly, 0, lx, ly, haloR);
+      halo.addColorStop(0,    'rgba(124,132,102,' + s.alpha.toFixed(3) + ')');
+      halo.addColorStop(0.45, 'rgba(124,132,102,' + (s.alpha * 0.45).toFixed(3) + ')');
+      halo.addColorStop(1,    'rgba(124,132,102,0)');
       dctx.beginPath();
-      dctx.arc(lx, ly, s.r, 0, Math.PI * 2);
-      dctx.fillStyle = 'rgba(31,35,39,' + s.alpha + ')';
+      dctx.arc(lx, ly, haloR, 0, Math.PI * 2);
+      dctx.fillStyle = halo;
+      dctx.fill();
+      // tighter inner core for body
+      dctx.beginPath();
+      dctx.arc(lx, ly, s.r * 0.7, 0, Math.PI * 2);
+      dctx.fillStyle = 'rgba(96,104,76,' + (s.alpha * 0.9).toFixed(3) + ')';
       dctx.fill();
     }
 
