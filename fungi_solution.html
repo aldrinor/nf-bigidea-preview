@@ -86,17 +86,18 @@ section{
   font-size:clamp(15px, 1.4vw, 18px);
   letter-spacing:-0.01em;
   line-height:1;
-  color:var(--muted);
+  color:#5a6066;
   white-space:nowrap;
   /* tucked into the clean background whitespace just outside the slab's
      lower-left edge — tied to the blue half by proximity, never overlapping
-     the fabric texture. */
+     the fabric texture. Solid muted ink at full opacity so the word reads
+     clearly at a glance without shouting. */
   top:62%;
   left:3%;
   transform:translate(0, 0);
 }
 @media (max-width:880px){
-  .nf-nameplate{ top:64%; left:4%; font-size:14px; }
+  .nf-nameplate{ top:64%; left:4%; font-size:14px; color:#5a6066; }
 }
 
 /* === Text column === */
@@ -346,9 +347,9 @@ section{
 
   /* ---------- Dust particle overlay ----------
      Restrained falling-dust effect. Dust lands on both halves of the slab.
-     On the blue (charged) half, a brief soft blue flash plays on contact and
-     the speck vanishes. On the grey half, the speck simply vanishes — the
-     video itself handles all visible mold growth there.
+     On either half the speck simply vanishes on contact — no flash, no glow.
+     The blue half's own colour conveys the charged material; the proof is
+     that spores never grow on the blue side while mold grows on the grey side.
 
      Pacing note: fall speed is computed per-speck from the actual vertical
      travel distance at spawn time, picked so the speck lands in 1.2–2.2s.
@@ -362,9 +363,6 @@ section{
   const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to its landing yFrac
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
   const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
-  const FLASH_DURATION = 240;   // ms — clear but quick azure pulse on neutralization
-  const FLASH_MAX_RADIUS = 14;  // px — soft, readable glow without blooming
-  const FLASH_PEAK_ALPHA = 0.36;// clear blue flash, elegant not gaudy
 
   // Visible depth of the fabric face (from the slab's top edge down to its
   // bottom edge), measured in the safe middle region away from the slab's
@@ -377,7 +375,6 @@ section{
   const FACE_DEPTH_YFRAC = (window.innerWidth <= 880) ? 0.509 : 0.502;
 
   let specks = [];
-  let flashes = [];
   let dustRunning = false;
   let dustStartTime = 0;
   let lastSpawnTime = 0;
@@ -544,7 +541,6 @@ section{
     if (reducedMotion) return;
     resizeDustCanvas();
     specks = [];
-    flashes = [];
     dustRunning = true;
     dustStartTime = performance.now();
     lastSpawnTime = dustStartTime;
@@ -554,7 +550,6 @@ section{
   function stopDust(){
     dustRunning = false;
     specks = [];
-    flashes = [];
     if (rafId){
       cancelAnimationFrame(rafId);
       rafId = null;
@@ -562,16 +557,6 @@ section{
     // clear canvas
     const rect = videoStack.getBoundingClientRect();
     dctx.clearRect(0, 0, rect.width, rect.height);
-  }
-
-  // Flash envelope: a single continuous ease-out from the start. Radius and
-  // alpha both peak immediately at t=0 and fade smoothly to zero over the
-  // full duration — no held plateau, no lingering hold at peak brightness.
-  // The held plateau was exactly what read as "dramatic/fake"; removing it
-  // makes the flash quick, small, and quiet.
-  function flashEnvelope(t){
-    const v = Math.pow(1 - t, 2); // ease-out quad decay from peak to zero
-    return { radiusFrac: v, alphaFrac: v };
   }
 
   function dustTick(now){
@@ -616,35 +601,12 @@ section{
       const landY = rect.top + s.landYFrac * rect.height;
 
       if (s.y >= landY){
-        // landed — determine side using boundary at landing yFrac.
-        // Specks fall straight down in x, so a speck that spawned within
-        // [leftEdgeXFrac, rightEdgeXFrac] at its spawn yFrac is still within
-        // the slab's silhouette at the landing yFrac (the slab is convex
-        // across this range). No extra drift check needed.
-        const yFrac = (s.y - rect.top) / rect.height;
-        const bxFrac = boundaryXFrac(yFrac);
-        const boundaryX = rect.left + bxFrac * rect.width;
-        if (s.x < boundaryX){
-          // blue half: brief soft flash
-          flashes.push({
-            x: s.x, y: s.y,
-            start: now,
-            duration: FLASH_DURATION,
-            maxR: FLASH_MAX_RADIUS
-          });
-        }
-        // grey half: just disappear
+        // landed — quietly vanish on either half (blue or grey), exactly
+        // like the grey half. No flash, no glow, no ring: the blue half's
+        // own colour already conveys the charged material.
         specks.splice(i, 1);
       } else if (s.y > rect.bottom + 4){
         specks.splice(i, 1);
-      }
-    }
-
-    // Update flashes
-    for (let i = flashes.length - 1; i >= 0; i--){
-      const f = flashes[i];
-      if (now - f.start >= f.duration){
-        flashes.splice(i, 1);
       }
     }
 
@@ -675,40 +637,10 @@ section{
       dctx.fill();
     }
 
-    // flashes — a quick, quiet pulse of light: small soft white core fading
-    // into a blue halo. Single continuous ease-out from peak to zero over
-    // the full duration — no held plateau, so it never reads as a dramatic
-    // flare. The smooth multi-stop white-to-blue gradient is preserved (soft
-    // round glow, not a hard-edged disc); only the size, duration, and peak
-    // brightness have been pulled back.
-    for (let i = 0; i < flashes.length; i++){
-      const f = flashes[i];
-      const t = Math.min(1, Math.max(0, (now - f.start) / f.duration));
-      const env = flashEnvelope(t);
-      const r = Math.max(0.5, f.maxR * env.radiusFrac);
-      const alpha = FLASH_PEAK_ALPHA * env.alphaFrac;
-      const lx = f.x - rect.left;
-      const ly = f.y - rect.top;
-
-      if (alpha <= 0.005) continue;
-
-      // Clear azure pulse — a single soft blue radial, no near-white
-      // core, no shockwave ring. Reads as a clean "azure" flash the instant
-      // a spore is neutralized on the blue side.
-      const grad = dctx.createRadialGradient(lx, ly, 0, lx, ly, r);
-      grad.addColorStop(0,   'rgba(90,160,255,'  + alpha.toFixed(3) + ')');
-      grad.addColorStop(0.45,'rgba(27,123,255,'  + (alpha * 0.75).toFixed(3) + ')');
-      grad.addColorStop(1,   'rgba(27,123,255,0)');
-      dctx.beginPath();
-      dctx.arc(lx, ly, r, 0, Math.PI * 2);
-      dctx.fillStyle = grad;
-      dctx.fill();
-    }
-
     // Continue if anything is still alive OR we're still allowed to spawn
-    if (dustRunning && (allowSpawn || specks.length > 0 || flashes.length > 0)){
+    if (dustRunning && (allowSpawn || specks.length > 0)){
       rafId = requestAnimationFrame(dustTick);
-    } else if (dustRunning && !allowSpawn && specks.length === 0 && flashes.length === 0){
+    } else if (dustRunning && !allowSpawn && specks.length === 0){
       // video ended and everything settled — go idle (but stay ready for restart)
       dustRunning = false;
       rafId = null;
