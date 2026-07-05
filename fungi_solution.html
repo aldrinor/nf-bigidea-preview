@@ -86,15 +86,17 @@ section{
   font-size:clamp(15px, 1.4vw, 18px);
   letter-spacing:-0.01em;
   line-height:1;
-  color:var(--ink);
+  color:var(--muted);
   white-space:nowrap;
-  /* anchored to the upper-center of the clean blue (left) half of the slab */
-  top:38%;
-  left:38%;
-  transform:translate(-50%, 0);
+  /* tucked into the clean background whitespace just outside the slab's
+     lower-left edge — tied to the blue half by proximity, never overlapping
+     the fabric texture. */
+  top:62%;
+  left:3%;
+  transform:translate(0, 0);
 }
 @media (max-width:880px){
-  .nf-nameplate{ top:40%; left:42%; font-size:14px; }
+  .nf-nameplate{ top:64%; left:4%; font-size:14px; }
 }
 
 /* === Text column === */
@@ -360,9 +362,9 @@ section{
   const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to its landing yFrac
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
   const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
-  const FLASH_DURATION = 170;   // ms — quick faint glint, not a dramatic flare
-  const FLASH_MAX_RADIUS = 9;   // px — small, barely registers
-  const FLASH_PEAK_ALPHA = 0.20;// faint shimmer, never blooms
+  const FLASH_DURATION = 240;   // ms — clear but quick azure pulse on neutralization
+  const FLASH_MAX_RADIUS = 14;  // px — soft, readable glow without blooming
+  const FLASH_PEAK_ALPHA = 0.36;// clear blue flash, elegant not gaudy
 
   // Visible depth of the fabric face (from the slab's top edge down to its
   // bottom edge), measured in the safe middle region away from the slab's
@@ -690,12 +692,12 @@ section{
 
       if (alpha <= 0.005) continue;
 
-      // Faint quick blue glint — a single soft blue radial, no near-white
-      // core, no shockwave ring. Just enough to register a neutralized
-      // spore without blooming.
+      // Clear azure pulse — a single soft blue radial, no near-white
+      // core, no shockwave ring. Reads as a clean "azure" flash the instant
+      // a spore is neutralized on the blue side.
       const grad = dctx.createRadialGradient(lx, ly, 0, lx, ly, r);
-      grad.addColorStop(0,   'rgba(160,200,255,' + alpha.toFixed(3) + ')');
-      grad.addColorStop(0.5, 'rgba(27,123,255,'  + (alpha * 0.5).toFixed(3) + ')');
+      grad.addColorStop(0,   'rgba(90,160,255,'  + alpha.toFixed(3) + ')');
+      grad.addColorStop(0.45,'rgba(27,123,255,'  + (alpha * 0.75).toFixed(3) + ')');
       grad.addColorStop(1,   'rgba(27,123,255,0)');
       dctx.beginPath();
       dctx.arc(lx, ly, r, 0, Math.PI * 2);
