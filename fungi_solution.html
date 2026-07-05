@@ -86,7 +86,7 @@ section{
   font-size:clamp(15px, 1.4vw, 18px);
   letter-spacing:-0.01em;
   line-height:1;
-  color:#5a6066;
+  color:#33383d;
   white-space:nowrap;
   /* tucked into the clean background whitespace just outside the slab's
      lower-left edge — tied to the blue half by proximity, never overlapping
@@ -97,7 +97,7 @@ section{
   transform:translate(0, 0);
 }
 @media (max-width:880px){
-  .nf-nameplate{ top:64%; left:4%; font-size:14px; color:#5a6066; }
+  .nf-nameplate{ top:64%; left:4%; font-size:14px; color:#33383d; }
 }
 
 /* === Text column === */
@@ -482,7 +482,7 @@ section{
     const EDGE_MARGIN = 0.018; // fraction of container width
 
     // Pick a side first so we get a balanced mix on both halves.
-    const onBlue = Math.random() < 0.5;
+    const onBlue = Math.random() < 0.22;
     let xFrac;
     if (onBlue){
       // blue half: from just inside the left silhouette edge up to just
@@ -532,7 +532,8 @@ section{
         r: r * (0.7 + Math.random() * 0.5),
         speed: speed, alpha: alpha,
         landYFrac: landYFrac,
-        rectTop: rect.top, rectHeight: rect.height, rectLeft: rect.left, rectWidth: rect.width
+        rectTop: rect.top, rectHeight: rect.height, rectLeft: rect.left, rectWidth: rect.width,
+        onBlue: onBlue, spawnY: y + co.dy, dissolve: 1
       });
     }
   }
@@ -607,6 +608,16 @@ section{
         specks.splice(i, 1);
       } else if (s.y > rect.bottom + 4){
         specks.splice(i, 1);
+      } else if (s.onBlue){
+        // Dissolve blue-side specks cleanly as they approach the surface:
+        // shrink radius + fade alpha over the final 18% of travel so they
+        // vanish just above the clean blue surface — destroyed on contact,
+        // never landing as a visible green speck. No glow, no flash.
+        const total = landY - s.spawnY;
+        const remaining = landY - s.y;
+        const DISSOLVE_FRAC = 0.18;
+        const frac = total > 0 ? remaining / total : 0;
+        s.dissolve = frac < DISSOLVE_FRAC ? Math.max(0, frac / DISSOLVE_FRAC) : 1;
       }
     }
 
@@ -619,12 +630,16 @@ section{
     // particles read as mold spores, not black dust.
     for (let i = 0; i < specks.length; i++){
       const s = specks[i];
+      const d = s.dissolve;
+      if (d <= 0.01) continue;
       const lx = s.x - rect.left;
       const ly = s.y - rect.top;
-      const haloR = Math.max(0.6, s.r * 2.4);
+      const er = s.r * d;
+      const ea = s.alpha * d;
+      const haloR = Math.max(0.6, er * 2.4);
       const halo = dctx.createRadialGradient(lx, ly, 0, lx, ly, haloR);
-      halo.addColorStop(0,    'rgba(124,132,102,' + s.alpha.toFixed(3) + ')');
-      halo.addColorStop(0.45, 'rgba(124,132,102,' + (s.alpha * 0.45).toFixed(3) + ')');
+      halo.addColorStop(0,    'rgba(124,132,102,' + ea.toFixed(3) + ')');
+      halo.addColorStop(0.45, 'rgba(124,132,102,' + (ea * 0.45).toFixed(3) + ')');
       halo.addColorStop(1,    'rgba(124,132,102,0)');
       dctx.beginPath();
       dctx.arc(lx, ly, haloR, 0, Math.PI * 2);
@@ -632,8 +647,8 @@ section{
       dctx.fill();
       // tighter inner core for body
       dctx.beginPath();
-      dctx.arc(lx, ly, s.r * 0.7, 0, Math.PI * 2);
-      dctx.fillStyle = 'rgba(96,104,76,' + (s.alpha * 0.9).toFixed(3) + ')';
+      dctx.arc(lx, ly, er * 0.7, 0, Math.PI * 2);
+      dctx.fillStyle = 'rgba(96,104,76,' + (ea * 0.9).toFixed(3) + ')';
       dctx.fill();
     }
 
