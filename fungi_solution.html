@@ -67,6 +67,15 @@ section{
 .video-stack.reduced video{ opacity:0 !important; }
 .video-stack.reduced img.poster{ opacity:1; }
 
+#nfDustCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:2;
+}
+
 /* === Text column === */
 .text-col{
   position:relative;
@@ -233,6 +242,7 @@ section{
            poster="assets/videos/posters/mold_answer.jpg?v=4"
            muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
+    <canvas id="nfDustCanvas"></canvas>
     <img class="poster" src="assets/videos/posters/mold_answer.jpg?v=1" alt="">
   </div>
 
@@ -263,19 +273,26 @@ section{
   const videoStack = document.getElementById('videoStack');
   const videoA = document.getElementById('videoA');
   const bigNumber = document.getElementById('bigNumber');
+  const dustCanvas = document.getElementById('nfDustCanvas');
+  const dctx = dustCanvas.getContext('2d');
 
   /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
   if (reducedMotion) {
     videoStack.classList.add('reduced');
   }
   const isEmbedded = window.self !== window.top;
+
   function startFilter(){
     if (reducedMotion) return;
     try { videoA.currentTime = 0; videoA.play(); } catch(e){}
     bigNumber.textContent = '0%';
     animateNumber();
+    startDust();
   }
-  function stopFilter(){ try { videoA.pause(); } catch(e){} }
+  function stopFilter(){
+    try { videoA.pause(); } catch(e){}
+    stopDust();
+  }
 
   /* ---------- Number animation ---------- */
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
@@ -302,6 +319,289 @@ section{
 
     requestAnimationFrame(step);
   }
+
+  /* ---------- Dust particle overlay ----------
+     Restrained falling-dust effect. Dust lands on both halves of the slab.
+     On the blue (charged) half, a brief soft blue flash plays on contact and
+     the speck vanishes. On the grey half, the speck simply vanishes — the
+     video itself handles all visible mold growth there.
+
+     Pacing note: fall speed is computed per-speck from the actual vertical
+     travel distance at spawn time, picked so the speck lands in 1.2–2.2s.
+     This keeps pacing consistent across any viewport height (the old fixed
+     px/sec was far too slow on tall desktop viewports — specks were still
+     falling after the 6s clip had ended) and guarantees that specks spawned
+     in the first ~4s land while the clip is still visibly growing.
+  */
+  const VIDEO_DURATION = 6.04;   // seconds — slab clip length
+  const SPAWN_RATE = 1.0;        // specks per second (restrained; ~6 spawns across the 6s clip → ~4–6 landings during the clip)
+  const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to LAND_YFRAC
+  const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
+  const LAND_YFRAC = 0.5;        // y-fraction within rect where specks "land"
+  const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
+  const FLASH_DURATION = 340;   // ms
+  const FLASH_MAX_RADIUS = 22;  // px
+
+  let specks = [];
+  let flashes = [];
+  let dustRunning = false;
+  let dustStartTime = 0;
+  let lastSpawnTime = 0;
+  let rafId = null;
+  let dpr = 1;
+
+  function resizeDustCanvas(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = videoStack.getBoundingClientRect();
+    dustCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    dustCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function boundaryXFrac(yFrac){
+    const mobile = window.innerWidth <= 880;
+    let y0, x0, y1, x1;
+    if (mobile){
+      y0 = 0.239; x0 = 0.582;
+      y1 = 0.718; x1 = 0.441;
+    } else {
+      y0 = 0.25;  x0 = 0.617;
+      y1 = 0.667; x1 = 0.424;
+    }
+    let f = (yFrac - y0) / (y1 - y0);
+    // allow mild extrapolation, then clamp
+    f = Math.max(-0.25, Math.min(1.25, f));
+    return x0 + (x1 - x0) * f;
+  }
+
+  // Left silhouette edge of the slab (tilted diamond). Same two-point linear
+  // interpolation + clamp pattern as boundaryXFrac(). Specks must spawn to
+  // the RIGHT of this edge to land on the fabric.
+  function leftEdgeXFrac(yFrac){
+    const mobile = window.innerWidth <= 880;
+    let y0, x0, y1, x1;
+    if (mobile){
+      y0 = 0.308; x0 = 0.339;
+      y1 = 0.650; x1 = 0.223;
+    } else {
+      y0 = 0.278; x0 = 0.282;
+      y1 = 0.611; x1 = 0.110;
+    }
+    let f = (yFrac - y0) / (y1 - y0);
+    f = Math.max(-0.25, Math.min(1.25, f));
+    return x0 + (x1 - x0) * f;
+  }
+
+  // Right silhouette edge of the slab. Specks must spawn to the LEFT of this
+  // edge to land on the fabric.
+  function rightEdgeXFrac(yFrac){
+    const mobile = window.innerWidth <= 880;
+    let y0, x0, y1, x1;
+    if (mobile){
+      y0 = 0.308; x0 = 0.821;
+      y1 = 0.650; x1 = 0.715;
+    } else {
+      y0 = 0.333; x0 = 0.947;
+      y1 = 0.611; x1 = 0.823;
+    }
+    let f = (yFrac - y0) / (y1 - y0);
+    f = Math.max(-0.25, Math.min(1.25, f));
+    return x0 + (x1 - x0) * f;
+  }
+
+  function spawnSpeck(now){
+    const rect = videoStack.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    // Spawn somewhere above the slab. Use a yFrac in [0.02, SPAWN_YFRAC_MAX].
+    const yFrac = 0.02 + Math.random() * (SPAWN_YFRAC_MAX - 0.02);
+    const y = rect.top + yFrac * rect.height;
+
+    // Horizontal span at this height: keep specks within the slab's actual
+    // silhouette. The slab is a tilted diamond — its left/right edges are
+    // themselves diagonal lines that shift with height, exactly like the
+    // internal blue/grey boundary. Anchor the spawn ranges to those real
+    // edges (with a small margin so specks stay visibly on the fabric, away
+    // from its very edge) instead of the old fixed 0.04 / 0.96 margins that
+    // assumed the slab spans almost the full container width.
+    const bxFrac = boundaryXFrac(yFrac);
+    const leftEdge = leftEdgeXFrac(yFrac);
+    const rightEdge = rightEdgeXFrac(yFrac);
+    const EDGE_MARGIN = 0.018; // fraction of container width
+
+    // Allow specks across most of the slab width; pick a side first so we
+    // get a balanced mix on both halves.
+    const onBlue = Math.random() < 0.5;
+    let xFrac;
+    if (onBlue){
+      // blue half: from just inside the left silhouette edge up to just
+      // before the blue/grey boundary.
+      const lo = leftEdge + EDGE_MARGIN;
+      const hi = bxFrac - EDGE_MARGIN;
+      xFrac = lo + Math.random() * Math.max(0.005, (hi - lo));
+    } else {
+      // grey half: from just past the boundary to just inside the right
+      // silhouette edge.
+      const lo = bxFrac + EDGE_MARGIN;
+      const hi = rightEdge - EDGE_MARGIN;
+      xFrac = lo + Math.random() * Math.max(0.005, (hi - lo));
+    }
+    const x = rect.left + xFrac * rect.width;
+
+    const r = 1.5 + Math.random() * 1.4; // 1.5–~2.9px
+
+    // Fall speed proportional to the actual travel distance at spawn time,
+    // so the speck lands in 1.2–2.2s regardless of viewport height.
+    const travelDistance = (LAND_YFRAC - yFrac) * rect.height;
+    const fallDurationSec = FALL_DURATION_MIN + Math.random() * (FALL_DURATION_MAX - FALL_DURATION_MIN);
+    const speed = travelDistance / fallDurationSec;
+
+    const alpha = 0.32 + Math.random() * 0.22;
+
+    specks.push({
+      x: x, y: y,
+      r: r, speed: speed, alpha: alpha,
+      rectTop: rect.top, rectHeight: rect.height, rectLeft: rect.left, rectWidth: rect.width
+    });
+  }
+
+  function startDust(){
+    if (reducedMotion) return;
+    resizeDustCanvas();
+    specks = [];
+    flashes = [];
+    dustRunning = true;
+    dustStartTime = performance.now();
+    lastSpawnTime = dustStartTime;
+    if (!rafId) rafId = requestAnimationFrame(dustTick);
+  }
+
+  function stopDust(){
+    dustRunning = false;
+    specks = [];
+    flashes = [];
+    if (rafId){
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    // clear canvas
+    const rect = videoStack.getBoundingClientRect();
+    dctx.clearRect(0, 0, rect.width, rect.height);
+  }
+
+  function dustTick(now){
+    rafId = null;
+    if (!dustRunning) return;
+
+    const elapsedVideoSec = videoA.currentTime || 0;
+    const videoEnded = videoA.ended || elapsedVideoSec >= VIDEO_DURATION;
+    const allowSpawn = !videoEnded;
+
+    // Spawn at restrained rate
+    if (allowSpawn){
+      const sinceSpawn = now - lastSpawnTime;
+      const interval = 1000 / SPAWN_RATE;
+      // small jitter so it doesn't feel mechanical
+      if (sinceSpawn >= interval + (Math.random() * 240 - 120)){
+        spawnSpeck(now);
+        lastSpawnTime = now;
+      }
+    }
+
+    // Update specks
+    const rect = videoStack.getBoundingClientRect();
+    const landY = rect.top + LAND_YFRAC * rect.height;
+    const dt = 1/60; // approximate; gentle motion, no need for precise dt
+
+    for (let i = specks.length - 1; i >= 0; i--){
+      const s = specks[i];
+      s.y += s.speed * dt;
+
+      if (s.y >= landY){
+        // landed — determine side using boundary at landing yFrac.
+        // Specks fall straight down in x, so a speck that spawned within
+        // [leftEdgeXFrac, rightEdgeXFrac] at its spawn yFrac is still within
+        // the slab's silhouette at the landing yFrac (the slab is convex
+        // across this range). No extra drift check needed.
+        const yFrac = (s.y - rect.top) / rect.height;
+        const bxFrac = boundaryXFrac(yFrac);
+        const boundaryX = rect.left + bxFrac * rect.width;
+        if (s.x < boundaryX){
+          // blue half: brief soft flash
+          flashes.push({
+            x: s.x, y: s.y,
+            start: now,
+            duration: FLASH_DURATION,
+            maxR: FLASH_MAX_RADIUS
+          });
+        }
+        // grey half: just disappear
+        specks.splice(i, 1);
+      } else if (s.y > rect.bottom + 4){
+        specks.splice(i, 1);
+      }
+    }
+
+    // Update flashes
+    for (let i = flashes.length - 1; i >= 0; i--){
+      const f = flashes[i];
+      if (now - f.start >= f.duration){
+        flashes.splice(i, 1);
+      }
+    }
+
+    // Render
+    dctx.clearRect(0, 0, rect.width, rect.height);
+
+    // specks (relative to rect)
+    for (let i = 0; i < specks.length; i++){
+      const s = specks[i];
+      const lx = s.x - rect.left;
+      const ly = s.y - rect.top;
+      dctx.beginPath();
+      dctx.arc(lx, ly, s.r, 0, Math.PI * 2);
+      dctx.fillStyle = 'rgba(31,35,39,' + s.alpha + ')';
+      dctx.fill();
+    }
+
+    // flashes — soft radial glow with a bright near-white core so it reads
+    // as an actual spark of light against the pale blue fabric, not just a
+    // same-hue opacity blur.
+    for (let i = 0; i < flashes.length; i++){
+      const f = flashes[i];
+      const t = (now - f.start) / f.duration; // 0..1
+      // ease-out for radius growth, fade alpha
+      const ease = 1 - Math.pow(1 - t, 2);
+      const r = f.maxR * ease;
+      const alpha = 0.7 * (1 - t);
+      const lx = f.x - rect.left;
+      const ly = f.y - rect.top;
+      const grad = dctx.createRadialGradient(lx, ly, 0, lx, ly, Math.max(0.5, r));
+      grad.addColorStop(0,    'rgba(220,240,255,' + alpha.toFixed(3) + ')');
+      grad.addColorStop(0.35, 'rgba(27,123,255,'  + alpha.toFixed(3) + ')');
+      grad.addColorStop(0.7,  'rgba(27,123,255,'  + (alpha * 0.3).toFixed(3) + ')');
+      grad.addColorStop(1,    'rgba(27,123,255,0)');
+      dctx.beginPath();
+      dctx.arc(lx, ly, Math.max(0.5, r), 0, Math.PI * 2);
+      dctx.fillStyle = grad;
+      dctx.fill();
+    }
+
+    // Continue if anything is still alive OR we're still allowed to spawn
+    if (dustRunning && (allowSpawn || specks.length > 0 || flashes.length > 0)){
+      rafId = requestAnimationFrame(dustTick);
+    } else if (dustRunning && !allowSpawn && specks.length === 0 && flashes.length === 0){
+      // video ended and everything settled — go idle (but stay ready for restart)
+      dustRunning = false;
+      rafId = null;
+    } else if (dustRunning){
+      rafId = requestAnimationFrame(dustTick);
+    }
+  }
+
+  window.addEventListener('resize', function(){
+    if (dustRunning) resizeDustCanvas();
+  });
 
   if (reducedMotion) {
     bigNumber.textContent = '99.2%';
