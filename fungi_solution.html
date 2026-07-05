@@ -76,77 +76,51 @@ section{
   z-index:2;
 }
 
-/* === Slab annotation tags === */
-.nf-tag{
+/* === Slab annotation legend (frosted, matches site legend language) === */
+.nf-legend{
   position:absolute;
   z-index:5;
   pointer-events:none;
+  top:20px;
+  right:20px;
   display:flex;
-  align-items:center;
-  gap:7px;
-  font-family:var(--mono);
+  flex-direction:column;
+  gap:5px;
+  padding:9px 12px;
+  background:rgba(255,255,255,0.9);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(20,24,28,0.06);
+  border-radius:9px;
+  box-shadow:0 2px 14px rgba(0,0,0,0.08);
+  font-family:var(--stack);
   font-size:14px;
-  font-weight:500;
-  letter-spacing:0.02em;
-  line-height:1;
+  font-weight:600;
+  color:var(--ink);
+  line-height:1.25;
   white-space:nowrap;
 }
-.nf-tag__label{
-  display:inline-block;
-  padding:4px 7px;
-  border-radius:5px;
-  background:rgba(237,240,242,0.72);
-  box-shadow:0 1px 2px rgba(255,255,255,0.45);
-  backdrop-filter:blur(2px);
-  -webkit-backdrop-filter:blur(2px);
+.nf-legend__row{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  line-height:1.25;
 }
-.nf-tag__dot{
-  position:relative;
-  width:6px;
-  height:6px;
+.nf-legend__dot{
+  width:9px;
+  height:9px;
   border-radius:50%;
-  display:block;
+  border:0.5px solid #fff;
+  box-shadow:0 0 0 0.5px rgba(0,0,0,0.1);
   flex:0 0 auto;
 }
-.nf-tag__dot::after{
-  content:'';
-  position:absolute;
-  top:100%;
-  left:50%;
-  width:1px;
-  height:26px;
-  transform:translateX(-50%);
-  background:currentColor;
-  opacity:0.35;
-}
-.nf-tag--blue{
-  color:var(--accent);
-  left:40%;
-  top:14%;
-}
-.nf-tag--blue .nf-tag__dot{
-  background:var(--accent);
-  box-shadow:0 0 0 3px rgba(27,123,255,0.14);
-}
-.nf-tag--muted{
-  color:#2a2f34;
-  left:70%;
-  top:16%;
-}
-.nf-tag--muted .nf-tag__dot{
-  background:#8a9095;
-  box-shadow:0 0 0 3px rgba(138,144,149,0.14);
-}
-.nf-tag--muted .nf-tag__label{
-  color:#2a2f34;
-}
+.nf-legend__dot--blue{ background:#1b7bff; }
+.nf-legend__dot--grey{ background:#8a9095; }
+.nf-legend__dot--dark{ background:#2a2f34; }
 @media (max-width:880px){
-  .nf-tag{ font-size:10px; gap:5px; }
-  .nf-tag__label{ padding:3px 5px; border-radius:4px; }
-  .nf-tag__dot{ width:5px; height:5px; }
-  .nf-tag__dot::after{ height:14px; }
-  .nf-tag--blue{ left:6%; top:11%; }
-  .nf-tag--muted{ left:52%; top:15%; }
+  .nf-legend{ top:12px; right:12px; padding:10px 12px; font-size:12px; gap:7px; max-width:calc(100% - 24px); }
+  .nf-legend__row{ gap:7px; }
+  .nf-legend__dot{ width:8px; height:8px; }
 }
 
 /* === Text column === */
@@ -317,13 +291,19 @@ section{
            style="opacity:1; z-index:1;"></video>
     <canvas id="nfDustCanvas"></canvas>
     <img class="poster" src="assets/videos/posters/mold_answer.jpg?v=1" alt="">
-    <div class="nf-tag nf-tag--blue" aria-hidden="true">
-      <span class="nf-tag__dot"></span>
-      <span class="nf-tag__label">NanoFlashing Material</span>
-    </div>
-    <div class="nf-tag nf-tag--muted" aria-hidden="true">
-      <span class="nf-tag__dot"></span>
-      <span class="nf-tag__label">Conventional Material</span>
+    <div class="nf-legend" aria-hidden="true">
+      <div class="nf-legend__row">
+        <span class="nf-legend__dot nf-legend__dot--blue"></span>
+        <span class="nf-legend__label">NanoFlashing Material</span>
+      </div>
+      <div class="nf-legend__row">
+        <span class="nf-legend__dot nf-legend__dot--grey"></span>
+        <span class="nf-legend__label">Conventional Material</span>
+      </div>
+      <div class="nf-legend__row">
+        <span class="nf-legend__dot nf-legend__dot--dark"></span>
+        <span class="nf-legend__label">Airborne mold spores</span>
+      </div>
     </div>
   </div>
 
