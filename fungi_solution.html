@@ -76,6 +76,76 @@ section{
   z-index:2;
 }
 
+/* === Slab annotation tags === */
+.nf-tag{
+  position:absolute;
+  z-index:5;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-family:var(--mono);
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0.02em;
+  line-height:1;
+  white-space:nowrap;
+}
+.nf-tag__label{
+  display:inline-block;
+  padding:4px 7px;
+  border-radius:5px;
+  background:rgba(237,240,242,0.72);
+  box-shadow:0 1px 2px rgba(255,255,255,0.45);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+}
+.nf-tag__dot{
+  position:relative;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  display:block;
+  flex:0 0 auto;
+}
+.nf-tag__dot::after{
+  content:'';
+  position:absolute;
+  top:100%;
+  left:50%;
+  width:1px;
+  height:26px;
+  transform:translateX(-50%);
+  background:currentColor;
+  opacity:0.35;
+}
+.nf-tag--blue{
+  color:var(--accent);
+  left:40%;
+  top:14%;
+}
+.nf-tag--blue .nf-tag__dot{
+  background:var(--accent);
+  box-shadow:0 0 0 3px rgba(27,123,255,0.14);
+}
+.nf-tag--muted{
+  color:#2a2f34;
+  left:70%;
+  top:16%;
+}
+.nf-tag--muted .nf-tag__dot{
+  background:#8a9095;
+  box-shadow:0 0 0 3px rgba(138,144,149,0.14);
+}
+.nf-tag--muted .nf-tag__label{
+  color:#2a2f34;
+}
+@media (max-width:880px){
+  .nf-tag--blue{ left:37%; top:11%; }
+  .nf-tag--muted{ left:64%; top:13%; }
+  .nf-tag__dot::after{ height:16px; }
+}
+
 /* === Text column === */
 .text-col{
   position:relative;
@@ -244,6 +314,14 @@ section{
            style="opacity:1; z-index:1;"></video>
     <canvas id="nfDustCanvas"></canvas>
     <img class="poster" src="assets/videos/posters/mold_answer.jpg?v=1" alt="">
+    <div class="nf-tag nf-tag--blue" aria-hidden="true">
+      <span class="nf-tag__dot"></span>
+      <span class="nf-tag__label">NanoFlashing Material</span>
+    </div>
+    <div class="nf-tag nf-tag--muted" aria-hidden="true">
+      <span class="nf-tag__dot"></span>
+      <span class="nf-tag__label">Conventional Material</span>
+    </div>
   </div>
 
   <div class="scrim"></div>
@@ -334,7 +412,7 @@ section{
      in the first ~4s land while the clip is still visibly growing.
   */
   const VIDEO_DURATION = 6.04;   // seconds — slab clip length
-  const SPAWN_RATE = 45.0;       // specks per second — denser ambient dust so a still frame reads as busy
+  const SPAWN_RATE = 450.0;      // specks per second — ~10x denser ambient dust; emitted via catch-up loop below
   const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to its landing yFrac
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
   const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
@@ -554,14 +632,22 @@ section{
     const videoEnded = videoA.ended || elapsedVideoSec >= VIDEO_DURATION;
     const allowSpawn = !videoEnded;
 
-    // Spawn at restrained rate
+    // Spawn at a high ambient rate. The old single-shot-per-frame check
+    // capped real output near 60 specks/sec regardless of SPAWN_RATE, so we
+    // emit as many specks as the elapsed time warrants since the last spawn,
+    // with a sane per-frame cap so density never runs away. Small jitter on
+    // the carried-over time keeps the pattern from feeling mechanical.
     if (allowSpawn){
-      const sinceSpawn = now - lastSpawnTime;
       const interval = 1000 / SPAWN_RATE;
-      // small jitter so it doesn't feel mechanical
-      if (sinceSpawn >= interval + (Math.random() * 240 - 120)){
-        spawnSpeck(now);
-        lastSpawnTime = now;
+      const sinceSpawn = now - lastSpawnTime;
+      if (sinceSpawn >= interval){
+        let toSpawn = Math.floor(sinceSpawn / interval);
+        toSpawn = Math.min(toSpawn, 24);
+        for (let i = 0; i < toSpawn; i++){
+          spawnSpeck(now);
+        }
+        const carry = sinceSpawn - toSpawn * interval;
+        lastSpawnTime = now - carry + (Math.random() * 120 - 60);
       }
     }
 
