@@ -335,13 +335,12 @@ section{
   */
   const VIDEO_DURATION = 6.04;   // seconds — slab clip length
   const SPAWN_RATE = 9.0;        // specks per second — denser ambient dust so a still frame reads as busy
-  const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to LAND_YFRAC
+  const FALL_DURATION_MIN = 1.2; // seconds for a speck to travel from spawn y to its landing yFrac
   const FALL_DURATION_MAX = 2.2; // seconds (randomized per-speck so they don't move in lockstep)
-  const LAND_YFRAC = 0.5;        // y-fraction within rect where specks "land"
   const SPAWN_YFRAC_MAX = 0.13;  // spawn only above the slab's visible area
-  const FLASH_DURATION = 420;   // ms — slightly longer so the held plateau is readable
-  const FLASH_MAX_RADIUS = 42;  // px — real pulse of light, not a pinprick
-  const FLASH_PEAK_ALPHA = 0.72; // bright-but-soft white core at peak (trimmed ~18% from 0.88)
+  const FLASH_DURATION = 260;   // ms — quick, quiet pulse, not a dramatic flare
+  const FLASH_MAX_RADIUS = 20;  // px — small, only noticeable if you're looking at the spot
+  const FLASH_PEAK_ALPHA = 0.5; // restrained peak — soft glow, not a bright stamp
 
   let specks = [];
   let flashes = [];
@@ -410,6 +409,28 @@ section{
     return x0 + (x1 - x0) * f;
   }
 
+  // Top surface of the slab — a gently tilted plane, not a flat horizontal
+  // line. Inverted relative to boundaryXFrac(): takes xFrac, returns yFrac.
+  // Same two-point linear interpolation + mild clamp pattern, switched at
+  // the same 880px breakpoint. A speck's x is fixed once it spawns (it only
+  // falls straight down), so its landing yFrac is computed once from its own
+  // xFrac using this function.
+  function topSurfaceYFrac(xFrac){
+    const mobile = window.innerWidth <= 880;
+    let x0, y0, x1, y1;
+    if (mobile){
+      x0 = 0.410; y0 = 0.212;
+      x1 = 0.795; y1 = 0.260;
+    } else {
+      x0 = 0.353; y0 = 0.211;
+      x1 = 0.952; y1 = 0.279;
+    }
+    let f = (xFrac - x0) / (x1 - x0);
+    // allow mild extrapolation, then clamp
+    f = Math.max(-0.25, Math.min(1.25, f));
+    return y0 + (y1 - y0) * f;
+  }
+
   function spawnSpeck(now){
     const rect = videoStack.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
@@ -451,9 +472,14 @@ section{
 
     const r = 0.8 + Math.random() * 0.9; // 0.8–~1.7px — finer dust/grain
 
+    // Compute this speck's landing yFrac ONCE from its own xFrac using the
+    // tilted top-surface plane. The speck only falls straight down (x is
+    // fixed), so its target landing y is fixed at spawn time.
+    const landYFrac = topSurfaceYFrac(xFrac);
+
     // Fall speed proportional to the actual travel distance at spawn time,
     // so the speck lands in 1.2–2.2s regardless of viewport height.
-    const travelDistance = (LAND_YFRAC - yFrac) * rect.height;
+    const travelDistance = (landYFrac - yFrac) * rect.height;
     const fallDurationSec = FALL_DURATION_MIN + Math.random() * (FALL_DURATION_MAX - FALL_DURATION_MIN);
     const speed = travelDistance / fallDurationSec;
 
@@ -464,6 +490,7 @@ section{
     specks.push({
       x: x, y: y,
       r: r, speed: speed, alpha: alpha,
+      landYFrac: landYFrac,
       rectTop: rect.top, rectHeight: rect.height, rectLeft: rect.left, rectWidth: rect.width
     });
   }
@@ -492,24 +519,14 @@ section{
     dctx.clearRect(0, 0, rect.width, rect.height);
   }
 
-  // Flash envelope: quick ramp up (first 15%), hold near-peak through the
-  // middle 50%, ease out over the final 35%. Returns {radiusFrac, alphaFrac}.
-  // radiusFrac grows a touch during the ease-out so the shockwave expands as
-  // it fades, reading as a real pulse rather than a static blob.
+  // Flash envelope: a single continuous ease-out from the start. Radius and
+  // alpha both peak immediately at t=0 and fade smoothly to zero over the
+  // full duration — no held plateau, no lingering hold at peak brightness.
+  // The held plateau was exactly what read as "dramatic/fake"; removing it
+  // makes the flash quick, small, and quiet.
   function flashEnvelope(t){
-    if (t < 0.15){
-      const u = t / 0.15;
-      const ease = 1 - Math.pow(1 - u, 2); // ease-out quad
-      return { radiusFrac: ease, alphaFrac: ease };
-    } else if (t < 0.65){
-      // held plateau — tiny radius breathing so it doesn't feel frozen
-      const u = (t - 0.15) / 0.5; // 0..1 across plateau
-      return { radiusFrac: 1.0 + 0.04 * u, alphaFrac: 1.0 };
-    } else {
-      const u = (t - 0.65) / 0.35; // 0..1 across ease-out
-      const ease = 1 - Math.pow(1 - u, 2); // ease-out quad for alpha
-      return { radiusFrac: 1.04 + 0.36 * u, alphaFrac: 1.0 - ease };
-    }
+    const v = Math.pow(1 - t, 2); // ease-out quad decay from peak to zero
+    return { radiusFrac: v, alphaFrac: v };
   }
 
   function dustTick(now){
@@ -533,12 +550,16 @@ section{
 
     // Update specks
     const rect = videoStack.getBoundingClientRect();
-    const landY = rect.top + LAND_YFRAC * rect.height;
     const dt = 1/60; // approximate; gentle motion, no need for precise dt
 
     for (let i = specks.length - 1; i >= 0; i--){
       const s = specks[i];
       s.y += s.speed * dt;
+
+      // Per-speck landing y, computed once at spawn from this speck's own
+      // xFrac via topSurfaceYFrac(). Specks stop right at the true tilted
+      // top-surface line for their x position, not a shared flat height.
+      const landY = rect.top + s.landYFrac * rect.height;
 
       if (s.y >= landY){
         // landed — determine side using boundary at landing yFrac.
@@ -587,15 +608,12 @@ section{
       dctx.fill();
     }
 
-    // flashes — a real pulse of light: bright near-white core, soft blue
-    // halo, and a thin shockwave rim that expands as the flash fades.
-    // Envelope: 15% ramp up, 50% held near-peak plateau, 35% ease out.
-    //
-    // Gradient: six closely-spaced stops so the white core fades into the
-    // blue halo gradually (no hard "stamped circle" edge). The fully-bright
-    // core is pulled in earlier (drops off by ~10% of radius instead of
-    // holding flat to 18%), so more of the shape is soft falloff and less
-    // of it is a flat bright disc. Overall radius and duration unchanged.
+    // flashes — a quick, quiet pulse of light: small soft white core fading
+    // into a blue halo. Single continuous ease-out from peak to zero over
+    // the full duration — no held plateau, so it never reads as a dramatic
+    // flare. The smooth multi-stop white-to-blue gradient is preserved (soft
+    // round glow, not a hard-edged disc); only the size, duration, and peak
+    // brightness have been pulled back.
     for (let i = 0; i < flashes.length; i++){
       const f = flashes[i];
       const t = Math.min(1, Math.max(0, (now - f.start) / f.duration));
@@ -624,8 +642,8 @@ section{
       dctx.fill();
 
       // Outer shockwave rim — thin bright ring at ~1.4x core radius.
-      // Expands slightly during the ease-out so it reads as a propagating
-      // edge rather than a static stroke. Low alpha keeps it restrained.
+      // Low alpha keeps it restrained; shrinks with the core as the flash
+      // fades out.
       const ringR = Math.max(0.5, r * 1.4);
       const ringAlpha = alpha * 0.32;
       if (ringAlpha > 0.01){
