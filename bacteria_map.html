@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drug-resistant bacteria worldwide — NanoFlashing</title>
+<title>Drug-resistant MRSA across U.S. states — NanoFlashing</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -301,13 +301,13 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <h2>Drug-resistant bacteria are <em class="em">rising worldwide</em></h2>
-      <p class="caption">Bacteria that resist antibiotics now cause an estimated 1.27 million deaths a year — heaviest across South Asia and sub-Saharan Africa.</p>
+      <h2>Drug-resistant MRSA reaches <em class="em">every U.S. state</em></h2>
+      <p class="caption">MRSA — a staph infection the frontline antibiotics can't beat — strikes hospital patients in every state, and some states carry far more than their share.</p>
     </div>
   </div>
 
   <div class="chrome chrome-legend">
-    <div class="legend-title">AMR deaths per 100,000</div>
+    <div class="legend-title">Drug-resistant MRSA</div>
     <div class="legend-gradient"></div>
     <div class="legend-labels">
       <span>Lower</span>
@@ -321,7 +321,7 @@ body {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ============================================================
-//  Drug-resistant bacteria — static world choropleth by country
+//  Drug-resistant MRSA — static U.S. states choropleth
 // ============================================================
 const isEmbedded = window.self !== window.top;
 
@@ -330,23 +330,23 @@ const isMobile = window.matchMedia('(max-width: 880px)').matches;
 const map = L.map('map', {
   zoomControl: false,
   scrollWheelZoom: !isEmbedded,
-  minZoom: 1,
-  maxZoom: 7,
-  center: isMobile ? [15, 10] : [20, 0],
-  zoom: isMobile ? 1 : 2,
+  minZoom: 3,
+  maxZoom: 8,
+  center: [38, -96],
+  zoom: isMobile ? 3 : 4,
   worldCopyJump: false,
-  maxBounds: [[-85, -200], [85, 200]],
+  maxBounds: [[5, -180], [80, -45]],
   maxBoundsViscosity: 0.85
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
 
-// No basemap tiles — render only the colored country polygons on the --bg background.
+// No basemap tiles — render only the colored state polygons on the --bg background.
 
-const RAMP_STOPS = [[11.2,'#f3cdc6'],[14.3,'#eea799'],[17.5,'#e87f6d'],[20.6,'#e4554a'],[23.7,'#e23b3b']];
+const RAMP_STOPS = [[0.316,'#f3cdc6'],[0.512,'#eea799'],[0.714,'#e87f6d'],[0.910,'#e4554a'],[1.106,'#e23b3b']];
 const NO_DATA_COLOR = '#d7dbde';
 
-let amrData = null;
-let countryLayer = null;
+let mrsaData = null;
+let stateLayer = null;
 let openTooltipLayer = null;
 
 function hexToRgb(h){ h = h.replace('#',''); return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
@@ -371,61 +371,63 @@ function rateColor(v){
   return rgbToHex(ca[0]+(cb[0]-ca[0])*k, ca[1]+(cb[1]-ca[1])*k, ca[2]+(cb[2]-ca[2])*k);
 }
 
-function countryName(feature){
+function stateName(feature){
   const p = feature && feature.properties || {};
-  return p.ADMIN || p.name || p.NAME || p.admin || 'Unknown';
+  return p.name || p.NAME || p.STATE_NAME || 'Unknown';
 }
 
-function rateForISO(iso){
-  if (!amrData || !amrData[iso]) return null;
-  return amrData[iso].rate;
+function dataForState(name){
+  if (!mrsaData || !mrsaData[name]) return null;
+  return mrsaData[name];
 }
 
 function styleFor(feature){
-  const iso = feature && feature.properties && feature.properties.ISO_A3;
-  const v = rateForISO(iso);
+  const name = stateName(feature);
+  const d = dataForState(name);
+  const v = d ? d.value : null;
   const fill = (v == null) ? NO_DATA_COLOR : rateColor(v);
   const op  = (v == null) ? 0.55 : 0.82;
   return { fillColor: fill, fillOpacity: op, weight: 1, color: '#ffffff' };
 }
 
 function tooltipText(feature){
-  const name = countryName(feature);
-  const iso = feature && feature.properties && feature.properties.ISO_A3;
-  const v = rateForISO(iso);
-  if (v == null) return name;
-  return name + ' — ' + (Math.round(v*10)/10).toFixed(1) + ' per 100,000';
+  const name = stateName(feature);
+  const d = dataForState(name);
+  if (!d || d.value == null) return name;
+  const ratio = (Math.round(d.value * 100) / 100).toFixed(2);
+  return name + ' — ' + ratio + ' vs. U.S. baseline · ' + d.observed + ' infections';
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
 
-function fitWorld(){
-  if (countryLayer) {
+function fitUS(){
+  if (stateLayer) {
     try {
-      const b = L.latLngBounds([[-56, -168], [83, 190]]); // inhabited world — excludes Antarctica
+      const b = L.latLngBounds([[24.5, -125.5], [49.5, -66]]); // lower 48
       const padX = window.innerWidth < 880 ? 20 : 60;
       const padY = window.innerWidth < 880 ? 20 : 60;
-      map.fitBounds(b, { paddingTopLeft: [padX, padY], paddingBottomRight: [padX, padY], maxZoom: 3, animate: false });
+      map.fitBounds(b, { paddingTopLeft: [padX, padY], paddingBottomRight: [padX, padY], maxZoom: 6, animate: false });
     } catch(e) {}
   } else {
     if (window.innerWidth < 880) {
-      map.setView([15, 10], 1);
+      map.setView([38, -96], 3);
     } else {
-      map.setView([20, 0], 2);
+      map.setView([38, -96], 4);
     }
   }
 }
 
-async function loadCountries(){
+async function loadStates(){
   try {
     const [geoResp, dataResp] = await Promise.all([
-      fetch('data/bacteria_map/world_countries.geojson'),
-      fetch('data/bacteria_map/amr_by_country.json')
+      fetch('data/bacteria_map/us_states.geojson'),
+      fetch('data/bacteria_map/us_states_infection.json')
     ]);
     const geo = await geoResp.json();
-    amrData = await dataResp.json();
+    mrsaData = await dataResp.json();
 
-    countryLayer = L.geoJSON(geo, {
+    stateLayer = L.geoJSON(geo, {
+      filter: function(feature){ return ['Alaska','Hawaii','Puerto Rico'].indexOf(stateName(feature)) === -1; },
       style: styleFor,
       onEachFeature: function(feature, layer){
         layer.bindTooltip(tooltipText(feature), { sticky: true, direction: 'top', opacity: 1 });
@@ -441,26 +443,26 @@ async function loadCountries(){
       }
     }).addTo(map);
 
-    fitWorld();
+    fitUS();
   } catch (e) {
-    // leave the map clean — no countries drawn
+    // leave the map clean — no states drawn
   }
 }
 
 // Source line — same style/position as reference
 (function buildSource(){
   const el = document.getElementById('chromeSource');
-  el.innerHTML = 'The Lancet — Murray et al. 2022 (GRAM) · map: Natural Earth';
+  el.innerHTML = 'CDC — Antimicrobial Resistance & Patient Safety Portal, 2024';
 })();
 
-loadCountries();
+loadStates();
 
 let resizeTimer = null;
 window.addEventListener('resize', function(){
   if (resizeTimer) clearTimeout(resizeTimer);
   resizeTimer = setTimeout(function(){
     map.invalidateSize();
-    fitWorld();
+    fitUS();
   }, 150);
 });
 
