@@ -230,369 +230,575 @@ section{
   </div>
 </section>
 
-<script>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
 (function () {
   'use strict';
 
-  var section = document.getElementById('section');
-  var canvas = document.getElementById('cloud-canvas');
+  const section = document.getElementById('section');
+  const canvas = document.getElementById('cloud-canvas');
   if (!section || !canvas) return;
-  var ctx = canvas.getContext('2d');
-  if (!ctx) return;
 
-  var dpr = 1, W = 0, H = 0;
-  var reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
-  var isMobile = (window.innerWidth <= 880);
-  var running = false, rafId = 0, lastT = 0;
+  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
 
-  /* ---- Charged-surface state ---- */
-  var surfaceX = 0;       // base x of the membrane
-  var surfaceAmp = 0;     // wave amplitude
-  var pollutants = [];    // grey dots drifting toward surface
-  var blooms = [];        // azure energy blooms at capture points
-  var surfaceEnergy = []; // 0..1 per sample — shimmering azure edge
-  var surfacePoints = []; // cached {x,y} per sample
+  /* ===== Renderer ===== */
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setClearColor(0xedf0f2, 1);
+  const dprCap = 2;
 
-  var POLLUTANT_COUNT = 0;
-  var SURFACE_SAMPLES = 120;
+  /* ===== Scene & Camera ===== */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  const CAM_BASE = new THREE.Vector3(7, 15, 31);
+  const CAM_TARGET = new THREE.Vector3(-2, -1, -4);
+  camera.position.copy(CAM_BASE);
+  camera.lookAt(CAM_TARGET);
 
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = section.clientWidth;
-    H = section.clientHeight;
-    canvas.width = Math.max(1, Math.floor(W * dpr));
-    canvas.height = Math.max(1, Math.floor(H * dpr));
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    isMobile = (window.innerWidth <= 880);
-    POLLUTANT_COUNT = isMobile ? 110 : 320;
-    surfaceX = isMobile ? W * 0.58 : W * 0.65;
-    surfaceAmp = Math.max(6, Math.min(W, H) * 0.022);
-    surfaceEnergy = new Array(SURFACE_SAMPLES).fill(0);
-    surfacePoints = new Array(SURFACE_SAMPLES);
+  /* ===== Wave height function (shared JS / GLSL) ===== */
+  function waveHeight(x, z, t) {
+    let h = 0;
+    h += Math.sin(x * 0.15 + t * 0.50) * 1.4;
+    h += Math.sin(z * 0.20 + t * 0.35) * 1.2;
+    h += Math.sin((x + z) * 0.10 + t * 0.30) * 0.8;
+    h += Math.sin(x * 0.06 + z * 0.08 + t * 0.20) * 1.6;
+    return h;
   }
 
-  /* ---- Surface geometry: layered sine waves, slow & organic ---- */
-  function surfaceXAt(y, t) {
-    var ph = y / Math.max(1, H);
-    return surfaceX
-      + Math.sin(ph * Math.PI * 2.2 + t * 0.00038) * surfaceAmp
-      + Math.sin(ph * Math.PI * 3.7 + t * 0.00021 + 1.3) * surfaceAmp * 0.45
-      + Math.sin(ph * Math.PI * 1.3 + t * 0.00013 + 2.1) * surfaceAmp * 0.30;
+  /* ===== Surface (charged membrane) ===== */
+  const GRID_X = 220;
+  const GRID_Z = 120;
+  const SURF_W = 54;
+  const SURF_D = 38;
+  const SURF_COUNT = GRID_X * GRID_Z;
+
+  const surfaceGeo = new THREE.BufferGeometry();
+  const sPositions = new Float32Array(SURF_COUNT * 3);
+  const sBoosts = new Float32Array(SURF_COUNT);
+
+  for (let ix = 0; ix < GRID_X; ix++) {
+    for (let iz = 0; iz < GRID_Z; iz++) {
+      const i = ix * GRID_Z + iz;
+      sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      sPositions[i * 3 + 1] = 0;
+      sPositions[i * 3 + 2] = (iz / (GRID_Z - 1) - 0.5) * SURF_D;
+      sBoosts[i] = 0;
+    }
   }
 
-  /* ---- Pollutant factory ---- */
+  surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
+  surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
+
+  const surfaceMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uSize: { value: 1.4 },
+      uBaseColor: { value: new THREE.Color(0x7a8da8) },
+      uAzureColor: { value: new THREE.Color(0x1b7bff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 28 },
+      uFogFar: { value: 62 },
+    },
+    vertexShader: `
+      attribute float aBoost;
+      uniform float uTime;
+      uniform float uPixelRatio;
+      uniform float uSize;
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+
+      float waveHeight(float x, float z, float t) {
+        float h = 0.0;
+        h += sin(x * 0.15 + t * 0.50) * 1.4;
+        h += sin(z * 0.20 + t * 0.35) * 1.2;
+        h += sin((x + z) * 0.10 + t * 0.30) * 0.8;
+        h += sin(x * 0.06 + z * 0.08 + t * 0.20) * 1.6;
+        return h;
+      }
+
+      void main() {
+        vec3 pos = position;
+        pos.y = waveHeight(pos.x, pos.z, uTime);
+        vHeight = pos.y;
+
+        float shimmer = 0.85 + 0.15 * sin(uTime * 2.5 + pos.x * 0.4 + pos.z * 0.4);
+        vBoost = aBoost * shimmer;
+
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
+
+        float sz = uSize * (1.0 + aBoost * 3.5);
+        gl_PointSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+      }
+    `,
+    fragmentShader: `
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      uniform vec3 uBaseColor;
+      uniform vec3 uAzureColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+
+        float circle = smoothstep(0.5, 0.18, d);
+
+        float heightFactor = smoothstep(-3.5, 3.5, vHeight);
+        vec3 baseShaded = mix(uBaseColor * 0.82, uBaseColor * 1.18, heightFactor);
+        vec3 color = mix(baseShaded, uAzureColor, vBoost);
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.85);
+
+        float depthFade = smoothstep(58.0, 18.0, vDist);
+        float alpha = circle * depthFade * (0.45 + vBoost * 0.55);
+        alpha *= (1.0 - fog * 0.7);
+
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const surfacePoints = new THREE.Points(surfaceGeo, surfaceMat);
+  surfacePoints.renderOrder = 0;
+  scene.add(surfacePoints);
+
+  /* ===== Pollutants ===== */
+  const POLL_COUNT = 130;
+  const pollGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(POLL_COUNT * 3);
+  const pAzure = new Float32Array(POLL_COUNT);
+  const pSize = new Float32Array(POLL_COUNT);
+  const pAlpha = new Float32Array(POLL_COUNT);
+
+  const pollutants = [];
+
   function makePollutant(initial) {
-    var y = Math.random() * H;
-    var x = initial ? Math.random() * surfaceX : (-15 - Math.random() * 90);
     return {
-      x: x, y: y,
-      vx: 0.30 + Math.random() * 0.90,
-      vy: (Math.random() - 0.5) * 0.10,
-      r: 1.5 + Math.random() * 1.5,
-      a: 0.26 + Math.random() * 0.36,
-      phase: Math.random() * Math.PI * 2,
-      wobble: 0.3 + Math.random() * 0.7,
-      state: 'drift',      // drift → pressing → caught → neutralized
-      pressT: 0,
-      pressDuration: 0,
+      x: (Math.random() - 0.5) * 44,
+      y: initial ? 1 + Math.random() * 15 : 10 + Math.random() * 8,
+      z: (Math.random() - 0.5) * 32,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -0.7 - Math.random() * 0.9,
+      vz: (Math.random() - 0.5) * 0.3,
+      size: 1.2 + Math.random() * 1.8,
+      alpha: 0.28 + Math.random() * 0.30,
+      state: 'drift',
+      azure: 0,
       captureT: 0,
-      hue: 0               // 0 = grey, 1 = azure
+      phase: Math.random() * Math.PI * 2,
     };
   }
 
-  function initPollutants() {
-    pollutants.length = 0;
-    for (var i = 0; i < POLLUTANT_COUNT; i++) pollutants.push(makePollutant(true));
+  for (let i = 0; i < POLL_COUNT; i++) {
+    pollutants.push(makePollutant(true));
+    pSize[i] = pollutants[i].size;
   }
 
-  /* ---- Energy field: boost around a y-position ---- */
-  function boostEnergy(y) {
-    var idx = Math.floor((y / Math.max(1, H)) * (SURFACE_SAMPLES - 1));
-    idx = Math.max(0, Math.min(SURFACE_SAMPLES - 1, idx));
-    for (var k = -5; k <= 5; k++) {
-      var ki = idx + k;
-      if (ki >= 0 && ki < SURFACE_SAMPLES) {
-        var falloff = 1 - Math.abs(k) / 6;
-        surfaceEnergy[ki] = Math.min(1, surfaceEnergy[ki] + 0.42 * falloff);
+  pollGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  pollGeo.setAttribute('aAzure', new THREE.BufferAttribute(pAzure, 1));
+  pollGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
+  pollGeo.setAttribute('aAlpha', new THREE.BufferAttribute(pAlpha, 1));
+
+  const pollMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uGreyColor: { value: new THREE.Color(0x596068) },
+      uAzureColor: { value: new THREE.Color(0x1b7bff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 28 },
+      uFogFar: { value: 62 },
+    },
+    vertexShader: `
+      attribute float aAzure;
+      attribute float aSize;
+      attribute float aAlpha;
+      uniform float uPixelRatio;
+      varying float vAzure;
+      varying float vAlpha;
+      varying float vDist;
+
+      void main() {
+        vAzure = aAzure;
+        vAlpha = aAlpha;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
+        gl_PointSize = aSize * uPixelRatio * (120.0 / max(vDist, 1.0));
+      }
+    `,
+    fragmentShader: `
+      varying float vAzure;
+      varying float vAlpha;
+      varying float vDist;
+      uniform vec3 uGreyColor;
+      uniform vec3 uAzureColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+
+        float circle = smoothstep(0.5, 0.12, d);
+        vec3 color = mix(uGreyColor, uAzureColor, vAzure);
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.8);
+
+        float alpha = circle * vAlpha * (1.0 - fog * 0.6);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const pollPoints = new THREE.Points(pollGeo, pollMat);
+  pollPoints.renderOrder = 1;
+  scene.add(pollPoints);
+
+  /* ===== Blooms (azure neutralize glow) ===== */
+  const BLOOM_COUNT = 80;
+  const bloomGeo = new THREE.BufferGeometry();
+  const bPos = new Float32Array(BLOOM_COUNT * 3);
+  const bAge = new Float32Array(BLOOM_COUNT);
+  const bActive = new Float32Array(BLOOM_COUNT);
+  const bMaxSize = new Float32Array(BLOOM_COUNT);
+
+  const blooms = [];
+  for (let i = 0; i < BLOOM_COUNT; i++) {
+    blooms.push({ active: false, age: 0, life: 0, x: 0, y: 0, z: 0, maxSize: 0 });
+    bPos[i * 3] = 9999;
+    bMaxSize[i] = 20 + Math.random() * 18;
+  }
+
+  bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
+  bloomGeo.setAttribute('aAge', new THREE.BufferAttribute(bAge, 1));
+  bloomGeo.setAttribute('aActive', new THREE.BufferAttribute(bActive, 1));
+  bloomGeo.setAttribute('aMaxSize', new THREE.BufferAttribute(bMaxSize, 1));
+
+  const bloomMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 28 },
+      uFogFar: { value: 62 },
+    },
+    vertexShader: `
+      attribute float aAge;
+      attribute float aActive;
+      attribute float aMaxSize;
+      uniform float uPixelRatio;
+      varying float vAlpha;
+      varying float vDist;
+      varying float vAge;
+
+      void main() {
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
+
+        float t = aAge;
+        float size = aMaxSize * (0.12 + t * 0.88);
+        gl_PointSize = size * uPixelRatio * (120.0 / max(vDist, 1.0));
+
+        vAge = t;
+        vAlpha = aActive * (1.0 - t) * 0.55;
+      }
+    `,
+    fragmentShader: `
+      varying float vAlpha;
+      varying float vDist;
+      varying float vAge;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+
+        float soft = smoothstep(0.5, 0.0, d);
+        float core = smoothstep(0.22, 0.0, d);
+
+        vec3 azure = vec3(0.106, 0.482, 1.0);
+        vec3 brightAzure = vec3(0.35, 0.62, 1.0);
+        vec3 color = mix(azure, brightAzure, core * (1.0 - vAge * 0.5));
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.7);
+
+        float alpha = (soft * 0.5 + core * 0.5) * vAlpha * (1.0 - fog * 0.5);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const bloomPoints = new THREE.Points(bloomGeo, bloomMat);
+  bloomPoints.renderOrder = 2;
+  scene.add(bloomPoints);
+
+  /* ===== Surface boost at capture ===== */
+  function boostSurfaceAt(x, z, amount) {
+    const gx = Math.round(((x / SURF_W) + 0.5) * (GRID_X - 1));
+    const gz = Math.round(((z / SURF_D) + 0.5) * (GRID_Z - 1));
+    const radius = 5;
+    for (let dx = -radius; dx <= radius; dx++) {
+      for (let dz = -radius; dz <= radius; dz++) {
+        const ix = gx + dx;
+        const iz = gz + dz;
+        if (ix < 0 || ix >= GRID_X || iz < 0 || iz >= GRID_Z) continue;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist > radius) continue;
+        const falloff = Math.pow(1 - dist / radius, 1.5);
+        const i = ix * GRID_Z + iz;
+        sBoosts[i] = Math.min(1, sBoosts[i] + amount * falloff);
       }
     }
   }
 
-  /* ---- Bloom factory: azure radial glow at capture point ---- */
-  function spawnBloom(x, y) {
-    blooms.push({
-      x: x, y: y,
-      age: 0,
-      life: 700 + Math.random() * 600,
-      maxR: 10 + Math.random() * 20,
-      coreR: 1.4 + Math.random() * 1.6
-    });
-  }
-
-  /* ---- Cache surface sample points ---- */
-  function updateSurfacePoints(t) {
-    for (var i = 0; i < SURFACE_SAMPLES; i++) {
-      var sy = (i / (SURFACE_SAMPLES - 1)) * H;
-      surfacePoints[i] = { x: surfaceXAt(sy, t), y: sy };
+  /* ===== Spawn bloom ===== */
+  function spawnBloom(x, y, z) {
+    for (let i = 0; i < BLOOM_COUNT; i++) {
+      if (!blooms[i].active) {
+        blooms[i].active = true;
+        blooms[i].age = 0;
+        blooms[i].life = 0.7 + Math.random() * 0.6;
+        blooms[i].x = x;
+        blooms[i].y = y;
+        blooms[i].z = z;
+        blooms[i].maxSize = 18 + Math.random() * 16;
+        bMaxSize[i] = blooms[i].maxSize;
+        return;
+      }
     }
   }
 
-  /* ---- Draw the faint blue-grey membrane (layered strokes) ---- */
-  function drawSurfaceBase() {
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    ctx.beginPath();
-    for (var i = 0; i < SURFACE_SAMPLES; i++) {
-      var sp = surfacePoints[i];
-      if (i === 0) ctx.moveTo(sp.x, sp.y);
-      else ctx.lineTo(sp.x, sp.y);
-    }
-
-    ctx.strokeStyle = 'rgba(128,150,178,0.045)';
-    ctx.lineWidth = 30;
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(128,150,178,0.075)';
-    ctx.lineWidth = 15;
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(108,135,168,0.13)';
-    ctx.lineWidth = 3.5;
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(98,125,158,0.20)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+  /* ===== Resize ===== */
+  function resize() {
+    const w = section.clientWidth;
+    const h = section.clientHeight;
+    if (w === 0 || h === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    surfaceMat.uniforms.uPixelRatio.value = dpr;
+    pollMat.uniforms.uPixelRatio.value = dpr;
+    bloomMat.uniforms.uPixelRatio.value = dpr;
   }
 
-  /* ---- Draw the shimmering azure energy along the surface ---- */
-  function drawSurfaceEnergy(t) {
-    for (var e = 0; e < SURFACE_SAMPLES; e++) {
-      var energy = surfaceEnergy[e];
-      if (energy < 0.025) continue;
-      var sp = surfacePoints[e];
-      var shimmer = 0.80 + 0.20 * Math.sin(t * 0.003 + e * 0.42);
-      var rad = 5 + energy * 24;
-      var a = energy * shimmer;
+  /* ===== Animation loop ===== */
+  let running = false;
+  let rafId = 0;
+  let lastT = 0;
+  let clock = 0;
 
-      var grad = ctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, rad);
-      grad.addColorStop(0, 'rgba(27,123,255,' + (a * 0.42) + ')');
-      grad.addColorStop(0.35, 'rgba(27,123,255,' + (a * 0.16) + ')');
-      grad.addColorStop(1, 'rgba(27,123,255,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(sp.x, sp.y, rad, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    /* Bright thin core line where energy is strong */
-    ctx.lineCap = 'round';
-    var drawing = false;
-    ctx.beginPath();
-    for (var e2 = 0; e2 < SURFACE_SAMPLES; e2++) {
-      if (surfaceEnergy[e2] < 0.18) { drawing = false; continue; }
-      var sp2 = surfacePoints[e2];
-      if (!drawing) { ctx.moveTo(sp2.x, sp2.y); drawing = true; }
-      else { ctx.lineTo(sp2.x, sp2.y); }
-    }
-    ctx.strokeStyle = 'rgba(90,155,255,0.45)';
-    ctx.lineWidth = 1.4;
-    ctx.stroke();
-  }
-
-  /* ---- Draw a single bloom (azure radial glow + bright core) ---- */
-  function drawBloom(bl) {
-    var lifeT = bl.age / bl.life;
-    var ease = 1 - Math.pow(1 - lifeT, 2.5);
-    var rad = bl.maxR * ease;
-    var alpha = 1 - lifeT;
-
-    var grad = ctx.createRadialGradient(bl.x, bl.y, 0, bl.x, bl.y, rad);
-    grad.addColorStop(0, 'rgba(27,123,255,' + (alpha * 0.48) + ')');
-    grad.addColorStop(0.22, 'rgba(27,123,255,' + (alpha * 0.20) + ')');
-    grad.addColorStop(1, 'rgba(27,123,255,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(bl.x, bl.y, rad, 0, Math.PI * 2);
-    ctx.fill();
-
-    /* bright azure core dot */
-    var coreA = (1 - lifeT) * 0.88;
-    ctx.fillStyle = 'rgba(150,195,255,' + coreA + ')';
-    ctx.beginPath();
-    ctx.arc(bl.x, bl.y, bl.coreR * (1 - lifeT * 0.3), 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  /* ---- Main animation loop ---- */
   function loop(t) {
     if (!running) return;
     rafId = requestAnimationFrame(loop);
-    var dt = lastT ? Math.min((t - lastT), 50) : 16;
+    const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
     lastT = t;
-    var f = dt / 16;
+    clock += dt;
 
-    /* clear */
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#edf0f2';
-    ctx.fillRect(0, 0, W, H);
+    /* Surface time */
+    surfaceMat.uniforms.uTime.value = clock;
 
-    updateSurfacePoints(t);
+    /* Decay boosts */
+    const decay = Math.pow(0.965, dt * 60);
+    for (let i = 0; i < SURF_COUNT; i++) {
+      sBoosts[i] *= decay;
+    }
+    surfaceGeo.attributes.aBoost.needsUpdate = true;
 
-    /* decay energy field */
-    var decay = Math.pow(0.982, f);
-    for (var e = 0; e < SURFACE_SAMPLES; e++) surfaceEnergy[e] *= decay;
-
-    /* draw faint membrane */
-    drawSurfaceBase();
-
-    /* update + draw pollutants */
-    for (var i = 0; i < pollutants.length; i++) {
-      var p = pollutants[i];
+    /* Update pollutants */
+    for (let i = 0; i < POLL_COUNT; i++) {
+      let p = pollutants[i];
 
       if (p.state === 'drift') {
-        p.vy += Math.sin(t * 0.0007 + p.phase) * 0.007 * p.wobble;
-        p.vy *= 0.96;
-        p.x += p.vx * f;
-        p.y += p.vy * f;
-        if (p.y < 0) p.y = 0;
-        if (p.y > H) p.y = H;
+        p.vx += Math.sin(clock * 0.5 + p.phase) * 0.01 * dt * 60;
+        p.vz += Math.cos(clock * 0.4 + p.phase) * 0.01 * dt * 60;
+        p.vx *= 0.985;
+        p.vz *= 0.985;
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        p.z += p.vz * dt * 60;
 
-        var sx = surfaceXAt(p.y, t);
-        if (p.x >= sx - 1.5) {
-          p.state = 'pressing';
-          p.pressT = 0;
-          p.pressDuration = 70 + Math.random() * 300;
-          p.x = sx - 1.5;
-        }
-      } else if (p.state === 'pressing') {
-        p.pressT += dt;
-        var sxp = surfaceXAt(p.y, t);
-        p.x = sxp - 1.5 - Math.sin(p.pressT * 0.022) * 1.2;
-        p.y += Math.sin(t * 0.004 + p.phase) * 0.18 * f;
-        if (p.y < 0) p.y = 0;
-        if (p.y > H) p.y = H;
-        if (p.pressT > p.pressDuration) {
-          p.state = 'caught';
-          p.captureT = t;
-          var capX = surfaceXAt(p.y, t);
-          boostEnergy(p.y);
-          spawnBloom(capX, p.y);
-        }
-      } else if (p.state === 'caught') {
-        var el = t - p.captureT;
-        p.hue = Math.min(1, el / 260);
-        var sxc = surfaceXAt(p.y, t);
-        p.x = sxc - 1.5;
-        if (el > 260) {
-          p.state = 'neutralized';
-          p.captureT = t;
-        }
-      } else if (p.state === 'neutralized') {
-        var ageN = (t - p.captureT) / 520;
-        if (ageN >= 1) {
+        if (Math.abs(p.x) > 30 || Math.abs(p.z) > 22) {
           pollutants[i] = makePollutant(false);
-          continue;
+          p = pollutants[i];
+        } else {
+          const surfH = waveHeight(p.x, p.z, clock);
+          if (p.y <= surfH + 0.4) {
+            p.state = 'captured';
+            p.captureT = clock;
+            p.y = surfH;
+            boostSurfaceAt(p.x, p.z, 0.85);
+            spawnBloom(p.x, surfH + 0.2, p.z);
+          }
         }
-        p.hue = 1;
-        var sxn = surfaceXAt(p.y, t);
-        p.x = sxn - 1.5 + ageN * 4;
+      } else if (p.state === 'captured') {
+        const elapsed = clock - p.captureT;
+        p.azure = Math.min(1, elapsed / 0.25);
+        p.y = waveHeight(p.x, p.z, clock);
+        if (elapsed > 0.45) {
+          p.state = 'fading';
+          p.captureT = clock;
+        }
+      } else if (p.state === 'fading') {
+        const elapsed = clock - p.captureT;
+        p.azure = 1;
+        p.y = waveHeight(p.x, p.z, clock) + elapsed * 1.5;
+        if (elapsed > 0.8) {
+          pollutants[i] = makePollutant(false);
+          p = pollutants[i];
+        }
       }
 
-      /* draw pollutant */
-      var drawA = p.a;
-      var cr, cg, cb;
-      if (p.state === 'drift' || p.state === 'pressing') {
-        cr = 31; cg = 35; cb = 39;
-        if (!isMobile && p.x < W * 0.42) drawA *= 0.10;
+      /* Write to buffers */
+      pPos[i * 3] = p.x;
+      pPos[i * 3 + 1] = p.y;
+      pPos[i * 3 + 2] = p.z;
+      pAzure[i] = p.azure;
+      pSize[i] = p.size;
+
+      if (p.state === 'drift') {
+        pAlpha[i] = p.alpha;
+      } else if (p.state === 'captured') {
+        pAlpha[i] = p.alpha * (1.0 - p.azure * 0.15);
       } else {
-        cr = Math.round(31 + (27 - 31) * p.hue);
-        cg = Math.round(35 + (123 - 35) * p.hue);
-        cb = Math.round(39 + (255 - 39) * p.hue);
-        if (p.state === 'caught') drawA *= 1 - p.hue * 0.25;
-        if (p.state === 'neutralized') drawA *= (1 - (t - p.captureT) / 520);
+        const fadeElapsed = clock - p.captureT;
+        pAlpha[i] = p.alpha * Math.max(0, 1 - fadeElapsed / 0.8);
       }
-
-      if (drawA <= 0.008) continue;
-      ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + drawA + ')';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
     }
+    pollGeo.attributes.position.needsUpdate = true;
+    pollGeo.attributes.aAzure.needsUpdate = true;
+    pollGeo.attributes.aSize.needsUpdate = true;
+    pollGeo.attributes.aAlpha.needsUpdate = true;
 
-    /* draw shimmering azure energy over surface */
-    drawSurfaceEnergy(t);
-
-    /* draw + update blooms on top */
-    for (var bi = blooms.length - 1; bi >= 0; bi--) {
-      var bl = blooms[bi];
-      bl.age += dt;
-      if (bl.age >= bl.life) { blooms.splice(bi, 1); continue; }
-      drawBloom(bl);
-    }
-  }
-
-  /* ---- Static frame for prefers-reduced-motion ---- */
-  function drawStatic() {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#edf0f2';
-    ctx.fillRect(0, 0, W, H);
-
-    var t = 1400;
-    updateSurfacePoints(t);
-
-    /* seed energy at several points for a beautiful still frame */
-    var seeds = [0.10, 0.22, 0.36, 0.48, 0.61, 0.74, 0.87, 0.95];
-    for (var s = 0; s < seeds.length; s++) {
-      var idx = Math.floor(seeds[s] * (SURFACE_SAMPLES - 1));
-      for (var k = -5; k <= 5; k++) {
-        var ki = idx + k;
-        if (ki >= 0 && ki < SURFACE_SAMPLES) {
-          surfaceEnergy[ki] = Math.max(surfaceEnergy[ki], 0.68 * (1 - Math.abs(k) / 6));
+    /* Update blooms */
+    for (let i = 0; i < BLOOM_COUNT; i++) {
+      const b = blooms[i];
+      if (b.active) {
+        b.age += dt;
+        if (b.age >= b.life) {
+          b.active = false;
+          bPos[i * 3] = 9999;
+          bAge[i] = 0;
+          bActive[i] = 0;
+        } else {
+          bPos[i * 3] = b.x;
+          bPos[i * 3 + 1] = b.y;
+          bPos[i * 3 + 2] = b.z;
+          bAge[i] = b.age / b.life;
+          bActive[i] = 1;
         }
       }
-      var sy = seeds[s] * H;
-      var sx = surfaceXAt(sy, t);
-      blooms.push({ x: sx, y: sy, age: 180, life: 1600, maxR: 18, coreR: 2.2 });
     }
+    bloomGeo.attributes.position.needsUpdate = true;
+    bloomGeo.attributes.aAge.needsUpdate = true;
+    bloomGeo.attributes.aActive.needsUpdate = true;
 
-    drawSurfaceBase();
+    /* Camera idle drift */
+    camera.position.x = CAM_BASE.x + Math.sin(clock * 0.08) * 1.2;
+    camera.position.y = CAM_BASE.y + Math.cos(clock * 0.06) * 0.6;
+    camera.position.z = CAM_BASE.z + Math.sin(clock * 0.05) * 0.8;
+    camera.lookAt(
+      CAM_TARGET.x + Math.sin(clock * 0.04) * 0.4,
+      CAM_TARGET.y,
+      CAM_TARGET.z
+    );
 
-    /* draw some grey pollutants drifting */
-    for (var i = 0; i < pollutants.length; i++) {
-      var p = pollutants[i];
-      var drawA = p.a;
-      if (!isMobile && p.x < W * 0.42) drawA *= 0.10;
-      if (drawA <= 0.008) continue;
-      ctx.fillStyle = 'rgba(31,35,39,' + drawA + ')';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    /* draw a few neutralized azure dots at the surface */
-    var neutralSeeds = [0.14, 0.40, 0.58, 0.82];
-    for (var ns = 0; ns < neutralSeeds.length; ns++) {
-      var ny = neutralSeeds[ns] * H;
-      var nx = surfaceXAt(ny, t) - 1.5;
-      ctx.fillStyle = 'rgba(27,123,255,0.55)';
-      ctx.beginPath();
-      ctx.arc(nx, ny, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    drawSurfaceEnergy(t);
-
-    for (var bi2 = 0; bi2 < blooms.length; bi2++) drawBloom(blooms[bi2]);
+    renderer.render(scene, camera);
   }
 
-  /* ---- Start / stop ---- */
+  /* ===== Static frame for reduced motion ===== */
+  function drawStatic() {
+    clock = 2.5;
+    surfaceMat.uniforms.uTime.value = clock;
+
+    /* Seed several captures */
+    const seeds = [
+      [-18, -10], [-8, 5], [3, -8], [12, 10], [18, -3], [-5, 14], [8, -15], [-15, 2]
+    ];
+    for (let s = 0; s < seeds.length; s++) {
+      const [sx, sz] = seeds[s];
+      const sy = waveHeight(sx, sz, clock);
+      boostSurfaceAt(sx, sz, 0.9);
+      spawnBloom(sx, sy + 0.2, sz);
+      blooms[s].age = 0.2 + Math.random() * 0.3;
+    }
+
+    /* Update bloom buffers */
+    for (let i = 0; i < BLOOM_COUNT; i++) {
+      const b = blooms[i];
+      if (b.active) {
+        bPos[i * 3] = b.x;
+        bPos[i * 3 + 1] = b.y;
+        bPos[i * 3 + 2] = b.z;
+        bAge[i] = b.age / b.life;
+        bActive[i] = 1;
+      }
+    }
+
+    /* Place some pollutants */
+    for (let i = 0; i < POLL_COUNT; i++) {
+      const p = pollutants[i];
+      if (i < seeds.length) {
+        p.state = 'captured';
+        p.azure = 1;
+        p.x = seeds[i][0];
+        p.z = seeds[i][1];
+        p.y = waveHeight(p.x, p.z, clock);
+      } else {
+        p.y = 3 + Math.random() * 12;
+      }
+      pPos[i * 3] = p.x;
+      pPos[i * 3 + 1] = p.y;
+      pPos[i * 3 + 2] = p.z;
+      pAzure[i] = p.azure;
+      pSize[i] = p.size;
+      pAlpha[i] = p.state === 'captured' ? p.alpha : p.alpha * 0.6;
+    }
+
+    surfaceGeo.attributes.aBoost.needsUpdate = true;
+    pollGeo.attributes.position.needsUpdate = true;
+    pollGeo.attributes.aAzure.needsUpdate = true;
+    pollGeo.attributes.aSize.needsUpdate = true;
+    pollGeo.attributes.aAlpha.needsUpdate = true;
+    bloomGeo.attributes.position.needsUpdate = true;
+    bloomGeo.attributes.aAge.needsUpdate = true;
+    bloomGeo.attributes.aActive.needsUpdate = true;
+
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
+    renderer.render(scene, camera);
+  }
+
+  /* ===== Start / stop ===== */
   function start() {
-    if (reduced) { drawStatic(); return; }
+    if (reduced) return;
     if (!running) {
       running = true;
       lastT = 0;
@@ -605,18 +811,19 @@ section{
     rafId = 0;
   }
 
-  /* ---- Init ---- */
+  /* ===== Init ===== */
   resize();
-  initPollutants();
-  if (reduced) drawStatic();
+  if (reduced) {
+    drawStatic();
+  }
 
   if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      for (var i = 0; i < entries.length; i++) {
-        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.35) start();
+    const io = new IntersectionObserver(function (entries) {
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.3) start();
         else if (!entries[i].isIntersecting) stop();
       }
-    }, { threshold: [0, 0.35, 1] });
+    }, { threshold: [0, 0.3, 1] });
     io.observe(section);
   } else {
     start();
@@ -627,16 +834,11 @@ section{
     else if (!reduced && !running) { running = true; lastT = 0; rafId = requestAnimationFrame(loop); }
   });
 
-  var rt = 0;
+  let rt = 0;
   window.addEventListener('resize', function () {
     if (rt) clearTimeout(rt);
     rt = setTimeout(function () {
       resize();
-      var nc = isMobile ? 110 : 320;
-      if (Math.abs(nc - POLLUTANT_COUNT) > 20) {
-        POLLUTANT_COUNT = nc;
-        initPollutants();
-      }
       if (reduced) drawStatic();
     }, 180);
   });
