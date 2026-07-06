@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Airborne bacterial infections across U.S. states — NanoFlashing</title>
+<title>Airborne bacterial infections across America — NanoFlashing</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,7 +72,7 @@ body {
   text-shadow: 0 1px 8px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.9);
 }
 .chrome-top-left h2 .accent { color: var(--accent); }
-.chrome-top-left h2 em { color: var(--red); font-weight: 700; font-style: normal; }
+.chrome-top-left h2 .em { color: var(--red); font-weight: 700; }
 .caption {
   font-family: var(--stack);
   font-size: 19px;
@@ -129,6 +129,26 @@ body {
   color: var(--ink);
   margin-bottom: 10px;
 }
+.legend-pm {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.legend-pm-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0.5px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1);
+}
 .legend-note {
   font-family: var(--stack);
   font-size: 11px;
@@ -158,28 +178,27 @@ body {
 }
 
 /* Time control */
-.chrome-time {
+.time-control {
+  position: absolute;
   bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(560px, calc(100vw - 44px));
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 12px 16px 10px;
-  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px;
+  padding: 16px 22px 18px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.12);
+  width: min(580px, calc(100vw - 44px));
 }
-.time-row {
+.tc-top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  margin-bottom: 8px;
 }
-.time-play {
-  flex: 0 0 auto;
+.tc-btn {
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -190,70 +209,86 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(226,59,59,0.32);
-  transition: transform .12s ease, box-shadow .15s ease, background .15s ease;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
 }
-.time-play:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(226,59,59,0.42); }
-.time-play:active { transform: translateY(0); }
-.time-play svg { width: 16px; height: 16px; display: block; }
-.time-year {
+.tc-btn:hover { background: #c92f2f; }
+.tc-btn:active { transform: scale(0.94); }
+.tc-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.tc-date {
   font-family: var(--stack);
-  font-weight: 700;
-  font-size: 22px;
+  font-size: 16px;
   color: var(--ink);
-  letter-spacing: -0.01em;
-  min-width: 56px;
-  text-align: left;
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.time-slider-wrap {
-  flex: 1 1 auto;
+.tc-counter {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.tc-slider-wrap {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  margin: 2px 0 0;
 }
-.time-slider {
+.tc-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: rgba(20,24,28,0.12);
+  background: var(--faint);
   outline: none;
-  margin: 0;
+  cursor: pointer;
 }
-.time-slider::-webkit-slider-thumb {
+.tc-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: var(--red);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.22);
   cursor: pointer;
-  transition: transform .12s ease;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
 }
-.time-slider::-webkit-slider-thumb:hover { transform: scale(1.12); }
-.time-slider::-moz-range-thumb {
+.tc-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.tc-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background: var(--red);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.22);
   cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
 }
-.time-ticks {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
+
+.tc-ticks {
+  position: relative;
+  height: 24px;
+  margin-top: 7px;
+}
+.tc-tick {
+  position: absolute;
+  transform: translateX(-50%);
   font-family: var(--stack);
-  font-size: 11px;
+  font-size: 16px;
   color: var(--muted);
-  letter-spacing: 0.01em;
 }
-.time-ticks span { position: relative; }
-.time-ticks span.active { color: var(--red); font-weight: 600; }
+.tc-tick::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 5px;
+  background: var(--faint);
+  margin: 0 auto 2px;
+}
 
 /* Leaflet popup */
 .leaflet-popup-content-wrapper {
@@ -311,25 +346,15 @@ body {
   .chrome-top-left { max-width: calc(100vw - 44px); }
   .chrome-top-left h2 { font-size: 24px; }
   .caption { font-size: 16px; max-width: 100%; }
-  .chrome-legend {
-    min-width: 0;
-    width: calc(100vw - 32px);
-    left: 16px;
-    right: 16px;
-    bottom: 150px;
-    padding: 10px 12px;
+  .chrome-legend { display: none; }
+  .time-control {
+    width: calc(100vw - 24px);
+    padding: 10px 14px 8px;
+    bottom: 12px;
   }
+  .tc-date { font-size: 12px; }
+  .tc-btn { width: 34px; height: 34px; }
   .chrome-source { font-size: 9px; bottom: 12px; right: 12px; }
-  .chrome-time {
-    width: calc(100vw - 32px);
-    left: 16px;
-    right: 16px;
-    transform: none;
-    bottom: 16px;
-    padding: 10px 12px 8px;
-  }
-  .time-year { font-size: 18px; min-width: 48px; }
-  .time-play { width: 34px; height: 34px; }
 }
 
 @media (max-height: 520px) {
@@ -348,12 +373,20 @@ body {
     line-height: 1.45;
     max-width: min(52vw, 420px);
   }
+  .time-control {
+    bottom: 10px;
+    padding: 8px 14px;
+  }
+  .tc-date { font-size: 13px; }
+  .tc-ticks { height: 16px; margin-top: 4px; }
+  .tc-tick { font-size: 12px; }
+  .tc-btn { width: 32px; height: 32px; }
   .chrome-source { bottom: 10px; font-size: 10px; }
-  .chrome-time { bottom: 10px; }
 }
 
 @media (max-height: 430px) {
   .caption { font-size: 12px; }
+  .time-control { bottom: 8px; }
 }
 
 @media (max-width: 880px) {
@@ -390,7 +423,7 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <h2>Airborne bacterial infections are <em>surging across America</em></h2>
+      <h2>Airborne bacterial infections are <span class="em">surging across America</span></h2>
       <p class="caption">Reported cases — Legionnaires', whooping cough, TB, and meningococcal — fell during COVID and have surged back to a decade high, about 52,000 in 2024. Pneumonia, the biggest, hospitalizes roughly 1.5 million Americans a year.</p>
     </div>
   </div>
@@ -404,56 +437,63 @@ body {
     </div>
   </div>
 
-  <div class="chrome chrome-time" id="chromeTime">
-    <div class="time-row">
-      <button class="time-play" id="timePlay" aria-label="Play animation">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <div class="time-year" id="timeYear">2024</div>
-      <div class="time-slider-wrap">
-        <input type="range" class="time-slider" id="timeSlider" min="0" max="3" step="1" value="3">
-        <div class="time-ticks" id="timeTicks"></div>
-      </div>
-    </div>
-  </div>
-
   <div class="chrome chrome-source" id="chromeSource"></div>
+
+  <div class="time-control" id="timeControl">
+    <div class="tc-top">
+      <button class="tc-btn" id="playBtn" aria-label="Play">
+        <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="tc-date" id="dateLabel">2024</div>
+      <div class="tc-counter" id="tcCounter">0 cases</div>
+    </div>
+    <div class="tc-slider-wrap">
+      <input type="range" class="tc-slider" id="frameSlider" min="0" max="11" value="11" step="1">
+    </div>
+    <div class="tc-ticks" id="yearTicks"></div>
+  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ============================================================
-//  Airborne bacterial infections — animated U.S. states choropleth
+//  Airborne bacterial infections — choropleth by state, yearly
 // ============================================================
 const isEmbedded = window.self !== window.top;
-const isMobile = window.matchMedia('(max-width: 880px)').matches;
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const map = L.map('map', {
-  zoomControl: false,
-  scrollWheelZoom: !isEmbedded,
-  minZoom: 3,
-  maxZoom: 8,
-  center: [38, -96],
-  zoom: isMobile ? 3 : 4,
-  worldCopyJump: false,
-  maxBounds: [[5, -180], [80, -45]],
-  maxBoundsViscosity: 0.85
+  zoomControl: false, scrollWheelZoom: !isEmbedded,
+  minZoom: 3, maxZoom: 12,
+  maxBounds: [[8, -140], [62, -52]], maxBoundsViscosity: 0.85
 });
 L.control.zoom({ position: 'topright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO', detectRetina: true
+}).addTo(map);
 
-// Fixed color ramp across all years — domain 1 -> 30 (rate per 100k)
-const RAMP_STOPS = [[1,'#f3cdc6'],[8.25,'#eea799'],[15.5,'#e87f6d'],[22.75,'#e4554a'],[30,'#e23b3b']];
+const US_BOUNDS = L.latLngBounds([[24.4, -124.8], [49.4, -66.9]]);
+function fitUS(){
+  const w = window.innerWidth;
+  if (w > 820){
+    map.fitBounds(US_BOUNDS, { paddingTopLeft: [Math.min(520, w*0.40), 40], paddingBottomRight: [40, 160] });
+  } else {
+    map.fitBounds(US_BOUNDS, { paddingTopLeft: [16, 210], paddingBottomRight: [16, 150] });
+  }
+}
+
+const PLAY_INTERVAL = 700;
 const NO_DATA_COLOR = '#d7dbde';
 
-let tsData = null;          // { years:[...], states:{ name: { "2021":{cases,rate}, ... } } }
-let yearsList = [];
-let currentYear = null;
+const RAMP_STOPS = [[1,'#f3cdc6'],[8.25,'#eea799'],[15.5,'#e87f6d'],[22.75,'#e4554a'],[30,'#e23b3b']];
+
+let years = [];
+let tsData = { states: {} };
+let currentYearIdx = 0;
+let playing = false;
+let playTimer = null;
 let stateLayer = null;
 let openTooltipLayer = null;
-let featureIndex = [];      // [{feature, layer}]
 
-// ---- color helpers ----
 function hexToRgb(h){ h = h.replace('#',''); return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
 function rgbToHex(r,g,b){
   return '#' + [r,g,b].map(function(x){
@@ -461,10 +501,11 @@ function rgbToHex(r,g,b){
     return s.length < 2 ? '0'+s : s;
   }).join('');
 }
-function rateColor(v){
+
+function scoreColor(v){
   if (v == null || isNaN(v)) return NO_DATA_COLOR;
-  if (v <= RAMP_STOPS[0][0]) return RAMP_STOPS[0][1];
-  if (v >= RAMP_STOPS[RAMP_STOPS.length-1][0]) return RAMP_STOPS[RAMP_STOPS.length-1][1];
+  if (v <= 1) return RAMP_STOPS[0][1];
+  if (v >= 30) return RAMP_STOPS[RAMP_STOPS.length-1][1];
   let a = RAMP_STOPS[0], b = RAMP_STOPS[RAMP_STOPS.length-1];
   for (let i=0;i<RAMP_STOPS.length-1;i++){
     if (v >= RAMP_STOPS[i][0] && v <= RAMP_STOPS[i+1][0]){ a = RAMP_STOPS[i]; b = RAMP_STOPS[i+1]; break; }
@@ -475,108 +516,147 @@ function rateColor(v){
   return rgbToHex(ca[0]+(cb[0]-ca[0])*k, ca[1]+(cb[1]-ca[1])*k, ca[2]+(cb[2]-ca[2])*k);
 }
 
-function stateName(feature){
-  const p = feature && feature.properties || {};
-  return p.name || p.NAME || p.STATE_NAME || 'Unknown';
+function rateFor(stateName, yearIdx){
+  if (!tsData.states[stateName]) return null;
+  const year = years[yearIdx];
+  const rec = tsData.states[stateName][String(year)];
+  if (!rec) return null;
+  return rec.rate;
 }
 
-function recordForState(name){
-  if (!tsData || !tsData.states || !tsData.states[name]) return null;
-  const yr = String(currentYear);
-  return tsData.states[name][yr] || null;
+function casesFor(stateName, yearIdx){
+  if (!tsData.states[stateName]) return null;
+  const year = years[yearIdx];
+  const rec = tsData.states[stateName][String(year)];
+  if (!rec) return null;
+  return rec.cases;
 }
 
-function styleFor(feature){
-  const name = stateName(feature);
-  const rec = recordForState(name);
-  const v = rec ? rec.rate : null;
-  const fill = (v == null) ? NO_DATA_COLOR : rateColor(v);
-  const op  = (v == null) ? 0.55 : 0.82;
+function styleFor(stateName, yearIdx){
+  const v = rateFor(stateName, yearIdx);
+  const fill = (v == null) ? NO_DATA_COLOR : scoreColor(v);
+  const op  = (v == null) ? 0.35 : 0.78;
   return { fillColor: fill, fillOpacity: op, weight: 1, color: '#ffffff' };
 }
 
-function tooltipText(feature){
-  const name = stateName(feature);
-  const rec = recordForState(name);
-  if (!rec || rec.rate == null) return name;
-  const rate = (Math.round(rec.rate * 100) / 100).toFixed(2);
-  return name + ' — ' + rate + ' per 100,000 · ' + rec.cases + ' cases (' + currentYear + ')';
+function tooltipText(stateName, yearIdx){
+  const v = rateFor(stateName, yearIdx);
+  if (v == null) return stateName;
+  const c = casesFor(stateName, yearIdx);
+  const year = years[yearIdx];
+  return stateName + ' — ' + Number(v).toFixed(2) + ' per 100,000 · ' + (c != null ? c.toLocaleString() : '—') + ' cases (' + year + ')';
+}
+
+function totalCasesForYear(yearIdx){
+  const year = years[yearIdx];
+  let total = 0;
+  for (const name in tsData.states){
+    const rec = tsData.states[name][String(year)];
+    if (rec && typeof rec.cases === 'number') total += rec.cases;
+  }
+  return total;
+}
+
+function recolor(yearIdx){
+  if (!years.length) return;
+  yearIdx = Math.max(0, Math.min(years.length-1, yearIdx|0));
+  currentYearIdx = yearIdx;
+  document.getElementById('dateLabel').textContent = String(years[yearIdx]);
+  document.getElementById('frameSlider').value = yearIdx;
+  const total = totalCasesForYear(yearIdx);
+  document.getElementById('tcCounter').textContent = total.toLocaleString() + ' cases';
+  if (!stateLayer) return;
+  stateLayer.eachLayer(function(layer){
+    const name = layer.feature && layer.feature.properties && layer.feature.properties.name;
+    const v = rateFor(name, yearIdx);
+    const fill = (v == null) ? NO_DATA_COLOR : scoreColor(v);
+    const op  = (v == null) ? 0.35 : 0.78;
+    layer.setStyle({ fillColor: fill, fillOpacity: op });
+    if (layer === openTooltipLayer){
+      try { layer.setTooltipContent(tooltipText(name, yearIdx)); } catch(e){}
+    }
+  });
+}
+
+function play(){
+  playing = true;
+  document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label','Pause');
+  // If already at the last year, restart from the first
+  if (currentYearIdx >= years.length - 1) {
+    recolor(0);
+  }
+  playTimer = setTimeout(playLoop, PLAY_INTERVAL);
+}
+function pause(){
+  playing = false;
+  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label','Play');
+  if (playTimer){ clearTimeout(playTimer); playTimer = null; }
+}
+function togglePlay(){ if (playing) pause(); else play(); }
+function playLoop(){
+  if (!playing) return;
+  const next = currentYearIdx + 1;
+  if (next >= years.length - 1){
+    recolor(years.length - 1);
+    pause();
+    return;
+  }
+  recolor(next);
+  playTimer = setTimeout(playLoop, PLAY_INTERVAL);
+}
+
+function setupYearTicks(){
+  const container = document.getElementById('yearTicks');
+  container.innerHTML = '';
+  if (years.length < 2) return;
+  const lastIdx = years.length - 1;
+  const tickYears = [2014, 2016, 2018, 2020, 2022, 2024];
+  for (let i=0;i<tickYears.length;i++){
+    const y = tickYears[i];
+    const idx = years.indexOf(y);
+    if (idx < 0) continue;
+    const pct = idx / lastIdx * 100;
+    const tick = document.createElement('span');
+    tick.className = 'tc-tick';
+    if (pct <= 2){ tick.style.left = '0'; tick.style.transform = 'none'; }
+    else if (pct >= 98){ tick.style.left = '100%'; tick.style.transform = 'translateX(-100%)'; }
+    else { tick.style.left = pct + '%'; }
+    tick.textContent = String(y);
+    container.appendChild(tick);
+  }
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
 
-// ---- recolor + tooltip refresh on year change ----
-function refreshForYear(){
-  if (!stateLayer) return;
-  featureIndex.forEach(function(item){
-    item.layer.setStyle(styleFor(item.feature));
-    item.layer.setTooltipContent(tooltipText(item.feature));
-  });
-  document.getElementById('timeYear').textContent = String(currentYear);
-  // active tick
-  const ticks = document.getElementById('timeTicks');
-  if (ticks && ticks.children.length === yearsList.length){
-    const idx = yearsList.indexOf(currentYear);
-    for (let i=0;i<ticks.children.length;i++){
-      ticks.children[i].classList.toggle('active', i === idx);
-    }
-  }
-  // slider position
-  const slider = document.getElementById('timeSlider');
-  const idx = yearsList.indexOf(currentYear);
-  if (slider && idx >= 0) slider.value = String(idx);
-}
-
-function fitUS(){
-  if (stateLayer) {
-    try {
-      const b = L.latLngBounds([[24.5, -125.5], [49.5, -66]]); // lower 48
-      const padX = window.innerWidth < 880 ? 20 : 60;
-      const padY = window.innerWidth < 880 ? 20 : 60;
-      map.fitBounds(b, { paddingTopLeft: [padX, padY], paddingBottomRight: [padX, padY], maxZoom: 6, animate: false });
-    } catch(e) {}
-  } else {
-    if (window.innerWidth < 880) {
-      map.setView([38, -96], 3);
-    } else {
-      map.setView([38, -96], 4);
-    }
-  }
-}
-
-async function loadStates(){
+async function loadData(){
   try {
-    const [geoResp, dataResp] = await Promise.all([
+    const [geoResp, tsResp] = await Promise.all([
       fetch('data/bacteria_map/us_states.geojson'),
       fetch('data/bacteria_map/us_airborne_timeseries.json')
     ]);
     const geo = await geoResp.json();
-    tsData = await dataResp.json();
-    yearsList = (tsData && tsData.years && tsData.years.length) ? tsData.years.slice() : [2021,2022,2023,2024];
-    currentYear = yearsList[yearsList.length - 1];
+    tsData = await tsResp.json();
+    years = tsData.years || [];
 
-    // build ticks
-    const ticks = document.getElementById('timeTicks');
-    ticks.innerHTML = '';
-    yearsList.forEach(function(y, i){
-      const s = document.createElement('span');
-      // thin labels when there are many years so they don't crowd
-      const show = (yearsList.length <= 6) || (i % 2 === 0) || (i === yearsList.length - 1);
-      s.textContent = show ? String(y) : '';
-      ticks.appendChild(s);
-    });
-    const slider = document.getElementById('timeSlider');
-    slider.min = '0';
-    slider.max = String(yearsList.length - 1);
-    slider.step = '1';
-    slider.value = String(yearsList.length - 1);
+    if (years.length){
+      currentYearIdx = years.length - 1;
+      document.getElementById('frameSlider').min = 0;
+      document.getElementById('frameSlider').max = years.length - 1;
+      document.getElementById('frameSlider').value = currentYearIdx;
+      setupYearTicks();
+    }
 
     stateLayer = L.geoJSON(geo, {
-      filter: function(feature){ return ['Alaska','Hawaii','Puerto Rico'].indexOf(stateName(feature)) === -1; },
-      style: styleFor,
+      filter: function(feature){
+        const name = feature.properties.name;
+        return name !== 'Alaska' && name !== 'Hawaii' && name !== 'Puerto Rico';
+      },
+      style: function(feature){ return styleFor(feature.properties.name, currentYearIdx); },
       onEachFeature: function(feature, layer){
-        featureIndex.push({ feature: feature, layer: layer });
-        layer.bindTooltip(tooltipText(feature), { sticky: true, direction: 'top', opacity: 1 });
+        const name = feature.properties.name;
+        layer.bindTooltip(tooltipText(name, currentYearIdx), { sticky: true, direction: 'top', opacity: 1 });
         layer.on('mouseover', function(){
           try { layer.bringToFront(); } catch(e){}
           layer.setStyle({ weight: 2, color: '#1f2327' });
@@ -588,101 +668,17 @@ async function loadStates(){
         });
       }
     }).addTo(map);
-
+    recolor(currentYearIdx);
     fitUS();
-    refreshForYear();
 
-    // Auto-play on arrival (unless reduced motion)
-    if (!prefersReducedMotion) {
-      startAutoPlay(true);
+    // Auto-play once on arrival unless reduced motion
+    if (years.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      play();
     }
   } catch (e) {
-    // leave the map clean — no states drawn
+    fitUS();
   }
 }
-
-// ---- time control ----
-const playBtn = document.getElementById('timePlay');
-const sliderEl = document.getElementById('timeSlider');
-const PLAY_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
-const PAUSE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
-
-let isPlaying = false;
-let playTimer = null;
-let autoStartedFromBeginning = false;
-
-function setPlaying(playing){
-  isPlaying = playing;
-  playBtn.innerHTML = playing ? PAUSE_ICON : PLAY_ICON;
-  playBtn.setAttribute('aria-label', playing ? 'Pause animation' : 'Play animation');
-}
-
-function stepForward(){
-  const idx = yearsList.indexOf(currentYear);
-  if (idx < 0) { currentYear = yearsList[0]; refreshForYear(); return false; }
-  if (idx >= yearsList.length - 1) { setPlaying(false); return false; }
-  currentYear = yearsList[idx + 1];
-  refreshForYear();
-  return true;
-}
-
-function startAutoPlay(fromStart){
-  if (!yearsList.length) return;
-  if (fromStart) {
-    currentYear = yearsList[0];
-    refreshForYear();
-  }
-  setPlaying(true);
-  if (playTimer) clearTimeout(playTimer);
-  const tick = function(){
-    if (!isActive) return; // paused by deck gating
-    if (!isPlaying) return;
-    const advanced = stepForward();
-    if (advanced) {
-      playTimer = setTimeout(tick, 900);
-    } else {
-      setPlaying(false);
-    }
-  };
-  playTimer = setTimeout(tick, 900);
-}
-
-function stopAutoPlay(){
-  setPlaying(false);
-  if (playTimer) { clearTimeout(playTimer); playTimer = null; }
-}
-
-playBtn.addEventListener('click', function(){
-  if (isPlaying) {
-    stopAutoPlay();
-  } else {
-    // If at the last year, restart from beginning; otherwise continue.
-    const idx = yearsList.indexOf(currentYear);
-    if (idx >= yearsList.length - 1) {
-      startAutoPlay(true);
-    } else {
-      setPlaying(true);
-      if (playTimer) clearTimeout(playTimer);
-      const tick = function(){
-        if (!isActive) return;
-        if (!isPlaying) return;
-        const advanced = stepForward();
-        if (advanced) { playTimer = setTimeout(tick, 900); }
-        else { setPlaying(false); }
-      };
-      playTimer = setTimeout(tick, 900);
-    }
-  }
-});
-
-sliderEl.addEventListener('input', function(e){
-  stopAutoPlay();
-  const idx = parseInt(e.target.value, 10);
-  if (!isNaN(idx) && idx >= 0 && idx < yearsList.length) {
-    currentYear = yearsList[idx];
-    refreshForYear();
-  }
-});
 
 // Source line
 (function buildSource(){
@@ -690,87 +686,41 @@ sliderEl.addEventListener('input', function(e){
   el.innerHTML = 'CDC — National Notifiable Diseases Surveillance System (updated weekly)';
 })();
 
-loadStates();
+loadData();
+
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+document.getElementById('frameSlider').addEventListener('input', function(e){
+  if (playing) pause();
+  recolor(parseInt(e.target.value, 10));
+});
+
+document.addEventListener('keydown', function(e){
+  if (e.target && e.target.tagName === 'INPUT') return;
+  if (!years.length) return;
+  if (e.code === 'Space'){ e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowLeft'){ pause(); recolor(Math.max(0, currentYearIdx - 1)); }
+  if (e.code === 'ArrowRight'){ pause(); recolor(Math.min(years.length - 1, currentYearIdx + 1)); }
+});
 
 let resizeTimer = null;
 window.addEventListener('resize', function(){
   if (resizeTimer) clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(function(){
-    map.invalidateSize();
-    fitUS();
-  }, 150);
+  resizeTimer = setTimeout(function(){ map.invalidateSize(); fitUS(); }, 100);
 });
 
-// Deck integration: pause/resume gating via postMessage + IntersectionObserver fallback.
-let isActive = true;
-let wasPlayingBeforeInactive = false;
-
+// Embedded in the deck wrapper: pause when scrolled away, replay from first year when active.
 if (isEmbedded) {
   window.addEventListener('message', function(ev){
     const d = ev.data || {};
-    if (d.type === 'nf-inactive') {
-      isActive = false;
-      if (isPlaying) { wasPlayingBeforeInactive = true; stopAutoPlay(); }
-    } else if (d.type === 'nf-active') {
-      isActive = true;
-      if (wasPlayingBeforeInactive) {
-        wasPlayingBeforeInactive = false;
-        // resume from current position; if at end, replay from start
-        const idx = yearsList.indexOf(currentYear);
-        if (idx >= yearsList.length - 1) {
-          startAutoPlay(true);
-        } else {
-          setPlaying(true);
-          if (playTimer) clearTimeout(playTimer);
-          const tick = function(){
-            if (!isActive) return;
-            if (!isPlaying) return;
-            const advanced = stepForward();
-            if (advanced) { playTimer = setTimeout(tick, 900); }
-            else { setPlaying(false); }
-          };
-          playTimer = setTimeout(tick, 900);
-        }
+    if (d.type === 'nf-inactive') { pause(); }
+    else if (d.type === 'nf-active') {
+      if (!playing && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        recolor(0);
+        play();
       }
     }
   });
 }
-
-// IntersectionObserver fallback for environments that don't post nf-active/nf-inactive
-(function setupObserverFallback(){
-  if (!('IntersectionObserver' in window)) return;
-  const target = document.querySelector('.map-wrap') || document.body;
-  const io = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      const visible = entry.isIntersecting && entry.intersectionRatio > 0.1;
-      if (visible && !isActive) {
-        isActive = true;
-        if (wasPlayingBeforeInactive) {
-          wasPlayingBeforeInactive = false;
-          const idx = yearsList.indexOf(currentYear);
-          if (idx >= yearsList.length - 1) {
-            startAutoPlay(true);
-          } else {
-            setPlaying(true);
-            if (playTimer) clearTimeout(playTimer);
-            const tick = function(){
-              if (!isActive) return;
-              if (!isPlaying) return;
-              const advanced = stepForward();
-              if (advanced) { playTimer = setTimeout(tick, 900); }
-              else { setPlaying(false); }
-            };
-            playTimer = setTimeout(tick, 900);
-          }
-        }
-      } else if (!visible && isActive) {
-        isActive = false;
-        if (isPlaying) { wasPlayingBeforeInactive = true; stopAutoPlay(); }
-      }
-    });
-  }, { threshold: [0, 0.1, 0.5] });
-  io.observe(target);
-})();
 </script>
 </body>
 </html>
