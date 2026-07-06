@@ -40,7 +40,6 @@ section{
   background:var(--bg);
 }
 
-/* === Canvas — full viewport background === */
 #cloud-canvas{
   position:absolute;
   inset:0;
@@ -50,19 +49,17 @@ section{
   pointer-events:none;
 }
 
-/* === Legibility scrim: soft wash behind upper-left text === */
 .scrim{
   position:absolute;
   top:0;
   left:0;
   width:62%;
-  height:52%;
+  height:54%;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 70% 80% at 28% 42%, rgba(237,240,242,0.88) 0%, rgba(237,240,242,0.55) 38%, rgba(237,240,242,0.18) 62%, rgba(237,240,242,0) 80%);
+  background:radial-gradient(ellipse 72% 82% at 26% 40%, rgba(237,240,242,0.92) 0%, rgba(237,240,242,0.62) 36%, rgba(237,240,242,0.22) 62%, rgba(237,240,242,0) 82%);
 }
 
-/* === Text column — upper-left of the open sky === */
 .text-col{
   position:absolute;
   top:clamp(32px, 6vh, 76px);
@@ -105,7 +102,6 @@ section{
   margin-bottom:22px;
 }
 
-/* === Mobile === */
 @media (max-width: 880px){
   section{
     min-height:100vh;
@@ -119,8 +115,8 @@ section{
   }
   .scrim{
     width:100%;
-    height:48%;
-    background:linear-gradient(180deg, var(--bg) 0%, rgba(237,240,242,0.92) 30%, rgba(237,240,242,0.5) 55%, rgba(237,240,242,0) 75%);
+    height:50%;
+    background:linear-gradient(180deg, var(--bg) 0%, rgba(237,240,242,0.94) 30%, rgba(237,240,242,0.55) 56%, rgba(237,240,242,0) 78%);
   }
   .text-col{
     max-width:none;
@@ -147,7 +143,6 @@ section{
   }
 }
 
-/* === Short screens === */
 @media (max-height: 760px) and (min-width: 881px){
   .text-col{ top:clamp(24px, 4vh, 48px); }
   .headline{
@@ -207,6 +202,28 @@ import * as THREE from 'three';
 
   const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
 
+  /* ===== Value noise (shared by fabric + mote collision) ===== */
+  function hash2(x, y) {
+    let s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    return s - Math.floor(s);
+  }
+  function valueNoise(x, y) {
+    const ix = Math.floor(x), iy = Math.floor(y);
+    const fx = x - ix, fy = y - iy;
+    const ux = fx * fx * (3 - 2 * fx);
+    const uy = fy * fy * (3 - 2 * fy);
+    const a = hash2(ix, iy);
+    const b = hash2(ix + 1, iy);
+    const c = hash2(ix, iy + 1);
+    const d = hash2(ix + 1, iy + 1);
+    return (a * (1 - ux) + b * ux) * (1 - uy) + (c * (1 - ux) + d * ux) * uy;
+  }
+  function fabricHeight(x, z, t) {
+    return 3.4 * valueNoise(x * 0.045, z * 0.045 + t * 0.05)
+         + 1.5 * valueNoise(x * 0.11, z * 0.11 - t * 0.08)
+         + 0.5 * valueNoise(x * 0.24, z * 0.24 + t * 0.11);
+  }
+
   /* ===== Renderer ===== */
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setClearColor(0xedf0f2, 1);
@@ -214,120 +231,73 @@ import * as THREE from 'three';
 
   /* ===== Scene & Camera ===== */
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+  camera.position.set(0, 9, 16);
+  camera.lookAt(0, 0.5, -5);
 
-  let camBase = new THREE.Vector3(0, 4, 22);
-  let camTarget = new THREE.Vector3(0, -2.3, 2);
-  let camFov = 55;
-
-  /* ===== Wave height function (shared JS / GLSL) ===== */
-  function waveHeight(x, z, t) {
-    let h = 0;
-    h += Math.sin(x * 0.12 + t * 0.40) * 0.8;
-    h += Math.sin(z * 0.16 + t * 0.28) * 0.7;
-    h += Math.sin((x + z) * 0.08 + t * 0.22) * 0.5;
-    h += Math.sin(x * 0.05 + z * 0.06 + t * 0.15) * 1.0;
-    return h;
-  }
-
-  /* ===== Surface (charged membrane) ===== */
-  const GRID_X = 240;
-  const GRID_Z = 150;
-  const SURF_W = 90;
-  const SURF_D = 60;
+  /* ===== Silk fabric (Points) ===== */
+  const GRID_X = 260;
+  const GRID_Z = 170;
+  const X_MIN = -38, X_MAX = 38;
+  const Z_MIN = -30, Z_MAX = 10;
   const SURF_COUNT = GRID_X * GRID_Z;
 
-  const surfaceGeo = new THREE.BufferGeometry();
+  const baseX = new Float32Array(SURF_COUNT);
+  const baseZ = new Float32Array(SURF_COUNT);
   const sPositions = new Float32Array(SURF_COUNT * 3);
-  const sBoosts = new Float32Array(SURF_COUNT);
+  const sAzure = new Float32Array(SURF_COUNT);
 
   for (let ix = 0; ix < GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
       const i = ix * GRID_Z + iz;
-      sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      const x = X_MIN + (ix / (GRID_X - 1)) * (X_MAX - X_MIN);
+      const z = Z_MIN + (iz / (GRID_Z - 1)) * (Z_MAX - Z_MIN);
+      baseX[i] = x;
+      baseZ[i] = z;
+      sPositions[i * 3] = x;
       sPositions[i * 3 + 1] = 0;
-      sPositions[i * 3 + 2] = (iz / (GRID_Z - 1) - 0.5) * SURF_D;
-      sBoosts[i] = 0;
+      sPositions[i * 3 + 2] = z;
+      sAzure[i] = 0;
     }
   }
 
+  const surfaceGeo = new THREE.BufferGeometry();
   surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
-  surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
+  surfaceGeo.setAttribute('aAzure', new THREE.BufferAttribute(sAzure, 1));
 
   const surfaceMat = new THREE.ShaderMaterial({
     uniforms: {
-      uTime: { value: 0 },
-      uPixelRatio: { value: renderer.getPixelRatio() },
-      uSize: { value: 1.3 },
-      uBaseColor: { value: new THREE.Color(0x7a8da8) },
-      uAzureColor: { value: new THREE.Color(0x1b7bff) },
-      uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 18 },
-      uFogFar: { value: 42 },
+      uDpr: { value: Math.min(window.devicePixelRatio || 1, dprCap) },
+      uBase: { value: new THREE.Vector3(0.47, 0.52, 0.60) },
+      uAzure: { value: new THREE.Vector3(0.106, 0.482, 1.0) },
     },
     vertexShader: `
-      attribute float aBoost;
-      uniform float uTime;
-      uniform float uPixelRatio;
-      uniform float uSize;
-      varying float vBoost;
+      attribute float aAzure;
+      uniform float uDpr;
+      varying float vAzure;
       varying float vDist;
-      varying float vHeight;
-
-      float waveHeight(float x, float z, float t) {
-        float h = 0.0;
-        h += sin(x * 0.12 + t * 0.40) * 0.8;
-        h += sin(z * 0.16 + t * 0.28) * 0.7;
-        h += sin((x + z) * 0.08 + t * 0.22) * 0.5;
-        h += sin(x * 0.05 + z * 0.06 + t * 0.15) * 1.0;
-        return h;
-      }
-
       void main() {
-        vec3 pos = position;
-        pos.y = waveHeight(pos.x, pos.z, uTime);
-        vHeight = pos.y;
-
-        float shimmer = 0.85 + 0.15 * sin(uTime * 2.0 + pos.x * 0.3 + pos.z * 0.3);
-        vBoost = aBoost * shimmer;
-
-        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
-        vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
-
-        float sz = uSize * (1.0 + aBoost * 4.0);
-        gl_PointSize = sz * uPixelRatio * (130.0 / max(vDist, 1.0));
+        vAzure = aAzure;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp((220.0 * uDpr) / max(vDist, 1.0), 0.5, 2.2);
       }
     `,
     fragmentShader: `
-      varying float vBoost;
+      varying float vAzure;
       varying float vDist;
-      varying float vHeight;
-      uniform vec3 uBaseColor;
-      uniform vec3 uAzureColor;
-      uniform vec3 uFogColor;
-      uniform float uFogNear;
-      uniform float uFogFar;
-
+      uniform vec3 uBase;
+      uniform vec3 uAzure;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-
-        float circle = smoothstep(0.5, 0.16, d);
-
-        float heightFactor = smoothstep(-2.5, 2.5, vHeight);
-        vec3 baseShaded = mix(uBaseColor * 0.80, uBaseColor * 1.16, heightFactor);
-        vec3 color = mix(baseShaded, uAzureColor, vBoost);
-
-        float fog = smoothstep(uFogNear, uFogFar, vDist);
-        color = mix(color, uFogColor, fog * 0.88);
-
-        float depthFade = smoothstep(44.0, 14.0, vDist);
-        float alpha = circle * depthFade * (0.42 + vBoost * 0.58);
-        alpha *= (1.0 - fog * 0.72);
-
-        gl_FragColor = vec4(color, alpha);
+        float soft = smoothstep(0.5, 0.08, d);
+        vec3 col = mix(uBase, uAzure, vAzure);
+        float farFade = smoothstep(52.0, 22.0, vDist);
+        float alpha = soft * 0.55 * farFade;
+        gl_FragColor = vec4(col, alpha);
       }
     `,
     transparent: true,
@@ -335,194 +305,134 @@ import * as THREE from 'three';
   });
 
   const surfacePoints = new THREE.Points(surfaceGeo, surfaceMat);
-  surfacePoints.renderOrder = 0;
   scene.add(surfacePoints);
 
-  /* ===== Pollutants — float, then pull, then neutralize ===== */
-  const POLL_COUNT = 90;
-  const pollGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(POLL_COUNT * 3);
-  const pAzure = new Float32Array(POLL_COUNT);
-  const pSize = new Float32Array(POLL_COUNT);
-  const pAlpha = new Float32Array(POLL_COUNT);
+  /* ===== Grey motes ===== */
+  const MOTE_COUNT = 70;
+  const mPositions = new Float32Array(MOTE_COUNT * 3);
+  const mAlpha = new Float32Array(MOTE_COUNT);
+  const mVisible = new Float32Array(MOTE_COUNT);
 
-  const pollutants = [];
+  const motes = [];
+  for (let i = 0; i < MOTE_COUNT; i++) {
+    motes.push(makeMote(true));
+  }
 
-  function makePollutant(initial) {
-    // Bias x toward center/right so they avoid upper-left text
-    const xBias = Math.random();
-    const x = -6 + xBias * 38; // -6 to 32, weighted right
+  function makeMote(initial) {
+    // x biased toward center/right (avoid upper-left text zone)
+    const r = Math.random() * 0.5 + Math.random() * 0.5;
+    const x = -30 + r * 64;
     return {
       x: x,
-      y: initial ? (7 + Math.random() * 8) : (8 + Math.random() * 7),
-      z: -12 + Math.random() * 24,
-      vx: (Math.random() - 0.5) * 0.12,
-      vy: 0,
-      vz: (Math.random() - 0.5) * 0.12,
-      size: 1.0 + Math.random() * 1.6,
-      alpha: 0.22 + Math.random() * 0.26,
-      state: 'float',
-      azure: 0,
-      stateT: 0,
-      floatTime: 2.5 + Math.random() * 6.5,
+      y: initial ? (2 + Math.random() * 12) : (10 + Math.random() * 6),
+      z: -26 + Math.random() * 32,
+      speed: 0.05 + Math.random() * 0.04,
+      driftX: (Math.random() - 0.5) * 0.01,
+      driftZ: (Math.random() - 0.5) * 0.01,
       phase: Math.random() * Math.PI * 2,
-      bobAmp: 0.15 + Math.random() * 0.25,
-      bobFreq: 0.25 + Math.random() * 0.3,
-      baseY: 0,
+      visible: 1,
+      respawnDelay: 0,
+      alpha: 0.4 + Math.random() * 0.2,
     };
   }
 
-  for (let i = 0; i < POLL_COUNT; i++) {
-    const p = makePollutant(true);
-    p.baseY = p.y;
-    pollutants.push(p);
-    pSize[i] = p.size;
-  }
+  const moteGeo = new THREE.BufferGeometry();
+  moteGeo.setAttribute('position', new THREE.BufferAttribute(mPositions, 3));
+  moteGeo.setAttribute('aAlpha', new THREE.BufferAttribute(mAlpha, 1));
+  moteGeo.setAttribute('aVisible', new THREE.BufferAttribute(mVisible, 1));
 
-  pollGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  pollGeo.setAttribute('aAzure', new THREE.BufferAttribute(pAzure, 1));
-  pollGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
-  pollGeo.setAttribute('aAlpha', new THREE.BufferAttribute(pAlpha, 1));
-
-  const pollMat = new THREE.ShaderMaterial({
+  const moteMat = new THREE.ShaderMaterial({
     uniforms: {
-      uPixelRatio: { value: renderer.getPixelRatio() },
-      uGreyColor: { value: new THREE.Color(0x596068) },
-      uAzureColor: { value: new THREE.Color(0x1b7bff) },
-      uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 18 },
-      uFogFar: { value: 42 },
+      uDpr: { value: Math.min(window.devicePixelRatio || 1, dprCap) },
+      uGrey: { value: new THREE.Vector3(0.42, 0.46, 0.52) },
     },
     vertexShader: `
-      attribute float aAzure;
-      attribute float aSize;
       attribute float aAlpha;
-      uniform float uPixelRatio;
-      varying float vAzure;
+      attribute float aVisible;
+      uniform float uDpr;
       varying float vAlpha;
-      varying float vDist;
-
+      varying float vVisible;
       void main() {
-        vAzure = aAzure;
         vAlpha = aAlpha;
-        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-        vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
-        float sz = aSize * (1.0 + aAzure * 1.5);
-        gl_PointSize = sz * uPixelRatio * (130.0 / max(vDist, 1.0));
+        vVisible = aVisible;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp((150.0 * uDpr) / max(-mv.z, 1.0), 1.2, 4.0);
       }
     `,
     fragmentShader: `
-      varying float vAzure;
       varying float vAlpha;
-      varying float vDist;
-      uniform vec3 uGreyColor;
-      uniform vec3 uAzureColor;
-      uniform vec3 uFogColor;
-      uniform float uFogNear;
-      uniform float uFogFar;
-
+      varying float vVisible;
+      uniform vec3 uGrey;
       void main() {
+        if (vVisible < 0.5) discard;
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-
-        float circle = smoothstep(0.5, 0.10, d);
-        float core = smoothstep(0.25, 0.0, d);
-        vec3 color = mix(uGreyColor, uAzureColor, vAzure);
-        color = mix(color, uAzureColor * 1.3, core * vAzure);
-
-        float fog = smoothstep(uFogNear, uFogFar, vDist);
-        color = mix(color, uFogColor, fog * 0.82);
-
-        float alpha = (circle * 0.7 + core * 0.3) * vAlpha * (1.0 - fog * 0.6);
-        gl_FragColor = vec4(color, alpha);
+        float soft = smoothstep(0.5, 0.12, d);
+        float core = smoothstep(0.22, 0.0, d);
+        gl_FragColor = vec4(uGrey, (soft * 0.7 + core * 0.3) * vAlpha);
       }
     `,
     transparent: true,
     depthWrite: false,
   });
 
-  const pollPoints = new THREE.Points(pollGeo, pollMat);
-  pollPoints.renderOrder = 1;
-  scene.add(pollPoints);
+  const motePoints = new THREE.Points(moteGeo, moteMat);
+  scene.add(motePoints);
 
-  /* ===== Blooms (azure neutralize glow) ===== */
-  const BLOOM_COUNT = 60;
-  const bloomGeo = new THREE.BufferGeometry();
-  const bPos = new Float32Array(BLOOM_COUNT * 3);
+  /* ===== Azure blooms ===== */
+  const BLOOM_COUNT = 80;
+  const bPositions = new Float32Array(BLOOM_COUNT * 3);
   const bAge = new Float32Array(BLOOM_COUNT);
   const bActive = new Float32Array(BLOOM_COUNT);
-  const bMaxSize = new Float32Array(BLOOM_COUNT);
 
   const blooms = [];
   for (let i = 0; i < BLOOM_COUNT; i++) {
-    blooms.push({ active: false, age: 0, life: 0, x: 0, y: 0, z: 0, maxSize: 0 });
-    bPos[i * 3] = 9999;
-    bMaxSize[i] = 20 + Math.random() * 18;
+    blooms.push({ active: false, age: 0, life: 1, x: 0, y: 0, z: 0 });
+    bPositions[i * 3] = 9999;
   }
 
-  bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
+  const bloomGeo = new THREE.BufferGeometry();
+  bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPositions, 3));
   bloomGeo.setAttribute('aAge', new THREE.BufferAttribute(bAge, 1));
   bloomGeo.setAttribute('aActive', new THREE.BufferAttribute(bActive, 1));
-  bloomGeo.setAttribute('aMaxSize', new THREE.BufferAttribute(bMaxSize, 1));
 
   const bloomMat = new THREE.ShaderMaterial({
     uniforms: {
-      uPixelRatio: { value: renderer.getPixelRatio() },
-      uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 18 },
-      uFogFar: { value: 42 },
+      uDpr: { value: Math.min(window.devicePixelRatio || 1, dprCap) },
     },
     vertexShader: `
       attribute float aAge;
       attribute float aActive;
-      attribute float aMaxSize;
-      uniform float uPixelRatio;
-      varying float vAlpha;
-      varying float vDist;
+      uniform float uDpr;
       varying float vAge;
-
+      varying float vActive;
       void main() {
-        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-        vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
-
-        float t = aAge;
-        float grow = smoothstep(0.0, 0.35, t);
-        float size = aMaxSize * (0.08 + grow * 0.92);
-        gl_PointSize = size * uPixelRatio * (130.0 / max(vDist, 1.0));
-
-        vAge = t;
-        float fade = (1.0 - t) * (1.0 - t);
-        vAlpha = aActive * fade * 0.6;
+        vAge = aAge;
+        vActive = aActive;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mv;
+        float grow = smoothstep(0.0, 0.4, aAge);
+        float sz = mix(24.0, 95.0, grow);
+        gl_PointSize = sz * uDpr;
       }
     `,
     fragmentShader: `
-      varying float vAlpha;
-      varying float vDist;
       varying float vAge;
-      uniform vec3 uFogColor;
-      uniform float uFogNear;
-      uniform float uFogFar;
-
+      varying float vActive;
       void main() {
+        if (vActive < 0.5) discard;
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-
         float soft = smoothstep(0.5, 0.0, d);
-        float core = smoothstep(0.18, 0.0, d);
-
+        float core = smoothstep(0.22, 0.0, d);
         vec3 azure = vec3(0.106, 0.482, 1.0);
-        vec3 brightAzure = vec3(0.40, 0.66, 1.0);
-        vec3 color = mix(azure, brightAzure, core * (1.0 - vAge * 0.4));
-
-        float fog = smoothstep(uFogNear, uFogFar, vDist);
-        color = mix(color, uFogColor, fog * 0.65);
-
-        float alpha = (soft * 0.45 + core * 0.55) * vAlpha * (1.0 - fog * 0.45);
-        gl_FragColor = vec4(color, alpha);
+        vec3 col = azure + core * 0.35;
+        float fade = 1.0 - vAge;
+        float alpha = (soft * 0.45 + core * 0.55) * fade * fade * 0.75;
+        gl_FragColor = vec4(col, alpha);
       }
     `,
     transparent: true,
@@ -530,40 +440,35 @@ import * as THREE from 'three';
   });
 
   const bloomPoints = new THREE.Points(bloomGeo, bloomMat);
-  bloomPoints.renderOrder = 2;
   scene.add(bloomPoints);
 
-  /* ===== Surface boost at capture ===== */
+  /* ===== Boost nearby fabric vertices on capture ===== */
   function boostSurfaceAt(x, z, amount) {
-    const gx = Math.round(((x / SURF_W) + 0.5) * (GRID_X - 1));
-    const gz = Math.round(((z / SURF_D) + 0.5) * (GRID_Z - 1));
-    const radius = 6;
+    const gx = Math.round(((x - X_MIN) / (X_MAX - X_MIN)) * (GRID_X - 1));
+    const gz = Math.round(((z - Z_MIN) / (Z_MAX - Z_MIN)) * (GRID_Z - 1));
+    const radius = 8;
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dz = -radius; dz <= radius; dz++) {
-        const ix = gx + dx;
-        const iz = gz + dz;
+        const ix = gx + dx, iz = gz + dz;
         if (ix < 0 || ix >= GRID_X || iz < 0 || iz >= GRID_Z) continue;
         const dist = Math.sqrt(dx * dx + dz * dz);
         if (dist > radius) continue;
-        const falloff = Math.pow(1 - dist / radius, 1.6);
+        const falloff = Math.pow(1 - dist / radius, 1.5);
         const i = ix * GRID_Z + iz;
-        sBoosts[i] = Math.min(1, sBoosts[i] + amount * falloff);
+        sAzure[i] = Math.min(1, sAzure[i] + amount * falloff);
       }
     }
   }
 
-  /* ===== Spawn bloom ===== */
   function spawnBloom(x, y, z) {
     for (let i = 0; i < BLOOM_COUNT; i++) {
       if (!blooms[i].active) {
         blooms[i].active = true;
         blooms[i].age = 0;
-        blooms[i].life = 0.9 + Math.random() * 0.7;
+        blooms[i].life = 0.9 + Math.random() * 0.3;
         blooms[i].x = x;
         blooms[i].y = y;
         blooms[i].z = z;
-        blooms[i].maxSize = 16 + Math.random() * 18;
-        bMaxSize[i] = blooms[i].maxSize;
         return;
       }
     }
@@ -577,31 +482,14 @@ import * as THREE from 'three';
     const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
-
-    const aspect = w / h;
-    if (aspect < 1) {
-      camFov = 64;
-      camBase.set(0, 5, 26);
-      camTarget.set(0, -2.8, 2);
-    } else if (aspect < 1.5) {
-      camFov = 58;
-      camBase.set(0, 4.2, 23);
-      camTarget.set(0, -2.4, 2);
-    } else {
-      camFov = 55;
-      camBase.set(0, 4, 22);
-      camTarget.set(0, -2.3, 2);
-    }
-    camera.fov = camFov;
-    camera.aspect = aspect;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-
-    surfaceMat.uniforms.uPixelRatio.value = dpr;
-    pollMat.uniforms.uPixelRatio.value = dpr;
-    bloomMat.uniforms.uPixelRatio.value = dpr;
+    surfaceMat.uniforms.uDpr.value = dpr;
+    moteMat.uniforms.uDpr.value = dpr;
+    bloomMat.uniforms.uDpr.value = dpr;
   }
 
-  /* ===== Animation loop ===== */
+  /* ===== Animation ===== */
   let running = false;
   let rafId = 0;
   let lastT = 0;
@@ -614,105 +502,57 @@ import * as THREE from 'three';
     lastT = t;
     clock += dt;
 
-    /* Surface time */
-    surfaceMat.uniforms.uTime.value = clock;
-
-    /* Decay boosts */
-    const decay = Math.pow(0.962, dt * 60);
+    /* Update fabric heights + decay azure */
+    const decay = Math.exp(-dt / 0.45); // ~1.2s visible decay
     for (let i = 0; i < SURF_COUNT; i++) {
-      sBoosts[i] *= decay;
+      sPositions[i * 3 + 1] = fabricHeight(baseX[i], baseZ[i], clock);
+      sAzure[i] *= decay;
     }
-    surfaceGeo.attributes.aBoost.needsUpdate = true;
+    surfaceGeo.attributes.position.needsUpdate = true;
+    surfaceGeo.attributes.aAzure.needsUpdate = true;
 
-    /* Update pollutants */
-    for (let i = 0; i < POLL_COUNT; i++) {
-      let p = pollutants[i];
-
-      if (p.state === 'float') {
-        p.stateT += dt;
-
-        /* Gentle weightless drift */
-        p.vx += Math.sin(clock * 0.3 + p.phase) * 0.004 * dt * 60;
-        p.vz += Math.cos(clock * 0.25 + p.phase * 1.3) * 0.004 * dt * 60;
-        p.vx *= 0.988;
-        p.vz *= 0.988;
-        p.x += p.vx * dt * 60;
-        p.z += p.vz * dt * 60;
-
-        /* Slow vertical bob — suspended */
-        p.y = p.baseY + Math.sin(clock * p.bobFreq + p.phase) * p.bobAmp;
-
-        /* Keep in bounds */
-        if (p.x < -8) { p.x = -8; p.vx = Math.abs(p.vx) * 0.5; }
-        if (p.x > 36) { p.x = 36; p.vx = -Math.abs(p.vx) * 0.5; }
-        if (p.z < -14) { p.z = -14; p.vz = Math.abs(p.vz) * 0.5; }
-        if (p.z > 14) { p.z = 14; p.vz = -Math.abs(p.vz) * 0.5; }
-
-        if (p.stateT > p.floatTime) {
-          p.state = 'pull';
-          p.stateT = 0;
-          p.vy = -0.08;
+    /* Update motes */
+    for (let i = 0; i < MOTE_COUNT; i++) {
+      const p = motes[i];
+      if (p.visible < 0.5) {
+        p.respawnDelay -= dt;
+        if (p.respawnDelay <= 0) {
+          const fresh = makeMote(false);
+          motes[i] = fresh;
+          fresh.visible = 1;
         }
-      } else if (p.state === 'pull') {
-        p.stateT += dt;
-
-        /* Attraction grows — accelerating downward */
-        var pullAccel = 0.025 + p.stateT * 0.06;
-        p.vy -= pullAccel * dt * 60;
-        p.vy = Math.max(p.vy, -3.5);
-        p.y += p.vy * dt * 60;
-
-        /* Continue slight horizontal drift, dampening */
-        p.vx *= 0.992;
-        p.vz *= 0.992;
-        p.x += p.vx * dt * 60;
-        p.z += p.vz * dt * 60;
-
-        var surfH = waveHeight(p.x, p.z, clock);
-        if (p.y <= surfH + 0.3) {
-          p.state = 'captured';
-          p.stateT = 0;
-          p.y = surfH;
-          boostSurfaceAt(p.x, p.z, 0.9);
-          spawnBloom(p.x, surfH + 0.15, p.z);
-        }
-      } else if (p.state === 'captured') {
-        p.stateT += dt;
-        p.azure = Math.min(1, p.stateT / 0.22);
-        p.y = waveHeight(p.x, p.z, clock);
-        if (p.stateT > 0.4) {
-          p.state = 'fading';
-          p.stateT = 0;
-        }
-      } else if (p.state === 'fading') {
-        p.stateT += dt;
-        p.azure = 1;
-        p.y = waveHeight(p.x, p.z, clock) + p.stateT * 0.8;
-        if (p.stateT > 0.7) {
-          pollutants[i] = makePollutant(false);
-          p = pollutants[i];
-        }
+        mVisible[i] = 0;
+        mAlpha[i] = 0;
+        mPositions[i * 3] = 9999;
+        continue;
       }
 
-      /* Write to buffers */
-      pPos[i * 3] = p.x;
-      pPos[i * 3 + 1] = p.y;
-      pPos[i * 3 + 2] = p.z;
-      pAzure[i] = p.azure;
-      pSize[i] = p.size;
+      p.y -= p.speed * dt * 60;
+      p.x += p.driftX * dt * 60 + Math.sin(clock * 0.4 + p.phase) * 0.006 * dt * 60;
+      p.z += p.driftZ * dt * 60 + Math.cos(clock * 0.35 + p.phase) * 0.006 * dt * 60;
 
-      if (p.state === 'float' || p.state === 'pull') {
-        pAlpha[i] = p.alpha;
-      } else if (p.state === 'captured') {
-        pAlpha[i] = p.alpha * (1.0 - p.azure * 0.1);
-      } else {
-        pAlpha[i] = p.alpha * Math.max(0, 1 - p.stateT / 0.7);
+      const fh = fabricHeight(p.x, p.z, clock);
+      if (p.y <= fh + 0.3) {
+        // Neutralize
+        boostSurfaceAt(p.x, p.z, 1.0);
+        spawnBloom(p.x, fh + 0.15, p.z);
+        p.visible = 0;
+        p.respawnDelay = 0.6 + Math.random() * 1.4;
+        mVisible[i] = 0;
+        mAlpha[i] = 0;
+        mPositions[i * 3] = 9999;
+        continue;
       }
+
+      mPositions[i * 3] = p.x;
+      mPositions[i * 3 + 1] = p.y;
+      mPositions[i * 3 + 2] = p.z;
+      mVisible[i] = 1;
+      mAlpha[i] = p.alpha;
     }
-    pollGeo.attributes.position.needsUpdate = true;
-    pollGeo.attributes.aAzure.needsUpdate = true;
-    pollGeo.attributes.aSize.needsUpdate = true;
-    pollGeo.attributes.aAlpha.needsUpdate = true;
+    moteGeo.attributes.position.needsUpdate = true;
+    moteGeo.attributes.aAlpha.needsUpdate = true;
+    moteGeo.attributes.aVisible.needsUpdate = true;
 
     /* Update blooms */
     for (let i = 0; i < BLOOM_COUNT; i++) {
@@ -721,13 +561,13 @@ import * as THREE from 'three';
         b.age += dt;
         if (b.age >= b.life) {
           b.active = false;
-          bPos[i * 3] = 9999;
+          bPositions[i * 3] = 9999;
           bAge[i] = 0;
           bActive[i] = 0;
         } else {
-          bPos[i * 3] = b.x;
-          bPos[i * 3 + 1] = b.y;
-          bPos[i * 3 + 2] = b.z;
+          bPositions[i * 3] = b.x;
+          bPositions[i * 3 + 1] = b.y;
+          bPositions[i * 3 + 2] = b.z;
           bAge[i] = b.age / b.life;
           bActive[i] = 1;
         }
@@ -737,84 +577,64 @@ import * as THREE from 'three';
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
 
-    /* Subtle camera idle drift */
-    camera.position.x = camBase.x + Math.sin(clock * 0.06) * 0.8;
-    camera.position.y = camBase.y + Math.cos(clock * 0.05) * 0.35;
-    camera.position.z = camBase.z + Math.sin(clock * 0.04) * 0.5;
-    camera.lookAt(
-      camTarget.x + Math.sin(clock * 0.03) * 0.3,
-      camTarget.y,
-      camTarget.z
-    );
-
     renderer.render(scene, camera);
   }
 
   /* ===== Static frame for reduced motion ===== */
   function drawStatic() {
-    clock = 3.0;
-    surfaceMat.uniforms.uTime.value = clock;
-
-    /* Seed several captures on the surface */
-    const seeds = [
-      [-12, -8, 0], [4, 6, 0], [14, -4, 0], [22, 8, 0],
-      [-4, 12, 0], [10, -10, 0], [-16, 4, 0], [28, 0, 0]
-    ];
-    for (let s = 0; s < seeds.length; s++) {
-      const sx = seeds[s][0];
-      const sz = seeds[s][1];
-      const sy = waveHeight(sx, sz, clock);
-      boostSurfaceAt(sx, sz, 0.92);
-      spawnBloom(sx, sy + 0.15, sz);
-      blooms[s].age = 0.15 + Math.random() * 0.35;
+    clock = 4.0;
+    for (let i = 0; i < SURF_COUNT; i++) {
+      sPositions[i * 3 + 1] = fabricHeight(baseX[i], baseZ[i], clock);
     }
 
-    /* Update bloom buffers */
+    const seeds = [
+      [6, -8], [14, 2], [22, -6], [30, 4], [10, 6], [18, -12], [4, 0], [26, -2]
+    ];
+    for (let s = 0; s < seeds.length; s++) {
+      const sx = seeds[s][0], sz = seeds[s][1];
+      const sy = fabricHeight(sx, sz, clock);
+      boostSurfaceAt(sx, sz, 1.0);
+      spawnBloom(sx, sy + 0.15, sz);
+      blooms[s].age = 0.2 + Math.random() * 0.3;
+    }
     for (let i = 0; i < BLOOM_COUNT; i++) {
       const b = blooms[i];
       if (b.active) {
-        bPos[i * 3] = b.x;
-        bPos[i * 3 + 1] = b.y;
-        bPos[i * 3 + 2] = b.z;
+        bPositions[i * 3] = b.x;
+        bPositions[i * 3 + 1] = b.y;
+        bPositions[i * 3 + 2] = b.z;
         bAge[i] = b.age / b.life;
         bActive[i] = 1;
       }
     }
 
-    /* Place floating pollutants in center/right sky */
-    for (let i = 0; i < POLL_COUNT; i++) {
-      const p = pollutants[i];
-      if (i < seeds.length) {
-        p.state = 'captured';
-        p.azure = 1;
-        p.x = seeds[i][0];
-        p.z = seeds[i][1];
-        p.y = waveHeight(p.x, p.z, clock);
+    for (let i = 0; i < MOTE_COUNT; i++) {
+      const p = motes[i];
+      if (i < 6) {
+        p.x = seeds[i][0] + 1;
+        p.z = seeds[i][1] + 1;
+        p.y = fabricHeight(p.x, p.z, clock) + 3 + Math.random() * 2;
       } else {
-        p.state = 'float';
-        p.x = -4 + Math.random() * 36;
-        p.z = -12 + Math.random() * 24;
-        p.y = 7 + Math.random() * 8;
+        p.x = -30 + (Math.random() * 0.5 + Math.random() * 0.5) * 64;
+        p.z = -26 + Math.random() * 32;
+        p.y = 6 + Math.random() * 8;
       }
-      pPos[i * 3] = p.x;
-      pPos[i * 3 + 1] = p.y;
-      pPos[i * 3 + 2] = p.z;
-      pAzure[i] = p.azure;
-      pSize[i] = p.size;
-      pAlpha[i] = p.state === 'captured' ? p.alpha : p.alpha * 0.65;
+      mPositions[i * 3] = p.x;
+      mPositions[i * 3 + 1] = p.y;
+      mPositions[i * 3 + 2] = p.z;
+      mVisible[i] = 1;
+      mAlpha[i] = p.alpha;
     }
 
-    surfaceGeo.attributes.aBoost.needsUpdate = true;
-    pollGeo.attributes.position.needsUpdate = true;
-    pollGeo.attributes.aAzure.needsUpdate = true;
-    pollGeo.attributes.aSize.needsUpdate = true;
-    pollGeo.attributes.aAlpha.needsUpdate = true;
+    surfaceGeo.attributes.position.needsUpdate = true;
+    surfaceGeo.attributes.aAzure.needsUpdate = true;
+    moteGeo.attributes.position.needsUpdate = true;
+    moteGeo.attributes.aAlpha.needsUpdate = true;
+    moteGeo.attributes.aVisible.needsUpdate = true;
     bloomGeo.attributes.position.needsUpdate = true;
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
 
-    camera.position.copy(camBase);
-    camera.lookAt(camTarget);
     renderer.render(scene, camera);
   }
 
@@ -835,9 +655,7 @@ import * as THREE from 'three';
 
   /* ===== Init ===== */
   resize();
-  if (reduced) {
-    drawStatic();
-  }
+  if (reduced) drawStatic();
 
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(function (entries) {
