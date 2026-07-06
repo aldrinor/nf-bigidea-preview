@@ -424,7 +424,7 @@ body {
   <div class="chrome chrome-top-left">
     <div>
       <h2>Airborne bacterial infections are <span class="em">surging across America</span></h2>
-      <p class="caption">Reported cases — Legionnaires', whooping cough, TB, and meningococcal — fell during COVID and have surged back to a decade high, about 52,000 in 2024. Pneumonia, the biggest, hospitalizes roughly 1.5 million Americans a year.</p>
+      <p class="caption">Reported cases — Legionnaires', whooping cough, TB, and meningococcal — have surged in the last few years, to about 52,000 in 2024. Pneumonia, the biggest, hospitalizes roughly 1.5 million Americans a year.</p>
     </div>
   </div>
 
@@ -612,12 +612,10 @@ function setupYearTicks(){
   container.innerHTML = '';
   if (years.length < 2) return;
   const lastIdx = years.length - 1;
-  const tickYears = [2014, 2016, 2018, 2020, 2022, 2024];
-  for (let i=0;i<tickYears.length;i++){
-    const y = tickYears[i];
-    const idx = years.indexOf(y);
-    if (idx < 0) continue;
-    const pct = idx / lastIdx * 100;
+  const step = years.length <= 6 ? 1 : 2;
+  for (let i=0;i<years.length;i+=step){
+    const y = years[i];
+    const pct = i / lastIdx * 100;
     const tick = document.createElement('span');
     tick.className = 'tc-tick';
     if (pct <= 2){ tick.style.left = '0'; tick.style.transform = 'none'; }
@@ -638,7 +636,7 @@ async function loadData(){
     ]);
     const geo = await geoResp.json();
     tsData = await tsResp.json();
-    years = tsData.years || [];
+    years = (tsData.years || []).slice(-3); // last 3 years — same recent window as the wildfire/fungi maps
 
     if (years.length){
       currentYearIdx = years.length - 1;
