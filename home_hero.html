@@ -174,7 +174,8 @@ section{
     line-height:1.6;
     margin-bottom:clamp(16px,2.5vh,22px);
     color:var(--ink);
-  }
+  }
+
   .advocacy-link{
     font-size:16px;
     line-height:1.4;
@@ -192,7 +193,8 @@ section{
     font-size:17px;
     line-height:1.5;
     margin-bottom:18px;
-  }
+  }
+
 }
 @media (max-height: 680px) and (min-width: 881px){
   .eyebrow{
@@ -207,7 +209,8 @@ section{
     font-size:16px;
     line-height:1.45;
     margin-bottom:14px;
-  }
+  }
+
   .advocacy-link{font-size:16px;}
 }
 </style>
@@ -235,75 +238,23 @@ section{
   var canvas = document.getElementById('cloud-canvas');
   if (!section || !canvas) return;
   var ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
   var dpr = 1, W = 0, H = 0;
-  var particles = [];
   var reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
   var isMobile = (window.innerWidth <= 880);
   var running = false, rafId = 0, lastT = 0;
 
-  // Round 3: BIGGER + RICHER — 14000-18000 desktop, ~40% less on mobile
-  var COUNT = isMobile ? 9000 : 16000;
+  /* ---- Charged-surface state ---- */
+  var surfaceX = 0;       // base x of the membrane
+  var surfaceAmp = 0;     // wave amplitude
+  var pollutants = [];    // grey dots drifting toward surface
+  var blooms = [];        // azure energy blooms at capture points
+  var surfaceEnergy = []; // 0..1 per sample — shimmering azure edge
+  var surfacePoints = []; // cached {x,y} per sample
 
-  // Cloud geometry — LARGE, sprawling, fills right ~55% of stage, 60-70% viewport height tall
-  var cloudCX = 0, cloudCY = 0, maxRadius = 0;
-  var chargeX = 0, chargeY = 0;
-  var textBoundaryX = 0, textBoundaryY = 0;
-  var coreRadius = 0;
-
-  // Organic silhouette: 3 overlapping gaussian lobes at offset centers
-  var lobes = [];
-
-  function seedLobes() {
-    lobes.length = 0;
-    // 3 overlapping lobes at slightly offset centers for organic, asymmetric nebula silhouette
-    var baseR = maxRadius;
-    lobes.push({
-      ox: 0, oy: 0,
-      rx: baseR * 1.0, ry: baseR * 0.92,
-      weight: 1.0,
-      rot: 0.15
-    });
-    lobes.push({
-      ox: baseR * 0.28, oy: -baseR * 0.22,
-      rx: baseR * 0.78, ry: baseR * 0.85,
-      weight: 0.75,
-      rot: -0.4
-    });
-    lobes.push({
-      ox: -baseR * 0.20, oy: baseR * 0.30,
-      rx: baseR * 0.72, ry: baseR * 0.68,
-      weight: 0.65,
-      rot: 0.6
-    });
-
-    // Low-frequency angular harmonics for soft irregular outline
-    harmonics.length = 0;
-    var n = 6;
-    for (var i = 0; i < n; i++) {
-      harmonics.push({
-        freq: 2 + Math.floor(Math.random() * 5),
-        phase: Math.random() * Math.PI * 2,
-        amp: 0.04 + Math.random() * 0.07
-      });
-    }
-  }
-
-  var harmonics = [];
-
-  function silhouetteScale(angle) {
-    var s = 1;
-    for (var i = 0; i < harmonics.length; i++) {
-      var h = harmonics[i];
-      s += h.amp * Math.sin(h.freq * angle + h.phase);
-    }
-    return Math.max(0.55, s);
-  }
-
-  // Gaussian via sum of 4 randoms: (r1+r2+r3+r4-2)/2 -> range ~-1..1, bell-shaped
-  function gaussian() {
-    return (Math.random() + Math.random() + Math.random() + Math.random() - 2) / 2;
-  }
+  var POLLUTANT_COUNT = 0;
+  var SURFACE_SAMPLES = 120;
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -316,128 +267,168 @@ section{
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     isMobile = (window.innerWidth <= 880);
-    COUNT = isMobile ? 9000 : 16000;
-
-    // Cloud center at x=72% (right-weighted), vertically centered
-    cloudCX = W * 0.72;
-    cloudCY = H * 0.50;
-
-    // LARGE cloud: 60-70% of viewport height tall, sprawling to fill right ~55% of stage
-    // Use the larger dimension to ensure it fills generously
-    maxRadius = Math.max(280, Math.min(W, H) * 0.42);
-    // On wide screens, let it stretch even more horizontally
-    if (!isMobile && W > 1000) {
-      maxRadius = Math.max(maxRadius, H * 0.38);
-    }
-
-    chargeX = cloudCX;
-    chargeY = cloudCY;
-    coreRadius = maxRadius * 0.16;
-    textBoundaryX = W * 0.42;
-    textBoundaryY = H * 0.55;
-
-    seedLobes();
+    POLLUTANT_COUNT = isMobile ? 110 : 320;
+    surfaceX = isMobile ? W * 0.58 : W * 0.65;
+    surfaceAmp = Math.max(6, Math.min(W, H) * 0.022);
+    surfaceEnergy = new Array(SURFACE_SAMPLES).fill(0);
+    surfacePoints = new Array(SURFACE_SAMPLES);
   }
 
-  function makeParticle() {
-    // Pick one of the 3 overlapping lobes (weighted) for organic multi-center silhouette
-    var lobeIdx;
-    var rrand = Math.random();
-    if (rrand < 0.45) lobeIdx = 0;
-    else if (rrand < 0.75) lobeIdx = 1;
-    else lobeIdx = 2;
-    var lobe = lobes[lobeIdx];
+  /* ---- Surface geometry: layered sine waves, slow & organic ---- */
+  function surfaceXAt(y, t) {
+    var ph = y / Math.max(1, H);
+    return surfaceX
+      + Math.sin(ph * Math.PI * 2.2 + t * 0.00038) * surfaceAmp
+      + Math.sin(ph * Math.PI * 3.7 + t * 0.00021 + 1.3) * surfaceAmp * 0.45
+      + Math.sin(ph * Math.PI * 1.3 + t * 0.00013 + 2.1) * surfaceAmp * 0.30;
+  }
 
-    // Gaussian clustering within the chosen lobe: dense core, feathering to sparse edges
-    var gx = gaussian(); // -1..1 bell
-    var gy = gaussian(); // -1..1 bell
-
-    // angle for organic silhouette perturbation
-    var angle = Math.atan2(gy, gx);
-    var sil = silhouetteScale(angle);
-
-    // sqrt/pow bias so core is densely packed, edges sparse
-    var radialBias = Math.pow(Math.abs(gx * gx + gy * gy), 0.5);
-    var radial = Math.pow(Math.random(), 0.45) * sil;
-
-    // Apply lobe rotation
-    var cosR = Math.cos(lobe.rot);
-    var sinR = Math.sin(lobe.rot);
-    var lx = gx * lobe.rx * radial;
-    var ly = gy * lobe.ry * radial;
-    var rx = lx * cosR - ly * sinR;
-    var ry = lx * sinR + ly * cosR;
-
-    var x = cloudCX + lobe.ox + rx;
-    var y = cloudCY + lobe.oy + ry;
-
-    // distance from the main charge epicenter
-    var dx = x - cloudCX, dy = y - cloudCY;
-    var dist = Math.sqrt(dx * dx + dy * dy);
-    var normDist = Math.min(1, dist / maxRadius);
-
-    // SIZE by distance: core 2-3px, edge <1px
-    var size;
-    if (normDist < 0.12) {
-      size = 2.0 + Math.random() * 1.0;       // core 2.0–3.0
-    } else if (normDist < 0.30) {
-      size = 1.4 + Math.random() * 0.8;       // mid 1.4–2.2
-    } else if (normDist < 0.60) {
-      size = 0.8 + Math.random() * 0.6;       // outer-mid 0.8–1.4
-    } else {
-      size = 0.4 + Math.random() * 0.5;       // edge 0.4–0.9
-    }
-
-    // ALPHA by distance: core opaque, edge fades — dark ink dots at ~0.75-0.9 in core
-    var a;
-    if (normDist < 0.12) {
-      a = 0.65 + Math.random() * 0.25;        // core 0.65–0.90
-    } else if (normDist < 0.30) {
-      a = 0.50 + Math.random() * 0.25;        // mid 0.50–0.75
-    } else if (normDist < 0.60) {
-      a = 0.25 + Math.random() * 0.20;        // outer 0.25–0.45
-    } else {
-      a = 0.08 + Math.random() * 0.14;        // edge 0.08–0.22
-    }
-
+  /* ---- Pollutant factory ---- */
+  function makePollutant(initial) {
+    var y = Math.random() * H;
+    var x = initial ? Math.random() * surfaceX : (-15 - Math.random() * 90);
     return {
       x: x, y: y,
-      vx: 0, vy: 0,
-      r: size,
-      a: a,
-      baseA: a,
+      vx: 0.30 + Math.random() * 0.90,
+      vy: (Math.random() - 0.5) * 0.10,
+      r: 1.5 + Math.random() * 1.5,
+      a: 0.26 + Math.random() * 0.36,
       phase: Math.random() * Math.PI * 2,
-      driftSpeed: 0.00004 + Math.random() * 0.00008,
-      inwardBias: 0.003 + Math.random() * 0.008,
-      recycleAt: 5000 + Math.random() * 10000,
-      age: Math.random() * 8000,
-      lobeIdx: lobeIdx
+      wobble: 0.3 + Math.random() * 0.7,
+      state: 'drift',      // drift → pressing → caught → neutralized
+      pressT: 0,
+      pressDuration: 0,
+      captureT: 0,
+      hue: 0               // 0 = grey, 1 = azure
     };
   }
 
-  function initParticles() {
-    particles.length = 0;
-    for (var i = 0; i < COUNT; i++) particles.push(makeParticle());
+  function initPollutants() {
+    pollutants.length = 0;
+    for (var i = 0; i < POLLUTANT_COUNT; i++) pollutants.push(makePollutant(true));
   }
 
-  function inTextZone(x, y) {
-    if (isMobile) return y < textBoundaryY;
-    return x < textBoundaryX;
-  }
-
-  function colorForDist(normDist) {
-    // core (normDist small) -> blue accent charged; outer -> dark ink pollutant
-    if (normDist < 0.10) {
-      return { blue: true, alphaMul: 0.85 };
-    } else if (normDist < 0.20) {
-      // transition: mostly blue with some ink
-      return { blue: Math.random() < 0.72, alphaMul: 0.82 };
-    } else if (normDist < 0.32) {
-      return { blue: Math.random() < 0.28, alphaMul: 0.90 };
+  /* ---- Energy field: boost around a y-position ---- */
+  function boostEnergy(y) {
+    var idx = Math.floor((y / Math.max(1, H)) * (SURFACE_SAMPLES - 1));
+    idx = Math.max(0, Math.min(SURFACE_SAMPLES - 1, idx));
+    for (var k = -5; k <= 5; k++) {
+      var ki = idx + k;
+      if (ki >= 0 && ki < SURFACE_SAMPLES) {
+        var falloff = 1 - Math.abs(k) / 6;
+        surfaceEnergy[ki] = Math.min(1, surfaceEnergy[ki] + 0.42 * falloff);
+      }
     }
-    return { blue: false, alphaMul: 1 };
   }
 
+  /* ---- Bloom factory: azure radial glow at capture point ---- */
+  function spawnBloom(x, y) {
+    blooms.push({
+      x: x, y: y,
+      age: 0,
+      life: 700 + Math.random() * 600,
+      maxR: 10 + Math.random() * 20,
+      coreR: 1.4 + Math.random() * 1.6
+    });
+  }
+
+  /* ---- Cache surface sample points ---- */
+  function updateSurfacePoints(t) {
+    for (var i = 0; i < SURFACE_SAMPLES; i++) {
+      var sy = (i / (SURFACE_SAMPLES - 1)) * H;
+      surfacePoints[i] = { x: surfaceXAt(sy, t), y: sy };
+    }
+  }
+
+  /* ---- Draw the faint blue-grey membrane (layered strokes) ---- */
+  function drawSurfaceBase() {
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    for (var i = 0; i < SURFACE_SAMPLES; i++) {
+      var sp = surfacePoints[i];
+      if (i === 0) ctx.moveTo(sp.x, sp.y);
+      else ctx.lineTo(sp.x, sp.y);
+    }
+
+    ctx.strokeStyle = 'rgba(128,150,178,0.045)';
+    ctx.lineWidth = 30;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(128,150,178,0.075)';
+    ctx.lineWidth = 15;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(108,135,168,0.13)';
+    ctx.lineWidth = 3.5;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(98,125,158,0.20)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  /* ---- Draw the shimmering azure energy along the surface ---- */
+  function drawSurfaceEnergy(t) {
+    for (var e = 0; e < SURFACE_SAMPLES; e++) {
+      var energy = surfaceEnergy[e];
+      if (energy < 0.025) continue;
+      var sp = surfacePoints[e];
+      var shimmer = 0.80 + 0.20 * Math.sin(t * 0.003 + e * 0.42);
+      var rad = 5 + energy * 24;
+      var a = energy * shimmer;
+
+      var grad = ctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, rad);
+      grad.addColorStop(0, 'rgba(27,123,255,' + (a * 0.42) + ')');
+      grad.addColorStop(0.35, 'rgba(27,123,255,' + (a * 0.16) + ')');
+      grad.addColorStop(1, 'rgba(27,123,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(sp.x, sp.y, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    /* Bright thin core line where energy is strong */
+    ctx.lineCap = 'round';
+    var drawing = false;
+    ctx.beginPath();
+    for (var e2 = 0; e2 < SURFACE_SAMPLES; e2++) {
+      if (surfaceEnergy[e2] < 0.18) { drawing = false; continue; }
+      var sp2 = surfacePoints[e2];
+      if (!drawing) { ctx.moveTo(sp2.x, sp2.y); drawing = true; }
+      else { ctx.lineTo(sp2.x, sp2.y); }
+    }
+    ctx.strokeStyle = 'rgba(90,155,255,0.45)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+  }
+
+  /* ---- Draw a single bloom (azure radial glow + bright core) ---- */
+  function drawBloom(bl) {
+    var lifeT = bl.age / bl.life;
+    var ease = 1 - Math.pow(1 - lifeT, 2.5);
+    var rad = bl.maxR * ease;
+    var alpha = 1 - lifeT;
+
+    var grad = ctx.createRadialGradient(bl.x, bl.y, 0, bl.x, bl.y, rad);
+    grad.addColorStop(0, 'rgba(27,123,255,' + (alpha * 0.48) + ')');
+    grad.addColorStop(0.22, 'rgba(27,123,255,' + (alpha * 0.20) + ')');
+    grad.addColorStop(1, 'rgba(27,123,255,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(bl.x, bl.y, rad, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* bright azure core dot */
+    var coreA = (1 - lifeT) * 0.88;
+    ctx.fillStyle = 'rgba(150,195,255,' + coreA + ')';
+    ctx.beginPath();
+    ctx.arc(bl.x, bl.y, bl.coreR * (1 - lifeT * 0.3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  /* ---- Main animation loop ---- */
   function loop(t) {
     if (!running) return;
     rafId = requestAnimationFrame(loop);
@@ -445,101 +436,161 @@ section{
     lastT = t;
     var f = dt / 16;
 
-    // clear — no fake glow, just bg
+    /* clear */
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = '#edf0f2';
     ctx.fillRect(0, 0, W, H);
 
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      p.age += dt;
+    updateSurfacePoints(t);
 
-      // slow organic drift — gentle diagonal drift
-      var nx = Math.cos(p.y * 0.0040 + t * p.driftSpeed + p.phase);
-      var ny = Math.sin(p.x * 0.0040 + t * p.driftSpeed * 0.9 + p.phase * 1.3);
-      p.vx += nx * 0.008;
-      p.vy += ny * 0.008;
+    /* decay energy field */
+    var decay = Math.pow(0.982, f);
+    for (var e = 0; e < SURFACE_SAMPLES; e++) surfaceEnergy[e] *= decay;
 
-      // gentle inward pull toward the charge core
-      var dx = chargeX - p.x, dy = chargeY - p.y;
-      var d = Math.sqrt(dx * dx + dy * dy) || 1;
-      var pull = p.inwardBias * (1 + (1 - Math.min(1, d / maxRadius)) * 1.8);
-      p.vx += (dx / d) * pull;
-      p.vy += (dy / d) * pull;
+    /* draw faint membrane */
+    drawSurfaceBase();
 
-      // damping
-      p.vx *= 0.92;
-      p.vy *= 0.92;
-      p.x += p.vx * f;
-      p.y += p.vy * f;
+    /* update + draw pollutants */
+    for (var i = 0; i < pollutants.length; i++) {
+      var p = pollutants[i];
 
-      // recompute distance from epicenter
-      var cdx = p.x - cloudCX, cdy = p.y - cloudCY;
-      var cd = Math.sqrt(cdx * cdx + cdy * cdy);
-      var normDist = Math.min(1, cd / maxRadius);
+      if (p.state === 'drift') {
+        p.vy += Math.sin(t * 0.0007 + p.phase) * 0.007 * p.wobble;
+        p.vy *= 0.96;
+        p.x += p.vx * f;
+        p.y += p.vy * f;
+        if (p.y < 0) p.y = 0;
+        if (p.y > H) p.y = H;
 
-      var col = colorForDist(normDist);
-      var drawAlpha = p.baseA * col.alphaMul;
-      if (inTextZone(p.x, p.y)) drawAlpha *= 0.12;
-      if (drawAlpha <= 0.004) continue;
-
-      ctx.fillStyle = col.blue
-        ? 'rgba(27,123,255,' + drawAlpha + ')'
-        : 'rgba(31,35,39,' + drawAlpha + ')';
-
-      var s = p.r;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, s / 2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // recycle: when a dot drifts deep into the core and aged, respawn at edge
-      if (cd < coreRadius * 0.7 && p.age > p.recycleAt) {
-        var lobe = lobes[p.lobeIdx];
-        var ggx = gaussian();
-        var ggy = gaussian();
-        var ang = Math.atan2(ggy, ggx);
-        var sil = silhouetteScale(ang);
-        var edgeRadial = Math.pow(Math.random(), 0.45) * sil * (0.75 + Math.random() * 0.15);
-        var llx = ggx * lobe.rx * edgeRadial;
-        var lly = ggy * lobe.ry * edgeRadial;
-        var cosR = Math.cos(lobe.rot);
-        var sinR = Math.sin(lobe.rot);
-        p.x = cloudCX + lobe.ox + (llx * cosR - lly * sinR);
-        p.y = cloudCY + lobe.oy + (llx * sinR + lly * cosR);
-        p.vx = 0; p.vy = 0;
-        p.age = 0;
-        p.recycleAt = 5000 + Math.random() * 10000;
+        var sx = surfaceXAt(p.y, t);
+        if (p.x >= sx - 1.5) {
+          p.state = 'pressing';
+          p.pressT = 0;
+          p.pressDuration = 70 + Math.random() * 300;
+          p.x = sx - 1.5;
+        }
+      } else if (p.state === 'pressing') {
+        p.pressT += dt;
+        var sxp = surfaceXAt(p.y, t);
+        p.x = sxp - 1.5 - Math.sin(p.pressT * 0.022) * 1.2;
+        p.y += Math.sin(t * 0.004 + p.phase) * 0.18 * f;
+        if (p.y < 0) p.y = 0;
+        if (p.y > H) p.y = H;
+        if (p.pressT > p.pressDuration) {
+          p.state = 'caught';
+          p.captureT = t;
+          var capX = surfaceXAt(p.y, t);
+          boostEnergy(p.y);
+          spawnBloom(capX, p.y);
+        }
+      } else if (p.state === 'caught') {
+        var el = t - p.captureT;
+        p.hue = Math.min(1, el / 260);
+        var sxc = surfaceXAt(p.y, t);
+        p.x = sxc - 1.5;
+        if (el > 260) {
+          p.state = 'neutralized';
+          p.captureT = t;
+        }
+      } else if (p.state === 'neutralized') {
+        var ageN = (t - p.captureT) / 520;
+        if (ageN >= 1) {
+          pollutants[i] = makePollutant(false);
+          continue;
+        }
+        p.hue = 1;
+        var sxn = surfaceXAt(p.y, t);
+        p.x = sxn - 1.5 + ageN * 4;
       }
+
+      /* draw pollutant */
+      var drawA = p.a;
+      var cr, cg, cb;
+      if (p.state === 'drift' || p.state === 'pressing') {
+        cr = 31; cg = 35; cb = 39;
+        if (!isMobile && p.x < W * 0.42) drawA *= 0.10;
+      } else {
+        cr = Math.round(31 + (27 - 31) * p.hue);
+        cg = Math.round(35 + (123 - 35) * p.hue);
+        cb = Math.round(39 + (255 - 39) * p.hue);
+        if (p.state === 'caught') drawA *= 1 - p.hue * 0.25;
+        if (p.state === 'neutralized') drawA *= (1 - (t - p.captureT) / 520);
+      }
+
+      if (drawA <= 0.008) continue;
+      ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + drawA + ')';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    /* draw shimmering azure energy over surface */
+    drawSurfaceEnergy(t);
+
+    /* draw + update blooms on top */
+    for (var bi = blooms.length - 1; bi >= 0; bi--) {
+      var bl = blooms[bi];
+      bl.age += dt;
+      if (bl.age >= bl.life) { blooms.splice(bi, 1); continue; }
+      drawBloom(bl);
     }
   }
 
+  /* ---- Static frame for prefers-reduced-motion ---- */
   function drawStatic() {
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = '#edf0f2';
     ctx.fillRect(0, 0, W, H);
 
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      var cdx = p.x - cloudCX, cdy = p.y - cloudCY;
-      var cd = Math.sqrt(cdx * cdx + cdy * cdy);
-      var normDist = Math.min(1, cd / maxRadius);
+    var t = 1400;
+    updateSurfacePoints(t);
 
-      var col = colorForDist(normDist);
-      var drawAlpha = p.baseA * col.alphaMul * 0.95;
-      if (inTextZone(p.x, p.y)) drawAlpha *= 0.12;
-      if (drawAlpha <= 0.004) continue;
+    /* seed energy at several points for a beautiful still frame */
+    var seeds = [0.10, 0.22, 0.36, 0.48, 0.61, 0.74, 0.87, 0.95];
+    for (var s = 0; s < seeds.length; s++) {
+      var idx = Math.floor(seeds[s] * (SURFACE_SAMPLES - 1));
+      for (var k = -5; k <= 5; k++) {
+        var ki = idx + k;
+        if (ki >= 0 && ki < SURFACE_SAMPLES) {
+          surfaceEnergy[ki] = Math.max(surfaceEnergy[ki], 0.68 * (1 - Math.abs(k) / 6));
+        }
+      }
+      var sy = seeds[s] * H;
+      var sx = surfaceXAt(sy, t);
+      blooms.push({ x: sx, y: sy, age: 180, life: 1600, maxR: 18, coreR: 2.2 });
+    }
 
-      ctx.fillStyle = col.blue
-        ? 'rgba(27,123,255,' + drawAlpha + ')'
-        : 'rgba(31,35,39,' + drawAlpha + ')';
+    drawSurfaceBase();
 
-      var s = p.r;
+    /* draw some grey pollutants drifting */
+    for (var i = 0; i < pollutants.length; i++) {
+      var p = pollutants[i];
+      var drawA = p.a;
+      if (!isMobile && p.x < W * 0.42) drawA *= 0.10;
+      if (drawA <= 0.008) continue;
+      ctx.fillStyle = 'rgba(31,35,39,' + drawA + ')';
       ctx.beginPath();
-      ctx.arc(p.x, p.y, s / 2, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    /* draw a few neutralized azure dots at the surface */
+    var neutralSeeds = [0.14, 0.40, 0.58, 0.82];
+    for (var ns = 0; ns < neutralSeeds.length; ns++) {
+      var ny = neutralSeeds[ns] * H;
+      var nx = surfaceXAt(ny, t) - 1.5;
+      ctx.fillStyle = 'rgba(27,123,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(nx, ny, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    drawSurfaceEnergy(t);
+
+    for (var bi2 = 0; bi2 < blooms.length; bi2++) drawBloom(blooms[bi2]);
   }
 
+  /* ---- Start / stop ---- */
   function start() {
     if (reduced) { drawStatic(); return; }
     if (!running) {
@@ -554,8 +605,9 @@ section{
     rafId = 0;
   }
 
+  /* ---- Init ---- */
   resize();
-  initParticles();
+  initPollutants();
   if (reduced) drawStatic();
 
   if ('IntersectionObserver' in window) {
@@ -580,10 +632,10 @@ section{
     if (rt) clearTimeout(rt);
     rt = setTimeout(function () {
       resize();
-      var nc = isMobile ? 9000 : 16000;
-      if (Math.abs(nc - COUNT) > 60) {
-        COUNT = nc;
-        initParticles();
+      var nc = isMobile ? 110 : 320;
+      if (Math.abs(nc - POLLUTANT_COUNT) > 20) {
+        POLLUTANT_COUNT = nc;
+        initPollutants();
       }
       if (reduced) drawStatic();
     }, 180);
