@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NanoFlashing — C-POLAR Technologies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.5;
+}
+.wrap{
+  width:100%;
+  max-width:1240px;
+  margin:0 auto;
+  padding:0 clamp(24px, 6vw, 96px);
+}
+
+/* Top bar */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:rgba(237,240,242,0.85);
+  backdrop-filter:saturate(140%) blur(10px);
+  -webkit-backdrop-filter:saturate(140%) blur(10px);
+  border-bottom:1px solid var(--hair);
+}
+.topbar .wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  height:64px;
+}
+.brand{
+  font-family:var(--stack); font-weight:600; font-size:15px;
+  color:var(--headline-ink); letter-spacing:-0.01em;
+  display:flex; align-items:center; gap:10px;
+}
+.brand .dot{
+  width:9px; height:9px; border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 4px rgba(27,123,255,0.14);
+}
+.nav-links{ display:flex; gap:28px; }
+.nav-links a{
+  font-size:14px; color:var(--ink); text-decoration:none;
+  transition:color .18s ease;
+}
+.nav-links a:hover{ color:var(--accent); }
+
+/* Section base */
+.section{
+  position:relative;
+  padding:clamp(96px, 14vh, 160px) 0;
+  border-top:1px solid var(--hair);
+}
+.section:first-of-type{ border-top:none; }
+
+.eyebrow, .kicker{
+  font-family:var(--stack);
+  font-size:14px;
+  font-weight:500;
+  color:var(--muted);
+  letter-spacing:0.01em;
+  margin-bottom:28px;
+}
+.kicker{ color:var(--accent); }
+
+h1, h2, h3{
+  font-family:var(--stack);
+  color:var(--headline-ink);
+  font-weight:600;
+  letter-spacing:-0.022em;
+  line-height:1.08;
+}
+
+/* HERO */
+.hero{ padding:clamp(120px, 16vh, 180px) 0 clamp(96px, 14vh, 140px); }
+.hero .eyebrow{ margin-bottom:40px; }
+.hero h1{
+  font-size:clamp(56px, 11vw, 148px);
+  font-weight:700;
+  letter-spacing:-0.045em;
+  line-height:0.92;
+  margin-bottom:36px;
+}
+.hero h1 .tm{
+  font-size:0.32em; vertical-align:super; font-weight:500;
+  color:var(--muted); letter-spacing:0; margin-left:0.04em;
+}
+.hero .sub{
+  max-width:680px;
+  font-size:clamp(18px, 1.6vw, 22px);
+  line-height:1.55;
+  color:var(--ink);
+  margin-bottom:44px;
+}
+.cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
+.btn{
+  font-family:var(--stack);
+  font-size:15px; font-weight:500;
+  padding:13px 22px;
+  border-radius:8px;
+  text-decoration:none;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:transform .15s ease, background .18s ease, color .18s ease, border-color .18s ease;
+  cursor:pointer;
+  border:1px solid transparent;
+}
+.btn-primary{
+  background:var(--accent); color:#fff;
+}
+.btn-primary:hover{ background:#0f6bf0; }
+.btn-ghost{
+  background:transparent; color:var(--ink);
+  border-color:var(--hair);
+}
+.btn-ghost:hover{ border-color:var(--ink); }
+
+/* BIG IDEA */
+.idea{ text-align:center; }
+.idea .wrap{ max-width:920px; }
+.idea h2{
+  font-size:clamp(34px, 5.4vw, 68px);
+  font-weight:600;
+  letter-spacing:-0.03em;
+  line-height:1.05;
+  margin-bottom:32px;
+}
+.idea p{
+  font-size:clamp(18px, 1.5vw, 21px);
+  line-height:1.6;
+  color:var(--ink);
+  max-width:720px;
+  margin:0 auto 36px;
+}
+.ghost-link{
+  font-family:var(--stack);
+  font-size:16px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color .18s ease, border-color .18s ease;
+}
+.ghost-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
+
+/* PROVEN */
+.proven .wrap{ max-width:1080px; }
+.proven .head{ margin-bottom:64px; }
+.proven h2{
+  font-size:clamp(30px, 4.2vw, 52px);
+  font-weight:600;
+  letter-spacing:-0.028em;
+  line-height:1.1;
+}
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:1px;
+  background:var(--hair);
+  border:1px solid var(--hair);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:40px;
+}
+.stat-cell{
+  background:var(--bg);
+  padding:clamp(28px, 3.4vw, 44px) clamp(24px, 2.4vw, 36px);
+  display:flex; flex-direction:column; gap:14px;
+}
+.stat-num{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:clamp(34px, 3.6vw, 52px);
+  line-height:1;
+  letter-spacing:-0.02em;
+  color:var(--headline-ink);
+}
+.stat-num.accent{ color:var(--accent); }
+.stat-num.red{ color:var(--red); }
+.stat-label{
+  font-family:var(--stack);
+  font-size:14px;
+  font-weight:500;
+  color:var(--muted);
+  line-height:1.45;
+  letter-spacing:0.005em;
+}
+.stat-sub{
+  font-family:var(--stack);
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.5;
+  margin-top:2px;
+}
+.compare{
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+.compare .vs{
+  font-family:var(--stack); font-size:12px; color:var(--muted);
+  font-weight:500;
+}
+
+/* PIPELINE */
+.pipeline .wrap{ max-width:1180px; }
+.pipeline .head{ margin-bottom:56px; }
+.pipeline h2{
+  font-size:clamp(30px, 4.2vw, 52px);
+  font-weight:600;
+  letter-spacing:-0.028em;
+  line-height:1.1;
+}
+.vert-grid{
+  display:grid;
+  grid-template-columns:repeat(6, 1fr);
+  gap:16px;
+  margin-bottom:40px;
+}
+.vert-card{
+  border:1px solid var(--hair);
+  border-radius:14px;
+  padding:28px 24px 26px;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  min-height:220px;
+  transition:border-color .2s ease, transform .2s ease;
+}
+.vert-card:hover{ border-color:rgba(27,123,255,0.35); }
+.vert-card.lead{
+  grid-column:span 2;
+  background:#fff;
+  border-color:rgba(27,123,255,0.25);
+  box-shadow:0 1px 0 rgba(27,123,255,0.04), 0 8px 28px -18px rgba(27,123,255,0.25);
+}
+.vert-card.std{ grid-column:span 1; }
+.vert-name{
+  font-family:var(--stack);
+  font-size:20px;
+  font-weight:600;
+  color:var(--headline-ink);
+  letter-spacing:-0.015em;
+  margin-bottom:14px;
+}
+.vert-card.lead .vert-name{ font-size:26px; }
+.vert-desc{
+  font-family:var(--stack);
+  font-size:14px;
+  line-height:1.5;
+  color:var(--ink);
+  margin-bottom:auto;
+  padding-bottom:20px;
+}
+.pill{
+  align-self:flex-start;
+  font-family:var(--stack);
+  font-size:12px;
+  font-weight:500;
+  padding:5px 11px;
+  border-radius:999px;
+  letter-spacing:0.01em;
+}
+.pill.proven{
+  background:rgba(27,123,255,0.10);
+  color:var(--accent);
+  border:1px solid rgba(27,123,255,0.22);
+}
+.pill.rd{
+  background:transparent;
+  color:var(--muted);
+  border:1px solid var(--hair);
+}
+.pipeline .footnote{
+  font-size:15px;
+  color:var(--muted);
+  line-height:1.55;
+  max-width:680px;
+}
+
+/* BUILD */
+.build .wrap{ max-width:920px; }
+.build h2{
+  font-size:clamp(30px, 4.2vw, 52px);
+  font-weight:600;
+  letter-spacing:-0.028em;
+  line-height:1.1;
+  margin-bottom:28px;
+}
+.build p{
+  font-size:clamp(18px, 1.5vw, 21px);
+  line-height:1.6;
+  color:var(--ink);
+  max-width:680px;
+  margin-bottom:36px;
+}
+
+/* CLOSE */
+.close{ text-align:center; border-top:none; padding:clamp(120px, 18vh, 200px) 0 clamp(96px, 14vh, 140px); }
+.close .wrap{ max-width:880px; }
+.close h2{
+  font-size:clamp(40px, 6vw, 84px);
+  font-weight:600;
+  letter-spacing:-0.035em;
+  line-height:1.02;
+  margin-bottom:24px;
+}
+.close p{
+  font-size:clamp(18px, 1.5vw, 22px);
+  color:var(--muted);
+  line-height:1.55;
+  margin-bottom:44px;
+}
+.close .cta-row{ justify-content:center; }
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--hair);
+  padding:56px 0 48px;
+}
+footer .wrap{ display:flex; flex-direction:column; gap:36px; }
+.foot-nav{
+  display:flex; gap:28px; flex-wrap:wrap;
+}
+.foot-nav a{
+  font-size:14px; color:var(--ink); text-decoration:none;
+  transition:color .18s ease;
+}
+.foot-nav a:hover{ color:var(--accent); }
+.foot-legal{
+  font-size:12.5px;
+  line-height:1.65;
+  color:var(--muted);
+  max-width:760px;
+}
+.foot-bottom{
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:12px;
+  padding-top:24px;
+  border-top:1px solid var(--hair);
+}
+.foot-bottom .brand{ font-size:14px; }
+.foot-bottom .copy{ font-size:12.5px; color:var(--muted); }
+
+/* Responsive */
+@media (max-width: 880px){
+  .nav-links{ display:none; }
+  .hero h1{ font-size:clamp(48px, 14vw, 84px); }
+  .stat-grid{ grid-template-columns:1fr; }
+  .vert-grid{ grid-template-columns:1fr; }
+  .vert-card.lead, .vert-card.std{ grid-column:span 1; }
+  .vert-card.lead .vert-name{ font-size:22px; }
+  .close h2{ font-size:clamp(36px, 10vw, 56px); }
+  .foot-bottom{ flex-direction:column; align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>C-POLAR Technologies</div>
+    <nav class="nav-links">
+      <a href="#science">The Science</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#platform">Platform</a>
+      <a href="#partner">Partner</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1. HERO -->
+  <section class="section hero" id="home">
+    <div class="wrap">
+      <div class="eyebrow">C-POLAR Technologies — a health science platform company</div>
+      <h1>NanoFlashing<span class="tm">™</span></h1>
+      <p class="sub">A patented permanent positive polarity (3P) technology, engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#evidence">See it proven</a>
+        <a class="btn btn-ghost" href="#platform">Explore the platform</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. BIG IDEA -->
+  <section class="section idea" id="science">
+    <div class="wrap">
+      <h2>Most pollutants carry a negative charge.</h2>
+      <p>The microbes and smoke in the air, the PFAS in water, the biofilm on a surface — completely different problems that mostly share one trait: a negative charge. A permanent positive charge is what pulls them in.</p>
+      <a class="ghost-link" href="#science">See the science</a>
+    </div>
+  </section>
+
+  <!-- 3. PROVEN -->
+  <section class="section proven" id="evidence">
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker">Proven, not promised.</div>
+        <h2>Air is where we proved it.</h2>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="compare">
+            <span class="stat-num accent">−95.44%</span>
+            <span class="vs">vs.</span>
+            <span class="stat-num red">+2,092%</span>
+          </div>
+          <div class="stat-label">Living Airborne Particles at the NanoFlashing Vent</div>
+          <div class="stat-sub">A 260-day hospital trial. The conventional filter, shown in red, increased airborne bioburden over the same period.</div>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num">441</span>
+          <div class="stat-label">Buildings Across 7 Countries</div>
+          <div class="stat-sub">Independently measured in the field.</div>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num">31</span>
+          <div class="stat-label">Scientists Across 16 Research Institutes</div>
+          <div class="stat-sub">Peer-reviewed in Microbiology Spectrum.</div>
+        </div>
+      </div>
+      <a class="ghost-link" href="#evidence">See the evidence</a>
+    </div>
+  </section>
+
+  <!-- 4. PIPELINE -->
+  <section class="section pipeline" id="platform">
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker">One charge. Five verticals.</div>
+        <h2>A platform, not a product.</h2>
+      </div>
+      <div class="vert-grid">
+        <div class="vert-card lead">
+          <div class="vert-name">Air</div>
+          <div class="vert-desc">Field-measured cleaner air in hospitals, airports, and homes.</div>
+          <span class="pill proven">Proven</span>
+        </div>
+        <div class="vert-card std">
+          <div class="vert-name">Water</div>
+          <div class="vert-desc">Capturing charged contaminants — PFAS, dyes, nitrate.</div>
+          <span class="pill rd">In R&amp;D</span>
+        </div>
+        <div class="vert-card std">
+          <div class="vert-name">Personal Protective Wear (PPW™)</div>
+          <div class="vert-desc">The charge engineered into protective fabrics.</div>
+          <span class="pill rd">In R&amp;D</span>
+        </div>
+        <div class="vert-card std">
+          <div class="vert-name">Food Packaging</div>
+          <div class="vert-desc">Films that resist microbial growth by physical action.</div>
+          <span class="pill rd">In R&amp;D</span>
+        </div>
+        <div class="vert-card std">
+          <div class="vert-name">Medical Devices</div>
+          <div class="vert-desc">Charged materials for clinical settings.</div>
+          <span class="pill rd">In R&amp;D</span>
+        </div>
+      </div>
+      <p class="footnote">Proven first in air — the same permanent positive polarity engineered into each vertical.</p>
+    </div>
+  </section>
+
+  <!-- 5. BUILD IT IN -->
+  <section class="section build" id="partner">
+    <div class="wrap">
+      <h2>Build it into what you make.</h2>
+      <p>NanoFlashing is engineered into the media, fabrics, films, and surfaces manufacturers already make — a permanent property, built in once, carrying the one mark buyers ask for: made with NanoFlashing™.</p>
+      <a class="btn btn-primary" href="#partner">Partner with us</a>
+    </div>
+  </section>
+
+  <!-- 6. CLOSE -->
+  <section class="section close">
+    <div class="wrap">
+      <h2>NanoFlashing. The charged material.</h2>
+      <p>The world's first material with a permanent positive charge built in.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#evidence">See the evidence</a>
+        <a class="btn btn-ghost" href="#partner">Partner with us</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 7. FOOTER -->
+<footer>
+  <div class="wrap">
+    <nav class="foot-nav">
+      <a href="#home">Home</a>
+      <a href="#science">The Science</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#platform">Platform</a>
+      <a href="#partner">Partner</a>
+    </nav>
+    <p class="foot-legal">NanoFlashing™ is a permanent positive polarity engineered into the material; it works by physical action. The NanoFlashing™ Air Filter is a pesticide device under FIFRA §2(h) — the EPA does not register, approve, or endorse pesticide devices. Water, PPW, food packaging, and medical-device applications are in research and development. Institution and journal names indicate publication and affiliation only, not endorsement. © 2026 C-POLAR Technologies, Inc.</p>
+    <div class="foot-bottom">
+      <div class="brand"><span class="dot"></span>C-POLAR Technologies</div>
+      <div class="copy">NanoFlashing™ — a permanent positive polarity technology.</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
