@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — C-POLAR Technologies</title>
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  max-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.eyebrow{
+  font-family:var(--stack);
+  font-size:clamp(13px, 1.05vw, 15px);
+  line-height:1.4;
+  color:var(--muted);
+  letter-spacing:0;
+  margin-bottom:18px;
+  font-weight:400;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size:clamp(24px, 2.7vw, 34px);
+  line-height:1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:28px;
+}
+.headline > span{
+  display:block;
+}
+.headline em{
+  color:var(--accent);
+  font-style:normal;
+  font-weight:600;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width:440px;
+  font-size:19px;
+  line-height:1.55;
+  color:#1a1a1a;
+  margin-bottom:22px;
+}
+
+/* === Links === */
+.link-row{
+  display:flex;
+  align-items:center;
+  gap:28px;
+  flex-wrap:wrap;
+}
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+.quiet-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--muted);
+  text-decoration:none;
+  border-bottom:1px solid rgba(138,144,149,0.4);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.quiet-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+
+/* === Canvas === */
+#nf-charge-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  pointer-events:none;
+}
+
+/* === Mobile === */
+@media (max-width: 880px){
+  section{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    min-height:100vh;
+    max-height:none;
+    overflow:visible;
+  }
+  .text-col{
+    max-width:none;
+    width:100%;
+    align-items:stretch;
+    padding-left:clamp(20px,5vw,28px);
+    padding-right:clamp(20px,5vw,28px);
+    padding-top:clamp(20px,4vh,32px);
+    padding-bottom:8px;
+    flex:0 0 auto;
+  }
+  .eyebrow{
+    font-size:clamp(12px,3vw,14px);
+    margin-bottom:14px;
+  }
+  .headline{
+    font-size:clamp(26px,6.5vw,34px);
+    line-height:1.18;
+    margin-bottom:clamp(18px,3vh,24px);
+    color:var(--headline-ink);
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.6;
+    margin-bottom:clamp(16px,2.5vh,22px);
+    color:var(--ink);
+  }
+  .advocacy-link, .quiet-link{
+    font-size:16px;
+    line-height:1.4;
+  }
+  #nf-charge-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+    pointer-events:none;
+  }
+}
+
+/* === Short screens (1366×768 etc.) === */
+@media (max-height: 760px) and (min-width: 881px){
+  .eyebrow{
+    font-size:13px;
+    margin-bottom:14px;
+  }
+  .headline{
+    font-size:clamp(26px, 2.6vw, 34px);
+    margin-bottom:22px;
+  }
+  .body-text{
+    font-size:17px;
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+}
+@media (max-height: 680px) and (min-width: 881px){
+  .eyebrow{
+    font-size:12px;
+    margin-bottom:10px;
+  }
+  .headline{
+    font-size:clamp(22px, 2.2vw, 28px);
+    margin-bottom:16px;
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.45;
+    margin-bottom:14px;
+  }
+  .advocacy-link, .quiet-link{
+    font-size:16px;
+  }
+}
+</style>
+</head>
+<body>
+
+<section id="section">
+  <canvas id="nf-charge-canvas"></canvas>
+
+  <div class="text-col">
+    <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
+
+    <h1 class="headline">
+      <span>NanoFlashing™</span>
+      <span><em>permanent positive polarity,</em> by design</span>
+    </h1>
+
+    <p class="body-text">
+      A patented permanent positive polarity (3P) technology, engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.
+    </p>
+
+    <div class="link-row">
+      <a class="advocacy-link" href="#proof">See it proven →</a>
+      <a class="quiet-link" href="#platform">Explore the platform →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var section = document.getElementById('section');
+  var canvas = document.getElementById('nf-charge-canvas');
+  if (!section || !canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  var dpr = 1, W = 0, H = 0;
+  var particles = [];
+  var running = false;
+  var rafId = 0;
+  var lastT = 0;
+  var reduced = false;
+  var resizeT = 0;
+  var hasFired = false;
+
+  var isMobile = (window.innerWidth <= 880);
+  var targetCount = isMobile ? 220 : 760;
+
+  // Charged zone — a calm vertical field on the right side
+  var zoneX = 0, zoneW = 0;
+
+  // ---------- Sprite pre-render (soft grey discs) ----------
+  var sprites = [];
+  function makeSprite(radius, blur, alpha) {
+    var size = Math.max(10, Math.ceil(radius * 2 + blur * 4));
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var cx = c.getContext('2d');
+    var r = size / 2;
+    var g = cx.createRadialGradient(r, r, 0, r, r, r);
+    g.addColorStop(0, 'rgba(180,187,192,' + (alpha * 0.9) + ')');
+    g.addColorStop(0.3, 'rgba(138,144,149,' + (alpha * 0.5) + ')');
+    g.addColorStop(0.7, 'rgba(138,144,149,' + (alpha * 0.15) + ')');
+    g.addColorStop(1, 'rgba(138,144,149,0)');
+    cx.fillStyle = g;
+    cx.fillRect(0, 0, size, size);
+    return c;
+  }
+  function buildSprites() {
+    sprites = [
+      makeSprite(0.8, 2.0, 0.85),
+      makeSprite(1.6, 3.5, 0.85),
+      makeSprite(2.8, 5.0, 0.85),
+      makeSprite(4.2, 6.5, 0.85)
+    ];
+  }
+
+  // ---------- Resize ----------
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    W = section.clientWidth;
+    H = section.clientHeight;
+    canvas.width = Math.max(1, Math.floor(W * dpr));
+    canvas.height = Math.max(1, Math.floor(H * dpr));
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#edf0f2';
+    ctx.fillRect(0, 0, W, H);
+
+    // Charged zone: right ~30% of the screen, a soft vertical band
+    if (isMobile) {
+      zoneX = W * 0.62;
+      zoneW = W * 0.30;
+    } else {
+      zoneX = W * 0.66;
+      zoneW = W * 0.26;
+    }
+  }
+
+  // ---------- Particle ----------
+  function makeParticle(initial) {
+    var layer = Math.random();
+    var spriteIdx, r, a, vx, vy;
+    if (layer < 0.35) {
+      spriteIdx = 0; r = 0.6 + Math.random() * 0.8; a = 0.14 + Math.random() * 0.10;
+    } else if (layer < 0.75) {
+      spriteIdx = 1; r = 1.2 + Math.random() * 1.2; a = 0.22 + Math.random() * 0.12;
+    } else if (layer < 0.90) {
+      spriteIdx = 2; r = 2.0 + Math.random() * 1.6; a = 0.26 + Math.random() * 0.12;
+    } else {
+      spriteIdx = 3; r = 3.0 + Math.random() * 2.0; a = 0.26 + Math.random() * 0.16;
+    }
+    vx = (Math.random() - 0.5) * 0.22;
+    vy = (Math.random() - 0.5) * 0.22;
+
+    var x, y;
+    if (initial) {
+      x = Math.random() * W;
+      y = Math.random() * H;
+    } else {
+      // spawn from the left edge, drifting in
+      x = -20 - Math.random() * 60;
+      y = Math.random() * H;
+    }
+
+    return {
+      x: x, y: y,
+      vx: vx, vy: vy,
+      r: r, baseA: a, a: a,
+      sprite: sprites[spriteIdx],
+      phase: Math.random() * Math.PI * 2,
+      freq: 0.0006 + Math.random() * 0.0014,
+      amp: 0.04 + Math.random() * 0.09,
+      captured: false,
+      fade: 0
+    };
+  }
+
+  function initParticles() {
+    particles.length = 0;
+    for (var i = 0; i < targetCount; i++) particles.push(makeParticle(true));
+  }
+
+  // ---------- Loop ----------
+  function loop(t) {
+    if (!running) return;
+    rafId = requestAnimationFrame(loop);
+    var dt = lastT ? Math.min((t - lastT) / 16.67, 3) : 1;
+    lastT = t;
+
+    if (reduced) return;
+
+    // translucent bg trail-wash
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(237,240,242,0.30)';
+    ctx.fillRect(0, 0, W, H);
+
+    // draw the calm blue charged zone (very faint)
+    drawChargedZone(t);
+
+    // draw particles
+    ctx.globalCompositeOperation = 'source-over';
+    var alive = 0;
+    var respawnBudget = 0;
+
+    var zoneCenter = zoneX + zoneW * 0.5;
+
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      if (p.fade >= 1) continue;
+      alive++;
+
+      // Organic flow (curl)
+      var fx = Math.cos(p.y * p.freq + t * 0.00018 + p.phase);
+      var fy = Math.sin(p.x * p.freq + t * 0.00015 + p.phase * 1.3);
+      p.vx += fx * p.amp * dt;
+      p.vy += fy * p.amp * dt;
+
+      // Gentle pull toward the charged zone center (rightward)
+      var dx = zoneCenter - p.x;
+      var d = Math.abs(dx);
+      // pull strength grows as particle approaches the zone
+      var pull = 0;
+      if (p.x < zoneX) {
+        // outside zone — gentle rightward drift, stronger when closer
+        var proximity = 1 - (p.x / zoneX); // 0 at left edge, 1 at zone edge
+        proximity = Math.max(0, Math.min(1, proximity));
+        pull = 0.012 + proximity * proximity * 0.05;
+        p.vx += pull * dt;
+      } else {
+        // inside zone — captured, slow drift toward center, fade out
+        p.vx += (dx / (Math.abs(dx) || 1)) * 0.03 * dt;
+        p.vy *= 0.96;
+        p.fade = Math.min(1, p.fade + 0.012 * dt);
+      }
+
+      // Damping
+      p.vx *= 0.985; p.vy *= 0.985;
+      var sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      var maxSp = 1.6;
+      if (sp > maxSp) { p.vx = p.vx / sp * maxSp; p.vy = p.vy / sp * maxSp; }
+
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+
+      // Recycle offscreen
+      if (p.x < -40) { p.x = W + 20; p.y = Math.random() * H; p.fade = 0; p.baseA = 0.14 + Math.random() * 0.10; }
+      else if (p.x > W + 40) { p.x = -20; p.y = Math.random() * H; p.fade = 0; }
+      if (p.y < -30) p.y = H + 20;
+      else if (p.y > H + 30) p.y = -20;
+
+      // Alpha: fade + left-column restraint (keep dust away from text)
+      var aa = p.baseA * (1 - p.fade);
+      if (p.x < W * 0.45) aa *= 0.55;
+      if (aa <= 0.004) continue;
+
+      ctx.globalAlpha = aa;
+      var sz = p.r * 7.5;
+      ctx.drawImage(p.sprite, p.x - sz / 2, p.y - sz / 2, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+
+    // Living trickle — keep population topped up
+    if (alive < targetCount) {
+      respawnBudget += 0.02 * dt;
+      while (respawnBudget >= 1 && alive < targetCount) {
+        respawnBudget--;
+        var np = makeParticle(false);
+        np.baseA *= 0.75;
+        particles.push(np);
+        alive++;
+        if (particles.length > targetCount * 1.15) {
+          for (var k = 0; k < particles.length; k++) {
+            if (particles[k].fade >= 1) { particles.splice(k, 1); break; }
+          }
+        }
+      }
+    }
+  }
+
+  // ---------- Calm blue charged zone ----------
+  function drawChargedZone(t) {
+    var cx = zoneX + zoneW * 0.5;
+    // very faint vertical gradient band
+    var grad = ctx.createLinearGradient(zoneX, 0, zoneX + zoneW, 0);
+    grad.addColorStop(0, 'rgba(27,123,255,0)');
+    grad.addColorStop(0.5, 'rgba(27,123,255,0.045)');
+    grad.addColorStop(1, 'rgba(27,123,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(zoneX, 0, zoneW, H);
+
+    // whisper-quiet pulsing field lines — a few faint vertical hairlines
+    var pulse = 0.5 + 0.5 * Math.sin(t * 0.0006);
+    ctx.strokeStyle = 'rgba(27,123,255,' + (0.035 + pulse * 0.025) + ')';
+    ctx.lineWidth = 1;
+    var lines = 5;
+    for (var i = 0; i < lines; i++) {
+      var lx = zoneX + (zoneW * (i + 0.5) / lines);
+      var wobble = Math.sin(t * 0.0004 + i * 1.3) * 6;
+      ctx.beginPath();
+      ctx.moveTo(lx + wobble, 0);
+      ctx.lineTo(lx - wobble, H);
+      ctx.stroke();
+    }
+
+    // soft central glow
+    var glowR = zoneW * 0.55;
+    var g = ctx.createRadialGradient(cx, H * 0.5, 0, cx, H * 0.5, glowR);
+    g.addColorStop(0, 'rgba(27,123,255,' + (0.06 + pulse * 0.03) + ')');
+    g.addColorStop(0.6, 'rgba(27,123,255,0.015)');
+    g.addColorStop(1, 'rgba(27,123,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - glowR, 0, glowR * 2, H);
+  }
+
+  // ---------- Static frame for reduced motion ----------
+  function drawStatic() {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#edf0f2';
+    ctx.fillRect(0, 0, W, H);
+
+    // faint charged zone
+    var grad = ctx.createLinearGradient(zoneX, 0, zoneX + zoneW, 0);
+    grad.addColorStop(0, 'rgba(27,123,255,0)');
+    grad.addColorStop(0.5, 'rgba(27,123,255,0.05)');
+    grad.addColorStop(1, 'rgba(27,123,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(zoneX, 0, zoneW, H);
+
+    var cx = zoneX + zoneW * 0.5;
+    var glowR = zoneW * 0.55;
+    var g = ctx.createRadialGradient(cx, H * 0.5, 0, cx, H * 0.5, glowR);
+    g.addColorStop(0, 'rgba(27,123,255,0.07)');
+    g.addColorStop(0.6, 'rgba(27,123,255,0.02)');
+    g.addColorStop(1, 'rgba(27,123,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - glowR, 0, glowR * 2, H);
+
+    // a few faint field lines
+    ctx.strokeStyle = 'rgba(27,123,255,0.04)';
+    ctx.lineWidth = 1;
+    var lines = 5;
+    for (var i = 0; i < lines; i++) {
+      var lx = zoneX + (zoneW * (i + 0.5) / lines);
+      ctx.beginPath();
+      ctx.moveTo(lx, 0);
+      ctx.lineTo(lx, H);
+      ctx.stroke();
+    }
+
+    // static dust
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var aa = p.baseA * 0.5;
+      if (p.x < W * 0.45) aa *= 0.55;
+      ctx.globalAlpha = aa;
+      var sz = p.r * 7.5;
+      ctx.drawImage(p.sprite, p.x - sz / 2, p.y - sz / 2, sz, sz);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ---------- Start / Stop ----------
+  function start() {
+    if (hasFired) return;
+    hasFired = true;
+    if (reduced) { drawStatic(); return; }
+    if (!running) {
+      running = true;
+      lastT = 0;
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  // ---------- Reduced motion ----------
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    reduced = true;
+  }
+
+  buildSprites();
+  resize();
+  initParticles();
+  if (reduced) drawStatic();
+
+  // ---------- IntersectionObserver ----------
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      var e = entries[0];
+      if (!e) return;
+      if (reduced) return;
+      if (e.isIntersecting && e.intersectionRatio >= 0.4) start();
+      else if (hasFired && running) stop();
+    }, { threshold: [0, 0.4, 1] });
+    io.observe(section);
+  }
+
+  // ---------- Visibility pause ----------
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop();
+    else if (hasFired && !reduced && !running) {
+      running = true; lastT = 0;
+      rafId = requestAnimationFrame(loop);
+    }
+  });
+
+  // ---------- Debounced resize ----------
+  window.addEventListener('resize', function () {
+    if (resizeT) clearTimeout(resizeT);
+    resizeT = setTimeout(function () {
+      resize();
+      var nm = (window.innerWidth <= 880);
+      var nt = nm ? 220 : 760;
+      if (Math.abs(nt - targetCount) > 50) {
+        targetCount = nt;
+        while (particles.length < targetCount) particles.push(makeParticle(false));
+      }
+      if (reduced) drawStatic();
+    }, 180);
+  });
+})();
+</script>
+</body>
+</html>
