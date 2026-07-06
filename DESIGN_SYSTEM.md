@@ -8,6 +8,17 @@ is a change to the whole system.
 
 Repo: `aldrinor/nf-bigidea-preview` → `C:\EPA\US\website_project\_deploy`.
 
+**How the locked design files fit together (one hierarchy, no duplicates):**
+- **This file (`DESIGN_SYSTEM.md`)** — the top-level constitution: voice, type, color, layout,
+  graphic/motion style, URL policy. Start here.
+- **`design_system/DESIGN_TEMPLATE.md`** — the deck/section TEMPLATE detail: chart conventions, the
+  dust-capture signature effect, deck iframe (`nf-active`) integration. Reference implementation to
+  copy = `wf_solution.html`.
+- **`design_system/design_tokens.css`** — the tokens + base component CSS in CODE. New pages link/copy it.
+
+On any conflict, the **LIVE locked deck wins** (e.g. the big stat is now `clamp(56px, 6vw, 96px)`/700
+after the 2026-07-05 consistency pass, superseding the template's older 52/92).
+
 ---
 
 ## 1. Voice & writing tone
