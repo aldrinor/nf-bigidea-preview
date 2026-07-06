@@ -390,8 +390,8 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <h2>Airborne bacterial infections are <em>climbing across America</em></h2>
-      <p class="caption">Reported cases — Legionnaires', whooping cough, TB, and meningococcal — have climbed from about 19,000 to 52,000 across the states since 2021. Pneumonia, the biggest, hospitalizes roughly 1.5 million Americans a year.</p>
+      <h2>Airborne bacterial infections are <em>surging across America</em></h2>
+      <p class="caption">Reported cases — Legionnaires', whooping cough, TB, and meningococcal — fell during COVID and have surged back to a decade high, about 52,000 in 2024. Pneumonia, the biggest, hospitalizes roughly 1.5 million Americans a year.</p>
     </div>
   </div>
 
@@ -558,9 +558,11 @@ async function loadStates(){
     // build ticks
     const ticks = document.getElementById('timeTicks');
     ticks.innerHTML = '';
-    yearsList.forEach(function(y){
+    yearsList.forEach(function(y, i){
       const s = document.createElement('span');
-      s.textContent = String(y);
+      // thin labels when there are many years so they don't crowd
+      const show = (yearsList.length <= 6) || (i % 2 === 0) || (i === yearsList.length - 1);
+      s.textContent = show ? String(y) : '';
       ticks.appendChild(s);
     });
     const slider = document.getElementById('timeSlider');
