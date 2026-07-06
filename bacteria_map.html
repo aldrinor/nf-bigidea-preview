@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drug-resistant MRSA across U.S. states — NanoFlashing</title>
+<title>Airborne Legionnaires' disease across U.S. states — NanoFlashing</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -301,13 +301,13 @@ body {
 
   <div class="chrome chrome-top-left">
     <div>
-      <h2>Drug-resistant MRSA reaches <em class="em">every U.S. state</em></h2>
-      <p class="caption">MRSA — a staph infection the frontline antibiotics can't beat — strikes hospital patients in every state, and some states carry far more than their share.</p>
+      <h2>Airborne Legionnaires' disease is <em class="em">climbing across America</em></h2>
+      <p class="caption">You catch Legionnaires' by breathing in mist from cooling towers, plumbing, and building air systems — and U.S. cases have risen about ninefold since 2000.</p>
     </div>
   </div>
 
   <div class="chrome chrome-legend">
-    <div class="legend-title">Drug-resistant MRSA</div>
+    <div class="legend-title">Legionnaires' per 100,000</div>
     <div class="legend-gradient"></div>
     <div class="legend-labels">
       <span>Lower</span>
@@ -342,7 +342,7 @@ L.control.zoom({ position: 'topright' }).addTo(map);
 
 // No basemap tiles — render only the colored state polygons on the --bg background.
 
-const RAMP_STOPS = [[0.316,'#f3cdc6'],[0.512,'#eea799'],[0.714,'#e87f6d'],[0.910,'#e4554a'],[1.106,'#e23b3b']];
+const RAMP_STOPS = [[0.63,'#f3cdc6'],[1.78,'#eea799'],[2.92,'#e87f6d'],[4.07,'#e4554a'],[5.21,'#e23b3b']];
 const NO_DATA_COLOR = '#d7dbde';
 
 let mrsaData = null;
@@ -394,8 +394,8 @@ function tooltipText(feature){
   const name = stateName(feature);
   const d = dataForState(name);
   if (!d || d.value == null) return name;
-  const ratio = (Math.round(d.value * 100) / 100).toFixed(2);
-  return name + ' — ' + ratio + ' vs. U.S. baseline · ' + d.observed + ' infections';
+  const rate = (Math.round(d.value * 100) / 100).toFixed(2);
+  return name + ' — ' + rate + ' per 100,000 · ' + d.cases + ' cases';
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
@@ -421,7 +421,7 @@ async function loadStates(){
   try {
     const [geoResp, dataResp] = await Promise.all([
       fetch('data/bacteria_map/us_states.geojson'),
-      fetch('data/bacteria_map/us_states_infection.json')
+      fetch('data/bacteria_map/us_states_legionella.json')
     ]);
     const geo = await geoResp.json();
     mrsaData = await dataResp.json();
@@ -452,7 +452,7 @@ async function loadStates(){
 // Source line — same style/position as reference
 (function buildSource(){
   const el = document.getElementById('chromeSource');
-  el.innerHTML = 'CDC — Antimicrobial Resistance & Patient Safety Portal, 2024';
+  el.innerHTML = 'CDC — National Notifiable Diseases Surveillance System, 2023';
 })();
 
 loadStates();

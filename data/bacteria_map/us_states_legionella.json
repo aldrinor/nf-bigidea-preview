@@ -1,0 +1,262 @@
+{
+ "Alabama": {
+  "value": 1.29,
+  "cases": 66,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Alaska": {
+  "value": 0.68,
+  "cases": 5,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Arizona": {
+  "value": 1.54,
+  "cases": 115,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Arkansas": {
+  "value": 1.73,
+  "cases": 53,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "California": {
+  "value": 1.8,
+  "cases": 706,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Colorado": {
+  "value": 2.24,
+  "cases": 132,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Connecticut": {
+  "value": 3.38,
+  "cases": 123,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Delaware": {
+  "value": 2.89,
+  "cases": 30,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "District of Columbia": {
+  "value": 3.49,
+  "cases": 24,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Florida": {
+  "value": 2.05,
+  "cases": 469,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Georgia": {
+  "value": 1.79,
+  "cases": 198,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Hawaii": {
+  "value": 1.32,
+  "cases": 19,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Idaho": {
+  "value": 1.52,
+  "cases": 30,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Illinois": {
+  "value": 3.32,
+  "cases": 420,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Indiana": {
+  "value": 3.9,
+  "cases": 268,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Iowa": {
+  "value": 1.77,
+  "cases": 57,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Kansas": {
+  "value": 1.46,
+  "cases": 43,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Kentucky": {
+  "value": 2.35,
+  "cases": 107,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Louisiana": {
+  "value": 1.42,
+  "cases": 65,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Maine": {
+  "value": 1.79,
+  "cases": 25,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Maryland": {
+  "value": 2.73,
+  "cases": 170,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Massachusetts": {
+  "value": 3.58,
+  "cases": 253,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Michigan": {
+  "value": 4.17,
+  "cases": 420,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Minnesota": {
+  "value": 2.36,
+  "cases": 136,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Mississippi": {
+  "value": 1.36,
+  "cases": 40,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Missouri": {
+  "value": 2.17,
+  "cases": 135,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Montana": {
+  "value": 1.77,
+  "cases": 20,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Nebraska": {
+  "value": 2.01,
+  "cases": 40,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Nevada": {
+  "value": 1.12,
+  "cases": 36,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "New Hampshire": {
+  "value": 3.0,
+  "cases": 42,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "New Jersey": {
+  "value": 2.87,
+  "cases": 269,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "New Mexico": {
+  "value": 1.6,
+  "cases": 34,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "New York": {
+  "value": 4.02,
+  "cases": 793,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "North Carolina": {
+  "value": 1.65,
+  "cases": 180,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "North Dakota": {
+  "value": 0.63,
+  "cases": 5,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Ohio": {
+  "value": 5.21,
+  "cases": 616,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Oklahoma": {
+  "value": 1.48,
+  "cases": 60,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Oregon": {
+  "value": 1.58,
+  "cases": 67,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Pennsylvania": {
+  "value": 2.87,
+  "cases": 373,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Rhode Island": {
+  "value": 4.98,
+  "cases": 55,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "South Carolina": {
+  "value": 2.82,
+  "cases": 152,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "South Dakota": {
+  "value": 1.85,
+  "cases": 17,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Tennessee": {
+  "value": 2.21,
+  "cases": 158,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Texas": {
+  "value": 1.39,
+  "cases": 426,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Utah": {
+  "value": 1.19,
+  "cases": 41,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Vermont": {
+  "value": 3.39,
+  "cases": 22,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Virginia": {
+  "value": 1.92,
+  "cases": 168,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Washington": {
+  "value": 1.67,
+  "cases": 131,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "West Virginia": {
+  "value": 3.73,
+  "cases": 66,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Wisconsin": {
+  "value": 3.57,
+  "cases": 212,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Wyoming": {
+  "value": 1.54,
+  "cases": 9,
+  "metric": "Legionnaires' cases per 100,000"
+ },
+ "Puerto Rico": {
+  "value": 0.19,
+  "cases": 6,
+  "metric": "Legionnaires' cases per 100,000"
+ }
+}
