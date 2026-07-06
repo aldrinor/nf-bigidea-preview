@@ -144,6 +144,22 @@ section{
   color: #1a1a1a;
 }
 
+/* === Advocacy link (matched to wf_solution) === */
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  margin-top:24px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+
 /* === Mobile ===
    Restructured: video is no longer a full-bleed background cropped to cover
    a (potentially very tall) text column. Instead it becomes a bounded
@@ -235,6 +251,7 @@ section{
     margin-bottom:12px;
   }
   .body-text:last-child{ margin-bottom:0; }
+  .advocacy-link{ font-size:16px; }
 }
 </style>
 </head>
@@ -268,6 +285,7 @@ section{
     <p class="body-text">
       Researchers at Massachusetts General Hospital and Harvard Medical School, in a study with funding from the U.S. National Institutes of Health, tested NanoFlashing the hard way. The standard mold test is gentle: a light dose of spores, laid on the material, left in still air, 28 days to see whether mold grows. This test challenged NanoFlashing with more than 100 million live, dry spores, driven in by fast-moving air in just 3 minutes — the way mold actually reaches a filter.
     </p>
+    <a class="advocacy-link" href="#advocacy">Advocacy →</a>
   </div>
 </section>
 
