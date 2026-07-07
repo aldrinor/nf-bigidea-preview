@@ -950,21 +950,8 @@ import * as THREE from 'three';
     dustGeo.attributes.aSize.needsUpdate = true;
     dustGeo.attributes.aAzure.needsUpdate = true;
 
-    /* Spawn ambient captures: 6-10 per second across full width */
-    captureSpawnTimer += dt;
-    if (captureSpawnTimer >= nextCaptureInterval) {
-      captureSpawnTimer = 0;
-      nextCaptureInterval = 0.1 + Math.random() * 0.067;
-      spawnCaptureMote(clock, false, mouseW, mStr);
-    }
-
-    /* Cursor-driven captures: ~3x more, tighter, faster */
-    cursorCaptureTimer += dt;
-    if (mStr > 0.15 && cursorCaptureTimer >= nextCursorCaptureInterval) {
-      cursorCaptureTimer = 0;
-      nextCursorCaptureInterval = (0.1 + Math.random() * 0.067) / 3.0;
-      spawnCaptureMote(clock, true, mouseW, mStr);
-    }
+    /* 3D surface-capture disabled — the neutralize is now the 2D dust falling onto the surface
+       and forming a soft azure (see the #dust-canvas script). Left the system in place, dormant. */
 
     /* Update capture motes */
     for (let i = 0; i < CAPTURE_COUNT; i++) {
@@ -1180,7 +1167,8 @@ import * as THREE from 'three';
 })();
 </script>
 
-<!-- Pollutant dust in the air — ported VERBATIM from act1.html so it matches exactly -->
+<!-- Pollutant dust: act1's dense grey grain, now FLOATING + FALLING onto the "+" surface;
+     on contact a soft, light azure forms and the mote vanishes, then respawns up top -->
 <script>
 (function () {
   'use strict';
@@ -1188,13 +1176,24 @@ import * as THREE from 'three';
   var cv = document.getElementById('dust-canvas');
   if (!cv) return;
   var ctx = cv.getContext('2d');
-  var W = 0, H = 0, DPR = 1;
-  var NB = 8, dustB = [];
+  var W = 0, H = 0, DPR = 1, HORIZON = 0;
+  var motes = [], blooms = [];
 
-  function mote() {
+  // one dust grain — act1's grey grain, plus a gentle fall and a landing depth on the surface band
+  function newMote(fromTop) {
     var ang = Math.random() * Math.PI * 2;
-    var sp = 0.18 + Math.random() * 0.32;
-    return { x: Math.random() * W, y: Math.random() * H, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r: 0.55 + Math.random() * 1.7 };
+    var sp = 0.12 + Math.random() * 0.22;
+    return {
+      x: Math.random() * W,
+      y: fromTop ? (-Math.random() * H * 0.18) : (Math.random() * HORIZON),
+      vx: Math.cos(ang) * sp,
+      vy: Math.abs(Math.sin(ang) * sp) * 0.25,
+      r: 0.55 + Math.random() * 1.7,
+      a: 0.08 + ((Math.random() * 8) | 0) * 0.045,   // act1's 8 depth-alpha buckets
+      landingY: HORIZON + Math.pow(Math.random(), 1.4) * (H * 0.99 - HORIZON),
+      state: 'float',
+      fade: 1
+    };
   }
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -1202,33 +1201,35 @@ import * as THREE from 'three';
     if (W === 0 || H === 0) return;
     cv.width = W * DPR; cv.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    var n = Math.round(Math.min(3800, W * H / 520));
-    dustB = [];
-    for (var b = 0; b < NB; b++) dustB.push({ a: 0.08 + b * 0.045, motes: [] });
-    for (var i = 0; i < n; i++) dustB[(Math.random() * NB) | 0].motes.push(mote());
+    HORIZON = H * 0.44;                                  // top of the "+" surface band, in screen space
+    var n = Math.round(Math.min(3800, W * H / 520));     // act1's exact density
+    motes = []; for (var i = 0; i < n; i++) motes.push(newMote(false));
+    blooms = [];
   }
-  function updateDust(dt) {
+  var GRAV = 0.012;   // gentle — motes float, then fall onto the surface
+  function update(dt) {
     var f = dt / 16.67;
-    for (var bk = 0; bk < dustB.length; bk++) {
-      var ms = dustB[bk].motes;
-      for (var j = 0; j < ms.length; j++) {
-        var d = ms[j];
+    for (var i = 0; i < motes.length; i++) {
+      var m = motes[i];
+      if (m.state === 'float') {
         if (!reduced) {
-          d.vx += (Math.random() - 0.5) * 0.018 * f;
-          d.vy += (Math.random() - 0.5) * 0.018 * f;
-          d.vx *= Math.pow(0.992, f); d.vy *= Math.pow(0.992, f);
-          var sp = Math.hypot(d.vx, d.vy);
-          if (sp < 0.12) {
-            if (sp < 1e-6) { var a = Math.random() * Math.PI * 2; d.vx = Math.cos(a) * 0.18; d.vy = Math.sin(a) * 0.18; }
-            else { var k = 0.18 / sp; d.vx *= k; d.vy *= k; }
-            sp = 0.18;
-          } else if (sp > 0.5) { var k2 = 0.5 / sp; d.vx *= k2; d.vy *= k2; sp = 0.5; }
-          d.x += d.vx * f; d.y += d.vy * f;
+          m.vx += (Math.random() - 0.5) * 0.016 * f;
+          m.vy += GRAV * f;
+          m.vx *= Math.pow(0.99, f);
+          if (m.vy > 0.85) m.vy = 0.85;                  // gentle terminal fall
+          m.x += m.vx * f; m.y += m.vy * f;
         }
-        if (d.x < -4) d.x = W + 4; else if (d.x > W + 4) d.x = -4;
-        if (d.y < -4) d.y = H + 4; else if (d.y > H + 4) d.y = -4;
+        if (m.x < -4) m.x = W + 4; else if (m.x > W + 4) m.x = -4;
+        if (m.y >= m.landingY) {                         // hit the "+" surface
+          m.state = 'hit'; m.y = m.landingY;
+          blooms.push({ x: m.x, y: m.y, age: 0, life: 0.65, size: 10 + Math.random() * 8 });
+        }
+      } else {                                           // hit -> soft fade, then respawn up top
+        m.fade -= dt / 280;
+        if (m.fade <= 0) motes[i] = newMote(true);
       }
     }
+    for (var b = blooms.length - 1; b >= 0; b--) { blooms[b].age += dt / 1000; if (blooms[b].age >= blooms[b].life) blooms.splice(b, 1); }
   }
   var moteSprite = document.createElement('canvas'); moteSprite.width = moteSprite.height = 18;
   (function () {
@@ -1237,20 +1238,30 @@ import * as THREE from 'three';
     g.addColorStop(0, 'rgba(60,64,72,0.95)'); g.addColorStop(0.45, 'rgba(60,64,72,0.55)'); g.addColorStop(1, 'rgba(60,64,72,0)');
     m.fillStyle = g; m.beginPath(); m.arc(9, 9, 9, 0, 6.2832); m.fill();
   })();
-  function drawDust() {
+  function draw() {
     ctx.clearRect(0, 0, W, H);
-    for (var bk = 0; bk < dustB.length; bk++) {
-      ctx.globalAlpha = dustB[bk].a;
-      var ms = dustB[bk].motes;
-      for (var j = 0; j < ms.length; j++) { var d = ms[j]; var s = d.r * 3.0; ctx.drawImage(moteSprite, d.x - s / 2, d.y - s / 2, s, s); }
+    for (var i = 0; i < motes.length; i++) {             // grey dust
+      var m = motes[i]; var s = m.r * 3.0;
+      ctx.globalAlpha = m.a * m.fade;
+      ctx.drawImage(moteSprite, m.x - s / 2, m.y - s / 2, s, s);
     }
     ctx.globalAlpha = 1;
+    for (var b = 0; b < blooms.length; b++) {            // soft, light azure at each surface contact
+      var bl = blooms[b], t = bl.age / bl.life;
+      var rad = bl.size * (0.55 + t * 1.0);
+      var al = (1 - t) * 0.26;
+      var g2 = ctx.createRadialGradient(bl.x, bl.y, 0, bl.x, bl.y, rad);
+      g2.addColorStop(0, 'rgba(126,180,255,' + al.toFixed(3) + ')');
+      g2.addColorStop(0.5, 'rgba(126,180,255,' + (al * 0.45).toFixed(3) + ')');
+      g2.addColorStop(1, 'rgba(126,180,255,0)');
+      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(bl.x, bl.y, rad, 0, 6.2832); ctx.fill();
+    }
   }
   var lastT = 0, running = true;
   function tick(t) {
     if (!running) return;
     var dt = Math.min(40, t - lastT); lastT = t;
-    updateDust(dt); drawDust();
+    update(dt); draw();
     requestAnimationFrame(tick);
   }
   resize();
