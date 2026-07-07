@@ -55,7 +55,7 @@ section{
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 66% 82% at 22% 50%, rgba(237,240,242,0.98) 0%, rgba(237,240,242,0.93) 50%, rgba(237,240,242,0.5) 72%, rgba(237,240,242,0) 90%);
+  background:radial-gradient(ellipse 58% 84% at 19% 50%, rgba(237,240,242,0.9) 0%, rgba(237,240,242,0.64) 46%, rgba(237,240,242,0.2) 70%, rgba(237,240,242,0) 84%);
 }
 
 .text-col{
@@ -83,14 +83,15 @@ section{
   margin-bottom:22px;
 }
 
-/* logo sized by WIDTH (fills the block, ~2x bigger); overflow crops the SVG's transparent padding */
+/* logo sized by WIDTH (fills the block, ~2x bigger); overflow crops the SVG's transparent padding.
+   negative margin cancels the SVG's baked left padding so the mark aligns to the writing's left edge */
 .logo-wrap{
   width:var(--block);
   height:clamp(66px, 8vw, 112px);
   overflow:hidden;
   display:flex;
   align-items:center;
-  margin-left:-1.2%;
+  margin-left:-7.4%;
   margin-bottom:26px;
 }
 .logo-wrap img{
@@ -99,45 +100,53 @@ section{
   display:block;
 }
 
-.body-text{
+/* both paragraphs share ONE size + font */
+.body-text, .cpolar-lead{
   width:var(--block);
   max-width:100%;
-  font-size:clamp(18px, 1.5vw, 22px);
+  font-size:clamp(17px, 1.35vw, 20px);
   line-height:1.55;
-  color:#1f2327;
 }
+.body-text{ color:#1f2327; }
 
-/* "what is C-POLAR" — the identity line + the five verticals, presented cleanly */
+/* "what is C-POLAR" — identity line + the five verticals, presented cleanly */
 .cpolar{
   width:var(--block);
   max-width:100%;
-  margin-top:30px;
-  padding-top:26px;
+  margin-top:26px;
+  padding-top:24px;
   border-top:1px solid var(--hair);
 }
-.cpolar-lead{
-  font-size:clamp(14px, 1.05vw, 16.5px);
-  line-height:1.62;
-  color:var(--muted);
-}
-.cpolar-lead em{ font-style:normal; font-weight:500; color:var(--ink); }
+.cpolar-lead{ color:#3a4046; }
+.cpolar-lead em{ font-style:normal; font-weight:600; color:var(--ink); }
+
+/* five verticals — equal-width rows, one standardized font, a cobalt "+" marker */
 .verticals{
   list-style:none;
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-  margin-top:16px;
+  margin-top:18px;
   padding:0;
+  width:var(--block);
+  max-width:100%;
+  border-top:1px solid var(--hair);
 }
 .verticals li{
-  font-family:var(--mono);
-  font-size:12px;
-  letter-spacing:0.02em;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:12px 2px;
+  border-bottom:1px solid var(--hair);
+  font-family:var(--stack);
+  font-size:clamp(15px, 1.15vw, 17px);
+  font-weight:450;
+  letter-spacing:0.002em;
   color:var(--ink);
-  border:1px solid var(--hair);
-  border-radius:999px;
-  padding:7px 13px;
-  white-space:nowrap;
+}
+.v-mark{
+  color:var(--accent);
+  font-weight:600;
+  width:14px;
+  text-align:center;
+  flex:0 0 14px;
 }
 
 .micro-label{
@@ -206,18 +215,17 @@ section{
   <div class="scrim"></div>
 
   <div class="text-col">
-    <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
     <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
     <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
 
     <div class="cpolar">
       <p class="cpolar-lead">C-POLAR Technologies, Inc. is a <em>Health Science Platform Company</em> built around its patented NanoFlashing™ technology. The platform has five primary application verticals:</p>
       <ul class="verticals">
-        <li>Air</li>
-        <li>Water</li>
-        <li>Personal Protective Wear (PPW™)</li>
-        <li>Food Packaging</li>
-        <li>Medical Devices</li>
+        <li><span class="v-mark">+</span><span class="v-name">Air</span></li>
+        <li><span class="v-mark">+</span><span class="v-name">Water</span></li>
+        <li><span class="v-mark">+</span><span class="v-name">Personal Protective Wear (PPW™)</span></li>
+        <li><span class="v-mark">+</span><span class="v-name">Food Packaging</span></li>
+        <li><span class="v-mark">+</span><span class="v-name">Medical Devices</span></li>
       </ul>
     </div>
   </div>
@@ -421,7 +429,7 @@ import * as THREE from 'three';
         float heightFactor = smoothstep(-1.0, 1.0, vHeight);
         vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
 
-        float baseAlpha = 0.32;
+        float baseAlpha = 0.58;
 
         // subtle firming on the swell: the raised "+" gently gather ink toward cobalt (no glow halo)
         float charge = clamp(vMouse, 0.0, 1.0);
