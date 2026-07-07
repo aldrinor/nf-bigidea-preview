@@ -207,24 +207,25 @@ import * as THREE from 'three';
   camera.position.copy(CAM_BASE);
   camera.lookAt(CAM_TARGET);
 
-  function sstep(e0, e1, x) {
-    const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
-    return t * t * (3 - 2 * t);
-  }
+  /* ===== Surface constants ===== */
+  const GRID_X = 150;
+  const GRID_Z = 40;
+  const SURF_W = 150;
+  const SURF_D = 26;
+  const Z_FAR = -1;
+  const SURF_COUNT = GRID_X * GRID_Z;
 
-  /* ===== Wave height — ONE slow breath, amplitude ~0.7, ~20s cycle ===== */
+  /* ===== Wave height — static curved dome + far-edge rise + slow breath ===== */
   function waveHeight(x, z, t) {
-    return Math.sin(x * 0.08 + z * 0.05 + t * 0.314) * 0.7;
+    var dome = -0.00044 * x * x;
+    var zNorm = (z - Z_FAR) / SURF_D;
+    var farRise = (1.0 - zNorm) * 3.0;
+    var und1 = Math.sin(x * 0.06 + t * 0.393) * 0.8;
+    var und2 = Math.sin(z * 0.04 + t * 0.314 + 1.5) * 0.8;
+    return dome + farRise + und1 + und2;
   }
 
   /* ===== Surface (charged membrane) ===== */
-  const GRID_X = 300;
-  const GRID_Z = 70;
-  const SURF_W = 150;
-  const SURF_D = 30;
-  const Z_FAR = -5;
-  const SURF_COUNT = GRID_X * GRID_Z;
-
   const surfaceGeo = new THREE.BufferGeometry();
   const sPositions = new Float32Array(SURF_COUNT * 3);
   const sBoosts = new Float32Array(SURF_COUNT);
@@ -249,7 +250,7 @@ import * as THREE from 'three';
     uniforms: {
       uTime: { value: 0 },
       uPixelRatio: { value: renderer.getPixelRatio() },
-      uSize: { value: 2.1 },
+      uSize: { value: 2.7 },
       uBaseColor: { value: new THREE.Color(0x5a6674) },
       uChargeColor: { value: new THREE.Color(0x1466e6) },
       uTipColor: { value: new THREE.Color(0x5aa0ff) },
@@ -277,7 +278,12 @@ import * as THREE from 'three';
       varying vec2 vDirZ;
 
       float waveHeight(float x, float z, float t) {
-        return sin(x * 0.08 + z * 0.05 + t * 0.314) * 0.7;
+        float dome = -0.00044 * x * x;
+        float zNorm = (z + 1.0) / 26.0;
+        float farRise = (1.0 - zNorm) * 3.0;
+        float und1 = sin(x * 0.06 + t * 0.393) * 0.8;
+        float und2 = sin(z * 0.04 + t * 0.314 + 1.5) * 0.8;
+        return dome + farRise + und1 + und2;
       }
 
       void main() {
@@ -288,12 +294,9 @@ import * as THREE from 'three';
         float mprox = uMouseStr * exp(-mdist * mdist / 120.0);
         vMouse = mprox;
 
-        /* NO cursor-driven vertical lift — plus stays tangent-FLAT everywhere */
-
         vHeight = pos.y;
         vRow = aRow;
         vWorldX = pos.x;
-
         vBoost = aBoost;
 
         vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
@@ -310,11 +313,9 @@ import * as THREE from 'three';
         vDirX = normalize((clipX.xy / clipX.w) - s0);
         vDirZ = normalize((clipZ.xy / clipZ.w) - s0);
 
-        /* uniform point-size increase only (max 1.12x), never vertical stretch */
         float sz = uSize * (1.0 + aBoost * 1.6 + mprox * 0.12);
         float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
-        /* CAP on-screen point size so near points don't blow up into streaks */
-        gl_PointSize = min(rawSize, 24.0 * uPixelRatio);
+        gl_PointSize = clamp(rawSize, 6.0 * uPixelRatio, 22.0 * uPixelRatio);
       }
     `,
     fragmentShader: `
@@ -337,22 +338,14 @@ import * as THREE from 'three';
         vec2 uv = gl_PointCoord - 0.5;
         uv.y = -uv.y;
 
-        /* Detect near-edge foreshortening: when the two tangent arms become
-           nearly parallel, both collapse toward vertical and the plus reads
-           as an "I". In that case, force one arm to screen-horizontal so a
-           clean plus always renders. Keep natural tangents otherwise. */
         vec2 dirX = vDirX;
         vec2 dirZ = vDirZ;
-        float parallel = abs(dot(normalize(vDirX), normalize(vDirZ)));
-        if (parallel > 0.5) {
-          dirZ = vec2(1.0, 0.0);
-        }
 
         vec2 perpX = vec2(-dirX.y, dirX.x);
         vec2 perpZ = vec2(-dirZ.y, dirZ.x);
         float alongX = dot(uv, dirX), distX = abs(dot(uv, perpX));
         float alongZ = dot(uv, dirZ), distZ = abs(dot(uv, perpZ));
-        float thick = 0.15;
+        float thick = 0.18;
         float arm   = 0.5;
         float armX = (1.0 - smoothstep(thick * 0.55, thick, distX)) *
                      (1.0 - smoothstep(arm - 0.07, arm, abs(alongX)));
@@ -371,15 +364,16 @@ import * as THREE from 'three';
         float tip = charge * smoothstep(0.6, 1.0, charge) * 0.5;
         color = mix(color, uTipColor, tip);
 
-        color = mix(color, uChargeColor, vBoost * 0.5);
+        color = mix(color, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9);
+        color = mix(color, uTipColor, smoothstep(0.45, 1.0, vBoost) * 0.55);
 
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.85);
 
-        float depthFade = smoothstep(115.0, 20.0, vDist);
-        float topFade = smoothstep(0.0, 0.22, vRow);
+        float depthFade = smoothstep(35.0, 12.0, vDist);
+        float topFade = smoothstep(0.0, 0.42, vRow);
         float leftFade = smoothstep(-60.0, -20.0, vWorldX);
-        float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.35 + charge * 0.4);
+        float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
         alpha *= (1.0 - fog * 0.7);
 
         gl_FragColor = vec4(color, alpha);
@@ -393,39 +387,36 @@ import * as THREE from 'three';
   surfacePoints.renderOrder = 0;
   scene.add(surfacePoints);
 
-  /* ===== Dense dust field — fine particulate, richer near surface ===== */
+  /* ===== Ambient dust field — dense drifting particulate ===== */
   let DUST_COUNT = 0;
   let dustParticles = [];
   let dustGeo, dustMat, dustPoints;
-  let dPos, dAlpha, dSize, dAzure, dBucket;
+  let dPos, dAlpha, dSize, dAzure;
 
   function buildDust() {
     const w = section.clientWidth;
     const h = section.clientHeight;
-    DUST_COUNT = Math.round(Math.min(5200, (w * h) / 360));
+    DUST_COUNT = Math.round(Math.min(3800, (w * h) / 520));
 
     dustParticles = [];
     for (let i = 0; i < DUST_COUNT; i++) {
       const bucket = Math.floor(Math.random() * 8);
-      /* distribute low: y from -2 to 14, concentrated near surface */
-      const yRand = Math.pow(Math.random(), 1.8);
+      const xRand = Math.random();
+      const x = (xRand - 0.5) * SURF_W;
+      const yRand = Math.random();
+      const y = -1 + yRand * 15;
       dustParticles.push({
-        x: (Math.random() - 0.5) * 150,
-        y: -2 + yRand * 16,
+        x: x,
+        y: y,
         z: Z_FAR - 4 + Math.random() * (SURF_D + 8),
         vx: (Math.random() - 0.5) * 0.05,
         vy: (Math.random() - 0.5) * 0.05,
         vz: (Math.random() - 0.5) * 0.05,
-        /* fine grains: small crisp */
-        size: 0.2 + Math.random() * 0.6,
+        size: 0.2 + Math.random() * 0.8,
         bucket: bucket,
-        /* richer opacity: 0.10 + bucket*0.045, range 0.10 -> 0.415 */
-        baseAlpha: 0.10 + bucket * 0.045,
-        alpha: 0.10 + bucket * 0.045,
+        baseAlpha: 0.08 + bucket * 0.045,
+        alpha: 0.08 + bucket * 0.045,
         azure: 0,
-        state: 'drift',
-        captureT: 0,
-        fadeT: 0,
         phase: Math.random() * Math.PI * 2,
       });
     }
@@ -434,7 +425,6 @@ import * as THREE from 'three';
     dAlpha = new Float32Array(DUST_COUNT);
     dSize = new Float32Array(DUST_COUNT);
     dAzure = new Float32Array(DUST_COUNT);
-    dBucket = new Float32Array(DUST_COUNT);
 
     for (let i = 0; i < DUST_COUNT; i++) {
       const p = dustParticles[i];
@@ -444,7 +434,6 @@ import * as THREE from 'three';
       dAlpha[i] = p.alpha;
       dSize[i] = p.size;
       dAzure[i] = 0;
-      dBucket[i] = p.bucket;
     }
 
     if (dustGeo) {
@@ -455,7 +444,6 @@ import * as THREE from 'three';
     dustGeo.setAttribute('aAlpha', new THREE.BufferAttribute(dAlpha, 1));
     dustGeo.setAttribute('aSize', new THREE.BufferAttribute(dSize, 1));
     dustGeo.setAttribute('aAzure', new THREE.BufferAttribute(dAzure, 1));
-    dustGeo.setAttribute('aBucket', new THREE.BufferAttribute(dBucket, 1));
 
     if (!dustMat) {
       dustMat = new THREE.ShaderMaterial({
@@ -464,42 +452,39 @@ import * as THREE from 'three';
           uGreyColor: { value: new THREE.Color(0x3a404a) },
           uAzureColor: { value: new THREE.Color(0x5aa0ff) },
           uFogColor: { value: new THREE.Color(0xedf0f2) },
-          uFogNear: { value: 20 },
-          uFogFar: { value: 90 },
+          uFogNear: { value: 15 },
+          uFogFar: { value: 70 },
         },
         vertexShader: `
           attribute float aAlpha;
           attribute float aSize;
           attribute float aAzure;
-          attribute float aBucket;
           uniform float uPixelRatio;
           varying float vAlpha;
           varying float vAzure;
           varying float vDist;
-          varying float vBucket;
           varying float vTopFade;
+          varying float vLeftFade;
 
           void main() {
             vAlpha = aAlpha;
             vAzure = aAzure;
-            vBucket = aBucket;
             vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
             vDist = -mvPos.z;
             gl_Position = projectionMatrix * mvPos;
-            /* fine grains: ~1-4px before dpr */
-            gl_PointSize = aSize * 1.2 * uPixelRatio * (120.0 / max(vDist, 1.0));
+            float rawSize = aSize * (120.0 / max(vDist, 1.0));
+            gl_PointSize = clamp(rawSize, 1.65, 6.75) * uPixelRatio;
 
-            /* vertical density gradient: dense near surface (low y), near-empty top 45% */
-            /* full opacity below y=2, fades to 0 by y=10 */
-            vTopFade = 1.0 - smoothstep(2.0, 10.0, position.y);
+            vTopFade = 1.0 - smoothstep(8.0, 14.0, position.y);
+            vLeftFade = smoothstep(-75.0, -30.0, position.x);
           }
         `,
         fragmentShader: `
           varying float vAlpha;
           varying float vAzure;
           varying float vDist;
-          varying float vBucket;
           varying float vTopFade;
+          varying float vLeftFade;
           uniform vec3 uGreyColor;
           uniform vec3 uAzureColor;
           uniform vec3 uFogColor;
@@ -511,15 +496,14 @@ import * as THREE from 'three';
             float d = length(uv);
             if (d > 0.5) discard;
 
-            /* sharpened sprite: tight core solid to ~0.3, then crisp fade to 0.5 */
-            float soft = 1.0 - smoothstep(0.3, 0.5, d);
+            float soft = 1.0 - smoothstep(0.2, 0.5, d);
 
             vec3 color = mix(uGreyColor, uAzureColor, vAzure);
 
             float fog = smoothstep(uFogNear, uFogFar, vDist);
             color = mix(color, uFogColor, fog * 0.75);
 
-            float alpha = soft * vAlpha * vTopFade * (1.0 - fog * 0.5);
+            float alpha = soft * vAlpha * vTopFade * vLeftFade * (1.0 - fog * 0.5);
             gl_FragColor = vec4(color, alpha);
           }
         `,
@@ -538,8 +522,110 @@ import * as THREE from 'three';
 
   buildDust();
 
-  /* ===== Blooms (azure neutralize glow) — count ~24, max-size ~20 ===== */
-  const BLOOM_COUNT = 24;
+  /* ===== Descending capture motes — pulled in + neutralized by surface ===== */
+  const CAPTURE_COUNT = 220;
+  const captureParticles = [];
+  let captureGeo, captureMat, capturePoints;
+  let cPos, cAlpha, cSize, cAzure;
+
+  for (let i = 0; i < CAPTURE_COUNT; i++) {
+    captureParticles.push({
+      x: 0, y: 0, z: 0,
+      targetX: 0, targetY: 0, targetZ: 0,
+      startY: 0,
+      state: 'idle',
+      startTime: 0,
+      fadeStart: 0,
+      fallDuration: 2.0,
+      azure: 0,
+      alpha: 0,
+      size: 0.9 + Math.random() * 0.8,
+      baseAlpha: 0.5 + Math.random() * 0.25,
+    });
+  }
+
+  cPos = new Float32Array(CAPTURE_COUNT * 3);
+  cAlpha = new Float32Array(CAPTURE_COUNT);
+  cSize = new Float32Array(CAPTURE_COUNT);
+  cAzure = new Float32Array(CAPTURE_COUNT);
+
+  for (let i = 0; i < CAPTURE_COUNT; i++) {
+    cPos[i * 3] = 9999;
+    cAlpha[i] = 0;
+    cSize[i] = captureParticles[i].size;
+    cAzure[i] = 0;
+  }
+
+  captureGeo = new THREE.BufferGeometry();
+  captureGeo.setAttribute('position', new THREE.BufferAttribute(cPos, 3));
+  captureGeo.setAttribute('aAlpha', new THREE.BufferAttribute(cAlpha, 1));
+  captureGeo.setAttribute('aSize', new THREE.BufferAttribute(cSize, 1));
+  captureGeo.setAttribute('aAzure', new THREE.BufferAttribute(cAzure, 1));
+
+  captureMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uGreyColor: { value: new THREE.Color(0x3a404a) },
+      uAzureColor: { value: new THREE.Color(0x5aa0ff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 15 },
+      uFogFar: { value: 70 },
+    },
+    vertexShader: `
+      attribute float aAlpha;
+      attribute float aSize;
+      attribute float aAzure;
+      uniform float uPixelRatio;
+      varying float vAlpha;
+      varying float vAzure;
+      varying float vDist;
+
+      void main() {
+        vAlpha = aAlpha;
+        vAzure = aAzure;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
+        float rawSize = aSize * (120.0 / max(vDist, 1.0));
+        gl_PointSize = clamp(rawSize, 1.65, 6.75) * uPixelRatio;
+      }
+    `,
+    fragmentShader: `
+      varying float vAlpha;
+      varying float vAzure;
+      varying float vDist;
+      uniform vec3 uGreyColor;
+      uniform vec3 uAzureColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+
+        float soft = 1.0 - smoothstep(0.2, 0.5, d);
+
+        vec3 color = mix(uGreyColor, uAzureColor, vAzure);
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.75);
+
+        float alpha = soft * vAlpha * (1.0 - fog * 0.5);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  capturePoints = new THREE.Points(captureGeo, captureMat);
+  capturePoints.renderOrder = 2;
+  scene.add(capturePoints);
+
+  /* ===== Blooms (azure neutralize glow) ===== */
+  const BLOOM_COUNT = 48;
   const bloomGeo = new THREE.BufferGeometry();
   const bPos = new Float32Array(BLOOM_COUNT * 3);
   const bAge = new Float32Array(BLOOM_COUNT);
@@ -548,9 +634,9 @@ import * as THREE from 'three';
 
   const blooms = [];
   for (let i = 0; i < BLOOM_COUNT; i++) {
-    blooms.push({ active: false, age: 0, life: 0, x: 0, y: 0, z: 0, maxSize: 0 });
+    blooms.push({ active: false, age: 0, life: 0.85, x: 0, y: 0, z: 0, maxSize: 0 });
     bPos[i * 3] = 9999;
-    bMaxSize[i] = 14 + Math.random() * 10;
+    bMaxSize[i] = 42 + Math.random() * 28;
   }
 
   bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
@@ -562,8 +648,8 @@ import * as THREE from 'three';
     uniforms: {
       uPixelRatio: { value: renderer.getPixelRatio() },
       uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 28 },
-      uFogFar: { value: 62 },
+      uFogNear: { value: 20 },
+      uFogFar: { value: 50 },
     },
     vertexShader: `
       attribute float aAge;
@@ -580,11 +666,11 @@ import * as THREE from 'three';
         gl_Position = projectionMatrix * mvPos;
 
         float t = aAge;
-        float size = aMaxSize * (0.12 + t * 0.88);
-        gl_PointSize = size * uPixelRatio * (120.0 / max(vDist, 1.0));
+        float size = aMaxSize * (0.2 + t * 0.8);
+        gl_PointSize = size * uPixelRatio;
 
         vAge = t;
-        vAlpha = aActive * (1.0 - t) * 0.5;
+        vAlpha = aActive * (1.0 - t) * 0.72;
       }
     `,
     fragmentShader: `
@@ -619,14 +705,14 @@ import * as THREE from 'three';
   });
 
   const bloomPoints = new THREE.Points(bloomGeo, bloomMat);
-  bloomPoints.renderOrder = 2;
+  bloomPoints.renderOrder = 3;
   scene.add(bloomPoints);
 
   /* ===== Surface boost at capture ===== */
   function boostSurfaceAt(x, z, amount) {
     const gx = Math.round(((x / SURF_W) + 0.5) * (GRID_X - 1));
-    const gz = Math.round(((z / SURF_D) + 0.5) * (GRID_Z - 1));
-    const radius = 5;
+    const gz = Math.round(((z - Z_FAR) / SURF_D) * (GRID_Z - 1));
+    const radius = 6;
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dz = -radius; dz <= radius; dz++) {
         const ix = gx + dx;
@@ -647,14 +733,43 @@ import * as THREE from 'three';
       if (!blooms[i].active) {
         blooms[i].active = true;
         blooms[i].age = 0;
-        blooms[i].life = 0.7;
+        blooms[i].life = 0.85;
         blooms[i].x = x;
         blooms[i].y = y;
         blooms[i].z = z;
-        blooms[i].maxSize = 14 + Math.random() * 10;
+        blooms[i].maxSize = 42 + Math.random() * 28;
         bMaxSize[i] = blooms[i].maxSize;
         return;
       }
+    }
+  }
+
+  /* ===== Spawn capture mote ===== */
+  function spawnCaptureMote(clock, nearCursor, mouseW, mStr) {
+    for (let i = 0; i < CAPTURE_COUNT; i++) {
+      const p = captureParticles[i];
+      if (p.state !== 'idle') continue;
+
+      if (nearCursor) {
+        p.targetX = mouseW.x + (Math.random() - 0.5) * 6;
+        p.targetZ = mouseW.y + (Math.random() - 0.5) * 6;
+        p.fallDuration = 0.8 + Math.random() * 0.4;
+      } else {
+        p.targetX = (Math.random() - 0.5) * SURF_W;
+        p.targetZ = Z_FAR + Math.random() * SURF_D;
+        p.fallDuration = 1.4 + Math.random() * 0.8;
+      }
+
+      p.targetY = waveHeight(p.targetX, p.targetZ, clock);
+      p.startY = p.targetY + 8 + Math.random() * 6;
+      p.x = p.targetX + (Math.random() - 0.5) * 3;
+      p.y = p.startY;
+      p.z = p.targetZ + (Math.random() - 0.5) * 3;
+      p.state = 'falling';
+      p.startTime = clock;
+      p.azure = 0;
+      p.alpha = p.baseAlpha;
+      return;
     }
   }
 
@@ -670,6 +785,7 @@ import * as THREE from 'three';
     camera.updateProjectionMatrix();
     surfaceMat.uniforms.uPixelRatio.value = dpr;
     if (dustMat) dustMat.uniforms.uPixelRatio.value = dpr;
+    captureMat.uniforms.uPixelRatio.value = dpr;
     bloomMat.uniforms.uPixelRatio.value = dpr;
     buildDust();
   }
@@ -704,7 +820,10 @@ import * as THREE from 'three';
   let rafId = 0;
   let lastT = 0;
   let clock = 0;
-  let ambientCaptureTimer = 0;
+  let captureSpawnTimer = 0;
+  let nextCaptureInterval = 0.13;
+  let cursorCaptureTimer = 0;
+  let nextCursorCaptureInterval = 0.04;
   let mouseStrVal = 0;
 
   function loop(t) {
@@ -714,11 +833,10 @@ import * as THREE from 'three';
     lastT = t;
     clock += dt;
 
-    /* Surface time — slow breath */
     surfaceMat.uniforms.uTime.value = clock;
 
     /* Decay boosts */
-    const decay = Math.pow(0.965, dt * 60);
+    const decay = Math.pow(0.945, dt * 60);
     for (let i = 0; i < SURF_COUNT; i++) {
       sBoosts[i] *= decay;
     }
@@ -731,7 +849,6 @@ import * as THREE from 'three';
       um.y += (mouseTarget.y - um.y) * Math.min(1, dt * 4.5);
     }
 
-    /* Strength ramp-in dt*3, ramp-out 1.2s ease */
     if (mousePresent) {
       mouseStrVal += (1 - mouseStrVal) * Math.min(1, dt * 3.0);
     } else {
@@ -739,149 +856,146 @@ import * as THREE from 'three';
     }
     surfaceMat.uniforms.uMouseStr.value = mouseStrVal;
 
-    /* Update dust — fine drifting field with pull + neutralize */
     const mouseW = surfaceMat.uniforms.uMouse.value;
     const mStr = mouseStrVal;
 
+    /* Update ambient dust — drifting only, always grey */
     for (let i = 0; i < DUST_COUNT; i++) {
       const p = dustParticles[i];
 
-      if (p.state === 'drift') {
-        p.vx += (Math.random() - 0.5) * 0.018;
-        p.vy += (Math.random() - 0.5) * 0.018;
-        p.vz += (Math.random() - 0.5) * 0.018;
-        p.vx *= 0.992; p.vy *= 0.992; p.vz *= 0.992;
+      p.vx += (Math.random() - 0.5) * 0.018;
+      p.vy += (Math.random() - 0.5) * 0.018;
+      p.vz += (Math.random() - 0.5) * 0.018;
+      p.vx *= 0.992; p.vy *= 0.992; p.vz *= 0.992;
 
-        const sp = Math.sqrt(p.vx*p.vx + p.vy*p.vy + p.vz*p.vz);
-        if (sp > 0.5) { const s = 0.5/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
-        if (sp < 0.12 && sp > 0.001) { const s = 0.12/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
+      const sp = Math.sqrt(p.vx*p.vx + p.vy*p.vy + p.vz*p.vz);
+      if (sp > 0.5) { const s = 0.5/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
+      if (sp < 0.12 && sp > 0.001) { const s = 0.12/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
 
-        p.vx += Math.sin(clock * 0.25 + p.phase) * 0.001 * dt * 60;
-        p.vz += Math.cos(clock * 0.20 + p.phase) * 0.001 * dt * 60;
+      p.vx += Math.sin(clock * 0.25 + p.phase) * 0.001 * dt * 60;
+      p.vz += Math.cos(clock * 0.20 + p.phase) * 0.001 * dt * 60;
 
-        if (mStr > 0.01) {
-          const dx = mouseW.x - p.x;
-          const dz = mouseW.y - p.z;
-          const dist = Math.sqrt(dx*dx + dz*dz);
-          const fieldR = 15.0;
-          if (dist < fieldR) {
-            const pull = mStr * (1 - dist / fieldR) * 0.025;
-            p.vx += (dx / Math.max(dist, 0.1)) * pull;
-            p.vz += (dz / Math.max(dist, 0.1)) * pull;
-            p.vy += -pull * 0.4;
-          }
+      /* Slight cursor pull on ambient dust */
+      if (mStr > 0.01) {
+        const dx = mouseW.x - p.x;
+        const dz = mouseW.y - p.z;
+        const dist = Math.sqrt(dx*dx + dz*dz);
+        const fieldR = 12.0;
+        if (dist < fieldR) {
+          const pull = mStr * (1 - dist / fieldR) * 0.015;
+          p.vx += (dx / Math.max(dist, 0.1)) * pull;
+          p.vz += (dz / Math.max(dist, 0.1)) * pull;
+          p.vy += -pull * 0.3;
         }
+      }
 
-        const surfH = waveHeight(p.x, p.z, clock);
-        const distSurf = p.y - surfH;
+      p.x += p.vx * dt * 60;
+      p.y += p.vy * dt * 60;
+      p.z += p.vz * dt * 60;
 
-        if (distSurf < 0.6 && distSurf > -0.5) {
-          const dxm = mouseW.x - p.x;
-          const dzm = mouseW.y - p.z;
-          const distM = Math.sqrt(dxm*dxm + dzm*dzm);
-          if (mStr > 0.1 && distM < 12.0) {
-            p.state = 'capture';
-            p.captureT = clock;
-          }
-        }
+      if (p.x > 75) p.x = -75;
+      if (p.x < -75) p.x = 75;
+      if (p.z > Z_FAR + SURF_D + 4) p.z = Z_FAR - 4;
+      if (p.z < Z_FAR - 4) p.z = Z_FAR + SURF_D + 4;
+      if (p.y > 14) p.y = -1;
+      if (p.y < -2) p.y = 13;
 
-        p.x += p.vx * dt * 60;
-        p.y += p.vy * dt * 60;
-        p.z += p.vz * dt * 60;
-
-        if (p.x > 75) p.x = -75;
-        if (p.x < -75) p.x = 75;
-        if (p.z > Z_FAR + SURF_D + 4) p.z = Z_FAR - 4;
-        if (p.z < Z_FAR - 4) p.z = Z_FAR + SURF_D + 4;
-        if (p.y > 14) p.y = -2;
-        if (p.y < -3) p.y = 12;
-
-        /* RESTING: grey only. Blue ONLY inside cursor charge zone. */
-        p.azure = 0;
-        if (mStr > 0.01) {
-          const dx = mouseW.x - p.x;
-          const dz = mouseW.y - p.z;
-          const dist = Math.sqrt(dx*dx + dz*dz);
-          if (dist < 15.0) {
-            p.azure = mStr * (1.0 - dist / 15.0) * 0.5;
-          }
-        }
-        p.alpha = p.baseAlpha;
-
-      } else if (p.state === 'capture') {
-        const elapsed = clock - p.captureT;
-        const surfH = waveHeight(p.x, p.z, clock);
-
-        p.vy += -0.04 * dt * 60;
-        p.vx *= 0.96;
-        p.vz *= 0.96;
-
-        p.x += p.vx * dt * 60;
-        p.y += p.vy * dt * 60;
-        p.z += p.vz * dt * 60;
-
-        /* blue appears at capture near surface */
-        p.azure = Math.min(1, p.azure + dt * 3.0);
-
-        if (p.y <= surfH + 0.2 || elapsed > 1.4) {
-          p.state = 'neutralized';
-          p.captureT = clock;
-          p.y = surfH;
-          p.fadeT = 0;
-          boostSurfaceAt(p.x, p.z, 0.4);
-          spawnBloom(p.x, surfH + 0.15, p.z);
-        }
-      } else if (p.state === 'neutralized') {
-        p.fadeT += dt;
-        p.azure = 1;
-        p.y = waveHeight(p.x, p.z, clock);
-        p.alpha = p.baseAlpha * Math.max(0, 1 - p.fadeT / 0.4);
-
-        if (p.fadeT > 0.4) {
-          /* respawn low — concentrated near surface */
-          p.state = 'drift';
-          p.x = (Math.random() - 0.5) * 150;
-          const yRand = Math.pow(Math.random(), 1.8);
-          p.y = -2 + yRand * 16;
-          p.z = Z_FAR - 4 + Math.random() * (SURF_D + 8);
-          p.vx = (Math.random() - 0.5) * 0.05;
-          p.vy = (Math.random() - 0.5) * 0.05;
-          p.vz = (Math.random() - 0.5) * 0.05;
-          p.azure = 0;
-          p.alpha = p.baseAlpha;
-          p.phase = Math.random() * Math.PI * 2;
-        }
+      /* Keep above surface */
+      var surfH = waveHeight(p.x, p.z, clock);
+      if (p.y < surfH + 0.3) {
+        p.y = surfH + 0.3;
+        p.vy = Math.abs(p.vy) * 0.3;
       }
 
       dPos[i * 3] = p.x;
       dPos[i * 3 + 1] = p.y;
       dPos[i * 3 + 2] = p.z;
-      dAlpha[i] = p.alpha;
+      dAlpha[i] = p.baseAlpha;
       dSize[i] = p.size;
-      dAzure[i] = p.azure;
+      dAzure[i] = 0;
     }
     dustGeo.attributes.position.needsUpdate = true;
     dustGeo.attributes.aAlpha.needsUpdate = true;
     dustGeo.attributes.aSize.needsUpdate = true;
     dustGeo.attributes.aAzure.needsUpdate = true;
 
-    /* Ambient capture away from cursor: ~1 event / 5s */
-    ambientCaptureTimer += dt;
-    if (ambientCaptureTimer > 5.0 && mStr < 0.1) {
-      ambientCaptureTimer = 0;
-      for (let tries = 0; tries < 30; tries++) {
-        const idx = Math.floor(Math.random() * DUST_COUNT);
-        const p = dustParticles[idx];
-        if (p.state === 'drift') {
-          const surfH = waveHeight(p.x, p.z, clock);
-          if (p.y - surfH < 4.0) {
-            p.state = 'capture';
-            p.captureT = clock;
-            break;
-          }
+    /* Spawn ambient captures: 6-10 per second across full width */
+    captureSpawnTimer += dt;
+    if (captureSpawnTimer >= nextCaptureInterval) {
+      captureSpawnTimer = 0;
+      nextCaptureInterval = 0.1 + Math.random() * 0.067;
+      spawnCaptureMote(clock, false, mouseW, mStr);
+    }
+
+    /* Cursor-driven captures: ~3x more, tighter, faster */
+    cursorCaptureTimer += dt;
+    if (mStr > 0.15 && cursorCaptureTimer >= nextCursorCaptureInterval) {
+      cursorCaptureTimer = 0;
+      nextCursorCaptureInterval = (0.1 + Math.random() * 0.067) / 3.0;
+      spawnCaptureMote(clock, true, mouseW, mStr);
+    }
+
+    /* Update capture motes */
+    for (let i = 0; i < CAPTURE_COUNT; i++) {
+      const p = captureParticles[i];
+
+      if (p.state === 'idle') {
+        cAlpha[i] = 0;
+        cAzure[i] = 0;
+        continue;
+      }
+
+      if (p.state === 'falling') {
+        const elapsed = clock - p.startTime;
+        const progress = Math.min(1, elapsed / p.fallDuration);
+
+        var eased = progress * progress;
+        p.y = p.startY + (p.targetY - p.startY) * eased;
+
+        p.x += (p.targetX - p.x) * dt * 1.5;
+        p.z += (p.targetZ - p.z) * dt * 1.5;
+
+        var remaining = p.fallDuration - elapsed;
+        if (remaining < 0.4) {
+          p.azure = Math.min(1, 1.0 - (remaining / 0.4));
+        }
+
+        p.alpha = p.baseAlpha;
+
+        if (progress >= 1.0) {
+          p.state = 'fading';
+          p.fadeStart = clock;
+          p.y = p.targetY;
+          p.x = p.targetX;
+          p.z = p.targetZ;
+          p.azure = 1;
+          boostSurfaceAt(p.x, p.z, 1.0);
+          spawnBloom(p.x, p.targetY + 0.15, p.z);
+        }
+      } else if (p.state === 'fading') {
+        var fadeElapsed = clock - p.fadeStart;
+        p.alpha = p.baseAlpha * Math.max(0, 1 - fadeElapsed / 0.4);
+        p.azure = 1;
+        p.y = waveHeight(p.x, p.z, clock);
+
+        if (fadeElapsed >= 0.4) {
+          p.state = 'idle';
+          p.alpha = 0;
+          p.azure = 0;
         }
       }
+
+      cPos[i * 3] = p.x;
+      cPos[i * 3 + 1] = p.y;
+      cPos[i * 3 + 2] = p.z;
+      cAlpha[i] = p.alpha;
+      cAzure[i] = p.azure;
+      cSize[i] = p.size;
     }
+    captureGeo.attributes.position.needsUpdate = true;
+    captureGeo.attributes.aAlpha.needsUpdate = true;
+    captureGeo.attributes.aSize.needsUpdate = true;
+    captureGeo.attributes.aAzure.needsUpdate = true;
 
     /* Update blooms */
     for (let i = 0; i < BLOOM_COUNT; i++) {
@@ -905,8 +1019,8 @@ import * as THREE from 'three';
     bloomGeo.attributes.position.needsUpdate = true;
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
+    bloomGeo.attributes.aMaxSize.needsUpdate = true;
 
-    /* Camera: still */
     camera.position.copy(CAM_BASE);
     camera.lookAt(CAM_TARGET);
 
@@ -919,7 +1033,8 @@ import * as THREE from 'three';
     surfaceMat.uniforms.uTime.value = clock;
 
     const seeds = [
-      [-18, -10], [-8, 5], [3, -8], [12, 10], [18, -3], [-5, 14], [8, -15], [-15, 2]
+      [-18, -10], [-8, 5], [3, -8], [12, 10], [18, -3], [-5, 14], [8, -15], [-15, 2],
+      [25, 8], [-25, 18], [35, -2], [-35, 12]
     ];
     for (let s = 0; s < seeds.length; s++) {
       const [sx, sz] = seeds[s];
@@ -942,20 +1057,30 @@ import * as THREE from 'three';
 
     for (let i = 0; i < DUST_COUNT; i++) {
       const p = dustParticles[i];
+      dPos[i * 3] = p.x;
+      dPos[i * 3 + 1] = p.y;
+      dPos[i * 3 + 2] = p.z;
+      dAlpha[i] = p.baseAlpha;
+      dSize[i] = p.size;
+      dAzure[i] = 0;
+    }
+
+    for (let i = 0; i < CAPTURE_COUNT; i++) {
+      const p = captureParticles[i];
       if (i < seeds.length) {
-        p.state = 'neutralized';
+        p.state = 'fading';
         p.azure = 1;
         p.x = seeds[i][0];
         p.z = seeds[i][1];
         p.y = waveHeight(p.x, p.z, clock);
         p.alpha = 0;
       }
-      dPos[i * 3] = p.x;
-      dPos[i * 3 + 1] = p.y;
-      dPos[i * 3 + 2] = p.z;
-      dAlpha[i] = p.alpha;
-      dSize[i] = p.size;
-      dAzure[i] = p.azure;
+      cPos[i * 3] = p.x;
+      cPos[i * 3 + 1] = p.y;
+      cPos[i * 3 + 2] = p.z;
+      cAlpha[i] = p.alpha;
+      cAzure[i] = p.azure;
+      cSize[i] = p.size;
     }
 
     surfaceGeo.attributes.aBoost.needsUpdate = true;
@@ -963,9 +1088,14 @@ import * as THREE from 'three';
     dustGeo.attributes.aAlpha.needsUpdate = true;
     dustGeo.attributes.aSize.needsUpdate = true;
     dustGeo.attributes.aAzure.needsUpdate = true;
+    captureGeo.attributes.position.needsUpdate = true;
+    captureGeo.attributes.aAlpha.needsUpdate = true;
+    captureGeo.attributes.aSize.needsUpdate = true;
+    captureGeo.attributes.aAzure.needsUpdate = true;
     bloomGeo.attributes.position.needsUpdate = true;
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
+    bloomGeo.attributes.aMaxSize.needsUpdate = true;
 
     camera.position.copy(CAM_BASE);
     camera.lookAt(CAM_TARGET);
