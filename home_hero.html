@@ -174,7 +174,8 @@ section{
     line-height:1.6;
     margin-bottom:clamp(16px,2.5vh,22px);
     color:var(--ink);
-  }
+  }
+
   .advocacy-link{
     font-size:16px;
     line-height:1.4;
@@ -192,7 +193,8 @@ section{
     font-size:17px;
     line-height:1.5;
     margin-bottom:18px;
-  }
+  }
+
 }
 @media (max-height: 680px) and (min-width: 881px){
   .eyebrow{
@@ -207,7 +209,8 @@ section{
     font-size:16px;
     line-height:1.45;
     margin-bottom:14px;
-  }
+  }
+
   .advocacy-link{font-size:16px;}
 }
 </style>
@@ -227,321 +230,575 @@ section{
   </div>
 </section>
 
-<script>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
 (function () {
   'use strict';
 
-  var section = document.getElementById('section');
-  var canvas = document.getElementById('cloud-canvas');
+  const section = document.getElementById('section');
+  const canvas = document.getElementById('cloud-canvas');
   if (!section || !canvas) return;
-  var ctx = canvas.getContext('2d');
 
-  var dpr = 1, W = 0, H = 0;
-  var particles = [];
-  var reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
-  var isMobile = (window.innerWidth <= 880);
-  var running = false, rafId = 0, lastT = 0;
+  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
 
-  // Round 3: BIGGER + RICHER — 14000-18000 desktop, ~40% less on mobile
-  var COUNT = isMobile ? 9000 : 16000;
+  /* ===== Renderer ===== */
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setClearColor(0xedf0f2, 1);
+  const dprCap = 2;
 
-  // Cloud geometry — LARGE, sprawling, fills right ~55% of stage, 60-70% viewport height tall
-  var cloudCX = 0, cloudCY = 0, maxRadius = 0;
-  var chargeX = 0, chargeY = 0;
-  var textBoundaryX = 0, textBoundaryY = 0;
-  var coreRadius = 0;
+  /* ===== Scene & Camera ===== */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  const CAM_BASE = new THREE.Vector3(7, 15, 31);
+  const CAM_TARGET = new THREE.Vector3(-2, -1, -4);
+  camera.position.copy(CAM_BASE);
+  camera.lookAt(CAM_TARGET);
 
-  // Organic silhouette: 3 overlapping gaussian lobes at offset centers
-  var lobes = [];
+  /* ===== Wave height function (shared JS / GLSL) ===== */
+  function waveHeight(x, z, t) {
+    let h = 0;
+    h += Math.sin(x * 0.15 + t * 0.50) * 1.4;
+    h += Math.sin(z * 0.20 + t * 0.35) * 1.2;
+    h += Math.sin((x + z) * 0.10 + t * 0.30) * 0.8;
+    h += Math.sin(x * 0.06 + z * 0.08 + t * 0.20) * 1.6;
+    return h;
+  }
 
-  function seedLobes() {
-    lobes.length = 0;
-    // 3 overlapping lobes at slightly offset centers for organic, asymmetric nebula silhouette
-    var baseR = maxRadius;
-    lobes.push({
-      ox: 0, oy: 0,
-      rx: baseR * 1.0, ry: baseR * 0.92,
-      weight: 1.0,
-      rot: 0.15
-    });
-    lobes.push({
-      ox: baseR * 0.28, oy: -baseR * 0.22,
-      rx: baseR * 0.78, ry: baseR * 0.85,
-      weight: 0.75,
-      rot: -0.4
-    });
-    lobes.push({
-      ox: -baseR * 0.20, oy: baseR * 0.30,
-      rx: baseR * 0.72, ry: baseR * 0.68,
-      weight: 0.65,
-      rot: 0.6
-    });
+  /* ===== Surface (charged membrane) ===== */
+  const GRID_X = 220;
+  const GRID_Z = 120;
+  const SURF_W = 54;
+  const SURF_D = 38;
+  const SURF_COUNT = GRID_X * GRID_Z;
 
-    // Low-frequency angular harmonics for soft irregular outline
-    harmonics.length = 0;
-    var n = 6;
-    for (var i = 0; i < n; i++) {
-      harmonics.push({
-        freq: 2 + Math.floor(Math.random() * 5),
-        phase: Math.random() * Math.PI * 2,
-        amp: 0.04 + Math.random() * 0.07
-      });
+  const surfaceGeo = new THREE.BufferGeometry();
+  const sPositions = new Float32Array(SURF_COUNT * 3);
+  const sBoosts = new Float32Array(SURF_COUNT);
+
+  for (let ix = 0; ix < GRID_X; ix++) {
+    for (let iz = 0; iz < GRID_Z; iz++) {
+      const i = ix * GRID_Z + iz;
+      sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      sPositions[i * 3 + 1] = 0;
+      sPositions[i * 3 + 2] = (iz / (GRID_Z - 1) - 0.5) * SURF_D;
+      sBoosts[i] = 0;
     }
   }
 
-  var harmonics = [];
+  surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
+  surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
 
-  function silhouetteScale(angle) {
-    var s = 1;
-    for (var i = 0; i < harmonics.length; i++) {
-      var h = harmonics[i];
-      s += h.amp * Math.sin(h.freq * angle + h.phase);
-    }
-    return Math.max(0.55, s);
-  }
+  const surfaceMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uSize: { value: 1.4 },
+      uBaseColor: { value: new THREE.Color(0x7a8da8) },
+      uAzureColor: { value: new THREE.Color(0x1b7bff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 28 },
+      uFogFar: { value: 62 },
+    },
+    vertexShader: `
+      attribute float aBoost;
+      uniform float uTime;
+      uniform float uPixelRatio;
+      uniform float uSize;
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
 
-  // Gaussian via sum of 4 randoms: (r1+r2+r3+r4-2)/2 -> range ~-1..1, bell-shaped
-  function gaussian() {
-    return (Math.random() + Math.random() + Math.random() + Math.random() - 2) / 2;
-  }
+      float waveHeight(float x, float z, float t) {
+        float h = 0.0;
+        h += sin(x * 0.15 + t * 0.50) * 1.4;
+        h += sin(z * 0.20 + t * 0.35) * 1.2;
+        h += sin((x + z) * 0.10 + t * 0.30) * 0.8;
+        h += sin(x * 0.06 + z * 0.08 + t * 0.20) * 1.6;
+        return h;
+      }
 
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = section.clientWidth;
-    H = section.clientHeight;
-    canvas.width = Math.max(1, Math.floor(W * dpr));
-    canvas.height = Math.max(1, Math.floor(H * dpr));
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      void main() {
+        vec3 pos = position;
+        pos.y = waveHeight(pos.x, pos.z, uTime);
+        vHeight = pos.y;
 
-    isMobile = (window.innerWidth <= 880);
-    COUNT = isMobile ? 9000 : 16000;
+        float shimmer = 0.85 + 0.15 * sin(uTime * 2.5 + pos.x * 0.4 + pos.z * 0.4);
+        vBoost = aBoost * shimmer;
 
-    // Cloud center at x=72% (right-weighted), vertically centered
-    cloudCX = W * 0.72;
-    cloudCY = H * 0.50;
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
 
-    // LARGE cloud: 60-70% of viewport height tall, sprawling to fill right ~55% of stage
-    // Use the larger dimension to ensure it fills generously
-    maxRadius = Math.max(280, Math.min(W, H) * 0.42);
-    // On wide screens, let it stretch even more horizontally
-    if (!isMobile && W > 1000) {
-      maxRadius = Math.max(maxRadius, H * 0.38);
-    }
+        float sz = uSize * (1.0 + aBoost * 3.5);
+        gl_PointSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+      }
+    `,
+    fragmentShader: `
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      uniform vec3 uBaseColor;
+      uniform vec3 uAzureColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
 
-    chargeX = cloudCX;
-    chargeY = cloudCY;
-    coreRadius = maxRadius * 0.16;
-    textBoundaryX = W * 0.42;
-    textBoundaryY = H * 0.55;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
 
-    seedLobes();
-  }
+        float circle = smoothstep(0.5, 0.18, d);
 
-  function makeParticle() {
-    // Pick one of the 3 overlapping lobes (weighted) for organic multi-center silhouette
-    var lobeIdx;
-    var rrand = Math.random();
-    if (rrand < 0.45) lobeIdx = 0;
-    else if (rrand < 0.75) lobeIdx = 1;
-    else lobeIdx = 2;
-    var lobe = lobes[lobeIdx];
+        float heightFactor = smoothstep(-3.5, 3.5, vHeight);
+        vec3 baseShaded = mix(uBaseColor * 0.82, uBaseColor * 1.18, heightFactor);
+        vec3 color = mix(baseShaded, uAzureColor, vBoost);
 
-    // Gaussian clustering within the chosen lobe: dense core, feathering to sparse edges
-    var gx = gaussian(); // -1..1 bell
-    var gy = gaussian(); // -1..1 bell
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.85);
 
-    // angle for organic silhouette perturbation
-    var angle = Math.atan2(gy, gx);
-    var sil = silhouetteScale(angle);
+        float depthFade = smoothstep(58.0, 18.0, vDist);
+        float alpha = circle * depthFade * (0.45 + vBoost * 0.55);
+        alpha *= (1.0 - fog * 0.7);
 
-    // sqrt/pow bias so core is densely packed, edges sparse
-    var radialBias = Math.pow(Math.abs(gx * gx + gy * gy), 0.5);
-    var radial = Math.pow(Math.random(), 0.45) * sil;
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
 
-    // Apply lobe rotation
-    var cosR = Math.cos(lobe.rot);
-    var sinR = Math.sin(lobe.rot);
-    var lx = gx * lobe.rx * radial;
-    var ly = gy * lobe.ry * radial;
-    var rx = lx * cosR - ly * sinR;
-    var ry = lx * sinR + ly * cosR;
+  const surfacePoints = new THREE.Points(surfaceGeo, surfaceMat);
+  surfacePoints.renderOrder = 0;
+  scene.add(surfacePoints);
 
-    var x = cloudCX + lobe.ox + rx;
-    var y = cloudCY + lobe.oy + ry;
+  /* ===== Pollutants ===== */
+  const POLL_COUNT = 130;
+  const pollGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(POLL_COUNT * 3);
+  const pAzure = new Float32Array(POLL_COUNT);
+  const pSize = new Float32Array(POLL_COUNT);
+  const pAlpha = new Float32Array(POLL_COUNT);
 
-    // distance from the main charge epicenter
-    var dx = x - cloudCX, dy = y - cloudCY;
-    var dist = Math.sqrt(dx * dx + dy * dy);
-    var normDist = Math.min(1, dist / maxRadius);
+  const pollutants = [];
 
-    // SIZE by distance: core 2-3px, edge <1px
-    var size;
-    if (normDist < 0.12) {
-      size = 2.0 + Math.random() * 1.0;       // core 2.0–3.0
-    } else if (normDist < 0.30) {
-      size = 1.4 + Math.random() * 0.8;       // mid 1.4–2.2
-    } else if (normDist < 0.60) {
-      size = 0.8 + Math.random() * 0.6;       // outer-mid 0.8–1.4
-    } else {
-      size = 0.4 + Math.random() * 0.5;       // edge 0.4–0.9
-    }
-
-    // ALPHA by distance: core opaque, edge fades — dark ink dots at ~0.75-0.9 in core
-    var a;
-    if (normDist < 0.12) {
-      a = 0.65 + Math.random() * 0.25;        // core 0.65–0.90
-    } else if (normDist < 0.30) {
-      a = 0.50 + Math.random() * 0.25;        // mid 0.50–0.75
-    } else if (normDist < 0.60) {
-      a = 0.25 + Math.random() * 0.20;        // outer 0.25–0.45
-    } else {
-      a = 0.08 + Math.random() * 0.14;        // edge 0.08–0.22
-    }
-
+  function makePollutant(initial) {
     return {
-      x: x, y: y,
-      vx: 0, vy: 0,
-      r: size,
-      a: a,
-      baseA: a,
+      x: (Math.random() - 0.5) * 44,
+      y: initial ? 1 + Math.random() * 15 : 10 + Math.random() * 8,
+      z: (Math.random() - 0.5) * 32,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -0.7 - Math.random() * 0.9,
+      vz: (Math.random() - 0.5) * 0.3,
+      size: 1.2 + Math.random() * 1.8,
+      alpha: 0.28 + Math.random() * 0.30,
+      state: 'drift',
+      azure: 0,
+      captureT: 0,
       phase: Math.random() * Math.PI * 2,
-      driftSpeed: 0.00004 + Math.random() * 0.00008,
-      inwardBias: 0.003 + Math.random() * 0.008,
-      recycleAt: 5000 + Math.random() * 10000,
-      age: Math.random() * 8000,
-      lobeIdx: lobeIdx
     };
   }
 
-  function initParticles() {
-    particles.length = 0;
-    for (var i = 0; i < COUNT; i++) particles.push(makeParticle());
+  for (let i = 0; i < POLL_COUNT; i++) {
+    pollutants.push(makePollutant(true));
+    pSize[i] = pollutants[i].size;
   }
 
-  function inTextZone(x, y) {
-    if (isMobile) return y < textBoundaryY;
-    return x < textBoundaryX;
+  pollGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  pollGeo.setAttribute('aAzure', new THREE.BufferAttribute(pAzure, 1));
+  pollGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
+  pollGeo.setAttribute('aAlpha', new THREE.BufferAttribute(pAlpha, 1));
+
+  const pollMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uGreyColor: { value: new THREE.Color(0x596068) },
+      uAzureColor: { value: new THREE.Color(0x1b7bff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 28 },
+      uFogFar: { value: 62 },
+    },
+    vertexShader: `
+      attribute float aAzure;
+      attribute float aSize;
+      attribute float aAlpha;
+      uniform float uPixelRatio;
+      varying float vAzure;
+      varying float vAlpha;
+      varying float vDist;
+
+      void main() {
+        vAzure = aAzure;
+        vAlpha = aAlpha;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
+        gl_PointSize = aSize * uPixelRatio * (120.0 / max(vDist, 1.0));
+      }
+    `,
+    fragmentShader: `
+      varying float vAzure;
+      varying float vAlpha;
+      varying float vDist;
+      uniform vec3 uGreyColor;
+      uniform vec3 uAzureColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+
+        float circle = smoothstep(0.5, 0.12, d);
+        vec3 color = mix(uGreyColor, uAzureColor, vAzure);
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.8);
+
+        float alpha = circle * vAlpha * (1.0 - fog * 0.6);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const pollPoints = new THREE.Points(pollGeo, pollMat);
+  pollPoints.renderOrder = 1;
+  scene.add(pollPoints);
+
+  /* ===== Blooms (azure neutralize glow) ===== */
+  const BLOOM_COUNT = 80;
+  const bloomGeo = new THREE.BufferGeometry();
+  const bPos = new Float32Array(BLOOM_COUNT * 3);
+  const bAge = new Float32Array(BLOOM_COUNT);
+  const bActive = new Float32Array(BLOOM_COUNT);
+  const bMaxSize = new Float32Array(BLOOM_COUNT);
+
+  const blooms = [];
+  for (let i = 0; i < BLOOM_COUNT; i++) {
+    blooms.push({ active: false, age: 0, life: 0, x: 0, y: 0, z: 0, maxSize: 0 });
+    bPos[i * 3] = 9999;
+    bMaxSize[i] = 20 + Math.random() * 18;
   }
 
-  function colorForDist(normDist) {
-    // core (normDist small) -> blue accent charged; outer -> dark ink pollutant
-    if (normDist < 0.10) {
-      return { blue: true, alphaMul: 0.85 };
-    } else if (normDist < 0.20) {
-      // transition: mostly blue with some ink
-      return { blue: Math.random() < 0.72, alphaMul: 0.82 };
-    } else if (normDist < 0.32) {
-      return { blue: Math.random() < 0.28, alphaMul: 0.90 };
-    }
-    return { blue: false, alphaMul: 1 };
-  }
+  bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
+  bloomGeo.setAttribute('aAge', new THREE.BufferAttribute(bAge, 1));
+  bloomGeo.setAttribute('aActive', new THREE.BufferAttribute(bActive, 1));
+  bloomGeo.setAttribute('aMaxSize', new THREE.BufferAttribute(bMaxSize, 1));
 
-  function loop(t) {
-    if (!running) return;
-    rafId = requestAnimationFrame(loop);
-    var dt = lastT ? Math.min((t - lastT), 50) : 16;
-    lastT = t;
-    var f = dt / 16;
+  const bloomMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 28 },
+      uFogFar: { value: 62 },
+    },
+    vertexShader: `
+      attribute float aAge;
+      attribute float aActive;
+      attribute float aMaxSize;
+      uniform float uPixelRatio;
+      varying float vAlpha;
+      varying float vDist;
+      varying float vAge;
 
-    // clear — no fake glow, just bg
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#edf0f2';
-    ctx.fillRect(0, 0, W, H);
+      void main() {
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
 
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      p.age += dt;
+        float t = aAge;
+        float size = aMaxSize * (0.12 + t * 0.88);
+        gl_PointSize = size * uPixelRatio * (120.0 / max(vDist, 1.0));
 
-      // slow organic drift — gentle diagonal drift
-      var nx = Math.cos(p.y * 0.0040 + t * p.driftSpeed + p.phase);
-      var ny = Math.sin(p.x * 0.0040 + t * p.driftSpeed * 0.9 + p.phase * 1.3);
-      p.vx += nx * 0.008;
-      p.vy += ny * 0.008;
+        vAge = t;
+        vAlpha = aActive * (1.0 - t) * 0.55;
+      }
+    `,
+    fragmentShader: `
+      varying float vAlpha;
+      varying float vDist;
+      varying float vAge;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
 
-      // gentle inward pull toward the charge core
-      var dx = chargeX - p.x, dy = chargeY - p.y;
-      var d = Math.sqrt(dx * dx + dy * dy) || 1;
-      var pull = p.inwardBias * (1 + (1 - Math.min(1, d / maxRadius)) * 1.8);
-      p.vx += (dx / d) * pull;
-      p.vy += (dy / d) * pull;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
 
-      // damping
-      p.vx *= 0.92;
-      p.vy *= 0.92;
-      p.x += p.vx * f;
-      p.y += p.vy * f;
+        float soft = smoothstep(0.5, 0.0, d);
+        float core = smoothstep(0.22, 0.0, d);
 
-      // recompute distance from epicenter
-      var cdx = p.x - cloudCX, cdy = p.y - cloudCY;
-      var cd = Math.sqrt(cdx * cdx + cdy * cdy);
-      var normDist = Math.min(1, cd / maxRadius);
+        vec3 azure = vec3(0.106, 0.482, 1.0);
+        vec3 brightAzure = vec3(0.35, 0.62, 1.0);
+        vec3 color = mix(azure, brightAzure, core * (1.0 - vAge * 0.5));
 
-      var col = colorForDist(normDist);
-      var drawAlpha = p.baseA * col.alphaMul;
-      if (inTextZone(p.x, p.y)) drawAlpha *= 0.12;
-      if (drawAlpha <= 0.004) continue;
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.7);
 
-      ctx.fillStyle = col.blue
-        ? 'rgba(27,123,255,' + drawAlpha + ')'
-        : 'rgba(31,35,39,' + drawAlpha + ')';
+        float alpha = (soft * 0.5 + core * 0.5) * vAlpha * (1.0 - fog * 0.5);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+  });
 
-      var s = p.r;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, s / 2, 0, Math.PI * 2);
-      ctx.fill();
+  const bloomPoints = new THREE.Points(bloomGeo, bloomMat);
+  bloomPoints.renderOrder = 2;
+  scene.add(bloomPoints);
 
-      // recycle: when a dot drifts deep into the core and aged, respawn at edge
-      if (cd < coreRadius * 0.7 && p.age > p.recycleAt) {
-        var lobe = lobes[p.lobeIdx];
-        var ggx = gaussian();
-        var ggy = gaussian();
-        var ang = Math.atan2(ggy, ggx);
-        var sil = silhouetteScale(ang);
-        var edgeRadial = Math.pow(Math.random(), 0.45) * sil * (0.75 + Math.random() * 0.15);
-        var llx = ggx * lobe.rx * edgeRadial;
-        var lly = ggy * lobe.ry * edgeRadial;
-        var cosR = Math.cos(lobe.rot);
-        var sinR = Math.sin(lobe.rot);
-        p.x = cloudCX + lobe.ox + (llx * cosR - lly * sinR);
-        p.y = cloudCY + lobe.oy + (llx * sinR + lly * cosR);
-        p.vx = 0; p.vy = 0;
-        p.age = 0;
-        p.recycleAt = 5000 + Math.random() * 10000;
+  /* ===== Surface boost at capture ===== */
+  function boostSurfaceAt(x, z, amount) {
+    const gx = Math.round(((x / SURF_W) + 0.5) * (GRID_X - 1));
+    const gz = Math.round(((z / SURF_D) + 0.5) * (GRID_Z - 1));
+    const radius = 5;
+    for (let dx = -radius; dx <= radius; dx++) {
+      for (let dz = -radius; dz <= radius; dz++) {
+        const ix = gx + dx;
+        const iz = gz + dz;
+        if (ix < 0 || ix >= GRID_X || iz < 0 || iz >= GRID_Z) continue;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist > radius) continue;
+        const falloff = Math.pow(1 - dist / radius, 1.5);
+        const i = ix * GRID_Z + iz;
+        sBoosts[i] = Math.min(1, sBoosts[i] + amount * falloff);
       }
     }
   }
 
-  function drawStatic() {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#edf0f2';
-    ctx.fillRect(0, 0, W, H);
-
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      var cdx = p.x - cloudCX, cdy = p.y - cloudCY;
-      var cd = Math.sqrt(cdx * cdx + cdy * cdy);
-      var normDist = Math.min(1, cd / maxRadius);
-
-      var col = colorForDist(normDist);
-      var drawAlpha = p.baseA * col.alphaMul * 0.95;
-      if (inTextZone(p.x, p.y)) drawAlpha *= 0.12;
-      if (drawAlpha <= 0.004) continue;
-
-      ctx.fillStyle = col.blue
-        ? 'rgba(27,123,255,' + drawAlpha + ')'
-        : 'rgba(31,35,39,' + drawAlpha + ')';
-
-      var s = p.r;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, s / 2, 0, Math.PI * 2);
-      ctx.fill();
+  /* ===== Spawn bloom ===== */
+  function spawnBloom(x, y, z) {
+    for (let i = 0; i < BLOOM_COUNT; i++) {
+      if (!blooms[i].active) {
+        blooms[i].active = true;
+        blooms[i].age = 0;
+        blooms[i].life = 0.7 + Math.random() * 0.6;
+        blooms[i].x = x;
+        blooms[i].y = y;
+        blooms[i].z = z;
+        blooms[i].maxSize = 18 + Math.random() * 16;
+        bMaxSize[i] = blooms[i].maxSize;
+        return;
+      }
     }
   }
 
+  /* ===== Resize ===== */
+  function resize() {
+    const w = section.clientWidth;
+    const h = section.clientHeight;
+    if (w === 0 || h === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    surfaceMat.uniforms.uPixelRatio.value = dpr;
+    pollMat.uniforms.uPixelRatio.value = dpr;
+    bloomMat.uniforms.uPixelRatio.value = dpr;
+  }
+
+  /* ===== Animation loop ===== */
+  let running = false;
+  let rafId = 0;
+  let lastT = 0;
+  let clock = 0;
+
+  function loop(t) {
+    if (!running) return;
+    rafId = requestAnimationFrame(loop);
+    const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
+    lastT = t;
+    clock += dt;
+
+    /* Surface time */
+    surfaceMat.uniforms.uTime.value = clock;
+
+    /* Decay boosts */
+    const decay = Math.pow(0.965, dt * 60);
+    for (let i = 0; i < SURF_COUNT; i++) {
+      sBoosts[i] *= decay;
+    }
+    surfaceGeo.attributes.aBoost.needsUpdate = true;
+
+    /* Update pollutants */
+    for (let i = 0; i < POLL_COUNT; i++) {
+      let p = pollutants[i];
+
+      if (p.state === 'drift') {
+        p.vx += Math.sin(clock * 0.5 + p.phase) * 0.01 * dt * 60;
+        p.vz += Math.cos(clock * 0.4 + p.phase) * 0.01 * dt * 60;
+        p.vx *= 0.985;
+        p.vz *= 0.985;
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        p.z += p.vz * dt * 60;
+
+        if (Math.abs(p.x) > 30 || Math.abs(p.z) > 22) {
+          pollutants[i] = makePollutant(false);
+          p = pollutants[i];
+        } else {
+          const surfH = waveHeight(p.x, p.z, clock);
+          if (p.y <= surfH + 0.4) {
+            p.state = 'captured';
+            p.captureT = clock;
+            p.y = surfH;
+            boostSurfaceAt(p.x, p.z, 0.85);
+            spawnBloom(p.x, surfH + 0.2, p.z);
+          }
+        }
+      } else if (p.state === 'captured') {
+        const elapsed = clock - p.captureT;
+        p.azure = Math.min(1, elapsed / 0.25);
+        p.y = waveHeight(p.x, p.z, clock);
+        if (elapsed > 0.45) {
+          p.state = 'fading';
+          p.captureT = clock;
+        }
+      } else if (p.state === 'fading') {
+        const elapsed = clock - p.captureT;
+        p.azure = 1;
+        p.y = waveHeight(p.x, p.z, clock) + elapsed * 1.5;
+        if (elapsed > 0.8) {
+          pollutants[i] = makePollutant(false);
+          p = pollutants[i];
+        }
+      }
+
+      /* Write to buffers */
+      pPos[i * 3] = p.x;
+      pPos[i * 3 + 1] = p.y;
+      pPos[i * 3 + 2] = p.z;
+      pAzure[i] = p.azure;
+      pSize[i] = p.size;
+
+      if (p.state === 'drift') {
+        pAlpha[i] = p.alpha;
+      } else if (p.state === 'captured') {
+        pAlpha[i] = p.alpha * (1.0 - p.azure * 0.15);
+      } else {
+        const fadeElapsed = clock - p.captureT;
+        pAlpha[i] = p.alpha * Math.max(0, 1 - fadeElapsed / 0.8);
+      }
+    }
+    pollGeo.attributes.position.needsUpdate = true;
+    pollGeo.attributes.aAzure.needsUpdate = true;
+    pollGeo.attributes.aSize.needsUpdate = true;
+    pollGeo.attributes.aAlpha.needsUpdate = true;
+
+    /* Update blooms */
+    for (let i = 0; i < BLOOM_COUNT; i++) {
+      const b = blooms[i];
+      if (b.active) {
+        b.age += dt;
+        if (b.age >= b.life) {
+          b.active = false;
+          bPos[i * 3] = 9999;
+          bAge[i] = 0;
+          bActive[i] = 0;
+        } else {
+          bPos[i * 3] = b.x;
+          bPos[i * 3 + 1] = b.y;
+          bPos[i * 3 + 2] = b.z;
+          bAge[i] = b.age / b.life;
+          bActive[i] = 1;
+        }
+      }
+    }
+    bloomGeo.attributes.position.needsUpdate = true;
+    bloomGeo.attributes.aAge.needsUpdate = true;
+    bloomGeo.attributes.aActive.needsUpdate = true;
+
+    /* Camera idle drift */
+    camera.position.x = CAM_BASE.x + Math.sin(clock * 0.08) * 1.2;
+    camera.position.y = CAM_BASE.y + Math.cos(clock * 0.06) * 0.6;
+    camera.position.z = CAM_BASE.z + Math.sin(clock * 0.05) * 0.8;
+    camera.lookAt(
+      CAM_TARGET.x + Math.sin(clock * 0.04) * 0.4,
+      CAM_TARGET.y,
+      CAM_TARGET.z
+    );
+
+    renderer.render(scene, camera);
+  }
+
+  /* ===== Static frame for reduced motion ===== */
+  function drawStatic() {
+    clock = 2.5;
+    surfaceMat.uniforms.uTime.value = clock;
+
+    /* Seed several captures */
+    const seeds = [
+      [-18, -10], [-8, 5], [3, -8], [12, 10], [18, -3], [-5, 14], [8, -15], [-15, 2]
+    ];
+    for (let s = 0; s < seeds.length; s++) {
+      const [sx, sz] = seeds[s];
+      const sy = waveHeight(sx, sz, clock);
+      boostSurfaceAt(sx, sz, 0.9);
+      spawnBloom(sx, sy + 0.2, sz);
+      blooms[s].age = 0.2 + Math.random() * 0.3;
+    }
+
+    /* Update bloom buffers */
+    for (let i = 0; i < BLOOM_COUNT; i++) {
+      const b = blooms[i];
+      if (b.active) {
+        bPos[i * 3] = b.x;
+        bPos[i * 3 + 1] = b.y;
+        bPos[i * 3 + 2] = b.z;
+        bAge[i] = b.age / b.life;
+        bActive[i] = 1;
+      }
+    }
+
+    /* Place some pollutants */
+    for (let i = 0; i < POLL_COUNT; i++) {
+      const p = pollutants[i];
+      if (i < seeds.length) {
+        p.state = 'captured';
+        p.azure = 1;
+        p.x = seeds[i][0];
+        p.z = seeds[i][1];
+        p.y = waveHeight(p.x, p.z, clock);
+      } else {
+        p.y = 3 + Math.random() * 12;
+      }
+      pPos[i * 3] = p.x;
+      pPos[i * 3 + 1] = p.y;
+      pPos[i * 3 + 2] = p.z;
+      pAzure[i] = p.azure;
+      pSize[i] = p.size;
+      pAlpha[i] = p.state === 'captured' ? p.alpha : p.alpha * 0.6;
+    }
+
+    surfaceGeo.attributes.aBoost.needsUpdate = true;
+    pollGeo.attributes.position.needsUpdate = true;
+    pollGeo.attributes.aAzure.needsUpdate = true;
+    pollGeo.attributes.aSize.needsUpdate = true;
+    pollGeo.attributes.aAlpha.needsUpdate = true;
+    bloomGeo.attributes.position.needsUpdate = true;
+    bloomGeo.attributes.aAge.needsUpdate = true;
+    bloomGeo.attributes.aActive.needsUpdate = true;
+
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
+    renderer.render(scene, camera);
+  }
+
+  /* ===== Start / stop ===== */
   function start() {
-    if (reduced) { drawStatic(); return; }
+    if (reduced) return;
     if (!running) {
       running = true;
       lastT = 0;
@@ -554,17 +811,19 @@ section{
     rafId = 0;
   }
 
+  /* ===== Init ===== */
   resize();
-  initParticles();
-  if (reduced) drawStatic();
+  if (reduced) {
+    drawStatic();
+  }
 
   if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      for (var i = 0; i < entries.length; i++) {
-        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.35) start();
+    const io = new IntersectionObserver(function (entries) {
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.3) start();
         else if (!entries[i].isIntersecting) stop();
       }
-    }, { threshold: [0, 0.35, 1] });
+    }, { threshold: [0, 0.3, 1] });
     io.observe(section);
   } else {
     start();
@@ -575,16 +834,11 @@ section{
     else if (!reduced && !running) { running = true; lastT = 0; rafId = requestAnimationFrame(loop); }
   });
 
-  var rt = 0;
+  let rt = 0;
   window.addEventListener('resize', function () {
     if (rt) clearTimeout(rt);
     rt = setTimeout(function () {
       resize();
-      var nc = isMobile ? 9000 : 16000;
-      if (Math.abs(nc - COUNT) > 60) {
-        COUNT = nc;
-        initParticles();
-      }
       if (reduced) drawStatic();
     }, 180);
   });
