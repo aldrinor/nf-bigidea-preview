@@ -500,7 +500,6 @@ addEventListener('mousemove',e=>{
   bub.tx=e.clientX; bub.ty=e.clientY;
   mouseActive=true; lastMove=performance.now();
   if(mode!=='detail') mode='mouse';
-  // hover detection for cursor hint
   if(!detailMode){
     const over=Math.hypot(e.clientX-bub.x, e.clientY-bub.y) <= bub.R*1.04;
     document.body.classList.toggle('lens-hover', over);
@@ -570,7 +569,6 @@ function exitDetail(){
 detailClose.addEventListener('click', exitDetail);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && detailMode) exitDetail(); });
 
-// click / tap on lens -> jump to that specimen's detail page (top window, since this runs in the iframe pager)
 const DETAIL_URL={Wildfire_Smoke_Particle:'wildfire.html',Fungal_Spore:'wf_fungal_spore.html',Virus:'wf_virus.html',Bacteria:'wf_bacteria.html',Ultrafine_Particle:'wf_ultrafine.html',PFAS:'wf_pfas.html',Pollen:'wf_pollen.html'};
 function gotoDetail(i){
   const key=SPECS[((i%SPECS.length)+SPECS.length)%SPECS.length].key;
@@ -600,7 +598,6 @@ cv.addEventListener('touchend', e=>{
   touchStart=null;
 });
 
-// ?detail=N hook (for QA screenshots)
 if(DETAIL_QP!==null){
   const idx=(+DETAIL_QP||0)%SPECS.length;
   window.addEventListener('load', ()=>setTimeout(()=>enterDetail(idx), 900));
@@ -611,7 +608,6 @@ function tick(t){
   const dt=Math.min(40, t-lastT);
   lastT=t;
 
-  // lerp reveal toward target
   if (!revealFixed) {
     currentReveal += (revealTarget - currentReveal) * 0.14;
     if (Math.abs(revealTarget - currentReveal) < 0.001) currentReveal = revealTarget;
@@ -775,7 +771,6 @@ function drawLens(t){
   ctx.restore();
 }
 
-// ---------- tag chip ----------
 function positionTag(){
   if(detailMode){ tagEl.classList.remove('show'); return; }
   const R=bub.R, x=bub.x, y=bub.y;
