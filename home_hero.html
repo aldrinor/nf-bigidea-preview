@@ -51,13 +51,13 @@ section{
   pointer-events:none;
 }
 
-/* === Legibility scrim: clean fade from bg over the text zone === */
+/* === Legibility scrim: soft wash over the TEXT block only (upper-left), so the dots fill the rest === */
 .scrim{
   position:absolute;
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:linear-gradient(90deg, var(--bg) 0%, var(--bg) 36%, rgba(237,240,242,0.82) 46%, rgba(237,240,242,0) 60%);
+  background:radial-gradient(ellipse 56% 52% at 22% 42%, rgba(237,240,242,0.95) 0%, rgba(237,240,242,0.80) 38%, rgba(237,240,242,0.30) 62%, rgba(237,240,242,0) 80%);
 }
 
 /* === Text column === */
@@ -254,8 +254,8 @@ import * as THREE from 'three';
   /* ===== Scene & Camera ===== */
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
-  const CAM_BASE = new THREE.Vector3(7, 15, 31);
-  const CAM_TARGET = new THREE.Vector3(-2, -1, -4);
+  const CAM_BASE = new THREE.Vector3(0, 16, 32);
+  const CAM_TARGET = new THREE.Vector3(0, -1.5, -6);
   camera.position.copy(CAM_BASE);
   camera.lookAt(CAM_TARGET);
 
@@ -270,10 +270,10 @@ import * as THREE from 'three';
   }
 
   /* ===== Surface (charged membrane) ===== */
-  const GRID_X = 220;
-  const GRID_Z = 120;
-  const SURF_W = 54;
-  const SURF_D = 38;
+  const GRID_X = 560;
+  const GRID_Z = 188;
+  const SURF_W = 150;
+  const SURF_D = 62;
   const SURF_COUNT = GRID_X * GRID_Z;
 
   const surfaceGeo = new THREE.BufferGeometry();
@@ -301,8 +301,8 @@ import * as THREE from 'three';
       uBaseColor: { value: new THREE.Color(0x7a8da8) },
       uAzureColor: { value: new THREE.Color(0x1b7bff) },
       uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 28 },
-      uFogFar: { value: 62 },
+      uFogNear: { value: 52 },
+      uFogFar: { value: 128 },
     },
     vertexShader: `
       attribute float aBoost;
@@ -334,7 +334,7 @@ import * as THREE from 'three';
         vDist = -mvPos.z;
         gl_Position = projectionMatrix * mvPos;
 
-        float sz = uSize * (1.0 + aBoost * 3.5);
+        float sz = uSize * (1.0 + aBoost * 1.6);
         gl_PointSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
       }
     `,
@@ -362,8 +362,8 @@ import * as THREE from 'three';
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.85);
 
-        float depthFade = smoothstep(58.0, 18.0, vDist);
-        float alpha = circle * depthFade * (0.45 + vBoost * 0.55);
+        float depthFade = smoothstep(115.0, 20.0, vDist);
+        float alpha = circle * depthFade * (0.45 + vBoost * 0.28);
         alpha *= (1.0 - fog * 0.7);
 
         gl_FragColor = vec4(color, alpha);
@@ -389,9 +389,9 @@ import * as THREE from 'three';
 
   function makePollutant(initial) {
     return {
-      x: (Math.random() - 0.5) * 44,
+      x: (Math.random() - 0.5) * 88,
       y: initial ? 1 + Math.random() * 15 : 10 + Math.random() * 8,
-      z: (Math.random() - 0.5) * 32,
+      z: (Math.random() - 0.5) * 46,
       vx: (Math.random() - 0.5) * 0.3,
       vy: -0.7 - Math.random() * 0.9,
       vz: (Math.random() - 0.5) * 0.3,
