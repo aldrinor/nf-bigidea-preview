@@ -55,7 +55,7 @@ section{
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 52% 58% at 19% 44%, rgba(237,240,242,0.97) 0%, rgba(237,240,242,0.92) 46%, rgba(237,240,242,0.48) 70%, rgba(237,240,242,0) 88%);
+  background:radial-gradient(ellipse 66% 82% at 22% 50%, rgba(237,240,242,0.98) 0%, rgba(237,240,242,0.93) 50%, rgba(237,240,242,0.5) 72%, rgba(237,240,242,0) 90%);
 }
 
 .text-col{
@@ -65,10 +65,12 @@ section{
   flex-direction:column;
   justify-content:center;
   align-items:flex-start;
-  width:42%;
-  max-width:620px;
-  padding-left:clamp(48px, 7vw, 128px);
-  padding-right:24px;
+  width:63%;
+  max-width:1000px;
+  padding-left:clamp(36px, 4.5vw, 84px);
+  padding-right:40px;
+  /* one shared block width -> the logo and all the writing line up to the same width */
+  --block:100%;
 }
 
 .eyebrow{
@@ -78,30 +80,64 @@ section{
   color:var(--muted);
   font-weight:400;
   letter-spacing:0.005em;
-  margin-bottom:24px;
+  margin-bottom:22px;
 }
 
+/* logo sized by WIDTH (fills the block, ~2x bigger); overflow crops the SVG's transparent padding */
 .logo-wrap{
-  height:132px;
+  width:var(--block);
+  height:clamp(66px, 8vw, 112px);
+  overflow:hidden;
   display:flex;
   align-items:center;
-  margin-bottom:30px;
-  margin-left:-15px;
+  margin-left:-1.2%;
+  margin-bottom:26px;
 }
 .logo-wrap img{
-  height:132px;
-  width:auto;
-  max-width:100%;
+  width:100%;
+  height:auto;
   display:block;
-  object-fit:contain;
-  object-position:left center;
 }
 
 .body-text{
-  max-width:440px;
-  font-size:19px;
+  width:var(--block);
+  max-width:100%;
+  font-size:clamp(18px, 1.5vw, 22px);
   line-height:1.55;
   color:#1f2327;
+}
+
+/* "what is C-POLAR" — the identity line + the five verticals, presented cleanly */
+.cpolar{
+  width:var(--block);
+  max-width:100%;
+  margin-top:30px;
+  padding-top:26px;
+  border-top:1px solid var(--hair);
+}
+.cpolar-lead{
+  font-size:clamp(14px, 1.05vw, 16.5px);
+  line-height:1.62;
+  color:var(--muted);
+}
+.cpolar-lead em{ font-style:normal; font-weight:500; color:var(--ink); }
+.verticals{
+  list-style:none;
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:16px;
+  padding:0;
+}
+.verticals li{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:0.02em;
+  color:var(--ink);
+  border:1px solid var(--hair);
+  border-radius:999px;
+  padding:7px 13px;
+  white-space:nowrap;
 }
 
 .micro-label{
@@ -145,22 +181,21 @@ section{
     flex:0 0 auto;
   }
   .eyebrow{font-size:13px;margin-bottom:18px;}
-  .logo-wrap{height:78px;margin-bottom:24px;}
-  .logo-wrap img{height:78px;}
+  .logo-wrap{height:clamp(46px,13vw,72px);margin-bottom:22px;}
   .body-text{font-size:16px;line-height:1.6;}
+  .cpolar-lead{font-size:13.5px;}
   .micro-label{font-size:10px;}
 }
 
 @media (max-height: 760px) and (min-width: 881px){
-  .logo-wrap{height:88px;margin-bottom:24px;}
-  .logo-wrap img{height:88px;}
-  .body-text{font-size:17px;line-height:1.5;}
+  .logo-wrap{height:clamp(60px,7vw,92px);margin-bottom:22px;}
+  .body-text{font-size:18px;line-height:1.5;}
 }
 @media (max-height: 680px) and (min-width: 881px){
-  .eyebrow{font-size:12px;margin-bottom:16px;}
-  .logo-wrap{height:76px;margin-bottom:18px;}
-  .logo-wrap img{height:76px;}
+  .eyebrow{font-size:12px;margin-bottom:14px;}
+  .logo-wrap{height:clamp(56px,6vw,80px);margin-bottom:16px;}
   .body-text{font-size:16px;line-height:1.45;}
+  .cpolar{margin-top:20px;padding-top:18px;}
 }
 </style>
 </head>
@@ -174,6 +209,17 @@ section{
     <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
     <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
     <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
+
+    <div class="cpolar">
+      <p class="cpolar-lead">C-POLAR Technologies, Inc. is a <em>Health Science Platform Company</em> built around its patented NanoFlashing™ technology. The platform has five primary application verticals:</p>
+      <ul class="verticals">
+        <li>Air</li>
+        <li>Water</li>
+        <li>Personal Protective Wear (PPW™)</li>
+        <li>Food Packaging</li>
+        <li>Medical Devices</li>
+      </ul>
+    </div>
   </div>
 
   <div class="micro-label">3p — permanent positive polarity</div>
