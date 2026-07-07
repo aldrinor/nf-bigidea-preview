@@ -339,7 +339,7 @@ import * as THREE from 'three';
         uv.y = -uv.y;
 
         vec2 dirX = vDirX;
-        vec2 dirZ = vDirZ;
+        vec2 dirZ = vec2(-dirX.y, dirX.x); // exact perpendicular of dirX -> a true 90 deg plus that tilts with the surface but never shears
 
         vec2 perpX = vec2(-dirX.y, dirX.x);
         vec2 perpZ = vec2(-dirZ.y, dirZ.x);
