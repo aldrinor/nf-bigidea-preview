@@ -55,7 +55,9 @@ section{
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 58% 84% at 19% 50%, rgba(237,240,242,0.9) 0%, rgba(237,240,242,0.64) 46%, rgba(237,240,242,0.2) 70%, rgba(237,240,242,0) 84%);
+  /* white backing that hugs the writing (words stay obvious) but clears fast to the right so the
+     "+" surface stays strong in the open area */
+  background:radial-gradient(ellipse 48% 88% at 26% 50%, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.92) 54%, rgba(237,240,242,0.55) 74%, rgba(237,240,242,0.12) 88%, rgba(237,240,242,0) 96%);
 }
 
 .text-col{
@@ -133,10 +135,10 @@ section{
   display:flex;
   align-items:center;
   gap:16px;
-  padding:12px 2px;
+  padding:11px 2px;
   border-bottom:1px solid var(--hair);
   font-family:var(--stack);
-  font-size:clamp(15px, 1.15vw, 17px);
+  font-size:clamp(17px, 1.35vw, 20px);   /* same size as the paragraphs above */
   font-weight:450;
   letter-spacing:0.002em;
   color:var(--ink);
@@ -144,9 +146,9 @@ section{
 .v-mark{
   color:var(--accent);
   font-weight:600;
-  width:14px;
+  width:16px;
   text-align:center;
-  flex:0 0 14px;
+  flex:0 0 16px;
 }
 
 .micro-label{
