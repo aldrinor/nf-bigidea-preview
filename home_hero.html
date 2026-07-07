@@ -57,7 +57,7 @@ section{
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 56% 52% at 22% 42%, rgba(237,240,242,0.95) 0%, rgba(237,240,242,0.80) 38%, rgba(237,240,242,0.30) 62%, rgba(237,240,242,0) 80%);
+  background:radial-gradient(ellipse 58% 62% at 21% 46%, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.88) 44%, rgba(237,240,242,0.42) 68%, rgba(237,240,242,0) 86%);
 }
 
 /* === Text column === */
@@ -278,13 +278,14 @@ import * as THREE from 'three';
   const GRID_X = 300;
   const GRID_Z = 70;
   const SURF_W = 150;
-  const SURF_D = 38;       // depth of the band
-  const Z_FAR = -13;       // far edge (horizon ~50%); near edge = Z_FAR + SURF_D reaches the screen bottom
+  const SURF_D = 30;       // depth of the band
+  const Z_FAR = -5;        // far edge (horizon ~bottom half); near edge = Z_FAR + SURF_D reaches the screen bottom
   const SURF_COUNT = GRID_X * GRID_Z;
 
   const surfaceGeo = new THREE.BufferGeometry();
   const sPositions = new Float32Array(SURF_COUNT * 3);
   const sBoosts = new Float32Array(SURF_COUNT);
+  const sRows = new Float32Array(SURF_COUNT);   // 0 at far edge (horizon), 1 at near edge
 
   for (let ix = 0; ix < GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
@@ -293,11 +294,13 @@ import * as THREE from 'three';
       sPositions[i * 3 + 1] = 0;
       sPositions[i * 3 + 2] = Z_FAR + (iz / (GRID_Z - 1)) * SURF_D;
       sBoosts[i] = 0;
+      sRows[i] = iz / (GRID_Z - 1);
     }
   }
 
   surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
   surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
+  surfaceGeo.setAttribute('aRow', new THREE.BufferAttribute(sRows, 1));
 
   const surfaceMat = new THREE.ShaderMaterial({
     uniforms: {
@@ -314,6 +317,7 @@ import * as THREE from 'three';
     },
     vertexShader: `
       attribute float aBoost;
+      attribute float aRow;
       uniform float uTime;
       uniform float uPixelRatio;
       uniform float uSize;
@@ -323,6 +327,8 @@ import * as THREE from 'three';
       varying float vDist;
       varying float vHeight;
       varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
       varying vec2 vDirX;
       varying vec2 vDirZ;
 
@@ -339,13 +345,15 @@ import * as THREE from 'three';
         vec3 pos = position;
         pos.y = waveHeight(pos.x, pos.z, uTime);
 
-        // cursor interaction: a gentle lift + charge response that follows the cursor
+        // cursor interaction: a charge glow that follows the cursor (no surface lift — that
+        // distorted the "+" into an "I"); the "+" stay oriented on the calm wave
         float mdist = distance(pos.xz, uMouse);
         float mprox = uMouseStr * exp(-mdist * mdist / 55.0);
-        pos.y += mprox * 3.2;
         vMouse = mprox;
 
         vHeight = pos.y;
+        vRow = aRow;
+        vWorldX = pos.x;
 
         float shimmer = 0.85 + 0.15 * sin(uTime * 2.5 + pos.x * 0.4 + pos.z * 0.4);
         vBoost = aBoost * shimmer;
@@ -374,6 +382,8 @@ import * as THREE from 'three';
       varying float vDist;
       varying float vHeight;
       varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
       varying vec2 vDirX;
       varying vec2 vDirZ;
       uniform vec3 uBaseColor;
@@ -410,7 +420,13 @@ import * as THREE from 'three';
         color = mix(color, uFogColor, fog * 0.85);
 
         float depthFade = smoothstep(115.0, 20.0, vDist);
-        float alpha = plus * depthFade * (0.5 + vBoost * 0.3 + clamp(vMouse, 0.0, 1.0) * 0.4);
+        // top edge of the wave band (far rows near the horizon) dilutes into the cool-white
+        // upper half, so the surface fades out naturally instead of ending on a hard line
+        float topFade = smoothstep(0.0, 0.22, vRow);
+        // left edge recedes behind the text column so the copy breathes on clean white,
+        // and the wave massing stays center-right (more premium / restrained)
+        float leftFade = smoothstep(-60.0, -20.0, vWorldX);
+        float alpha = plus * depthFade * topFade * leftFade * (0.5 + vBoost * 0.3 + clamp(vMouse, 0.0, 1.0) * 0.4);
         alpha *= (1.0 - fog * 0.7);
 
         gl_FragColor = vec4(color, alpha);
@@ -425,7 +441,7 @@ import * as THREE from 'three';
   scene.add(surfacePoints);
 
   /* ===== Pollutants ===== */
-  const POLL_COUNT = 64;
+  const POLL_COUNT = 130;
   const pollGeo = new THREE.BufferGeometry();
   const pPos = new Float32Array(POLL_COUNT * 3);
   const pAzure = new Float32Array(POLL_COUNT);
@@ -442,8 +458,8 @@ import * as THREE from 'three';
       vx: (Math.random() - 0.5) * 0.07,
       vy: (Math.random() - 0.5) * 0.04,   // very gentle bob, NO gravity — it floats
       vz: (Math.random() - 0.5) * 0.07,
-      size: 1.2 + Math.random() * 1.8,
-      alpha: 0.26 + Math.random() * 0.28,
+      size: 1.3 + Math.random() * 1.9,
+      alpha: 0.34 + Math.random() * 0.30,
       state: 'float',
       azure: 0,
       captureT: 0,
