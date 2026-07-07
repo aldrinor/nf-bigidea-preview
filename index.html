@@ -64,6 +64,7 @@
 </head>
 <body>
   <div class="deck" id="deck">
+    <section class="screen"><iframe id="f0" src="home_hero.html" allow="autoplay"></iframe></section>
     <section class="screen"><iframe id="f1" src="act1.html?c3" allow="autoplay"></iframe></section>
     <section class="screen"><iframe id="f2" src="frame2.html?c2" allow="autoplay"></iframe></section>
   </div>
@@ -77,6 +78,7 @@
 <script>
 (function(){
   const deck = document.getElementById('deck');
+  const f0 = document.getElementById('f0');
   const f1 = document.getElementById('f1');
   const f2 = document.getElementById('f2');
   const cue = document.getElementById('cue');
@@ -84,6 +86,42 @@
   let idx = 0;
   let locked = false;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- reveal progress p for hero<->act1 transition ----
+  let pCurrent = 0;
+  let pFrom = 0, pTo = 0, pStart = 0, pRAF = 0;
+  const P_DUR = 700;
+
+  function postReveal(){
+    try{ f1.contentWindow.postMessage({type:'nf-reveal', p: pCurrent}, '*'); }catch(e){}
+  }
+
+  function pAnimLoop(t){
+    const elapsed = t - pStart;
+    const k = Math.min(1, elapsed / P_DUR);
+    const e = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k+2, 2)/2;
+    pCurrent = pFrom + (pTo - pFrom) * e;
+    postReveal();
+    if (k < 1) {
+      pRAF = requestAnimationFrame(pAnimLoop);
+    } else {
+      pCurrent = pTo;
+      postReveal();
+      pRAF = 0;
+    }
+  }
+
+  function setPTarget(target){
+    if (reduceMotion) {
+      pCurrent = target;
+      postReveal();
+      return;
+    }
+    pFrom = pCurrent;
+    pTo = target;
+    pStart = performance.now();
+    if (!pRAF) pRAF = requestAnimationFrame(pAnimLoop);
+  }
 
   function setScreenH(){
     const h = window.innerHeight;
@@ -111,14 +149,15 @@
 
   function goTo(i){
     if(i < 0) i = 0;
-    if(i > 1) i = 1;
+    if(i > 2) i = 2;
     if(i === idx) return;
     idx = i;
     applyTransform();
     locked = true;
     window.setTimeout(function(){ locked = false; }, 760);
     updateCue();
-    if(idx === 1){
+    setPTarget(idx === 0 ? 0 : 1);
+    if(idx === 2){
       try{ f2.contentWindow.postMessage({type:'nf-play'}, '*'); }catch(e){}
     }
   }
@@ -213,11 +252,13 @@
     attachIframe(iframe);
   }
 
-  f1.addEventListener('load', function(){ onIframeLoad(f1); });
+  f0.addEventListener('load', function(){ onIframeLoad(f0); });
+  f1.addEventListener('load', function(){ onIframeLoad(f1); postReveal(); });
   f2.addEventListener('load', function(){ onIframeLoad(f2); });
 
   // Also try attaching immediately in case load already fired / cached
-  try{ if(f1.contentDocument && f1.contentDocument.readyState === 'complete') attachIframe(f1); }catch(e){}
+  try{ if(f0.contentDocument && f0.contentDocument.readyState === 'complete') attachIframe(f0); }catch(e){}
+  try{ if(f1.contentDocument && f1.contentDocument.readyState === 'complete'){ attachIframe(f1); postReveal(); } }catch(e){}
   try{ if(f2.contentDocument && f2.contentDocument.readyState === 'complete') attachIframe(f2); }catch(e){}
 
   // Initial state
