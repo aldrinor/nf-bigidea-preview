@@ -1180,17 +1180,6 @@ import * as THREE from 'three';
   var motes = [], blooms = [];
 
   // one dust grain — act1's grey grain, plus a gentle fall and a landing depth on the surface band
-  var targets = [];
-  function computeTargets() {                            // spread nodes on the "+" surface — grains
-    targets = [];                                        // converge to the nearest, so they angle in
-    var top = H * 0.50, bot = H * 0.74;                  // laterally (an even draw-in, not straight rain)
-    var cols = Math.max(8, Math.round(W / 125)), rows = 2;
-    for (var c = 0; c < cols; c++) {
-      for (var r = 0; r < rows; r++) {
-        targets.push({ x: ((c + 0.5) / cols) * W + (Math.random() - 0.5) * 30, y: top + ((r + Math.random()) / rows) * (bot - top) });
-      }
-    }
-  }
   function newMote() {
     var ang = Math.random() * Math.PI * 2;
     var sp = 0.14 + Math.random() * 0.26;
@@ -1200,16 +1189,9 @@ import * as THREE from 'three';
       vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
       r: 0.55 + Math.random() * 1.7,
       a: 0.08 + ((Math.random() * 8) | 0) * 0.045,       // act1's 8 depth-alpha buckets
-      ti: -1, state: 'float', fade: 1
+      landingY: (H * 0.50) + Math.random() * (H * 0.30), // where this grain settles onto the "+" band
+      state: 'float', fade: 1
     };
-  }
-  function assignTarget(m) {                              // nearest surface target -> even pull-in
-    var bi = 0, bd = 1e18;
-    for (var i = 0; i < targets.length; i++) {
-      var dx = targets[i].x - m.x, dy = targets[i].y - m.y, d = dx * dx + dy * dy;
-      if (d < bd) { bd = d; bi = i; }
-    }
-    m.ti = bi;
   }
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -1217,17 +1199,16 @@ import * as THREE from 'three';
     if (W === 0 || H === 0) return;
     cv.width = W * DPR; cv.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    computeTargets();
     var n = Math.round(Math.min(3800, W * H / 520));     // act1's exact density
     motes = []; for (var i = 0; i < n; i++) motes.push(newMote());
     blooms = [];
   }
-  // The dust FLOATS like act1, then a gentle pull toward the "+" surface ramps up (A: 0 -> 1), drawing
-  // every grain EVENLY onto the surface (each toward its nearest target — a convergent pull, NOT a
-  // straight-down rain). At the surface it neutralizes in a soft azure and vanishes. Once all clean,
+  // Dust FLOATS like act1, then a gentle even draw ramps up (A: 0 -> 1) and SLOWLY pulls each round grain
+  // down onto the "+" surface at its own spot — soft, even across the width, no rain-fast fall, no
+  // streaks, no funnels. At the surface it neutralizes in a soft light azure and vanishes. Once all clean,
   // hold on clean air (proof it's clean), then a fresh batch floats in and it repeats.
   var phase = 'active', cleanTimer = 0, CLEAN_HOLD = 3.0, fieldFade = 0;
-  var cycT = 0, A = 0, FLOAT_TIME = 2.4, PULL_RAMP = 2.0;
+  var cycT = 0, A = 0, FLOAT_TIME = 2.6, PULL_RAMP = 2.2;
   function respawnBatch() {
     for (var i = 0; i < motes.length; i++) motes[i] = newMote();
     phase = 'active'; fieldFade = 0; cycT = 0; A = 0;
@@ -1247,25 +1228,19 @@ import * as THREE from 'three';
           m.vx += (Math.random() - 0.5) * 0.016 * f;     // act1 float (gentle wander)
           m.vy += (Math.random() - 0.5) * 0.016 * f;
           m.vx *= Math.pow(0.99, f); m.vy *= Math.pow(0.99, f);
-          if (A > 0.02) {                                // gentle, even pull toward the nearest surface target
-            if (m.ti < 0) assignTarget(m);
-            var tg = targets[m.ti];
-            var dx = tg.x - m.x, dy = tg.y - m.y, d = Math.sqrt(dx * dx + dy * dy) || 0.001;
-            var pull = A * A * 0.15;
-            m.vx += (dx / d) * pull * 1.2 * f;           // slight lateral lean toward the nearest node
-            m.vy += (dy / d) * pull * 0.9 * f;           // gentle even draw-in (not rain, not a funnel)
-            if (d < 14) {                                // reached the surface -> neutralize
-              m.state = 'hit';
-              blooms.push({ x: m.x, y: m.y, age: 0, life: 0.6, size: 9 + Math.random() * 7 });
-            }
+          if (A > 0.02) {                                // gentle even draw toward the surface (its own spot)
+            m.vy += (m.landingY - m.y) * 0.0011 * A * A * f;
           }
           var sp = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
-          var maxSp = 0.5 + A * 0.55;                    // slow float; gentle pull-in (never rain-fast)
+          var maxSp = 0.45 + A * 0.35;                   // slow float; gentle draw-down (never rain-fast)
           if (sp > maxSp) { m.vx = m.vx / sp * maxSp; m.vy = m.vy / sp * maxSp; }
           m.x += m.vx * f; m.y += m.vy * f;
         }
         if (m.x < -6) m.x = W + 6; else if (m.x > W + 6) m.x = -6;
-        if (m.y < -6) m.y = H * 0.42;
+        if (m.y >= m.landingY) {                          // settled onto the surface -> neutralize
+          m.state = 'hit'; m.y = m.landingY;
+          blooms.push({ x: m.x, y: m.y, age: 0, life: 0.6, size: 8 + Math.random() * 6 });
+        }
       } else {                                           // hit -> soft fade, then DONE
         m.fade -= dt / 260;
         if (m.fade <= 0) { m.fade = 0; m.state = 'done'; }
@@ -1284,24 +1259,6 @@ import * as THREE from 'three';
   })();
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    // convergent pull-in trails — faint streaks in each grain's direction of travel (toward its
-    // surface target). Only while being pulled, so it reads as an even DRAW-IN, not straight rain.
-    if (A > 0.3) {
-      ctx.strokeStyle = 'rgba(60,64,72,1)';
-      ctx.lineWidth = 1;
-      for (var i = 0; i < motes.length; i++) {
-        var mm = motes[i]; if (mm.state !== 'float') continue;
-        var sp = Math.sqrt(mm.vx * mm.vx + mm.vy * mm.vy);
-        if (sp < 0.35) continue;
-        var tl = 4 + sp * 9;
-        ctx.globalAlpha = mm.a * fieldFade * A * 0.5;
-        ctx.beginPath();
-        ctx.moveTo(mm.x, mm.y);
-        ctx.lineTo(mm.x - (mm.vx / sp) * tl, mm.y - (mm.vy / sp) * tl);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-    }
     for (var i = 0; i < motes.length; i++) {             // grey dust (skip cleaned-up grains)
       var m = motes[i]; if (m.state === 'done') continue;
       var s = m.r * 3.0;
@@ -1312,7 +1269,7 @@ import * as THREE from 'three';
     for (var b = 0; b < blooms.length; b++) {            // soft, light azure at each surface contact
       var bl = blooms[b], t = bl.age / bl.life;
       var rad = bl.size * (0.55 + t * 1.0);
-      var al = (1 - t) * 0.26;
+      var al = (1 - t) * 0.17;
       var g2 = ctx.createRadialGradient(bl.x, bl.y, 0, bl.x, bl.y, rad);
       g2.addColorStop(0, 'rgba(126,180,255,' + al.toFixed(3) + ')');
       g2.addColorStop(0.5, 'rgba(126,180,255,' + (al * 0.45).toFixed(3) + ')');
