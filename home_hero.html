@@ -250,6 +250,7 @@ import * as THREE from 'three';
     uniforms: {
       uTime: { value: 0 },
       uPixelRatio: { value: renderer.getPixelRatio() },
+      uResolution: { value: new THREE.Vector2(1, 1) },
       uSize: { value: 2.7 },
       uBaseColor: { value: new THREE.Color(0x5a6674) },
       uChargeColor: { value: new THREE.Color(0x1466e6) },
@@ -265,6 +266,7 @@ import * as THREE from 'three';
       attribute float aRow;
       uniform float uTime;
       uniform float uPixelRatio;
+      uniform vec2 uResolution;
       uniform float uSize;
       uniform vec2 uMouse;
       uniform float uMouseStr;
@@ -274,8 +276,8 @@ import * as THREE from 'three';
       varying float vMouse;
       varying float vRow;
       varying float vWorldX;
-      varying vec2 vDirX;
-      varying vec2 vDirZ;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
 
       float waveHeight(float x, float z, float t) {
         float dome = -0.00044 * x * x;
@@ -310,8 +312,14 @@ import * as THREE from 'three';
         vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
         vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
         vec2 s0 = clip0.xy / clip0.w;
-        vDirX = normalize((clipX.xy / clipX.w) - s0);
-        vDirZ = normalize((clipZ.xy / clipZ.w) - s0);
+        // aspect-correct screen deltas for a fixed world step along X and Z, NOT normalized, so the
+        // arm receding into the distance stays SHORTER -> the "+" lies FLAT on the surface
+        // (foreshortened in perspective) instead of standing upright facing the camera.
+        vec2 rawX = ((clipX.xy / clipX.w) - s0) * uResolution;
+        vec2 rawZ = ((clipZ.xy / clipZ.w) - s0) * uResolution;
+        float armM = max(length(rawX), length(rawZ)) + 1e-4;
+        vArmX = (rawX / armM) * 0.5;
+        vArmZ = (rawZ / armM) * 0.5;
 
         float sz = uSize * (1.0 + aBoost * 1.6 + mprox * 0.12);
         float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
@@ -325,8 +333,8 @@ import * as THREE from 'three';
       varying float vMouse;
       varying float vRow;
       varying float vWorldX;
-      varying vec2 vDirX;
-      varying vec2 vDirZ;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
       uniform vec3 uBaseColor;
       uniform vec3 uChargeColor;
       uniform vec3 uTipColor;
@@ -338,19 +346,22 @@ import * as THREE from 'three';
         vec2 uv = gl_PointCoord - 0.5;
         uv.y = -uv.y;
 
-        vec2 dirX = vDirX;
-        vec2 dirZ = vec2(-dirX.y, dirX.x); // exact perpendicular of dirX -> a true 90 deg plus that tilts with the surface but never shears
-
-        vec2 perpX = vec2(-dirX.y, dirX.x);
-        vec2 perpZ = vec2(-dirZ.y, dirZ.x);
-        float alongX = dot(uv, dirX), distX = abs(dot(uv, perpX));
-        float alongZ = dot(uv, dirZ), distZ = abs(dot(uv, perpZ));
-        float thick = 0.18;
-        float arm   = 0.5;
-        float armX = (1.0 - smoothstep(thick * 0.55, thick, distX)) *
-                     (1.0 - smoothstep(arm - 0.07, arm, abs(alongX)));
-        float armZ = (1.0 - smoothstep(thick * 0.55, thick, distZ)) *
-                     (1.0 - smoothstep(arm - 0.07, arm, abs(alongZ)));
+        // Draw each arm along its FORESHORTENED surface-tangent vector: the arm going into the
+        // distance is shorter, so the "+" reads as painted flat ON the wavy surface, tilting and
+        // foreshortening with it (not a billboard cross standing up toward the camera).
+        float thick = 0.11;                 // constant arm half-thickness in sprite-uv
+        float lenX = length(vArmX);
+        float lenZ = length(vArmZ);
+        vec2 uX = vArmX / max(lenX, 1e-4);
+        vec2 uZ = vArmZ / max(lenZ, 1e-4);
+        lenX = max(lenX, 0.16);             // floor so an edge-on arm never fully vanishes
+        lenZ = max(lenZ, 0.16);
+        float distX = abs(dot(uv, vec2(-uX.y, uX.x)));
+        float distZ = abs(dot(uv, vec2(-uZ.y, uZ.x)));
+        float armX = (1.0 - smoothstep(thick * 0.6, thick, distX)) *
+                     (1.0 - smoothstep(lenX - 0.06, lenX, abs(dot(uv, uX))));
+        float armZ = (1.0 - smoothstep(thick * 0.6, thick, distZ)) *
+                     (1.0 - smoothstep(lenZ - 0.06, lenZ, abs(dot(uv, uZ))));
         float plus  = max(armX, armZ);
         if (plus < 0.05) discard;
 
@@ -784,6 +795,7 @@ import * as THREE from 'three';
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     surfaceMat.uniforms.uPixelRatio.value = dpr;
+    surfaceMat.uniforms.uResolution.value.set(w, h);
     if (dustMat) dustMat.uniforms.uPixelRatio.value = dpr;
     captureMat.uniforms.uPixelRatio.value = dpr;
     bloomMat.uniforms.uPixelRatio.value = dpr;
