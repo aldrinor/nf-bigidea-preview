@@ -276,9 +276,10 @@ import * as THREE from 'three';
 
   /* ===== Surface (charged membrane) ===== */
   const GRID_X = 300;
-  const GRID_Z = 40;
+  const GRID_Z = 70;
   const SURF_W = 150;
-  const SURF_D = 20;
+  const SURF_D = 38;       // depth of the band
+  const Z_FAR = -13;       // far edge (horizon ~50%); near edge = Z_FAR + SURF_D reaches the screen bottom
   const SURF_COUNT = GRID_X * GRID_Z;
 
   const surfaceGeo = new THREE.BufferGeometry();
@@ -290,7 +291,7 @@ import * as THREE from 'three';
       const i = ix * GRID_Z + iz;
       sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
       sPositions[i * 3 + 1] = 0;
-      sPositions[i * 3 + 2] = (iz / (GRID_Z - 1) - 0.5) * SURF_D;
+      sPositions[i * 3 + 2] = Z_FAR + (iz / (GRID_Z - 1)) * SURF_D;
       sBoosts[i] = 0;
     }
   }
@@ -435,9 +436,9 @@ import * as THREE from 'three';
 
   function makePollutant(initial) {
     return {
-      x: (Math.random() - 0.5) * 124,
+      x: (Math.random() - 0.5) * 130,
       y: 8 + Math.random() * 20,          // floating gently in the upper air
-      z: (Math.random() - 0.5) * 22,
+      z: Z_FAR + Math.random() * SURF_D,
       vx: (Math.random() - 0.5) * 0.07,
       vy: (Math.random() - 0.5) * 0.04,   // very gentle bob, NO gravity — it floats
       vz: (Math.random() - 0.5) * 0.07,
@@ -685,6 +686,8 @@ import * as THREE from 'three';
   let rafId = 0;
   let lastT = 0;
   let clock = 0;
+  let cleanTimer = 0;
+  const CLEAN_HOLD = 5.5;   // seconds the upper air stays clean before a new batch drifts in
 
   function loop(t) {
     if (!running) return;
@@ -736,7 +739,7 @@ import * as THREE from 'three';
           p.y = surfH;
           boostSurfaceAt(p.x, p.z, 0.5);
           spawnBloom(p.x, surfH + 0.15, p.z);
-        } else if (Math.abs(p.x) > 64 || Math.abs(p.z) > 13 || p.y > 32) {
+        } else if (Math.abs(p.x) > 66 || p.z < Z_FAR - 3 || p.z > Z_FAR + SURF_D + 3 || p.y > 32) {
           pollutants[i] = makePollutant(false);
           p = pollutants[i];
         }
@@ -745,8 +748,7 @@ import * as THREE from 'three';
         p.azure = 1;
         p.y = waveHeight(p.x, p.z, clock);
         if (elapsed > 0.6) {
-          pollutants[i] = makePollutant(false);
-          p = pollutants[i];
+          p.state = 'done';   // cleaned — does NOT respawn; the upper air becomes clean
         }
       }
 
@@ -768,6 +770,21 @@ import * as THREE from 'three';
     pollGeo.attributes.aAzure.needsUpdate = true;
     pollGeo.attributes.aSize.needsUpdate = true;
     pollGeo.attributes.aAlpha.needsUpdate = true;
+
+    /* Cleaning cycle: once the whole batch is cleaned, the upper air is clean; hold, then a new batch drifts in */
+    let allDone = true;
+    for (let i = 0; i < POLL_COUNT; i++) {
+      if (pollutants[i].state !== 'done') { allDone = false; break; }
+    }
+    if (allDone) {
+      cleanTimer += dt;
+      if (cleanTimer > CLEAN_HOLD) {
+        cleanTimer = 0;
+        for (let i = 0; i < POLL_COUNT; i++) pollutants[i] = makePollutant(false);
+      }
+    } else {
+      cleanTimer = 0;
+    }
 
     /* Update blooms */
     for (let i = 0; i < BLOOM_COUNT; i++) {
