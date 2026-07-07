@@ -32,7 +32,8 @@ html,body{
 
 section{
   position:relative;
-  display:block;
+  display:flex;
+  align-items:center;
   min-height:100vh;
   max-height:100vh;
   width:100%;
@@ -40,6 +41,7 @@ section{
   background:var(--bg);
 }
 
+/* === Canvas (right-side particle field, behind text) === */
 #cloud-canvas{
   position:absolute;
   inset:0;
@@ -49,28 +51,25 @@ section{
   pointer-events:none;
 }
 
+/* === Legibility scrim: clean fade from bg over the text zone === */
 .scrim{
   position:absolute;
-  top:0;
-  left:0;
-  width:62%;
-  height:54%;
+  inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 72% 82% at 26% 40%, rgba(237,240,242,0.92) 0%, rgba(237,240,242,0.62) 36%, rgba(237,240,242,0.22) 62%, rgba(237,240,242,0) 82%);
+  background:linear-gradient(90deg, var(--bg) 0%, var(--bg) 36%, rgba(237,240,242,0.82) 46%, rgba(237,240,242,0) 60%);
 }
 
+/* === Text column === */
 .text-col{
-  position:absolute;
-  top:clamp(32px, 6vh, 76px);
-  left:0;
+  position:relative;
   z-index:3;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
+  justify-content:center;
   align-items:flex-start;
-  max-width:min(50%, 560px);
-  padding-left:clamp(24px, 6vw, 88px);
+  max-width:min(48%, 620px);
+  padding-left:clamp(24px, 6vw, 96px);
   padding-right:24px;
 }
 
@@ -81,7 +80,7 @@ section{
   color:var(--muted);
   font-weight:400;
   letter-spacing:0.005em;
-  margin-bottom:20px;
+  margin-bottom:22px;
 }
 
 .headline{
@@ -91,9 +90,15 @@ section{
   font-size:clamp(24px, 2.7vw, 34px);
   line-height:1.32;
   letter-spacing:-0.022em;
-  margin-bottom:24px;
+  margin-bottom:26px;
+}
+.headline em{
+  color:var(--accent);
+  font-style:normal;
+  font-weight:600;
 }
 
+/* === Body paragraph === */
 .body-text{
   max-width:440px;
   font-size:19px;
@@ -102,11 +107,39 @@ section{
   margin-bottom:22px;
 }
 
+
+/* === Links === */
+.links{
+  display:flex;
+  gap:28px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* === Advocacy link === */
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+
+/* === Mobile === */
 @media (max-width: 880px){
   section{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
     min-height:100vh;
-    max-height:100vh;
-    overflow:hidden;
+    max-height:none;
+    overflow:visible;
   }
   #cloud-canvas{
     position:absolute;
@@ -114,9 +147,7 @@ section{
     z-index:1;
   }
   .scrim{
-    width:100%;
-    height:50%;
-    background:linear-gradient(180deg, var(--bg) 0%, rgba(237,240,242,0.94) 30%, rgba(237,240,242,0.55) 56%, rgba(237,240,242,0) 78%);
+    background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 40%, rgba(237,240,242,0.80) 50%, rgba(237,240,242,0) 64%);
   }
   .text-col{
     max-width:none;
@@ -124,52 +155,60 @@ section{
     align-items:stretch;
     padding-left:clamp(20px,5vw,28px);
     padding-right:clamp(20px,5vw,28px);
-    padding-top:clamp(24px,4vh,36px);
+    padding-top:clamp(28px,5vh,40px);
+    padding-bottom:8px;
+    flex:0 0 auto;
   }
   .eyebrow{
     font-size:13px;
-    margin-bottom:16px;
+    margin-bottom:18px;
   }
   .headline{
     font-size:clamp(26px,6.5vw,34px);
     line-height:1.18;
-    margin-bottom:clamp(16px,2.5vh,22px);
+    margin-bottom:clamp(18px,3vh,24px);
+    color:var(--headline-ink);
   }
   .body-text{
     font-size:16px;
     line-height:1.6;
-    margin-bottom:0;
-    max-width:none;
+    margin-bottom:clamp(16px,2.5vh,22px);
+    color:var(--ink);
+  }
+  .advocacy-link{
+    font-size:16px;
+    line-height:1.4;
   }
+  .links{gap:22px;}
 }
 
+/* === Short screens (1366×768 etc.) === */
 @media (max-height: 760px) and (min-width: 881px){
-  .text-col{ top:clamp(24px, 4vh, 48px); }
   .headline{
     font-size:clamp(26px, 2.6vw, 34px);
-    margin-bottom:20px;
+    margin-bottom:22px;
   }
   .body-text{
     font-size:17px;
     line-height:1.5;
     margin-bottom:18px;
-  }
+  }
 }
 @media (max-height: 680px) and (min-width: 881px){
-  .text-col{ top:clamp(20px, 3vh, 36px); }
   .eyebrow{
     font-size:12px;
-    margin-bottom:14px;
+    margin-bottom:16px;
   }
   .headline{
     font-size:clamp(22px, 2.2vw, 28px);
-    margin-bottom:14px;
+    margin-bottom:16px;
   }
   .body-text{
     font-size:16px;
     line-height:1.45;
-    margin-bottom:0;
-  }
+    margin-bottom:14px;
+  }
+  .advocacy-link{font-size:16px;}
 }
 </style>
 </head>
@@ -181,573 +220,328 @@ section{
 
   <div class="text-col">
     <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
+
     <h1 class="headline">NanoFlashing™</h1>
+
     <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
   </div>
 </section>
 
-<script type="importmap">
-{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
-</script>
-
-<script type="module">
-import * as THREE from 'three';
-
+<script>
 (function () {
   'use strict';
 
-  const section = document.getElementById('section');
-  const canvas = document.getElementById('cloud-canvas');
+  var section = document.getElementById('section');
+  var canvas = document.getElementById('cloud-canvas');
   if (!section || !canvas) return;
+  var ctx = canvas.getContext('2d');
 
-  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+  var dpr = 1, W = 0, H = 0;
+  var particles = [];
+  var reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+  var isMobile = (window.innerWidth <= 880);
+  var running = false, rafId = 0, lastT = 0;
 
-  /* ===== Value noise (fbm) shared by silk + mote collision ===== */
-  function hash2(x, y) {
-    let s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-    return s - Math.floor(s);
+  // Round 3: BIGGER + RICHER — 14000-18000 desktop, ~40% less on mobile
+  var COUNT = isMobile ? 9000 : 16000;
+
+  // Cloud geometry — LARGE, sprawling, fills right ~55% of stage, 60-70% viewport height tall
+  var cloudCX = 0, cloudCY = 0, maxRadius = 0;
+  var chargeX = 0, chargeY = 0;
+  var textBoundaryX = 0, textBoundaryY = 0;
+  var coreRadius = 0;
+
+  // Organic silhouette: 3 overlapping gaussian lobes at offset centers
+  var lobes = [];
+
+  function seedLobes() {
+    lobes.length = 0;
+    // 3 overlapping lobes at slightly offset centers for organic, asymmetric nebula silhouette
+    var baseR = maxRadius;
+    lobes.push({
+      ox: 0, oy: 0,
+      rx: baseR * 1.0, ry: baseR * 0.92,
+      weight: 1.0,
+      rot: 0.15
+    });
+    lobes.push({
+      ox: baseR * 0.28, oy: -baseR * 0.22,
+      rx: baseR * 0.78, ry: baseR * 0.85,
+      weight: 0.75,
+      rot: -0.4
+    });
+    lobes.push({
+      ox: -baseR * 0.20, oy: baseR * 0.30,
+      rx: baseR * 0.72, ry: baseR * 0.68,
+      weight: 0.65,
+      rot: 0.6
+    });
+
+    // Low-frequency angular harmonics for soft irregular outline
+    harmonics.length = 0;
+    var n = 6;
+    for (var i = 0; i < n; i++) {
+      harmonics.push({
+        freq: 2 + Math.floor(Math.random() * 5),
+        phase: Math.random() * Math.PI * 2,
+        amp: 0.04 + Math.random() * 0.07
+      });
+    }
   }
-  function valueNoise(x, y) {
-    const ix = Math.floor(x), iy = Math.floor(y);
-    const fx = x - ix, fy = y - iy;
-    const ux = fx * fx * (3 - 2 * fx);
-    const uy = fy * fy * (3 - 2 * fy);
-    const a = hash2(ix, iy);
-    const b = hash2(ix + 1, iy);
-    const c = hash2(ix, iy + 1);
-    const d = hash2(ix + 1, iy + 1);
-    return (a * (1 - ux) + b * ux) * (1 - uy) + (c * (1 - ux) + d * ux) * uy;
-  }
-  function fabricHeight(x, z, t) {
-    // low-frequency fbm -> soft rolling silk folds
-    return 3.7 * valueNoise(x * 0.045, z * 0.045 + t * 0.05)
-         + 1.7 * valueNoise(x * 0.11,  z * 0.11  - t * 0.08)
-         + 0.5 * valueNoise(x * 0.24,  z * 0.24  + t * 0.11);
+
+  var harmonics = [];
+
+  function silhouetteScale(angle) {
+    var s = 1;
+    for (var i = 0; i < harmonics.length; i++) {
+      var h = harmonics[i];
+      s += h.amp * Math.sin(h.freq * angle + h.phase);
+    }
+    return Math.max(0.55, s);
   }
 
-  /* ===== Renderer ===== */
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-  renderer.setClearColor(0xedf0f2, 1);
-  const dprCap = 2;
-
-  /* ===== Scene & Camera ===== */
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 400);
-  camera.position.set(0, 20, 28);
-  camera.lookAt(0, -1.5, -12);
-
-  /* ===== Silk cloth mesh ===== */
-  const PLANE_W = 90, PLANE_D = 70;
-  const SEG_X = 256, SEG_Z = 192;
-  const STEP_X = PLANE_W / SEG_X;
-  const STEP_Z = PLANE_D / SEG_Z;
-  const Z_NEAR = -50;          // world z of iy=0 edge (after translate)
-  const X_LEFT = -PLANE_W / 2; // world x of ix=0 edge
-
-  const silkGeo = new THREE.PlaneGeometry(PLANE_W, PLANE_D, SEG_X, SEG_Z);
-  silkGeo.rotateX(-Math.PI / 2);
-  silkGeo.translate(0, 0, -15); // center at z=-15 → z spans [-50, 20]
-
-  const VCOUNT = (SEG_X + 1) * (SEG_Z + 1);
-  const posAttr = silkGeo.attributes.position;
-  const norAttr = silkGeo.attributes.normal;
-  const baseX = new Float32Array(VCOUNT);
-  const baseZ = new Float32Array(VCOUNT);
-  const aAzure = new Float32Array(VCOUNT);
-
-  for (let i = 0; i < VCOUNT; i++) {
-    baseX[i] = posAttr.getX(i);
-    baseZ[i] = posAttr.getZ(i);
+  // Gaussian via sum of 4 randoms: (r1+r2+r3+r4-2)/2 -> range ~-1..1, bell-shaped
+  function gaussian() {
+    return (Math.random() + Math.random() + Math.random() + Math.random() - 2) / 2;
   }
-  silkGeo.setAttribute('aAzure', new THREE.BufferAttribute(aAzure, 1));
 
-  const silkMat = new THREE.ShaderMaterial({
-    uniforms: {
-      // LIGHT silk base: soft light blue-grey (#ccd6e6)
-      uSilkColor:      { value: new THREE.Color(0.80, 0.839, 0.902) },
-      uKeyDir:         { value: new THREE.Vector3(-0.55, 0.78, 0.30).normalize() },
-      uKeyColor:       { value: new THREE.Color(1.00, 0.985, 0.96) },
-      uSkyColor:       { value: new THREE.Color(0.86, 0.89, 0.93) },
-      uGroundColor:    { value: new THREE.Color(0.52, 0.545, 0.585) },
-      uSheenColor:     { value: new THREE.Color(0.92, 0.95, 1.00) }, // cool satin sheen
-      // PALE soft azure for capture glow (#8fc0ff)
-      uAzure:          { value: new THREE.Color(0.561, 0.753, 1.0) },
-      uBg:             { value: new THREE.Color(0xedf0f2) },
-      uKeyStrength:    { value: 0.66 },
-      uAmbientStrength:{ value: 0.72 },
-      uSheenStrength:  { value: 0.52 },
-      uHemiStrength:   { value: 0.74 },
-    },
-    vertexShader: `
-      attribute float aAzure;
-      varying vec3 vNormal;
-      varying vec3 vWorldPos;
-      varying vec3 vViewDir;
-      varying float vAzure;
-      varying float vDist;
-      void main() {
-        vAzure = aAzure;
-        vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldPos = worldPos.xyz;
-        vNormal = normalize(mat3(modelMatrix) * normal);
-        vec4 mv = viewMatrix * worldPos;
-        vDist = -mv.z;
-        vViewDir = normalize(cameraPosition - worldPos.xyz);
-        gl_Position = projectionMatrix * mv;
-      }
-    `,
-    fragmentShader: `
-      uniform vec3 uSilkColor;
-      uniform vec3 uKeyDir;
-      uniform vec3 uKeyColor;
-      uniform vec3 uSkyColor;
-      uniform vec3 uGroundColor;
-      uniform vec3 uSheenColor;
-      uniform vec3 uAzure;
-      uniform vec3 uBg;
-      uniform float uKeyStrength;
-      uniform float uAmbientStrength;
-      uniform float uSheenStrength;
-      uniform float uHemiStrength;
-      varying vec3 vNormal;
-      varying vec3 vWorldPos;
-      varying vec3 vViewDir;
-      varying float vAzure;
-      varying float vDist;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = section.clientWidth;
+    H = section.clientHeight;
+    canvas.width = Math.max(1, Math.floor(W * dpr));
+    canvas.height = Math.max(1, Math.floor(H * dpr));
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // ---- micro-fiber value noise ----
-      float hash21(vec2 p){
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-      }
-      float vnoise(vec2 p){
-        vec2 i = floor(p); vec2 f = fract(p);
-        vec2 u = f*f*(3.0-2.0*f);
-        return mix(mix(hash21(i),            hash21(i+vec2(1.0,0.0)), u.x),
-                   mix(hash21(i+vec2(0.0,1.0)), hash21(i+vec2(1.0,1.0)), u.x), u.y);
-      }
-      float fbmFine(vec2 p){
-        float a = 0.5;
-        float s = 0.0;
-        for(int i=0;i<3;i++){
-          s += a * vnoise(p);
-          p *= 2.13;
-          a *= 0.5;
-        }
-        return s;
-      }
+    isMobile = (window.innerWidth <= 880);
+    COUNT = isMobile ? 9000 : 16000;
 
-      void main() {
-        vec3 N = normalize(vNormal);
-        vec3 V = normalize(vViewDir);
-        vec3 L = normalize(uKeyDir);
+    // Cloud center at x=72% (right-weighted), vertically centered
+    cloudCX = W * 0.72;
+    cloudCY = H * 0.50;
 
-        // ---- soft wrap diffuse: light on crests, shadow in valleys ----
-        float ndl = dot(N, L);
-        float wrap = clamp(ndl * 0.5 + 0.5, 0.0, 1.0);
-        wrap = wrap * wrap; // gentle contrast so valleys read softer
-        vec3 diffuse = uKeyColor * wrap * uKeyStrength;
+    // LARGE cloud: 60-70% of viewport height tall, sprawling to fill right ~55% of stage
+    // Use the larger dimension to ensure it fills generously
+    maxRadius = Math.max(280, Math.min(W, H) * 0.42);
+    // On wide screens, let it stretch even more horizontally
+    if (!isMobile && W > 1000) {
+      maxRadius = Math.max(maxRadius, H * 0.38);
+    }
 
-        // ---- hemisphere fill ----
-        float hemi = N.y * 0.5 + 0.5;
-        vec3 hemiCol = mix(uGroundColor, uSkyColor, hemi) * uHemiStrength;
-        vec3 amb = hemiCol * uAmbientStrength;
+    chargeX = cloudCX;
+    chargeY = cloudCY;
+    coreRadius = maxRadius * 0.16;
+    textBoundaryX = W * 0.42;
+    textBoundaryY = H * 0.55;
 
-        // ---- anisotropic satin sheen (Kajiya-Kay style) ----
-        // tangent along fold ridge direction (perpendicular to slope)
-        vec3 up = vec3(0.0, 1.0, 0.0);
-        vec3 T = normalize(cross(N, up) + vec3(0.0, 0.0001, 0.0));
-        vec3 Bvec = normalize(cross(N, T));
+    seedLobes();
+  }
 
-        vec3 H = normalize(L + V);
-        float dotTH = dot(T, H);
-        float dotBH = dot(Bvec, H);
-        float ax = 0.12;   // narrow along ridge  -> streak
-        float ay = 0.62;   // wider across ridge
-        float aniso = exp(-2.0 * (dotTH*dotTH/(ax*ax) + dotBH*dotBH/(ay*ay)));
-        float ndh = max(dot(N, H), 0.0);
-        aniso *= ndh;
+  function makeParticle() {
+    // Pick one of the 3 overlapping lobes (weighted) for organic multi-center silhouette
+    var lobeIdx;
+    var rrand = Math.random();
+    if (rrand < 0.45) lobeIdx = 0;
+    else if (rrand < 0.75) lobeIdx = 1;
+    else lobeIdx = 2;
+    var lobe = lobes[lobeIdx];
 
-        // micro-fiber texture modulating the sheen so it reads as woven silk
-        float fiber  = fbmFine(vWorldPos.xz * 16.0);
-        float fiber2 = vnoise(vWorldPos.xz * 54.0);
-        float microTex = 0.76 + 0.20 * fiber + 0.08 * fiber2;
+    // Gaussian clustering within the chosen lobe: dense core, feathering to sparse edges
+    var gx = gaussian(); // -1..1 bell
+    var gy = gaussian(); // -1..1 bell
 
-        vec3 sheen = uSheenColor * aniso * uSheenStrength * microTex;
+    // angle for organic silhouette perturbation
+    var angle = Math.atan2(gy, gx);
+    var sil = silhouetteScale(angle);
 
-        // very subtle fresnel rim — keeps it soft, not glowing
-        float fres = pow(1.0 - max(dot(N, V), 0.0), 5.0);
-        sheen += uSheenColor * fres * 0.05;
+    // sqrt/pow bias so core is densely packed, edges sparse
+    var radialBias = Math.pow(Math.abs(gx * gx + gy * gy), 0.5);
+    var radial = Math.pow(Math.random(), 0.45) * sil;
 
-        // base color with faint fiber variation
-        vec3 base = uSilkColor * (0.945 + 0.055 * fiber);
+    // Apply lobe rotation
+    var cosR = Math.cos(lobe.rot);
+    var sinR = Math.sin(lobe.rot);
+    var lx = gx * lobe.rx * radial;
+    var ly = gy * lobe.ry * radial;
+    var rx = lx * cosR - ly * sinR;
+    var ry = lx * sinR + ly * cosR;
 
-        // ---- pale azure capture glow anchored to the cloth lighting ----
-        float az = clamp(vAzure, 0.0, 1.25);
-        // respect fold light/shade: brighter on lit crests, muted in valleys
-        float lightTerm = clamp(wrap * 1.1 + 0.28, 0.0, 1.0);
-        vec3 emis = uAzure * az * (0.36 + 0.40 * az) * lightTerm;
+    var x = cloudCX + lobe.ox + rx;
+    var y = cloudCY + lobe.oy + ry;
 
-        vec3 col = base * (amb + diffuse) + sheen + emis;
+    // distance from the main charge epicenter
+    var dx = x - cloudCX, dy = y - cloudCY;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var normDist = Math.min(1, dist / maxRadius);
 
-        // gentle, restrained fade into bg at distance (no white-out)
-        float fade = smoothstep(88.0, 34.0, vDist);
-        col = mix(uBg * 0.985, col, fade);
+    // SIZE by distance: core 2-3px, edge <1px
+    var size;
+    if (normDist < 0.12) {
+      size = 2.0 + Math.random() * 1.0;       // core 2.0–3.0
+    } else if (normDist < 0.30) {
+      size = 1.4 + Math.random() * 0.8;       // mid 1.4–2.2
+    } else if (normDist < 0.60) {
+      size = 0.8 + Math.random() * 0.6;       // outer-mid 0.8–1.4
+    } else {
+      size = 0.4 + Math.random() * 0.5;       // edge 0.4–0.9
+    }
 
-        col = min(col, vec3(0.965)); // avoid blown-out white on lit crests
-        gl_FragColor = vec4(col, 1.0);
-      }
-    `,
-    side: THREE.DoubleSide,
-  });
+    // ALPHA by distance: core opaque, edge fades — dark ink dots at ~0.75-0.9 in core
+    var a;
+    if (normDist < 0.12) {
+      a = 0.65 + Math.random() * 0.25;        // core 0.65–0.90
+    } else if (normDist < 0.30) {
+      a = 0.50 + Math.random() * 0.25;        // mid 0.50–0.75
+    } else if (normDist < 0.60) {
+      a = 0.25 + Math.random() * 0.20;        // outer 0.25–0.45
+    } else {
+      a = 0.08 + Math.random() * 0.14;        // edge 0.08–0.22
+    }
 
-  const silkMesh = new THREE.Mesh(silkGeo, silkMat);
-  silkMesh.frustumCulled = false;
-  scene.add(silkMesh);
-
-  /* ===== Grey pollutant motes ===== */
-  const MOTE_COUNT = 150;
-  const mPositions = new Float32Array(MOTE_COUNT * 3);
-  const mAlpha = new Float32Array(MOTE_COUNT);
-  const mVisible = new Float32Array(MOTE_COUNT);
-  const motes = [];
-  for (let i = 0; i < MOTE_COUNT; i++) motes.push(makeMote(true));
-
-  function makeMote(initial) {
-    // bias toward center/right (avoid upper-left text)
-    const r = Math.random() * 0.5 + Math.random() * 0.5;
-    const x = -6 + r * 48;
     return {
-      x: x,
-      y: initial ? (2 + Math.random() * 14) : (12 + Math.random() * 7),
-      z: -44 + Math.random() * 56,
-      speed: 0.07 + Math.random() * 0.06,
-      driftX: (Math.random() - 0.5) * 0.012,
-      driftZ: (Math.random() - 0.5) * 0.012,
+      x: x, y: y,
+      vx: 0, vy: 0,
+      r: size,
+      a: a,
+      baseA: a,
       phase: Math.random() * Math.PI * 2,
-      visible: 1,
-      respawnDelay: 0,
-      alpha: 0.58 + Math.random() * 0.25,
+      driftSpeed: 0.00004 + Math.random() * 0.00008,
+      inwardBias: 0.003 + Math.random() * 0.008,
+      recycleAt: 5000 + Math.random() * 10000,
+      age: Math.random() * 8000,
+      lobeIdx: lobeIdx
     };
   }
 
-  const moteGeo = new THREE.BufferGeometry();
-  moteGeo.setAttribute('position', new THREE.BufferAttribute(mPositions, 3));
-  moteGeo.setAttribute('aAlpha', new THREE.BufferAttribute(mAlpha, 1));
-  moteGeo.setAttribute('aVisible', new THREE.BufferAttribute(mVisible, 1));
-
-  const moteMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uDpr: { value: Math.min(window.devicePixelRatio || 1, dprCap) },
-      uGrey: { value: new THREE.Vector3(0.42, 0.46, 0.52) },
-    },
-    vertexShader: `
-      attribute float aAlpha;
-      attribute float aVisible;
-      uniform float uDpr;
-      varying float vAlpha;
-      varying float vVisible;
-      void main() {
-        vAlpha = aAlpha;
-        vVisible = aVisible;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        gl_Position = projectionMatrix * mv;
-        gl_PointSize = clamp((190.0 * uDpr) / max(-mv.z, 1.0), 2.0, 7.0);
-      }
-    `,
-    fragmentShader: `
-      varying float vAlpha;
-      varying float vVisible;
-      uniform vec3 uGrey;
-      void main() {
-        if (vVisible < 0.5) discard;
-        vec2 uv = gl_PointCoord - 0.5;
-        float d = length(uv);
-        if (d > 0.5) discard;
-        float soft = smoothstep(0.5, 0.12, d);
-        float core = smoothstep(0.22, 0.0, d);
-        gl_FragColor = vec4(uGrey, (soft * 0.75 + core * 0.35) * vAlpha);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-  });
-  const motePoints = new THREE.Points(moteGeo, moteMat);
-  scene.add(motePoints);
-
-  /* ===== Azure bloom sprites (refined soft pale glow) ===== */
-  const BLOOM_COUNT = 110;
-  const bPositions = new Float32Array(BLOOM_COUNT * 3);
-  const bAge = new Float32Array(BLOOM_COUNT);
-  const bActive = new Float32Array(BLOOM_COUNT);
-  const blooms = [];
-  for (let i = 0; i < BLOOM_COUNT; i++) {
-    blooms.push({ active: false, age: 0, life: 1, x: 0, y: 0, z: 0 });
-    bPositions[i * 3] = 9999;
+  function initParticles() {
+    particles.length = 0;
+    for (var i = 0; i < COUNT; i++) particles.push(makeParticle());
   }
 
-  const bloomGeo = new THREE.BufferGeometry();
-  bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPositions, 3));
-  bloomGeo.setAttribute('aAge', new THREE.BufferAttribute(bAge, 1));
-  bloomGeo.setAttribute('aActive', new THREE.BufferAttribute(bActive, 1));
+  function inTextZone(x, y) {
+    if (isMobile) return y < textBoundaryY;
+    return x < textBoundaryX;
+  }
 
-  const bloomMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uDpr: { value: Math.min(window.devicePixelRatio || 1, dprCap) },
-    },
-    vertexShader: `
-      attribute float aAge;
-      attribute float aActive;
-      uniform float uDpr;
-      varying float vAge;
-      varying float vActive;
-      void main() {
-        vAge = aAge;
-        vActive = aActive;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        gl_Position = projectionMatrix * mv;
-        float grow = smoothstep(0.0, 0.45, aAge);
-        float sz = mix(24.0, 88.0, grow);
-        gl_PointSize = sz * uDpr;
-      }
-    `,
-    fragmentShader: `
-      varying float vAge;
-      varying float vActive;
-      void main() {
-        if (vActive < 0.5) discard;
-        vec2 uv = gl_PointCoord - 0.5;
-        float d = length(uv);
-        if (d > 0.5) discard;
-        float soft = smoothstep(0.5, 0.0, d);
-        float core = smoothstep(0.20, 0.0, d);
-        // PALE soft light azure (#8fc0ff) — gentle, low saturation
-        vec3 azure = vec3(0.561, 0.753, 1.0);
-        vec3 col = azure + core * 0.12;
-        float fade = 1.0 - vAge;
-        float alpha = (soft * 0.22 + core * 0.30) * fade * fade * 0.40;
-        gl_FragColor = vec4(col, alpha);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.NormalBlending,
-  });
-  const bloomPoints = new THREE.Points(bloomGeo, bloomMat);
-  scene.add(bloomPoints);
-
-  /* ===== Boost azure on silk vertices at capture ===== */
-  function boostSurfaceAt(x, z, amount) {
-    const gx = Math.round((x - X_LEFT) / STEP_X);
-    const gy = Math.round((z - Z_NEAR) / STEP_Z);
-    const radius = 7.5;
-    const rV = Math.ceil(radius / Math.min(STEP_X, STEP_Z));
-    for (let dy = -rV; dy <= rV; dy++) {
-      for (let dx = -rV; dx <= rV; dx++) {
-        const ix = gx + dx, iy = gy + dy;
-        if (ix < 0 || ix > SEG_X || iy < 0 || iy > SEG_Z) continue;
-        const wx = X_LEFT + ix * STEP_X;
-        const wz = Z_NEAR + iy * STEP_Z;
-        const dist = Math.sqrt((wx - x) * (wx - x) + (wz - z) * (wz - z));
-        if (dist > radius) continue;
-        const falloff = Math.pow(1 - dist / radius, 1.6);
-        const idx = iy * (SEG_X + 1) + ix;
-        aAzure[idx] = Math.min(1.25, aAzure[idx] + amount * falloff);
-      }
+  function colorForDist(normDist) {
+    // core (normDist small) -> blue accent charged; outer -> dark ink pollutant
+    if (normDist < 0.10) {
+      return { blue: true, alphaMul: 0.85 };
+    } else if (normDist < 0.20) {
+      // transition: mostly blue with some ink
+      return { blue: Math.random() < 0.72, alphaMul: 0.82 };
+    } else if (normDist < 0.32) {
+      return { blue: Math.random() < 0.28, alphaMul: 0.90 };
     }
-  }
-
-  function spawnBloom(x, y, z) {
-    for (let i = 0; i < BLOOM_COUNT; i++) {
-      if (!blooms[i].active) {
-        blooms[i].active = true;
-        blooms[i].age = 0;
-        blooms[i].life = 0.95 + Math.random() * 0.35;
-        blooms[i].x = x;
-        blooms[i].y = y;
-        blooms[i].z = z;
-        return;
-      }
-    }
-  }
-
-  /* ===== Resize ===== */
-  function resize() {
-    const w = section.clientWidth;
-    const h = section.clientHeight;
-    if (w === 0 || h === 0) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
-    renderer.setPixelRatio(dpr);
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    moteMat.uniforms.uDpr.value = dpr;
-    bloomMat.uniforms.uDpr.value = dpr;
-  }
-
-  /* ===== Animation ===== */
-  let running = false;
-  let rafId = 0;
-  let lastT = 0;
-  let clock = 0;
-
-  const EPS = 0.5;
-
-  function updateSilk(t) {
-    const decay = Math.exp(-(1 / 60) / 0.45); // per-frame decay (~1.2s visible)
-    const posArr = posAttr.array;
-    const norArr = norAttr.array;
-    for (let i = 0; i < VCOUNT; i++) {
-      const x = baseX[i];
-      const z = baseZ[i];
-      const h0 = fabricHeight(x, z, t);
-      const hx = fabricHeight(x + EPS, z, t);
-      const hz = fabricHeight(x, z + EPS, t);
-      posArr[i * 3 + 1] = h0;
-      let nx = -(hx - h0) / EPS;
-      let ny = 1.0;
-      let nz = -(hz - h0) / EPS;
-      const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
-      nx /= len; ny /= len; nz /= len;
-      norArr[i * 3]     = nx;
-      norArr[i * 3 + 1] = ny;
-      norArr[i * 3 + 2] = nz;
-      aAzure[i] *= decay;
-    }
-    posAttr.needsUpdate = true;
-    norAttr.needsUpdate = true;
-    silkGeo.attributes.aAzure.needsUpdate = true;
+    return { blue: false, alphaMul: 1 };
   }
 
   function loop(t) {
     if (!running) return;
     rafId = requestAnimationFrame(loop);
-    const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
+    var dt = lastT ? Math.min((t - lastT), 50) : 16;
     lastT = t;
-    clock += dt;
+    var f = dt / 16;
 
-    updateSilk(clock);
+    // clear — no fake glow, just bg
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#edf0f2';
+    ctx.fillRect(0, 0, W, H);
 
-    /* motes */
-    for (let i = 0; i < MOTE_COUNT; i++) {
-      const p = motes[i];
-      if (p.visible < 0.5) {
-        p.respawnDelay -= dt;
-        if (p.respawnDelay <= 0) {
-          const fresh = makeMote(false);
-          motes[i] = fresh;
-          fresh.visible = 1;
-        }
-        mVisible[i] = 0; mAlpha[i] = 0;
-        mPositions[i * 3] = 9999;
-        continue;
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.age += dt;
+
+      // slow organic drift — gentle diagonal drift
+      var nx = Math.cos(p.y * 0.0040 + t * p.driftSpeed + p.phase);
+      var ny = Math.sin(p.x * 0.0040 + t * p.driftSpeed * 0.9 + p.phase * 1.3);
+      p.vx += nx * 0.008;
+      p.vy += ny * 0.008;
+
+      // gentle inward pull toward the charge core
+      var dx = chargeX - p.x, dy = chargeY - p.y;
+      var d = Math.sqrt(dx * dx + dy * dy) || 1;
+      var pull = p.inwardBias * (1 + (1 - Math.min(1, d / maxRadius)) * 1.8);
+      p.vx += (dx / d) * pull;
+      p.vy += (dy / d) * pull;
+
+      // damping
+      p.vx *= 0.92;
+      p.vy *= 0.92;
+      p.x += p.vx * f;
+      p.y += p.vy * f;
+
+      // recompute distance from epicenter
+      var cdx = p.x - cloudCX, cdy = p.y - cloudCY;
+      var cd = Math.sqrt(cdx * cdx + cdy * cdy);
+      var normDist = Math.min(1, cd / maxRadius);
+
+      var col = colorForDist(normDist);
+      var drawAlpha = p.baseA * col.alphaMul;
+      if (inTextZone(p.x, p.y)) drawAlpha *= 0.12;
+      if (drawAlpha <= 0.004) continue;
+
+      ctx.fillStyle = col.blue
+        ? 'rgba(27,123,255,' + drawAlpha + ')'
+        : 'rgba(31,35,39,' + drawAlpha + ')';
+
+      var s = p.r;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, s / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // recycle: when a dot drifts deep into the core and aged, respawn at edge
+      if (cd < coreRadius * 0.7 && p.age > p.recycleAt) {
+        var lobe = lobes[p.lobeIdx];
+        var ggx = gaussian();
+        var ggy = gaussian();
+        var ang = Math.atan2(ggy, ggx);
+        var sil = silhouetteScale(ang);
+        var edgeRadial = Math.pow(Math.random(), 0.45) * sil * (0.75 + Math.random() * 0.15);
+        var llx = ggx * lobe.rx * edgeRadial;
+        var lly = ggy * lobe.ry * edgeRadial;
+        var cosR = Math.cos(lobe.rot);
+        var sinR = Math.sin(lobe.rot);
+        p.x = cloudCX + lobe.ox + (llx * cosR - lly * sinR);
+        p.y = cloudCY + lobe.oy + (llx * sinR + lly * cosR);
+        p.vx = 0; p.vy = 0;
+        p.age = 0;
+        p.recycleAt = 5000 + Math.random() * 10000;
       }
-      p.y -= p.speed * dt * 60;
-      p.x += p.driftX * dt * 60 + Math.sin(clock * 0.4 + p.phase) * 0.006 * dt * 60;
-      p.z += p.driftZ * dt * 60 + Math.cos(clock * 0.35 + p.phase) * 0.006 * dt * 60;
-
-      const fh = fabricHeight(p.x, p.z, clock);
-      if (p.y <= fh + 0.35) {
-        boostSurfaceAt(p.x, p.z, 1.0);
-        spawnBloom(p.x, fh + 0.18, p.z);
-        p.visible = 0;
-        p.respawnDelay = 0.4 + Math.random() * 1.2;
-        mVisible[i] = 0; mAlpha[i] = 0;
-        mPositions[i * 3] = 9999;
-        continue;
-      }
-      mPositions[i * 3]     = p.x;
-      mPositions[i * 3 + 1] = p.y;
-      mPositions[i * 3 + 2] = p.z;
-      mVisible[i] = 1;
-      mAlpha[i] = p.alpha;
     }
-    moteGeo.attributes.position.needsUpdate = true;
-    moteGeo.attributes.aAlpha.needsUpdate = true;
-    moteGeo.attributes.aVisible.needsUpdate = true;
-
-    /* blooms */
-    for (let i = 0; i < BLOOM_COUNT; i++) {
-      const b = blooms[i];
-      if (b.active) {
-        b.age += dt;
-        if (b.age >= b.life) {
-          b.active = false;
-          bPositions[i * 3] = 9999;
-          bAge[i] = 0; bActive[i] = 0;
-        } else {
-          bPositions[i * 3]     = b.x;
-          bPositions[i * 3 + 1] = b.y;
-          bPositions[i * 3 + 2] = b.z;
-          bAge[i] = b.age / b.life;
-          bActive[i] = 1;
-        }
-      }
-    }
-    bloomGeo.attributes.position.needsUpdate = true;
-    bloomGeo.attributes.aAge.needsUpdate = true;
-    bloomGeo.attributes.aActive.needsUpdate = true;
-
-    renderer.render(scene, camera);
   }
 
-  /* ===== Static frame for reduced motion ===== */
   function drawStatic() {
-    clock = 4.0;
-    updateSilk(clock);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#edf0f2';
+    ctx.fillRect(0, 0, W, H);
 
-    const seeds = [
-      [6, -8], [14, 2], [22, -6], [30, 4], [10, 6], [18, -12], [4, 0], [26, -2]
-    ];
-    for (let s = 0; s < seeds.length; s++) {
-      const sx = seeds[s][0], sz = seeds[s][1];
-      const sy = fabricHeight(sx, sz, clock);
-      boostSurfaceAt(sx, sz, 1.0);
-      spawnBloom(sx, sy + 0.18, sz);
-      blooms[s].age = 0.2 + Math.random() * 0.3;
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var cdx = p.x - cloudCX, cdy = p.y - cloudCY;
+      var cd = Math.sqrt(cdx * cdx + cdy * cdy);
+      var normDist = Math.min(1, cd / maxRadius);
+
+      var col = colorForDist(normDist);
+      var drawAlpha = p.baseA * col.alphaMul * 0.95;
+      if (inTextZone(p.x, p.y)) drawAlpha *= 0.12;
+      if (drawAlpha <= 0.004) continue;
+
+      ctx.fillStyle = col.blue
+        ? 'rgba(27,123,255,' + drawAlpha + ')'
+        : 'rgba(31,35,39,' + drawAlpha + ')';
+
+      var s = p.r;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, s / 2, 0, Math.PI * 2);
+      ctx.fill();
     }
-    for (let i = 0; i < BLOOM_COUNT; i++) {
-      const b = blooms[i];
-      if (b.active) {
-        bPositions[i * 3]     = b.x;
-        bPositions[i * 3 + 1] = b.y;
-        bPositions[i * 3 + 2] = b.z;
-        bAge[i] = b.age / b.life;
-        bActive[i] = 1;
-      }
-    }
-
-    for (let i = 0; i < MOTE_COUNT; i++) {
-      const p = motes[i];
-      if (i < 10) {
-        p.x = seeds[i % seeds.length][0] + 1.2;
-        p.z = seeds[i % seeds.length][1] + 1.2;
-        p.y = fabricHeight(p.x, p.z, clock) + 3 + Math.random() * 3;
-      } else {
-        const r = Math.random() * 0.5 + Math.random() * 0.5;
-        p.x = -6 + r * 48;
-        p.z = -44 + Math.random() * 56;
-        p.y = 5 + Math.random() * 10;
-      }
-      mPositions[i * 3]     = p.x;
-      mPositions[i * 3 + 1] = p.y;
-      mPositions[i * 3 + 2] = p.z;
-      mVisible[i] = 1;
-      mAlpha[i] = p.alpha;
-    }
-
-    moteGeo.attributes.position.needsUpdate = true;
-    moteGeo.attributes.aAlpha.needsUpdate = true;
-    moteGeo.attributes.aVisible.needsUpdate = true;
-    bloomGeo.attributes.position.needsUpdate = true;
-    bloomGeo.attributes.aAge.needsUpdate = true;
-    bloomGeo.attributes.aActive.needsUpdate = true;
-
-    renderer.render(scene, camera);
   }
 
-  /* ===== Start / stop ===== */
   function start() {
-    if (reduced) return;
+    if (reduced) { drawStatic(); return; }
     if (!running) {
       running = true;
       lastT = 0;
@@ -760,17 +554,17 @@ import * as THREE from 'three';
     rafId = 0;
   }
 
-  /* ===== Init ===== */
   resize();
+  initParticles();
   if (reduced) drawStatic();
 
   if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(function (entries) {
-      for (let i = 0; i < entries.length; i++) {
-        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.2) start();
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.35) start();
         else if (!entries[i].isIntersecting) stop();
       }
-    }, { threshold: [0, 0.2, 1] });
+    }, { threshold: [0, 0.35, 1] });
     io.observe(section);
   } else {
     start();
@@ -781,11 +575,16 @@ import * as THREE from 'three';
     else if (!reduced && !running) { running = true; lastT = 0; rafId = requestAnimationFrame(loop); }
   });
 
-  let rt = 0;
+  var rt = 0;
   window.addEventListener('resize', function () {
     if (rt) clearTimeout(rt);
     rt = setTimeout(function () {
       resize();
+      var nc = isMobile ? 9000 : 16000;
+      if (Math.abs(nc - COUNT) > 60) {
+        COUNT = nc;
+        initParticles();
+      }
       if (reduced) drawStatic();
     }, 180);
   });
