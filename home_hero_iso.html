@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — a permanent positive charge, engineered into the material</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1e22; --ink-soft:#3a4046; --muted:#8a9095; --accent:#1466e6;
+  --hair:rgba(24,30,38,0.14); --card:rgba(255,255,255,0.16);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{ height:100%; color:var(--ink); font-family:var(--stack); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+/* soft pale gradient — the Isomorphic 'air' (whisper of green -> blue, in our palette) */
+body{ background:linear-gradient(135deg, #eef3f0 0%, #ecf1f2 42%, #e6edf5 100%); }
+
+section{ position:relative; min-height:100vh; width:100%; overflow:hidden; padding:clamp(20px,3.2vw,44px); }
+
+/* nav */
+.nav{ position:relative; z-index:4; display:flex; align-items:center; justify-content:space-between; margin-bottom:clamp(18px,3vh,40px); }
+.nav .brand{ height:34px; }
+.nav .brand img{ height:100%; width:auto; display:block; }
+.nav .links{ display:flex; gap:8px; }
+.nav .links a{ font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-soft); text-decoration:none; border:1px solid var(--hair); border-radius:9px; padding:8px 13px; white-space:nowrap; }
+
+/* bento grid */
+.grid{ position:relative; z-index:3; display:grid; grid-template-columns:1fr 1.18fr; grid-template-rows:auto 1fr; gap:clamp(12px,1.4vw,20px); height:calc(100vh - clamp(120px,16vh,160px)); }
+.card{ border:1px solid var(--hair); border-radius:16px; background:var(--card); backdrop-filter:blur(2px); position:relative; }
+.card.a{ grid-column:1; grid-row:1; padding:clamp(26px,3vw,48px); display:flex; flex-direction:column; justify-content:flex-start; }
+.card.b{ grid-column:1; grid-row:2; padding:clamp(26px,3vw,48px); display:flex; flex-direction:column; justify-content:flex-end; }
+.card.c{ grid-column:2; grid-row:1 / span 2; overflow:visible; }
+
+.eyebrow{ font-size:13px; line-height:1.4; color:var(--muted); margin-bottom:22px; }
+.logo-wrap{ margin-left:-12px; }
+.logo-wrap img{ height:clamp(58px,6.4vw,92px); width:auto; max-width:100%; display:block; }
+.body-text{ max-width:460px; font-size:clamp(15px,1.15vw,18px); line-height:1.6; color:var(--ink-soft); }
+
+/* the object — a soft frosted cobalt cloud of "+" (our 'structure'), bleeding out of card C */
+#obj{ position:absolute; z-index:2; inset:0; width:100%; height:100%; pointer-events:none; }
+
+.micro-label{ position:absolute; right:clamp(24px,3vw,48px); bottom:clamp(20px,3vh,36px); z-index:4; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--muted); }
+
+@media (max-width:900px){
+  .grid{ grid-template-columns:1fr; grid-template-rows:auto auto 44vh; height:auto; }
+  .card.a{ grid-column:1; grid-row:1; } .card.b{ grid-column:1; grid-row:2; } .card.c{ grid-column:1; grid-row:3; }
+  .nav .links{ display:none; }
+  #obj{ inset:0; }
+}
+</style>
+</head>
+<body>
+<section>
+  <div class="nav">
+    <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <div class="links"><a>Air</a><a>Water</a><a>PPW</a><a>Food packaging</a><a>Medical devices</a></div>
+  </div>
+
+  <div class="grid">
+    <div class="card a">
+      <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
+      <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    </div>
+    <div class="card b">
+      <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
+    </div>
+    <div class="card c">
+      <canvas id="obj"></canvas>
+    </div>
+  </div>
+
+  <div class="micro-label">3p — permanent positive polarity</div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+  var cv = document.getElementById('obj'); if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var W = 0, H = 0, DPR = 1;
+
+  // soft frosted "+" sprite, cobalt, with a gentle glow
+  function makeSprite(size, r, g, b) {
+    var s = document.createElement('canvas'); s.width = s.height = size;
+    var c = s.getContext('2d'); var cx = size / 2;
+    var arm = size * 0.30, th = size * 0.085;
+    // soft outer glow
+    var gg = c.createRadialGradient(cx, cx, 0, cx, cx, cx);
+    gg.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',0.16)');
+    gg.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
+    c.fillStyle = gg; c.fillRect(0, 0, size, size);
+    c.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',0.92)';
+    c.lineWidth = th; c.lineCap = 'round';
+    c.shadowColor = 'rgba(' + r + ',' + g + ',' + b + ',0.55)'; c.shadowBlur = size * 0.06;
+    c.beginPath(); c.moveTo(cx - arm, cx); c.lineTo(cx + arm, cx); c.moveTo(cx, cx - arm); c.lineTo(cx, cx + arm); c.stroke();
+    return s;
+  }
+  var spNear = makeSprite(96, 20, 102, 230);   // #1466e6
+  var spFar  = makeSprite(96, 150, 186, 240);  // lighter cobalt
+
+  // build an organic cloud of "+" units (a few overlapping gaussian lobes -> a soft 'structure')
+  // one coherent volumetric form: a soft SHELL of "+" charge units (a charged orb), evenly spread
+  var pts = [];
+  var N = 200;
+  for (var i = 0; i < N; i++) {
+    var yy = 1 - (i / (N - 1)) * 2;             // -1 .. 1
+    var rad = Math.sqrt(Math.max(0, 1 - yy * yy));
+    var theta = i * 2.399963;                    // golden angle -> even distribution
+    var rr = 0.92 + Math.random() * 0.12;        // dense thin shell
+    pts.push({ x: Math.cos(theta) * rad * rr, y: yy * rr, z: Math.sin(theta) * rad * rr, s: 0.78 + Math.random() * 0.44 });
+  }
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    W = cv.clientWidth; H = cv.clientHeight; if(!W||!H) return;
+    cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  var t0 = 0, running = true;
+  function frame(t){
+    if(!running) return;
+    if(!t0) t0 = t; var tt = (t - t0)/1000;
+    ctx.clearRect(0,0,W,H);
+    var cx = W*0.5, cy = H*0.5, scale = Math.min(W,H)*0.40;
+    var ry = tt*0.10, rx = Math.sin(tt*0.13)*0.12, breathe = 1 + Math.sin(tt*0.35)*0.02;
+    var cosy=Math.cos(ry),siny=Math.sin(ry),cosx=Math.cos(rx),sinx=Math.sin(rx);
+    // soft frosted glow behind the cloud
+    var bg = ctx.createRadialGradient(cx,cy,0,cx,cy,scale*2.1);
+    bg.addColorStop(0,'rgba(120,170,240,0.09)'); bg.addColorStop(0.55,'rgba(120,170,240,0.035)'); bg.addColorStop(1,'rgba(120,170,240,0)');
+    ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(cx,cy,scale*2.1,0,6.2832); ctx.fill();
+    // soft cobalt volumetric CORE — gives the shell a solid, glowing centre (authority, not a scatter)
+    var core = ctx.createRadialGradient(cx,cy,0,cx,cy,scale*1.02);
+    core.addColorStop(0,'rgba(20,102,230,0.15)'); core.addColorStop(0.5,'rgba(20,102,230,0.06)'); core.addColorStop(1,'rgba(20,102,230,0)');
+    ctx.fillStyle=core; ctx.beginPath(); ctx.arc(cx,cy,scale*1.02,0,6.2832); ctx.fill();
+    var proj = [];
+    for(var i=0;i<pts.length;i++){
+      var p=pts[i];
+      var x=p.x, y=p.y, z=p.z;
+      var x1=x*cosy - z*siny, z1=x*siny + z*cosy;
+      var y1=y*cosx - z1*sinx, z2=y*sinx + z1*cosx;
+      proj.push({sx:cx + x1*scale*breathe, sy:cy - y1*scale*breathe, z:z2, s:p.s});
+    }
+    proj.sort(function(a,b){return a.z-b.z;});
+    for(var j=0;j<proj.length;j++){
+      var q=proj[j];
+      var depth=(q.z+1.15)/2.3; depth=Math.max(0,Math.min(1,depth));   // 0 far .. 1 near
+      var dd = depth*depth;                                            // stronger near/far contrast
+      var sz=(12 + dd*38) * q.s;
+      var alpha=0.10 + dd*0.64;
+      ctx.globalAlpha=alpha;
+      var spr = depth>0.52 ? spNear : spFar;
+      ctx.drawImage(spr, q.sx-sz/2, q.sy-sz/2, sz, sz);
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(frame);
+  }
+  resize(); window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden){running=false;} else if(!running){running=true; t0=0; requestAnimationFrame(frame);} });
+  if(!reduced) requestAnimationFrame(frame); else { /* static single frame */ requestAnimationFrame(function(t){ running=true; frame(t); running=false; }); }
+})();
+</script>
+</body>
+</html>
