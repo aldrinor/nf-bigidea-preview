@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — a permanent positive charge, engineered into the material</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1466e6;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  background:var(--bg); color:var(--ink); font-family:var(--stack);
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+section{
+  position:relative; display:flex; align-items:center;
+  min-height:100vh; max-height:100vh; width:100%; overflow:hidden; background:var(--bg);
+}
+
+/* ===== The money shot — a charged pollutant particle, feathered edgelessly into the page ===== */
+.hero-visual{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+.hero-visual .vid-move{
+  position:absolute; left:63vw; top:53vh;
+  width:122vh; height:122vh;
+  transform:translate(-50%,-50%);
+  will-change:transform;
+}
+.hero-visual video, .hero-visual .poster{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  /* grade toward the cool palette so the pale particle sits in the page's air; keep the blue glow */
+  filter:saturate(0.72) brightness(1.05) contrast(1.03);
+  /* kill the box: feather the whole clip to nothing — no rectangle, no card, no shadow */
+  -webkit-mask-image:radial-gradient(ellipse 43% 43% at 50% 49%, #000 40%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.12) 76%, transparent 86%);
+  mask-image:radial-gradient(ellipse 43% 43% at 50% 49%, #000 40%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.12) 76%, transparent 86%);
+  opacity:0; transform:scale(1.06);
+  transition:opacity 1.2s ease-out, transform 1.4s cubic-bezier(.16,1,.3,1);
+  animation:heroDrift 22s ease-in-out infinite alternate;
+}
+.hero-visual .poster{ animation:none; }
+body.revealed .hero-visual video, body.revealed .hero-visual .poster{ opacity:1; transform:scale(1); }
+@keyframes heroDrift{ from{ } to{ } } /* drift applied via .vid-move JS-free scale below */
+.hero-visual .vid-move{ animation:heroScale 24s ease-in-out infinite alternate; }
+@keyframes heroScale{ from{ transform:translate(-50%,-50%) scale(1.0);} to{ transform:translate(-50%,-50%) scale(1.05);} }
+
+/* a cool wash that lifts the warm studio-white of the clip toward #edf0f2, only over the visual */
+.cool-wash{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(ellipse 52% 60% at 63% 53%, rgba(224,233,242,0.55) 0%, rgba(224,233,242,0.28) 45%, rgba(224,233,242,0) 72%);
+  mix-blend-mode:screen;
+}
+
+/* cursor = a positive probe: a soft cobalt charge-bloom follows the pointer */
+.charge-bloom{
+  position:absolute; width:340px; height:340px; border-radius:50%; z-index:2;
+  transform:translate(-50%,-50%); pointer-events:none; opacity:0; left:63vw; top:53vh;
+  background:radial-gradient(circle, rgba(20,102,230,0.16) 0%, rgba(20,102,230,0.07) 34%, rgba(20,102,230,0) 66%);
+  transition:opacity .5s ease; will-change:left,top;
+}
+
+/* whole-hero film grain — unifies the clip's texture with the flat background (the anti-cheap move) */
+.grain{
+  position:absolute; inset:0; z-index:2; pointer-events:none; opacity:0.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px;
+}
+
+.scrim{
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  background:radial-gradient(ellipse 52% 60% at 19% 46%, rgba(237,240,242,0.98) 0%, rgba(237,240,242,0.92) 46%, rgba(237,240,242,0.45) 70%, rgba(237,240,242,0) 88%);
+}
+.text-col{
+  position:relative; z-index:4; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+  width:42%; max-width:620px; padding-left:clamp(48px, 7vw, 128px); padding-right:24px;
+}
+.eyebrow{ font-size:13px; line-height:1.4; color:var(--muted); font-weight:400; letter-spacing:0.005em; margin-bottom:24px; }
+.logo-wrap{ height:100px; display:flex; align-items:center; margin-bottom:30px; margin-left:-15px; }
+.logo-wrap img{ height:100px; width:auto; max-width:100%; display:block; object-fit:contain; object-position:left center; }
+.body-text{ max-width:440px; font-size:19px; line-height:1.55; color:#1f2327; }
+.micro-label{
+  position:absolute; right:clamp(20px, 3vw, 40px); bottom:clamp(18px, 3vh, 32px); z-index:4;
+  font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--muted); pointer-events:none; white-space:nowrap;
+}
+
+@media (max-width: 880px){
+  section{ flex-direction:column; justify-content:flex-start; align-items:stretch; min-height:100vh; max-height:none; overflow:visible; }
+  .hero-visual .vid-move{ left:78vw; top:70vh; width:105vh; height:105vh; }
+  .charge-bloom{ display:none; }
+  .scrim{ background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 40%, rgba(237,240,242,0.82) 52%, rgba(237,240,242,0) 66%); }
+  .text-col{ width:100%; max-width:none; align-items:stretch; padding-left:clamp(20px,5vw,28px); padding-right:clamp(20px,5vw,28px); padding-top:clamp(28px,5vh,40px); padding-bottom:8px; flex:0 0 auto; }
+  .eyebrow{font-size:13px;margin-bottom:18px;} .logo-wrap{height:78px;margin-bottom:24px;} .logo-wrap img{height:78px;}
+  .body-text{font-size:16px;line-height:1.6;} .micro-label{font-size:10px;}
+}
+@media (max-height: 760px) and (min-width: 881px){ .logo-wrap{height:88px;margin-bottom:24px;} .logo-wrap img{height:88px;} .body-text{font-size:17px;line-height:1.5;} }
+@media (max-height: 680px) and (min-width: 881px){ .eyebrow{font-size:12px;margin-bottom:16px;} .logo-wrap{height:76px;margin-bottom:18px;} .logo-wrap img{height:76px;} .body-text{font-size:16px;line-height:1.45;} }
+</style>
+</head>
+<body>
+
+<section id="section">
+  <div class="hero-visual">
+    <div class="vid-move" id="vidMove">
+      <video id="heroVid" autoplay muted loop playsinline preload="auto" poster="assets/ultrafine_poster.jpg">
+        <source src="assets/Ultrafine_Particle.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+  <div class="cool-wash"></div>
+  <div class="charge-bloom" id="chargeBloom"></div>
+  <div class="grain"></div>
+  <div class="scrim"></div>
+
+  <div class="text-col">
+    <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
+    <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
+  </div>
+
+  <div class="micro-label">3p — permanent positive polarity</div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+  requestAnimationFrame(function(){ document.body.classList.add('revealed'); });
+  var vid = document.getElementById('heroVid');
+  if (vid) { var pl = vid.play(); if (pl && pl.catch) pl.catch(function(){}); }
+
+  var move = document.getElementById('vidMove');
+  var bloom = document.getElementById('chargeBloom');
+  var tx = 0, ty = 0, cx = 0, cy = 0, bx = 0, by = 0, present = false;
+  window.addEventListener('pointermove', function (e) {
+    present = true;
+    bx = e.clientX; by = e.clientY;
+    // gentle parallax: particle drifts a few px OPPOSITE the cursor (you perturb its field)
+    tx = -(e.clientX / window.innerWidth - 0.5) * 22;
+    ty = -(e.clientY / window.innerHeight - 0.5) * 16;
+  }, { passive: true });
+  window.addEventListener('pointerleave', function () { present = false; tx = 0; ty = 0; });
+
+  function loop() {
+    cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
+    if (move) move.style.marginLeft = cx.toFixed(2) + 'px', move.style.marginTop = cy.toFixed(2) + 'px';
+    if (bloom) {
+      bloom.style.left = bx + 'px'; bloom.style.top = by + 'px';
+      bloom.style.opacity = present ? '1' : '0';
+    }
+    requestAnimationFrame(loop);
+  }
+  if (!reduced) requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
