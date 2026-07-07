@@ -1,205 +1,46 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NanoFlashing — a permanent positive charge, engineered into the material</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#edf0f2;
-  --ink:#1f2327;
-  --headline-ink:#1a1a1a;
-  --muted:#8a9095;
-  --accent:#1466e6;
-  --hair:rgba(20,24,28,0.08);
-  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
-  --mono:'Space Mono', ui-monospace, monospace;
-}
-
-*{box-sizing:border-box;margin:0;padding:0;}
-
-html,body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:var(--stack);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-section{
-  position:relative;
-  display:flex;
-  align-items:center;
-  min-height:100vh;
-  max-height:100vh;
-  width:100%;
-  overflow:hidden;
-  background:var(--bg);
-}
-
-#cloud-canvas{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:1;
-  pointer-events:none;
-}
-
-.scrim{
-  position:absolute;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  background:radial-gradient(ellipse 52% 58% at 19% 44%, rgba(237,240,242,0.97) 0%, rgba(237,240,242,0.92) 46%, rgba(237,240,242,0.48) 70%, rgba(237,240,242,0) 88%);
-}
-
-.text-col{
-  position:relative;
-  z-index:3;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:flex-start;
-  width:42%;
-  max-width:620px;
-  padding-left:clamp(48px, 7vw, 128px);
-  padding-right:24px;
-}
-
-.eyebrow{
-  font-family:var(--stack);
-  font-size:13px;
-  line-height:1.4;
-  color:var(--muted);
-  font-weight:400;
-  letter-spacing:0.005em;
-  margin-bottom:24px;
-}
-
-.logo-wrap{
-  height:100px;
-  display:flex;
-  align-items:center;
-  margin-bottom:30px;
-  margin-left:-15px;
-}
-.logo-wrap img{
-  height:100px;
-  width:auto;
-  max-width:100%;
-  display:block;
-  object-fit:contain;
-  object-position:left center;
-}
-
-.body-text{
-  max-width:440px;
-  font-size:19px;
-  line-height:1.55;
-  color:#1f2327;
-}
-
-.micro-label{
-  position:absolute;
-  right:clamp(20px, 3vw, 40px);
-  bottom:clamp(18px, 3vh, 32px);
-  z-index:3;
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:0.06em;
-  color:var(--muted);
-  pointer-events:none;
-  white-space:nowrap;
-}
-
-@media (max-width: 880px){
-  section{
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:stretch;
-    min-height:100vh;
-    max-height:none;
-    overflow:visible;
-  }
-  #cloud-canvas{
-    position:absolute;
-    inset:0;
-    z-index:1;
-  }
-  .scrim{
-    background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 38%, rgba(237,240,242,0.82) 50%, rgba(237,240,242,0) 66%);
-  }
-  .text-col{
-    width:100%;
-    max-width:none;
-    align-items:stretch;
-    padding-left:clamp(20px,5vw,28px);
-    padding-right:clamp(20px,5vw,28px);
-    padding-top:clamp(28px,5vh,40px);
-    padding-bottom:8px;
-    flex:0 0 auto;
-  }
-  .eyebrow{font-size:13px;margin-bottom:18px;}
-  .logo-wrap{height:78px;margin-bottom:24px;}
-  .logo-wrap img{height:78px;}
-  .body-text{font-size:16px;line-height:1.6;}
-  .micro-label{font-size:10px;}
-}
-
-@media (max-height: 760px) and (min-width: 881px){
-  .logo-wrap{height:88px;margin-bottom:24px;}
-  .logo-wrap img{height:88px;}
-  .body-text{font-size:17px;line-height:1.5;}
-}
-@media (max-height: 680px) and (min-width: 881px){
-  .eyebrow{font-size:12px;margin-bottom:16px;}
-  .logo-wrap{height:76px;margin-bottom:18px;}
-  .logo-wrap img{height:76px;}
-  .body-text{font-size:16px;line-height:1.45;}
-}
-</style>
-</head>
-<body>
-
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>NanoFlashing — a permanent positive charge, engineered into the material</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><style>
+:root{--bg:#edf0f2;--ink:#1f2327;--headline-ink:#1a1a1a;--muted:#8a9095;--accent:#1466e6;--hair:rgba(20,24,28,0.08);--stack:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;--mono:'Space Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+section{position:relative;display:flex;align-items:center;min-height:100vh;max-height:100vh;width:100%;overflow:hidden;background:var(--bg)}
+#cloud-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.scrim{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 52% 58% at 19% 44%,rgba(237,240,242,0.97) 0%,rgba(237,240,242,0.92) 46%,rgba(237,240,242,0.48) 70%,rgba(237,240,242,0) 88%)}
+#energy-core{position:absolute;width:156px;height:156px;border-radius:50%;pointer-events:none;z-index:2;transform:translate(-50%,-50%);opacity:0;will-change:left,top,opacity;background:radial-gradient(circle,rgba(188,214,255,0.5) 0%,rgba(188,214,255,0.46) 7%,rgba(90,160,255,0.42) 14%,rgba(20,102,230,0.22) 34%,rgba(20,102,230,0) 55%)}
+.text-col{position:relative;z-index:3;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;width:42%;max-width:620px;padding-left:clamp(48px,7vw,128px);padding-right:24px}
+.eyebrow{font-family:var(--stack);font-size:13px;line-height:1.4;color:var(--muted);font-weight:400;letter-spacing:0.005em;margin-bottom:24px}
+.logo-wrap{height:100px;display:flex;align-items:center;margin-bottom:30px;margin-left:-15px}
+.logo-wrap img{height:100px;width:auto;max-width:100%;display:block;object-fit:contain;object-position:left center}
+.body-text{max-width:440px;font-size:19px;line-height:1.55;color:#1f2327}
+.micro-label{position:absolute;right:clamp(20px,3vw,40px);bottom:clamp(18px,3vh,32px);z-index:3;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;color:var(--muted);pointer-events:none;white-space:nowrap}
+@media (max-width:880px){section{flex-direction:column;justify-content:flex-start;align-items:stretch;min-height:100vh;max-height:none;overflow:visible}#cloud-canvas{position:absolute;inset:0;z-index:1}.scrim{background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 38%,rgba(237,240,242,0.82) 50%,rgba(237,240,242,0) 66%)}.text-col{width:100%;max-width:none;align-items:stretch;padding-left:clamp(20px,5vw,28px);padding-right:clamp(20px,5vw,28px);padding-top:clamp(28px,5vh,40px);padding-bottom:8px;flex:0 0 auto}.eyebrow{font-size:13px;margin-bottom:18px}.logo-wrap{height:78px;margin-bottom:24px}.logo-wrap img{height:78px}.body-text{font-size:16px;line-height:1.6}.micro-label{font-size:10px}}
+@media (max-height:760px) and (min-width:881px){.logo-wrap{height:88px;margin-bottom:24px}.logo-wrap img{height:88px}.body-text{font-size:17px;line-height:1.5}}
+@media (max-height:680px) and (min-width:881px){.eyebrow{font-size:12px;margin-bottom:16px}.logo-wrap{height:76px;margin-bottom:18px}.logo-wrap img{height:76px}.body-text{font-size:16px;line-height:1.45}}
+</style></head><body>
 <section id="section">
   <canvas id="cloud-canvas"></canvas>
   <div class="scrim"></div>
-
+  <div id="energy-core"></div>
   <div class="text-col">
     <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
     <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
     <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
   </div>
-
   <div class="micro-label">3p — permanent positive polarity</div>
 </section>
-
-<script type="importmap">
-{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
-</script>
-
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
-
 (function () {
   'use strict';
-
   const section = document.getElementById('section');
   const canvas = document.getElementById('cloud-canvas');
+  const energyCore = document.getElementById('energy-core');
   if (!section || !canvas) return;
-
   const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
 
-  /* ===== Renderer ===== */
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setClearColor(0xedf0f2, 1);
   const dprCap = 2;
-
-  /* ===== Scene & Camera ===== */
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
   const CAM_BASE = new THREE.Vector3(0, 15, 26);
@@ -207,7 +48,6 @@ import * as THREE from 'three';
   camera.position.copy(CAM_BASE);
   camera.lookAt(CAM_TARGET);
 
-  /* ===== Surface constants ===== */
   const GRID_X = 150;
   const GRID_Z = 40;
   const SURF_W = 150;
@@ -215,7 +55,6 @@ import * as THREE from 'three';
   const Z_FAR = -1;
   const SURF_COUNT = GRID_X * GRID_Z;
 
-  /* ===== Wave height — static curved dome + far-edge rise + slow breath ===== */
   function waveHeight(x, z, t) {
     var dome = -0.00044 * x * x;
     var zNorm = (z - Z_FAR) / SURF_D;
@@ -230,7 +69,6 @@ import * as THREE from 'three';
   const sPositions = new Float32Array(SURF_COUNT * 3);
   const sBoosts = new Float32Array(SURF_COUNT);
   const sRows = new Float32Array(SURF_COUNT);
-
   for (let ix = 0; ix < GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
       const i = ix * GRID_Z + iz;
@@ -241,7 +79,6 @@ import * as THREE from 'three';
       sRows[i] = iz / (GRID_Z - 1);
     }
   }
-
   surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
   surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
   surfaceGeo.setAttribute('aRow', new THREE.BufferAttribute(sRows, 1));
@@ -260,6 +97,12 @@ import * as THREE from 'three';
       uFogFar: { value: 128 },
       uMouse: { value: new THREE.Vector2(9999, 9999) },
       uMouseStr: { value: 0 },
+      uRings: { value: [
+        new THREE.Vector4(0, 0, 0, 0),
+        new THREE.Vector4(0, 0, 0, 0),
+        new THREE.Vector4(0, 0, 0, 0),
+        new THREE.Vector4(0, 0, 0, 0),
+      ] },
     },
     vertexShader: `
       attribute float aBoost;
@@ -270,6 +113,7 @@ import * as THREE from 'three';
       uniform float uSize;
       uniform vec2 uMouse;
       uniform float uMouseStr;
+      uniform vec4 uRings[4];
       varying float vBoost;
       varying float vDist;
       varying float vHeight;
@@ -285,15 +129,53 @@ import * as THREE from 'three';
         float farRise = (1.0 - zNorm) * 3.0;
         float und1 = sin(x * 0.06 + t * 0.393) * 0.8;
         float und2 = sin(z * 0.04 + t * 0.314 + 1.5) * 0.8;
-        return dome + farRise + und1 + und2;
+        float base = dome + farRise + und1 + und2;
+
+        float ripple = 0.0;
+        float cdx = x - uMouse.x;
+        float cdz = z - uMouse.y;
+        float cdr = sqrt(cdx*cdx + cdz*cdz);
+        float domeG = 0.9 * exp(-cdr*cdr / 256.0);
+        float breath = 0.15 * sin(t * 0.8) * exp(-cdr*cdr / 512.0);
+        domeG = domeG * uMouseStr + breath;
+        domeG = clamp(domeG, -0.2, 1.0);
+        ripple += domeG;
+
+        for (int i = 0; i < 4; i++) {
+          vec4 ring = uRings[i];
+          if (ring.w > 0.5) {
+            float rdx = x - ring.x;
+            float rdz = z - ring.y;
+            float rr = sqrt(rdx*rdx + rdz*rdz);
+            float age = t - ring.z;
+            if (age > 0.0 && age < 1.2) {
+              float ringR = 22.0 * age;
+              float amp = 0.85 * exp(-rr / 18.0) * exp(-age / 1.2);
+              float k = 0.449;
+              ripple += amp * cos(k * (rr - ringR));
+            }
+          }
+        }
+        ripple = clamp(ripple, -1.2, 1.2);
+        return base + ripple;
       }
 
       void main() {
         vec3 pos = position;
+
+        float pullDx = uMouse.x - pos.x;
+        float pullDz = uMouse.y - pos.z;
+        float pullDist = sqrt(pullDx*pullDx + pullDz*pullDz);
+        float pullStrength = uMouseStr * 0.45 * max(0.0, 1.0 - pullDist / 12.0);
+        if (pullDist > 0.001) {
+          pos.x += (pullDx / pullDist) * pullStrength;
+          pos.z += (pullDz / pullDist) * pullStrength;
+        }
+
         pos.y = waveHeight(pos.x, pos.z, uTime);
 
         float mdist = distance(pos.xz, uMouse);
-        float mprox = uMouseStr * exp(-mdist * mdist / 120.0);
+        float mprox = uMouseStr * max(0.0, 1.0 - mdist / 12.0);
         vMouse = mprox;
 
         vHeight = pos.y;
@@ -312,16 +194,13 @@ import * as THREE from 'three';
         vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
         vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
         vec2 s0 = clip0.xy / clip0.w;
-        // aspect-correct screen deltas for a fixed world step along X and Z, NOT normalized, so the
-        // arm receding into the distance stays SHORTER -> the "+" lies FLAT on the surface
-        // (foreshortened in perspective) instead of standing upright facing the camera.
         vec2 rawX = ((clipX.xy / clipX.w) - s0) * uResolution;
         vec2 rawZ = ((clipZ.xy / clipZ.w) - s0) * uResolution;
         float armM = max(length(rawX), length(rawZ)) + 1e-4;
         vArmX = (rawX / armM) * 0.5;
         vArmZ = (rawZ / armM) * 0.5;
 
-        float sz = uSize * (1.0 + aBoost * 1.6 + mprox * 0.12);
+        float sz = uSize * (1.0 + aBoost * 1.6 + mprox * 0.5);
         float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
         gl_PointSize = clamp(rawSize, 6.0 * uPixelRatio, 22.0 * uPixelRatio);
       }
@@ -345,16 +224,12 @@ import * as THREE from 'three';
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         uv.y = -uv.y;
-
-        // Draw each arm along its FORESHORTENED surface-tangent vector: the arm going into the
-        // distance is shorter, so the "+" reads as painted flat ON the wavy surface, tilting and
-        // foreshortening with it (not a billboard cross standing up toward the camera).
-        float thick = 0.11;                 // constant arm half-thickness in sprite-uv
+        float thick = 0.11;
         float lenX = length(vArmX);
         float lenZ = length(vArmZ);
         vec2 uX = vArmX / max(lenX, 1e-4);
         vec2 uZ = vArmZ / max(lenZ, 1e-4);
-        lenX = max(lenX, 0.16);             // floor so an edge-on arm never fully vanishes
+        lenX = max(lenX, 0.16);
         lenZ = max(lenZ, 0.16);
         float distX = abs(dot(uv, vec2(-uX.y, uX.x)));
         float distZ = abs(dot(uv, vec2(-uZ.y, uZ.x)));
@@ -367,12 +242,11 @@ import * as THREE from 'three';
 
         float heightFactor = smoothstep(-1.0, 1.0, vHeight);
         vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
-
         float baseAlpha = 0.32;
 
         float charge = clamp(vMouse, 0.0, 1.0);
         vec3 color = mix(baseShaded, uChargeColor, charge * 0.85);
-        float tip = charge * smoothstep(0.6, 1.0, charge) * 0.5;
+        float tip = charge * smoothstep(0.5, 1.0, charge) * 0.5;
         color = mix(color, uTipColor, tip);
 
         color = mix(color, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9);
@@ -386,7 +260,6 @@ import * as THREE from 'three';
         float leftFade = smoothstep(-60.0, -20.0, vWorldX);
         float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
         alpha *= (1.0 - fog * 0.7);
-
         gl_FragColor = vec4(color, alpha);
       }
     `,
@@ -398,7 +271,7 @@ import * as THREE from 'three';
   surfacePoints.renderOrder = 0;
   scene.add(surfacePoints);
 
-  /* ===== Ambient dust field — dense drifting particulate ===== */
+  /* ===== Ambient dust field ===== */
   let DUST_COUNT = 0;
   let dustParticles = [];
   let dustGeo, dustMat, dustPoints;
@@ -408,54 +281,34 @@ import * as THREE from 'three';
     const w = section.clientWidth;
     const h = section.clientHeight;
     DUST_COUNT = Math.round(Math.min(3800, (w * h) / 520));
-
     dustParticles = [];
     for (let i = 0; i < DUST_COUNT; i++) {
       const bucket = Math.floor(Math.random() * 8);
-      const xRand = Math.random();
-      const x = (xRand - 0.5) * SURF_W;
-      const yRand = Math.random();
-      const y = -1 + yRand * 15;
+      const x = (Math.random() - 0.5) * SURF_W;
+      const y = -1 + Math.random() * 15;
       dustParticles.push({
-        x: x,
-        y: y,
-        z: Z_FAR - 4 + Math.random() * (SURF_D + 8),
-        vx: (Math.random() - 0.5) * 0.05,
-        vy: (Math.random() - 0.5) * 0.05,
-        vz: (Math.random() - 0.5) * 0.05,
-        size: 0.2 + Math.random() * 0.8,
-        bucket: bucket,
-        baseAlpha: 0.08 + bucket * 0.045,
-        alpha: 0.08 + bucket * 0.045,
-        azure: 0,
-        phase: Math.random() * Math.PI * 2,
+        x: x, y: y, z: Z_FAR - 4 + Math.random() * (SURF_D + 8),
+        vx: (Math.random() - 0.5) * 0.05, vy: (Math.random() - 0.5) * 0.05, vz: (Math.random() - 0.5) * 0.05,
+        size: 0.2 + Math.random() * 0.8, bucket: bucket,
+        baseAlpha: 0.08 + bucket * 0.045, alpha: 0.08 + bucket * 0.045,
+        azure: 0, phase: Math.random() * Math.PI * 2, vacuum: 0, vacuumStart: 0,
       });
     }
-
     dPos = new Float32Array(DUST_COUNT * 3);
     dAlpha = new Float32Array(DUST_COUNT);
     dSize = new Float32Array(DUST_COUNT);
     dAzure = new Float32Array(DUST_COUNT);
-
     for (let i = 0; i < DUST_COUNT; i++) {
       const p = dustParticles[i];
-      dPos[i * 3] = p.x;
-      dPos[i * 3 + 1] = p.y;
-      dPos[i * 3 + 2] = p.z;
-      dAlpha[i] = p.alpha;
-      dSize[i] = p.size;
-      dAzure[i] = 0;
+      dPos[i * 3] = p.x; dPos[i * 3 + 1] = p.y; dPos[i * 3 + 2] = p.z;
+      dAlpha[i] = p.alpha; dSize[i] = p.size; dAzure[i] = 0;
     }
-
-    if (dustGeo) {
-      dustGeo.dispose();
-    }
+    if (dustGeo) dustGeo.dispose();
     dustGeo = new THREE.BufferGeometry();
     dustGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
     dustGeo.setAttribute('aAlpha', new THREE.BufferAttribute(dAlpha, 1));
     dustGeo.setAttribute('aSize', new THREE.BufferAttribute(dSize, 1));
     dustGeo.setAttribute('aAzure', new THREE.BufferAttribute(dAzure, 1));
-
     if (!dustMat) {
       dustMat = new THREE.ShaderMaterial({
         uniforms: {
@@ -463,271 +316,236 @@ import * as THREE from 'three';
           uGreyColor: { value: new THREE.Color(0x3a404a) },
           uAzureColor: { value: new THREE.Color(0x5aa0ff) },
           uFogColor: { value: new THREE.Color(0xedf0f2) },
-          uFogNear: { value: 15 },
-          uFogFar: { value: 70 },
+          uFogNear: { value: 15 }, uFogFar: { value: 70 },
         },
         vertexShader: `
-          attribute float aAlpha;
-          attribute float aSize;
-          attribute float aAzure;
+          attribute float aAlpha; attribute float aSize; attribute float aAzure;
           uniform float uPixelRatio;
-          varying float vAlpha;
-          varying float vAzure;
-          varying float vDist;
-          varying float vTopFade;
-          varying float vLeftFade;
-
+          varying float vAlpha; varying float vAzure; varying float vDist;
+          varying float vTopFade; varying float vLeftFade;
           void main() {
-            vAlpha = aAlpha;
-            vAzure = aAzure;
+            vAlpha = aAlpha; vAzure = aAzure;
             vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-            vDist = -mvPos.z;
-            gl_Position = projectionMatrix * mvPos;
+            vDist = -mvPos.z; gl_Position = projectionMatrix * mvPos;
             float rawSize = aSize * (120.0 / max(vDist, 1.0));
             gl_PointSize = clamp(rawSize, 1.65, 6.75) * uPixelRatio;
-
             vTopFade = 1.0 - smoothstep(8.0, 14.0, position.y);
             vLeftFade = smoothstep(-75.0, -30.0, position.x);
           }
         `,
         fragmentShader: `
-          varying float vAlpha;
-          varying float vAzure;
-          varying float vDist;
-          varying float vTopFade;
-          varying float vLeftFade;
-          uniform vec3 uGreyColor;
-          uniform vec3 uAzureColor;
-          uniform vec3 uFogColor;
-          uniform float uFogNear;
-          uniform float uFogFar;
-
+          varying float vAlpha; varying float vAzure; varying float vDist;
+          varying float vTopFade; varying float vLeftFade;
+          uniform vec3 uGreyColor; uniform vec3 uAzureColor; uniform vec3 uFogColor;
+          uniform float uFogNear; uniform float uFogFar;
           void main() {
             vec2 uv = gl_PointCoord - 0.5;
             float d = length(uv);
             if (d > 0.5) discard;
-
             float soft = 1.0 - smoothstep(0.2, 0.5, d);
-
             vec3 color = mix(uGreyColor, uAzureColor, vAzure);
-
             float fog = smoothstep(uFogNear, uFogFar, vDist);
             color = mix(color, uFogColor, fog * 0.75);
-
             float alpha = soft * vAlpha * vTopFade * vLeftFade * (1.0 - fog * 0.5);
             gl_FragColor = vec4(color, alpha);
           }
         `,
-        transparent: true,
-        depthWrite: false,
+        transparent: true, depthWrite: false,
       });
     }
-
-    if (dustPoints) {
-      scene.remove(dustPoints);
-    }
+    if (dustPoints) scene.remove(dustPoints);
     dustPoints = new THREE.Points(dustGeo, dustMat);
     dustPoints.renderOrder = 1;
     scene.add(dustPoints);
   }
-
   buildDust();
 
-  /* ===== Descending capture motes — pulled in + neutralized by surface ===== */
+  /* ===== Capture motes ===== */
   const CAPTURE_COUNT = 220;
   const captureParticles = [];
   let captureGeo, captureMat, capturePoints;
   let cPos, cAlpha, cSize, cAzure;
-
   for (let i = 0; i < CAPTURE_COUNT; i++) {
     captureParticles.push({
-      x: 0, y: 0, z: 0,
-      targetX: 0, targetY: 0, targetZ: 0,
-      startY: 0,
-      state: 'idle',
-      startTime: 0,
-      fadeStart: 0,
-      fallDuration: 2.0,
-      azure: 0,
-      alpha: 0,
-      size: 0.9 + Math.random() * 0.8,
-      baseAlpha: 0.5 + Math.random() * 0.25,
+      x: 0, y: 0, z: 0, targetX: 0, targetY: 0, targetZ: 0, startY: 0,
+      state: 'idle', startTime: 0, fadeStart: 0, fallDuration: 2.0,
+      azure: 0, alpha: 0, size: 0.9 + Math.random() * 0.8, baseAlpha: 0.5 + Math.random() * 0.25,
     });
   }
-
   cPos = new Float32Array(CAPTURE_COUNT * 3);
   cAlpha = new Float32Array(CAPTURE_COUNT);
   cSize = new Float32Array(CAPTURE_COUNT);
   cAzure = new Float32Array(CAPTURE_COUNT);
-
-  for (let i = 0; i < CAPTURE_COUNT; i++) {
-    cPos[i * 3] = 9999;
-    cAlpha[i] = 0;
-    cSize[i] = captureParticles[i].size;
-    cAzure[i] = 0;
-  }
-
+  for (let i = 0; i < CAPTURE_COUNT; i++) { cPos[i * 3] = 9999; cAlpha[i] = 0; cSize[i] = captureParticles[i].size; cAzure[i] = 0; }
   captureGeo = new THREE.BufferGeometry();
   captureGeo.setAttribute('position', new THREE.BufferAttribute(cPos, 3));
   captureGeo.setAttribute('aAlpha', new THREE.BufferAttribute(cAlpha, 1));
   captureGeo.setAttribute('aSize', new THREE.BufferAttribute(cSize, 1));
   captureGeo.setAttribute('aAzure', new THREE.BufferAttribute(cAzure, 1));
-
   captureMat = new THREE.ShaderMaterial({
     uniforms: {
       uPixelRatio: { value: renderer.getPixelRatio() },
       uGreyColor: { value: new THREE.Color(0x3a404a) },
       uAzureColor: { value: new THREE.Color(0x5aa0ff) },
       uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 15 },
-      uFogFar: { value: 70 },
+      uFogNear: { value: 15 }, uFogFar: { value: 70 },
     },
     vertexShader: `
-      attribute float aAlpha;
-      attribute float aSize;
-      attribute float aAzure;
+      attribute float aAlpha; attribute float aSize; attribute float aAzure;
       uniform float uPixelRatio;
-      varying float vAlpha;
-      varying float vAzure;
-      varying float vDist;
-
+      varying float vAlpha; varying float vAzure; varying float vDist;
       void main() {
-        vAlpha = aAlpha;
-        vAzure = aAzure;
+        vAlpha = aAlpha; vAzure = aAzure;
         vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-        vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
+        vDist = -mvPos.z; gl_Position = projectionMatrix * mvPos;
         float rawSize = aSize * (120.0 / max(vDist, 1.0));
         gl_PointSize = clamp(rawSize, 1.65, 6.75) * uPixelRatio;
       }
     `,
     fragmentShader: `
-      varying float vAlpha;
-      varying float vAzure;
-      varying float vDist;
-      uniform vec3 uGreyColor;
-      uniform vec3 uAzureColor;
-      uniform vec3 uFogColor;
-      uniform float uFogNear;
-      uniform float uFogFar;
-
+      varying float vAlpha; varying float vAzure; varying float vDist;
+      uniform vec3 uGreyColor; uniform vec3 uAzureColor; uniform vec3 uFogColor;
+      uniform float uFogNear; uniform float uFogFar;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-
         float soft = 1.0 - smoothstep(0.2, 0.5, d);
-
         vec3 color = mix(uGreyColor, uAzureColor, vAzure);
-
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.75);
-
         float alpha = soft * vAlpha * (1.0 - fog * 0.5);
         gl_FragColor = vec4(color, alpha);
       }
     `,
-    transparent: true,
-    depthWrite: false,
+    transparent: true, depthWrite: false,
   });
-
   capturePoints = new THREE.Points(captureGeo, captureMat);
   capturePoints.renderOrder = 2;
   scene.add(capturePoints);
 
-  /* ===== Blooms (azure neutralize glow) ===== */
+  /* ===== Blooms ===== */
   const BLOOM_COUNT = 48;
   const bloomGeo = new THREE.BufferGeometry();
   const bPos = new Float32Array(BLOOM_COUNT * 3);
   const bAge = new Float32Array(BLOOM_COUNT);
   const bActive = new Float32Array(BLOOM_COUNT);
   const bMaxSize = new Float32Array(BLOOM_COUNT);
-
+  const bPeakAlpha = new Float32Array(BLOOM_COUNT);
   const blooms = [];
   for (let i = 0; i < BLOOM_COUNT; i++) {
-    blooms.push({ active: false, age: 0, life: 0.85, x: 0, y: 0, z: 0, maxSize: 0 });
-    bPos[i * 3] = 9999;
-    bMaxSize[i] = 42 + Math.random() * 28;
+    blooms.push({ active: false, age: 0, life: 0.85, x: 0, y: 0, z: 0, maxSize: 0, peakAlpha: 0.72 });
+    bPos[i * 3] = 9999; bMaxSize[i] = 42 + Math.random() * 28; bPeakAlpha[i] = 0.72;
   }
-
   bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
   bloomGeo.setAttribute('aAge', new THREE.BufferAttribute(bAge, 1));
   bloomGeo.setAttribute('aActive', new THREE.BufferAttribute(bActive, 1));
   bloomGeo.setAttribute('aMaxSize', new THREE.BufferAttribute(bMaxSize, 1));
-
+  bloomGeo.setAttribute('aPeakAlpha', new THREE.BufferAttribute(bPeakAlpha, 1));
   const bloomMat = new THREE.ShaderMaterial({
     uniforms: {
       uPixelRatio: { value: renderer.getPixelRatio() },
       uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 20 },
-      uFogFar: { value: 50 },
+      uFogNear: { value: 20 }, uFogFar: { value: 50 },
     },
     vertexShader: `
-      attribute float aAge;
-      attribute float aActive;
-      attribute float aMaxSize;
+      attribute float aAge; attribute float aActive; attribute float aMaxSize; attribute float aPeakAlpha;
       uniform float uPixelRatio;
-      varying float vAlpha;
-      varying float vDist;
-      varying float vAge;
-
+      varying float vAlpha; varying float vDist; varying float vAge;
       void main() {
         vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-        vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
-
+        vDist = -mvPos.z; gl_Position = projectionMatrix * mvPos;
         float t = aAge;
         float size = aMaxSize * (0.2 + t * 0.8);
         gl_PointSize = size * uPixelRatio;
-
-        vAge = t;
-        vAlpha = aActive * (1.0 - t) * 0.72;
+        vAge = t; vAlpha = aActive * (1.0 - t) * aPeakAlpha;
       }
     `,
     fragmentShader: `
-      varying float vAlpha;
-      varying float vDist;
-      varying float vAge;
-      uniform vec3 uFogColor;
-      uniform float uFogNear;
-      uniform float uFogFar;
-
+      varying float vAlpha; varying float vDist; varying float vAge;
+      uniform vec3 uFogColor; uniform float uFogNear; uniform float uFogFar;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-
         float soft = smoothstep(0.5, 0.0, d);
         float core = smoothstep(0.22, 0.0, d);
-
         vec3 azure = vec3(0.354, 0.627, 0.902);
         vec3 brightAzure = vec3(0.541, 0.753, 1.0);
         vec3 color = mix(azure, brightAzure, core * (1.0 - vAge * 0.5));
-
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.7);
-
         float alpha = (soft * 0.5 + core * 0.5) * vAlpha * (1.0 - fog * 0.5);
         gl_FragColor = vec4(color, alpha);
       }
     `,
-    transparent: true,
-    depthWrite: false,
+    transparent: true, depthWrite: false,
   });
-
   const bloomPoints = new THREE.Points(bloomGeo, bloomMat);
   bloomPoints.renderOrder = 3;
   scene.add(bloomPoints);
 
-  /* ===== Surface boost at capture ===== */
+  /* ===== Sparkles (comet wake) ===== */
+  const SPARKLE_COUNT = 30;
+  const sparkles = [];
+  const sparkleGeo = new THREE.BufferGeometry();
+  const spPos = new Float32Array(SPARKLE_COUNT * 3);
+  const spAge = new Float32Array(SPARKLE_COUNT);
+  const spActive = new Float32Array(SPARKLE_COUNT);
+  for (let i = 0; i < SPARKLE_COUNT; i++) {
+    sparkles.push({ active: false, age: 0, life: 0.6, x: 0, y: 0, z: 0, vy: 0.3 });
+    spPos[i * 3] = 9999;
+  }
+  sparkleGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
+  sparkleGeo.setAttribute('aAge', new THREE.BufferAttribute(spAge, 1));
+  sparkleGeo.setAttribute('aActive', new THREE.BufferAttribute(spActive, 1));
+  const sparkleMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uColor: { value: new THREE.Color(0x5aa0ff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 20 }, uFogFar: { value: 50 },
+    },
+    vertexShader: `
+      attribute float aAge; attribute float aActive;
+      uniform float uPixelRatio;
+      varying float vAlpha; varying float vDist;
+      void main() {
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        vDist = -mvPos.z; gl_Position = projectionMatrix * mvPos;
+        gl_PointSize = 5.0 * uPixelRatio;
+        vAlpha = aActive * (1.0 - aAge) * 0.8;
+      }
+    `,
+    fragmentShader: `
+      varying float vAlpha; varying float vDist;
+      uniform vec3 uColor; uniform vec3 uFogColor;
+      uniform float uFogNear; uniform float uFogFar;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float soft = 1.0 - smoothstep(0.0, 0.5, d);
+        vec3 color = uColor;
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.7);
+        gl_FragColor = vec4(color, soft * vAlpha * (1.0 - fog * 0.5));
+      }
+    `,
+    transparent: true, depthWrite: false,
+  });
+  const sparklePoints = new THREE.Points(sparkleGeo, sparkleMat);
+  sparklePoints.renderOrder = 4;
+  scene.add(sparklePoints);
+
+  /* ===== Helpers ===== */
   function boostSurfaceAt(x, z, amount) {
     const gx = Math.round(((x / SURF_W) + 0.5) * (GRID_X - 1));
     const gz = Math.round(((z - Z_FAR) / SURF_D) * (GRID_Z - 1));
     const radius = 6;
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dz = -radius; dz <= radius; dz++) {
-        const ix = gx + dx;
-        const iz = gz + dz;
+        const ix = gx + dx, iz = gz + dz;
         if (ix < 0 || ix >= GRID_X || iz < 0 || iz >= GRID_Z) continue;
         const dist = Math.sqrt(dx * dx + dz * dz);
         if (dist > radius) continue;
@@ -738,29 +556,39 @@ import * as THREE from 'three';
     }
   }
 
-  /* ===== Spawn bloom ===== */
-  function spawnBloom(x, y, z) {
+  function spawnBloom(x, y, z, opts) {
+    opts = opts || {};
     for (let i = 0; i < BLOOM_COUNT; i++) {
       if (!blooms[i].active) {
-        blooms[i].active = true;
-        blooms[i].age = 0;
-        blooms[i].life = 0.85;
-        blooms[i].x = x;
-        blooms[i].y = y;
-        blooms[i].z = z;
-        blooms[i].maxSize = 42 + Math.random() * 28;
+        blooms[i].active = true; blooms[i].age = 0;
+        blooms[i].life = opts.life || 0.85;
+        blooms[i].x = x; blooms[i].y = y; blooms[i].z = z;
+        blooms[i].maxSize = opts.size || (42 + Math.random() * 28);
+        blooms[i].peakAlpha = opts.peakAlpha || 0.72;
         bMaxSize[i] = blooms[i].maxSize;
+        bPeakAlpha[i] = blooms[i].peakAlpha;
         return;
       }
     }
   }
 
-  /* ===== Spawn capture mote ===== */
+  function spawnSparkle(x, y, z) {
+    for (let i = 0; i < SPARKLE_COUNT; i++) {
+      if (!sparkles[i].active) {
+        sparkles[i].active = true; sparkles[i].age = 0; sparkles[i].life = 0.6;
+        sparkles[i].x = x + (Math.random() - 0.5) * 2;
+        sparkles[i].y = y + Math.random() * 1;
+        sparkles[i].z = z + (Math.random() - 0.5) * 2;
+        sparkles[i].vy = 0.3 + Math.random() * 0.3;
+        return;
+      }
+    }
+  }
+
   function spawnCaptureMote(clock, nearCursor, mouseW, mStr) {
     for (let i = 0; i < CAPTURE_COUNT; i++) {
       const p = captureParticles[i];
       if (p.state !== 'idle') continue;
-
       if (nearCursor) {
         p.targetX = mouseW.x + (Math.random() - 0.5) * 6;
         p.targetZ = mouseW.y + (Math.random() - 0.5) * 6;
@@ -770,18 +598,33 @@ import * as THREE from 'three';
         p.targetZ = Z_FAR + Math.random() * SURF_D;
         p.fallDuration = 1.4 + Math.random() * 0.8;
       }
-
       p.targetY = waveHeight(p.targetX, p.targetZ, clock);
       p.startY = p.targetY + 8 + Math.random() * 6;
       p.x = p.targetX + (Math.random() - 0.5) * 3;
       p.y = p.startY;
       p.z = p.targetZ + (Math.random() - 0.5) * 3;
-      p.state = 'falling';
-      p.startTime = clock;
-      p.azure = 0;
-      p.alpha = p.baseAlpha;
+      p.state = 'falling'; p.startTime = clock; p.azure = 0; p.alpha = p.baseAlpha;
       return;
     }
+  }
+
+  /* ===== Ring management ===== */
+  const rings = [
+    { x: 0, z: 0, startTime: 0, active: 0 },
+    { x: 0, z: 0, startTime: 0, active: 0 },
+    { x: 0, z: 0, startTime: 0, active: 0 },
+    { x: 0, z: 0, startTime: 0, active: 0 },
+  ];
+  let lastRingX = 0, lastRingZ = 0, lastRingTime = 0, ringTravelAccum = 0, ringInit = false;
+
+  function emitRing(x, z, t) {
+    let slot = -1;
+    for (let i = 0; i < 4; i++) { if (!rings[i].active) { slot = i; break; } }
+    if (slot < 0) {
+      slot = 0;
+      for (let i = 1; i < 4; i++) { if (rings[i].startTime < rings[slot].startTime) slot = i; }
+    }
+    rings[slot].x = x; rings[slot].z = z; rings[slot].startTime = t; rings[slot].active = 1;
   }
 
   /* ===== Resize ===== */
@@ -799,6 +642,7 @@ import * as THREE from 'three';
     if (dustMat) dustMat.uniforms.uPixelRatio.value = dpr;
     captureMat.uniforms.uPixelRatio.value = dpr;
     bloomMat.uniforms.uPixelRatio.value = dpr;
+    sparkleMat.uniforms.uPixelRatio.value = dpr;
     buildDust();
   }
 
@@ -808,6 +652,7 @@ import * as THREE from 'three';
   let mousePresent = false;
   const _ndc = new THREE.Vector3();
   const _dir = new THREE.Vector3();
+  const _corePos = new THREE.Vector3();
   function updateMouseWorld(clientX, clientY) {
     const rect = section.getBoundingClientRect();
     const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -837,6 +682,7 @@ import * as THREE from 'three';
   let cursorCaptureTimer = 0;
   let nextCursorCaptureInterval = 0.04;
   let mouseStrVal = 0;
+  let lastWakeX = 9999, lastWakeZ = 9999;
 
   function loop(t) {
     if (!running) return;
@@ -844,102 +690,146 @@ import * as THREE from 'three';
     const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
     lastT = t;
     clock += dt;
-
     surfaceMat.uniforms.uTime.value = clock;
 
     /* Decay boosts */
     const decay = Math.pow(0.945, dt * 60);
-    for (let i = 0; i < SURF_COUNT; i++) {
-      sBoosts[i] *= decay;
-    }
+    for (let i = 0; i < SURF_COUNT; i++) sBoosts[i] *= decay;
     surfaceGeo.attributes.aBoost.needsUpdate = true;
 
-    /* Cursor world lerp */
+    /* Cursor world lerp dt*6 */
     if (mouseTarget.x < 9000) {
       const um = surfaceMat.uniforms.uMouse.value;
-      um.x += (mouseTarget.x - um.x) * Math.min(1, dt * 4.5);
-      um.y += (mouseTarget.y - um.y) * Math.min(1, dt * 4.5);
+      um.x += (mouseTarget.x - um.x) * Math.min(1, dt * 6);
+      um.y += (mouseTarget.y - um.y) * Math.min(1, dt * 6);
     }
 
+    /* Charge strength ramp-in dt*8, ramp-out ~0.9s */
     if (mousePresent) {
-      mouseStrVal += (1 - mouseStrVal) * Math.min(1, dt * 3.0);
+      mouseStrVal += (1 - mouseStrVal) * Math.min(1, dt * 8);
     } else {
-      mouseStrVal += (0 - mouseStrVal) * Math.min(1, dt / 1.2);
+      mouseStrVal += (0 - mouseStrVal) * Math.min(1, dt * 3);
     }
     surfaceMat.uniforms.uMouseStr.value = mouseStrVal;
 
     const mouseW = surfaceMat.uniforms.uMouse.value;
     const mStr = mouseStrVal;
 
-    /* Update ambient dust — drifting only, always grey */
+    /* Ring emission on cursor travel */
+    if (mousePresent && mStr > 0.1) {
+      if (!ringInit) { lastRingX = mouseW.x; lastRingZ = mouseW.y; ringInit = true; }
+      const rdx = mouseW.x - lastRingX;
+      const rdz = mouseW.y - lastRingZ;
+      ringTravelAccum += Math.sqrt(rdx * rdx + rdz * rdz);
+      if (ringTravelAccum > 3.0 && (clock - lastRingTime) > 0.18) {
+        emitRing(mouseW.x, mouseW.y, clock);
+        lastRingX = mouseW.x; lastRingZ = mouseW.y;
+        ringTravelAccum = 0; lastRingTime = clock;
+      }
+    }
+
+    /* Update ring uniforms */
+    for (let i = 0; i < 4; i++) {
+      if (rings[i].active && (clock - rings[i].startTime) > 1.2) rings[i].active = 0;
+      surfaceMat.uniforms.uRings.value[i].set(rings[i].x, rings[i].z, rings[i].startTime, rings[i].active);
+    }
+
+    /* Comet wake: boost surface points near cursor path + sparkles */
+    if (mousePresent && mStr > 0.1) {
+      const wdx = mouseW.x - lastWakeX;
+      const wdz = mouseW.y - lastWakeZ;
+      const wdist = Math.sqrt(wdx * wdx + wdz * wdz);
+      if (wdist > 0.5) {
+        boostSurfaceAt(mouseW.x, mouseW.y, 0.5);
+        if (Math.random() < 0.4) {
+          spawnSparkle(mouseW.x, waveHeight(mouseW.x, mouseW.y, clock) + 0.5, mouseW.y);
+        }
+        lastWakeX = mouseW.x; lastWakeZ = mouseW.y;
+      }
+    } else {
+      lastWakeX = 9999; lastWakeZ = 9999;
+    }
+
+    /* Update ambient dust + dust vacuum */
+    let cursorCaptureCount = 0;
     for (let i = 0; i < DUST_COUNT; i++) {
       const p = dustParticles[i];
 
-      p.vx += (Math.random() - 0.5) * 0.018;
-      p.vy += (Math.random() - 0.5) * 0.018;
-      p.vz += (Math.random() - 0.5) * 0.018;
-      p.vx *= 0.992; p.vy *= 0.992; p.vz *= 0.992;
-
-      const sp = Math.sqrt(p.vx*p.vx + p.vy*p.vy + p.vz*p.vz);
-      if (sp > 0.5) { const s = 0.5/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
-      if (sp < 0.12 && sp > 0.001) { const s = 0.12/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
-
-      p.vx += Math.sin(clock * 0.25 + p.phase) * 0.001 * dt * 60;
-      p.vz += Math.cos(clock * 0.20 + p.phase) * 0.001 * dt * 60;
-
-      /* Slight cursor pull on ambient dust */
-      if (mStr > 0.01) {
-        const dx = mouseW.x - p.x;
-        const dz = mouseW.y - p.z;
-        const dist = Math.sqrt(dx*dx + dz*dz);
-        const fieldR = 12.0;
-        if (dist < fieldR) {
-          const pull = mStr * (1 - dist / fieldR) * 0.015;
-          p.vx += (dx / Math.max(dist, 0.1)) * pull;
-          p.vz += (dz / Math.max(dist, 0.1)) * pull;
-          p.vy += -pull * 0.3;
+      if (p.vacuum === 1) {
+        const vacAge = clock - p.vacuumStart;
+        p.azure = Math.min(1, vacAge / 0.3);
+        p.alpha = p.baseAlpha * Math.max(0, 1 - vacAge / 0.3);
+        if (vacAge >= 0.3) {
+          spawnBloom(p.x, p.y, p.z, { life: 0.5, size: 16 + Math.random() * 10, peakAlpha: 0.5 });
+          p.x = (Math.random() - 0.5) * SURF_W;
+          p.z = Z_FAR + Math.random() * SURF_D;
+          p.y = -1 + Math.random() * 15;
+          p.vx = (Math.random() - 0.5) * 0.05;
+          p.vy = (Math.random() - 0.5) * 0.05;
+          p.vz = (Math.random() - 0.5) * 0.05;
+          p.vacuum = 0; p.azure = 0; p.alpha = p.baseAlpha;
         }
-      }
+      } else {
+        p.vx += (Math.random() - 0.5) * 0.018;
+        p.vy += (Math.random() - 0.5) * 0.018;
+        p.vz += (Math.random() - 0.5) * 0.018;
+        p.vx *= 0.992; p.vy *= 0.992; p.vz *= 0.992;
+        const sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy + p.vz * p.vz);
+        if (sp > 0.5) { const s = 0.5 / sp; p.vx *= s; p.vy *= s; p.vz *= s; }
+        if (sp < 0.12 && sp > 0.001) { const s = 0.12 / sp; p.vx *= s; p.vy *= s; p.vz *= s; }
+        p.vx += Math.sin(clock * 0.25 + p.phase) * 0.001 * dt * 60;
+        p.vz += Math.cos(clock * 0.20 + p.phase) * 0.001 * dt * 60;
 
-      p.x += p.vx * dt * 60;
-      p.y += p.vy * dt * 60;
-      p.z += p.vz * dt * 60;
+        if (mStr > 0.1) {
+          const dx = mouseW.x - p.x;
+          const dz = mouseW.y - p.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          const vacuumR = 18.0;
+          if (dist < vacuumR) {
+            const accel = mStr * (1 - dist / vacuumR) * 0.03;
+            p.vx += (dx / Math.max(dist, 0.1)) * accel;
+            p.vz += (dz / Math.max(dist, 0.1)) * accel;
+            p.vy += -accel * 0.2;
+            const vsp = Math.sqrt(p.vx * p.vx + p.vz * p.vz);
+            if (vsp > 0.8) { const s = 0.8 / vsp; p.vx *= s; p.vz *= s; }
+            if (dist < 1.2 && cursorCaptureCount < 6) {
+              p.vacuum = 1; p.vacuumStart = clock; cursorCaptureCount++;
+            }
+          }
+        }
 
-      if (p.x > 75) p.x = -75;
-      if (p.x < -75) p.x = 75;
-      if (p.z > Z_FAR + SURF_D + 4) p.z = Z_FAR - 4;
-      if (p.z < Z_FAR - 4) p.z = Z_FAR + SURF_D + 4;
-      if (p.y > 14) p.y = -1;
-      if (p.y < -2) p.y = 13;
-
-      /* Keep above surface */
-      var surfH = waveHeight(p.x, p.z, clock);
-      if (p.y < surfH + 0.3) {
-        p.y = surfH + 0.3;
-        p.vy = Math.abs(p.vy) * 0.3;
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        p.z += p.vz * dt * 60;
+        if (p.x > 75) p.x = -75;
+        if (p.x < -75) p.x = 75;
+        if (p.z > Z_FAR + SURF_D + 4) p.z = Z_FAR - 4;
+        if (p.z < Z_FAR - 4) p.z = Z_FAR + SURF_D + 4;
+        if (p.y > 14) p.y = -1;
+        if (p.y < -2) p.y = 13;
+        var surfH = waveHeight(p.x, p.z, clock);
+        if (p.y < surfH + 0.3) { p.y = surfH + 0.3; p.vy = Math.abs(p.vy) * 0.3; }
       }
 
       dPos[i * 3] = p.x;
       dPos[i * 3 + 1] = p.y;
       dPos[i * 3 + 2] = p.z;
-      dAlpha[i] = p.baseAlpha;
+      dAlpha[i] = p.alpha;
       dSize[i] = p.size;
-      dAzure[i] = 0;
+      dAzure[i] = p.azure;
     }
     dustGeo.attributes.position.needsUpdate = true;
     dustGeo.attributes.aAlpha.needsUpdate = true;
     dustGeo.attributes.aSize.needsUpdate = true;
     dustGeo.attributes.aAzure.needsUpdate = true;
 
-    /* Spawn ambient captures: 6-10 per second across full width */
+    /* Spawn ambient captures */
     captureSpawnTimer += dt;
     if (captureSpawnTimer >= nextCaptureInterval) {
       captureSpawnTimer = 0;
       nextCaptureInterval = 0.1 + Math.random() * 0.067;
       spawnCaptureMote(clock, false, mouseW, mStr);
     }
-
-    /* Cursor-driven captures: ~3x more, tighter, faster */
     cursorCaptureTimer += dt;
     if (mStr > 0.15 && cursorCaptureTimer >= nextCursorCaptureInterval) {
       cursorCaptureTimer = 0;
@@ -950,37 +840,20 @@ import * as THREE from 'three';
     /* Update capture motes */
     for (let i = 0; i < CAPTURE_COUNT; i++) {
       const p = captureParticles[i];
-
-      if (p.state === 'idle') {
-        cAlpha[i] = 0;
-        cAzure[i] = 0;
-        continue;
-      }
-
+      if (p.state === 'idle') { cAlpha[i] = 0; cAzure[i] = 0; continue; }
       if (p.state === 'falling') {
         const elapsed = clock - p.startTime;
         const progress = Math.min(1, elapsed / p.fallDuration);
-
         var eased = progress * progress;
         p.y = p.startY + (p.targetY - p.startY) * eased;
-
         p.x += (p.targetX - p.x) * dt * 1.5;
         p.z += (p.targetZ - p.z) * dt * 1.5;
-
         var remaining = p.fallDuration - elapsed;
-        if (remaining < 0.4) {
-          p.azure = Math.min(1, 1.0 - (remaining / 0.4));
-        }
-
+        if (remaining < 0.4) p.azure = Math.min(1, 1.0 - (remaining / 0.4));
         p.alpha = p.baseAlpha;
-
         if (progress >= 1.0) {
-          p.state = 'fading';
-          p.fadeStart = clock;
-          p.y = p.targetY;
-          p.x = p.targetX;
-          p.z = p.targetZ;
-          p.azure = 1;
+          p.state = 'fading'; p.fadeStart = clock;
+          p.y = p.targetY; p.x = p.targetX; p.z = p.targetZ; p.azure = 1;
           boostSurfaceAt(p.x, p.z, 1.0);
           spawnBloom(p.x, p.targetY + 0.15, p.z);
         }
@@ -989,20 +862,10 @@ import * as THREE from 'three';
         p.alpha = p.baseAlpha * Math.max(0, 1 - fadeElapsed / 0.4);
         p.azure = 1;
         p.y = waveHeight(p.x, p.z, clock);
-
-        if (fadeElapsed >= 0.4) {
-          p.state = 'idle';
-          p.alpha = 0;
-          p.azure = 0;
-        }
+        if (fadeElapsed >= 0.4) { p.state = 'idle'; p.alpha = 0; p.azure = 0; }
       }
-
-      cPos[i * 3] = p.x;
-      cPos[i * 3 + 1] = p.y;
-      cPos[i * 3 + 2] = p.z;
-      cAlpha[i] = p.alpha;
-      cAzure[i] = p.azure;
-      cSize[i] = p.size;
+      cPos[i * 3] = p.x; cPos[i * 3 + 1] = p.y; cPos[i * 3 + 2] = p.z;
+      cAlpha[i] = p.alpha; cAzure[i] = p.azure; cSize[i] = p.size;
     }
     captureGeo.attributes.position.needsUpdate = true;
     captureGeo.attributes.aAlpha.needsUpdate = true;
@@ -1015,16 +878,10 @@ import * as THREE from 'three';
       if (b.active) {
         b.age += dt;
         if (b.age >= b.life) {
-          b.active = false;
-          bPos[i * 3] = 9999;
-          bAge[i] = 0;
-          bActive[i] = 0;
+          b.active = false; bPos[i * 3] = 9999; bAge[i] = 0; bActive[i] = 0;
         } else {
-          bPos[i * 3] = b.x;
-          bPos[i * 3 + 1] = b.y;
-          bPos[i * 3 + 2] = b.z;
-          bAge[i] = b.age / b.life;
-          bActive[i] = 1;
+          bPos[i * 3] = b.x; bPos[i * 3 + 1] = b.y; bPos[i * 3 + 2] = b.z;
+          bAge[i] = b.age / b.life; bActive[i] = 1;
         }
       }
     }
@@ -1032,10 +889,43 @@ import * as THREE from 'three';
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
     bloomGeo.attributes.aMaxSize.needsUpdate = true;
+    bloomGeo.attributes.aPeakAlpha.needsUpdate = true;
+
+    /* Update sparkles */
+    for (let i = 0; i < SPARKLE_COUNT; i++) {
+      const s = sparkles[i];
+      if (s.active) {
+        s.age += dt;
+        s.y += s.vy * dt;
+        if (s.age >= s.life) {
+          s.active = false; spPos[i * 3] = 9999; spAge[i] = 0; spActive[i] = 0;
+        } else {
+          spPos[i * 3] = s.x; spPos[i * 3 + 1] = s.y; spPos[i * 3 + 2] = s.z;
+          spAge[i] = s.age / s.life; spActive[i] = 1;
+        }
+      }
+    }
+    sparkleGeo.attributes.position.needsUpdate = true;
+    sparkleGeo.attributes.aAge.needsUpdate = true;
+    sparkleGeo.attributes.aActive.needsUpdate = true;
+
+    /* Energy core DOM position */
+    if (energyCore) {
+      if (mStr > 0.01 && mouseW.x < 9000) {
+        const worldY = waveHeight(mouseW.x, mouseW.y, clock) + 0.5;
+        _corePos.set(mouseW.x, worldY, mouseW.y).project(camera);
+        const sx = (_corePos.x * 0.5 + 0.5) * section.clientWidth;
+        const sy = (-_corePos.y * 0.5 + 0.5) * section.clientHeight;
+        energyCore.style.left = sx + 'px';
+        energyCore.style.top = sy + 'px';
+        energyCore.style.opacity = mStr;
+      } else {
+        energyCore.style.opacity = 0;
+      }
+    }
 
     camera.position.copy(CAM_BASE);
     camera.lookAt(CAM_TARGET);
-
     renderer.render(scene, camera);
   }
 
@@ -1043,7 +933,6 @@ import * as THREE from 'three';
   function drawStatic() {
     clock = 2.5;
     surfaceMat.uniforms.uTime.value = clock;
-
     const seeds = [
       [-18, -10], [-8, 5], [3, -8], [12, 10], [18, -3], [-5, 14], [8, -15], [-15, 2],
       [25, 8], [-25, 18], [35, -2], [-35, 12]
@@ -1055,46 +944,28 @@ import * as THREE from 'three';
       spawnBloom(sx, sy + 0.2, sz);
       blooms[s].age = 0.2 + Math.random() * 0.3;
     }
-
     for (let i = 0; i < BLOOM_COUNT; i++) {
       const b = blooms[i];
       if (b.active) {
-        bPos[i * 3] = b.x;
-        bPos[i * 3 + 1] = b.y;
-        bPos[i * 3 + 2] = b.z;
-        bAge[i] = b.age / b.life;
-        bActive[i] = 1;
+        bPos[i * 3] = b.x; bPos[i * 3 + 1] = b.y; bPos[i * 3 + 2] = b.z;
+        bAge[i] = b.age / b.life; bActive[i] = 1;
       }
     }
-
     for (let i = 0; i < DUST_COUNT; i++) {
       const p = dustParticles[i];
-      dPos[i * 3] = p.x;
-      dPos[i * 3 + 1] = p.y;
-      dPos[i * 3 + 2] = p.z;
-      dAlpha[i] = p.baseAlpha;
-      dSize[i] = p.size;
-      dAzure[i] = 0;
+      dPos[i * 3] = p.x; dPos[i * 3 + 1] = p.y; dPos[i * 3 + 2] = p.z;
+      dAlpha[i] = p.baseAlpha; dSize[i] = p.size; dAzure[i] = 0;
     }
-
     for (let i = 0; i < CAPTURE_COUNT; i++) {
       const p = captureParticles[i];
       if (i < seeds.length) {
-        p.state = 'fading';
-        p.azure = 1;
-        p.x = seeds[i][0];
-        p.z = seeds[i][1];
-        p.y = waveHeight(p.x, p.z, clock);
-        p.alpha = 0;
+        p.state = 'fading'; p.azure = 1;
+        p.x = seeds[i][0]; p.z = seeds[i][1];
+        p.y = waveHeight(p.x, p.z, clock); p.alpha = 0;
       }
-      cPos[i * 3] = p.x;
-      cPos[i * 3 + 1] = p.y;
-      cPos[i * 3 + 2] = p.z;
-      cAlpha[i] = p.alpha;
-      cAzure[i] = p.azure;
-      cSize[i] = p.size;
+      cPos[i * 3] = p.x; cPos[i * 3 + 1] = p.y; cPos[i * 3 + 2] = p.z;
+      cAlpha[i] = p.alpha; cAzure[i] = p.azure; cSize[i] = p.size;
     }
-
     surfaceGeo.attributes.aBoost.needsUpdate = true;
     dustGeo.attributes.position.needsUpdate = true;
     dustGeo.attributes.aAlpha.needsUpdate = true;
@@ -1108,7 +979,7 @@ import * as THREE from 'three';
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
     bloomGeo.attributes.aMaxSize.needsUpdate = true;
-
+    bloomGeo.attributes.aPeakAlpha.needsUpdate = true;
     camera.position.copy(CAM_BASE);
     camera.lookAt(CAM_TARGET);
     renderer.render(scene, camera);
@@ -1117,22 +988,13 @@ import * as THREE from 'three';
   /* ===== Start / stop ===== */
   function start() {
     if (reduced) return;
-    if (!running) {
-      running = true;
-      lastT = 0;
-      rafId = requestAnimationFrame(loop);
-    }
+    if (!running) { running = true; lastT = 0; rafId = requestAnimationFrame(loop); }
   }
-  function stop() {
-    running = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = 0;
-  }
+  function stop() { running = false; if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
 
   /* ===== Init ===== */
   resize();
   if (reduced) drawStatic();
-
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(function (entries) {
       for (let i = 0; i < entries.length; i++) {
@@ -1141,24 +1003,16 @@ import * as THREE from 'three';
       }
     }, { threshold: [0, 0.3, 1] });
     io.observe(section);
-  } else {
-    start();
-  }
-
+  } else { start(); }
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) stop();
     else if (!reduced && !running) { running = true; lastT = 0; rafId = requestAnimationFrame(loop); }
   });
-
   let rt = 0;
   window.addEventListener('resize', function () {
     if (rt) clearTimeout(rt);
-    rt = setTimeout(function () {
-      resize();
-      if (reduced) drawStatic();
-    }, 180);
+    rt = setTimeout(function () { resize(); if (reduced) drawStatic(); }, 180);
   });
 })();
 </script>
-</body>
-</html>
+</body></html>
