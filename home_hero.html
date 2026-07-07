@@ -276,9 +276,9 @@ import * as THREE from 'three';
 
   /* ===== Surface (charged membrane) ===== */
   const GRID_X = 300;
-  const GRID_Z = 48;
+  const GRID_Z = 40;
   const SURF_W = 150;
-  const SURF_D = 26;
+  const SURF_D = 20;
   const SURF_COUNT = GRID_X * GRID_Z;
 
   const surfaceGeo = new THREE.BufferGeometry();
@@ -322,6 +322,8 @@ import * as THREE from 'three';
       varying float vDist;
       varying float vHeight;
       varying float vMouse;
+      varying vec2 vDirX;
+      varying vec2 vDirZ;
 
       float waveHeight(float x, float z, float t) {
         float h = 0.0;
@@ -349,7 +351,18 @@ import * as THREE from 'three';
 
         vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
         vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
+        vec4 clip0 = projectionMatrix * mvPos;
+        gl_Position = clip0;
+
+        // screen-space tangent directions of the surface, so the "+" lies ON the wavy plane
+        float e = 0.7;
+        vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime), pos.z);
+        vec3 pZ = vec3(pos.x, waveHeight(pos.x, pos.z + e, uTime), pos.z + e);
+        vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
+        vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
+        vec2 s0 = clip0.xy / clip0.w;
+        vDirX = normalize((clipX.xy / clipX.w) - s0);
+        vDirZ = normalize((clipZ.xy / clipZ.w) - s0);
 
         float sz = uSize * (1.0 + aBoost * 1.6);
         gl_PointSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
@@ -360,6 +373,8 @@ import * as THREE from 'three';
       varying float vDist;
       varying float vHeight;
       varying float vMouse;
+      varying vec2 vDirX;
+      varying vec2 vDirZ;
       uniform vec3 uBaseColor;
       uniform vec3 uAzureColor;
       uniform vec3 uFogColor;
@@ -368,15 +383,20 @@ import * as THREE from 'three';
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
+        uv.y = -uv.y; // point-coord y is downward; flip to clip-space y-up
 
-        // "+" symbol (positive charge): a soft plus/cross per point
+        // "+" oriented along the surface tangents so it LIES ON the wavy plane
+        vec2 perpX = vec2(-vDirX.y, vDirX.x);
+        vec2 perpZ = vec2(-vDirZ.y, vDirZ.x);
+        float alongX = dot(uv, vDirX), distX = abs(dot(uv, perpX));
+        float alongZ = dot(uv, vDirZ), distZ = abs(dot(uv, perpZ));
         float thick = 0.15;   // arm half-thickness
         float arm   = 0.5;    // arm half-length
-        float horiz = (1.0 - smoothstep(thick * 0.55, thick, abs(uv.y))) *
-                      (1.0 - smoothstep(arm - 0.07, arm, abs(uv.x)));
-        float vert  = (1.0 - smoothstep(thick * 0.55, thick, abs(uv.x))) *
-                      (1.0 - smoothstep(arm - 0.07, arm, abs(uv.y)));
-        float plus  = max(horiz, vert);
+        float armX = (1.0 - smoothstep(thick * 0.55, thick, distX)) *
+                     (1.0 - smoothstep(arm - 0.07, arm, abs(alongX)));
+        float armZ = (1.0 - smoothstep(thick * 0.55, thick, distZ)) *
+                     (1.0 - smoothstep(arm - 0.07, arm, abs(alongZ)));
+        float plus  = max(armX, armZ);
         if (plus < 0.05) discard;
 
         float heightFactor = smoothstep(-3.5, 3.5, vHeight);
@@ -415,9 +435,9 @@ import * as THREE from 'three';
 
   function makePollutant(initial) {
     return {
-      x: (Math.random() - 0.5) * 90,
+      x: (Math.random() - 0.5) * 124,
       y: 8 + Math.random() * 20,          // floating gently in the upper air
-      z: (Math.random() - 0.5) * 46,
+      z: (Math.random() - 0.5) * 22,
       vx: (Math.random() - 0.5) * 0.07,
       vy: (Math.random() - 0.5) * 0.04,   // very gentle bob, NO gravity — it floats
       vz: (Math.random() - 0.5) * 0.07,
@@ -716,7 +736,7 @@ import * as THREE from 'three';
           p.y = surfH;
           boostSurfaceAt(p.x, p.z, 0.5);
           spawnBloom(p.x, surfH + 0.15, p.z);
-        } else if (Math.abs(p.x) > 47 || Math.abs(p.z) > 26 || p.y > 30) {
+        } else if (Math.abs(p.x) > 64 || Math.abs(p.z) > 13 || p.y > 32) {
           pollutants[i] = makePollutant(false);
           p = pollutants[i];
         }
