@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — a permanent positive charge, engineered into the material</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1466e6;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  max-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+#cloud-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  pointer-events:none;
+}
+
+/* pollutant dust in the air — ported verbatim from act1.html (2D canvas), over the "+" surface */
+#dust-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  pointer-events:none;
+}
+
+.scrim{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:radial-gradient(ellipse 52% 58% at 19% 44%, rgba(237,240,242,0.97) 0%, rgba(237,240,242,0.92) 46%, rgba(237,240,242,0.48) 70%, rgba(237,240,242,0) 88%);
+}
+
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  width:42%;
+  max-width:620px;
+  padding-left:clamp(48px, 7vw, 128px);
+  padding-right:24px;
+}
+
+.eyebrow{
+  font-family:var(--stack);
+  font-size:13px;
+  line-height:1.4;
+  color:var(--muted);
+  font-weight:400;
+  letter-spacing:0.005em;
+  margin-bottom:24px;
+}
+
+.logo-wrap{
+  height:100px;
+  display:flex;
+  align-items:center;
+  margin-bottom:30px;
+  margin-left:-15px;
+}
+.logo-wrap img{
+  height:100px;
+  width:auto;
+  max-width:100%;
+  display:block;
+  object-fit:contain;
+  object-position:left center;
+}
+
+.body-text{
+  max-width:440px;
+  font-size:19px;
+  line-height:1.55;
+  color:#1f2327;
+}
+
+.micro-label{
+  position:absolute;
+  right:clamp(20px, 3vw, 40px);
+  bottom:clamp(18px, 3vh, 32px);
+  z-index:3;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.06em;
+  color:var(--muted);
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+@media (max-width: 880px){
+  section{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    min-height:100vh;
+    max-height:none;
+    overflow:visible;
+  }
+  #cloud-canvas{
+    position:absolute;
+    inset:0;
+    z-index:1;
+  }
+  .scrim{
+    background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 38%, rgba(237,240,242,0.82) 50%, rgba(237,240,242,0) 66%);
+  }
+  .text-col{
+    width:100%;
+    max-width:none;
+    align-items:stretch;
+    padding-left:clamp(20px,5vw,28px);
+    padding-right:clamp(20px,5vw,28px);
+    padding-top:clamp(28px,5vh,40px);
+    padding-bottom:8px;
+    flex:0 0 auto;
+  }
+  .eyebrow{font-size:13px;margin-bottom:18px;}
+  .logo-wrap{height:78px;margin-bottom:24px;}
+  .logo-wrap img{height:78px;}
+  .body-text{font-size:16px;line-height:1.6;}
+  .micro-label{font-size:10px;}
+}
+
+@media (max-height: 760px) and (min-width: 881px){
+  .logo-wrap{height:88px;margin-bottom:24px;}
+  .logo-wrap img{height:88px;}
+  .body-text{font-size:17px;line-height:1.5;}
+}
+@media (max-height: 680px) and (min-width: 881px){
+  .eyebrow{font-size:12px;margin-bottom:16px;}
+  .logo-wrap{height:76px;margin-bottom:18px;}
+  .logo-wrap img{height:76px;}
+  .body-text{font-size:16px;line-height:1.45;}
+}
+</style>
+</head>
+<body>
+
+<section id="section">
+  <canvas id="cloud-canvas"></canvas>
+  <div class="scrim"></div>
+
+  <div class="text-col">
+    <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
+    <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
+  </div>
+
+  <div class="micro-label">3p — permanent positive polarity</div>
+</section>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================================
+   Direction 1 — "The charge field"
+   A shallow charged plane sits low in the frame. ~56 thin cobalt field lines
+   arc up and out of it, curving like a real electric field and breathing slowly
+   (~7s). Every ~3s one bright point glides DOWN a line to the surface, brightens
+   to #5aa0ff and is absorbed with a soft ring (one capture at a time, calm).
+   The cursor is a positive probe: the field bows toward it, the lines crowd
+   under it and the plane SWELLS; idle settles to stillness.
+
+   Performance: every field line and every plane dot is animated ANALYTICALLY in
+   the vertex shader (breathing, sway, cursor bow, swell) — zero per-frame CPU
+   geometry rebuilds. The only per-frame CPU work is the single active capture
+   mote + its ring, and the cursor lerp. So there is no need to "re-integrate a
+   subset of lines" on the CPU; the whole field is a closed-form shader curve.
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  const section = document.getElementById('section');
+  const canvas = document.getElementById('cloud-canvas');
+  if (!section || !canvas) return;
+
+  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+
+  /* ===== Renderer ===== */
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setClearColor(0xedf0f2, 1);
+  const dprCap = 2;
+
+  /* ===== Scene & Camera (same low-angle pattern as the original hero) ===== */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  const CAM_BASE = new THREE.Vector3(0, 15, 26);
+  const CAM_TARGET = new THREE.Vector3(0, -4, -8);
+  camera.position.copy(CAM_BASE);
+  camera.lookAt(CAM_TARGET);
+
+  /* ===== Palette ===== */
+  const COL_LINE = new THREE.Color(0x1466e6);   // cobalt line base
+  const COL_TIP = new THREE.Color(0x5aa0ff);    // bright tip / capture
+  const COL_FOG = new THREE.Color(0xedf0f2);    // background wash
+  const COL_PLANE = new THREE.Color(0x8493a2);  // faint slate for the charged plane dots
+
+  /* ===== Field geometry constants (world units) ===== */
+  const LINE_COUNT = 56;
+  const LP = 40;                 // samples per field line
+  const FIELD_H = 15.0;          // tip height of a line above its base
+  const SPLAY_K = 0.33;          // outward fan (edge lines splay more)
+  const BREATH_PERIOD = 7.0;     // slow breathing, seconds
+  const BOW_R = 22.0;            // cursor influence radius over line bases
+  const BOW_K = 6.0;             // max lateral bow toward the cursor
+  const BUMP_H = 2.0;            // plane swell height under the cursor
+  const BUMP_FALL = 130.0;       // plane swell falloff
+
+  /* deterministic hash so the layout is stable between reloads */
+  function hash(n) {
+    const s = Math.sin(n * 127.1) * 43758.5453;
+    return s - Math.floor(s);
+  }
+
+  /* per-line seeds (kept in JS too, so capture motes can ride the same curve) */
+  const lineBaseX = new Float32Array(LINE_COUNT);
+  const lineBaseZ = new Float32Array(LINE_COUNT);
+  const linePhase = new Float32Array(LINE_COUNT);
+  const lineSplay = new Float32Array(LINE_COUNT);
+
+  for (let i = 0; i < LINE_COUNT; i++) {
+    const frac = i / (LINE_COUNT - 1);
+    const bx = -42 + frac * 92 + (hash(i) - 0.5) * 3.0;
+    const bz = 6 + Math.sin(frac * Math.PI) * 6.0 - 3.0 + (hash(i + 7) - 0.5) * 4.0;
+    lineBaseX[i] = bx;
+    lineBaseZ[i] = bz;
+    linePhase[i] = frac * Math.PI * 3.0 + bx * 0.03;
+    lineSplay[i] = SPLAY_K * bx;
+  }
+
+  /* ===== The shared field curve — mirrored in GLSL (lines/plane) and JS (motes) =====
+     Any edit here MUST be mirrored in the line vertex shader below, or motes drift
+     off their lines. */
+  function jsCursorBump(x, z, mx, mz, mstr) {
+    const dx = x - mx, dz = z - mz;
+    return mstr * BUMP_H * Math.exp(-(dx * dx + dz * dz) / BUMP_FALL);
+  }
+  function jsSurfaceY(x, z, t, mx, mz, mstr) {
+    const dome = -0.0006 * x * x;
+    const ripple = Math.sin(t * 0.8 + x * 0.05) * 0.2 + Math.sin(t * 0.6 + z * 0.08 + 1.3) * 0.2;
+    return dome + ripple + jsCursorBump(x, z, mx, mz, mstr);
+  }
+  const _cv = new THREE.Vector3();
+  function jsFieldCurve(bx, bz, phase, splay, s, t, mx, mz, mstr, out) {
+    const sc = Math.max(0, Math.min(1, s));
+    const br = 1.0 + 0.05 * Math.sin(t * (6.28318530718 / BREATH_PERIOD) + phase);
+    const rise = 1.0 - Math.pow(1.0 - sc, 1.7);
+    const h = FIELD_H * rise * br;
+    const sway = Math.sin(t * 0.55 + phase) * 0.9;
+    const dx = splay * Math.pow(sc, 1.5) + sway * sc;
+    const dz = 2.0 * Math.pow(sc, 1.4);
+    let x = bx + dx, z = bz + dz;
+    const y = jsSurfaceY(bx, bz, t, mx, mz, mstr) + h;
+    const mdx = mx - bx, mdz = mz - bz;
+    const d2 = mdx * mdx + mdz * mdz;
+    const infl = mstr * Math.exp(-d2 / (2.0 * BOW_R * BOW_R));
+    const bow = infl * Math.pow(sc, 1.3) * BOW_K;
+    const dd = Math.max(Math.sqrt(d2), 0.001);
+    x += (mdx / dd) * bow;
+    z += (mdz / dd) * bow;
+    out.set(x, y, z);
+  }
+
+  /* GLSL helpers shared by the line + plane shaders */
+  const GLSL_FIELD = `
+    uniform float uTime;
+    uniform vec2 uMouse;
+    uniform float uMouseStr;
+
+    float cursorBump(vec2 p){
+      vec2 d = p - uMouse;
+      return uMouseStr * ${BUMP_H.toFixed(1)} * exp(-dot(d,d) / ${BUMP_FALL.toFixed(1)});
+    }
+    float surfaceY(vec2 p){
+      float dome = -0.0006 * p.x * p.x;
+      float ripple = sin(uTime*0.8 + p.x*0.05)*0.2 + sin(uTime*0.6 + p.y*0.08 + 1.3)*0.2;
+      return dome + ripple + cursorBump(p);
+    }
+    vec3 fieldCurve(float bx, float bz, float phase, float splay, float s, out float infl){
+      float sc = clamp(s, 0.0, 1.0);
+      float br = 1.0 + 0.05 * sin(uTime * (6.28318530718 / ${BREATH_PERIOD.toFixed(1)}) + phase);
+      float rise = 1.0 - pow(1.0 - sc, 1.7);
+      float h = ${FIELD_H.toFixed(1)} * rise * br;
+      float sway = sin(uTime*0.55 + phase) * 0.9;
+      float dx = splay * pow(sc, 1.5) + sway * sc;
+      float dz = 2.0 * pow(sc, 1.4);
+      float x = bx + dx;
+      float z = bz + dz;
+      float y = surfaceY(vec2(bx, bz)) + h;
+      vec2 md = uMouse - vec2(bx, bz);
+      float d2 = dot(md, md);
+      infl = uMouseStr * exp(-d2 / (2.0 * ${BOW_R.toFixed(1)} * ${BOW_R.toFixed(1)}));
+      float bow = infl * pow(sc, 1.3) * ${BOW_K.toFixed(1)};
+      vec2 mdir = md / max(sqrt(d2), 0.001);
+      x += mdir.x * bow;
+      z += mdir.y * bow;
+      return vec3(x, y, z);
+    }
+  `;
+
+  /* ============================================================
+     Field lines — screen-space thickened ribbons (constant px width,
+     fully animated in the vertex shader)
+     ============================================================ */
+  const vCount = LINE_COUNT * LP * 2;
+  const aBaseX = new Float32Array(vCount);
+  const aBaseZ = new Float32Array(vCount);
+  const aPhase = new Float32Array(vCount);
+  const aSplay = new Float32Array(vCount);
+  const aS = new Float32Array(vCount);
+  const aSide = new Float32Array(vCount);
+  const lineIndices = new Uint16Array(LINE_COUNT * (LP - 1) * 6);
+
+  let ii = 0;
+  for (let l = 0; l < LINE_COUNT; l++) {
+    const lineStart = l * LP * 2;
+    for (let j = 0; j < LP; j++) {
+      for (let sd = 0; sd < 2; sd++) {
+        const idx = lineStart + j * 2 + sd;
+        aBaseX[idx] = lineBaseX[l];
+        aBaseZ[idx] = lineBaseZ[l];
+        aPhase[idx] = linePhase[l];
+        aSplay[idx] = lineSplay[l];
+        aS[idx] = j / (LP - 1);
+        aSide[idx] = sd === 0 ? -1 : 1;
+      }
+    }
+    for (let j = 0; j < LP - 1; j++) {
+      const a = lineStart + j * 2;
+      const b = a + 1;
+      const c = lineStart + (j + 1) * 2;
+      const d = c + 1;
+      lineIndices[ii++] = a; lineIndices[ii++] = b; lineIndices[ii++] = c;
+      lineIndices[ii++] = b; lineIndices[ii++] = d; lineIndices[ii++] = c;
+    }
+  }
+
+  const lineGeo = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vCount * 3), 3)); // unused, satisfies three
+  lineGeo.setAttribute('aBaseX', new THREE.BufferAttribute(aBaseX, 1));
+  lineGeo.setAttribute('aBaseZ', new THREE.BufferAttribute(aBaseZ, 1));
+  lineGeo.setAttribute('aPhase', new THREE.BufferAttribute(aPhase, 1));
+  lineGeo.setAttribute('aSplay', new THREE.BufferAttribute(aSplay, 1));
+  lineGeo.setAttribute('aS', new THREE.BufferAttribute(aS, 1));
+  lineGeo.setAttribute('aSide', new THREE.BufferAttribute(aSide, 1));
+  lineGeo.setIndex(new THREE.BufferAttribute(lineIndices, 1));
+  lineGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 6, 6), 200);
+
+  const lineMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uResolution: { value: new THREE.Vector2(1, 1) },
+      uMouse: { value: new THREE.Vector2(9999, 9999) },
+      uMouseStr: { value: 0 },
+      uLineWidth: { value: 1.7 },
+      uBaseColor: { value: COL_LINE },
+      uTipColor: { value: COL_TIP },
+      uFogColor: { value: COL_FOG },
+      uFogNear: { value: 46 },
+      uFogFar: { value: 122 },
+    },
+    vertexShader: `
+      attribute float aBaseX;
+      attribute float aBaseZ;
+      attribute float aPhase;
+      attribute float aSplay;
+      attribute float aS;
+      attribute float aSide;
+      uniform vec2 uResolution;
+      uniform float uLineWidth;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      varying float vS;
+      varying float vSide;
+      varying float vInfl;
+      varying float vFog;
+      varying float vLeftFade;
+
+      ${GLSL_FIELD}
+
+      void main(){
+        float inflA, inflB;
+        vec3 p0 = fieldCurve(aBaseX, aBaseZ, aPhase, aSplay, aS, inflA);
+        vec3 p1 = fieldCurve(aBaseX, aBaseZ, aPhase, aSplay, aS + 0.03, inflB);
+
+        vec4 mv0 = modelViewMatrix * vec4(p0, 1.0);
+        vec4 c0 = projectionMatrix * mv0;
+        vec4 c1 = projectionMatrix * modelViewMatrix * vec4(p1, 1.0);
+
+        vec2 s0 = c0.xy / c0.w;
+        vec2 s1 = c1.xy / c1.w;
+        vec2 dir = (s1 - s0) * uResolution;
+        float dl = length(dir);
+        dir = dl > 1e-5 ? dir / dl : vec2(1.0, 0.0);
+        vec2 nrm = vec2(-dir.y, dir.x);
+
+        vec2 offsetPx = nrm * aSide * (uLineWidth * 0.5);
+        vec2 ndc = offsetPx / uResolution * 2.0;
+        c0.xy += ndc * c0.w;
+        gl_Position = c0;
+
+        vS = aS;
+        vSide = aSide;
+        vInfl = inflA;
+        float vDist = -mv0.z;
+        vFog = smoothstep(uFogNear, uFogFar, vDist);
+        vLeftFade = smoothstep(-52.0, -10.0, aBaseX);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uBaseColor;
+      uniform vec3 uTipColor;
+      uniform vec3 uFogColor;
+      varying float vS;
+      varying float vSide;
+      varying float vInfl;
+      varying float vFog;
+      varying float vLeftFade;
+
+      void main(){
+        float aa = smoothstep(1.0, 0.35, abs(vSide));
+        float tipFade = 1.0 - smoothstep(0.82, 1.02, vS);   // keep most of the arc; only the very top dissolves into air
+        vec3 col = mix(uBaseColor, uTipColor, clamp(vS * 0.92 + vInfl * 0.4, 0.0, 1.0));  // cobalt base lifting to #5aa0ff at the tip
+        col = mix(col, uFogColor, vFog * 0.85);
+        float a = 0.6 * aa * tipFade * vLeftFade * (1.0 - vFog * 0.9) * (0.82 + vInfl * 0.7);
+        if (a < 0.003) discard;
+        gl_FragColor = vec4(col, a);
+      }
+    `,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+
+  const linesMesh = new THREE.Mesh(lineGeo, lineMat);
+  linesMesh.frustumCulled = false;
+  linesMesh.renderOrder = 1;
+  scene.add(linesMesh);
+
+  /* ============================================================
+     Charged plane — a faint field of dots that carries the SWELL
+     ============================================================ */
+  const GX = 70, GZ = 18;
+  const planeCount = GX * GZ;
+  const planePos = new Float32Array(planeCount * 3);
+  const planeRnd = new Float32Array(planeCount);
+  for (let ix = 0; ix < GX; ix++) {
+    for (let iz = 0; iz < GZ; iz++) {
+      const p = ix * GZ + iz;
+      planePos[p * 3] = (ix / (GX - 1) - 0.5) * 116.0;
+      planePos[p * 3 + 1] = 0;
+      planePos[p * 3 + 2] = -4 + (iz / (GZ - 1)) * 26.0;
+      planeRnd[p] = hash(p * 1.7);
+    }
+  }
+  const planeGeo = new THREE.BufferGeometry();
+  planeGeo.setAttribute('position', new THREE.BufferAttribute(planePos, 3));
+  planeGeo.setAttribute('aRnd', new THREE.BufferAttribute(planeRnd, 1));
+
+  const planeMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uMouse: { value: lineMat.uniforms.uMouse.value },
+      uMouseStr: { value: 0 },
+      uPixelRatio: { value: 1 },
+      uBaseColor: { value: COL_PLANE },
+      uTipColor: { value: COL_LINE },
+      uFogColor: { value: COL_FOG },
+      uFogNear: { value: 48 },
+      uFogFar: { value: 124 },
+    },
+    vertexShader: `
+      attribute float aRnd;
+      uniform float uPixelRatio;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      varying float vSwell;
+      varying float vFog;
+      varying float vLeftFade;
+      varying float vRnd;
+
+      ${GLSL_FIELD}
+
+      void main(){
+        vec3 pos = position;
+        pos.y = surfaceY(pos.xz);
+        float bump = cursorBump(pos.xz);
+        vSwell = clamp(bump / ${BUMP_H.toFixed(1)}, 0.0, 1.0);
+
+        vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+        float vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+
+        float rawSize = 2.2 * uPixelRatio * (120.0 / max(vDist, 1.0));
+        gl_PointSize = clamp(rawSize, 1.2 * uPixelRatio, 5.0 * uPixelRatio);
+
+        vFog = smoothstep(uFogNear, uFogFar, vDist);
+        vLeftFade = smoothstep(-58.0, -14.0, pos.x);
+        vRnd = aRnd;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uBaseColor;
+      uniform vec3 uTipColor;
+      uniform vec3 uFogColor;
+      varying float vSwell;
+      varying float vFog;
+      varying float vLeftFade;
+      varying float vRnd;
+
+      void main(){
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float soft = 1.0 - smoothstep(0.2, 0.5, d);
+        vec3 col = mix(uBaseColor, uTipColor, vSwell * 0.8);
+        col = mix(col, uFogColor, vFog * 0.8);
+        float base = 0.13 + vRnd * 0.05;
+        float a = soft * (base + vSwell * 0.5) * vLeftFade * (1.0 - vFog * 0.7);
+        gl_FragColor = vec4(col, a);
+      }
+    `,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+
+  const planePoints = new THREE.Points(planeGeo, planeMat);
+  planePoints.frustumCulled = false;
+  planePoints.renderOrder = 0;
+  scene.add(planePoints);
+
+  /* ============================================================
+     Capture motes — one bright point gliding DOWN a line to the surface
+     ============================================================ */
+  const MOTE_CAP = 6;
+  const motes = [];
+  for (let i = 0; i < MOTE_CAP; i++) {
+    motes.push({ active: false, line: 0, age: 0, dur: 2.2 });
+  }
+  const motePos = new Float32Array(MOTE_CAP * 3);
+  const moteBright = new Float32Array(MOTE_CAP);
+  const moteSize = new Float32Array(MOTE_CAP);
+  for (let i = 0; i < MOTE_CAP; i++) { motePos[i * 3] = 9999; moteSize[i] = 7; }
+
+  const moteGeo = new THREE.BufferGeometry();
+  moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
+  moteGeo.setAttribute('aBright', new THREE.BufferAttribute(moteBright, 1));
+  moteGeo.setAttribute('aSize', new THREE.BufferAttribute(moteSize, 1));
+
+  const moteMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: 1 },
+      uBaseColor: { value: COL_LINE },
+      uTipColor: { value: COL_TIP },
+      uFogColor: { value: COL_FOG },
+      uFogNear: { value: 20 },
+      uFogFar: { value: 80 },
+    },
+    vertexShader: `
+      attribute float aBright;
+      attribute float aSize;
+      uniform float uPixelRatio;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      varying float vBright;
+      varying float vFog;
+      void main(){
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        float vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp(aSize * uPixelRatio * (120.0 / max(vDist, 1.0)), 3.0 * uPixelRatio, 16.0 * uPixelRatio);
+        vBright = aBright;
+        vFog = smoothstep(uFogNear, uFogFar, vDist);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uBaseColor;
+      uniform vec3 uTipColor;
+      uniform vec3 uFogColor;
+      varying float vBright;
+      varying float vFog;
+      void main(){
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float core = 1.0 - smoothstep(0.0, 0.5, d);
+        float halo = 1.0 - smoothstep(0.1, 0.5, d);
+        vec3 col = mix(uBaseColor, uTipColor, vBright);
+        col = mix(col, uFogColor, vFog * 0.7);
+        float a = (core * 0.9 + halo * 0.3) * (0.6 + vBright * 0.4) * (1.0 - vFog * 0.6);
+        gl_FragColor = vec4(col, a);
+      }
+    `,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+
+  const motePoints = new THREE.Points(moteGeo, moteMat);
+  motePoints.frustumCulled = false;
+  motePoints.renderOrder = 3;
+  scene.add(motePoints);
+
+  /* ============================================================
+     Capture rings — soft expanding ring where a mote is absorbed
+     ============================================================ */
+  const RING_CAP = 8;
+  const rings = [];
+  for (let i = 0; i < RING_CAP; i++) rings.push({ active: false, age: 0, life: 0.75 });
+  const ringPos = new Float32Array(RING_CAP * 3);
+  const ringAge = new Float32Array(RING_CAP);
+  const ringActive = new Float32Array(RING_CAP);
+  for (let i = 0; i < RING_CAP; i++) ringPos[i * 3] = 9999;
+
+  const ringGeo = new THREE.BufferGeometry();
+  ringGeo.setAttribute('position', new THREE.BufferAttribute(ringPos, 3));
+  ringGeo.setAttribute('aAge', new THREE.BufferAttribute(ringAge, 1));
+  ringGeo.setAttribute('aActive', new THREE.BufferAttribute(ringActive, 1));
+
+  const ringMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uPixelRatio: { value: 1 },
+      uTipColor: { value: COL_TIP },
+      uFogColor: { value: COL_FOG },
+      uFogNear: { value: 20 },
+      uFogFar: { value: 80 },
+    },
+    vertexShader: `
+      attribute float aAge;
+      attribute float aActive;
+      uniform float uPixelRatio;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      varying float vAge;
+      varying float vActive;
+      varying float vFog;
+      void main(){
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        float vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp((3000.0 / max(vDist, 1.0)) * uPixelRatio, 20.0 * uPixelRatio, 220.0 * uPixelRatio);
+        vAge = aAge;
+        vActive = aActive;
+        vFog = smoothstep(uFogNear, uFogFar, vDist);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uTipColor;
+      uniform vec3 uFogColor;
+      varying float vAge;
+      varying float vActive;
+      varying float vFog;
+      void main(){
+        float d = length(gl_PointCoord - 0.5) * 2.0;
+        float r = 0.25 + vAge * 0.7;
+        float ring = smoothstep(0.14, 0.0, abs(d - r));
+        vec3 col = mix(uTipColor, uFogColor, vFog * 0.6);
+        float a = ring * vActive * (1.0 - vAge) * 0.55;
+        gl_FragColor = vec4(col, a);
+      }
+    `,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+
+  const ringPoints = new THREE.Points(ringGeo, ringMat);
+  ringPoints.frustumCulled = false;
+  ringPoints.renderOrder = 2;
+  scene.add(ringPoints);
+
+  /* ===== Capture spawning ===== */
+  function spawnRing(x, y, z) {
+    for (let i = 0; i < RING_CAP; i++) {
+      if (!rings[i].active) {
+        rings[i].active = true;
+        rings[i].age = 0;
+        rings[i].life = 0.7 + Math.random() * 0.15;
+        ringPos[i * 3] = x;
+        ringPos[i * 3 + 1] = y;
+        ringPos[i * 3 + 2] = z;
+        ringActive[i] = 1;
+        ringAge[i] = 0;
+        return;
+      }
+    }
+  }
+  // captures must land on lines in the visible right-hand field (not the faded / off-screen-left
+  // lines behind the text column), so the "one capture at a time" is always seen.
+  const VISIBLE_BASE_X = -6;
+  function spawnMote() {
+    for (let i = 0; i < MOTE_CAP; i++) {
+      if (!motes[i].active) {
+        let line = -1;
+        const mx = lineMat.uniforms.uMouse.value.x;
+        const mz = lineMat.uniforms.uMouse.value.y;
+        // bias toward the cursor when it is present (still within the visible set)
+        if (mousePresent && mx < 9000 && Math.random() < 0.6) {
+          let bestD = 1e9;
+          for (let k = 0; k < 14; k++) {
+            const cand = Math.floor(Math.random() * LINE_COUNT);
+            if (lineBaseX[cand] < VISIBLE_BASE_X) continue;
+            const dx = lineBaseX[cand] - mx, dz = lineBaseZ[cand] - mz;
+            const dd = dx * dx + dz * dz;
+            if (dd < bestD) { bestD = dd; line = cand; }
+          }
+        }
+        // otherwise a random visible line
+        if (line < 0) {
+          for (let tries = 0; tries < 24; tries++) {
+            const cand = Math.floor(Math.random() * LINE_COUNT);
+            if (lineBaseX[cand] >= VISIBLE_BASE_X) { line = cand; break; }
+          }
+          if (line < 0) line = LINE_COUNT - 1;
+        }
+        motes[i].active = true;
+        motes[i].line = line;
+        motes[i].age = 0;
+        motes[i].dur = 2.0 + Math.random() * 0.5;
+        return;
+      }
+    }
+  }
+
+  /* ===== Resize ===== */
+  function resize() {
+    const w = section.clientWidth;
+    const h = section.clientHeight;
+    if (w === 0 || h === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    lineMat.uniforms.uResolution.value.set(w, h);
+    planeMat.uniforms.uPixelRatio.value = dpr;
+    moteMat.uniforms.uPixelRatio.value = dpr;
+    ringMat.uniforms.uPixelRatio.value = dpr;
+  }
+
+  /* ===== Cursor interaction (same plumbing as the original: pointer -> ray to
+     the y=0 plane -> uMouse/uMouseStr lerp; drives the field bow + plane swell) ===== */
+  const mouseTarget = new THREE.Vector2(9999, 9999);
+  let mousePresent = false;
+  const _ndc = new THREE.Vector3();
+  const _dir = new THREE.Vector3();
+  function updateMouseWorld(clientX, clientY) {
+    const rect = section.getBoundingClientRect();
+    const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = -(((clientY - rect.top) / rect.height) * 2 - 1);
+    _ndc.set(nx, ny, 0.5).unproject(camera);
+    _dir.copy(_ndc).sub(camera.position).normalize();
+    if (Math.abs(_dir.y) < 1e-4) return;
+    const tPlane = -camera.position.y / _dir.y;
+    if (tPlane <= 0) return;
+    mouseTarget.set(camera.position.x + _dir.x * tPlane, camera.position.z + _dir.z * tPlane);
+    mousePresent = true;
+  }
+  if (!reduced) {
+    window.addEventListener('pointermove', function (e) { updateMouseWorld(e.clientX, e.clientY); }, { passive: true });
+    window.addEventListener('pointerleave', function () { mousePresent = false; });
+    window.addEventListener('blur', function () { mousePresent = false; });
+  }
+
+  /* ===== Animation loop ===== */
+  let running = false;
+  let rafId = 0;
+  let lastT = 0;
+  let clock = 0;
+  let captureTimer = 1.2;
+  let mouseStrVal = 0;
+
+  function updateMotesAndRings(dt) {
+    const mx = lineMat.uniforms.uMouse.value.x;
+    const mz = lineMat.uniforms.uMouse.value.y;
+
+    /* capture cadence — one at a time, calm (~3s) */
+    captureTimer -= dt;
+    if (captureTimer <= 0) {
+      spawnMote();
+      captureTimer = 2.6 + Math.random() * 0.8;
+    }
+
+    for (let i = 0; i < MOTE_CAP; i++) {
+      const m = motes[i];
+      if (!m.active) { motePos[i * 3] = 9999; moteBright[i] = 0; continue; }
+      m.age += dt / m.dur;
+      if (m.age >= 1.0) {
+        // reached the surface -> absorbed
+        jsFieldCurve(lineBaseX[m.line], lineBaseZ[m.line], linePhase[m.line], lineSplay[m.line],
+          0.0, clock, mx, mz, mouseStrVal, _cv);
+        spawnRing(_cv.x, _cv.y, _cv.z);
+        m.active = false;
+        motePos[i * 3] = 9999;
+        moteBright[i] = 0;
+        continue;
+      }
+      const ease = m.age * m.age * (3.0 - 2.0 * m.age);
+      const s = 0.95 * (1.0 - ease);   // glides from the top (0.95) down to the base (0)
+      jsFieldCurve(lineBaseX[m.line], lineBaseZ[m.line], linePhase[m.line], lineSplay[m.line],
+        s, clock, mx, mz, mouseStrVal, _cv);
+      motePos[i * 3] = _cv.x;
+      motePos[i * 3 + 1] = _cv.y;
+      motePos[i * 3 + 2] = _cv.z;
+      moteBright[i] = Math.min(1, m.age * 1.15);   // brightens to the tip colour as it nears the base
+      moteSize[i] = 6.0 + m.age * 4.5;
+    }
+    moteGeo.attributes.position.needsUpdate = true;
+    moteGeo.attributes.aBright.needsUpdate = true;
+    moteGeo.attributes.aSize.needsUpdate = true;
+
+    for (let i = 0; i < RING_CAP; i++) {
+      const r = rings[i];
+      if (!r.active) { ringActive[i] = 0; continue; }
+      r.age += dt / r.life;
+      if (r.age >= 1.0) {
+        r.active = false;
+        ringActive[i] = 0;
+        ringPos[i * 3] = 9999;
+      } else {
+        ringAge[i] = r.age;
+        ringActive[i] = 1;
+      }
+    }
+    ringGeo.attributes.aAge.needsUpdate = true;
+    ringGeo.attributes.aActive.needsUpdate = true;
+    ringGeo.attributes.position.needsUpdate = true;
+  }
+
+  function loop(t) {
+    if (!running) return;
+    rafId = requestAnimationFrame(loop);
+    const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
+    lastT = t;
+    clock += dt;
+
+    /* cursor world lerp + strength ease (idle settles to stillness) */
+    if (mouseTarget.x < 9000) {
+      const um = lineMat.uniforms.uMouse.value;
+      um.x += (mouseTarget.x - um.x) * Math.min(1, dt * 4.5);
+      um.y += (mouseTarget.y - um.y) * Math.min(1, dt * 4.5);
+    }
+    if (mousePresent) {
+      mouseStrVal += (1 - mouseStrVal) * Math.min(1, dt * 3.0);
+    } else {
+      mouseStrVal += (0 - mouseStrVal) * Math.min(1, dt / 1.2);
+    }
+
+    lineMat.uniforms.uTime.value = clock;
+    lineMat.uniforms.uMouseStr.value = mouseStrVal;
+    planeMat.uniforms.uTime.value = clock;
+    planeMat.uniforms.uMouseStr.value = mouseStrVal;
+
+    updateMotesAndRings(dt);
+
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
+    renderer.render(scene, camera);
+  }
+
+  /* ===== Static frame for reduced motion ===== */
+  function drawStatic() {
+    clock = 1.4;
+    mouseStrVal = 0;
+    lineMat.uniforms.uTime.value = clock;
+    lineMat.uniforms.uMouseStr.value = 0;
+    planeMat.uniforms.uTime.value = clock;
+    planeMat.uniforms.uMouseStr.value = 0;
+
+    // seed a few resting rings so the "capture" idea reads without motion
+    const seeds = [12, 24, 38, 47];
+    for (let k = 0; k < seeds.length; k++) {
+      const l = seeds[k];
+      jsFieldCurve(lineBaseX[l], lineBaseZ[l], linePhase[l], lineSplay[l], 0.0, clock, 9999, 9999, 0, _cv);
+      spawnRing(_cv.x, _cv.y, _cv.z);
+      rings[k].age = 0.35 + k * 0.1;
+      ringAge[k] = rings[k].age;
+    }
+    ringGeo.attributes.aAge.needsUpdate = true;
+    ringGeo.attributes.aActive.needsUpdate = true;
+    ringGeo.attributes.position.needsUpdate = true;
+
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
+    renderer.render(scene, camera);
+  }
+
+  /* ===== Start / stop ===== */
+  function start() {
+    if (reduced) return;
+    if (!running) {
+      running = true;
+      lastT = 0;
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  /* ===== Init ===== */
+  resize();
+  if (reduced) drawStatic();
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(function (entries) {
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.3) start();
+        else if (!entries[i].isIntersecting) stop();
+      }
+    }, { threshold: [0, 0.3, 1] });
+    io.observe(section);
+  } else {
+    start();
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop();
+    else if (!reduced && !running) { running = true; lastT = 0; rafId = requestAnimationFrame(loop); }
+  });
+
+  let rt = 0;
+  window.addEventListener('resize', function () {
+    if (rt) clearTimeout(rt);
+    rt = setTimeout(function () {
+      resize();
+      if (reduced) drawStatic();
+    }, 180);
+  });
+})();
+</script>
+</body>
+</html>
