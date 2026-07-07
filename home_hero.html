@@ -142,7 +142,11 @@ section{
   font-weight:450;
   letter-spacing:0.002em;
   color:var(--ink);
+  transition:color .2s ease;
 }
+/* hover: the row turns bold + blue */
+.verticals li:hover{ color:var(--accent); }
+.verticals li:hover .v-name{ font-weight:650; }
 .v-mark{
   color:var(--accent);
   font-weight:600;
@@ -150,6 +154,7 @@ section{
   text-align:center;
   flex:0 0 16px;
 }
+.v-name{ transition:font-weight .2s ease; }
 
 .micro-label{
   position:absolute;
