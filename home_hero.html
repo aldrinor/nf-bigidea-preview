@@ -1190,7 +1190,7 @@ import * as THREE from 'three';
       vy: Math.abs(Math.sin(ang) * sp) * 0.25,
       r: 0.55 + Math.random() * 1.7,
       a: 0.08 + ((Math.random() * 8) | 0) * 0.045,   // act1's 8 depth-alpha buckets
-      landingY: HORIZON + Math.pow(Math.random(), 1.4) * (H * 0.99 - HORIZON),
+      landingY: HORIZON + Math.pow(Math.random(), 1.3) * (H * 0.76 - HORIZON),
       state: 'float',
       fade: 1
     };
@@ -1206,17 +1206,29 @@ import * as THREE from 'three';
     motes = []; for (var i = 0; i < n; i++) motes.push(newMote(false));
     blooms = [];
   }
-  var GRAV = 0.012;   // gentle — motes float, then fall onto the surface
+  var GRAV = 0.019;   // motes float briefly, then fall onto the surface
+  // cleaning cycle: the dust does NOT respawn forever. A batch floats + falls + neutralizes until the
+  // air is fully CLEAN (no dust) — that clean pause shows the surface cleaned it all — then a fresh
+  // batch fades in and the clean-up repeats.
+  var phase = 'active', cleanTimer = 0, CLEAN_HOLD = 3.6, fieldFade = 0;
+  function respawnBatch() {
+    for (var i = 0; i < motes.length; i++) motes[i] = newMote(false);
+    phase = 'active'; fieldFade = 0;
+  }
   function update(dt) {
     var f = dt / 16.67;
+    if (phase === 'active' && fieldFade < 1) fieldFade = Math.min(1, fieldFade + dt / 1100);  // new dust eases in
+    var remaining = 0;
     for (var i = 0; i < motes.length; i++) {
       var m = motes[i];
+      if (m.state === 'done') continue;
+      remaining++;
       if (m.state === 'float') {
         if (!reduced) {
           m.vx += (Math.random() - 0.5) * 0.016 * f;
           m.vy += GRAV * f;
           m.vx *= Math.pow(0.99, f);
-          if (m.vy > 0.85) m.vy = 0.85;                  // gentle terminal fall
+          if (m.vy > 1.25) m.vy = 1.25;                  // terminal fall
           m.x += m.vx * f; m.y += m.vy * f;
         }
         if (m.x < -4) m.x = W + 4; else if (m.x > W + 4) m.x = -4;
@@ -1224,12 +1236,15 @@ import * as THREE from 'three';
           m.state = 'hit'; m.y = m.landingY;
           blooms.push({ x: m.x, y: m.y, age: 0, life: 0.65, size: 10 + Math.random() * 8 });
         }
-      } else {                                           // hit -> soft fade, then respawn up top
+      } else {                                           // hit -> soft fade, then DONE (does not respawn)
         m.fade -= dt / 280;
-        if (m.fade <= 0) motes[i] = newMote(true);
+        if (m.fade <= 0) { m.fade = 0; m.state = 'done'; }
       }
     }
     for (var b = blooms.length - 1; b >= 0; b--) { blooms[b].age += dt / 1000; if (blooms[b].age >= blooms[b].life) blooms.splice(b, 1); }
+    // all dust cleaned -> hold on clean, empty air (proof it's clean), then bring a fresh batch
+    if (phase === 'active' && remaining === 0 && blooms.length === 0) { phase = 'clean'; cleanTimer = 0; }
+    else if (phase === 'clean') { cleanTimer += dt / 1000; if (cleanTimer >= CLEAN_HOLD) respawnBatch(); }
   }
   var moteSprite = document.createElement('canvas'); moteSprite.width = moteSprite.height = 18;
   (function () {
@@ -1240,9 +1255,10 @@ import * as THREE from 'three';
   })();
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    for (var i = 0; i < motes.length; i++) {             // grey dust
-      var m = motes[i]; var s = m.r * 3.0;
-      ctx.globalAlpha = m.a * m.fade;
+    for (var i = 0; i < motes.length; i++) {             // grey dust (skip cleaned-up grains)
+      var m = motes[i]; if (m.state === 'done') continue;
+      var s = m.r * 3.0;
+      ctx.globalAlpha = m.a * m.fade * fieldFade;
       ctx.drawImage(moteSprite, m.x - s / 2, m.y - s / 2, s, s);
     }
     ctx.globalAlpha = 1;
