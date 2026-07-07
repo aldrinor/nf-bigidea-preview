@@ -288,13 +288,19 @@ import * as THREE from 'three';
         return dome + farRise + und1 + und2;
       }
 
+      // gentle SWELL under the cursor: a soft, shallow bump the surface rises into. Kept shallow
+      // (height 1.3u, wide falloff) so its slope stays gentle and the laying "+" never collapse.
+      float cursorBump(vec2 xz) {
+        vec2 d = xz - uMouse;
+        return uMouseStr * 2.8 * exp(-dot(d, d) / 140.0);
+      }
+
       void main() {
         vec3 pos = position;
-        pos.y = waveHeight(pos.x, pos.z, uTime);
+        float cb = cursorBump(pos.xz);
+        pos.y = waveHeight(pos.x, pos.z, uTime) + cb;
 
-        float mdist = distance(pos.xz, uMouse);
-        float mprox = uMouseStr * exp(-mdist * mdist / 120.0);
-        vMouse = mprox;
+        vMouse = clamp(cb / 2.8, 0.0, 1.0);   // normalized swell height, drives a subtle firming
 
         vHeight = pos.y;
         vRow = aRow;
@@ -307,8 +313,8 @@ import * as THREE from 'three';
         gl_Position = clip0;
 
         float e = 0.7;
-        vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime), pos.z);
-        vec3 pZ = vec3(pos.x, waveHeight(pos.x, pos.z + e, uTime), pos.z + e);
+        vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime) + cursorBump(vec2(pos.x + e, pos.z)), pos.z);
+        vec3 pZ = vec3(pos.x, waveHeight(pos.x, pos.z + e, uTime) + cursorBump(vec2(pos.x, pos.z + e)), pos.z + e);
         vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
         vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
         vec2 s0 = clip0.xy / clip0.w;
@@ -321,7 +327,7 @@ import * as THREE from 'three';
         vArmX = (rawX / armM) * 0.5;
         vArmZ = (rawZ / armM) * 0.5;
 
-        float sz = uSize * (1.0 + aBoost * 1.6 + mprox * 0.12);
+        float sz = uSize * (1.0 + aBoost * 1.6 + vMouse * 0.1);
         float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
         gl_PointSize = clamp(rawSize, 6.0 * uPixelRatio, 22.0 * uPixelRatio);
       }
@@ -370,9 +376,10 @@ import * as THREE from 'three';
 
         float baseAlpha = 0.32;
 
+        // subtle firming on the swell: the raised "+" gently gather ink toward cobalt (no glow halo)
         float charge = clamp(vMouse, 0.0, 1.0);
-        vec3 color = mix(baseShaded, uChargeColor, charge * 0.85);
-        float tip = charge * smoothstep(0.6, 1.0, charge) * 0.5;
+        vec3 color = mix(baseShaded, uChargeColor, charge * 0.42);
+        float tip = charge * smoothstep(0.7, 1.0, charge) * 0.28;
         color = mix(color, uTipColor, tip);
 
         color = mix(color, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9);
