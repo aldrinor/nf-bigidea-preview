@@ -13,8 +13,7 @@
   --ink:#1f2327;
   --headline-ink:#1a1a1a;
   --muted:#8a9095;
-  --accent:#1b7bff;
-  --red:#e23b3b;
+  --accent:#1466e6;
   --hair:rgba(20,24,28,0.08);
   --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
   --mono:'Space Mono', ui-monospace, monospace;
@@ -41,7 +40,6 @@ section{
   background:var(--bg);
 }
 
-/* === Canvas (right-side particle field, behind text) === */
 #cloud-canvas{
   position:absolute;
   inset:0;
@@ -51,16 +49,14 @@ section{
   pointer-events:none;
 }
 
-/* === Legibility scrim: soft wash over the TEXT block only (upper-left), so the dots fill the rest === */
 .scrim{
   position:absolute;
   inset:0;
   z-index:2;
   pointer-events:none;
-  background:radial-gradient(ellipse 58% 62% at 21% 46%, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.88) 44%, rgba(237,240,242,0.42) 68%, rgba(237,240,242,0) 86%);
+  background:radial-gradient(ellipse 52% 58% at 19% 44%, rgba(237,240,242,0.97) 0%, rgba(237,240,242,0.92) 46%, rgba(237,240,242,0.48) 70%, rgba(237,240,242,0) 88%);
 }
 
-/* === Text column === */
 .text-col{
   position:relative;
   z-index:3;
@@ -68,8 +64,9 @@ section{
   flex-direction:column;
   justify-content:center;
   align-items:flex-start;
-  max-width:min(48%, 620px);
-  padding-left:clamp(24px, 6vw, 96px);
+  width:42%;
+  max-width:620px;
+  padding-left:clamp(48px, 7vw, 128px);
   padding-right:24px;
 }
 
@@ -80,58 +77,45 @@ section{
   color:var(--muted);
   font-weight:400;
   letter-spacing:0.005em;
-  margin-bottom:22px;
+  margin-bottom:24px;
 }
 
-.headline{
-  font-family:var(--stack);
-  font-weight:600;
-  color:var(--headline-ink);
-  font-size:clamp(24px, 2.7vw, 34px);
-  line-height:1.32;
-  letter-spacing:-0.022em;
-  margin-bottom:26px;
+.logo-wrap{
+  height:100px;
+  display:flex;
+  align-items:center;
+  margin-bottom:30px;
+  margin-left:-15px;
 }
-.headline em{
-  color:var(--accent);
-  font-style:normal;
-  font-weight:600;
+.logo-wrap img{
+  height:100px;
+  width:auto;
+  max-width:100%;
+  display:block;
+  object-fit:contain;
+  object-position:left center;
 }
 
-/* === Body paragraph === */
 .body-text{
   max-width:440px;
   font-size:19px;
   line-height:1.55;
-  color:#1a1a1a;
-  margin-bottom:22px;
+  color:#1f2327;
 }
 
-
-/* === Links === */
-.links{
-  display:flex;
-  gap:28px;
-  flex-wrap:wrap;
-  align-items:center;
+.micro-label{
+  position:absolute;
+  right:clamp(20px, 3vw, 40px);
+  bottom:clamp(18px, 3vh, 32px);
+  z-index:3;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.06em;
+  color:var(--muted);
+  pointer-events:none;
+  white-space:nowrap;
 }
 
-/* === Advocacy link === */
-.advocacy-link{
-  font-family:var(--stack);
-  font-size:19px;
-  color:var(--accent);
-  text-decoration:none;
-  border-bottom:1px solid rgba(27,123,255,0.5);
-  padding-bottom:2px;
-  transition:color 0.18s ease, border-color 0.18s ease;
-}
-.advocacy-link:hover{
-  color:var(--ink);
-  border-bottom-color:var(--ink);
-}
-
-/* === Mobile === */
 @media (max-width: 880px){
   section{
     flex-direction:column;
@@ -147,11 +131,11 @@ section{
     z-index:1;
   }
   .scrim{
-    background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 40%, rgba(237,240,242,0.80) 50%, rgba(237,240,242,0) 64%);
+    background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 38%, rgba(237,240,242,0.82) 50%, rgba(237,240,242,0) 66%);
   }
   .text-col{
-    max-width:none;
     width:100%;
+    max-width:none;
     align-items:stretch;
     padding-left:clamp(20px,5vw,28px);
     padding-right:clamp(20px,5vw,28px);
@@ -159,59 +143,23 @@ section{
     padding-bottom:8px;
     flex:0 0 auto;
   }
-  .eyebrow{
-    font-size:13px;
-    margin-bottom:18px;
-  }
-  .headline{
-    font-size:clamp(26px,6.5vw,34px);
-    line-height:1.18;
-    margin-bottom:clamp(18px,3vh,24px);
-    color:var(--headline-ink);
-  }
-  .body-text{
-    font-size:16px;
-    line-height:1.6;
-    margin-bottom:clamp(16px,2.5vh,22px);
-    color:var(--ink);
-  }
-
-  .advocacy-link{
-    font-size:16px;
-    line-height:1.4;
-  }
-  .links{gap:22px;}
+  .eyebrow{font-size:13px;margin-bottom:18px;}
+  .logo-wrap{height:78px;margin-bottom:24px;}
+  .logo-wrap img{height:78px;}
+  .body-text{font-size:16px;line-height:1.6;}
+  .micro-label{font-size:10px;}
 }
 
-/* === Short screens (1366×768 etc.) === */
 @media (max-height: 760px) and (min-width: 881px){
-  .headline{
-    font-size:clamp(26px, 2.6vw, 34px);
-    margin-bottom:22px;
-  }
-  .body-text{
-    font-size:17px;
-    line-height:1.5;
-    margin-bottom:18px;
-  }
-
+  .logo-wrap{height:88px;margin-bottom:24px;}
+  .logo-wrap img{height:88px;}
+  .body-text{font-size:17px;line-height:1.5;}
 }
 @media (max-height: 680px) and (min-width: 881px){
-  .eyebrow{
-    font-size:12px;
-    margin-bottom:16px;
-  }
-  .headline{
-    font-size:clamp(22px, 2.2vw, 28px);
-    margin-bottom:16px;
-  }
-  .body-text{
-    font-size:16px;
-    line-height:1.45;
-    margin-bottom:14px;
-  }
-
-  .advocacy-link{font-size:16px;}
+  .eyebrow{font-size:12px;margin-bottom:16px;}
+  .logo-wrap{height:76px;margin-bottom:18px;}
+  .logo-wrap img{height:76px;}
+  .body-text{font-size:16px;line-height:1.45;}
 }
 </style>
 </head>
@@ -223,11 +171,11 @@ section{
 
   <div class="text-col">
     <p class="eyebrow">C-POLAR Technologies — a health science platform company</p>
-
-    <h1 class="headline">NanoFlashing™</h1>
-
+    <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
     <p class="body-text">NanoFlashing™ is a patented permanent positive polarity (3P) technology engineered into each of C-POLAR's five verticals. It attracts and captures ultrafine particles, wildfire smoke, PFAS, and pollen — and destroys viruses, bacteria, and fungal spores through a physical mechanism, making it safe for humans and the environment.</p>
   </div>
+
+  <div class="micro-label">3p — permanent positive polarity</div>
 </section>
 
 <script type="importmap">
@@ -264,28 +212,23 @@ import * as THREE from 'three';
     return t * t * (3 - 2 * t);
   }
 
-  /* ===== Wave height function (shared JS / GLSL) ===== */
+  /* ===== Wave height — ONE slow breath, amplitude ~0.7, ~20s cycle ===== */
   function waveHeight(x, z, t) {
-    let h = 0;
-    h += Math.sin(x * 0.15 + t * 0.22) * 1.4;
-    h += Math.sin(z * 0.20 + t * 0.15) * 1.2;
-    h += Math.sin((x + z) * 0.10 + t * 0.13) * 0.8;
-    h += Math.sin(x * 0.06 + z * 0.08 + t * 0.09) * 1.6;
-    return h;
+    return Math.sin(x * 0.08 + z * 0.05 + t * 0.314) * 0.7;
   }
 
   /* ===== Surface (charged membrane) ===== */
   const GRID_X = 300;
   const GRID_Z = 70;
   const SURF_W = 150;
-  const SURF_D = 30;       // depth of the band
-  const Z_FAR = -5;        // far edge (horizon ~bottom half); near edge = Z_FAR + SURF_D reaches the screen bottom
+  const SURF_D = 30;
+  const Z_FAR = -5;
   const SURF_COUNT = GRID_X * GRID_Z;
 
   const surfaceGeo = new THREE.BufferGeometry();
   const sPositions = new Float32Array(SURF_COUNT * 3);
   const sBoosts = new Float32Array(SURF_COUNT);
-  const sRows = new Float32Array(SURF_COUNT);   // 0 at far edge (horizon), 1 at near edge
+  const sRows = new Float32Array(SURF_COUNT);
 
   for (let ix = 0; ix < GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
@@ -307,8 +250,9 @@ import * as THREE from 'three';
       uTime: { value: 0 },
       uPixelRatio: { value: renderer.getPixelRatio() },
       uSize: { value: 2.1 },
-      uBaseColor: { value: new THREE.Color(0x7a8da8) },
-      uAzureColor: { value: new THREE.Color(0x1b7bff) },
+      uBaseColor: { value: new THREE.Color(0x5a6674) },
+      uChargeColor: { value: new THREE.Color(0x1466e6) },
+      uTipColor: { value: new THREE.Color(0x5aa0ff) },
       uFogColor: { value: new THREE.Color(0xedf0f2) },
       uFogNear: { value: 52 },
       uFogFar: { value: 128 },
@@ -333,37 +277,30 @@ import * as THREE from 'three';
       varying vec2 vDirZ;
 
       float waveHeight(float x, float z, float t) {
-        float h = 0.0;
-        h += sin(x * 0.15 + t * 0.22) * 1.4;
-        h += sin(z * 0.20 + t * 0.15) * 1.2;
-        h += sin((x + z) * 0.10 + t * 0.13) * 0.8;
-        h += sin(x * 0.06 + z * 0.08 + t * 0.09) * 1.6;
-        return h;
+        return sin(x * 0.08 + z * 0.05 + t * 0.314) * 0.7;
       }
 
       void main() {
         vec3 pos = position;
         pos.y = waveHeight(pos.x, pos.z, uTime);
 
-        // cursor interaction: a charge glow that follows the cursor (no surface lift — that
-        // distorted the "+" into an "I"); the "+" stay oriented on the calm wave
         float mdist = distance(pos.xz, uMouse);
-        float mprox = uMouseStr * exp(-mdist * mdist / 55.0);
+        float mprox = uMouseStr * exp(-mdist * mdist / 120.0);
         vMouse = mprox;
+
+        /* NO cursor-driven vertical lift — plus stays tangent-FLAT everywhere */
 
         vHeight = pos.y;
         vRow = aRow;
         vWorldX = pos.x;
 
-        float shimmer = 0.85 + 0.15 * sin(uTime * 2.5 + pos.x * 0.4 + pos.z * 0.4);
-        vBoost = aBoost * shimmer;
+        vBoost = aBoost;
 
         vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
         vDist = -mvPos.z;
         vec4 clip0 = projectionMatrix * mvPos;
         gl_Position = clip0;
 
-        // screen-space tangent directions of the surface, so the "+" lies ON the wavy plane
         float e = 0.7;
         vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime), pos.z);
         vec3 pZ = vec3(pos.x, waveHeight(pos.x, pos.z + e, uTime), pos.z + e);
@@ -373,8 +310,11 @@ import * as THREE from 'three';
         vDirX = normalize((clipX.xy / clipX.w) - s0);
         vDirZ = normalize((clipZ.xy / clipZ.w) - s0);
 
-        float sz = uSize * (1.0 + aBoost * 1.6);
-        gl_PointSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+        /* uniform point-size increase only (max 1.12x), never vertical stretch */
+        float sz = uSize * (1.0 + aBoost * 1.6 + mprox * 0.12);
+        float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+        /* CAP on-screen point size so near points don't blow up into streaks */
+        gl_PointSize = min(rawSize, 24.0 * uPixelRatio);
       }
     `,
     fragmentShader: `
@@ -387,22 +327,33 @@ import * as THREE from 'three';
       varying vec2 vDirX;
       varying vec2 vDirZ;
       uniform vec3 uBaseColor;
-      uniform vec3 uAzureColor;
+      uniform vec3 uChargeColor;
+      uniform vec3 uTipColor;
       uniform vec3 uFogColor;
       uniform float uFogNear;
       uniform float uFogFar;
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
-        uv.y = -uv.y; // point-coord y is downward; flip to clip-space y-up
+        uv.y = -uv.y;
 
-        // "+" oriented along the surface tangents so it LIES ON the wavy plane
-        vec2 perpX = vec2(-vDirX.y, vDirX.x);
-        vec2 perpZ = vec2(-vDirZ.y, vDirZ.x);
-        float alongX = dot(uv, vDirX), distX = abs(dot(uv, perpX));
-        float alongZ = dot(uv, vDirZ), distZ = abs(dot(uv, perpZ));
-        float thick = 0.15;   // arm half-thickness
-        float arm   = 0.5;    // arm half-length
+        /* Detect near-edge foreshortening: when the two tangent arms become
+           nearly parallel, both collapse toward vertical and the plus reads
+           as an "I". In that case, force one arm to screen-horizontal so a
+           clean plus always renders. Keep natural tangents otherwise. */
+        vec2 dirX = vDirX;
+        vec2 dirZ = vDirZ;
+        float parallel = abs(dot(normalize(vDirX), normalize(vDirZ)));
+        if (parallel > 0.5) {
+          dirZ = vec2(1.0, 0.0);
+        }
+
+        vec2 perpX = vec2(-dirX.y, dirX.x);
+        vec2 perpZ = vec2(-dirZ.y, dirZ.x);
+        float alongX = dot(uv, dirX), distX = abs(dot(uv, perpX));
+        float alongZ = dot(uv, dirZ), distZ = abs(dot(uv, perpZ));
+        float thick = 0.15;
+        float arm   = 0.5;
         float armX = (1.0 - smoothstep(thick * 0.55, thick, distX)) *
                      (1.0 - smoothstep(arm - 0.07, arm, abs(alongX)));
         float armZ = (1.0 - smoothstep(thick * 0.55, thick, distZ)) *
@@ -410,23 +361,25 @@ import * as THREE from 'three';
         float plus  = max(armX, armZ);
         if (plus < 0.05) discard;
 
-        float heightFactor = smoothstep(-3.5, 3.5, vHeight);
-        vec3 baseShaded = mix(uBaseColor * 0.82, uBaseColor * 1.18, heightFactor);
-        vec3 color = mix(baseShaded, uAzureColor, vBoost);
-        // cursor charge-glow: "+" charges near the cursor light up blue
-        color = mix(color, uAzureColor, clamp(vMouse, 0.0, 1.0) * 0.8);
+        float heightFactor = smoothstep(-1.0, 1.0, vHeight);
+        vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
+
+        float baseAlpha = 0.32;
+
+        float charge = clamp(vMouse, 0.0, 1.0);
+        vec3 color = mix(baseShaded, uChargeColor, charge * 0.85);
+        float tip = charge * smoothstep(0.6, 1.0, charge) * 0.5;
+        color = mix(color, uTipColor, tip);
+
+        color = mix(color, uChargeColor, vBoost * 0.5);
 
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.85);
 
         float depthFade = smoothstep(115.0, 20.0, vDist);
-        // top edge of the wave band (far rows near the horizon) dilutes into the cool-white
-        // upper half, so the surface fades out naturally instead of ending on a hard line
         float topFade = smoothstep(0.0, 0.22, vRow);
-        // left edge recedes behind the text column so the copy breathes on clean white,
-        // and the wave massing stays center-right (more premium / restrained)
         float leftFade = smoothstep(-60.0, -20.0, vWorldX);
-        float alpha = plus * depthFade * topFade * leftFade * (0.5 + vBoost * 0.3 + clamp(vMouse, 0.0, 1.0) * 0.4);
+        float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.35 + charge * 0.4);
         alpha *= (1.0 - fog * 0.7);
 
         gl_FragColor = vec4(color, alpha);
@@ -440,107 +393,153 @@ import * as THREE from 'three';
   surfacePoints.renderOrder = 0;
   scene.add(surfacePoints);
 
-  /* ===== Pollutants ===== */
-  const POLL_COUNT = 130;
-  const pollGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(POLL_COUNT * 3);
-  const pAzure = new Float32Array(POLL_COUNT);
-  const pSize = new Float32Array(POLL_COUNT);
-  const pAlpha = new Float32Array(POLL_COUNT);
+  /* ===== Dense dust field — fine particulate, richer near surface ===== */
+  let DUST_COUNT = 0;
+  let dustParticles = [];
+  let dustGeo, dustMat, dustPoints;
+  let dPos, dAlpha, dSize, dAzure, dBucket;
 
-  const pollutants = [];
+  function buildDust() {
+    const w = section.clientWidth;
+    const h = section.clientHeight;
+    DUST_COUNT = Math.round(Math.min(5200, (w * h) / 360));
 
-  function makePollutant(initial) {
-    return {
-      x: (Math.random() - 0.5) * 130,
-      y: 8 + Math.random() * 20,          // floating gently in the upper air
-      z: Z_FAR + Math.random() * SURF_D,
-      vx: (Math.random() - 0.5) * 0.07,
-      vy: (Math.random() - 0.5) * 0.04,   // very gentle bob, NO gravity — it floats
-      vz: (Math.random() - 0.5) * 0.07,
-      size: 1.3 + Math.random() * 1.9,
-      alpha: 0.34 + Math.random() * 0.30,
-      state: 'float',
-      azure: 0,
-      captureT: 0,
-      life: 0,
-      pullDelay: 2.5 + Math.random() * 6.0, // floats a while before the charge pulls it in
-      phase: Math.random() * Math.PI * 2,
-    };
+    dustParticles = [];
+    for (let i = 0; i < DUST_COUNT; i++) {
+      const bucket = Math.floor(Math.random() * 8);
+      /* distribute low: y from -2 to 14, concentrated near surface */
+      const yRand = Math.pow(Math.random(), 1.8);
+      dustParticles.push({
+        x: (Math.random() - 0.5) * 150,
+        y: -2 + yRand * 16,
+        z: Z_FAR - 4 + Math.random() * (SURF_D + 8),
+        vx: (Math.random() - 0.5) * 0.05,
+        vy: (Math.random() - 0.5) * 0.05,
+        vz: (Math.random() - 0.5) * 0.05,
+        /* fine grains: small crisp */
+        size: 0.2 + Math.random() * 0.6,
+        bucket: bucket,
+        /* richer opacity: 0.10 + bucket*0.045, range 0.10 -> 0.415 */
+        baseAlpha: 0.10 + bucket * 0.045,
+        alpha: 0.10 + bucket * 0.045,
+        azure: 0,
+        state: 'drift',
+        captureT: 0,
+        fadeT: 0,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    dPos = new Float32Array(DUST_COUNT * 3);
+    dAlpha = new Float32Array(DUST_COUNT);
+    dSize = new Float32Array(DUST_COUNT);
+    dAzure = new Float32Array(DUST_COUNT);
+    dBucket = new Float32Array(DUST_COUNT);
+
+    for (let i = 0; i < DUST_COUNT; i++) {
+      const p = dustParticles[i];
+      dPos[i * 3] = p.x;
+      dPos[i * 3 + 1] = p.y;
+      dPos[i * 3 + 2] = p.z;
+      dAlpha[i] = p.alpha;
+      dSize[i] = p.size;
+      dAzure[i] = 0;
+      dBucket[i] = p.bucket;
+    }
+
+    if (dustGeo) {
+      dustGeo.dispose();
+    }
+    dustGeo = new THREE.BufferGeometry();
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
+    dustGeo.setAttribute('aAlpha', new THREE.BufferAttribute(dAlpha, 1));
+    dustGeo.setAttribute('aSize', new THREE.BufferAttribute(dSize, 1));
+    dustGeo.setAttribute('aAzure', new THREE.BufferAttribute(dAzure, 1));
+    dustGeo.setAttribute('aBucket', new THREE.BufferAttribute(dBucket, 1));
+
+    if (!dustMat) {
+      dustMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uPixelRatio: { value: renderer.getPixelRatio() },
+          uGreyColor: { value: new THREE.Color(0x3a404a) },
+          uAzureColor: { value: new THREE.Color(0x5aa0ff) },
+          uFogColor: { value: new THREE.Color(0xedf0f2) },
+          uFogNear: { value: 20 },
+          uFogFar: { value: 90 },
+        },
+        vertexShader: `
+          attribute float aAlpha;
+          attribute float aSize;
+          attribute float aAzure;
+          attribute float aBucket;
+          uniform float uPixelRatio;
+          varying float vAlpha;
+          varying float vAzure;
+          varying float vDist;
+          varying float vBucket;
+          varying float vTopFade;
+
+          void main() {
+            vAlpha = aAlpha;
+            vAzure = aAzure;
+            vBucket = aBucket;
+            vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+            vDist = -mvPos.z;
+            gl_Position = projectionMatrix * mvPos;
+            /* fine grains: ~1-4px before dpr */
+            gl_PointSize = aSize * 1.2 * uPixelRatio * (120.0 / max(vDist, 1.0));
+
+            /* vertical density gradient: dense near surface (low y), near-empty top 45% */
+            /* full opacity below y=2, fades to 0 by y=10 */
+            vTopFade = 1.0 - smoothstep(2.0, 10.0, position.y);
+          }
+        `,
+        fragmentShader: `
+          varying float vAlpha;
+          varying float vAzure;
+          varying float vDist;
+          varying float vBucket;
+          varying float vTopFade;
+          uniform vec3 uGreyColor;
+          uniform vec3 uAzureColor;
+          uniform vec3 uFogColor;
+          uniform float uFogNear;
+          uniform float uFogFar;
+
+          void main() {
+            vec2 uv = gl_PointCoord - 0.5;
+            float d = length(uv);
+            if (d > 0.5) discard;
+
+            /* sharpened sprite: tight core solid to ~0.3, then crisp fade to 0.5 */
+            float soft = 1.0 - smoothstep(0.3, 0.5, d);
+
+            vec3 color = mix(uGreyColor, uAzureColor, vAzure);
+
+            float fog = smoothstep(uFogNear, uFogFar, vDist);
+            color = mix(color, uFogColor, fog * 0.75);
+
+            float alpha = soft * vAlpha * vTopFade * (1.0 - fog * 0.5);
+            gl_FragColor = vec4(color, alpha);
+          }
+        `,
+        transparent: true,
+        depthWrite: false,
+      });
+    }
+
+    if (dustPoints) {
+      scene.remove(dustPoints);
+    }
+    dustPoints = new THREE.Points(dustGeo, dustMat);
+    dustPoints.renderOrder = 1;
+    scene.add(dustPoints);
   }
 
-  for (let i = 0; i < POLL_COUNT; i++) {
-    pollutants.push(makePollutant(true));
-    pSize[i] = pollutants[i].size;
-  }
+  buildDust();
 
-  pollGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  pollGeo.setAttribute('aAzure', new THREE.BufferAttribute(pAzure, 1));
-  pollGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
-  pollGeo.setAttribute('aAlpha', new THREE.BufferAttribute(pAlpha, 1));
-
-  const pollMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uPixelRatio: { value: renderer.getPixelRatio() },
-      uGreyColor: { value: new THREE.Color(0x596068) },
-      uAzureColor: { value: new THREE.Color(0x7db4ff) },
-      uFogColor: { value: new THREE.Color(0xedf0f2) },
-      uFogNear: { value: 28 },
-      uFogFar: { value: 62 },
-    },
-    vertexShader: `
-      attribute float aAzure;
-      attribute float aSize;
-      attribute float aAlpha;
-      uniform float uPixelRatio;
-      varying float vAzure;
-      varying float vAlpha;
-      varying float vDist;
-
-      void main() {
-        vAzure = aAzure;
-        vAlpha = aAlpha;
-        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-        vDist = -mvPos.z;
-        gl_Position = projectionMatrix * mvPos;
-        gl_PointSize = aSize * uPixelRatio * (120.0 / max(vDist, 1.0));
-      }
-    `,
-    fragmentShader: `
-      varying float vAzure;
-      varying float vAlpha;
-      varying float vDist;
-      uniform vec3 uGreyColor;
-      uniform vec3 uAzureColor;
-      uniform vec3 uFogColor;
-      uniform float uFogNear;
-      uniform float uFogFar;
-
-      void main() {
-        vec2 uv = gl_PointCoord - 0.5;
-        float d = length(uv);
-        if (d > 0.5) discard;
-
-        float circle = smoothstep(0.5, 0.12, d);
-        vec3 color = mix(uGreyColor, uAzureColor, vAzure);
-
-        float fog = smoothstep(uFogNear, uFogFar, vDist);
-        color = mix(color, uFogColor, fog * 0.8);
-
-        float alpha = circle * vAlpha * (1.0 - fog * 0.6);
-        gl_FragColor = vec4(color, alpha);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-  });
-
-  const pollPoints = new THREE.Points(pollGeo, pollMat);
-  pollPoints.renderOrder = 1;
-  scene.add(pollPoints);
-
-  /* ===== Blooms (azure neutralize glow) ===== */
-  const BLOOM_COUNT = 80;
+  /* ===== Blooms (azure neutralize glow) — count ~24, max-size ~20 ===== */
+  const BLOOM_COUNT = 24;
   const bloomGeo = new THREE.BufferGeometry();
   const bPos = new Float32Array(BLOOM_COUNT * 3);
   const bAge = new Float32Array(BLOOM_COUNT);
@@ -551,7 +550,7 @@ import * as THREE from 'three';
   for (let i = 0; i < BLOOM_COUNT; i++) {
     blooms.push({ active: false, age: 0, life: 0, x: 0, y: 0, z: 0, maxSize: 0 });
     bPos[i * 3] = 9999;
-    bMaxSize[i] = 20 + Math.random() * 18;
+    bMaxSize[i] = 14 + Math.random() * 10;
   }
 
   bloomGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
@@ -585,7 +584,7 @@ import * as THREE from 'three';
         gl_PointSize = size * uPixelRatio * (120.0 / max(vDist, 1.0));
 
         vAge = t;
-        vAlpha = aActive * (1.0 - t) * 0.55;
+        vAlpha = aActive * (1.0 - t) * 0.5;
       }
     `,
     fragmentShader: `
@@ -604,8 +603,8 @@ import * as THREE from 'three';
         float soft = smoothstep(0.5, 0.0, d);
         float core = smoothstep(0.22, 0.0, d);
 
-        vec3 azure = vec3(0.49, 0.71, 1.0);
-        vec3 brightAzure = vec3(0.66, 0.82, 1.0);
+        vec3 azure = vec3(0.354, 0.627, 0.902);
+        vec3 brightAzure = vec3(0.541, 0.753, 1.0);
         vec3 color = mix(azure, brightAzure, core * (1.0 - vAge * 0.5));
 
         float fog = smoothstep(uFogNear, uFogFar, vDist);
@@ -648,11 +647,11 @@ import * as THREE from 'three';
       if (!blooms[i].active) {
         blooms[i].active = true;
         blooms[i].age = 0;
-        blooms[i].life = 0.7 + Math.random() * 0.6;
+        blooms[i].life = 0.7;
         blooms[i].x = x;
         blooms[i].y = y;
         blooms[i].z = z;
-        blooms[i].maxSize = 18 + Math.random() * 16;
+        blooms[i].maxSize = 14 + Math.random() * 10;
         bMaxSize[i] = blooms[i].maxSize;
         return;
       }
@@ -670,13 +669,15 @@ import * as THREE from 'three';
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     surfaceMat.uniforms.uPixelRatio.value = dpr;
-    pollMat.uniforms.uPixelRatio.value = dpr;
+    if (dustMat) dustMat.uniforms.uPixelRatio.value = dpr;
     bloomMat.uniforms.uPixelRatio.value = dpr;
+    buildDust();
   }
 
-  /* ===== Cursor interaction (gradual) ===== */
+  /* ===== Cursor interaction ===== */
   const mouseTarget = new THREE.Vector2(9999, 9999);
   let mouseActive = 0;
+  let mousePresent = false;
   const _ndc = new THREE.Vector3();
   const _dir = new THREE.Vector3();
   function updateMouseWorld(clientX, clientY) {
@@ -689,12 +690,13 @@ import * as THREE from 'three';
     const tPlane = -camera.position.y / _dir.y;
     if (tPlane <= 0) return;
     mouseTarget.set(camera.position.x + _dir.x * tPlane, camera.position.z + _dir.z * tPlane);
+    mousePresent = true;
     mouseActive = 1;
   }
   if (!reduced) {
     window.addEventListener('pointermove', function (e) { updateMouseWorld(e.clientX, e.clientY); }, { passive: true });
-    window.addEventListener('pointerleave', function () { mouseActive = 0; });
-    window.addEventListener('blur', function () { mouseActive = 0; });
+    window.addEventListener('pointerleave', function () { mousePresent = false; });
+    window.addEventListener('blur', function () { mousePresent = false; });
   }
 
   /* ===== Animation loop ===== */
@@ -702,8 +704,8 @@ import * as THREE from 'three';
   let rafId = 0;
   let lastT = 0;
   let clock = 0;
-  let cleanTimer = 0;
-  const CLEAN_HOLD = 5.5;   // seconds the upper air stays clean before a new batch drifts in
+  let ambientCaptureTimer = 0;
+  let mouseStrVal = 0;
 
   function loop(t) {
     if (!running) return;
@@ -712,7 +714,7 @@ import * as THREE from 'three';
     lastT = t;
     clock += dt;
 
-    /* Surface time */
+    /* Surface time — slow breath */
     surfaceMat.uniforms.uTime.value = clock;
 
     /* Decay boosts */
@@ -722,84 +724,163 @@ import * as THREE from 'three';
     }
     surfaceGeo.attributes.aBoost.needsUpdate = true;
 
-    /* Update pollutants */
-    for (let i = 0; i < POLL_COUNT; i++) {
-      let p = pollutants[i];
+    /* Cursor world lerp */
+    if (mouseTarget.x < 9000) {
+      const um = surfaceMat.uniforms.uMouse.value;
+      um.x += (mouseTarget.x - um.x) * Math.min(1, dt * 4.5);
+      um.y += (mouseTarget.y - um.y) * Math.min(1, dt * 4.5);
+    }
 
-      if (p.state === 'float') {
-        p.life += dt;
+    /* Strength ramp-in dt*3, ramp-out 1.2s ease */
+    if (mousePresent) {
+      mouseStrVal += (1 - mouseStrVal) * Math.min(1, dt * 3.0);
+    } else {
+      mouseStrVal += (0 - mouseStrVal) * Math.min(1, dt / 1.2);
+    }
+    surfaceMat.uniforms.uMouseStr.value = mouseStrVal;
+
+    /* Update dust — fine drifting field with pull + neutralize */
+    const mouseW = surfaceMat.uniforms.uMouse.value;
+    const mStr = mouseStrVal;
+
+    for (let i = 0; i < DUST_COUNT; i++) {
+      const p = dustParticles[i];
+
+      if (p.state === 'drift') {
+        p.vx += (Math.random() - 0.5) * 0.018;
+        p.vy += (Math.random() - 0.5) * 0.018;
+        p.vz += (Math.random() - 0.5) * 0.018;
+        p.vx *= 0.992; p.vy *= 0.992; p.vz *= 0.992;
+
+        const sp = Math.sqrt(p.vx*p.vx + p.vy*p.vy + p.vz*p.vz);
+        if (sp > 0.5) { const s = 0.5/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
+        if (sp < 0.12 && sp > 0.001) { const s = 0.12/sp; p.vx*=s; p.vy*=s; p.vz*=s; }
+
+        p.vx += Math.sin(clock * 0.25 + p.phase) * 0.001 * dt * 60;
+        p.vz += Math.cos(clock * 0.20 + p.phase) * 0.001 * dt * 60;
+
+        if (mStr > 0.01) {
+          const dx = mouseW.x - p.x;
+          const dz = mouseW.y - p.z;
+          const dist = Math.sqrt(dx*dx + dz*dz);
+          const fieldR = 15.0;
+          if (dist < fieldR) {
+            const pull = mStr * (1 - dist / fieldR) * 0.025;
+            p.vx += (dx / Math.max(dist, 0.1)) * pull;
+            p.vz += (dz / Math.max(dist, 0.1)) * pull;
+            p.vy += -pull * 0.4;
+          }
+        }
+
         const surfH = waveHeight(p.x, p.z, clock);
+        const distSurf = p.y - surfH;
 
-        // very gentle floating drift + soft vertical bob (no gravity, no fast flying)
-        p.vx += Math.sin(clock * 0.35 + p.phase) * 0.0032 * dt * 60;
-        p.vz += Math.cos(clock * 0.28 + p.phase) * 0.0032 * dt * 60;
-        p.vy += Math.sin(clock * 0.45 + p.phase * 1.3) * 0.0022 * dt * 60;
-        p.vx *= 0.97; p.vz *= 0.97; p.vy *= 0.95;
-
-        // the charge gradually PULLS it toward the surface (grows after a float delay)
-        const pull = Math.min(0.8, Math.max(0, p.life - p.pullDelay) * 0.08);
-        p.vy += -pull * 0.5 * dt * 60;
+        if (distSurf < 0.6 && distSurf > -0.5) {
+          const dxm = mouseW.x - p.x;
+          const dzm = mouseW.y - p.z;
+          const distM = Math.sqrt(dxm*dxm + dzm*dzm);
+          if (mStr > 0.1 && distM < 12.0) {
+            p.state = 'capture';
+            p.captureT = clock;
+          }
+        }
 
         p.x += p.vx * dt * 60;
         p.y += p.vy * dt * 60;
         p.z += p.vz * dt * 60;
 
-        // as it is pulled in, the lighter azure GRADUALLY releases (grey -> light azure)
-        const dist = p.y - surfH;
-        p.azure = 1.0 - sstep(0.4, 7.0, dist);
+        if (p.x > 75) p.x = -75;
+        if (p.x < -75) p.x = 75;
+        if (p.z > Z_FAR + SURF_D + 4) p.z = Z_FAR - 4;
+        if (p.z < Z_FAR - 4) p.z = Z_FAR + SURF_D + 4;
+        if (p.y > 14) p.y = -2;
+        if (p.y < -3) p.y = 12;
 
-        if (p.y <= surfH + 0.35) {
-          // reached the surface — neutralized
+        /* RESTING: grey only. Blue ONLY inside cursor charge zone. */
+        p.azure = 0;
+        if (mStr > 0.01) {
+          const dx = mouseW.x - p.x;
+          const dz = mouseW.y - p.z;
+          const dist = Math.sqrt(dx*dx + dz*dz);
+          if (dist < 15.0) {
+            p.azure = mStr * (1.0 - dist / 15.0) * 0.5;
+          }
+        }
+        p.alpha = p.baseAlpha;
+
+      } else if (p.state === 'capture') {
+        const elapsed = clock - p.captureT;
+        const surfH = waveHeight(p.x, p.z, clock);
+
+        p.vy += -0.04 * dt * 60;
+        p.vx *= 0.96;
+        p.vz *= 0.96;
+
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
+        p.z += p.vz * dt * 60;
+
+        /* blue appears at capture near surface */
+        p.azure = Math.min(1, p.azure + dt * 3.0);
+
+        if (p.y <= surfH + 0.2 || elapsed > 1.4) {
           p.state = 'neutralized';
           p.captureT = clock;
           p.y = surfH;
-          boostSurfaceAt(p.x, p.z, 0.5);
+          p.fadeT = 0;
+          boostSurfaceAt(p.x, p.z, 0.4);
           spawnBloom(p.x, surfH + 0.15, p.z);
-        } else if (Math.abs(p.x) > 66 || p.z < Z_FAR - 3 || p.z > Z_FAR + SURF_D + 3 || p.y > 32) {
-          pollutants[i] = makePollutant(false);
-          p = pollutants[i];
         }
       } else if (p.state === 'neutralized') {
-        const elapsed = clock - p.captureT;
+        p.fadeT += dt;
         p.azure = 1;
         p.y = waveHeight(p.x, p.z, clock);
-        if (elapsed > 0.6) {
-          p.state = 'done';   // cleaned — does NOT respawn; the upper air becomes clean
+        p.alpha = p.baseAlpha * Math.max(0, 1 - p.fadeT / 0.4);
+
+        if (p.fadeT > 0.4) {
+          /* respawn low — concentrated near surface */
+          p.state = 'drift';
+          p.x = (Math.random() - 0.5) * 150;
+          const yRand = Math.pow(Math.random(), 1.8);
+          p.y = -2 + yRand * 16;
+          p.z = Z_FAR - 4 + Math.random() * (SURF_D + 8);
+          p.vx = (Math.random() - 0.5) * 0.05;
+          p.vy = (Math.random() - 0.5) * 0.05;
+          p.vz = (Math.random() - 0.5) * 0.05;
+          p.azure = 0;
+          p.alpha = p.baseAlpha;
+          p.phase = Math.random() * Math.PI * 2;
         }
       }
 
-      /* Write to buffers */
-      pPos[i * 3] = p.x;
-      pPos[i * 3 + 1] = p.y;
-      pPos[i * 3 + 2] = p.z;
-      pAzure[i] = p.azure;
-      pSize[i] = p.size;
-
-      if (p.state === 'float') {
-        pAlpha[i] = p.alpha;
-      } else {
-        const fadeElapsed = clock - p.captureT;
-        pAlpha[i] = p.alpha * Math.max(0, 1 - fadeElapsed / 0.6);
-      }
+      dPos[i * 3] = p.x;
+      dPos[i * 3 + 1] = p.y;
+      dPos[i * 3 + 2] = p.z;
+      dAlpha[i] = p.alpha;
+      dSize[i] = p.size;
+      dAzure[i] = p.azure;
     }
-    pollGeo.attributes.position.needsUpdate = true;
-    pollGeo.attributes.aAzure.needsUpdate = true;
-    pollGeo.attributes.aSize.needsUpdate = true;
-    pollGeo.attributes.aAlpha.needsUpdate = true;
+    dustGeo.attributes.position.needsUpdate = true;
+    dustGeo.attributes.aAlpha.needsUpdate = true;
+    dustGeo.attributes.aSize.needsUpdate = true;
+    dustGeo.attributes.aAzure.needsUpdate = true;
 
-    /* Cleaning cycle: once the whole batch is cleaned, the upper air is clean; hold, then a new batch drifts in */
-    let allDone = true;
-    for (let i = 0; i < POLL_COUNT; i++) {
-      if (pollutants[i].state !== 'done') { allDone = false; break; }
-    }
-    if (allDone) {
-      cleanTimer += dt;
-      if (cleanTimer > CLEAN_HOLD) {
-        cleanTimer = 0;
-        for (let i = 0; i < POLL_COUNT; i++) pollutants[i] = makePollutant(false);
+    /* Ambient capture away from cursor: ~1 event / 5s */
+    ambientCaptureTimer += dt;
+    if (ambientCaptureTimer > 5.0 && mStr < 0.1) {
+      ambientCaptureTimer = 0;
+      for (let tries = 0; tries < 30; tries++) {
+        const idx = Math.floor(Math.random() * DUST_COUNT);
+        const p = dustParticles[idx];
+        if (p.state === 'drift') {
+          const surfH = waveHeight(p.x, p.z, clock);
+          if (p.y - surfH < 4.0) {
+            p.state = 'capture';
+            p.captureT = clock;
+            break;
+          }
+        }
       }
-    } else {
-      cleanTimer = 0;
     }
 
     /* Update blooms */
@@ -825,26 +906,9 @@ import * as THREE from 'three';
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
 
-    /* Cursor interaction: gradual follow + gradual strength */
-    if (mouseTarget.x < 9000) {
-      const um = surfaceMat.uniforms.uMouse.value;
-      um.x += (mouseTarget.x - um.x) * Math.min(1, dt * 4.5);
-      um.y += (mouseTarget.y - um.y) * Math.min(1, dt * 4.5);
-    }
-    {
-      const ums = surfaceMat.uniforms.uMouseStr;
-      ums.value += (mouseActive - ums.value) * Math.min(1, dt * 3.0);
-    }
-
-    /* Camera idle drift */
-    camera.position.x = CAM_BASE.x + Math.sin(clock * 0.08) * 1.2;
-    camera.position.y = CAM_BASE.y + Math.cos(clock * 0.06) * 0.6;
-    camera.position.z = CAM_BASE.z + Math.sin(clock * 0.05) * 0.8;
-    camera.lookAt(
-      CAM_TARGET.x + Math.sin(clock * 0.04) * 0.4,
-      CAM_TARGET.y,
-      CAM_TARGET.z
-    );
+    /* Camera: still */
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
 
     renderer.render(scene, camera);
   }
@@ -854,7 +918,6 @@ import * as THREE from 'three';
     clock = 2.5;
     surfaceMat.uniforms.uTime.value = clock;
 
-    /* Seed several captures */
     const seeds = [
       [-18, -10], [-8, 5], [3, -8], [12, 10], [18, -3], [-5, 14], [8, -15], [-15, 2]
     ];
@@ -866,7 +929,6 @@ import * as THREE from 'three';
       blooms[s].age = 0.2 + Math.random() * 0.3;
     }
 
-    /* Update bloom buffers */
     for (let i = 0; i < BLOOM_COUNT; i++) {
       const b = blooms[i];
       if (b.active) {
@@ -878,32 +940,29 @@ import * as THREE from 'three';
       }
     }
 
-    /* Place some pollutants */
-    for (let i = 0; i < POLL_COUNT; i++) {
-      const p = pollutants[i];
+    for (let i = 0; i < DUST_COUNT; i++) {
+      const p = dustParticles[i];
       if (i < seeds.length) {
         p.state = 'neutralized';
         p.azure = 1;
         p.x = seeds[i][0];
         p.z = seeds[i][1];
         p.y = waveHeight(p.x, p.z, clock);
-      } else {
-        p.y = 6 + Math.random() * 16;
-        p.azure = 1.0 - sstep(0.4, 7.0, p.y - waveHeight(p.x, p.z, clock));
+        p.alpha = 0;
       }
-      pPos[i * 3] = p.x;
-      pPos[i * 3 + 1] = p.y;
-      pPos[i * 3 + 2] = p.z;
-      pAzure[i] = p.azure;
-      pSize[i] = p.size;
-      pAlpha[i] = p.state === 'neutralized' ? p.alpha : p.alpha * 0.75;
+      dPos[i * 3] = p.x;
+      dPos[i * 3 + 1] = p.y;
+      dPos[i * 3 + 2] = p.z;
+      dAlpha[i] = p.alpha;
+      dSize[i] = p.size;
+      dAzure[i] = p.azure;
     }
 
     surfaceGeo.attributes.aBoost.needsUpdate = true;
-    pollGeo.attributes.position.needsUpdate = true;
-    pollGeo.attributes.aAzure.needsUpdate = true;
-    pollGeo.attributes.aSize.needsUpdate = true;
-    pollGeo.attributes.aAlpha.needsUpdate = true;
+    dustGeo.attributes.position.needsUpdate = true;
+    dustGeo.attributes.aAlpha.needsUpdate = true;
+    dustGeo.attributes.aSize.needsUpdate = true;
+    dustGeo.attributes.aAzure.needsUpdate = true;
     bloomGeo.attributes.position.needsUpdate = true;
     bloomGeo.attributes.aAge.needsUpdate = true;
     bloomGeo.attributes.aActive.needsUpdate = true;
@@ -930,9 +989,7 @@ import * as THREE from 'three';
 
   /* ===== Init ===== */
   resize();
-  if (reduced) {
-    drawStatic();
-  }
+  if (reduced) drawStatic();
 
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(function (entries) {
