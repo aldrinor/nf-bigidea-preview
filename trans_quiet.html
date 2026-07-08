@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Quiet Reveal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1466e6;
+  --tip:#5aa0ff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+#stage{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  overflow:hidden;
+}
+
+/* ---- ROOM layer (back) ---- */
+.room{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  opacity:0;
+  background-image:url('assets/Background_c2.png');
+  background-size:cover;
+  background-position:center;
+  will-change:opacity;
+}
+#dust-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  opacity:0;
+  will-change:opacity;
+}
+.room-headline{
+  position:absolute;
+  left:clamp(28px, 4.5vw, 72px);
+  bottom:clamp(40px, 7vh, 92px);
+  max-width:62vw;
+  font-family:var(--stack);
+  font-size:clamp(22px, 3.4vw, 46px);
+  line-height:1.18;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  color:var(--headline-ink);
+  pointer-events:none;
+  will-change:opacity, transform;
+  opacity:0;
+}
+.room-headline .charge{ color:var(--red); font-weight:600; }
+.room-logo{
+  position:absolute;
+  left:clamp(22px, 3vw, 40px);
+  top:clamp(20px, 3vh, 34px);
+  height:34px;
+  width:auto;
+  pointer-events:none;
+  will-change:opacity, transform;
+  opacity:0;
+}
+.room-logo img{ height:100%; width:auto; display:block; }
+
+/* ---- soft pale wash (single continuous reveal element) ---- */
+.wash{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:160vh;
+  z-index:2;
+  pointer-events:none;
+  background:linear-gradient(to bottom,
+    transparent 0%,
+    transparent 4%,
+    var(--bg) 25%,
+    var(--bg) 100%);
+  transform:translateY(-40vh);
+  will-change:transform;
+}
+
+/* ---- Three.js canvas (middle) ---- */
+#wave-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:3;
+  pointer-events:none;
+  display:block;
+}
+
+/* ---- HERO DOM layer (front) ---- */
+.hero{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  will-change:opacity, transform;
+}
+.hero-logo{
+  position:absolute;
+  left:clamp(28px, 4.5vw, 72px);
+  top:clamp(28px, 5vh, 56px);
+  height:clamp(56px, 7vw, 96px);
+  width:auto;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+}
+.hero-logo img{ height:100%; width:auto; display:block; }
+.hero-tag{
+  position:absolute;
+  left:clamp(28px, 4.5vw, 72px);
+  top:calc(clamp(28px, 5vh, 56px) + clamp(56px, 7vw, 96px) + 18px);
+  font-family:var(--stack);
+  font-size:clamp(15px, 1.25vw, 19px);
+  line-height:1.5;
+  color:#3a4046;
+  max-width:46ch;
+  letter-spacing:0.002em;
+}
+.hero-tag .hl{ color:var(--accent); font-weight:600; }
+
+/* ---- concept label ---- */
+.concept-label{
+  position:absolute;
+  right:clamp(18px, 3vw, 36px);
+  bottom:clamp(16px, 3vh, 28px);
+  z-index:6;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.06em;
+  color:var(--muted);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.concept-label .p-val{ color:var(--accent); }
+
+@media (max-width: 720px){
+  .room-headline{ font-size:clamp(20px, 6vw, 30px); max-width:84vw; }
+  .hero-logo{ height:clamp(44px, 12vw, 64px); }
+  .hero-tag{ font-size:14px; max-width:80vw; }
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- 1. ROOM layer -->
+  <div class="room" id="room">
+    <canvas id="dust-canvas"></canvas>
+    <div class="room-logo"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <div class="room-headline">Most harmful pollutants carry an electric <span class="charge">charge</span></div>
+  </div>
+
+  <!-- 2. soft pale wash (travels down to reveal the room) -->
+  <div class="wash" id="wash"></div>
+
+  <!-- 3. Three.js "+" wave surface -->
+  <canvas id="wave-canvas"></canvas>
+
+  <!-- 4. HERO DOM layer -->
+  <div class="hero" id="hero">
+    <div class="hero-logo"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <div class="hero-tag">A <span class="hl">permanent positive charge</span>, engineered into the material.</div>
+  </div>
+
+  <!-- concept label -->
+  <div class="concept-label">Quiet Reveal · p=<span class="p-val" id="p-val">0.00</span></div>
+
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+(function () {
+  'use strict';
+
+  const stage = document.getElementById('stage');
+  const canvas = document.getElementById('wave-canvas');
+  const roomEl = document.getElementById('room');
+  const washEl = document.getElementById('wash');
+  const dustCanvas = document.getElementById('dust-canvas');
+  const heroEl = document.getElementById('hero');
+  const pValEl = document.getElementById('p-val');
+
+  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+
+  /* ===== Renderer ===== */
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setClearColor(0xedf0f2, 0);
+  const dprCap = 2;
+
+  /* ===== Scene & Camera ===== */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  const CAM_BASE = new THREE.Vector3(0, 15, 26);
+  const CAM_TARGET = new THREE.Vector3(0, -4, -8);
+  camera.position.copy(CAM_BASE);
+  camera.lookAt(CAM_TARGET);
+
+  /* ===== Surface constants ===== */
+  const GRID_X = 150;
+  const GRID_Z = 55;
+  const SURF_W = 150;
+  const SURF_D = 36;
+  const Z_FAR = -11;
+  const SURF_COUNT = GRID_X * GRID_Z;
+
+  function waveHeight(x, z, t) {
+    var dome = -0.00044 * x * x;
+    var zNorm = (z - Z_FAR) / SURF_D;
+    var farRise = (1.0 - zNorm) * 3.0;
+    var und1 = Math.sin(x * 0.06 + t * 0.393) * 0.8;
+    var und2 = Math.sin(z * 0.04 + t * 0.314 + 1.5) * 0.8;
+    return dome + farRise + und1 + und2;
+  }
+
+  /* ===== Surface geometry ===== */
+  const surfaceGeo = new THREE.BufferGeometry();
+  const sPositions = new Float32Array(SURF_COUNT * 3);
+  const sBoosts = new Float32Array(SURF_COUNT);
+  const sRows = new Float32Array(SURF_COUNT);
+  const sNoise = new Float32Array(SURF_COUNT); // per-point stagger threshold [0..0.85]
+
+  for (let ix = 0; ix < GRID_X; ix++) {
+    for (let iz = 0; iz < GRID_Z; iz++) {
+      const i = ix * GRID_Z + iz;
+      sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      sPositions[i * 3 + 1] = 0;
+      sPositions[i * 3 + 2] = Z_FAR + (iz / (GRID_Z - 1)) * SURF_D;
+      sBoosts[i] = 0;
+      sRows[i] = iz / (GRID_Z - 1);
+      // deterministic hash -> stagger threshold (capped so all points are gone by p=1)
+      const h = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+      sNoise[i] = (h - Math.floor(h)) * 0.85;
+    }
+  }
+
+  const basePositions = new Float32Array(sPositions);
+
+  surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
+  surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
+  surfaceGeo.setAttribute('aRow', new THREE.BufferAttribute(sRows, 1));
+  surfaceGeo.setAttribute('aNoise', new THREE.BufferAttribute(sNoise, 1));
+
+  /* ===== Surface material ===== */
+  const surfaceMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uResolution: { value: new THREE.Vector2(1, 1) },
+      uSize: { value: 2.7 },
+      uBaseColor: { value: new THREE.Color(0x96baf0) },
+      uChargeColor: { value: new THREE.Color(0x1466e6) },
+      uTipColor: { value: new THREE.Color(0x5aa0ff) },
+      uGreyColor: { value: new THREE.Color(0x3a404a) }, // pollutant-dust ink
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 52 },
+      uFogFar: { value: 128 },
+      uMouse: { value: new THREE.Vector2(9999, 9999) },
+      uMouseStr: { value: 0 },
+      uFade: { value: 1.0 },
+      uMorph: { value: 0.0 }, // transition progress 0..1
+    },
+    vertexShader: `
+      attribute float aBoost;
+      attribute float aRow;
+      attribute float aNoise;
+      uniform float uTime;
+      uniform float uPixelRatio;
+      uniform vec2 uResolution;
+      uniform float uSize;
+      uniform vec2 uMouse;
+      uniform float uMouseStr;
+      uniform float uMorph;
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
+      varying float vNoise;
+
+      float waveHeight(float x, float z, float t) {
+        float m = uMorph;
+        float dome = -0.00044 * x * x;
+        float zNorm = (z + 11.0) / 36.0;
+        float farRise = (1.0 - zNorm) * 3.0 * (1.0 - 0.35 * m);
+        float und1 = sin(x * 0.06 + t * 0.393) * 0.8 * (1.0 - 0.65 * m);
+        float und2 = sin(z * 0.04 + t * 0.314 + 1.5) * 0.8 * (1.0 - 0.65 * m);
+        return dome + farRise + und1 + und2;
+      }
+
+      float cursorBump(vec2 xz) {
+        vec2 d = xz - uMouse;
+        return uMouseStr * 2.8 * exp(-dot(d, d) / 140.0);
+      }
+
+      void main() {
+        vec3 pos = position;
+        float cb = cursorBump(pos.xz);
+        pos.y = waveHeight(pos.x, pos.z, uTime) + cb;
+
+        vMouse = clamp(cb / 2.8, 0.0, 1.0);
+
+        vHeight = pos.y;
+        vRow = aRow;
+        vWorldX = pos.x;
+        vBoost = aBoost;
+        vNoise = aNoise;
+
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        vDist = -mvPos.z;
+        vec4 clip0 = projectionMatrix * mvPos;
+        gl_Position = clip0;
+
+        float e = 0.7;
+        vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime) + cursorBump(vec2(pos.x + e, pos.z)), pos.z);
+        vec3 pZ = vec3(pos.x, waveHeight(pos.x, pos.z + e, uTime) + cursorBump(vec2(pos.x, pos.z + e)), pos.z + e);
+        vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
+        vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
+        vec2 s0 = clip0.xy / clip0.w;
+        vec2 rawX = ((clipX.xy / clipX.w) - s0) * uResolution;
+        vec2 rawZ = ((clipZ.xy / clipZ.w) - s0) * uResolution;
+        float armM = max(length(rawX), length(rawZ)) + 1e-4;
+        vArmX = (rawX / armM) * 0.5;
+        vArmZ = (rawZ / armM) * 0.5;
+
+        float sz = uSize * (1.0 + aBoost * 1.6 + vMouse * 0.1);
+        sz *= (1.0 - 0.22 * uMorph); // quiet thinning of the marks themselves
+        float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+        gl_PointSize = clamp(rawSize, 6.0 * uPixelRatio, 22.0 * uPixelRatio);
+      }
+    `,
+    fragmentShader: `
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
+      varying float vNoise;
+      uniform vec3 uBaseColor;
+      uniform vec3 uChargeColor;
+      uniform vec3 uTipColor;
+      uniform vec3 uGreyColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      uniform float uFade;
+      uniform float uMorph;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        uv.y = -0.5) * 0.5;
+        vArmZ = (rawZ / armM) * 0.5;
+
+        float sz = uSize * (1.0 + aBoost * 1.6 + vMouse * 0.1);
+        sz *= (1.0 - 0.22 * uMorph); // quiet thinning of point size
+        float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+        gl_PointSize = clamp(rawSize, 6.0 * uPixelRatio, 22.0 * uPixelRatio);
+      }
+    `,
+    fragmentShader: `
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
+      varying float vNoise;
+      uniform vec3 uBaseColor;
+      uniform vec3 uChargeColor;
+      uniform vec3 uTipColor;
+      uniform vec3 uGreyColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      uniform float uFade;
+      uniform float uMorph;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        uv.y = -uv.y;
+
+        float thick = 0.11;
+        float lenX = length(vArmX);
+        float lenZ = length(vArmZ);
+        vec2 uX = vArmX / max(lenX, 1e-4);
+        vec2 uZ = vArmZ / max(lenZ, 1e-4);
+        lenX = max(lenX, 0.16);
+        lenZ = max(lenZ, 0.16);
+        float distX = abs(dot(uv, vec2(-uX.y, uX.x)));
+        float distZ = abs(dot(uv, vec2(-uZ.y, uZ.x)));
+        float armX = (1.0 - smoothstep(thick * 0.6, thick, distX)) *
+                     (1.0 - smoothstep(lenX - 0.06, lenX, abs(dot(uv, uX))));
+        float armZ = (1.0 - smoothstep(thick * 0.6, thick, distZ)) *
+                     (1.0 - smoothstep(lenZ - 0.06, lenZ, abs(dot(uv, uZ))));
+        float plus  = max(armX, armZ);
+        if (plus < 0.05) discard;
+
+        float heightFactor = smoothstep(-1.0, 1.0, vHeight);
+        vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
+
+        float baseAlpha = 0.58;
+
+        // charge / tip influence quiets down as we morph toward dust
+        float charge = clamp(vMouse, 0.0, 1.0) * (1.0 - uMorph);
+        vec3 color = mix(baseShaded, uChargeColor, charge * 0.42);
+        float tip = charge * smoothstep(0.7, 1.0, charge) * 0.28;
+        color = mix(color, uTipColor, tip);
+
+        color = mix(color, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9 * (1.0 - uMorph));
+        color = mix(color, uTipColor, smoothstep(0.45, 1.0, vBoost) * 0.55 * (1.0 - uMorph));
+
+        // desaturate pale-blue -> pollutant-dust grey (the premium light-theme move)
+        color = mix(color, uGreyColor, uMorph * 0.82);
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        // fog eases toward the pale bg, but keep grey readable: blend less fog as we morph
+        color = mix(color, uFogColor, fog * 0.85 * (1.0 - 0.45 * uMorph));
+
+        float depthFade = smoothstep(35.0, 12.0, vDist);
+        float topFade = smoothstep(0.0, 0.22, vRow);
+        float leftFade = smoothstep(-60.0, -20.0, vWorldX);
+        float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
+        alpha *= (1.0 - fog * 0.7);
+
+        // staggered per-point thinning: each charge fades at its own moment
+        float thin = 1.0 - smoothstep(vNoise - 0.05, vNoise + 0.2, uMorph);
+
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.85);
+
+        float depthFade = smoothstep(35.0, 12.0, vDist);
+        float topFade = smoothstep(0.0, 0.22, vRow);
+        float leftFade = smoothstep(-60.0, -20.0, vWorldX);
+        float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
+        alpha *= (1.0 - fog * 0.7);
+
+        alpha *= thin;     // staggered per-point thinning
+        alpha *= uFade;    // safety kill at the very end
+
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.NormalBlending,
+  });
+
+  const surfacePoints = new THREE.Points(surfaceGeo, surfaceMat);
+  surfacePoints.renderOrder = 0;
+  scene.add(surfacePoints);
+
+  /* ===== 2D dust canvas over the room ===== */
+  const dustCtx = dustCanvas.getContext('2d');
+  let dustMotes = [];
+  let dustW = 0, dustH = 0;
+
+  function buildDust2D() {
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    dustW = w; dustH = h;
+    dustCanvas.width = Math.floor(w * Math.min(window.devicePixelRatio || 1, dprCap));
+    dustCanvas.height = Math.floor(h * Math.min(window.devicePixelRatio || 1, dprCap));
+    dustCanvas.style.width = w + 'px';
+    dustCanvas.style.height = h + 'px';
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    dustCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const count = Math.round(Math.min(420, (w * h) / 4200));
+    dustMotes = [];
+    for (let i = 0; i < count; i++) {
+      dustMotes.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: -0.04 - Math.random() * 0.08,
+        r: 0.4 + Math.random() * 1.4,
+        a: 0.05 + Math.random() * 0.14,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  function drawDust2D(t) {
+    if (dustW === 0 || dustH === 0) return;
+    dustCtx.clearRect(0, 0, dustW, dustH);
+    for (let i = 0; i < dustMotes.length; i++) {
+      const m = dustMotes[i];
+      m.x += m.vx + Math.sin(t * 0.3 + m.phase) * 0.05;
+      m.y += m.vy;
+      if (m.y < -4) { m.y = dustH + 4; m.x = Math.random() * dustW; }
+      if (m.x < -4) m.x = dustW + 4;
+      if (m.x > dustW + 4) m.x = -4;
+      dustCtx.beginPath();
+      dustCtx.fillStyle = 'rgba(58,64,74,' + m.a.toFixed(3) + ')';
+      dustCtx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+      dustCtx.fill();
+    }
+  }
+
+  /* ===== Resize ===== */
+  function resize() {
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    if (w === 0 || h === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    surfaceMat.uniforms.uPixelRatio.value = dpr;
+    surfaceMat.uniforms.uResolution.value.set(w, h);
+    buildDust2D();
+  }
+
+  /* ===== helpers ===== */
+  function smoothstep(a, b, x) {
+    let t = (x - a) / (b - a);
+    t = Math.max(0, Math.min(1, t));
+    return t * t * (3 - 2 * t);
+  }
+  function easeInOutCubic(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  }
+
+  /* =====================================================================
+     TRANSITION — Quiet Reveal (Direction D)
+     - Camera does NOT move. Stays at base the whole time.
+     - The "+" charge field stays alive: it gently SETTLES (damped undulations),
+       THINS (per-point staggered fade via aNoise), and DESATURATES
+       pale-blue -> pollutant-dust grey (#3a404a). It never blinks off as a block.
+     - One single continuous element connects the two scenes: a slow, soft pale
+       haze/gradient wash that travels down the frame, revealing the room photo
+       behind it. Covered region = bg colour (invisible against bg); only the
+       soft edge is visible as it sweeps.
+     - Text cross-fades in place only (opacity + 12px translate).
+       Hero wordmark+line OUT early (by ~0.3). Room headline+logo IN late (after ~0.65).
+       The two text blocks never collide.
+     ===================================================================== */
+  const ctx = {
+    THREE,
+    scene,
+    camera,
+    renderer,
+    surfacePoints,
+    surfaceGeo,
+    surfaceMat,
+    uniforms: surfaceMat.uniforms,
+    basePositions,
+    sPositions,
+    sBoosts,
+    sRows,
+    sNoise,
+    GRID_X, GRID_Z, SURF_W, SURF_D, Z_FAR, SURF_COUNT,
+    CAM_BASE, CAM_TARGET,
+    waveHeight,
+    roomEl,
+    washEl,
+    dustCanvas,
+    dustCtx,
+    dustMotes: () => dustMotes,
+    heroEl,
+    headlineEl: roomEl.querySelector('.room-headline'),
+    roomLogoEl: roomEl.querySelector('.room-logo'),
+    heroLogoEl: heroEl.querySelector('.hero-logo'),
+    heroTagEl: heroEl.querySelector('.hero-tag'),
+  };
+  window.__trans = ctx;
+
+  function applyTransition(p) {
+    const cp = Math.max(0, Math.min(1, p));
+
+    // --- charge field uniforms: settle + thin + desaturate ---
+    surfaceMat.uniforms.uMorph.value = cp;
+    // kill any stragglers right at the very end (per-point thinning already does most)
+    surfaceMat.uniforms.uFade.value = 1.0 - smoothstep(0.92, 1.0, cp);
+
+    // --- camera: static. No moves. ---
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
+
+    // --- the single continuous element: soft pale wash traveling down ---
+    const washP = easeInOutCubic(cp);
+    washEl.style.transform = 'translateY(' + (-40 + washP * 140).toFixed(2) + 'vh)';
+
+    // --- room photo: always rendered, revealed by the wash ---
+    roomEl.style.opacity = '1';
+    // dust fades in gently alongside the reveal
+    dustCanvas.style.opacity = String(smoothstep(0.1, 0.95, cp));
+
+    // --- hero text: OUT early, tiny 12px upward translate ---
+    const heroOut = smoothstep(0.15, 0.32, cp);
+    heroEl.style.opacity = String(1 - heroOut);
+    heroEl.style.transform = 'translateY(' + (-12 * heroOut).toFixed(2) + 'px)';
+
+    // --- room text: IN late, tiny 12px translate settling to 0 ---
+    const roomIn = smoothstep(0.62, 0.85, cp);
+    ctx.headlineEl.style.opacity = String(roomIn);
+    ctx.headlineEl.style.transform = 'translateY(' + (12 * (1 - roomIn)).toFixed(2) + 'px)';
+    ctx.roomLogoEl.style.opacity = String(roomIn);
+    ctx.roomLogoEl.style.transform = 'translateY(' + (12 * (1 - roomIn)).toFixed(2) + 'px)';
+  }
+
+  /* ===== viewing harness: autoloop / scrub / QA freeze ===== */
+  const params = new URLSearchParams(window.location.search);
+  const qaP = params.get('p');
+  let qaFixed = false;
+  let qaValue = 0;
+  if (qaP !== null) {
+    const v = parseFloat(qaP);
+    if (!isNaN(v)) {
+      qaFixed = true;
+      qaValue = Math.max(0, Math.min(1, v));
+    }
+  }
+
+  let p = 0;
+  let autoDir = 1;
+  let autoPaused = false;
+  let autoResumeAt = 0;
+  let holdUntil = 0;
+  const LEG = 1.6;
+  const HOLD_AT_ONE = 1.6;
+  const HOLD_AT_ZERO = 1.2;
+
+  function easeInOutCubicHarness(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  }
+
+  let lastT = 0;
+  let clock = 0;
+  let running = false;
+  let rafId = 0;
+
+  function step(t) {
+    if (!running) return;
+    rafId = requestAnimationFrame(step);
+    const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
+    lastT = t;
+    clock += dt;
+
+    surfaceMat.uniforms.uTime.value = clock;
+
+    const decay = Math.pow(0.945, dt * 60);
+    for (let i = 0; i < SURF_COUNT; i++) sBoosts[i] *= decay;
+    surfaceGeo.attributes.aBoost.needsUpdate = true;
+
+    if (qaFixed) {
+      p = qaValue;
+    } else if (autoPaused) {
+      if (t >= autoResumeAt) autoPaused = false;
+    } else {
+      if (t < holdUntil) {
+        // holding
+      } else {
+        const dir = autoDir;
+        const speed = 1 / LEG;
+        p += dir * speed * dt;
+        if (p >= 1) {
+          p = 1;
+          autoDir = -1;
+          holdUntil = t + HOLD_AT_ONE * 1000;
+        } else if (p <= 0) {
+          p = 0;
+          autoDir = 1;
+          holdUntil = t + HOLD_AT_ZERO * 1000;
+        }
+      }
+    }
+
+    let pDisplay = p;
+    if (!qaFixed && !autoPaused && t >= holdUntil) {
+      const legFrac = autoDir === 1 ? p : (1 - p);
+      const easedFrac = easeInOutCubicHarness(legFrac);
+      pDisplay = autoDir === 1 ? easedFrac : (1 - easedFrac);
+    } else if (autoPaused || t < holdUntil) {
+      pDisplay = p;
+    }
+
+    applyTransition(pDisplay);
+    pValEl.textContent = pDisplay.toFixed(2);
+
+    drawDust2D(clock);
+
+    renderer.render(scene, camera);
+  }
+
+  /* ===== scrub: wheel + drag ===== */
+  function pauseAutoFor(ms) {
+    if (qaFixed) return;
+    autoPaused = true;
+    autoResumeAt = performance.now() + ms;
+    holdUntil = 0;
+  }
+
+  function scrubBy(deltaPx) {
+    if (qaFixed) return;
+    pauseAutoFor(1400);
+    const k = 0.0024;
+    p = Math.max(0, Math.min(1, p + deltaPx * k));
+    autoDir = p < 0.5 ? 1 : -1;
+  }
+
+  window.addEventListener('wheel', function (e) {
+    if (qaFixed) return;
+    e.preventDefault();
+    scrubBy(-e.deltaY);
+  }, { passive: false });
+
+  let dragging = false;
+  let lastY = 0;
+  stage.addEventListener('pointerdown', function (e) {
+    if (qaFixed) return;
+    dragging = true;
+    lastY = e.clientY;
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!dragging || qaFixed) return;
+    const dy = e.clientY - lastY;
+    lastY = e.clientY;
+    scrubBy(-dy);
+  });
+  stage.addEventListener('pointerup', function (e) {
+    dragging = false;
+    try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+  });
+  stage.addEventListener('pointercancel', function () { dragging = false; });
+
+  /* ===== start / stop ===== */
+  function start() {
+    if (!running) {
+      running = true;
+      lastT = 0;
+      rafId = requestAnimationFrame(step);
+    }
+  }
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  /* ===== init ===== */
+  resize();
+  applyTransition(qaFixed ? qaValue : 0);
+  pValEl.textContent = (qaFixed ? qaValue : 0).toFixed(2);
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(function (entries) {
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) start();
+        else stop();
+      }
+    }, { threshold: [0, 0.1] });
+    io.observe(stage);
+  } else {
+    start();
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop();
+    else if (!running) { running = true; lastT = 0; rafId = requestAnimationFrame(step); }
+  });
+
+  let rt = 0;
+  window.addEventListener('resize', function () {
+    if (rt) clearTimeout(rt);
+    rt = setTimeout(resize, 180);
+  });
+
+  if (reduced && !qaFixed) {
+    // gentle autoloop is calm enough; keep it.
+  }
+})();
+</script>
+
+</body>
+</html>

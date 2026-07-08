@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — The Charge Becomes the Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1466e6;
+  --tip:#5aa0ff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+#stage{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  overflow:hidden;
+}
+
+/* ---- ROOM layer (back) ---- */
+.room{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  opacity:0;
+  background-image:url('assets/Background_c2.png');
+  background-size:cover;
+  background-position:center;
+  will-change:opacity;
+}
+#dust-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  opacity:0;
+  will-change:opacity;
+}
+.room-headline{
+  position:absolute;
+  left:clamp(28px, 4.5vw, 72px);
+  bottom:clamp(40px, 7vh, 92px);
+  max-width:62vw;
+  font-family:var(--stack);
+  font-size:clamp(22px, 3.4vw, 46px);
+  line-height:1.18;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  color:var(--headline-ink);
+  pointer-events:none;
+  will-change:opacity;
+}
+.room-headline .charge{ color:var(--red); font-weight:600; }
+.room-logo{
+  position:absolute;
+  left:clamp(22px, 3vw, 40px);
+  top:clamp(20px, 3vh, 34px);
+  height:34px;
+  width:auto;
+  pointer-events:none;
+  will-change:opacity;
+}
+.room-logo img{ height:100%; width:auto; display:block; }
+
+/* ---- Three.js canvas (middle) ---- */
+#wave-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  pointer-events:none;
+  display:block;
+}
+
+/* ---- HERO DOM layer (front) ---- */
+.hero{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  will-change:opacity;
+}
+.hero-logo{
+  position:absolute;
+  left:clamp(28px, 4.5vw, 72px);
+  top:clamp(28px, 5vh, 56px);
+  height:clamp(56px, 7vw, 96px);
+  width:auto;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+}
+.hero-logo img{ height:100%; width:auto; display:block; }
+.hero-tag{
+  position:absolute;
+  left:clamp(28px, 4.5vw, 72px);
+  top:calc(clamp(28px, 5vh, 56px) + clamp(56px, 7vw, 96px) + 18px);
+  font-family:var(--stack);
+  font-size:clamp(15px, 1.25vw, 19px);
+  line-height:1.5;
+  color:#3a4046;
+  max-width:46ch;
+  letter-spacing:0.002em;
+}
+.hero-tag .hl{ color:var(--accent); font-weight:600; }
+
+/* ---- concept label ---- */
+.concept-label{
+  position:absolute;
+  right:clamp(18px, 3vw, 36px);
+  bottom:clamp(16px, 3vh, 28px);
+  z-index:5;
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.06em;
+  color:var(--muted);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.concept-label .p-val{ color:var(--accent); }
+
+@media (max-width: 720px){
+  .room-headline{ font-size:clamp(20px, 6vw, 30px); max-width:84vw; }
+  .hero-logo{ height:clamp(44px, 12vw, 64px); }
+  .hero-tag{ font-size:14px; max-width:80vw; }
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- 1. ROOM layer -->
+  <div class="room" id="room">
+    <canvas id="dust-canvas"></canvas>
+    <div class="room-logo"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <div class="room-headline">Most harmful pollutants carry an electric <span class="charge">charge</span></div>
+  </div>
+
+  <!-- 2. Three.js "+" wave surface -->
+  <canvas id="wave-canvas"></canvas>
+
+  <!-- 3. HERO DOM layer -->
+  <div class="hero" id="hero">
+    <div class="hero-logo"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <div class="hero-tag">A <span class="hl">permanent positive charge</span>, engineered into the material.</div>
+  </div>
+
+  <!-- concept label -->
+  <div class="concept-label">The Charge Becomes the Room · p=<span class="p-val" id="p-val">0.00</span></div>
+
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+(function () {
+  'use strict';
+
+  const stage = document.getElementById('stage');
+  const canvas = document.getElementById('wave-canvas');
+  const roomEl = document.getElementById('room');
+  const dustCanvas = document.getElementById('dust-canvas');
+  const heroEl = document.getElementById('hero');
+  const pValEl = document.getElementById('p-val');
+
+  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+
+  /* ===== Helpers ===== */
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+  function smoothstep(a, b, x){
+    const t = clamp01((x - a) / (b - a));
+    return t * t * (3 - 2 * t);
+  }
+  function easeInOutCubic(x){
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  }
+
+  /* ===== Renderer ===== */
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setClearColor(0xedf0f2, 0);
+  const dprCap = 2;
+
+  /* ===== Scene & Camera ===== */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  const CAM_BASE = new THREE.Vector3(0, 15, 26);
+  const CAM_TARGET = new THREE.Vector3(0, -4, -8);
+  // Room-viewing dolly target (subtle push-in + level)
+  const CAM_ROOM = new THREE.Vector3(0, 5, 21);
+  const CAM_TARGET_ROOM = new THREE.Vector3(0, -1, -5);
+  camera.position.copy(CAM_BASE);
+  camera.lookAt(CAM_TARGET);
+
+  /* ===== Surface constants ===== */
+  const GRID_X = 150;
+  const GRID_Z = 55;
+  const SURF_W = 150;
+  const SURF_D = 36;
+  const Z_FAR = -11;
+  const SURF_COUNT = GRID_X * GRID_Z;
+
+  function waveHeight(x, z, t) {
+    var dome = -0.00044 * x * x;
+    var zNorm = (z - Z_FAR) / SURF_D;
+    var farRise = (1.0 - zNorm) * 3.0;
+    var und1 = Math.sin(x * 0.06 + t * 0.393) * 0.8;
+    var und2 = Math.sin(z * 0.04 + t * 0.314 + 1.5) * 0.8;
+    return dome + farRise + und1 + und2;
+  }
+
+  /* ===== Surface geometry ===== */
+  const surfaceGeo = new THREE.BufferGeometry();
+  const sPositions = new Float32Array(SURF_COUNT * 3);
+  const sBoosts = new Float32Array(SURF_COUNT);
+  const sRows = new Float32Array(SURF_COUNT);
+
+  for (let ix = 0; ix < GRID_X; ix++) {
+    for (let iz = 0; iz < GRID_Z; iz++) {
+      const i = ix * GRID_Z + iz;
+      sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      sPositions[i * 3 + 1] = 0;
+      sPositions[i * 3 + 2] = Z_FAR + (iz / (GRID_Z - 1)) * SURF_D;
+      sBoosts[i] = 0;
+      sRows[i] = iz / (GRID_Z - 1);
+    }
+  }
+
+  const basePositions = new Float32Array(sPositions);
+
+  /* ===== Per-point dust targets + stagger (the morph field) ===== */
+  // A soft 3D cloud filling the volume in front of the room backdrop.
+  const aTarget = new Float32Array(SURF_COUNT * 3);
+  const aStagger = new Float32Array(SURF_COUNT);
+  const aSeed = new Float32Array(SURF_COUNT);
+
+  let _seed = 9281;
+  function srand() { _seed = (_seed * 1664525 + 1013904223) >>> 0; return _seed / 4294967296; }
+
+  for (let i = 0; i < SURF_COUNT; i++) {
+    // dust target: spread across the room volume
+    aTarget[i * 3]     = (srand() - 0.5) * 52.0;   // x
+    aTarget[i * 3 + 1] = (srand() - 0.5) * 22.0;   // y
+    aTarget[i * 3 + 2] = -7.0 + srand() * 15.0;    // z (-7..8)
+    // stagger: front of wave (high row = close to camera) breaks first
+    const row = sRows[i];
+    let st = srand() * 0.32 - row * 0.22;
+    st = Math.max(0.0, Math.min(0.38, st));
+    aStagger[i] = st;
+    aSeed[i] = srand();
+  }
+
+  surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
+  surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
+  surfaceGeo.setAttribute('aRow', new THREE.BufferAttribute(sRows, 1));
+  surfaceGeo.setAttribute('aTarget', new THREE.BufferAttribute(aTarget, 3));
+  surfaceGeo.setAttribute('aStagger', new THREE.BufferAttribute(aStagger, 1));
+  surfaceGeo.setAttribute('aSeed', new THREE.BufferAttribute(aSeed, 1));
+
+  /* ===== Surface material ===== */
+  const surfaceMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uResolution: { value: new THREE.Vector2(1, 1) },
+      uSize: { value: 2.7 },
+      uBaseColor: { value: new THREE.Color(0x96baf0) },
+      uChargeColor: { value: new THREE.Color(0x1466e6) },
+      uTipColor: { value: new THREE.Color(0x5aa0ff) },
+      uFogColor: { value: new THREE.Color(0xedf0f2) },
+      uFogNear: { value: 52 },
+      uFogFar: { value: 128 },
+      uMouse: { value: new THREE.Vector2(9999, 9999) },
+      uMouseStr: { value: 0 },
+      uFade: { value: 1.0 },
+      // transition uniforms
+      uMorph: { value: 0.0 },        // overall progress 0..1
+      uDustColor: { value: new THREE.Color(0x3a404a) },
+      uDriftAmp: { value: 0.0 },     // brownian drift amplitude (grows with p)
+      uDriftTime: { value: 0.0 },
+    },
+    vertexShader: `
+      attribute float aBoost;
+      attribute float aRow;
+      attribute vec3 aTarget;
+      attribute float aStagger;
+      attribute float aSeed;
+      uniform float uTime;
+      uniform float uPixelRatio;
+      uniform vec2 uResolution;
+      uniform float uSize;
+      uniform vec2 uMouse;
+      uniform float uMouseStr;
+      uniform float uMorph;
+      uniform float uDriftAmp;
+      uniform float uDriftTime;
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
+      varying float vMorph;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
+
+      float waveHeight(float x, float z, float t) {
+        float dome = -0.00044 * x * x;
+        float zNorm = (z + 11.0) / 36.0;
+        float farRise = (1.0 - zNorm) * 3.0;
+        float und1 = sin(x * 0.06 + t * 0.393) * 0.8;
+        float und2 = sin(z * 0.04 + t * 0.314 + 1.5) * 0.8;
+        return dome + farRise + und1 + und2;
+      }
+
+      float cursorBump(vec2 xz) {
+        vec2 d = xz - uMouse;
+        return uMouseStr * 2.8 * exp(-dot(d, d) / 140.0);
+      }
+
+      // cheap hash noise for per-point drift
+      float hsh(float n){ return fract(sin(n) * 43758.5453123); }
+
+      void main() {
+        // ---- wave (hero) position ----
+        vec3 wavePos = position;
+        float cb = cursorBump(wavePos.xz);
+        wavePos.y = waveHeight(wavePos.x, wavePos.z, uTime) + cb;
+        vMouse = clamp(cb / 2.8, 0.0, 1.0);
+
+        // ---- per-point local progress (staggered) ----
+        float lp = clamp((uMorph - aStagger) / 0.58, 0.0, 1.0);
+        lp = lp * lp * (3.0 - 2.0 * lp); // smoothstep
+        vMorph = lp;
+
+        // ---- dust target + brownian/curl drift ----
+        vec3 tgt = aTarget;
+        float dt = uDriftTime + aSeed * 6.2831;
+        // gentle curl-ish drift, loosens as we morph
+        float da = uDriftAmp;
+        tgt.x += sin(dt * 0.7 + aTarget.y * 0.3) * da;
+        tgt.y += cos(dt * 0.6 + aTarget.x * 0.21) * da;
+        tgt.z += sin(dt * 0.5 + aTarget.z * 0.4) * da;
+        // a little spiral as the charge "inverts"
+        float sw = lp * 1.4;
+        tgt.x += sin(dt * 0.9 + aSeed * 12.0) * sw * 0.4;
+        tgt.y += cos(dt * 0.8 + aSeed * 9.0) * sw * 0.4;
+
+        // ---- blend wave -> dust ----
+        vec3 pos = mix(wavePos, tgt, lp);
+
+        vHeight = pos.y;
+        vRow = aRow;
+        vWorldX = pos.x;
+        vBoost = aBoost;
+
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        vDist = -mvPos.z;
+        vec4 clip0 = projectionMatrix * mvPos;
+        gl_Position = clip0;
+
+        // ---- plus arms (computed from wave neighbors; vanish as we morph) ----
+        float e = 0.7;
+        vec3 pX = vec3(wavePos.x + e, waveHeight(wavePos.x + e, wavePos.z, uTime) + cursorBump(vec2(wavePos.x + e, wavePos.z)), wavePos.z);
+        vec3 pZ = vec3(wavePos.x, waveHeight(wavePos.x, wavePos.z + e, uTime) + cursorBump(vec2(wavePos.x, wavePos.z + e)), wavePos.z + e);
+        vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
+        vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
+        vec2 s0 = clip0.xy / clip0.w;
+        vec2 rawX = ((clipX.xy / clipX.w) - s0) * uResolution;
+        vec2 rawZ = ((clipZ.xy / clipZ.w) - s0) * uResolution;
+        float armM = max(length(rawX), length(rawZ)) + 1e-4;
+        vArmX = (rawX / armM) * 0.5 * (1.0 - lp);
+        vArmZ = (rawZ / armM) * 0.5 * (1.0 - lp);
+
+        // ---- point size: shrink plus toward a small dust speck ----
+        float sz = uSize * (1.0 + aBoost * 1.6 + vMouse * 0.1);
+        sz *= mix(1.0, 0.42, lp);
+        float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
+        gl_PointSize = clamp(rawSize, 4.0 * uPixelRatio, 22.0 * uPixelRatio);
+      }
+    `,
+    fragmentShader: `
+      varying float vBoost;
+      varying float vDist;
+      varying float vHeight;
+      varying float vMouse;
+      varying float vRow;
+      varying float vWorldX;
+      varying float vMorph;
+      varying vec2 vArmX;
+      varying vec2 vArmZ;
+      uniform vec3 uBaseColor;
+      uniform vec3 uChargeColor;
+      uniform vec3 uTipColor;
+      uniform vec3 uDustColor;
+      uniform vec3 uFogColor;
+      uniform float uFogNear;
+      uniform float uFogFar;
+      uniform float uFade;
+
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        uv.y = -uv.y;
+
+        // ---- plus symbol (fades out as morph increases) ----
+        vec2 armX = vArmX;
+        vec2 armZ = vArmZ;
+        float thick = 0.11;
+        float lenX = max(length(armX), 0.16);
+        float lenZ = max(length(armZ), 0.16);
+        vec2 uX = armX / max(lenX, 1e-4);
+        vec2 uZ = armZ / max(lenZ, 1e-4);
+        float distX = abs(dot(uv, vec2(-uX.y, uX.x)));
+        float distZ = abs(dot(uv, vec2(-uZ.y, uZ.x)));
+        float armXm = (1.0 - smoothstep(thick * 0.6, thick, distX)) *
+                      (1.0 - smoothstep(lenX - 0.06, lenX, abs(dot(uv, uX))));
+        float armZm = (1.0 - smoothstep(thick * 0.6, thick, distZ)) *
+                      (1.0 - smoothstep(lenZ - 0.06, lenZ, abs(dot(uv, uZ))));
+        float plus = max(armXm, armZm);
+
+        // ---- round dust speck (grows in as morph increases) ----
+        float speckR = mix(0.10, 0.30, vMorph);
+        float speck = 1.0 - smoothstep(speckR * 0.65, speckR, length(uv));
+
+        float shape = mix(plus, speck, vMorph);
+        if (shape < 0.05) discard;
+
+        // ---- color: pale charge-blue -> pollutant grey (#3a404a) ----
+        float heightFactor = smoothstep(-1.0, 1.0, vHeight);
+        vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
+        float charge = clamp(vMouse, 0.0, 1.0);
+        vec3 heroColor = mix(baseShaded, uChargeColor, charge * 0.42);
+        float tip = charge * smoothstep(0.7, 1.0, charge) * 0.28;
+        heroColor = mix(heroColor, uTipColor, tip);
+        heroColor = mix(heroColor, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9);
+        heroColor = mix(heroColor, uTipColor, smoothstep(0.45, 1.0, vBoost) * 0.55);
+
+        vec3 color = mix(heroColor, uDustColor, vMorph);
+
+        // fog
+        float fog = smoothstep(uFogNear, uFogFar, vDist);
+        color = mix(color, uFogColor, fog * 0.85);
+
+        // ---- alpha ----
+        // hero edge fades relax as the field becomes dust (dust fills the frame)
+        float depthFade = mix(smoothstep(35.0, 12.0, vDist), 1.0, vMorph);
+        float topFade   = mix(smoothstep(0.0, 0.22, vRow), 1.0, vMorph);
+        float leftFade  = mix(smoothstep(-60.0, -20.0, vWorldX), 1.0, vMorph);
+
+        float heroAlpha = plus * depthFade * topFade * leftFade * (0.58 + vBoost * 0.6 + charge * 0.4);
+        heroAlpha *= (1.0 - fog * 0.7);
+        float dustAlpha = speck * 0.34;
+
+        float alpha = mix(heroAlpha, dustAlpha, vMorph);
+        alpha *= uFade;
+
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.NormalBlending,
+  });
+
+  const surfacePoints = new THREE.Points(surfaceGeo, surfaceMat);
+  surfacePoints.renderOrder = 0;
+  scene.add(surfacePoints);
+
+  /* ===== 2D dust canvas over the room ===== */
+  const dustCtx = dustCanvas.getContext('2d');
+  let dustMotes = [];
+  let dustW = 0, dustH = 0;
+
+  function buildDust2D() {
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    dustW = w; dustH = h;
+    dustCanvas.width = Math.floor(w * Math.min(window.devicePixelRatio || 1, dprCap));
+    dustCanvas.height = Math.floor(h * Math.min(window.devicePixelRatio || 1, dprCap));
+    dustCanvas.style.width = w + 'px';
+    dustCanvas.style.height = h + 'px';
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    dustCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const count = Math.round(Math.min(420, (w * h) / 4200));
+    dustMotes = [];
+    for (let i = 0; i < count; i++) {
+      dustMotes.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: -0.04 - Math.random() * 0.08,
+        r: 0.4 + Math.random() * 1.4,
+        a: 0.05 + Math.random() * 0.14,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  function drawDust2D(t) {
+    if (dustW === 0 || dustH === 0) return;
+    dustCtx.clearRect(0, 0, dustW, dustH);
+    for (let i = 0; i < dustMotes.length; i++) {
+      const m = dustMotes[i];
+      m.x += m.vx + Math.sin(t * 0.3 + m.phase) * 0.05;
+      m.y += m.vy;
+      if (m.y < -4) { m.y = dustH + 4; m.x = Math.random() * dustW; }
+      if (m.x < -4) m.x = dustW + 4;
+      if (m.x > dustW + 4) m.x = -4;
+      dustCtx.beginPath();
+      dustCtx.fillStyle = 'rgba(58,64,74,' + m.a.toFixed(3) + ')';
+      dustCtx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+      dustCtx.fill();
+    }
+  }
+
+  /* ===== Resize ===== */
+  function resize() {
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    if (w === 0 || h === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    surfaceMat.uniforms.uPixelRatio.value = dpr;
+    surfaceMat.uniforms.uResolution.value.set(w, h);
+    buildDust2D();
+  }
+
+  /* =====================================================================
+     TRANSITION — The Charge Becomes the Room
+     The "+" surface points morph (staggered, per-point) from the wave
+     into a drifting dust cloud filling the room volume. Color lerps
+     pale charge-blue -> pollutant grey. The plus shrinks/rounds into a
+     dust speck. The room photo resolves underneath, trailing the color
+     morph. Hero text out by p~0.3; room text in after p~0.65. A subtle
+     camera dolly pushes us into the room. By p=1 the 3D charges have
+     dissolved into the room's own 2D dust.
+     ===================================================================== */
+  const ctx = {
+    THREE,
+    scene,
+    camera,
+    renderer,
+    surfacePoints,
+    surfaceGeo,
+    surfaceMat,
+    uniforms: surfaceMat.uniforms,
+    basePositions,
+    sPositions,
+    sBoosts,
+    sRows,
+    aTarget,
+    aStagger,
+    GRID_X, GRID_Z, SURF_W, SURF_D, Z_FAR, SURF_COUNT,
+    CAM_BASE, CAM_TARGET, CAM_ROOM, CAM_TARGET_ROOM,
+    waveHeight,
+    roomEl,
+    dustCanvas,
+    dustCtx,
+    dustMotes: () => dustMotes,
+    heroEl,
+    headlineEl: roomEl.querySelector('.room-headline'),
+    roomLogoEl: roomEl.querySelector('.room-logo'),
+    heroLogoEl: heroEl.querySelector('.hero-logo'),
+    heroTagEl: heroEl.querySelector('.hero-tag'),
+  };
+  window.__trans = ctx;
+
+  // module-level clock so applyTransition can drive drift time idempotently
+  let __clock = 0;
+
+  function applyTransition(p) {
+    const cp = clamp01(p);
+
+    // --- hero DOM text: out early (by p=0.3) ---
+    const heroOp = clamp01(1.0 - cp / 0.3);
+    heroEl.style.opacity = String(heroOp);
+
+    // --- room photo + 2D dust: resolve underneath, trailing the color morph ---
+    const roomOp = smoothstep(0.25, 0.9, cp);
+    roomEl.style.opacity = String(roomOp);
+    dustCanvas.style.opacity = String(roomOp);
+
+    // --- room headline + logo: in late (after p=0.65), never colliding with hero text ---
+    const textOp = smoothstep(0.65, 1.0, cp);
+    ctx.headlineEl.style.opacity = String(textOp);
+    ctx.roomLogoEl.style.opacity = String(textOp);
+
+    // --- surface morph uniforms ---
+    surfaceMat.uniforms.uMorph.value = cp;
+    // drift loosens from calm wave to brownian dust
+    surfaceMat.uniforms.uDriftAmp.value = 0.55 * cp;
+    surfaceMat.uniforms.uDriftTime.value = __clock;
+    // 3D charges hand off to the room's 2D dust at the very end
+    surfaceMat.uniforms.uFade.value = 1.0 - smoothstep(0.86, 1.0, cp);
+
+    // --- subtle camera dolly into the room ---
+    const e = easeInOutCubic(cp);
+    camera.position.lerpVectors(CAM_BASE, CAM_ROOM, e);
+    const tx = CAM_TARGET.x + (CAM_TARGET_ROOM.x - CAM_TARGET.x) * e;
+    const ty = CAM_TARGET.y + (CAM_TARGET_ROOM.y - CAM_TARGET.y) * e;
+    const tz = CAM_TARGET.z + (CAM_TARGET_ROOM.z - CAM_TARGET.z) * e;
+    camera.lookAt(tx, ty, tz);
+  }
+
+  /* ===== viewing harness: autoloop / scrub / QA freeze ===== */
+  const params = new URLSearchParams(window.location.search);
+  const qaP = params.get('p');
+  let qaFixed = false;
+  let qaValue = 0;
+  if (qaP !== null) {
+    const v = parseFloat(qaP);
+    if (!isNaN(v)) {
+      qaFixed = true;
+      qaValue = Math.max(0, Math.min(1, v));
+    }
+  }
+
+  let p = 0;
+  let autoDir = 1;
+  let autoPaused = false;
+  let autoResumeAt = 0;
+  let holdUntil = 0;
+  const LEG = 1.6;
+  const HOLD_AT_ONE = 1.6;
+  const HOLD_AT_ZERO = 1.2;
+
+  let lastT = 0;
+  let clock = 0;
+  let running = false;
+  let rafId = 0;
+
+  function step(t) {
+    if (!running) return;
+    rafId = requestAnimationFrame(step);
+    const dt = lastT ? Math.min((t - lastT) / 1000, 0.05) : 0.016;
+    lastT = t;
+    clock += dt;
+    __clock = clock;
+
+    // wave time always advances (calm motion preserved)
+    surfaceMat.uniforms.uTime.value = clock;
+
+    // decay boosts
+    const decay = Math.pow(0.945, dt * 60);
+    for (let i = 0; i < SURF_COUNT; i++) sBoosts[i] *= decay;
+    surfaceGeo.attributes.aBoost.needsUpdate = true;
+
+    // drive p
+    if (qaFixed) {
+      p = qaValue;
+    } else if (autoPaused) {
+      if (t >= autoResumeAt) autoPaused = false;
+    } else {
+      if (t < holdUntil) {
+        // holding
+      } else {
+        const dir = autoDir;
+        const speed = 1 / LEG;
+        p += dir * speed * dt;
+        if (p >= 1) {
+          p = 1;
+          autoDir = -1;
+          holdUntil = t + HOLD_AT_ONE * 1000;
+        } else if (p <= 0) {
+          p = 0;
+          autoDir = 1;
+          holdUntil = t + HOLD_AT_ZERO * 1000;
+        }
+      }
+    }
+
+    let pDisplay = p;
+    if (!qaFixed && !autoPaused && t >= holdUntil) {
+      const legFrac = autoDir === 1 ? p : (1 - p);
+      const easedFrac = easeInOutCubic(legFrac);
+      pDisplay = autoDir === 1 ? easedFrac : (1 - easedFrac);
+    } else {
+      pDisplay = p;
+    }
+
+    applyTransition(pDisplay);
+    pValEl.textContent = pDisplay.toFixed(2);
+
+    drawDust2D(clock);
+
+    renderer.render(scene, camera);
+  }
+
+  /* ===== scrub: wheel + drag ===== */
+  function pauseAutoFor(ms) {
+    if (qaFixed) return;
+    autoPaused = true;
+    autoResumeAt = performance.now() + ms;
+    holdUntil = 0;
+  }
+
+  function scrubBy(deltaPx) {
+    if (qaFixed) return;
+    pauseAutoFor(1400);
+    const k = 0.0024;
+    p = Math.max(0, Math.min(1, p + deltaPx * k));
+    autoDir = p < 0.5 ? 1 : -1;
+  }
+
+  window.addEventListener('wheel', function (e) {
+    if (qaFixed) return;
+    e.preventDefault();
+    scrubBy(-e.deltaY);
+  }, { passive: false });
+
+  let dragging = false;
+  let lastY = 0;
+  stage.addEventListener('pointerdown', function (e) {
+    if (qaFixed) return;
+    dragging = true;
+    lastY = e.clientY;
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!dragging || qaFixed) return;
+    const dy = e.clientY - lastY;
+    lastY = e.clientY;
+    scrubBy(-dy);
+  });
+  stage.addEventListener('pointerup', function (e) {
+    dragging = false;
+    try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+  });
+  stage.addEventListener('pointercancel', function () { dragging = false; });
+
+  /* ===== start / stop ===== */
+  function start() {
+    if (!running) {
+      running = true;
+      lastT = 0;
+      rafId = requestAnimationFrame(step);
+    }
+  }
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  /* ===== init ===== */
+  resize();
+  applyTransition(qaFixed ? qaValue : 0);
+  pValEl.textContent = (qaFixed ? qaValue : 0).toFixed(2);
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(function (entries) {
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) start();
+        else stop();
+      }
+    }, { threshold: [0, 0.1] });
+    io.observe(stage);
+  } else {
+    start();
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stop();
+    else if (!running) { running = true; lastT = 0; rafId = requestAnimationFrame(step); }
+  });
+
+  let rt = 0;
+  window.addEventListener('resize', function () {
+    if (rt) clearTimeout(rt);
+    rt = setTimeout(resize, 180);
+  });
+
+  if (reduced && !qaFixed) {
+    // gentle autoloop retained; motion is calm
+  }
+})();
+</script>
+
+</body>
+</html>
