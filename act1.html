@@ -169,7 +169,7 @@
 </head>
 <body>
 <!-- act1_electric_v3 -->
-<video id="roomVid" src="screen2_full.mp4?v=1" muted playsinline preload="auto"></video>
+<video id="roomVid" src="screen2_full.mp4?v=2" muted playsinline preload="auto"></video>
 <canvas id="scene"></canvas>
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
@@ -351,7 +351,7 @@ let dustSprites = [];
 let dustMotes = [];
 let prevCT = 0;
 const FLOAT_END = 3.6;
-const SUCK_END = 8.4;
+const SUCK_END = 7.9;   // clip re-timed to 8.58s (seam cross-dissolve removed 0.5s); force-absorb before the clean end
 
 function makeDustSprites() {
   dustSprites = DUST_RGB.map(function(rgb){
@@ -380,7 +380,7 @@ function makeMote() {
     spriteIdx: Math.floor(Math.random()*3),
     phase: Math.random()*Math.PI*2,
     state: 'float',
-    suckStart: FLOAT_END+Math.random()*3.4,
+    suckStart: FLOAT_END+Math.random()*2.9,
     suckDur: 0.6+Math.random()*0.8,
     tx: 0, ty: 0,
     startX: 0, startY: 0,
@@ -405,7 +405,7 @@ function resetDust() {
     m.y=Math.random()*H;
     m.vx=(Math.random()-0.5)*0.4;
     m.vy=(Math.random()-0.5)*0.4;
-    m.suckStart=FLOAT_END+Math.random()*3.4;
+    m.suckStart=FLOAT_END+Math.random()*2.9;
     m.suckDur=0.6+Math.random()*0.8;
     m.curveAmt=0;
   }
