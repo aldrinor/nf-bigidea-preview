@@ -21,7 +21,7 @@
     --reveal-text:0;
     --reveal-lens:0;
   }
-  .env{position:fixed;inset:0;z-index:0;background:url('assets/Background_c2.png') center/cover no-repeat;opacity:var(--reveal-room,0);}
+  #roomVid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:var(--reveal-room,0);background:#edf0f2;}
   #scene{position:fixed;inset:0;z-index:1;cursor:none;opacity:1;}
   body.lens-hover #scene{cursor:pointer;}
   body.detail-active{cursor:auto;}
@@ -151,7 +151,7 @@
 </head>
 <body>
 <!-- act1_electric_v3 -->
-<div class="env"></div>
+<video id="roomVid" src="screen2_full.mp4?v=1" muted playsinline preload="auto"></video>
 <canvas id="scene"></canvas>
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
@@ -204,7 +204,7 @@ if (revealQP !== null) {
 }
 document.body.style.setProperty('--reveal', currentReveal);
 
-// ---------- capture progress (scroll-linked drain effect) ----------
+// ---------- capture progress (now drives video scrub) ----------
 const captureQP = new URLSearchParams(location.search).get('capture');
 let captureTarget, displayCp, captureFixed;
 if (captureQP !== null) {
@@ -243,6 +243,7 @@ const detailClose=document.getElementById('detailClose');
 const detailVid=document.getElementById('detailVid');
 const heroEl=document.querySelector('.hero');
 const brandEl=document.querySelector('.brand');
+const roomVid=document.getElementById('roomVid');
 
 let W=0,H=0,DPR=1,lastT=performance.now();
 
@@ -297,55 +298,6 @@ function pollutantPoint(i){
   return {x:p.x*W, y:p.y*H};
 }
 
-// ---------- dust ----------
-const NB=8;
-let dustB=[];
-
-// helper: nearest device rect index for a point (x,y in px)
-function nearestRectIndex(x,y){
-  let bi=0, bd=1e9;
-  for(let k=0;k<capPxRects.length;k++){
-    const r=capPxRects[k];
-    const d=Math.hypot(r.cx-x, r.cy-y);
-    if(d<bd){bd=d;bi=k;}
-  }
-  return bi;
-}
-// helper: random point uniformly inside a rect (with slight inset)
-function randomPointInRect(r){
-  const inset = Math.min(r.w, r.h)*0.08;
-  const x = r.x + inset + Math.random()*(r.w - 2*inset);
-  const y = r.y + inset + Math.random()*(r.h - 2*inset);
-  return {x,y};
-}
-
-// distance from point to nearest edge of a rect (0 if inside, positive if outside)
-function distToRect(x, y, r){
-  const dx = Math.max(r.x - x, 0, x - (r.x + r.w));
-  const dy = Math.max(r.y - y, 0, y - (r.y + r.h));
-  return Math.hypot(dx, dy);
-}
-
-function mote(){
-  const ang=Math.random()*Math.PI*2;
-  const sp=0.18+Math.random()*0.32;
-  const sx=Math.random()*W, sy=Math.random()*H;
-  const ti = nearestRectIndex(sx, sy);
-  const tgt = randomPointInRect(capPxRects[ti]);
-  // per-mote staggered capture threshold spread across 0.42..0.92
-  const captureStart = 0.42 + Math.random()*0.50;
-  return {
-    x:sx, y:sy,
-    vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
-    r:.55+Math.random()*1.7,
-    targetIndex:ti,
-    targetX:tgt.x,
-    targetY:tgt.y,
-    absorbed:false,
-    fade:0,
-    captureStart:captureStart
-  };
-}
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
@@ -363,190 +315,6 @@ function resize(){
     const rad = r.round * Math.min(w, h);
     return { x, y, w, h, rx:rad, ry:rad, cx:x+w/2, cy:y+h/2 };
   });
-  const n=Math.round(Math.min(3800, W*H/520));
-  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.08+b*0.045, motes:[]});
-  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
-}
-
-// capture timing constants
-const HALO_START = 0.25;
-const HALO_FULL  = 0.42;
-const SUCK_GLOBAL_START = 0.42;
-
-// outer approach distance (px) over which motes dissolve as they near a device
-const DISSOLVE_RADIUS = 95;
-
-function updateDust(dt){
-  const f=dt/16.67;
-  const cp=displayCp;
-  for(const bucket of dustB){
-    for(let i=0, n=bucket.motes.length; i<n; i++){
-      const d=bucket.motes[i];
-      if(d.absorbed) continue;
-
-      // per-mote sucking: only when cp exceeds this mote's staggered threshold
-      const sucking = cp >= d.captureStart;
-
-      if(!REDUCED){
-        d.vx += (Math.random()-.5)*0.018*f;
-        d.vy += (Math.random()-.5)*0.018*f;
-        d.vx *= Math.pow(0.992, f);
-        d.vy *= Math.pow(0.992, f);
-        let sp = Math.hypot(d.vx, d.vy);
-        if(sp < 0.12){
-          if(sp < 1e-6){ const a=Math.random()*Math.PI*2; d.vx=Math.cos(a)*0.18; d.vy=Math.sin(a)*0.18; }
-          else { const k=0.18/sp; d.vx*=k; d.vy*=k; }
-          sp = 0.18;
-        } else if(sp > 0.5){
-          const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
-        }
-
-        // capture attraction: only after this mote's staggered threshold
-        if(sucking){
-          const cb = Math.max(0, Math.min(1, (cp - d.captureStart) / (1.0 - d.captureStart)));
-          if(cb > 0){
-            const dx = d.targetX - d.x, dy = d.targetY - d.y;
-            const dist = Math.hypot(dx, dy) + 0.0001;
-            // pull grows with local capture progress
-            const pull = cb * 0.05 * f;
-            d.vx += dx * pull;
-            d.vy += dy * pull;
-            // dampen drift as we get closer / capture progresses
-            const damp = 1 - cb*0.55;
-            d.vx *= damp;
-            d.vy *= damp;
-
-            // DISSOLVE: fade opacity to 0 based on proximity to target.
-            // Motes vanish as they arrive — no pile-up inside the device.
-            // Distance from mote to the device rect edge (0 when inside).
-            const r = capPxRects[d.targetIndex];
-            const dRect = distToRect(d.x, d.y, r);
-            // Also consider distance to the mote's specific target point for finer fade.
-            const dTarget = dist;
-            // Use the smaller of the two so fade kicks in as soon as the mote
-            // touches the device silhouette OR reaches its target point.
-            const dEff = Math.min(dRect, dTarget);
-            // normalized proximity: 1 at device, 0 at DISSOLVE_RADIUS away
-            const proxN = Math.max(0, Math.min(1, 1 - dEff / DISSOLVE_RADIUS));
-            // smoothstep for gentle, premium falloff
-            const smooth = proxN * proxN * (3 - 2 * proxN);
-            // one-way: fade only increases (absorbed = gone forever)
-            if(smooth > d.fade) d.fade = smooth;
-            // once effectively invisible, mark absorbed permanently
-            if(d.fade >= 0.995){
-              d.absorbed = true;
-              continue;
-            }
-          }
-        }
-
-        d.x += d.vx*f; d.y += d.vy*f;
-      }
-
-      if(isNaN(d.x)||isNaN(d.y)||!isFinite(d.x)||!isFinite(d.y)){
-        d.x=Math.random()*W; d.y=Math.random()*H;
-        const a=Math.random()*Math.random()*Math.PI*2; const s=0.25;
-        d.vx=Math.cos(a)*s; d.vy=Math.sin(a)*s;
-        continue;
-      }
-      // wrap only while not being strongly captured / dissolved
-      if(!sucking || d.fade < 0.3){
-        if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
-        if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
-      }
-    }
-  }
-}
-const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
-(function(){const m=moteSprite.getContext('2d');
-  const g=m.createRadialGradient(9,9,0,9,9,9);
-  g.addColorStop(0,'rgba(110,118,127,0.95)'); g.addColorStop(0.45,'rgba(110,118,127,0.55)'); g.addColorStop(1,'rgba(110,118,127,0)');
-  m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
-function drawDust(){
-  for(const bucket of dustB){
-    for(const d of bucket.motes){
-      if(d.absorbed) continue;
-      // opacity multiplier: 1 when far from device, 0 when arrived
-      const vis = 1 - d.fade;
-      if(vis <= 0.01) continue;
-      ctx.globalAlpha = bucket.a * roomO * vis;
-      const s=d.r*3.0;
-      ctx.drawImage(moteSprite, d.x-s/2, d.y-s/2, s, s);
-    }
-  }
-  ctx.globalAlpha=1;
-}
-
-// ---------- capture halos: soft feathered blue glow tracing each device silhouette ----------
-// Offscreen canvas for blurred glow — keeps dust/lens untouched by filter.
-const haloCanvas = document.createElement('canvas');
-const haloCtx = haloCanvas.getContext('2d');
-
-function roundedRectPath(c, x, y, w, h, rx, ry){
-  const r = Math.min(rx, w/2, h/2);
-  const rY = ry!=null ? Math.min(ry, w/2, h/2) : r;
-  c.beginPath();
-  c.moveTo(x+r, y);
-  c.lineTo(x+w-r, y);
-  c.quadraticCurveTo(x+w, y, x+w, y+rY);
-  c.lineTo(x+w, y+h-rY);
-  c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  c.lineTo(x+r, y+h);
-  c.quadraticCurveTo(x, y+h, x, y+h-rY);
-  c.lineTo(x, y+rY);
-  c.quadraticCurveTo(x, y, x+r, y);
-  c.closePath();
-}
-
-function drawHalos(){
-  const cp=displayCp;
-  // halo grows in over cp 0.25 .. 0.42, then holds
-  const haloStrength = Math.max(0, Math.min(1, (cp - HALO_START) / (HALO_FULL - HALO_START)));
-  if(haloStrength <= 0.001) return;
-
-  // Ensure offscreen canvas matches scene size (CSS px)
-  if(haloCanvas.width !== Math.ceil(W) || haloCanvas.height !== Math.ceil(H)){
-    haloCanvas.width = Math.ceil(W);
-    haloCanvas.height = Math.ceil(H);
-  }
-  haloCtx.setTransform(1,0,0,1,0,0);
-  haloCtx.clearRect(0,0,haloCanvas.width,haloCanvas.height);
-
-  // Draw each device silhouette as a filled blue shape, then blur heavily.
-  // We layer two passes: a tighter core and a wider outer bloom for soft falloff.
-  const blurOuter = 26;
-  const blurCore  = 14;
-
-  // Pass 1 — wide outer bloom
-  haloCtx.save();
-  haloCtx.filter = 'blur(' + blurOuter + 'px)';
-  haloCtx.fillStyle = 'rgba(27,123,255,0.55)';
-  for(let k=0;k<capPxRects.length;k++){
-    const r=capPxRects[k];
-    const pad = 6;
-    roundedRectPath(haloCtx, r.x-pad, r.y-pad, r.w+2*pad, r.h+2*pad, r.rx+pad*0.5, r.ry+pad*0.5);
-    haloCtx.fill();
-  }
-  haloCtx.restore();
-
-  // Pass 2 — tighter core, slightly brighter for a gentle hot center
-  haloCtx.save();
-  haloCtx.filter = 'blur(' + blurCore + 'px)';
-  haloCtx.fillStyle = 'rgba(27,123,255,0.75)';
-  for(let k=0;k<capPxRects.length;k++){
-    const r=capPxRects[k];
-    roundedRectPath(haloCtx, r.x, r.y, r.w, r.h, r.rx, r.ry);
-    haloCtx.fill();
-  }
-  haloCtx.restore();
-
-  // Composite onto main scene at low alpha — peak ~0.22 when full strength.
-  // No filter on main ctx, so dust + lens stay crisp.
-  ctx.save();
-  ctx.globalAlpha = 0.22 * haloStrength;
-  ctx.drawImage(haloCanvas, 0, 0, W, H);
-  ctx.restore();
-  ctx.globalAlpha = 1;
 }
 
 // ---------- lens state ----------
@@ -828,6 +596,10 @@ if(DETAIL_QP!==null){
   window.addEventListener('load', ()=>setTimeout(()=>enterDetail(idx), 900));
 }
 
+// ---------- video scrub state ----------
+let scrubTarget = captureTarget;
+let scrubCur = displayCp;
+
 // ---------- main loop ----------
 function tick(t){
   const dt=Math.min(40, t-lastT);
@@ -846,13 +618,22 @@ function tick(t){
   document.body.style.setProperty('--reveal-text', textO);
   document.body.style.setProperty('--reveal-lens', lensO);
 
-  // capture progress smoothing — slow & premium (~2.5s for 0->1)
+  // capture progress smoothing — now drives the video scrub
   if (!captureFixed) {
     displayCp += (captureTarget - displayCp) * 0.045;
     if (Math.abs(captureTarget - displayCp) < 0.0005) displayCp = captureTarget;
   }
 
-  updateDust(dt);
+  // scrub the room video by scroll progress
+  scrubTarget = displayCp;
+  scrubCur += (scrubTarget - scrubCur) * 0.08;
+  if (roomVid && roomVid.readyState >= 1) {
+    const dur = roomVid.duration || 9;
+    const ct = scrubCur * dur;
+    if (Math.abs(roomVid.currentTime - ct) > 0.016) {
+      try { roomVid.currentTime = Math.max(0, Math.min(dur, ct)); } catch(e){}
+    }
+  }
 
   if(detailMode){
     const d=detailLensTarget();
@@ -909,8 +690,6 @@ autoT0=performance.now();
 
 function draw(t){
   ctx.clearRect(0,0,W,H);
-  drawHalos();
-  drawDust();
   drawLens(t);
   positionTag();
 }
