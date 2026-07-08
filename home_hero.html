@@ -257,8 +257,33 @@ import * as THREE from 'three';
 
   const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
 
+  /* ===== Through-transition helpers ===== */
+  function smoothstep(a, b, x) {
+    const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  }
+  function hash3(x, y, z) {
+    const h = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453;
+    return h - Math.floor(h);
+  }
+
+  /* ===== Through-transition state ===== */
+  let throughTarget = 0;
+  let throughCurrent = 0;
+  let throughFixed = false;
+
+  const throughParam = new URLSearchParams(location.search).get('through');
+  if (throughParam !== null) {
+    const v = parseFloat(throughParam);
+    if (!isNaN(v)) {
+      throughFixed = true;
+      throughCurrent = Math.max(0, Math.min(1, v));
+      throughTarget = throughCurrent;
+    }
+  }
+
   /* ===== Renderer ===== */
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setClearColor(0xedf0f2, 1);
   const dprCap = 2;
 
@@ -267,6 +292,8 @@ import * as THREE from 'three';
   const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
   const CAM_BASE = new THREE.Vector3(0, 15, 26);
   const CAM_TARGET = new THREE.Vector3(0, -4, -8);
+  const CAM_END = new THREE.Vector3(0, 7.5, -19);
+  const CAM_TARGET_END = new THREE.Vector3(0, -6, -26);
   camera.position.copy(CAM_BASE);
   camera.lookAt(CAM_TARGET);
 
@@ -293,21 +320,27 @@ import * as THREE from 'three';
   const sPositions = new Float32Array(SURF_COUNT * 3);
   const sBoosts = new Float32Array(SURF_COUNT);
   const sRows = new Float32Array(SURF_COUNT);
+  const sNoise = new Float32Array(SURF_COUNT);
 
   for (let ix = 0; ix < GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
       const i = ix * GRID_Z + iz;
-      sPositions[i * 3] = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      const px = (ix / (GRID_X - 1) - 0.5) * SURF_W;
+      const pz = Z_FAR + (iz / (GRID_Z - 1)) * SURF_D;
+      sPositions[i * 3] = px;
       sPositions[i * 3 + 1] = 0;
-      sPositions[i * 3 + 2] = Z_FAR + (iz / (GRID_Z - 1)) * SURF_D;
+      sPositions[i * 3 + 2] = pz;
       sBoosts[i] = 0;
       sRows[i] = iz / (GRID_Z - 1);
+      const rowBias = (iz / (GRID_Z - 1)) * 0.25;
+      sNoise[i] = Math.max(0, Math.min(1, hash3(px, pz, 1.3) * 0.85 + rowBias));
     }
   }
 
   surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
   surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
   surfaceGeo.setAttribute('aRow', new THREE.BufferAttribute(sRows, 1));
+  surfaceGeo.setAttribute('aNoise', new THREE.BufferAttribute(sNoise, 1));
 
   const surfaceMat = new THREE.ShaderMaterial({
     uniforms: {
@@ -323,16 +356,22 @@ import * as THREE from 'three';
       uFogFar: { value: 128 },
       uMouse: { value: new THREE.Vector2(9999, 9999) },
       uMouseStr: { value: 0 },
+      uFade: { value: 1.0 },
+      uProgress: { value: 0.0 },
+      uDustColor: { value: new THREE.Color(0x3a404a) },
+      uHazeStrength: { value: 0.0 },
     },
     vertexShader: `
       attribute float aBoost;
       attribute float aRow;
+      attribute float aNoise;
       uniform float uTime;
       uniform float uPixelRatio;
       uniform vec2 uResolution;
       uniform float uSize;
       uniform vec2 uMouse;
       uniform float uMouseStr;
+      uniform float uProgress;
       varying float vBoost;
       varying float vDist;
       varying float vHeight;
@@ -341,6 +380,8 @@ import * as THREE from 'three';
       varying float vWorldX;
       varying vec2 vArmX;
       varying vec2 vArmZ;
+      varying float vLocalP;
+      varying float vClipX;
 
       float waveHeight(float x, float z, float t) {
         float dome = -0.00044 * x * x;
@@ -360,8 +401,22 @@ import * as THREE from 'three';
 
       void main() {
         vec3 pos = position;
+
+        // staggered per-point transformation progress
+        float thresh = aNoise * 0.55;
+        float localP = clamp((uProgress - thresh) / max(0.45, 1.0 - thresh), 0.0, 1.0);
+        localP = smoothstep(0.0, 1.0, localP);
+        vLocalP = localP;
+
         float cb = cursorBump(pos.xz);
         pos.y = waveHeight(pos.x, pos.z, uTime) + cb;
+
+        // gentle curl-like drift as the point transforms into dust
+        float drift = localP;
+        float n1 = aNoise * 6.2831;
+        pos.x += sin(uTime * 0.45 + n1) * drift * 1.6;
+        pos.z += cos(uTime * 0.38 + n1 * 1.3) * drift * 1.1;
+        pos.y += drift * 0.7;
 
         vMouse = clamp(cb / 2.8, 0.0, 1.0);   // normalized swell height, drives a subtle firming
 
@@ -374,6 +429,7 @@ import * as THREE from 'three';
         vDist = -mvPos.z;
         vec4 clip0 = projectionMatrix * mvPos;
         gl_Position = clip0;
+        vClipX = clip0.x / max(abs(clip0.w), 1e-4);
 
         float e = 0.7;
         vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime) + cursorBump(vec2(pos.x + e, pos.z)), pos.z);
@@ -404,12 +460,18 @@ import * as THREE from 'three';
       varying float vWorldX;
       varying vec2 vArmX;
       varying vec2 vArmZ;
+      varying float vLocalP;
+      varying float vClipX;
       uniform vec3 uBaseColor;
       uniform vec3 uChargeColor;
       uniform vec3 uTipColor;
       uniform vec3 uFogColor;
+      uniform vec3 uDustColor;
       uniform float uFogNear;
       uniform float uFogFar;
+      uniform float uFade;
+      uniform float uHazeStrength;
+      uniform float uProgress;
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
@@ -448,14 +510,37 @@ import * as THREE from 'three';
         color = mix(color, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9);
         color = mix(color, uTipColor, smoothstep(0.45, 1.0, vBoost) * 0.55);
 
+        // color morph: pale charge-blue -> pollutant dust grey/ink
+        color = mix(color, uDustColor, vLocalP * 0.92);
+
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.85);
+
+        // veil haze: thickens around the midpoint, clears at both ends
+        color = mix(color, uFogColor, uHazeStrength * 0.72);
 
         float depthFade = smoothstep(35.0, 12.0, vDist);
         float topFade = smoothstep(0.0, 0.22, vRow);
         float leftFade = smoothstep(-60.0, -20.0, vWorldX);
+
+        // behind-camera fade (points the camera has passed stream past and vanish)
+        // gated so it's 1.0 at rest (uProgress=0)
+        float pGate = smoothstep(0.0, 0.04, uProgress);
+        float behindFade = mix(1.0, smoothstep(0.0, 2.5, vDist), pGate);
+
+        // soft edge fade so streaming points dissolve at frame sides
+        float edgeFade = 1.0 - smoothstep(0.72, 1.08, abs(vClipX)) * pGate;
+
+        // transforming points gently dissolve
+        float transFade = 1.0 - vLocalP * 0.82;
+
+        // haze also reduces alpha so the veil reads as fog, not a tint
+        float hazeAlpha = 1.0 - uHazeStrength * 0.45;
+
         float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
         alpha *= (1.0 - fog * 0.7);
+        alpha *= behindFade * edgeFade * transFade * hazeAlpha;
+        alpha *= uFade;
 
         gl_FragColor = vec4(color, alpha);
       }
@@ -467,6 +552,58 @@ import * as THREE from 'three';
   const surfacePoints = new THREE.Points(surfaceGeo, surfaceMat);
   surfacePoints.renderOrder = 0;
   scene.add(surfacePoints);
+
+  /* ===== Through-transition: DOM refs + apply function ===== */
+  const scrimEl = section.querySelector('.scrim');
+  const textColEl = section.querySelector('.text-col');
+  const microLabelEl = section.querySelector('.micro-label');
+
+  function applyThroughTransition(p) {
+    const cp = Math.max(0, Math.min(1, p));
+    const t = smoothstep(0, 1, cp);
+
+    // --- one persistent camera dollies forward through the field ---
+    camera.position.set(
+      CAM_BASE.x + (CAM_END.x - CAM_BASE.x) * t,
+      CAM_BASE.y + (CAM_END.y - CAM_BASE.y) * t,
+      CAM_BASE.z + (CAM_END.z - CAM_BASE.z) * t
+    );
+    const lx = CAM_TARGET.x + (CAM_TARGET_END.x - CAM_TARGET.x) * t;
+    const ly = CAM_TARGET.y + (CAM_TARGET_END.y - CAM_TARGET.y) * t;
+    const lz = CAM_TARGET.z + (CAM_TARGET_END.z - CAM_TARGET.z) * t;
+    camera.lookAt(lx, ly, lz);
+
+    // --- uniforms ---
+    surfaceMat.uniforms.uProgress.value = cp;
+    const haze = Math.sin(cp * Math.PI);
+    surfaceMat.uniforms.uHazeStrength.value = Math.max(0, haze) * 0.85;
+    surfaceMat.uniforms.uFade.value = 1.0 - smoothstep(0.82, 1.0, cp);
+
+    // --- text column + micro-label fade out early (by ~0.32) ---
+    const textAlpha = 1.0 - smoothstep(0.12, 0.32, cp);
+    if (textColEl) textColEl.style.opacity = String(textAlpha);
+    if (microLabelEl) microLabelEl.style.opacity = String(textAlpha);
+
+    // --- background fade so act1 beneath shows through ---
+    const bgAlpha = 1.0 - smoothstep(0.30, 0.75, cp);
+    renderer.setClearColor(0xedf0f2, bgAlpha);
+    section.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
+    document.body.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
+    document.documentElement.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
+    if (scrimEl) scrimEl.style.opacity = String(bgAlpha);
+  }
+
+  /* ===== nf-through message listener ===== */
+  window.addEventListener('message', function (e) {
+    if (!e.data || e.data.type !== 'nf-through') return;
+    if (throughFixed) return;
+    throughTarget = Math.max(0, Math.min(1, e.data.p || 0));
+    if (reduced) {
+      throughCurrent = throughTarget;
+      applyThroughTransition(throughCurrent);
+      renderer.render(scene, camera);
+    }
+  });
 
   /* ===== Ambient dust field — dense drifting particulate ===== */
   let DUST_COUNT = 0;
@@ -1091,8 +1228,12 @@ import * as THREE from 'three';
     bloomGeo.attributes.aActive.needsUpdate = true;
     bloomGeo.attributes.aMaxSize.needsUpdate = true;
 
-    camera.position.copy(CAM_BASE);
-    camera.lookAt(CAM_TARGET);
+    /* Lerp through-progress toward target */
+    if (!throughFixed) {
+      throughCurrent += (throughTarget - throughCurrent) * Math.min(1, dt * 8.4);
+      if (Math.abs(throughTarget - throughCurrent) < 0.001) throughCurrent = throughTarget;
+    }
+    applyThroughTransition(throughCurrent);
 
     renderer.render(scene, camera);
   }
@@ -1167,8 +1308,7 @@ import * as THREE from 'three';
     bloomGeo.attributes.aActive.needsUpdate = true;
     bloomGeo.attributes.aMaxSize.needsUpdate = true;
 
-    camera.position.copy(CAM_BASE);
-    camera.lookAt(CAM_TARGET);
+    applyThroughTransition(throughCurrent);
     renderer.render(scene, camera);
   }
 
