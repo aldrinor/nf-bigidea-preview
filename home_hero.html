@@ -111,6 +111,9 @@ section{
 }
 .body-text{ color:#1f2327; }
 .body-text .hl{ color:var(--accent); font-weight:600; }
+/* each pollutant/pathogen term links to its page; keep the blue emphasis, underline on hover */
+.body-text .hl a{ color:inherit; text-decoration:none; border-bottom:1px solid transparent; transition:border-color .18s ease; }
+.body-text .hl a:hover{ border-bottom-color:currentColor; }
 
 /* "what is C-POLAR" — identity line + the five verticals, presented cleanly */
 .cpolar{
@@ -228,7 +231,7 @@ section{
 
   <div class="text-col">
     <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
-    <p class="body-text">NanoFlashing™ is a patented <span class="hl">permanent positive polarity (3P)</span> technology engineered into each of C-POLAR's five verticals. It attracts and captures <span class="hl">ultrafine particles, wildfire smoke, PFAS, and pollen</span> — and destroys up to 99.9% of a broad-spectrum of <span class="hl">viruses, bacteria, and fungal spores</span> through a physical mechanism, making it safe for humans and the environment.</p>
+    <p class="body-text">NanoFlashing™ is a patented <span class="hl">permanent positive polarity (3P)</span> technology engineered into each of C-POLAR's five verticals. It attracts and captures <span class="hl"><a href="ultrafine.html">ultrafine particles</a>, <a href="wildfire.html">wildfire smoke</a>, <a href="pfas.html">PFAS</a>, and <a href="pollen.html">pollen</a></span> — and destroys up to 99.9% of a broad-spectrum of <span class="hl"><a href="virus.html">viruses</a>, <a href="bacteria.html">bacteria</a>, and <a href="fungi.html">fungal spores</a></span> through a physical mechanism, making it safe for humans and the environment.</p>
 
     <div class="cpolar">
       <p class="cpolar-lead">C-POLAR Technologies, Inc. is a <em>Health Science Platform Company</em> built around its patented NanoFlashing™ technology. The platform has five primary application verticals:</p>
