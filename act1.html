@@ -32,7 +32,7 @@
   .brand{position:fixed;top:26px;left:32px;z-index:7;height:114px;pointer-events:none;opacity:var(--reveal-text,0);}
   .brand img{height:100%;width:auto;display:block;}
   .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
-    top:50%;transform:translateY(-50%);opacity:var(--reveal-text,0);}
+    top:50%;transform:translateY(-50%);opacity:var(--hero-op,0);}
   body.detail-active .hero{opacity:0;}
   h1{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
@@ -50,6 +50,21 @@
     letter-spacing:-0.02em;
     white-space:nowrap;
   }
+  /* resolution words — appear only after the room is clean; black + blue */
+  .resolve{position:fixed;z-index:3;left:3vw;max-width:640px;pointer-events:none;
+    top:50%;transform:translateY(-50%);opacity:var(--resolve-op,0);}
+  body.detail-active .resolve{opacity:0;}
+  .resolve .rh{
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    font-weight:600;font-size:49px;line-height:1.1;letter-spacing:-0.022em;
+    color:#1a1a1a;text-wrap:balance;
+  }
+  .resolve .rh .catch{color:#1b7bff;font-weight:700;letter-spacing:-0.02em;}
+  .resolve .deck{
+    margin-top:18px;max-width:600px;
+    font-size:20px;line-height:1.5;font-weight:450;color:#2a2622;letter-spacing:0;
+  }
+  .resolve .deck b{font-weight:600;color:#1b7bff;}
   .tag{
     position:fixed;z-index:5;pointer-events:none;
     display:flex;flex-direction:column;
@@ -129,6 +144,9 @@
     .brand{height:90px;top:18px;left:18px;transform:none;}
     body.detail-active .brand{opacity:0;}
     .hero{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
+    .resolve{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
+    .resolve .rh{font-size:clamp(26px, 8vw, 44px);}
+    .resolve .deck{font-size:15px;margin-top:14px;line-height:1.45;}
     h1{font-size:clamp(26px, 8vw, 44px);}
     h1 .line{white-space:normal;}
     .tag{padding:9px 14px 10px;}
@@ -157,6 +175,10 @@
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
 <div class="hero">
   <h1><span class="line">Most harmful pollutants</span><span class="line">carry an <span class="chg">electric charge.</span></span></h1>
+</div>
+<div class="resolve" id="resolve" aria-hidden="true">
+  <h1 class="rh"><span class="line">What they carry,</span><span class="line">we <span class="catch">catch.</span></span></h1>
+  <p class="deck">Positive polarity captures particles, destroys up to <b>99.9%</b> of pathogens by a physical mechanism.</p>
 </div>
 <div class="tag" id="tag">
   <div class="name" id="t-name">—</div>
@@ -778,6 +800,13 @@ if(DETAIL_QP!==null){
 let autoPlayed = false;   // screen 2 auto-plays its video once on arrival, at a gentle pace
 const AUTOPLAY_RATE = 0.8;
 
+// ---------- resolution swap: the words change ONLY after the room video fully ends (all dust cleaned) ----------
+const resolveQP = new URLSearchParams(location.search).get('resolve');
+const resolveForced = (resolveQP !== null);          // ?resolve=1 forces the resolution shown (QA hook)
+let resolveRaw = (resolveForced && parseFloat(resolveQP) > 0) ? 1 : 0;
+let roomEnded = false;
+roomVid.addEventListener('ended', function(){ roomEnded = true; });
+
 // ---------- main loop ----------
 function tick(t){
   const dt=Math.min(40, t-lastT);
@@ -803,6 +832,17 @@ function tick(t){
     try { roomVid.playbackRate = AUTOPLAY_RATE; roomVid.currentTime = 0; roomVid.play().catch(function(){}); } catch(e){}
   }
   if (currentReveal < 0.4) { autoPlayed = false; }   // reset so returning to screen 2 replays from the top
+
+  // The resolution words appear ONLY after the room video has fully finished (all dust cleaned) — never during float or suck-in.
+  if (!resolveForced) {
+    const dur = roomVid.duration || 9;
+    const ended = roomEnded || (roomVid.readyState >= 1 && dur > 1 && isFinite(roomVid.currentTime) && roomVid.currentTime >= dur - 0.05);
+    if (ended && currentReveal > 0.85) resolveRaw = Math.min(1, resolveRaw + dt / 900);   // ~0.9s gentle cross-fade
+    if (currentReveal < 0.4) { resolveRaw = 0; roomEnded = false; }                        // reset when leaving screen 2
+  }
+  const rp = easeInOut(Math.max(0, Math.min(1, resolveRaw)));
+  document.body.style.setProperty('--hero-op', textO * (1 - rp));    // problem headline fades out
+  document.body.style.setProperty('--resolve-op', textO * rp);        // resolution fades in
 
   if(detailMode){
     const d=detailLensTarget();
