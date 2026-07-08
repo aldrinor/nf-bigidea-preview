@@ -218,11 +218,11 @@
   function advance(dir){
     if(idx === 1){
       if(dir > 0){
-        if(!s2captured){ s2captured = true; sendCapture(1); locked = true; setTimeout(function(){ locked = false; }, 950); return; }
+        // first scroll down on screen 2 plays the ~2.5s capture (halo first, then even suck-in); next scroll advances
+        if(!s2captured){ s2captured = true; sendCapture(1); locked = true; setTimeout(function(){ locked = false; }, 2600); return; }
         goTo(2);
       } else {
-        if(s2captured){ s2captured = false; sendCapture(0); locked = true; setTimeout(function(){ locked = false; }, 950); return; }
-        goTo(0);
+        goTo(0);  // scroll up leaves screen 2; the suck-in is one-way (absorbed dust stays gone)
       }
     } else {
       goTo(idx + dir);
