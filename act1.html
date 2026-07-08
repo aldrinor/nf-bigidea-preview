@@ -51,13 +51,13 @@
     white-space:nowrap;
   }
   /* resolution words — appear only after the room is clean; black + blue */
-  .resolve{position:fixed;z-index:3;left:3vw;max-width:640px;pointer-events:none;
+  .resolve{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
     top:50%;transform:translateY(-50%);opacity:var(--resolve-op,0);}
   body.detail-active .resolve{opacity:0;}
   .resolve .rh{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
     font-weight:600;font-size:49px;line-height:1.1;letter-spacing:-0.022em;
-    color:#1a1a1a;text-wrap:balance;
+    color:#1a1a1a;white-space:nowrap;
   }
   .resolve .rh .catch{color:#1b7bff;font-weight:700;letter-spacing:-0.02em;}
   .resolve .deck{
@@ -145,7 +145,7 @@
     body.detail-active .brand{opacity:0;}
     .hero{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
     .resolve{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
-    .resolve .rh{font-size:clamp(26px, 8vw, 44px);}
+    .resolve .rh{font-size:clamp(26px, 8vw, 44px);white-space:normal;}
     .resolve .deck{font-size:15px;margin-top:14px;line-height:1.45;}
     h1{font-size:clamp(26px, 8vw, 44px);}
     h1 .line{white-space:normal;}
@@ -177,7 +177,7 @@
   <h1><span class="line">Most harmful pollutants</span><span class="line">carry an <span class="chg">electric charge.</span></span></h1>
 </div>
 <div class="resolve" id="resolve" aria-hidden="true">
-  <h1 class="rh"><span class="line">What they carry,</span><span class="line">we <span class="catch">catch.</span></span></h1>
+  <h1 class="rh">What they carry, we <span class="catch">catch.</span></h1>
   <p class="deck">Positive polarity captures particles, destroys up to <b>99.9%</b> of pathogens by a physical mechanism.</p>
 </div>
 <div class="tag" id="tag">
