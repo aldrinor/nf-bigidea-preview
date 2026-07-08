@@ -825,20 +825,21 @@ function tick(t){
   document.body.style.setProperty('--reveal-text', textO);
   document.body.style.setProperty('--reveal-lens', lensO);
 
-  // AUTO-PLAY the room video ONCE, at a gentle pace, when screen 2 is fully revealed.
-  // Timing is the video's own — NOT scroll — so fast scrolling can't rush it.
-  if (!autoPlayed && currentReveal > 0.9 && roomVid && roomVid.readyState >= 2) {
+  // Start the room video AS SOON AS the room begins to reveal — so it is ALREADY in motion when it
+  // appears, never a static first-frame that then jumps to video. It plays through the morph (behind the
+  // hero) at a gentle pace, so screen 2 lands on a live, already-moving room.
+  if (!autoPlayed && currentReveal > 0.04 && roomVid && roomVid.readyState >= 2) {
     autoPlayed = true;
     try { roomVid.playbackRate = AUTOPLAY_RATE; roomVid.currentTime = 0; roomVid.play().catch(function(){}); } catch(e){}
   }
-  if (currentReveal < 0.4) { autoPlayed = false; }   // reset so returning to screen 2 replays from the top
+  // Reset only once fully back on screen 1, so the next arrival replays cleanly from the top.
+  if (currentReveal < 0.02) { autoPlayed = false; roomEnded = false; resolveRaw = 0; }
 
   // The resolution words appear ONLY after the room video has fully finished (all dust cleaned) — never during float or suck-in.
   if (!resolveForced) {
     const dur = roomVid.duration || 9;
     const ended = roomEnded || (roomVid.readyState >= 1 && dur > 1 && isFinite(roomVid.currentTime) && roomVid.currentTime >= dur - 0.05);
     if (ended && currentReveal > 0.85) resolveRaw = Math.min(1, resolveRaw + dt / 900);   // ~0.9s gentle cross-fade
-    if (currentReveal < 0.4) { resolveRaw = 0; roomEnded = false; }                        // reset when leaving screen 2
   }
   const rp = easeInOut(Math.max(0, Math.min(1, resolveRaw)));
   document.body.style.setProperty('--hero-op', textO * (1 - rp));    // problem headline fades out
