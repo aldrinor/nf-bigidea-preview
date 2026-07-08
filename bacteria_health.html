@@ -631,7 +631,7 @@
       const areaH = rightEl.clientHeight;
       const figW = figure.offsetWidth || (areaH * 688 / 962);
 
-      let scale = 2.5;
+      let scale = 0.86 / Math.max(d.oy, 0.40); scale = Math.min(2.5, Math.max(1.5, scale));
       const maxScale = areaW / figW;
       if (scale > maxScale) scale = maxScale;
       if (scale < 1) scale = 1; // never shrink
@@ -648,7 +648,7 @@
       const fW = figure.offsetWidth;
       const fH = figure.offsetHeight;
       targetX = restOffsetX() - (d.ox - 0.5) * fW * scale;
-      targetY = -(d.oy - (d.oyAnchor||0.5)) * fH * scale;
+      targetY = fH * (0.06 - 0.5 + 0.5 * scale);
       
       applyTransform();
       
