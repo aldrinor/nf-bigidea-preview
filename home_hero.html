@@ -1,15 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- hero runs inside the deck iframe; links must take over the whole browser, not the frame -->
-<base target="_top">
-<title>NanoFlashing — a permanent positive charge, engineered into the material</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><base target="_top"><title>NanoFlashing — a permanent positive charge, engineered into the material</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><style>
 :root{
   --bg:#edf0f2;
   --ink:#1f2327;
@@ -24,7 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 
 html,body{
-  background:var(--bg);
+  background:transparent;
   color:var(--ink);
   font-family:var(--stack);
   -webkit-font-smoothing:antialiased;
@@ -39,7 +28,7 @@ section{
   max-height:100vh;
   width:100%;
   overflow:hidden;
-  background:var(--bg);
+  background:transparent;
 }
 
 #cloud-canvas{
@@ -57,8 +46,6 @@ section{
   inset:0;
   z-index:2;
   pointer-events:none;
-  /* white backing that hugs the writing (words stay obvious) but clears fast to the right so the
-     "+" surface stays strong in the open area */
   background:radial-gradient(ellipse 48% 88% at 26% 50%, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.92) 54%, rgba(237,240,242,0.55) 74%, rgba(237,240,242,0.12) 88%, rgba(237,240,242,0) 96%);
 }
 
@@ -73,7 +60,6 @@ section{
   max-width:1000px;
   padding-left:clamp(36px, 4.5vw, 84px);
   padding-right:40px;
-  /* one shared block width -> the logo and all the writing line up to the same width */
   --block:100%;
 }
 
@@ -87,8 +73,6 @@ section{
   margin-bottom:22px;
 }
 
-/* logo sized by WIDTH (fills the block, ~2x bigger); overflow crops the SVG's transparent padding.
-   negative margin cancels the SVG's baked left padding so the mark aligns to the writing's left edge */
 .logo-wrap{
   width:var(--block);
   height:clamp(66px, 8vw, 112px);
@@ -104,7 +88,6 @@ section{
   display:block;
 }
 
-/* both paragraphs share ONE size + font */
 .body-text, .cpolar-lead{
   width:var(--block);
   max-width:100%;
@@ -113,11 +96,9 @@ section{
 }
 .body-text{ color:#1f2327; }
 .body-text .hl{ color:var(--accent); font-weight:600; }
-/* each pollutant/pathogen term links to its page; keep the blue emphasis, underline on hover */
 .body-text .hl a{ color:inherit; text-decoration:none; border-bottom:1px solid transparent; transition:border-color .18s ease; }
 .body-text .hl a:hover{ border-bottom-color:currentColor; }
 
-/* "what is C-POLAR" — identity line + the five verticals, presented cleanly */
 .cpolar{
   width:var(--block);
   max-width:100%;
@@ -128,7 +109,6 @@ section{
 .cpolar-lead{ color:#3a4046; }
 .cpolar-lead em{ font-style:normal; font-weight:600; color:var(--ink); }
 
-/* five verticals — equal-width rows, one standardized font, a cobalt "+" marker */
 .verticals{
   list-style:none;
   margin-top:18px;
@@ -140,21 +120,19 @@ section{
 .verticals li{
   border-bottom:1px solid var(--hair);
 }
-/* each vertical is a link to its page; the whole row is the click target */
 .verticals a{
   display:flex;
   align-items:center;
   gap:16px;
   padding:11px 2px;
   font-family:var(--stack);
-  font-size:clamp(17px, 1.35vw, 20px);   /* same size as the paragraphs above */
+  font-size:clamp(17px, 1.35vw, 20px);
   font-weight:450;
   letter-spacing:0.002em;
   color:var(--ink);
   text-decoration:none;
   transition:color .2s ease;
 }
-/* hover: the row turns bold + blue */
 .verticals a:hover{ color:var(--accent); }
 .verticals a:hover .v-name{ font-weight:650; }
 .v-mark{
@@ -266,11 +244,12 @@ import * as THREE from 'three';
 
   const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
 
-  /* ===== Through-transition helpers ===== */
+  /* ===== helpers ===== */
   function smoothstep(a, b, x) {
     const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
     return t * t * (3 - 2 * t);
   }
+  function clamp01(x) { return Math.max(0, Math.min(1, x)); }
   function hash3(x, y, z) {
     const h = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453;
     return h - Math.floor(h);
@@ -301,8 +280,6 @@ import * as THREE from 'three';
   const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
   const CAM_BASE = new THREE.Vector3(0, 15, 26);
   const CAM_TARGET = new THREE.Vector3(0, -4, -8);
-  const CAM_END = new THREE.Vector3(0, 7.5, -19);
-  const CAM_TARGET_END = new THREE.Vector3(0, -6, -26);
   camera.position.copy(CAM_BASE);
   camera.lookAt(CAM_TARGET);
 
@@ -310,11 +287,11 @@ import * as THREE from 'three';
   const GRID_X = 150;
   const GRID_Z = 55;
   const SURF_W = 150;
-  const SURF_D = 36;       // deeper band — the surface reaches higher up the frame
-  const Z_FAR = -11;       // far edge recedes further -> higher horizon (near edge still ~screen bottom)
+  const SURF_D = 36;
+  const Z_FAR = -11;
   const SURF_COUNT = GRID_X * GRID_Z;
 
-  /* ===== Wave height — static curved dome + far-edge rise + slow breath ===== */
+  /* ===== Wave height ===== */
   function waveHeight(x, z, t) {
     var dome = -0.00044 * x * x;
     var zNorm = (z - Z_FAR) / SURF_D;
@@ -329,7 +306,9 @@ import * as THREE from 'three';
   const sPositions = new Float32Array(SURF_COUNT * 3);
   const sBoosts = new Float32Array(SURF_COUNT);
   const sRows = new Float32Array(SURF_COUNT);
-  const sNoise = new Float32Array(SURF_COUNT);
+  const sStagger = new Float32Array(SURF_COUNT);
+  const sSeed = new Float32Array(SURF_COUNT);
+  const sTarget = new Float32Array(SURF_COUNT * 3);
 
   for (let ix = 0; ix < GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
@@ -341,15 +320,24 @@ import * as THREE from 'three';
       sPositions[i * 3 + 2] = pz;
       sBoosts[i] = 0;
       sRows[i] = iz / (GRID_Z - 1);
-      const rowBias = (iz / (GRID_Z - 1)) * 0.25;
-      sNoise[i] = Math.max(0, Math.min(1, hash3(px, pz, 1.3) * 0.85 + rowBias));
+
+      // per-point stagger + seed for the flip / scatter breathing
+      sStagger[i] = Math.random();
+      sSeed[i] = Math.random();
+
+      // scatter targets: fill the entire visible viewport left-to-right, top-to-bottom
+      sTarget[i * 3]     = (Math.random() - 0.5) * 32;
+      sTarget[i * 3 + 1] = (Math.random() - 0.5) * 28 + 3;
+      sTarget[i * 3 + 2] = Math.random() * 18;
     }
   }
 
   surfaceGeo.setAttribute('position', new THREE.BufferAttribute(sPositions, 3));
   surfaceGeo.setAttribute('aBoost', new THREE.BufferAttribute(sBoosts, 1));
   surfaceGeo.setAttribute('aRow', new THREE.BufferAttribute(sRows, 1));
-  surfaceGeo.setAttribute('aNoise', new THREE.BufferAttribute(sNoise, 1));
+  surfaceGeo.setAttribute('aStagger', new THREE.BufferAttribute(sStagger, 1));
+  surfaceGeo.setAttribute('aSeed', new THREE.BufferAttribute(sSeed, 1));
+  surfaceGeo.setAttribute('aTarget', new THREE.BufferAttribute(sTarget, 3));
 
   const surfaceMat = new THREE.ShaderMaterial({
     uniforms: {
@@ -366,23 +354,24 @@ import * as THREE from 'three';
       uMouse: { value: new THREE.Vector2(9999, 9999) },
       uMouseStr: { value: 0 },
       uFade: { value: 1.0 },
-      uProgress: { value: 0.0 },
-      uDustColor: { value: new THREE.Color(0x3a404a) },
-      uHazeStrength: { value: 0.0 },
-      uMidBoost: { value: 0.0 },
+      uFlip: { value: 0.0 },
+      uScatter: { value: 0.0 },
+      uGreyColor: { value: new THREE.Color(0x6e767f) },
     },
     vertexShader: `
       attribute float aBoost;
       attribute float aRow;
-      attribute float aNoise;
+      attribute float aStagger;
+      attribute float aSeed;
+      attribute vec3 aTarget;
       uniform float uTime;
       uniform float uPixelRatio;
       uniform vec2 uResolution;
       uniform float uSize;
       uniform vec2 uMouse;
       uniform float uMouseStr;
-      uniform float uProgress;
-      uniform float uMidBoost;
+      uniform float uFlip;
+      uniform float uScatter;
       varying float vBoost;
       varying float vDist;
       varying float vHeight;
@@ -391,8 +380,9 @@ import * as THREE from 'three';
       varying float vWorldX;
       varying vec2 vArmX;
       varying vec2 vArmZ;
-      varying float vLocalP;
-      varying float vClipX;
+      varying float vFlip;
+      varying float vScat;
+      varying float vColorDrift;
 
       float waveHeight(float x, float z, float t) {
         float dome = -0.00044 * x * x;
@@ -403,8 +393,6 @@ import * as THREE from 'three';
         return dome + farRise + und1 + und2;
       }
 
-      // gentle SWELL under the cursor: a soft, shallow bump the surface rises into. Kept shallow
-      // (height 1.3u, wide falloff) so its slope stays gentle and the laying "+" never collapse.
       float cursorBump(vec2 xz) {
         vec2 d = xz - uMouse;
         return uMouseStr * 2.8 * exp(-dot(d, d) / 140.0);
@@ -412,57 +400,68 @@ import * as THREE from 'three';
 
       void main() {
         vec3 pos = position;
-
-        // staggered per-point transformation progress
-        float thresh = aNoise * 0.55;
-        float localP = clamp((uProgress - thresh) / max(0.45, 1.0 - thresh), 0.0, 1.0);
-        localP = smoothstep(0.0, 1.0, localP);
-        vLocalP = localP;
-
         float cb = cursorBump(pos.xz);
         pos.y = waveHeight(pos.x, pos.z, uTime) + cb;
 
-        // gentle curl-like drift as the point transforms into dust
-        float drift = localP;
-        float n1 = aNoise * 6.2831;
-        pos.x += sin(uTime * 0.45 + n1) * drift * 1.6;
-        pos.z += cos(uTime * 0.38 + n1 * 1.3) * drift * 1.1;
-        pos.y += drift * 0.7;
-
-        vMouse = clamp(cb / 2.8, 0.0, 1.0);   // normalized swell height, drives a subtle firming
-
+        vMouse = clamp(cb / 2.8, 0.0, 1.0);
         vHeight = pos.y;
         vRow = aRow;
         vWorldX = pos.x;
         vBoost = aBoost;
 
-        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
-        vDist = -mvPos.z;
-        vec4 clip0 = projectionMatrix * mvPos;
-        gl_Position = clip0;
-        vClipX = clip0.x / max(abs(clip0.w), 1e-4);
-
+        // ---- plus/minus arm directions (from wave neighbours) ----
+        vec4 mvPosWave = modelViewMatrix * vec4(pos, 1.0);
+        vec4 clip0 = projectionMatrix * mvPosWave;
         float e = 0.7;
         vec3 pX = vec3(pos.x + e, waveHeight(pos.x + e, pos.z, uTime) + cursorBump(vec2(pos.x + e, pos.z)), pos.z);
         vec3 pZ = vec3(pos.x, waveHeight(pos.x, pos.z + e, uTime) + cursorBump(vec2(pos.x, pos.z + e)), pos.z + e);
         vec4 clipX = projectionMatrix * modelViewMatrix * vec4(pX, 1.0);
         vec4 clipZ = projectionMatrix * modelViewMatrix * vec4(pZ, 1.0);
         vec2 s0 = clip0.xy / clip0.w;
-        // aspect-correct screen deltas for a fixed world step along X and Z, NOT normalized, so the
-        // arm receding into the distance stays SHORTER -> the "+" lies FLAT on the surface
-        // (foreshortened in perspective) instead of standing upright facing the camera.
         vec2 rawX = ((clipX.xy / clipX.w) - s0) * uResolution;
         vec2 rawZ = ((clipZ.xy / clipZ.w) - s0) * uResolution;
         float armM = max(length(rawX), length(rawZ)) + 1e-4;
         vArmX = (rawX / armM) * 0.5;
         vArmZ = (rawZ / armM) * 0.5;
 
+        // ---- per-point staggered transition progress ----
+        float stg = aStagger;
+        float flipP = clamp((uFlip  - stg * 0.45) / 0.55, 0.0, 1.0);
+        float scatP = clamp((uScatter - stg * 0.50) / 0.50, 0.0, 1.0);
+        vFlip = flipP;
+        vScat = scatP;
+        vColorDrift = clamp(flipP * 0.25 + scatP * 0.85, 0.0, 1.0);
+
+        // ---- scatter: wave pos -> drifting target (curl/brownian) ----
+        float bt = uTime * 0.4 + aSeed * 100.0;
+        vec3 brownian = vec3(
+          sin(bt),
+          cos(bt * 1.1 + 1.7),
+          sin(bt * 0.8 + 0.5)
+        ) * 1.2;
+        vec3 targetPos = aTarget + brownian * (0.4 + scatP * 0.6);
+
+        // bow the path so points arc out, not straight lerp
+        float bow = sin(scatP * 3.14159);
+        vec3 bowOff = vec3(
+          sin(bt * 1.6 + aSeed * 20.0),
+          cos(bt * 1.3 + aSeed * 15.0),
+          0.0
+        ) * bow * 3.0;
+
+        float ep = smoothstep(0.0, 1.0, scatP);
+        vec3 finalPos = mix(pos, targetPos, ep) + bowOff;
+
+        vec4 mvPos = modelViewMatrix * vec4(finalPos, 1.0);
+        vDist = -mvPos.z;
+        gl_Position = projectionMatrix * mvPos;
+
+        // ---- point size: wave plus -> small round dust speck ----
         float sz = uSize * (1.0 + aBoost * 1.6 + vMouse * 0.1);
         float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
-        // mid-flight boost: points grow bigger + stay bigger through the middle so the field reads
-        // full and premium on the light background, easing back to normal by the end
-        float sizeBoost = 1.0 + uMidBoost * 0.5;
-        gl_PointSize = clamp(rawSize * sizeBoost, 6.0 * uPixelRatio, 28.0 * uPixelRatio);
+        float dustSize = 5.0 * uPixelRatio * (26.0 / max(vDist, 1.0));
+        float finalSize = mix(rawSize, dustSize, scatP);
+        gl_PointSize = clamp(finalSize, 2.0 * uPixelRatio, 22.0 * uPixelRatio);
       }
     `,
     fragmentShader: `
@@ -474,33 +473,29 @@ import * as THREE from 'three';
       varying float vWorldX;
       varying vec2 vArmX;
       varying vec2 vArmZ;
-      varying float vLocalP;
-      varying float vClipX;
+      varying float vFlip;
+      varying float vScat;
+      varying float vColorDrift;
       uniform vec3 uBaseColor;
       uniform vec3 uChargeColor;
       uniform vec3 uTipColor;
       uniform vec3 uFogColor;
-      uniform vec3 uDustColor;
+      uniform vec3 uGreyColor;
       uniform float uFogNear;
       uniform float uFogFar;
       uniform float uFade;
-      uniform float uHazeStrength;
-      uniform float uProgress;
-      uniform float uMidBoost;
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         uv.y = -uv.y;
 
-        // Draw each arm along its FORESHORTENED surface-tangent vector: the arm going into the
-        // distance is shorter, so the "+" reads as painted flat ON the wavy surface, tilting and
-        // foreshortening with it (not a billboard cross standing up toward the camera).
-        float thick = 0.11;                 // constant arm half-thickness in sprite-uv
+        // ---- plus shape ----
+        float thick = 0.11;
         float lenX = length(vArmX);
         float lenZ = length(vArmZ);
         vec2 uX = vArmX / max(lenX, 1e-4);
         vec2 uZ = vArmZ / max(lenZ, 1e-4);
-        lenX = max(lenX, 0.16);             // floor so an edge-on arm never fully vanishes
+        lenX = max(lenX, 0.16);
         lenZ = max(lenZ, 0.16);
         float distX = abs(dot(uv, vec2(-uX.y, uX.x)));
         float distZ = abs(dot(uv, vec2(-uZ.y, uZ.x)));
@@ -508,54 +503,44 @@ import * as THREE from 'three';
                      (1.0 - smoothstep(lenX - 0.06, lenX, abs(dot(uv, uX))));
         float armZ = (1.0 - smoothstep(thick * 0.6, thick, distZ)) *
                      (1.0 - smoothstep(lenZ - 0.06, lenZ, abs(dot(uv, uZ))));
-        float plus  = max(armX, armZ);
-        if (plus < 0.05) discard;
+        // vertical arm fades with flip  ->  "+" becomes "-"
+        armZ *= (1.0 - vFlip);
+        float plusShape = max(armX, armZ);
 
+        // ---- round dust speck ----
+        float r = 0.22;
+        float circleShape = 1.0 - smoothstep(r - 0.04, r + 0.05, length(uv));
+
+        float shape = mix(plusShape, circleShape, vScat);
+        if (shape < 0.01) discard;
+
+        // ---- colour ----
         float heightFactor = smoothstep(-1.0, 1.0, vHeight);
         vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
-
-        // mid-flight alpha lift so the "+" field reads dense through the middle (no glow/bloom)
-        float baseAlpha = 0.58 + uMidBoost * 0.22;
-
-        // subtle firming on the swell: the raised "+" gently gather ink toward cobalt (no glow halo)
+        float baseAlpha = 0.58;
         float charge = clamp(vMouse, 0.0, 1.0);
         vec3 color = mix(baseShaded, uChargeColor, charge * 0.42);
         float tip = charge * smoothstep(0.7, 1.0, charge) * 0.28;
         color = mix(color, uTipColor, tip);
-
         color = mix(color, uChargeColor, clamp(vBoost, 0.0, 1.0) * 0.9);
         color = mix(color, uTipColor, smoothstep(0.45, 1.0, vBoost) * 0.55);
 
-        // color morph: pale charge-blue -> pollutant dust grey/ink
-        color = mix(color, uDustColor, vLocalP * 0.92);
+        // charge-blue -> pollutant grey
+        color = mix(color, uGreyColor, vColorDrift);
 
+        // fog (relaxes as dust leaves the wave)
         float fog = smoothstep(uFogNear, uFogFar, vDist);
-        color = mix(color, uFogColor, fog * 0.85);
+        color = mix(color, uFogColor, fog * 0.85 * (1.0 - vScat));
 
-        // veil haze: thickens around the midpoint, clears at both ends
-        color = mix(color, uFogColor, uHazeStrength * 0.72);
-
+        // ---- alpha ----
         float depthFade = smoothstep(35.0, 12.0, vDist);
-        float topFade = smoothstep(0.0, 0.22, vRow);
-        float leftFade = smoothstep(-60.0, -20.0, vWorldX);
-
-        // behind-camera fade (points the camera has passed stream past and vanish)
-        // gated so it's 1.0 at rest (uProgress=0)
-        float pGate = smoothstep(0.0, 0.04, uProgress);
-        float behindFade = mix(1.0, smoothstep(0.0, 2.5, vDist), pGate);
-
-        // soft edge fade so streaming points dissolve at frame sides
-        float edgeFade = 1.0 - smoothstep(0.72, 1.08, abs(vClipX)) * pGate;
-
-        // transforming points gently dissolve
-        float transFade = 1.0 - vLocalP * 0.82;
-
-        // haze also reduces alpha so the veil reads as fog, not a tint
-        float hazeAlpha = 1.0 - uHazeStrength * 0.45;
-
-        float alpha = plus * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
-        alpha *= (1.0 - fog * 0.7);
-        alpha *= behindFade * edgeFade * transFade * hazeAlpha;
+        // topFade and leftFade relax to 1.0 during scatter so dust fills the whole frame
+        float topFade = mix(smoothstep(0.0, 0.22, vRow), 1.0, vScat);
+        float leftFade = mix(smoothstep(-60.0, -20.0, vWorldX), 1.0, vScat);
+        float waveAlpha = shape * depthFade * topFade * leftFade * (baseAlpha + vBoost * 0.6 + charge * 0.4);
+        waveAlpha *= (1.0 - fog * 0.7);
+        float dustAlpha = shape * 0.6;
+        float alpha = mix(waveAlpha, dustAlpha, vScat);
         alpha *= uFade;
 
         gl_FragColor = vec4(color, alpha);
@@ -575,42 +560,38 @@ import * as THREE from 'three';
   const microLabelEl = section.querySelector('.micro-label');
 
   function applyThroughTransition(p) {
-    const cp = Math.max(0, Math.min(1, p));
-    const t = smoothstep(0, 1, cp);
+    const cp = clamp01(p);
 
-    // --- one persistent camera dollies forward through the field ---
-    camera.position.set(
-      CAM_BASE.x + (CAM_END.x - CAM_BASE.x) * t,
-      CAM_BASE.y + (CAM_END.y - CAM_BASE.y) * t,
-      CAM_BASE.z + (CAM_END.z - CAM_BASE.z) * t
-    );
-    const lx = CAM_TARGET.x + (CAM_TARGET_END.x - CAM_TARGET.x) * t;
-    const ly = CAM_TARGET.y + (CAM_TARGET_END.y - CAM_TARGET.y) * t;
-    const lz = CAM_TARGET.z + (CAM_TARGET_END.z - CAM_TARGET.z) * t;
-    camera.lookAt(lx, ly, lz);
-
-    // --- uniforms ---
-    surfaceMat.uniforms.uProgress.value = cp;
-    const haze = Math.sin(cp * Math.PI);
-    surfaceMat.uniforms.uHazeStrength.value = Math.max(0, haze) * 0.85;
-    surfaceMat.uniforms.uFade.value = 1.0 - smoothstep(0.82, 1.0, cp);
-
-    // mid-flight density boost: ramps up through 0.15-0.5, holds, eases back 0.75-1.0
-    // so the "+" field reads full and premium through the middle, settling to rest at both ends
-    const midBoost = smoothstep(0.15, 0.5, cp) * (1.0 - smoothstep(0.75, 1.0, cp));
-    surfaceMat.uniforms.uMidBoost.value = midBoost;
-
-    // --- text column + micro-label fade out early (by ~0.32) ---
-    const textAlpha = 1.0 - smoothstep(0.12, 0.32, cp);
+    // BEAT 1 (0.00 -> 0.16): hero text fades OUT. "+" wave stays put.
+    const textAlpha = 1.0 - smoothstep(0.0, 0.16, cp);
     if (textColEl) textColEl.style.opacity = String(textAlpha);
     if (microLabelEl) microLabelEl.style.opacity = String(textAlpha);
 
-    // --- background fade so act1 beneath shows through (shifted earlier so room resolves by midpoint) ---
-    const bgAlpha = 1.0 - smoothstep(0.12, 0.55, cp);
+    // BEAT 2 (0.12 -> 0.40): per-point "+" -> "-" (fade vertical arm) + begin blue->grey.
+    const flip = smoothstep(0.12, 0.40, cp);
+
+    // BEAT 3 (0.36 -> 0.72): "-" detach + scatter into grey dust on the pale field.
+    const scatter = smoothstep(0.36, 0.72, cp);
+
+    surfaceMat.uniforms.uFlip.value = flip;
+    surfaceMat.uniforms.uScatter.value = scatter;
+
+    // Dust fades out to nothing by uProgress ~1.0 so the layer ends fully transparent
+    const dustFade = 1.0 - smoothstep(0.82, 1.0, cp);
+    surfaceMat.uniforms.uFade.value = dustFade;
+    if (captureMat) captureMat.uniforms.uFade.value = dustFade;
+    if (bloomMat) bloomMat.uniforms.uFade.value = dustFade;
+
+    // camera stays at rest — this is a morph in place, not a move
+    camera.position.copy(CAM_BASE);
+    camera.lookAt(CAM_TARGET);
+
+    // Background: opaque while cp < 0.5, then eases 1.0 -> 0.0 across 0.55 -> 0.88
+    // so the room behind dilutes in through this layer
+    const bgAlpha = 1.0 - smoothstep(0.55, 0.88, cp);
     renderer.setClearColor(0xedf0f2, bgAlpha);
-    section.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
-    document.body.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
-    document.documentElement.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
+
+    // Scrim fades out with the background so it never blocks the room
     if (scrimEl) scrimEl.style.opacity = String(bgAlpha);
   }
 
@@ -756,7 +737,7 @@ import * as THREE from 'three';
     }
     dustPoints = new THREE.Points(dustGeo, dustMat);
     dustPoints.renderOrder = 1;
-    dustPoints.visible = false;   // 3D ambient dust replaced by the act1-exact 2D dust overlay
+    dustPoints.visible = false;
     scene.add(dustPoints);
   }
 
@@ -810,6 +791,7 @@ import * as THREE from 'three';
       uFogColor: { value: new THREE.Color(0xedf0f2) },
       uFogNear: { value: 15 },
       uFogFar: { value: 70 },
+      uFade: { value: 1.0 },
     },
     vertexShader: `
       attribute float aAlpha;
@@ -839,6 +821,7 @@ import * as THREE from 'three';
       uniform vec3 uFogColor;
       uniform float uFogNear;
       uniform float uFogFar;
+      uniform float uFade;
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
@@ -852,7 +835,7 @@ import * as THREE from 'three';
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.75);
 
-        float alpha = soft * vAlpha * (1.0 - fog * 0.5);
+        float alpha = soft * vAlpha * (1.0 - fog * 0.5) * uFade;
         gl_FragColor = vec4(color, alpha);
       }
     `,
@@ -890,6 +873,7 @@ import * as THREE from 'three';
       uFogColor: { value: new THREE.Color(0xedf0f2) },
       uFogNear: { value: 20 },
       uFogFar: { value: 50 },
+      uFade: { value: 1.0 },
     },
     vertexShader: `
       attribute float aAge;
@@ -920,6 +904,7 @@ import * as THREE from 'three';
       uniform vec3 uFogColor;
       uniform float uFogNear;
       uniform float uFogFar;
+      uniform float uFade;
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
@@ -936,7 +921,7 @@ import * as THREE from 'three';
         float fog = smoothstep(uFogNear, uFogFar, vDist);
         color = mix(color, uFogColor, fog * 0.7);
 
-        float alpha = (soft * 0.5 + core * 0.5) * vAlpha * (1.0 - fog * 0.5);
+        float alpha = (soft * 0.5 + core * 0.5) * vAlpha * (1.0 - fog * 0.5) * uFade;
         gl_FragColor = vec4(color, alpha);
       }
     `,
@@ -1159,9 +1144,6 @@ import * as THREE from 'three';
     dustGeo.attributes.aAlpha.needsUpdate = true;
     dustGeo.attributes.aSize.needsUpdate = true;
     dustGeo.attributes.aAzure.needsUpdate = true;
-
-    /* 3D surface-capture disabled — the neutralize is now the 2D dust falling onto the surface
-       and forming a soft azure (see the #dust-canvas script). Left the system in place, dormant. */
 
     /* Update capture motes */
     for (let i = 0; i < CAPTURE_COUNT; i++) {

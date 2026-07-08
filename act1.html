@@ -17,19 +17,22 @@
     cursor:none;
     -webkit-font-smoothing:antialiased;
     --reveal:0;
+    --reveal-room:0;
+    --reveal-text:0;
+    --reveal-lens:0;
   }
-  .env{position:fixed;inset:0;z-index:0;background:url('assets/Background_c2.png') center/cover no-repeat;opacity:var(--reveal,0);}
-  #scene{position:fixed;inset:0;z-index:1;cursor:none;opacity:var(--reveal,0);}
+  .env{position:fixed;inset:0;z-index:0;background:url('assets/Background_c2.png') center/cover no-repeat;opacity:var(--reveal-room,0);}
+  #scene{position:fixed;inset:0;z-index:1;cursor:none;opacity:1;}
   body.lens-hover #scene{cursor:pointer;}
   body.detail-active{cursor:auto;}
   body.detail-active #scene{cursor:default;}
   .scrim{position:fixed;top:0;left:0;width:64%;height:62%;z-index:2;pointer-events:none;
     background:radial-gradient(120% 95% at 12% 22%, rgba(237,240,242,0.72) 0%, rgba(237,240,242,0.28) 48%, rgba(237,240,242,0) 76%);
-    opacity:var(--reveal,0);}
-  .brand{position:fixed;top:26px;left:32px;z-index:7;height:114px;pointer-events:none;opacity:var(--reveal,0);}
+    opacity:var(--reveal-room,0);}
+  .brand{position:fixed;top:26px;left:32px;z-index:7;height:114px;pointer-events:none;opacity:var(--reveal-text,0);}
   .brand img{height:100%;width:auto;display:block;}
   .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
-    top:calc(26px + 114px + 5vh);opacity:var(--reveal,0);}
+    top:calc(26px + 114px + 5vh);opacity:var(--reveal-text,0);}
   body.detail-active .hero{opacity:0;}
   h1{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
@@ -57,7 +60,7 @@
     opacity:0;
     will-change:transform,opacity;
   }
-  .tag.show{opacity:var(--reveal,0);}
+  .tag.show{opacity:var(--reveal-lens,0);}
   body.detail-active .tag{opacity:0 !important;}
   .tag .name{
     font-size:22px;font-weight:500;color:#1a1a1a;line-height:1.2;letter-spacing:-0.005em;
@@ -187,6 +190,15 @@ if (revealQP !== null) {
   revealFixed = false;
 }
 document.body.style.setProperty('--reveal', currentReveal);
+
+// ---------- staged reveal helpers ----------
+let roomO=0, textO=0, lensO=0;
+function stageOpacity(r, start, end){
+  if(r<=start) return 0;
+  if(r>=end) return 1;
+  return (r-start)/(end-start);
+}
+
 window.addEventListener('message', function(e){
   if (!e.data || e.data.type !== 'nf-reveal') return;
   if (revealFixed) return;
@@ -309,11 +321,11 @@ function updateDust(dt){
 const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
 (function(){const m=moteSprite.getContext('2d');
   const g=m.createRadialGradient(9,9,0,9,9,9);
-  g.addColorStop(0,'rgba(60,64,72,0.95)'); g.addColorStop(0.45,'rgba(60,64,72,0.55)'); g.addColorStop(1,'rgba(60,64,72,0)');
+  g.addColorStop(0,'rgba(110,118,127,0.95)'); g.addColorStop(0.45,'rgba(110,118,127,0.55)'); g.addColorStop(1,'rgba(110,118,127,0)');
   m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
 function drawDust(){
   for(const bucket of dustB){
-    ctx.globalAlpha=bucket.a;
+    ctx.globalAlpha=bucket.a*roomO;
     for(const d of bucket.motes){
       const s=d.r*3.0;
       ctx.drawImage(moteSprite, d.x-s/2, d.y-s/2, s, s);
@@ -614,6 +626,14 @@ function tick(t){
   }
   document.body.style.setProperty('--reveal', currentReveal);
 
+  // staged reveal: compute per-layer opacity from currentReveal
+  roomO = stageOpacity(currentReveal, 0.00, 0.42);
+  textO = stageOpacity(currentReveal, 0.38, 0.70);
+  lensO = stageOpacity(currentReveal, 0.66, 1.00);
+  document.body.style.setProperty('--reveal-room', roomO);
+  document.body.style.setProperty('--reveal-text', textO);
+  document.body.style.setProperty('--reveal-lens', lensO);
+
   updateDust(dt);
 
   if(detailMode){
@@ -677,9 +697,11 @@ function draw(t){
 }
 
 function drawLens(t){
+  if(lensO<=0.001) return;
   const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.beginPath();
   ctx.arc(x, y+8, R*0.94, 0, Math.PI*2);
   ctx.fillStyle='rgba(30,34,40,0.18)';
@@ -688,6 +710,7 @@ function drawLens(t){
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.beginPath();
   ctx.arc(x, y, R, 0, Math.PI*2);
   ctx.clip();
@@ -725,6 +748,7 @@ function drawLens(t){
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.lineWidth=6;
   const bezel=ctx.createLinearGradient(x-R, y-R, x+R, y+R);
   bezel.addColorStop(0,'rgba(255,255,255,0.55)');
@@ -735,12 +759,14 @@ function drawLens(t){
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.lineWidth=1.8;
   ctx.strokeStyle='rgba(255,255,255,0.55)';
   ctx.beginPath(); ctx.arc(x,y,R-0.9,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.lineWidth=2.2;
   ctx.lineCap='round';
   const rimGrad=ctx.createLinearGradient(x-R*0.7, y-R*0.7, x+R*0.7, y+R*0.7);
@@ -752,6 +778,7 @@ function drawLens(t){
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.lineWidth=3.2;
   ctx.lineCap='round';
   ctx.strokeStyle='rgba(255,255,255,0.85)';
@@ -759,16 +786,20 @@ function drawLens(t){
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.lineWidth=2;
   ctx.strokeStyle='rgba(255,255,255,0.18)';
   ctx.beginPath(); ctx.arc(x,y,R+1.2,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 
   ctx.save();
+  ctx.globalAlpha = lensO;
   ctx.lineWidth=1;
   ctx.strokeStyle='rgba(255,255,255,0.30)';
   ctx.beginPath(); ctx.arc(x,y,R-6.5,0,Math.PI*2); ctx.stroke();
   ctx.restore();
+
+  ctx.globalAlpha=1;
 }
 
 function positionTag(){
