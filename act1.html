@@ -569,7 +569,7 @@ function exitDetail(){
 detailClose.addEventListener('click', exitDetail);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && detailMode) exitDetail(); });
 
-const DETAIL_URL={Wildfire_Smoke_Particle:'wildfire.html',Fungal_Spore:'fungi.html',Virus:'wf_virus.html',Bacteria:'wf_bacteria.html',Ultrafine_Particle:'wf_ultrafine.html',PFAS:'wf_pfas.html',Pollen:'wf_pollen.html'};
+const DETAIL_URL={Wildfire_Smoke_Particle:'wildfire.html',Fungal_Spore:'fungi.html',Virus:'virus.html',Bacteria:'bacteria.html',Ultrafine_Particle:'ultrafine.html',PFAS:'pfas.html',Pollen:'pollen.html'};
 function gotoDetail(i){
   const key=SPECS[((i%SPECS.length)+SPECS.length)%SPECS.length].key;
   const url=DETAIL_URL[key]; if(!url) return;
