@@ -21,7 +21,7 @@
     --reveal-text:0;
     --reveal-lens:0;
   }
-  #roomVid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:var(--reveal-room,0);background:#edf0f2;}
+  .env{position:fixed;inset:0;z-index:0;background:url('assets/Background_c2.png') center/cover no-repeat;opacity:var(--reveal-room,0);}
   #scene{position:fixed;inset:0;z-index:1;cursor:none;opacity:1;}
   body.lens-hover #scene{cursor:pointer;}
   body.detail-active{cursor:auto;}
@@ -32,7 +32,7 @@
   .brand{position:fixed;top:26px;left:32px;z-index:7;height:114px;pointer-events:none;opacity:var(--reveal-text,0);}
   .brand img{height:100%;width:auto;display:block;}
   .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
-    top:50%;transform:translateY(-50%);opacity:var(--hero-op,0);}
+    top:calc(26px + 114px + 5vh);opacity:var(--reveal-text,0);}
   body.detail-active .hero{opacity:0;}
   h1{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
@@ -50,21 +50,6 @@
     letter-spacing:-0.02em;
     white-space:nowrap;
   }
-  /* resolution words — appear only after the room is clean; black + blue */
-  .resolve{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
-    top:50%;transform:translateY(-50%);opacity:var(--resolve-op,0);}
-  body.detail-active .resolve{opacity:0;}
-  .resolve .rh{
-    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
-    font-weight:600;font-size:49px;line-height:1.1;letter-spacing:-0.022em;
-    color:#1a1a1a;white-space:nowrap;
-  }
-  .resolve .rh .catch{color:#1b7bff;font-weight:700;letter-spacing:-0.02em;}
-  .resolve .deck{
-    margin-top:18px;max-width:600px;
-    font-size:20px;line-height:1.5;font-weight:450;color:#2a2622;letter-spacing:0;
-  }
-  .resolve .deck b{font-weight:600;color:#1b7bff;}
   .tag{
     position:fixed;z-index:5;pointer-events:none;
     display:flex;flex-direction:column;
@@ -84,7 +69,7 @@
     font-size:11.5px;font-weight:400;color:#8a817a;line-height:1.3;margin-top:3px;
   }
 
-  /* ---------- detail mode ---------- */
+  /* ---------- DETAIL MODE ---------- */
   .detail{
     position:fixed; z-index:6;
     top:0; right:0; height:100%; width:54%;
@@ -114,7 +99,7 @@
   }
   .charge-mark{
     display:inline-block; width:6px; height:6px; border-radius:50%;
-    background:#e23b3b; opacity:.75; margin-right:10px;
+    background:#e23b3b; margin-right:10px; opacity:.75;
   }
   .detail h2{
     font-size:clamp(30px,3.6vw,46px); font-weight:600;
@@ -130,6 +115,7 @@
   .sec .body{font-size:16.5px; line-height:1.6; color:#2a2622; margin-top:10px;}
   .sec .src{font-size:12px; color:#8a7f74; margin-top:10px; font-style:italic;}
 
+  /* detail mode: solid clean background (no room) + bare specimen video (no lens) */
   .detail-screen{position:fixed; inset:0; z-index:4; background:#edf0f2;
     opacity:0; visibility:hidden; transition:opacity .5s ease, visibility .5s; pointer-events:none;}
   body.detail-active .detail-screen{opacity:1; visibility:visible;}
@@ -143,10 +129,7 @@
   @media (max-width:720px){
     .brand{height:90px;top:18px;left:18px;transform:none;}
     body.detail-active .brand{opacity:0;}
-    .hero{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
-    .resolve{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
-    .resolve .rh{font-size:clamp(26px, 8vw, 44px);white-space:normal;}
-    .resolve .deck{font-size:15px;margin-top:14px;line-height:1.45;}
+    .hero{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;}
     h1{font-size:clamp(26px, 8vw, 44px);}
     h1 .line{white-space:normal;}
     .tag{padding:9px 14px 10px;}
@@ -164,21 +147,18 @@
     .sec .body{font-size:15.5px;}
     .sec{padding:16px 0;}
     .sec:first-of-type{padding-top:20px;}
+    .detail-vid{left:50%; top:6vh; transform:translateX(-50%); width:62vw;}
   }
 </style>
 </head>
 <body>
 <!-- act1_electric_v3 -->
-<video id="roomVid" src="screen2_full.mp4?v=2" muted playsinline preload="auto"></video>
+<div class="env"></div>
 <canvas id="scene"></canvas>
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
 <div class="hero">
   <h1><span class="line">Most harmful pollutants</span><span class="line">carry an <span class="chg">electric charge.</span></span></h1>
-</div>
-<div class="resolve" id="resolve" aria-hidden="true">
-  <h1 class="rh">What they carry, we <span class="catch">catch.</span></h1>
-  <p class="deck">Positive polarity captures particles, destroys up to <b>99.9%</b> of pathogens through a physical mechanism.</p>
 </div>
 <div class="tag" id="tag">
   <div class="name" id="t-name">—</div>
@@ -191,21 +171,6 @@
   <div class="detail-inner" id="detailInner"></div>
 </aside>
 <script>
-function easeInOut(k){ return k<0.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2; }
-
-// ---------- image-anchored device rectangles ----------
-// The room photo's native pixel size; CSS uses center/cover so we replicate that transform.
-const IMG_W = 1344, IMG_H = 752;
-// Device bounding boxes as fractions OF THE IMAGE (1344x752)
-const DEVICE_IMG_RECTS = [
-  { fx0:0.446, fy0:0.092, fx1:0.567, fy1:0.186, round:0.10 },  // supply vent (square)
-  { fx0:0.622, fy0:0.392, fx1:0.682, fy1:0.560, round:0.42 }   // wall purifier (nudged down)
-];
-// pixel rects recomputed on resize via the same cover transform CSS uses
-let capPxRects = DEVICE_IMG_RECTS.map(()=>({
-  x:0,y:0,w:0,h:0,rx:0,ry:0,cx:0,cy:0
-}));
-
 // ---------- reveal (scroll-linked dilute-in from hero) ----------
 const inPager = window.top !== window.self;
 const revealQP = new URLSearchParams(location.search).get('reveal');
@@ -226,20 +191,6 @@ if (revealQP !== null) {
 }
 document.body.style.setProperty('--reveal', currentReveal);
 
-// ---------- capture progress (now drives video scrub) ----------
-const captureQP = new URLSearchParams(location.search).get('capture');
-let captureTarget, displayCp, captureFixed;
-if (captureQP !== null) {
-  const v = parseFloat(captureQP);
-  captureTarget = isNaN(v) ? 0 : Math.max(0, Math.min(1, v));
-  displayCp = captureTarget;
-  captureFixed = true;
-} else {
-  captureTarget = 0;
-  displayCp = 0;
-  captureFixed = false;
-}
-
 // ---------- staged reveal helpers ----------
 let roomO=0, textO=0, lensO=0;
 function stageOpacity(r, start, end){
@@ -249,12 +200,9 @@ function stageOpacity(r, start, end){
 }
 
 window.addEventListener('message', function(e){
-  if (!e.data) return;
-  if (e.data.type === 'nf-reveal' && !revealFixed) {
-    revealTarget = Math.max(0, Math.min(1, e.data.p || 0));
-  } else if (e.data.type === 'nf-capture' && !captureFixed) {
-    captureTarget = Math.max(0, Math.min(1, e.data.p || 0));
-  }
+  if (!e.data || e.data.type !== 'nf-reveal') return;
+  if (revealFixed) return;
+  revealTarget = Math.max(0, Math.min(1, e.data.p || 0));
 });
 
 const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
@@ -265,7 +213,6 @@ const detailClose=document.getElementById('detailClose');
 const detailVid=document.getElementById('detailVid');
 const heroEl=document.querySelector('.hero');
 const brandEl=document.querySelector('.brand');
-const roomVid=document.getElementById('roomVid');
 
 let W=0,H=0,DPR=1,lastT=performance.now();
 
@@ -320,200 +267,71 @@ function pollutantPoint(i){
   return {x:p.x*W, y:p.y*H};
 }
 
+// ---------- dust ----------
+const NB=8;
+let dustB=[];
+function mote(){
+  const ang=Math.random()*Math.PI*2;
+  const sp=0.18+Math.random()*0.32;
+  return {
+    x:Math.random()*W, y:Math.random()*H,
+    vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
+    r:.55+Math.random()*1.7
+  };
+}
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
   cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  // recompute capture rect pixel geometry via the SAME cover transform CSS uses
-  const scale = Math.max(W / IMG_W, H / IMG_H);
-  const drawnW = IMG_W * scale, drawnH = IMG_H * scale;
-  const offX = (W - drawnW) / 2, offY = (H - drawnH) / 2;
-  capPxRects = DEVICE_IMG_RECTS.map(r=>{
-    const x = offX + r.fx0 * drawnW;
-    const y = offY + r.fy0 * drawnH;
-    const w = (r.fx1 - r.fx0) * drawnW;
-    const h = (r.fy1 - r.fy0) * drawnH;
-    const rad = r.round * Math.min(w, h);
-    return { x, y, w, h, rx:rad, ry:rad, cx:x+w/2, cy:y+h/2 };
-  });
-  // adjust dust count for breakpoint
-  if (typeof dustMotes !== 'undefined' && dustMotes && dustMotes.length > 0) {
-    const target = W < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);
-    while (dustMotes.length > target) dustMotes.pop();
-    while (dustMotes.length < target) dustMotes.push(makeMote());
-  }
+  const n=Math.round(Math.min(3800, W*H/520));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.08+b*0.045, motes:[]});
+  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
 }
-
-// ---------- dust particle system (synced to roomVid.currentTime) ----------
-const DUST_RGB = [[110,118,127], [122,128,136], [94,102,110]];
-let dustSprites = [];
-let dustMotes = [];
-let prevCT = 0;
-const FLOAT_END = 3.6;
-const SUCK_END = 7.9;   // clip re-timed to 8.58s (seam cross-dissolve removed 0.5s); force-absorb before the clean end
-
-function makeDustSprites() {
-  dustSprites = DUST_RGB.map(function(rgb){
-    var r=rgb[0], g=rgb[1], b=rgb[2];
-    var s=document.createElement('canvas');
-    s.width=24; s.height=24;
-    var sc=s.getContext('2d');
-    var grd=sc.createRadialGradient(12,12,0, 12,12,12);
-    grd.addColorStop(0, 'rgba('+r+','+g+','+b+',1)');
-    grd.addColorStop(0.35, 'rgba('+r+','+g+','+b+',0.5)');
-    grd.addColorStop(1, 'rgba('+r+','+g+','+b+',0)');
-    sc.fillStyle=grd;
-    sc.fillRect(0,0,24,24);
-    return s;
-  });
-}
-
-function makeMote() {
-  return {
-    x: Math.random()*W,
-    y: Math.random()*H,
-    vx: (Math.random()-0.5)*0.4,
-    vy: (Math.random()-0.5)*0.4,
-    size: 1.0+Math.random()*3.0,
-    baseAlpha: 0.15+Math.random()*0.45,
-    spriteIdx: Math.floor(Math.random()*3),
-    phase: Math.random()*Math.PI*2,
-    state: 'float',
-    suckStart: FLOAT_END+Math.random()*2.9,
-    suckDur: 0.6+Math.random()*0.8,
-    tx: 0, ty: 0,
-    startX: 0, startY: 0,
-    curveAmt: 0,
-    absorbed: false
-  };
-}
-
-function initDust() {
-  if (dustSprites.length === 0) makeDustSprites();
-  var count = W < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);
-  dustMotes = [];
-  for (var i=0; i<count; i++) dustMotes.push(makeMote());
-}
-
-function resetDust() {
-  for (var i=0; i<dustMotes.length; i++) {
-    var m=dustMotes[i];
-    m.state='float';
-    m.absorbed=false;
-    m.x=Math.random()*W;
-    m.y=Math.random()*H;
-    m.vx=(Math.random()-0.5)*0.4;
-    m.vy=(Math.random()-0.5)*0.4;
-    m.suckStart=FLOAT_END+Math.random()*2.9;
-    m.suckDur=0.6+Math.random()*0.8;
-    m.curveAmt=0;
-  }
-}
-
-function updateDust(t, dt) {
-  var ct = (roomVid && isFinite(roomVid.currentTime)) ? roomVid.currentTime : 0;
-  // detect video restart (currentTime jumps backward)
-  if (ct < prevCT - 0.3) resetDust();
-  prevCT = ct;
-
-  var dts = Math.min(2.5, dt/16.67);
-
-  for (var i=0; i<dustMotes.length; i++) {
-    var m=dustMotes[i];
-    if (m.absorbed) continue;
-
-    // past suck end — force absorb
-    if (ct >= SUCK_END) {
-      m.absorbed=true; m.state='absorbed';
-      continue;
-    }
-
-    if (m.state === 'suck') {
-      var elapsed = ct - m.suckStart;
-      var progress = Math.min(1, Math.max(0, elapsed/m.suckDur));
-      if (progress >= 1) {
-        m.absorbed=true; m.state='absorbed';
+function updateDust(dt){
+  const f=dt/16.67;
+  for(const bucket of dustB){
+    for(const d of bucket.motes){
+      if(!REDUCED){
+        d.vx += (Math.random()-.5)*0.018*f;
+        d.vy += (Math.random()-.5)*0.018*f;
+        d.vx *= Math.pow(0.992, f);
+        d.vy *= Math.pow(0.992, f);
+        let sp = Math.hypot(d.vx, d.vy);
+        if(sp < 0.12){
+          if(sp < 1e-6){ const a=Math.random()*Math.PI*2; d.vx=Math.cos(a)*0.18; d.vy=Math.sin(a)*0.18; }
+          else { const k=0.18/sp; d.vx*=k; d.vy*=k; }
+          sp = 0.18;
+        } else if(sp > 0.5){
+          const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
+        }
+        d.x += d.vx*f; d.y += d.vy*f;
+      }
+      if(isNaN(d.x)||isNaN(d.y)||!isFinite(d.x)||!isFinite(d.y)){
+        d.x=Math.random()*W; d.y=Math.random()*H;
+        const a=Math.random()*Math.PI*2; const s=0.25;
+        d.vx=Math.cos(a)*s; d.vy=Math.sin(a)*s;
         continue;
       }
-      // easeInQuad for accelerating suck
-      var ep = progress*progress;
-      m.x = m.startX + (m.tx-m.startX)*ep;
-      m.y = m.startY + (m.ty-m.startY)*ep;
-      // curved path (perpendicular offset peaking mid-flight)
-      var dx = m.tx-m.startX, dy = m.ty-m.startY;
-      var len = Math.hypot(dx,dy) || 1;
-      var curve = Math.sin(progress*Math.PI) * m.curveAmt;
-      m.x += (-dy/len)*curve;
-      m.y += (dx/len)*curve;
-    } else {
-      // float phase — check if this mote should start sucking
-      if (ct >= m.suckStart && ct >= FLOAT_END) {
-        m.state='suck';
-        m.startX=m.x; m.startY=m.y;
-        // pick nearer device
-        var d0=Math.hypot(m.x-capPxRects[0].cx, m.y-capPxRects[0].cy);
-        var d1=Math.hypot(m.x-capPxRects[1].cx, m.y-capPxRects[1].cy);
-        var rect = d0<=d1 ? capPxRects[0] : capPxRects[1];
-        // random target spread across whole device rect
-        m.tx = rect.x + Math.random()*rect.w;
-        m.ty = rect.y + Math.random()*rect.h;
-        var dist = Math.hypot(m.tx-m.startX, m.ty-m.startY);
-        m.curveAmt = (Math.random()-0.5) * Math.min(80, dist*0.25);
-        continue;
-      }
-      // Brownian + gentle curl
-      m.vx += (Math.random()-0.5)*0.06*dts;
-      m.vy += (Math.random()-0.5)*0.06*dts;
-      m.vx += Math.sin(m.y*0.005 + t*0.00015)*0.012*dts;
-      m.vy += Math.cos(m.x*0.005 + t*0.00015)*0.012*dts;
-      m.vx *= Math.pow(0.95, dts);
-      m.vy *= Math.pow(0.95, dts);
-      m.x += m.vx*dts;
-      m.y += m.vy*dts;
-      // wrap edges
-      if (m.x < -15) m.x = W+15;
-      if (m.x > W+15) m.x = -15;
-      if (m.y < -15) m.y = H+15;
-      if (m.y > H+15) m.y = -15;
+      if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
+      if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
     }
   }
 }
-
-function drawDust(t) {
-  if (roomO <= 0.001) return;
-  if (dustSprites.length === 0) makeDustSprites();
-  if (dustMotes.length === 0) return;
-
-  var ct = (roomVid && isFinite(roomVid.currentTime)) ? roomVid.currentTime : 0;
-
-  ctx.save();
-  ctx.globalCompositeOperation = 'source-over';
-
-  for (var i=0; i<dustMotes.length; i++) {
-    var m=dustMotes[i];
-    if (m.absorbed) continue;
-
-    var alpha = m.baseAlpha;
-    if (m.state === 'suck') {
-      var elapsed = ct - m.suckStart;
-      var progress = Math.min(1, Math.max(0, elapsed/m.suckDur));
-      // fade stays visible during travel, drops near arrival
-      alpha = m.baseAlpha * (1 - progress*progress);
+const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
+(function(){const m=moteSprite.getContext('2d');
+  const g=m.createRadialGradient(9,9,0,9,9,9);
+  g.addColorStop(0,'rgba(110,118,127,0.95)'); g.addColorStop(0.45,'rgba(110,118,127,0.55)'); g.addColorStop(1,'rgba(110,118,127,0)');
+  m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
+function drawDust(){
+  for(const bucket of dustB){
+    ctx.globalAlpha=bucket.a*roomO;
+    for(const d of bucket.motes){
+      const s=d.r*3.0;
+      ctx.drawImage(moteSprite, d.x-s/2, d.y-s/2, s, s);
     }
-    // gentle twinkle
-    alpha *= (0.75 + 0.25*Math.sin(t*0.001 + m.phase));
-    // honor room reveal
-    alpha *= roomO;
-    if (alpha < 0.003) continue;
-
-    ctx.globalAlpha = alpha;
-    var ds = m.size * 4;
-    ctx.drawImage(dustSprites[m.spriteIdx], m.x-ds/2, m.y-ds/2, ds, ds);
   }
-
-  ctx.globalAlpha = 1;
-  ctx.restore();
+  ctx.globalAlpha=1;
 }
 
 // ---------- lens state ----------
@@ -553,7 +371,7 @@ const DETAIL_DATA={
        body:"Fungal spores are how mold spreads — microscopic reproductive grains, mostly 3 to 8 microns, drifting constantly through indoor and outdoor air.",
        source:"US EPA; size, PMC9025873 (2022)"},
       {label:"Its charge",
-       body:"A spore's wall runs net negative — its melanin coat holds a strong negative surface charge, around -40 millivolts on common mold. A living target: captured and destroyed on contact, through a physical mechanism.",
+       body:"A spore's wall runs net negative — its melanin coat holds a strong negative surface charge, around -40 millivolts on common mold. A living target: captured and destroyed on contact, by physical action.",
        source:"Pihet et al., BMC Microbiology, 2009"},
       {label:"How widespread",
        body:"Mold grows anywhere damp. Roughly 10 to 50% of buildings carry it, and spores ride the air in every room.",
@@ -571,9 +389,9 @@ const DETAIL_DATA={
        body:"A virus is a self-assembling biological nanoparticle — 20 to 300 nanometres of protein wrapped around genetic material. It can't copy itself; it has to hijack a living cell.",
        source:"Michen and Graule, J. Applied Microbiology, 2010"},
       {label:"Its charge",
-       body:"At the pH of the air and the airway, most viruses run net negative — their isoelectric point sits below neutral, so the surface carries negative charge. A living target: captured and destroyed on contact, through a physical mechanism.",
+       body:"At the pH of the air and the airway, most viruses run net negative — their isoelectric point sits below neutral, so the surface carries negative charge. A living target: captured and destroyed on contact, by physical action.",
        source:"Michen and Graule, Isoelectric points of viruses, 2010"},
-      {label:"How it spreads",
+      {label:"How widespread",
        body:"Airborne and relentless. Seasonal influenza alone runs to about a billion cases a year.",
        source:"WHO, Influenza (seasonal), 2025"},
       {label:"Health impact",
@@ -589,7 +407,7 @@ const DETAIL_DATA={
        body:"Bacteria are single-celled microbes. Airborne, they ride on droplets and dust — from a quarter of a micron up to about 20 microns across.",
        source:"Ghosh et al., Environment International, 2015"},
       {label:"Its charge",
-       body:"A bacterium's outer surface runs net negative — its lipopolysaccharide and teichoic acids carry ionized phosphate and carboxyl groups. A living target: captured and destroyed on contact, through a physical mechanism.",
+       body:"A bacterium's outer surface runs net negative — its lipopolysaccharide and teichoic acids carry ionized phosphate and carboxyl groups. A living target: captured and destroyed on contact, by physical action.",
        source:"Wilson et al., J. Microbiological Methods, 2001"},
       {label:"How widespread",
        body:"In hospitals alone, about 7 of every 100 patients in wealthy countries pick up an infection during their stay.",
@@ -688,6 +506,8 @@ function findNearestSpec(x,y){
   return best;
 }
 
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
 addEventListener('mousemove',e=>{
   bub.tx=e.clientX; bub.ty=e.clientY;
   mouseActive=true; lastMove=performance.now();
@@ -709,7 +529,6 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 window.addEventListener('focus',resetClock);
 
 resize();
-initDust();
 bub.x=W*0.5; bub.y=H*0.5; bub.tx=bub.x; bub.ty=bub.y;
 setSpec(PROBE!==null?(+PROBE||0):0);
 if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE||0).y; }
@@ -796,26 +615,6 @@ if(DETAIL_QP!==null){
   window.addEventListener('load', ()=>setTimeout(()=>enterDetail(idx), 900));
 }
 
-// ---------- video auto-play state ----------
-let autoPlayed = false;   // screen 2 auto-plays its video once on arrival, at a gentle pace
-const AUTOPLAY_RATE = 0.5;   // gentle — slows the whole sequence, incl. the baked-in blue turn-on
-
-// ---------- resolution swap: the words change ONLY after the room video fully ends (all dust cleaned) ----------
-const resolveQP = new URLSearchParams(location.search).get('resolve');
-const resolveForced = (resolveQP !== null);          // ?resolve=1 forces the resolution shown (QA hook)
-let resolveRaw = (resolveForced && parseFloat(resolveQP) > 0) ? 1 : 0;
-let roomEnded = false;
-roomVid.addEventListener('ended', function(){ roomEnded = true; });
-// Prime the decoder on load (muted play->pause) so the first frame is painted and playback resumes
-// INSTANTLY when the room reveals — kills the static-frame-then-video hitch.
-let primed = false;
-function primeVideo(){
-  if(primed) return; primed = true;
-  try { roomVid.play().then(function(){ if(!autoPlayed){ roomVid.pause(); roomVid.currentTime = 0; } }).catch(function(){}); } catch(e){}
-}
-roomVid.addEventListener('loadeddata', primeVideo);
-if (roomVid.readyState >= 2) primeVideo();
-
 // ---------- main loop ----------
 function tick(t){
   const dt=Math.min(40, t-lastT);
@@ -827,6 +626,7 @@ function tick(t){
   }
   document.body.style.setProperty('--reveal', currentReveal);
 
+  // staged reveal: compute per-layer opacity from currentReveal
   roomO = stageOpacity(currentReveal, 0.00, 0.42);
   textO = stageOpacity(currentReveal, 0.38, 0.70);
   lensO = stageOpacity(currentReveal, 0.66, 1.00);
@@ -834,25 +634,7 @@ function tick(t){
   document.body.style.setProperty('--reveal-text', textO);
   document.body.style.setProperty('--reveal-lens', lensO);
 
-  // Start the room video AS SOON AS the room begins to reveal — so it is ALREADY in motion when it
-  // appears, never a static first-frame that then jumps to video. It plays through the morph (behind the
-  // hero) at a gentle pace, so screen 2 lands on a live, already-moving room.
-  if (!autoPlayed && currentReveal > 0.02 && roomVid && roomVid.readyState >= 2) {
-    autoPlayed = true;
-    try { roomVid.playbackRate = AUTOPLAY_RATE; roomVid.currentTime = 0; roomVid.play().catch(function(){}); } catch(e){}
-  }
-  // Reset only once fully back on screen 1, so the next arrival replays cleanly from the top.
-  if (currentReveal < 0.02) { autoPlayed = false; roomEnded = false; resolveRaw = 0; }
-
-  // The resolution words appear ONLY after the room video has fully finished (all dust cleaned) — never during float or suck-in.
-  if (!resolveForced) {
-    const dur = roomVid.duration || 9;
-    const ended = roomEnded || (roomVid.readyState >= 1 && dur > 1 && isFinite(roomVid.currentTime) && roomVid.currentTime >= dur - 0.05);
-    if (ended && currentReveal > 0.85) resolveRaw = Math.min(1, resolveRaw + dt / 900);   // ~0.9s gentle cross-fade
-  }
-  const rp = easeInOut(Math.max(0, Math.min(1, resolveRaw)));
-  document.body.style.setProperty('--hero-op', textO * (1 - rp));    // problem headline fades out
-  document.body.style.setProperty('--resolve-op', textO * rp);        // resolution fades in
+  updateDust(dt);
 
   if(detailMode){
     const d=detailLensTarget();
@@ -900,7 +682,6 @@ function tick(t){
   }
 
   if(!detailMode) bub.R+=(targetR()-bub.R)*0.12;
-  updateDust(t, dt);
   draw(t);
   requestAnimationFrame(tick);
 }
@@ -910,7 +691,7 @@ autoT0=performance.now();
 
 function draw(t){
   ctx.clearRect(0,0,W,H);
-  drawDust(t);
+  drawDust();
   drawLens(t);
   positionTag();
 }

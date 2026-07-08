@@ -58,7 +58,7 @@
     <iframe id="f1" allow="autoplay"></iframe>
   </div>
   <div class="screen" id="s2" style="z-index:1;opacity:0;pointer-events:none;">
-    <iframe id="f2" src="frame2.html?c2" allow="autoplay"></iframe>
+    <iframe id="f2" src="frame2.html?c3" allow="autoplay"></iframe>
   </div>
   <button id="cue" aria-label="Continue">
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
@@ -93,8 +93,8 @@
 
   // Set act1 iframe src (include reveal param when frozen for instant exact state)
   f1.src = frozen
-    ? 'act1.html?c8&reveal=' + freezeQ
-    : 'act1.html?c8';
+    ? 'act1.html?c9&reveal=' + freezeQ
+    : 'act1.html?c9';
 
   // ---- Transition state ----
   let transFrom = 0, transTo = 0;

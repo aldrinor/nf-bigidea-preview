@@ -21,7 +21,7 @@
     --reveal-text:0;
     --reveal-lens:0;
   }
-  #roomVid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:var(--reveal-room,0);background:#edf0f2;}
+  .env{position:fixed;inset:0;z-index:0;background:url('assets/Background_c2.png') center/cover no-repeat;opacity:var(--reveal-room,0);}
   #scene{position:fixed;inset:0;z-index:1;cursor:none;opacity:1;}
   body.lens-hover #scene{cursor:pointer;}
   body.detail-active{cursor:auto;}
@@ -32,7 +32,7 @@
   .brand{position:fixed;top:26px;left:32px;z-index:7;height:114px;pointer-events:none;opacity:var(--reveal-text,0);}
   .brand img{height:100%;width:auto;display:block;}
   .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
-    top:50%;transform:translateY(-50%);opacity:var(--hero-op,0);}
+    top:50%;transform:translateY(-50%);opacity:var(--reveal-text,0);}
   body.detail-active .hero{opacity:0;}
   h1{
     font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
@@ -50,21 +50,6 @@
     letter-spacing:-0.02em;
     white-space:nowrap;
   }
-  /* resolution words — appear only after the room is clean; black + blue */
-  .resolve{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
-    top:50%;transform:translateY(-50%);opacity:var(--resolve-op,0);}
-  body.detail-active .resolve{opacity:0;}
-  .resolve .rh{
-    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
-    font-weight:600;font-size:49px;line-height:1.1;letter-spacing:-0.022em;
-    color:#1a1a1a;white-space:nowrap;
-  }
-  .resolve .rh .catch{color:#1b7bff;font-weight:700;letter-spacing:-0.02em;}
-  .resolve .deck{
-    margin-top:18px;max-width:600px;
-    font-size:20px;line-height:1.5;font-weight:450;color:#2a2622;letter-spacing:0;
-  }
-  .resolve .deck b{font-weight:600;color:#1b7bff;}
   .tag{
     position:fixed;z-index:5;pointer-events:none;
     display:flex;flex-direction:column;
@@ -144,9 +129,6 @@
     .brand{height:90px;top:18px;left:18px;transform:none;}
     body.detail-active .brand{opacity:0;}
     .hero{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
-    .resolve{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;transform:none;}
-    .resolve .rh{font-size:clamp(26px, 8vw, 44px);white-space:normal;}
-    .resolve .deck{font-size:15px;margin-top:14px;line-height:1.45;}
     h1{font-size:clamp(26px, 8vw, 44px);}
     h1 .line{white-space:normal;}
     .tag{padding:9px 14px 10px;}
@@ -169,16 +151,12 @@
 </head>
 <body>
 <!-- act1_electric_v3 -->
-<video id="roomVid" src="screen2_full.mp4?v=2" muted playsinline preload="auto"></video>
+<div class="env"></div>
 <canvas id="scene"></canvas>
 <div class="scrim"></div>
 <div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
 <div class="hero">
   <h1><span class="line">Most harmful pollutants</span><span class="line">carry an <span class="chg">electric charge.</span></span></h1>
-</div>
-<div class="resolve" id="resolve" aria-hidden="true">
-  <h1 class="rh">What they carry, we <span class="catch">catch.</span></h1>
-  <p class="deck">Positive polarity captures particles, destroys up to <b>99.9%</b> of pathogens through a physical mechanism.</p>
 </div>
 <div class="tag" id="tag">
   <div class="name" id="t-name">—</div>
@@ -226,7 +204,7 @@ if (revealQP !== null) {
 }
 document.body.style.setProperty('--reveal', currentReveal);
 
-// ---------- capture progress (now drives video scrub) ----------
+// ---------- capture progress (scroll-linked drain effect) ----------
 const captureQP = new URLSearchParams(location.search).get('capture');
 let captureTarget, displayCp, captureFixed;
 if (captureQP !== null) {
@@ -265,7 +243,6 @@ const detailClose=document.getElementById('detailClose');
 const detailVid=document.getElementById('detailVid');
 const heroEl=document.querySelector('.hero');
 const brandEl=document.querySelector('.brand');
-const roomVid=document.getElementById('roomVid');
 
 let W=0,H=0,DPR=1,lastT=performance.now();
 
@@ -320,6 +297,55 @@ function pollutantPoint(i){
   return {x:p.x*W, y:p.y*H};
 }
 
+// ---------- dust ----------
+const NB=8;
+let dustB=[];
+
+// helper: nearest device rect index for a point (x,y in px)
+function nearestRectIndex(x,y){
+  let bi=0, bd=1e9;
+  for(let k=0;k<capPxRects.length;k++){
+    const r=capPxRects[k];
+    const d=Math.hypot(r.cx-x, r.cy-y);
+    if(d<bd){bd=d;bi=k;}
+  }
+  return bi;
+}
+// helper: random point uniformly inside a rect (with slight inset)
+function randomPointInRect(r){
+  const inset = Math.min(r.w, r.h)*0.08;
+  const x = r.x + inset + Math.random()*(r.w - 2*inset);
+  const y = r.y + inset + Math.random()*(r.h - 2*inset);
+  return {x,y};
+}
+
+// distance from point to nearest edge of a rect (0 if inside, positive if outside)
+function distToRect(x, y, r){
+  const dx = Math.max(r.x - x, 0, x - (r.x + r.w));
+  const dy = Math.max(r.y - y, 0, y - (r.y + r.h));
+  return Math.hypot(dx, dy);
+}
+
+function mote(){
+  const ang=Math.random()*Math.PI*2;
+  const sp=0.18+Math.random()*0.32;
+  const sx=Math.random()*W, sy=Math.random()*H;
+  const ti = nearestRectIndex(sx, sy);
+  const tgt = randomPointInRect(capPxRects[ti]);
+  // per-mote staggered capture threshold spread across 0.42..0.92
+  const captureStart = 0.42 + Math.random()*0.50;
+  return {
+    x:sx, y:sy,
+    vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
+    r:.55+Math.random()*1.7,
+    targetIndex:ti,
+    targetX:tgt.x,
+    targetY:tgt.y,
+    absorbed:false,
+    fade:0,
+    captureStart:captureStart
+  };
+}
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
   W=window.innerWidth; H=window.innerHeight;
@@ -337,183 +363,190 @@ function resize(){
     const rad = r.round * Math.min(w, h);
     return { x, y, w, h, rx:rad, ry:rad, cx:x+w/2, cy:y+h/2 };
   });
-  // adjust dust count for breakpoint
-  if (typeof dustMotes !== 'undefined' && dustMotes && dustMotes.length > 0) {
-    const target = W < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);
-    while (dustMotes.length > target) dustMotes.pop();
-    while (dustMotes.length < target) dustMotes.push(makeMote());
-  }
+  const n=Math.round(Math.min(3800, W*H/520));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.08+b*0.045, motes:[]});
+  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
 }
 
-// ---------- dust particle system (synced to roomVid.currentTime) ----------
-const DUST_RGB = [[110,118,127], [122,128,136], [94,102,110]];
-let dustSprites = [];
-let dustMotes = [];
-let prevCT = 0;
-const FLOAT_END = 3.6;
-const SUCK_END = 7.9;   // clip re-timed to 8.58s (seam cross-dissolve removed 0.5s); force-absorb before the clean end
+// capture timing constants
+const HALO_START = 0.25;
+const HALO_FULL  = 0.42;
+const SUCK_GLOBAL_START = 0.42;
 
-function makeDustSprites() {
-  dustSprites = DUST_RGB.map(function(rgb){
-    var r=rgb[0], g=rgb[1], b=rgb[2];
-    var s=document.createElement('canvas');
-    s.width=24; s.height=24;
-    var sc=s.getContext('2d');
-    var grd=sc.createRadialGradient(12,12,0, 12,12,12);
-    grd.addColorStop(0, 'rgba('+r+','+g+','+b+',1)');
-    grd.addColorStop(0.35, 'rgba('+r+','+g+','+b+',0.5)');
-    grd.addColorStop(1, 'rgba('+r+','+g+','+b+',0)');
-    sc.fillStyle=grd;
-    sc.fillRect(0,0,24,24);
-    return s;
-  });
-}
+// outer approach distance (px) over which motes dissolve as they near a device
+const DISSOLVE_RADIUS = 95;
 
-function makeMote() {
-  return {
-    x: Math.random()*W,
-    y: Math.random()*H,
-    vx: (Math.random()-0.5)*0.4,
-    vy: (Math.random()-0.5)*0.4,
-    size: 1.0+Math.random()*3.0,
-    baseAlpha: 0.15+Math.random()*0.45,
-    spriteIdx: Math.floor(Math.random()*3),
-    phase: Math.random()*Math.PI*2,
-    state: 'float',
-    suckStart: FLOAT_END+Math.random()*2.9,
-    suckDur: 0.6+Math.random()*0.8,
-    tx: 0, ty: 0,
-    startX: 0, startY: 0,
-    curveAmt: 0,
-    absorbed: false
-  };
-}
+function updateDust(dt){
+  const f=dt/16.67;
+  const cp=displayCp;
+  for(const bucket of dustB){
+    for(let i=0, n=bucket.motes.length; i<n; i++){
+      const d=bucket.motes[i];
+      if(d.absorbed) continue;
 
-function initDust() {
-  if (dustSprites.length === 0) makeDustSprites();
-  var count = W < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);
-  dustMotes = [];
-  for (var i=0; i<count; i++) dustMotes.push(makeMote());
-}
+      // per-mote sucking: only when cp exceeds this mote's staggered threshold
+      const sucking = cp >= d.captureStart;
 
-function resetDust() {
-  for (var i=0; i<dustMotes.length; i++) {
-    var m=dustMotes[i];
-    m.state='float';
-    m.absorbed=false;
-    m.x=Math.random()*W;
-    m.y=Math.random()*H;
-    m.vx=(Math.random()-0.5)*0.4;
-    m.vy=(Math.random()-0.5)*0.4;
-    m.suckStart=FLOAT_END+Math.random()*2.9;
-    m.suckDur=0.6+Math.random()*0.8;
-    m.curveAmt=0;
-  }
-}
+      if(!REDUCED){
+        d.vx += (Math.random()-.5)*0.018*f;
+        d.vy += (Math.random()-.5)*0.018*f;
+        d.vx *= Math.pow(0.992, f);
+        d.vy *= Math.pow(0.992, f);
+        let sp = Math.hypot(d.vx, d.vy);
+        if(sp < 0.12){
+          if(sp < 1e-6){ const a=Math.random()*Math.PI*2; d.vx=Math.cos(a)*0.18; d.vy=Math.sin(a)*0.18; }
+          else { const k=0.18/sp; d.vx*=k; d.vy*=k; }
+          sp = 0.18;
+        } else if(sp > 0.5){
+          const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
+        }
 
-function updateDust(t, dt) {
-  var ct = (roomVid && isFinite(roomVid.currentTime)) ? roomVid.currentTime : 0;
-  // detect video restart (currentTime jumps backward)
-  if (ct < prevCT - 0.3) resetDust();
-  prevCT = ct;
+        // capture attraction: only after this mote's staggered threshold
+        if(sucking){
+          const cb = Math.max(0, Math.min(1, (cp - d.captureStart) / (1.0 - d.captureStart)));
+          if(cb > 0){
+            const dx = d.targetX - d.x, dy = d.targetY - d.y;
+            const dist = Math.hypot(dx, dy) + 0.0001;
+            // pull grows with local capture progress
+            const pull = cb * 0.05 * f;
+            d.vx += dx * pull;
+            d.vy += dy * pull;
+            // dampen drift as we get closer / capture progresses
+            const damp = 1 - cb*0.55;
+            d.vx *= damp;
+            d.vy *= damp;
 
-  var dts = Math.min(2.5, dt/16.67);
+            // DISSOLVE: fade opacity to 0 based on proximity to target.
+            // Motes vanish as they arrive — no pile-up inside the device.
+            // Distance from mote to the device rect edge (0 when inside).
+            const r = capPxRects[d.targetIndex];
+            const dRect = distToRect(d.x, d.y, r);
+            // Also consider distance to the mote's specific target point for finer fade.
+            const dTarget = dist;
+            // Use the smaller of the two so fade kicks in as soon as the mote
+            // touches the device silhouette OR reaches its target point.
+            const dEff = Math.min(dRect, dTarget);
+            // normalized proximity: 1 at device, 0 at DISSOLVE_RADIUS away
+            const proxN = Math.max(0, Math.min(1, 1 - dEff / DISSOLVE_RADIUS));
+            // smoothstep for gentle, premium falloff
+            const smooth = proxN * proxN * (3 - 2 * proxN);
+            // one-way: fade only increases (absorbed = gone forever)
+            if(smooth > d.fade) d.fade = smooth;
+            // once effectively invisible, mark absorbed permanently
+            if(d.fade >= 0.995){
+              d.absorbed = true;
+              continue;
+            }
+          }
+        }
 
-  for (var i=0; i<dustMotes.length; i++) {
-    var m=dustMotes[i];
-    if (m.absorbed) continue;
+        d.x += d.vx*f; d.y += d.vy*f;
+      }
 
-    // past suck end — force absorb
-    if (ct >= SUCK_END) {
-      m.absorbed=true; m.state='absorbed';
-      continue;
-    }
-
-    if (m.state === 'suck') {
-      var elapsed = ct - m.suckStart;
-      var progress = Math.min(1, Math.max(0, elapsed/m.suckDur));
-      if (progress >= 1) {
-        m.absorbed=true; m.state='absorbed';
+      if(isNaN(d.x)||isNaN(d.y)||!isFinite(d.x)||!isFinite(d.y)){
+        d.x=Math.random()*W; d.y=Math.random()*H;
+        const a=Math.random()*Math.random()*Math.PI*2; const s=0.25;
+        d.vx=Math.cos(a)*s; d.vy=Math.sin(a)*s;
         continue;
       }
-      // easeInQuad for accelerating suck
-      var ep = progress*progress;
-      m.x = m.startX + (m.tx-m.startX)*ep;
-      m.y = m.startY + (m.ty-m.startY)*ep;
-      // curved path (perpendicular offset peaking mid-flight)
-      var dx = m.tx-m.startX, dy = m.ty-m.startY;
-      var len = Math.hypot(dx,dy) || 1;
-      var curve = Math.sin(progress*Math.PI) * m.curveAmt;
-      m.x += (-dy/len)*curve;
-      m.y += (dx/len)*curve;
-    } else {
-      // float phase — check if this mote should start sucking
-      if (ct >= m.suckStart && ct >= FLOAT_END) {
-        m.state='suck';
-        m.startX=m.x; m.startY=m.y;
-        // pick nearer device
-        var d0=Math.hypot(m.x-capPxRects[0].cx, m.y-capPxRects[0].cy);
-        var d1=Math.hypot(m.x-capPxRects[1].cx, m.y-capPxRects[1].cy);
-        var rect = d0<=d1 ? capPxRects[0] : capPxRects[1];
-        // random target spread across whole device rect
-        m.tx = rect.x + Math.random()*rect.w;
-        m.ty = rect.y + Math.random()*rect.h;
-        var dist = Math.hypot(m.tx-m.startX, m.ty-m.startY);
-        m.curveAmt = (Math.random()-0.5) * Math.min(80, dist*0.25);
-        continue;
+      // wrap only while not being strongly captured / dissolved
+      if(!sucking || d.fade < 0.3){
+        if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
+        if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
       }
-      // Brownian + gentle curl
-      m.vx += (Math.random()-0.5)*0.06*dts;
-      m.vy += (Math.random()-0.5)*0.06*dts;
-      m.vx += Math.sin(m.y*0.005 + t*0.00015)*0.012*dts;
-      m.vy += Math.cos(m.x*0.005 + t*0.00015)*0.012*dts;
-      m.vx *= Math.pow(0.95, dts);
-      m.vy *= Math.pow(0.95, dts);
-      m.x += m.vx*dts;
-      m.y += m.vy*dts;
-      // wrap edges
-      if (m.x < -15) m.x = W+15;
-      if (m.x > W+15) m.x = -15;
-      if (m.y < -15) m.y = H+15;
-      if (m.y > H+15) m.y = -15;
     }
   }
 }
+const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
+(function(){const m=moteSprite.getContext('2d');
+  const g=m.createRadialGradient(9,9,0,9,9,9);
+  g.addColorStop(0,'rgba(110,118,127,0.95)'); g.addColorStop(0.45,'rgba(110,118,127,0.55)'); g.addColorStop(1,'rgba(110,118,127,0)');
+  m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
+function drawDust(){
+  for(const bucket of dustB){
+    for(const d of bucket.motes){
+      if(d.absorbed) continue;
+      // opacity multiplier: 1 when far from device, 0 when arrived
+      const vis = 1 - d.fade;
+      if(vis <= 0.01) continue;
+      ctx.globalAlpha = bucket.a * roomO * vis;
+      const s=d.r*3.0;
+      ctx.drawImage(moteSprite, d.x-s/2, d.y-s/2, s, s);
+    }
+  }
+  ctx.globalAlpha=1;
+}
 
-function drawDust(t) {
-  if (roomO <= 0.001) return;
-  if (dustSprites.length === 0) makeDustSprites();
-  if (dustMotes.length === 0) return;
+// ---------- capture halos: soft feathered blue glow tracing each device silhouette ----------
+// Offscreen canvas for blurred glow — keeps dust/lens untouched by filter.
+const haloCanvas = document.createElement('canvas');
+const haloCtx = haloCanvas.getContext('2d');
 
-  var ct = (roomVid && isFinite(roomVid.currentTime)) ? roomVid.currentTime : 0;
+function roundedRectPath(c, x, y, w, h, rx, ry){
+  const r = Math.min(rx, w/2, h/2);
+  const rY = ry!=null ? Math.min(ry, w/2, h/2) : r;
+  c.beginPath();
+  c.moveTo(x+r, y);
+  c.lineTo(x+w-r, y);
+  c.quadraticCurveTo(x+w, y, x+w, y+rY);
+  c.lineTo(x+w, y+h-rY);
+  c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  c.lineTo(x+r, y+h);
+  c.quadraticCurveTo(x, y+h, x, y+h-rY);
+  c.lineTo(x, y+rY);
+  c.quadraticCurveTo(x, y, x+r, y);
+  c.closePath();
+}
 
+function drawHalos(){
+  const cp=displayCp;
+  // halo grows in over cp 0.25 .. 0.42, then holds
+  const haloStrength = Math.max(0, Math.min(1, (cp - HALO_START) / (HALO_FULL - HALO_START)));
+  if(haloStrength <= 0.001) return;
+
+  // Ensure offscreen canvas matches scene size (CSS px)
+  if(haloCanvas.width !== Math.ceil(W) || haloCanvas.height !== Math.ceil(H)){
+    haloCanvas.width = Math.ceil(W);
+    haloCanvas.height = Math.ceil(H);
+  }
+  haloCtx.setTransform(1,0,0,1,0,0);
+  haloCtx.clearRect(0,0,haloCanvas.width,haloCanvas.height);
+
+  // Draw each device silhouette as a filled blue shape, then blur heavily.
+  // We layer two passes: a tighter core and a wider outer bloom for soft falloff.
+  const blurOuter = 26;
+  const blurCore  = 14;
+
+  // Pass 1 — wide outer bloom
+  haloCtx.save();
+  haloCtx.filter = 'blur(' + blurOuter + 'px)';
+  haloCtx.fillStyle = 'rgba(27,123,255,0.55)';
+  for(let k=0;k<capPxRects.length;k++){
+    const r=capPxRects[k];
+    const pad = 6;
+    roundedRectPath(haloCtx, r.x-pad, r.y-pad, r.w+2*pad, r.h+2*pad, r.rx+pad*0.5, r.ry+pad*0.5);
+    haloCtx.fill();
+  }
+  haloCtx.restore();
+
+  // Pass 2 — tighter core, slightly brighter for a gentle hot center
+  haloCtx.save();
+  haloCtx.filter = 'blur(' + blurCore + 'px)';
+  haloCtx.fillStyle = 'rgba(27,123,255,0.75)';
+  for(let k=0;k<capPxRects.length;k++){
+    const r=capPxRects[k];
+    roundedRectPath(haloCtx, r.x, r.y, r.w, r.h, r.rx, r.ry);
+    haloCtx.fill();
+  }
+  haloCtx.restore();
+
+  // Composite onto main scene at low alpha — peak ~0.22 when full strength.
+  // No filter on main ctx, so dust + lens stay crisp.
   ctx.save();
-  ctx.globalCompositeOperation = 'source-over';
-
-  for (var i=0; i<dustMotes.length; i++) {
-    var m=dustMotes[i];
-    if (m.absorbed) continue;
-
-    var alpha = m.baseAlpha;
-    if (m.state === 'suck') {
-      var elapsed = ct - m.suckStart;
-      var progress = Math.min(1, Math.max(0, elapsed/m.suckDur));
-      // fade stays visible during travel, drops near arrival
-      alpha = m.baseAlpha * (1 - progress*progress);
-    }
-    // gentle twinkle
-    alpha *= (0.75 + 0.25*Math.sin(t*0.001 + m.phase));
-    // honor room reveal
-    alpha *= roomO;
-    if (alpha < 0.003) continue;
-
-    ctx.globalAlpha = alpha;
-    var ds = m.size * 4;
-    ctx.drawImage(dustSprites[m.spriteIdx], m.x-ds/2, m.y-ds/2, ds, ds);
-  }
-
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = 0.22 * haloStrength;
+  ctx.drawImage(haloCanvas, 0, 0, W, H);
   ctx.restore();
+  ctx.globalAlpha = 1;
 }
 
 // ---------- lens state ----------
@@ -553,7 +586,7 @@ const DETAIL_DATA={
        body:"Fungal spores are how mold spreads — microscopic reproductive grains, mostly 3 to 8 microns, drifting constantly through indoor and outdoor air.",
        source:"US EPA; size, PMC9025873 (2022)"},
       {label:"Its charge",
-       body:"A spore's wall runs net negative — its melanin coat holds a strong negative surface charge, around -40 millivolts on common mold. A living target: captured and destroyed on contact, through a physical mechanism.",
+       body:"A spore's wall runs net negative — its melanin coat holds a strong negative surface charge, around -40 millivolts on common mold. A living target: captured and destroyed on contact, by physical action.",
        source:"Pihet et al., BMC Microbiology, 2009"},
       {label:"How widespread",
        body:"Mold grows anywhere damp. Roughly 10 to 50% of buildings carry it, and spores ride the air in every room.",
@@ -571,7 +604,7 @@ const DETAIL_DATA={
        body:"A virus is a self-assembling biological nanoparticle — 20 to 300 nanometres of protein wrapped around genetic material. It can't copy itself; it has to hijack a living cell.",
        source:"Michen and Graule, J. Applied Microbiology, 2010"},
       {label:"Its charge",
-       body:"At the pH of the air and the airway, most viruses run net negative — their isoelectric point sits below neutral, so the surface carries negative charge. A living target: captured and destroyed on contact, through a physical mechanism.",
+       body:"At the pH of the air and the airway, most viruses run net negative — their isoelectric point sits below neutral, so the surface carries negative charge. A living target: captured and destroyed on contact, by physical action.",
        source:"Michen and Graule, Isoelectric points of viruses, 2010"},
       {label:"How it spreads",
        body:"Airborne and relentless. Seasonal influenza alone runs to about a billion cases a year.",
@@ -589,7 +622,7 @@ const DETAIL_DATA={
        body:"Bacteria are single-celled microbes. Airborne, they ride on droplets and dust — from a quarter of a micron up to about 20 microns across.",
        source:"Ghosh et al., Environment International, 2015"},
       {label:"Its charge",
-       body:"A bacterium's outer surface runs net negative — its lipopolysaccharide and teichoic acids carry ionized phosphate and carboxyl groups. A living target: captured and destroyed on contact, through a physical mechanism.",
+       body:"A bacterium's outer surface runs net negative — its lipopolysaccharide and teichoic acids carry ionized phosphate and carboxyl groups. A living target: captured and destroyed on contact, by physical action.",
        source:"Wilson et al., J. Microbiological Methods, 2001"},
       {label:"How widespread",
        body:"In hospitals alone, about 7 of every 100 patients in wealthy countries pick up an infection during their stay.",
@@ -709,7 +742,6 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 window.addEventListener('focus',resetClock);
 
 resize();
-initDust();
 bub.x=W*0.5; bub.y=H*0.5; bub.tx=bub.x; bub.ty=bub.y;
 setSpec(PROBE!==null?(+PROBE||0):0);
 if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE||0).y; }
@@ -796,26 +828,6 @@ if(DETAIL_QP!==null){
   window.addEventListener('load', ()=>setTimeout(()=>enterDetail(idx), 900));
 }
 
-// ---------- video auto-play state ----------
-let autoPlayed = false;   // screen 2 auto-plays its video once on arrival, at a gentle pace
-const AUTOPLAY_RATE = 0.5;   // gentle — slows the whole sequence, incl. the baked-in blue turn-on
-
-// ---------- resolution swap: the words change ONLY after the room video fully ends (all dust cleaned) ----------
-const resolveQP = new URLSearchParams(location.search).get('resolve');
-const resolveForced = (resolveQP !== null);          // ?resolve=1 forces the resolution shown (QA hook)
-let resolveRaw = (resolveForced && parseFloat(resolveQP) > 0) ? 1 : 0;
-let roomEnded = false;
-roomVid.addEventListener('ended', function(){ roomEnded = true; });
-// Prime the decoder on load (muted play->pause) so the first frame is painted and playback resumes
-// INSTANTLY when the room reveals — kills the static-frame-then-video hitch.
-let primed = false;
-function primeVideo(){
-  if(primed) return; primed = true;
-  try { roomVid.play().then(function(){ if(!autoPlayed){ roomVid.pause(); roomVid.currentTime = 0; } }).catch(function(){}); } catch(e){}
-}
-roomVid.addEventListener('loadeddata', primeVideo);
-if (roomVid.readyState >= 2) primeVideo();
-
 // ---------- main loop ----------
 function tick(t){
   const dt=Math.min(40, t-lastT);
@@ -834,25 +846,13 @@ function tick(t){
   document.body.style.setProperty('--reveal-text', textO);
   document.body.style.setProperty('--reveal-lens', lensO);
 
-  // Start the room video AS SOON AS the room begins to reveal — so it is ALREADY in motion when it
-  // appears, never a static first-frame that then jumps to video. It plays through the morph (behind the
-  // hero) at a gentle pace, so screen 2 lands on a live, already-moving room.
-  if (!autoPlayed && currentReveal > 0.02 && roomVid && roomVid.readyState >= 2) {
-    autoPlayed = true;
-    try { roomVid.playbackRate = AUTOPLAY_RATE; roomVid.currentTime = 0; roomVid.play().catch(function(){}); } catch(e){}
+  // capture progress smoothing — slow & premium (~2.5s for 0->1)
+  if (!captureFixed) {
+    displayCp += (captureTarget - displayCp) * 0.045;
+    if (Math.abs(captureTarget - displayCp) < 0.0005) displayCp = captureTarget;
   }
-  // Reset only once fully back on screen 1, so the next arrival replays cleanly from the top.
-  if (currentReveal < 0.02) { autoPlayed = false; roomEnded = false; resolveRaw = 0; }
 
-  // The resolution words appear ONLY after the room video has fully finished (all dust cleaned) — never during float or suck-in.
-  if (!resolveForced) {
-    const dur = roomVid.duration || 9;
-    const ended = roomEnded || (roomVid.readyState >= 1 && dur > 1 && isFinite(roomVid.currentTime) && roomVid.currentTime >= dur - 0.05);
-    if (ended && currentReveal > 0.85) resolveRaw = Math.min(1, resolveRaw + dt / 900);   // ~0.9s gentle cross-fade
-  }
-  const rp = easeInOut(Math.max(0, Math.min(1, resolveRaw)));
-  document.body.style.setProperty('--hero-op', textO * (1 - rp));    // problem headline fades out
-  document.body.style.setProperty('--resolve-op', textO * rp);        // resolution fades in
+  updateDust(dt);
 
   if(detailMode){
     const d=detailLensTarget();
@@ -900,7 +900,6 @@ function tick(t){
   }
 
   if(!detailMode) bub.R+=(targetR()-bub.R)*0.12;
-  updateDust(t, dt);
   draw(t);
   requestAnimationFrame(tick);
 }
@@ -910,7 +909,8 @@ autoT0=performance.now();
 
 function draw(t){
   ctx.clearRect(0,0,W,H);
-  drawDust(t);
+  drawHalos();
+  drawDust();
   drawLens(t);
   positionTag();
 }
