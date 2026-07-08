@@ -133,21 +133,25 @@ section{
   border-top:1px solid var(--hair);
 }
 .verticals li{
+  border-bottom:1px solid var(--hair);
+}
+/* each vertical is a link to its page; the whole row is the click target */
+.verticals a{
   display:flex;
   align-items:center;
   gap:16px;
   padding:11px 2px;
-  border-bottom:1px solid var(--hair);
   font-family:var(--stack);
   font-size:clamp(17px, 1.35vw, 20px);   /* same size as the paragraphs above */
   font-weight:450;
   letter-spacing:0.002em;
   color:var(--ink);
+  text-decoration:none;
   transition:color .2s ease;
 }
 /* hover: the row turns bold + blue */
-.verticals li:hover{ color:var(--accent); }
-.verticals li:hover .v-name{ font-weight:650; }
+.verticals a:hover{ color:var(--accent); }
+.verticals a:hover .v-name{ font-weight:650; }
 .v-mark{
   color:var(--accent);
   font-weight:600;
@@ -229,11 +233,11 @@ section{
     <div class="cpolar">
       <p class="cpolar-lead">C-POLAR Technologies, Inc. is a <em>Health Science Platform Company</em> built around its patented NanoFlashing™ technology. The platform has five primary application verticals:</p>
       <ul class="verticals">
-        <li><span class="v-mark">+</span><span class="v-name">Air</span></li>
-        <li><span class="v-mark">+</span><span class="v-name">Water</span></li>
-        <li><span class="v-mark">+</span><span class="v-name">Personal Protective Wear (PPW™)</span></li>
-        <li><span class="v-mark">+</span><span class="v-name">Food Packaging</span></li>
-        <li><span class="v-mark">+</span><span class="v-name">Medical Devices</span></li>
+        <li><a href="air.html"><span class="v-mark">+</span><span class="v-name">Air</span></a></li>
+        <li><a href="water.html"><span class="v-mark">+</span><span class="v-name">Water</span></a></li>
+        <li><a href="ppw.html"><span class="v-mark">+</span><span class="v-name">Personal Protective Wear (PPW™)</span></a></li>
+        <li><a href="food_packaging.html"><span class="v-mark">+</span><span class="v-name">Food Packaging</span></a></li>
+        <li><a href="medical_devices.html"><span class="v-mark">+</span><span class="v-name">Medical Devices</span></a></li>
       </ul>
     </div>
   </div>
