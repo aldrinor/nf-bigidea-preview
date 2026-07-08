@@ -174,8 +174,8 @@
       if(idx === 2){
         try{ f2.contentWindow.postMessage({type:'nf-play'}, '*'); }catch(e){}
       }
-      // arriving at screen 2: reset the capture so the dust is present and the first scroll plays it
-      if(idx === 1){ s2captured = false; sendCapture(0); }
+      // arriving at screen 2: reset the scrub so the dust is floating and scrolling scrubs it in
+      if(idx === 1){ capP = 0; sendCapture(0); }
     }
   }
 
@@ -213,16 +213,29 @@
   }
 
   // ---- Screen 2 capture sub-step: 1st scroll down plays the halo + dust-suck; next scroll advances ----
-  var s2captured = false;
+  // Screen 2 is SCROLL-SCRUBBED: capP 0->1 accrues over several scrolls
+  // (dust floats a while -> halo -> gradual suck -> clean); only when full does the next scroll advance.
+  var capP = 0;
+  var CAP_STEP = 0.2;   // ~5 deliberate scrolls: dust floats, then halo, then gradual suck, then clean
   function sendCapture(p){ try{ f1.contentWindow.postMessage({type:'nf-capture', p:p}, '*'); }catch(e){} }
   function advance(dir){
     if(idx === 1){
       if(dir > 0){
-        // first scroll down on screen 2 plays the ~2.5s capture (halo first, then even suck-in); next scroll advances
-        if(!s2captured){ s2captured = true; sendCapture(1); locked = true; setTimeout(function(){ locked = false; }, 2600); return; }
-        goTo(2);
+        if(capP < 0.999){
+          capP = Math.min(1, capP + CAP_STEP);
+          sendCapture(capP);
+          locked = true; setTimeout(function(){ locked = false; }, 260);
+          return;
+        }
+        goTo(2);   // room is clean -> next scroll moves on
       } else {
-        goTo(0);  // scroll up leaves screen 2; the suck-in is one-way (absorbed dust stays gone)
+        if(capP > 0.001){
+          capP = Math.max(0, capP - CAP_STEP);
+          sendCapture(capP);
+          locked = true; setTimeout(function(){ locked = false; }, 260);
+          return;
+        }
+        goTo(0);   // back at the floating-dust start -> leave up (absorbed dust never regenerates)
       }
     } else {
       goTo(idx + dir);

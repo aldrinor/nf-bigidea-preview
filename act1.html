@@ -171,16 +171,17 @@
 <script>
 function easeInOut(k){ return k<0.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2; }
 
-// ---------- capture device rectangles (tunable, normalized fractions of W,H) ----------
-// [0] = supply vent (square), [1] = wall purifier (rounded rect)
-const CAP_RECTS = [
-  { x0:0.457, y0:0.080, x1:0.567, y1:0.172, round:0.10 },
-  { x0:0.634, y0:0.360, x1:0.691, y1:0.544, round:0.45 }
+// ---------- image-anchored device rectangles ----------
+// The room photo's native pixel size; CSS uses center/cover so we replicate that transform.
+const IMG_W = 1344, IMG_H = 752;
+// Device bounding boxes as fractions OF THE IMAGE (1344x752)
+const DEVICE_IMG_RECTS = [
+  { fx0:0.446, fy0:0.092, fx1:0.567, fy1:0.186, round:0.10 },  // supply vent (square)
+  { fx0:0.622, fy0:0.376, fx1:0.682, fy1:0.548, round:0.42 }   // wall purifier (rounded rect)
 ];
-// pixel rects recomputed on resize
-let capPxRects = CAP_RECTS.map(r=>({
-  x:0,y:0,w:0,h:0,rx:0,ry:0,
-  cx:0,cy:0
+// pixel rects recomputed on resize via the same cover transform CSS uses
+let capPxRects = DEVICE_IMG_RECTS.map(()=>({
+  x:0,y:0,w:0,h:0,rx:0,ry:0,cx:0,cy:0
 }));
 
 // ---------- reveal (scroll-linked dilute-in from hero) ----------
@@ -324,6 +325,8 @@ function mote(){
   const sx=Math.random()*W, sy=Math.random()*H;
   const ti = nearestRectIndex(sx, sy);
   const tgt = randomPointInRect(capPxRects[ti]);
+  // per-mote staggered capture threshold spread across 0.42..0.92
+  const captureStart = 0.42 + Math.random()*0.50;
   return {
     x:sx, y:sy,
     vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
@@ -332,7 +335,8 @@ function mote(){
     targetX:tgt.x,
     targetY:tgt.y,
     absorbed:false,
-    captureBlend:0
+    captureBlend:0,
+    captureStart:captureStart
   };
 }
 function resize(){
@@ -340,10 +344,16 @@ function resize(){
   W=window.innerWidth; H=window.innerHeight;
   cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  // recompute capture rect pixel geometry
-  capPxRects = CAP_RECTS.map(r=>{
-    const x=r.x0*W, y=r.y0*H, w=(r.x1-r.x0)*W, h=(r.y1-r.y0)*H;
-    const rad = r.round * Math.min(w,h);
+  // recompute capture rect pixel geometry via the SAME cover transform CSS uses
+  const scale = Math.max(W / IMG_W, H / IMG_H);
+  const drawnW = IMG_W * scale, drawnH = IMG_H * scale;
+  const offX = (W - drawnW) / 2, offY = (H - drawnH) / 2;
+  capPxRects = DEVICE_IMG_RECTS.map(r=>{
+    const x = offX + r.fx0 * drawnW;
+    const y = offY + r.fy0 * drawnH;
+    const w = (r.fx1 - r.fx0) * drawnW;
+    const h = (r.fy1 - r.fy0) * drawnH;
+    const rad = r.round * Math.min(w, h);
     return { x, y, w, h, rx:rad, ry:rad, cx:x+w/2, cy:y+h/2 };
   });
   const n=Math.round(Math.min(3800, W*H/520));
@@ -352,19 +362,20 @@ function resize(){
 }
 
 // capture timing constants
-const HALO_START = 0.0;
-const HALO_FULL  = 0.35;
-const SUCK_START = 0.45;
-const SUCK_END   = 1.0;
+const HALO_START = 0.25;
+const HALO_FULL  = 0.42;
+const SUCK_GLOBAL_START = 0.42;
 
 function updateDust(dt){
   const f=dt/16.67;
   const cp=displayCp;
-  const sucking = cp >= SUCK_START;
   for(const bucket of dustB){
     for(let i=0, n=bucket.motes.length; i<n; i++){
       const d=bucket.motes[i];
       if(d.absorbed) continue;
+
+      // per-mote sucking: only when cp exceeds this mote's staggered threshold
+      const sucking = cp >= d.captureStart;
 
       if(!REDUCED){
         d.vx += (Math.random()-.5)*0.018*f;
@@ -380,13 +391,13 @@ function updateDust(dt){
           const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
         }
 
-        // capture attraction: only after halo is established (cp >= SUCK_START)
+        // capture attraction: only after this mote's staggered threshold
         if(sucking){
-          const cb = Math.max(0, Math.min(1, (cp - SUCK_START) / (SUCK_END - SUCK_START)));
+          const cb = Math.max(0, Math.min(1, (cp - d.captureStart) / (1.0 - d.captureStart)));
           if(cb > 0){
             const dx = d.targetX - d.x, dy = d.targetY - d.y;
             const dist = Math.hypot(dx, dy) + 0.0001;
-            // pull grows with capture progress
+            // pull grows with local capture progress
             const pull = cb * 0.05 * f;
             d.vx += dx * pull;
             d.vy += dy * pull;
@@ -394,10 +405,10 @@ function updateDust(dt){
             const damp = 1 - cb*0.55;
             d.vx *= damp;
             d.vy *= damp;
-            // update captureBlend based on proximity to target + progress
+            // update captureBlend based on proximity to target + progress (one-way: only increases)
             const prox = Math.max(0, 1 - dist/120);
             const blend = Math.min(1, cb*0.7 + prox*cb*0.6);
-            d.captureBlend = Math.max(d.captureBlend, blend);
+            if(blend > d.captureBlend) d.captureBlend = blend;
             if(d.captureBlend >= 0.995){
               d.absorbed = true;
               continue;
@@ -464,8 +475,7 @@ function roundedRectPath(c, x, y, w, h, rx, ry){
 
 function drawHalos(){
   const cp=displayCp;
-  if(cp <= 0.001) return;
-  // halo strength: 0 -> full over cp 0.0 .. 0.35, then holds; fades as cp lowers
+  // halo grows in over cp 0.25 .. 0.42, then holds
   const haloStrength = Math.max(0, Math.min(1, (cp - HALO_START) / (HALO_FULL - HALO_START)));
   if(haloStrength <= 0.001) return;
 
