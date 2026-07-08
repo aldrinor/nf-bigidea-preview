@@ -315,6 +315,183 @@ function resize(){
     const rad = r.round * Math.min(w, h);
     return { x, y, w, h, rx:rad, ry:rad, cx:x+w/2, cy:y+h/2 };
   });
+  // adjust dust count for breakpoint
+  if (typeof dustMotes !== 'undefined' && dustMotes && dustMotes.length > 0) {
+    const target = W < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);
+    while (dustMotes.length > target) dustMotes.pop();
+    while (dustMotes.length < target) dustMotes.push(makeMote());
+  }
+}
+
+// ---------- dust particle system (synced to roomVid.currentTime) ----------
+const DUST_RGB = [[110,118,127], [122,128,136], [94,102,110]];
+let dustSprites = [];
+let dustMotes = [];
+let prevCT = 0;
+const FLOAT_END = 3.6;
+const SUCK_END = 8.4;
+
+function makeDustSprites() {
+  dustSprites = DUST_RGB.map(function(rgb){
+    var r=rgb[0], g=rgb[1], b=rgb[2];
+    var s=document.createElement('canvas');
+    s.width=24; s.height=24;
+    var sc=s.getContext('2d');
+    var grd=sc.createRadialGradient(12,12,0, 12,12,12);
+    grd.addColorStop(0, 'rgba('+r+','+g+','+b+',1)');
+    grd.addColorStop(0.35, 'rgba('+r+','+g+','+b+',0.5)');
+    grd.addColorStop(1, 'rgba('+r+','+g+','+b+',0)');
+    sc.fillStyle=grd;
+    sc.fillRect(0,0,24,24);
+    return s;
+  });
+}
+
+function makeMote() {
+  return {
+    x: Math.random()*W,
+    y: Math.random()*H,
+    vx: (Math.random()-0.5)*0.4,
+    vy: (Math.random()-0.5)*0.4,
+    size: 1.0+Math.random()*3.0,
+    baseAlpha: 0.15+Math.random()*0.45,
+    spriteIdx: Math.floor(Math.random()*3),
+    phase: Math.random()*Math.PI*2,
+    state: 'float',
+    suckStart: FLOAT_END+Math.random()*3.4,
+    suckDur: 0.6+Math.random()*0.8,
+    tx: 0, ty: 0,
+    startX: 0, startY: 0,
+    curveAmt: 0,
+    absorbed: false
+  };
+}
+
+function initDust() {
+  if (dustSprites.length === 0) makeDustSprites();
+  var count = W < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);
+  dustMotes = [];
+  for (var i=0; i<count; i++) dustMotes.push(makeMote());
+}
+
+function resetDust() {
+  for (var i=0; i<dustMotes.length; i++) {
+    var m=dustMotes[i];
+    m.state='float';
+    m.absorbed=false;
+    m.x=Math.random()*W;
+    m.y=Math.random()*H;
+    m.vx=(Math.random()-0.5)*0.4;
+    m.vy=(Math.random()-0.5)*0.4;
+    m.suckStart=FLOAT_END+Math.random()*3.4;
+    m.suckDur=0.6+Math.random()*0.8;
+    m.curveAmt=0;
+  }
+}
+
+function updateDust(t, dt) {
+  var ct = (roomVid && isFinite(roomVid.currentTime)) ? roomVid.currentTime : 0;
+  // detect video restart (currentTime jumps backward)
+  if (ct < prevCT - 0.3) resetDust();
+  prevCT = ct;
+
+  var dts = Math.min(2.5, dt/16.67);
+
+  for (var i=0; i<dustMotes.length; i++) {
+    var m=dustMotes[i];
+    if (m.absorbed) continue;
+
+    // past suck end — force absorb
+    if (ct >= SUCK_END) {
+      m.absorbed=true; m.state='absorbed';
+      continue;
+    }
+
+    if (m.state === 'suck') {
+      var elapsed = ct - m.suckStart;
+      var progress = Math.min(1, Math.max(0, elapsed/m.suckDur));
+      if (progress >= 1) {
+        m.absorbed=true; m.state='absorbed';
+        continue;
+      }
+      // easeInQuad for accelerating suck
+      var ep = progress*progress;
+      m.x = m.startX + (m.tx-m.startX)*ep;
+      m.y = m.startY + (m.ty-m.startY)*ep;
+      // curved path (perpendicular offset peaking mid-flight)
+      var dx = m.tx-m.startX, dy = m.ty-m.startY;
+      var len = Math.hypot(dx,dy) || 1;
+      var curve = Math.sin(progress*Math.PI) * m.curveAmt;
+      m.x += (-dy/len)*curve;
+      m.y += (dx/len)*curve;
+    } else {
+      // float phase — check if this mote should start sucking
+      if (ct >= m.suckStart && ct >= FLOAT_END) {
+        m.state='suck';
+        m.startX=m.x; m.startY=m.y;
+        // pick nearer device
+        var d0=Math.hypot(m.x-capPxRects[0].cx, m.y-capPxRects[0].cy);
+        var d1=Math.hypot(m.x-capPxRects[1].cx, m.y-capPxRects[1].cy);
+        var rect = d0<=d1 ? capPxRects[0] : capPxRects[1];
+        // random target spread across whole device rect
+        m.tx = rect.x + Math.random()*rect.w;
+        m.ty = rect.y + Math.random()*rect.h;
+        var dist = Math.hypot(m.tx-m.startX, m.ty-m.startY);
+        m.curveAmt = (Math.random()-0.5) * Math.min(80, dist*0.25);
+        continue;
+      }
+      // Brownian + gentle curl
+      m.vx += (Math.random()-0.5)*0.06*dts;
+      m.vy += (Math.random()-0.5)*0.06*dts;
+      m.vx += Math.sin(m.y*0.005 + t*0.00015)*0.012*dts;
+      m.vy += Math.cos(m.x*0.005 + t*0.00015)*0.012*dts;
+      m.vx *= Math.pow(0.95, dts);
+      m.vy *= Math.pow(0.95, dts);
+      m.x += m.vx*dts;
+      m.y += m.vy*dts;
+      // wrap edges
+      if (m.x < -15) m.x = W+15;
+      if (m.x > W+15) m.x = -15;
+      if (m.y < -15) m.y = H+15;
+      if (m.y > H+15) m.y = -15;
+    }
+  }
+}
+
+function drawDust(t) {
+  if (roomO <= 0.001) return;
+  if (dustSprites.length === 0) makeDustSprites();
+  if (dustMotes.length === 0) return;
+
+  var ct = (roomVid && isFinite(roomVid.currentTime)) ? roomVid.currentTime : 0;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+
+  for (var i=0; i<dustMotes.length; i++) {
+    var m=dustMotes[i];
+    if (m.absorbed) continue;
+
+    var alpha = m.baseAlpha;
+    if (m.state === 'suck') {
+      var elapsed = ct - m.suckStart;
+      var progress = Math.min(1, Math.max(0, elapsed/m.suckDur));
+      // fade stays visible during travel, drops near arrival
+      alpha = m.baseAlpha * (1 - progress*progress);
+    }
+    // gentle twinkle
+    alpha *= (0.75 + 0.25*Math.sin(t*0.001 + m.phase));
+    // honor room reveal
+    alpha *= roomO;
+    if (alpha < 0.003) continue;
+
+    ctx.globalAlpha = alpha;
+    var ds = m.size * 4;
+    ctx.drawImage(dustSprites[m.spriteIdx], m.x-ds/2, m.y-ds/2, ds, ds);
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
 }
 
 // ---------- lens state ----------
@@ -510,6 +687,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 window.addEventListener('focus',resetClock);
 
 resize();
+initDust();
 bub.x=W*0.5; bub.y=H*0.5; bub.tx=bub.x; bub.ty=bub.y;
 setSpec(PROBE!==null?(+PROBE||0):0);
 if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE||0).y; }
@@ -672,6 +850,7 @@ function tick(t){
   }
 
   if(!detailMode) bub.R+=(targetR()-bub.R)*0.12;
+  updateDust(t, dt);
   draw(t);
   requestAnimationFrame(tick);
 }
@@ -681,6 +860,7 @@ autoT0=performance.now();
 
 function draw(t){
   ctx.clearRect(0,0,W,H);
+  drawDust(t);
   drawLens(t);
   positionTag();
 }
