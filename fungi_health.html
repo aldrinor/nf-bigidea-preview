@@ -35,7 +35,7 @@
   .grid{
     flex:1;
     display:grid;
-    grid-template-columns:44% 56%;
+    grid-template-columns:48% 52%;
     align-items:start;
     width:100%;
     min-height:0;
@@ -48,24 +48,24 @@
     justify-content:flex-start;                 /* top-anchored so the passage never shifts vertically */
     min-width:0;
     max-height:100vh;
-    padding:clamp(56px,7.5vh,74px) clamp(24px,6vw,96px) clamp(20px,3vh,36px);
+    padding:clamp(28px,4vh,50px) clamp(24px,5vw,80px) clamp(16px,2vh,28px);
     z-index:10;
     position:relative;
   }
   h1.headline{
     font-family:var(--stack);
     font-weight:600;
-    font-size:clamp(24px, 2.7vw, 34px);
+    font-size:clamp(20px, 1.95vw, 28px);
     line-height:1.32;
     letter-spacing:-0.022em;
     color:var(--headline-ink);
     margin:0 0 clamp(14px,2vh,22px);
-    max-width:18ch;
+    max-width:none;
   }
   h1.headline em{font-style:normal;color:var(--red)}
 
   .card{
-    min-height:230px;
+    min-height:170px;
     position:relative;
     flex-shrink:0;
   }
@@ -86,21 +86,21 @@
   }
   .card-intro{
     font-family:var(--stack);
-    font-size:19px;
-    line-height:1.55;
+    font-size:17.5px;
+    line-height:1.5;
     color:#1a1a1a;
     font-weight:400;
     margin:0 0 14px;
-    max-width:440px;
+    max-width:540px;
   }
   .card-impacts p{
     font-family:var(--stack);
-    font-size:19px;
-    line-height:1.55;
+    font-size:17.5px;
+    line-height:1.5;
     color:#1a1a1a;
     font-weight:400;
     margin:0 0 12px;
-    max-width:440px;
+    max-width:540px;
   }
   .card-impacts p:last-child{margin-bottom:0}
   .card-impacts a{
@@ -113,7 +113,7 @@
 
   /* ANATOMY INDEX — vertical selector */
   .index{
-    margin-top:clamp(16px,2.2vh,24px);
+    margin-top:clamp(10px,1.4vh,18px);
     display:flex;
     flex-direction:column;
     border-top:1px solid var(--hair);
@@ -124,7 +124,7 @@
     align-items:center;
     gap:18px;
     width:100%;
-    padding:11px 6px 11px 14px;
+    padding:8px 6px 8px 14px;
     background:transparent;
     border:0;
     border-bottom:1px solid var(--hair);
@@ -355,7 +355,7 @@
     }
     .card{min-height:180px}
     h1.headline{max-width:none}
-    .index-row{padding:11px 6px 11px 14px}
+    .index-row{padding:8px 6px 8px 14px}
     .index-row .nm{font-size:16px}
   }
 
@@ -498,7 +498,7 @@
       impacts:[
         {text:"A Brown University study of nearly 6,000 adults across eight European cities found a moldy home linked to [about 40% higher odds of depression].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC1994167/"}
       ],
-      ox:0.50, oy:0.045, label:"Brain & Mind"
+      ox:0.50, oy:0.045, oyAnchor:0.42, label:"Brain & Mind"
     },
     nose_sinuses: {
       name:"Nose & Sinuses",
@@ -648,7 +648,7 @@
       const fW = figure.offsetWidth;
       const fH = figure.offsetHeight;
       targetX = restOffsetX() - (d.ox - 0.5) * fW * scale;
-      targetY = -(d.oy - 0.5) * fH * scale;
+      targetY = -(d.oy - (d.oyAnchor||0.5)) * fH * scale;
       
       applyTransform();
       

@@ -493,8 +493,9 @@ const MONTHS_FULL = ['January','February','March','April','May','June','July','A
 const PLAY_INTERVAL = 700;
 
 const realMonth = new Date().getMonth(); // 0=Jan .. 11=Dec
-let currentMonth = realMonth;
-let loopStart = realMonth;   // the month a play-tour started from; tour rests back here
+const PEAK_MONTH = 7;        // August — the worst month (season.index peaks here); the map opens here
+let currentMonth = PEAK_MONTH;
+let loopStart = PEAK_MONTH;   // the month a play-tour started from; tour rests back here
 let playing = false;
 let playTimer = null;
 let stateLayer = null;
@@ -650,7 +651,7 @@ async function loadStates(){
 // Source link — built from MOLD.meta, linking the words "World Population Review" if present
 (function buildSource(){
   const el = document.getElementById('chromeSource');
-  el.innerHTML = 'Source — <a href="https://worldpopulationreview.com/state-rankings/mold-count-by-state" target="_blank" rel="noopener">World Population Review</a> · EPA · AAAAI';
+  el.innerHTML = 'Source — HouseFresh via <a href="https://worldpopulationreview.com/state-rankings/mold-count-by-state" target="_blank" rel="noopener">World Population Review</a> · EPA · AAAAI';
 })();
 
 setupMonthTicks();
@@ -676,20 +677,15 @@ window.addEventListener('resize', function(){
   resizeTimer = setTimeout(function(){ map.invalidateSize(); fitUS(); }, 100);
 });
 
-// Open on the CURRENT month (strong, in-season) — not January — then tour the year once.
+// Open STATIC on the worst month (August). The seasonal tour plays ONLY when the user clicks Play.
 recolor(currentMonth);
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  play();
-}
 
 // Embedded in the deck wrapper: pause the seasonal tour when scrolled away, resume when active.
 if (isEmbedded) {
   window.addEventListener('message', function(ev){
     const d = ev.data || {};
     if (d.type === 'nf-inactive') { pause(); }
-    else if (d.type === 'nf-active') {
-      if (!playing && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) play();
-    }
+    // nf-active: do NOT auto-play — the map stays on the worst month until the user clicks Play.
   });
 }
 </script>
