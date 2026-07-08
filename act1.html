@@ -174,8 +174,8 @@ function easeInOut(k){ return k<0.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2; }
 // ---------- capture device rectangles (tunable, normalized fractions of W,H) ----------
 // [0] = supply vent (square), [1] = wall purifier (rounded rect)
 const CAP_RECTS = [
-  { x0:0.455, y0:0.075, x1:0.525, y1:0.185, round:0.10 },
-  { x0:0.585, y0:0.350, x1:0.650, y1:0.490, round:0.45 }
+  { x0:0.457, y0:0.080, x1:0.567, y1:0.172, round:0.10 },
+  { x0:0.634, y0:0.360, x1:0.691, y1:0.544, round:0.45 }
 ];
 // pixel rects recomputed on resize
 let capPxRects = CAP_RECTS.map(r=>({
@@ -441,7 +441,11 @@ function drawDust(){
   ctx.globalAlpha=1;
 }
 
-// ---------- capture halos: soft blue glow tracing each device RECTANGLE shape ----------
+// ---------- capture halos: soft feathered blue glow tracing each device silhouette ----------
+// Offscreen canvas for blurred glow — keeps dust/lens untouched by filter.
+const haloCanvas = document.createElement('canvas');
+const haloCtx = haloCanvas.getContext('2d');
+
 function roundedRectPath(c, x, y, w, h, rx, ry){
   const r = Math.min(rx, w/2, h/2);
   const rY = ry!=null ? Math.min(ry, w/2, h/2) : r;
@@ -457,53 +461,57 @@ function roundedRectPath(c, x, y, w, h, rx, ry){
   c.quadraticCurveTo(x, y, x+r, y);
   c.closePath();
 }
+
 function drawHalos(){
   const cp=displayCp;
   if(cp <= 0.001) return;
-  // halo strength: 0 -> full over cp 0.0 .. 0.35, then holds
+  // halo strength: 0 -> full over cp 0.0 .. 0.35, then holds; fades as cp lowers
   const haloStrength = Math.max(0, Math.min(1, (cp - HALO_START) / (HALO_FULL - HALO_START)));
   if(haloStrength <= 0.001) return;
 
-  ctx.save();
+  // Ensure offscreen canvas matches scene size (CSS px)
+  if(haloCanvas.width !== Math.ceil(W) || haloCanvas.height !== Math.ceil(H)){
+    haloCanvas.width = Math.ceil(W);
+    haloCanvas.height = Math.ceil(H);
+  }
+  haloCtx.setTransform(1,0,0,1,0,0);
+  haloCtx.clearRect(0,0,haloCanvas.width,haloCanvas.height);
 
+  // Draw each device silhouette as a filled blue shape, then blur heavily.
+  // We layer two passes: a tighter core and a wider outer bloom for soft falloff.
+  const blurOuter = 26;
+  const blurCore  = 14;
+
+  // Pass 1 — wide outer bloom
+  haloCtx.save();
+  haloCtx.filter = 'blur(' + blurOuter + 'px)';
+  haloCtx.fillStyle = 'rgba(27,123,255,0.55)';
   for(let k=0;k<capPxRects.length;k++){
     const r=capPxRects[k];
-    const pad = 10 + haloStrength*16;
-
-    // outer soft glow: blurred rounded-rect fill, fading past edges
-    ctx.save();
-    ctx.filter = 'blur(' + (10 + haloStrength*8) + 'px)';
-    ctx.fillStyle = 'rgba(27,123,255,' + (0.10*haloStrength) + ')';
-    roundedRectPath(ctx, r.x-pad, r.y-pad, r.w+2*pad, r.h+2*pad, r.rx+pad*0.6, r.ry+pad*0.6);
-    ctx.fill();
-    ctx.restore();
-
-    // inner area fill (gentle)
-    ctx.save();
-    ctx.filter = 'blur(' + (4 + haloStrength*4) + 'px)';
-    ctx.fillStyle = 'rgba(27,123,255,' + (0.07*haloStrength) + ')';
-    roundedRectPath(ctx, r.x, r.y, r.w, r.h, r.rx, r.ry);
-    ctx.fill();
-    ctx.restore();
-
-    // soft outline tracing the device silhouette
-    ctx.save();
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(27,123,255,' + (0.32*haloStrength) + ')';
-    roundedRectPath(ctx, r.x, r.y, r.w, r.h, r.rx, r.ry);
-    ctx.stroke();
-    ctx.restore();
-
-    // a second, slightly larger faint outline for a gentle outer edge
-    ctx.save();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(27,123,255,' + (0.14*haloStrength) + ')';
-    roundedRectPath(ctx, r.x-3, r.y-3, r.w+6, r.h+6, r.rx+3, r.ry+3);
-    ctx.stroke();
-    ctx.restore();
+    const pad = 6;
+    roundedRectPath(haloCtx, r.x-pad, r.y-pad, r.w+2*pad, r.h+2*pad, r.rx+pad*0.5, r.ry+pad*0.5);
+    haloCtx.fill();
   }
+  haloCtx.restore();
 
+  // Pass 2 — tighter core, slightly brighter for a gentle hot center
+  haloCtx.save();
+  haloCtx.filter = 'blur(' + blurCore + 'px)';
+  haloCtx.fillStyle = 'rgba(27,123,255,0.75)';
+  for(let k=0;k<capPxRects.length;k++){
+    const r=capPxRects[k];
+    roundedRectPath(haloCtx, r.x, r.y, r.w, r.h, r.rx, r.ry);
+    haloCtx.fill();
+  }
+  haloCtx.restore();
+
+  // Composite onto main scene at low alpha — peak ~0.22 when full strength.
+  // No filter on main ctx, so dust + lens stay crisp.
+  ctx.save();
+  ctx.globalAlpha = 0.22 * haloStrength;
+  ctx.drawImage(haloCanvas, 0, 0, W, H);
   ctx.restore();
+  ctx.globalAlpha = 1;
 }
 
 // ---------- lens state ----------
