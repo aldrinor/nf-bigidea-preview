@@ -105,6 +105,16 @@
     return k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k+2, 2)/2;
   }
 
+  function smoothstep(a, b, x){
+    var t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  }
+
+  // act1 reveal ramp: reaches ~1.0 by q≈0.7 so the room is well established mid-roll
+  function fastReveal(q){
+    return smoothstep(0, 0.7, q);
+  }
+
   function applyState(from, to, q){
     var heroOp, act1Op, act1Rev, frame2Op, throughP;
 
@@ -113,11 +123,11 @@
       else if(from === 1){ heroOp=0; act1Op=1; act1Rev=1; frame2Op=0; throughP=1; }
       else { heroOp=0; act1Op=0; act1Rev=1; frame2Op=1; throughP=1; }
     } else if(from === 0 && to === 1){
-      // hero plays fly-through on top; act1 room resolves beneath
-      heroOp = 1; act1Op = 1; act1Rev = q; frame2Op = 0; throughP = q;
+      // hero plays fly-through on top; act1 room resolves beneath (room ramps faster than hero)
+      heroOp = 1; act1Op = 1; act1Rev = fastReveal(q); frame2Op = 0; throughP = q;
     } else if(from === 1 && to === 0){
-      // reverse: hero reforms on top; act1 room recedes
-      heroOp = 1; act1Op = 1; act1Rev = 1 - q; frame2Op = 0; throughP = 1 - q;
+      // reverse: hero reforms on top; act1 room recedes (mirror of forward fast reveal)
+      heroOp = 1; act1Op = 1; act1Rev = fastReveal(1 - q); frame2Op = 0; throughP = 1 - q;
     } else if(from === 1 && to === 2){
       heroOp = 0; act1Op = 1 - q; act1Rev = 1; frame2Op = q; throughP = 1;
     } else if(from === 2 && to === 1){

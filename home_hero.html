@@ -224,7 +224,7 @@ section{
 
   <div class="text-col">
     <div class="logo-wrap"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
-    <p class="body-text">NanoFlashing™ is a patented <span class="hl">Permanent Positive Polarity (3P)</span> technology engineered into each of C-POLAR's five verticals. It attracts and captures <span class="hl">ultrafine particles, wildfire smoke, PFAS, and pollen</span> — and destroys <span class="hl">viruses, bacteria, and fungal spores</span> through a physical mechanism, making it safe for humans and the environment.</p>
+    <p class="body-text">NanoFlashing™ is a patented <span class="hl">permanent positive polarity (3P)</span> technology engineered into each of C-POLAR's five verticals. It attracts and captures <span class="hl">ultrafine particles, wildfire smoke, PFAS, and pollen</span> — and destroys <span class="hl">up to 99.9% of a broad-spectrum of viruses, bacteria, and fungal spores</span> through a physical mechanism, making it safe for humans and the environment.</p>
 
     <div class="cpolar">
       <p class="cpolar-lead">C-POLAR Technologies, Inc. is a <em>Health Science Platform Company</em> built around its patented NanoFlashing™ technology. The platform has five primary application verticals:</p>
@@ -360,6 +360,7 @@ import * as THREE from 'three';
       uProgress: { value: 0.0 },
       uDustColor: { value: new THREE.Color(0x3a404a) },
       uHazeStrength: { value: 0.0 },
+      uMidBoost: { value: 0.0 },
     },
     vertexShader: `
       attribute float aBoost;
@@ -372,6 +373,7 @@ import * as THREE from 'three';
       uniform vec2 uMouse;
       uniform float uMouseStr;
       uniform float uProgress;
+      uniform float uMidBoost;
       varying float vBoost;
       varying float vDist;
       varying float vHeight;
@@ -448,7 +450,10 @@ import * as THREE from 'three';
 
         float sz = uSize * (1.0 + aBoost * 1.6 + vMouse * 0.1);
         float rawSize = sz * uPixelRatio * (120.0 / max(vDist, 1.0));
-        gl_PointSize = clamp(rawSize, 6.0 * uPixelRatio, 22.0 * uPixelRatio);
+        // mid-flight boost: points grow bigger + stay bigger through the middle so the field reads
+        // full and premium on the light background, easing back to normal by the end
+        float sizeBoost = 1.0 + uMidBoost * 0.5;
+        gl_PointSize = clamp(rawSize * sizeBoost, 6.0 * uPixelRatio, 28.0 * uPixelRatio);
       }
     `,
     fragmentShader: `
@@ -472,6 +477,7 @@ import * as THREE from 'three';
       uniform float uFade;
       uniform float uHazeStrength;
       uniform float uProgress;
+      uniform float uMidBoost;
 
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
@@ -499,7 +505,8 @@ import * as THREE from 'three';
         float heightFactor = smoothstep(-1.0, 1.0, vHeight);
         vec3 baseShaded = mix(uBaseColor * 0.85, uBaseColor * 1.15, heightFactor);
 
-        float baseAlpha = 0.58;
+        // mid-flight alpha lift so the "+" field reads dense through the middle (no glow/bloom)
+        float baseAlpha = 0.58 + uMidBoost * 0.22;
 
         // subtle firming on the swell: the raised "+" gently gather ink toward cobalt (no glow halo)
         float charge = clamp(vMouse, 0.0, 1.0);
@@ -579,13 +586,18 @@ import * as THREE from 'three';
     surfaceMat.uniforms.uHazeStrength.value = Math.max(0, haze) * 0.85;
     surfaceMat.uniforms.uFade.value = 1.0 - smoothstep(0.82, 1.0, cp);
 
+    // mid-flight density boost: ramps up through 0.15-0.5, holds, eases back 0.75-1.0
+    // so the "+" field reads full and premium through the middle, settling to rest at both ends
+    const midBoost = smoothstep(0.15, 0.5, cp) * (1.0 - smoothstep(0.75, 1.0, cp));
+    surfaceMat.uniforms.uMidBoost.value = midBoost;
+
     // --- text column + micro-label fade out early (by ~0.32) ---
     const textAlpha = 1.0 - smoothstep(0.12, 0.32, cp);
     if (textColEl) textColEl.style.opacity = String(textAlpha);
     if (microLabelEl) microLabelEl.style.opacity = String(textAlpha);
 
-    // --- background fade so act1 beneath shows through ---
-    const bgAlpha = 1.0 - smoothstep(0.30, 0.75, cp);
+    // --- background fade so act1 beneath shows through (shifted earlier so room resolves by midpoint) ---
+    const bgAlpha = 1.0 - smoothstep(0.12, 0.55, cp);
     renderer.setClearColor(0xedf0f2, bgAlpha);
     section.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
     document.body.style.backgroundColor = 'rgba(237,240,242,' + bgAlpha + ')';
