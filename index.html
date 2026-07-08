@@ -174,8 +174,7 @@
       if(idx === 2){
         try{ f2.contentWindow.postMessage({type:'nf-play'}, '*'); }catch(e){}
       }
-      // arriving at screen 2: reset the scrub so the dust is floating and scrolling scrubs it in
-      if(idx === 1){ capP = 0; sendCapture(0); }
+      // screen 2's video auto-plays itself on arrival (handled inside act1 via the reveal)
     }
   }
 
@@ -213,34 +212,9 @@
   }
 
   // ---- Screen 2 capture sub-step: 1st scroll down plays the halo + dust-suck; next scroll advances ----
-  // Screen 2 is SCROLL-SCRUBBED: capP 0->1 accrues over several scrolls
-  // (dust floats a while -> halo -> gradual suck -> clean); only when full does the next scroll advance.
-  var capP = 0;
-  var CAP_STEP = 0.2;   // ~5 deliberate scrolls: dust floats, then halo, then gradual suck, then clean
-  function sendCapture(p){ try{ f1.contentWindow.postMessage({type:'nf-capture', p:p}, '*'); }catch(e){} }
-  function advance(dir){
-    if(idx === 1){
-      if(dir > 0){
-        if(capP < 0.999){
-          capP = Math.min(1, capP + CAP_STEP);
-          sendCapture(capP);
-          locked = true; setTimeout(function(){ locked = false; }, 260);
-          return;
-        }
-        goTo(2);   // room is clean -> next scroll moves on
-      } else {
-        if(capP > 0.001){
-          capP = Math.max(0, capP - CAP_STEP);
-          sendCapture(capP);
-          locked = true; setTimeout(function(){ locked = false; }, 260);
-          return;
-        }
-        goTo(0);   // back at the floating-dust start -> leave up (absorbed dust never regenerates)
-      }
-    } else {
-      goTo(idx + dir);
-    }
-  }
+  // Screen 2's video AUTO-PLAYS on arrival (act1 handles it, gentle pace, not scroll-driven).
+  // The deck just pages normally.
+  function advance(dir){ goTo(idx + dir); }
 
   // ---- Wheel ----
   function wheelHandler(e){

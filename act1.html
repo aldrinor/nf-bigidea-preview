@@ -596,9 +596,9 @@ if(DETAIL_QP!==null){
   window.addEventListener('load', ()=>setTimeout(()=>enterDetail(idx), 900));
 }
 
-// ---------- video scrub state ----------
-let scrubTarget = captureTarget;
-let scrubCur = displayCp;
+// ---------- video auto-play state ----------
+let autoPlayed = false;   // screen 2 auto-plays its video once on arrival, at a gentle pace
+const AUTOPLAY_RATE = 0.8;
 
 // ---------- main loop ----------
 function tick(t){
@@ -618,22 +618,13 @@ function tick(t){
   document.body.style.setProperty('--reveal-text', textO);
   document.body.style.setProperty('--reveal-lens', lensO);
 
-  // capture progress smoothing — now drives the video scrub
-  if (!captureFixed) {
-    displayCp += (captureTarget - displayCp) * 0.045;
-    if (Math.abs(captureTarget - displayCp) < 0.0005) displayCp = captureTarget;
+  // AUTO-PLAY the room video ONCE, at a gentle pace, when screen 2 is fully revealed.
+  // Timing is the video's own — NOT scroll — so fast scrolling can't rush it.
+  if (!autoPlayed && currentReveal > 0.9 && roomVid && roomVid.readyState >= 2) {
+    autoPlayed = true;
+    try { roomVid.playbackRate = AUTOPLAY_RATE; roomVid.currentTime = 0; roomVid.play().catch(function(){}); } catch(e){}
   }
-
-  // scrub the room video by scroll progress
-  scrubTarget = displayCp;
-  scrubCur += (scrubTarget - scrubCur) * 0.08;
-  if (roomVid && roomVid.readyState >= 1) {
-    const dur = roomVid.duration || 9;
-    const ct = scrubCur * dur;
-    if (Math.abs(roomVid.currentTime - ct) > 0.016) {
-      try { roomVid.currentTime = Math.max(0, Math.min(dur, ct)); } catch(e){}
-    }
-  }
+  if (currentReveal < 0.4) { autoPlayed = false; }   // reset so returning to screen 2 replays from the top
 
   if(detailMode){
     const d=detailLensTarget();
