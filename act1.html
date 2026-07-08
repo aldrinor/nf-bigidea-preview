@@ -798,7 +798,7 @@ if(DETAIL_QP!==null){
 
 // ---------- video auto-play state ----------
 let autoPlayed = false;   // screen 2 auto-plays its video once on arrival, at a gentle pace
-const AUTOPLAY_RATE = 0.8;
+const AUTOPLAY_RATE = 0.5;   // gentle — slows the whole sequence, incl. the baked-in blue turn-on
 
 // ---------- resolution swap: the words change ONLY after the room video fully ends (all dust cleaned) ----------
 const resolveQP = new URLSearchParams(location.search).get('resolve');
@@ -806,6 +806,15 @@ const resolveForced = (resolveQP !== null);          // ?resolve=1 forces the re
 let resolveRaw = (resolveForced && parseFloat(resolveQP) > 0) ? 1 : 0;
 let roomEnded = false;
 roomVid.addEventListener('ended', function(){ roomEnded = true; });
+// Prime the decoder on load (muted play->pause) so the first frame is painted and playback resumes
+// INSTANTLY when the room reveals — kills the static-frame-then-video hitch.
+let primed = false;
+function primeVideo(){
+  if(primed) return; primed = true;
+  try { roomVid.play().then(function(){ if(!autoPlayed){ roomVid.pause(); roomVid.currentTime = 0; } }).catch(function(){}); } catch(e){}
+}
+roomVid.addEventListener('loadeddata', primeVideo);
+if (roomVid.readyState >= 2) primeVideo();
 
 // ---------- main loop ----------
 function tick(t){
@@ -828,7 +837,7 @@ function tick(t){
   // Start the room video AS SOON AS the room begins to reveal — so it is ALREADY in motion when it
   // appears, never a static first-frame that then jumps to video. It plays through the morph (behind the
   // hero) at a gentle pace, so screen 2 lands on a live, already-moving room.
-  if (!autoPlayed && currentReveal > 0.04 && roomVid && roomVid.readyState >= 2) {
+  if (!autoPlayed && currentReveal > 0.02 && roomVid && roomVid.readyState >= 2) {
     autoPlayed = true;
     try { roomVid.playbackRate = AUTOPLAY_RATE; roomVid.currentTime = 0; roomVid.play().catch(function(){}); } catch(e){}
   }
