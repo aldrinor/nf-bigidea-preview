@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The filter breeds the bacteria it caught — NanoFlashing</title>
+<title>The filter keeps the bacteria it caught alive — NanoFlashing</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -291,23 +291,29 @@ section{
 
   <div class="text-col">
     <h1 class="headline">
-      The filter <em>breeds</em><br>
-      the bacteria it caught
+      The filter keeps<br>
+      the bacteria it caught <em>alive</em>
     </h1>
 
     <div class="stat-block">
-      <div class="big-number" id="bigNumber">~0%</div>
-      <p class="caption">more living particles at an ordinary filter over a year in a hospital trial.</p>
+      <div class="big-number" id="bigNumber">0</div>
+      <p class="caption">living bacterial colonies in a single milligram of used filter — the media becomes a reservoir.</p>
     </div>
 
     <p class="body-text">
-      An ordinary filter catches bacteria — but warm, damp media does not just hold them. It lets them multiply.
+      An ordinary filter catches bacteria — but it does not kill them. In the warm, damp media, the bacteria stay alive.
     </p>
     <p class="body-text">
-      Researchers found bacteria <a href="https://www.sciencedirect.com/science/article/abs/pii/S1352231001002801" target="_blank" rel="noopener">proliferate on loaded filter media and release back into the air</a>, turning the filter into a secondary source.
+      The University of Minnesota <a href="https://pubmed.ncbi.nlm.nih.gov/18385868/" target="_blank" rel="noopener">recovered 39 species of live bacteria</a> from the HVAC filters of two U.S. buildings — the hardy, spore-forming kind most of all.
     </p>
     <p class="body-text">
-      In an independent 12-month hospital trial, an ordinary filter’s living-particle count climbed 2,092% as its media bred what it caught — while the NanoFlashing filter beside it fell 95%.
+      A study in the Journal of Hazardous Materials found car cabin filters carried <a href="https://pubmed.ncbi.nlm.nih.gov/38691999/" target="_blank" rel="noopener">Mycobacterium — the genus that includes tuberculosis</a> — with more than 400 species and up to 26,000 living colonies in a single milligram.
+    </p>
+    <p class="body-text">
+      The filter meant to remove bacteria becomes a reservoir of them — held alive in the airstream it feeds.
+    </p>
+    <p class="body-text">
+      In hospitals, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8307074/" target="_blank" rel="noopener">about 60% of ventilation samples carried multidrug-resistant bacteria</a> — the ones antibiotics no longer reliably kill.
     </p>
   </div>
 </section>
@@ -327,7 +333,7 @@ section{
   function startFilter(){
     if (reducedMotion) return;
     try { videoA.currentTime = 0; videoA.play(); } catch(e){}
-    bigNumber.textContent = '+0%';
+    bigNumber.textContent = '0';
     animateNumber();
   }
   function stopFilter(){ try { videoA.pause(); } catch(e){} }
@@ -343,14 +349,14 @@ section{
       const p = Math.min(1, (now - start) / DURATION);
       const e = easeOutCubic(p);
 
-      // count big number 0 -> 95
-      const n = Math.round(e * 2092);
-      bigNumber.textContent = '+' + n.toLocaleString() + '%';
+      // count big number 0 -> 26,000
+      const n = Math.round(e * 26000);
+      bigNumber.textContent = n.toLocaleString();
 
       if (p < 1) {
         requestAnimationFrame(step);
       } else {
-        bigNumber.textContent = '+2,092%';
+        bigNumber.textContent = '26,000';
       }
     }
 
@@ -358,9 +364,9 @@ section{
   }
 
   if (reducedMotion) {
-    bigNumber.textContent = '+2,092%';
+    bigNumber.textContent = '26,000';
   } else {
-    bigNumber.textContent = '+0%';
+    bigNumber.textContent = '0';
     if (isEmbedded) {
       // In the deck: play the discharge video + count only when this section becomes active.
       window.addEventListener('message', function(e){
