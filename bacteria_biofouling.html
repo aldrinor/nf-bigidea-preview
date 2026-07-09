@@ -69,6 +69,7 @@ section{
 
 /* === Drifting grey smoke overlay (right block) === */
 .smoke{
+  display:none; /* removed: green-tinted drift haze over the biofilm — Yin asked to take out the green effect */
   position:absolute;
   top:0;
   bottom:0;
@@ -174,8 +175,9 @@ section{
 /* === Stat block === */
 .stat-block{
   display:flex;
-  align-items:center;
-  gap:24px;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
   margin-bottom:8px;
 }
 .big-number{
@@ -192,8 +194,8 @@ section{
   font-size:clamp(17px, 1.5vw, 20px);
   line-height:1.45;
   color:var(--ink);
-  max-width:26ch;
-  padding-top:6px;
+  max-width:none;
+  padding-top:0;
 }
 
 /* === Body paragraph === */
@@ -273,11 +275,11 @@ section{
 
 <section id="section">
   <div class="video-stack" id="videoStack">
-    <video id="videoA" src="assets/videos/filter_bacteria_load.mp4?v=1"
-           poster="assets/videos/posters/filter_bacteria_load.jpg?v=1"
+    <video id="videoA" src="assets/videos/filter_bacteria_load.mp4?v=2"
+           poster="assets/videos/posters/filter_bacteria_load.jpg?v=2"
            muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
-    <img class="poster" src="assets/videos/posters/filter_bacteria_load.jpg?v=1" alt="">
+    <img class="poster" src="assets/videos/posters/filter_bacteria_load.jpg?v=2" alt="">
   </div>
 
   <div class="smoke" aria-hidden="true">
