@@ -232,14 +232,14 @@
     <div class="headline-wrap">
       <div class="kicker">Charge, not chemistry. Built in, not sprayed on.</div>
       <h1 class="headline">
-        Watch an ordinary filter lose its charge. <span class="accent">Ours never does.</span>
+        Watch a conventional filter lose its charge. <span class="accent">Ours never does.</span>
       </h1>
     </div>
 
     <div class="caption-zone">
       <div class="caption-block" id="cap-ordinary">
         <div class="state-label" id="state-label">
-          <span id="state-text">An ordinary filter</span>
+          <span id="state-text">A conventional filter</span>
         </div>
         <p class="caption" id="caption-text">
           Its charge is sprayed on. It fades in weeks — and the filter becomes the source.
@@ -272,7 +272,7 @@
 
   const STATE = {
     ordinary: {
-      label: 'An ordinary filter',
+      label: 'A conventional filter',
       caption: 'Its charge is sprayed on. It fades in weeks — and the filter becomes the source.',
       nano: false
     },
@@ -314,9 +314,9 @@
       // Show both captions stacked? Spec says show hold still + headline + both captions.
       // We'll show ordinary briefly then nano, but reduced motion = no autoplay.
       // Simplest: show nano state (the persistent truth) and include ordinary caption inline above.
-      stateText.textContent = 'An ordinary filter  →  NanoFlashing';
+      stateText.textContent = 'A conventional filter  →  NanoFlashing';
       captionText.innerHTML =
-        'An ordinary filter: its charge is sprayed on. It fades in weeks — and the filter becomes the source.<br>' +
+        'A conventional filter: its charge is sprayed on. It fades in weeks — and the filter becomes the source.<br>' +
         '<span style="color:var(--muted)">NanoFlashing: ours is built into the fiber. It captures the inert and destroys the living, through a physical mechanism.</span>';
       return;
     }
