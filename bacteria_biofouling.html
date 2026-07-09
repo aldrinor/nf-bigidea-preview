@@ -164,7 +164,7 @@ section{
   font-size: clamp(24px, 2.7vw, 34px);
   line-height: 1.32;
   letter-spacing:-0.022em;
-  margin-bottom:34px;
+  margin-bottom:20px;
 }
 .headline em{
   color:var(--red);
@@ -175,9 +175,8 @@ section{
 /* === Stat block === */
 .stat-block{
   display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  gap:6px;
+  align-items:center;
+  gap:24px;
   margin-bottom:8px;
 }
 .big-number{
@@ -192,18 +191,18 @@ section{
 
 .caption{
   font-size:clamp(17px, 1.5vw, 20px);
-  line-height:1.45;
+  line-height:1.35;
   color:var(--ink);
   max-width:none;
-  padding-top:0;
+  padding-top:2px;
 }
 
 /* === Body paragraph === */
 .body-text{
-  max-width: 440px;
-  font-size:19px;
-  line-height:1.55;
-  margin-top:32px;
+  max-width: 460px;
+  font-size:18px;
+  line-height:1.5;
+  margin-top:16px;
   color: #1a1a1a;
 }
 .body-text a{
@@ -299,14 +298,23 @@ section{
 
     <div class="stat-block">
       <div class="big-number" id="bigNumber">0</div>
-      <p class="caption">living bacteria in 1 mg of a used filter.</p>
+      <p class="caption">living bacteria<br><span style="white-space:nowrap">in 1 mg of a used filter.</span></p>
     </div>
 
     <p class="body-text">
       A conventional filter catches bacteria — but it does not kill them. In the warm, damp media, the bacteria stay alive.
     </p>
     <p class="body-text">
-      The University of Minnesota <a href="https://pubmed.ncbi.nlm.nih.gov/18385868/" target="_blank" rel="noopener">recovered 39 species of live bacteria</a> from the HVAC filters of two U.S. buildings — and a growing share are <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8307074/" target="_blank" rel="noopener">drug-resistant</a>, the ones antibiotics can no longer kill.
+      The University of Minnesota <a href="https://pubmed.ncbi.nlm.nih.gov/18385868/" target="_blank" rel="noopener">recovered 39 species of live bacteria</a> from the HVAC filters of two U.S. buildings — the hardy, spore-forming kind most of all.
+    </p>
+    <p class="body-text">
+      A study in the Journal of Hazardous Materials found car cabin filters carried <a href="https://pubmed.ncbi.nlm.nih.gov/38691999/" target="_blank" rel="noopener">Mycobacterium — the genus that includes tuberculosis</a> — with more than 400 species and up to 26,000 living colonies in a single milligram.
+    </p>
+    <p class="body-text">
+      The filter meant to remove bacteria becomes a reservoir of them — held alive in the airstream it feeds.
+    </p>
+    <p class="body-text">
+      In hospitals, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8307074/" target="_blank" rel="noopener">about 60% of ventilation samples carried multidrug-resistant bacteria</a> — the ones antibiotics no longer reliably kill.
     </p>
   </div>
 </section>
