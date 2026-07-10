@@ -1,2 +1,12 @@
 preview_spec*.png
 node_modules/
+
+# scratch render/measure scripts
+_bact_*.mjs
+_seq*.mjs
+_live_*.mjs
+_measure_*.mjs
+_balance.mjs
+_gap_check.mjs
+_lifecycle.mjs
+_verify_widths.mjs
