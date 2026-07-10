@@ -73,10 +73,11 @@ section{
   margin-bottom:22px;
 }
 
-.logo-cpolar, .logo-nano { display:flex; align-items:center; width:clamp(300px, 40vw, 460px); max-width:84%; }
-.logo-cpolar { margin-left:0; margin-bottom:24px; }
-.logo-nano { margin-left:0; margin-top:24px; margin-bottom:0; }
-.logo-cpolar img, .logo-nano img { width:100%; height:auto; display:block; }
+.logo-cpolar, .logo-nano { display:flex; align-items:center; justify-content:flex-start; margin-left:0; }
+/* letter heights matched: C-POLAR box is 1.5x taller so its shield doesn't shrink the wordmark */
+.logo-cpolar { height:clamp(45px, 5.1vw, 63px); margin-bottom:24px; }
+.logo-nano { height:clamp(30px, 3.4vw, 42px); margin-top:24px; margin-bottom:0; }
+.logo-cpolar img, .logo-nano img { height:100%; width:auto; max-width:100%; display:block; }
 
 .body-text, .cpolar-lead{
   width:var(--block);
@@ -174,19 +175,19 @@ section{
     flex:0 0 auto;
   }
   .eyebrow{font-size:13px;margin-bottom:18px;}
-  .logo-cpolar, .logo-nano{width:clamp(260px, 66vw, 380px);} .logo-cpolar{margin-bottom:22px;} .logo-nano{margin-top:22px;}
+  .logo-cpolar{height:clamp(33px, 10.2vw, 48px); margin-bottom:22px;} .logo-nano{height:clamp(22px, 6.8vw, 32px); margin-top:22px;}
   .body-text{font-size:16px;line-height:1.6;}
   .cpolar-lead{font-size:13.5px;}
   .micro-label{font-size:10px;}
 }
 
 @media (max-height: 760px) and (min-width: 881px){
-  .logo-cpolar, .logo-nano{width:clamp(280px, 34vw, 420px);} .logo-cpolar{margin-bottom:22px;} .logo-nano{margin-top:22px;}
+  .logo-cpolar{height:clamp(45px, 6vw, 63px); margin-bottom:22px;} .logo-nano{height:clamp(30px, 4vw, 42px); margin-top:22px;}
   .body-text{font-size:18px;line-height:1.5;}
 }
 @media (max-height: 680px) and (min-width: 881px){
   .eyebrow{font-size:12px;margin-bottom:14px;}
-  .logo-cpolar, .logo-nano{width:clamp(260px, 30vw, 380px);} .logo-cpolar{margin-bottom:16px;} .logo-nano{margin-top:16px;}
+  .logo-cpolar{height:clamp(41px, 5.3vw, 57px); margin-bottom:16px;} .logo-nano{height:clamp(27px, 3.5vw, 38px); margin-top:16px;}
   .body-text{font-size:16px;line-height:1.45;}
   .cpolar{margin-top:20px;padding-top:18px;}
 }
@@ -199,7 +200,7 @@ section{
   <div class="scrim"></div>
 
   <div class="text-col">
-    <div class="logo-cpolar"><img src="assets/brand/cpolar_full_color.png" alt="C-POLAR"></div>
+    <div class="logo-cpolar"><img src="assets/brand/cpolar_trim.png" alt="C-POLAR"></div>
     <p class="cpolar-lead">C-POLAR Technologies, Inc. is a <em>Health Science Platform Company</em> built around its patented NanoFlashing™ technology.</p>
 
     <div class="cpolar">
@@ -213,7 +214,7 @@ section{
       </ul>
     </div>
 
-    <div class="logo-nano"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+    <div class="logo-nano"><img src="assets/brand/nano_trim.png" alt="NanoFlashing"></div>
     <p class="body-text">NanoFlashing™ is a patented <span class="hl">permanent positive polarity (3P)</span> technology engineered into each of C-POLAR's five verticals. It attracts and captures <span class="hl"><a href="ultrafine.html">ultrafine particles</a>, <a href="wildfire.html">wildfire smoke</a>, <a href="pfas.html">PFAS</a>, and <a href="pollen.html">pollen</a></span> — and destroys 99.9% of a broad-spectrum of <span class="hl"><a href="virus.html">viruses</a>, <a href="bacteria.html">bacteria</a>, and <a href="fungi.html">fungal spores</a></span> through a physical mechanism, making it safe for humans and the environment.</p>
   </div>
 
