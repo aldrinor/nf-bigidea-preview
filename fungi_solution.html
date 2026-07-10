@@ -311,8 +311,11 @@ window.nfSpores = (function () {
     const size = 3 + Math.random() * 3; // 3-6px
     el.style.width = size + 'px';
     el.style.height = size + 'px';
-    // spawn directly ABOVE the slab top face (across its width) so it falls onto the material
-    const fx = 0.43 + Math.random() * 0.26; // over the top face, both halves
+    // spawn directly ABOVE the slab top face. Balance 50/50 across the two halves
+    // (split at SLAB_SPLIT) so an EQUAL amount of mould lands on each side.
+    const onBlue = Math.random() < 0.5;
+    const fx = onBlue ? (0.43 + Math.random() * 0.075)   // NanoFlashing half  (0.430..0.505)
+                      : (0.515 + Math.random() * 0.185); // conventional half  (0.515..0.700)
     const topFy = TOP_M * fx + TOP_B;
     const spawnFy = topFy - (0.12 + Math.random() * 0.26);
     const x0 = m.offX + fx * 1280 * m.s;
@@ -340,10 +343,10 @@ window.nfSpores = (function () {
       spawnAccum += dt;
       if (spawnAccum >= nextSpawnInterval) {
         spawnAccum = 0;
-        nextSpawnInterval = 70 + Math.random() * 90; // spawn fast -> heavy fall
-        const deficit = 26 - spores.length;
-        const count = deficit > 0 ? Math.min(deficit, 5) : 2;
-        for (let i = 0; i < count && spores.length < 36; i++) createSpore();
+        nextSpawnInterval = 25 + Math.random() * 55; // spawn very fast -> dense heavy fall (~5x)
+        const deficit = 130 - spores.length;
+        const count = deficit > 0 ? Math.min(deficit, 18) : 8;
+        for (let i = 0; i < count && spores.length < 150; i++) createSpore();
       }
     }
 
