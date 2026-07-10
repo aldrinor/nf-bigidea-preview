@@ -236,7 +236,7 @@ section{
   <div class="video-stack" id="videoStack">
     <video id="videoA" src="assets/videos/fungi_mold.mp4?v=1"
            poster="assets/videos/posters/fungi_mold.jpg?v=1"
-           muted playsinline preload="auto" loop
+           muted playsinline preload="auto"
            style="opacity:1; z-index:1;"></video>
     <img class="poster" src="assets/videos/posters/fungi_mold.jpg?v=1" alt="">
     <div class="anno" aria-hidden="true">
@@ -277,6 +277,7 @@ window.nfSpores = (function () {
   let container = null;
   let spores = [];
   let running = false;
+  let spawning = false;
   let rafId = null;
   let lastTime = 0;
   let spawnAccum = 0;
@@ -326,6 +327,7 @@ window.nfSpores = (function () {
       wobbleAmp: Math.random() * 1.2,  // barely any drift (not floaty)
       wobbleFreq: 0.5 + Math.random() * 0.8,
       wobblePhase: Math.random() * Math.PI * 2,
+      depthT: Math.random(),           // where on the face it settles (0=top edge .. 1=front)
       age: 0,
       done: false
     };
@@ -334,13 +336,15 @@ window.nfSpores = (function () {
   }
 
   function update(dt) {
-    spawnAccum += dt;
-    if (spawnAccum >= nextSpawnInterval) {
-      spawnAccum = 0;
-      nextSpawnInterval = 70 + Math.random() * 90; // spawn fast -> heavy fall
-      const deficit = 26 - spores.length;
-      const count = deficit > 0 ? Math.min(deficit, 5) : 2;
-      for (let i = 0; i < count && spores.length < 36; i++) createSpore();
+    if (spawning) {
+      spawnAccum += dt;
+      if (spawnAccum >= nextSpawnInterval) {
+        spawnAccum = 0;
+        nextSpawnInterval = 70 + Math.random() * 90; // spawn fast -> heavy fall
+        const deficit = 26 - spores.length;
+        const count = deficit > 0 ? Math.min(deficit, 5) : 2;
+        for (let i = 0; i < count && spores.length < 36; i++) createSpore();
+      }
     }
 
     const m = coverMap();
@@ -355,7 +359,12 @@ window.nfSpores = (function () {
 
       const fx = (s.x - m.offX) / (1280 * m.s);
       const fy = (s.y - m.offY) / (720 * m.s);
-      const surfaceFy = TOP_M * fx + TOP_B + LAND_OFFSET;
+      // land EVENLY across the whole top face: pick a depth between the top edge
+      // and the front edge (a parabola), per-spore, so they cover the surface.
+      const fyTop = TOP_M * fx + TOP_B;
+      const fyFront = 0.665 - 1.9 * (fx - 0.55) * (fx - 0.55);
+      const faceDepth = Math.max(0.05, fyFront - fyTop - 0.06);
+      const surfaceFy = fyTop + 0.04 + s.depthT * faceDepth;
 
       // landed on the slab surface -> vanish. Blue flash on NanoFlashing (destroyed),
       // quiet settle on the conventional half.
@@ -390,6 +399,8 @@ window.nfSpores = (function () {
     lastTime = time;
     if (dt > 100) dt = 100;
     update(dt);
+    // once spawning has stopped and the last falling spore has landed, end the loop
+    if (!spawning && spores.length === 0) { running = false; rafId = null; return; }
     rafId = requestAnimationFrame(loop);
   }
 
@@ -402,6 +413,7 @@ window.nfSpores = (function () {
 
   function beginLoop() {
     running = true;
+    spawning = true;
     lastTime = 0;
     spawnAccum = 0;
     nextSpawnInterval = 200;
@@ -409,6 +421,8 @@ window.nfSpores = (function () {
     window.addEventListener('resize', resizeHandler);
     rafId = requestAnimationFrame(loop);
   }
+  // stop making new mold, but let the last few finish falling and landing
+  function stopSpawning() { spawning = false; }
 
   function start() {
     if (running) return;
@@ -430,6 +444,7 @@ window.nfSpores = (function () {
 
   function stop() {
     running = false;
+    spawning = false;
     if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
     if (resizeHandler) {
@@ -439,7 +454,7 @@ window.nfSpores = (function () {
     clearAll();
   }
 
-  return { start: start, stop: stop };
+  return { start: start, stop: stop, stopSpawning: stopSpawning };
 })();
 </script>
 <script>
@@ -482,15 +497,26 @@ window.nfSpores = (function () {
   window.addEventListener('resize', positionAnno);
   window.addEventListener('load', positionAnno);
 
+  // The mould finishes growing at ~5s (before the 3s hold). Stop making new
+  // falling mould once biofouling is complete; the last few finish landing.
+  const GROW_END = 5.0;
+  function onGrow(){
+    if (videoA.currentTime >= GROW_END){
+      videoA.removeEventListener('timeupdate', onGrow);
+      if (window.nfSpores) window.nfSpores.stopSpawning();
+    }
+  }
   function startFilter(){
     if (reducedMotion) return;
     try { videoA.currentTime = 0; videoA.play(); } catch(e){}
     bigNumber.textContent = '0%';
     animateNumber();
     positionAnno();
+    videoA.removeEventListener('timeupdate', onGrow);
+    videoA.addEventListener('timeupdate', onGrow);
     if (window.nfSpores) window.nfSpores.start();
   }
-  function stopFilter(){ try { videoA.pause(); } catch(e){} if (window.nfSpores) window.nfSpores.stop(); }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} videoA.removeEventListener('timeupdate', onGrow); if (window.nfSpores) window.nfSpores.stop(); }
 
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
   function animateNumber(){
