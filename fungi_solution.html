@@ -59,63 +59,22 @@ section{
 /* ===== .anno overlay + labels + spore effect (GLM 5.2) ===== */
 .anno{position:absolute;inset:0;z-index:5;pointer-events:none;}
 
-/* Top info block: centered over slab (slab center x≈37.5%), sits in empty space above slab (y 0..20%) */
+/* Top info block: ONE font (sans --stack), centered over the WHOLE slab (x≈53%).
+   Title in ink; each fact one line, grey with the metric bolded in ink. No mono, no blue. */
 .anno-top{
   position:absolute;
-  left:37.5%;
-  top:2.5%;
+  left:53%;
+  top:6%;
   transform:translateX(-50%);
   text-align:center;
   z-index:5;
   pointer-events:none;
 }
-.anno-top > div{ margin:0 0 5px; }
+.anno-top > div{ font-family:var(--stack); letter-spacing:0.01em; margin:0 0 4px; }
 .anno-top > div:last-child{ margin-bottom:0; }
-
-.anno-test{
-  color:var(--ink);
-  font-family:var(--stack);
-  font-weight:600;
-  font-size:22px;
-  letter-spacing:0.01em;
-  line-height:1.2;
-}
-.anno-dose{
-  color:var(--ink);
-  font-family:var(--stack);
-  font-weight:400;
-  font-size:15px;
-  letter-spacing:0.01em;
-  line-height:1.3;
-}
-.anno-num{
-  font-weight:700;
-  color:var(--ink);
-}
-.anno-stress{
-  color:var(--ink);
-  font-family:var(--stack);
-  font-weight:500;
-  font-size:15px;
-  letter-spacing:0.01em;
-  line-height:1.3;
-}
-.anno-stress-x{
-  color:var(--accent);
-  font-weight:700;
-  font-family:var(--mono);
-  letter-spacing:0;
-  margin-right:2px;
-}
-.anno-airflow{
-  color:var(--muted);
-  font-family:var(--mono);
-  font-weight:400;
-  font-size:13px;
-  letter-spacing:0.02em;
-  line-height:1.3;
-  margin-top:7px !important;
-}
+.anno-test{ color:var(--ink); font-weight:600; font-size:22px; line-height:1.25; margin-bottom:9px; }
+.anno-fact{ color:var(--muted); font-weight:400; font-size:15px; line-height:1.4; }
+.anno-fact b{ color:var(--ink); font-weight:600; }
 
 /* Bottom material labels: level row just below slab (y≈85%), each centered under its own half */
 .anno-lbl{
@@ -170,16 +129,9 @@ section{
 
 /* ===== Mobile ===== */
 @media (max-width:880px){
-  .anno-top {
-    left: 34%;
-    top: 0.5%;
-    transform: translateX(-50%);
-    text-align: center;
-  }
-  .anno-top .anno-test { font-size: 15px; font-weight: 600; line-height: 1.1; margin: 0; }
-  .anno-top .anno-dose { font-size: 12px; line-height: 1.1; margin: 2px 0 0; }
-  .anno-top .anno-stress { font-size: 12px; line-height: 1.1; margin: 2px 0 0; }
-  .anno-top .anno-airflow { font-size: 10px; margin-top: 3px; line-height: 1.1; }
+  .anno-top { left: 52%; top: 1.5%; }
+  .anno-top .anno-test { font-size: 15px; margin-bottom: 5px; }
+  .anno-top .anno-fact { font-size: 12px; }
   .anno-lbl { top: 77%; font-size: 16px; }
   .anno-lbl-nf { left: 30%; }
   .anno-lbl-cv { left: 72%; }
@@ -251,7 +203,7 @@ section{
   .video-stack{
     position:relative; top:auto; bottom:auto; right:auto; left:auto;
     width:100%; max-width:100%; height:auto;
-    aspect-ratio:4 / 3; max-height:62vh;
+    aspect-ratio:1 / 1; max-height:74vh;
     -webkit-mask-image:none; mask-image:none; background:var(--bg);
   }
   .video-stack::after{
@@ -282,9 +234,9 @@ section{
     <div class="anno" aria-hidden="true">
       <div class="anno-top">
         <div class="anno-test">Airborne mold spores</div>
-        <div class="anno-dose"><span class="anno-num">136 million</span> spores per sample</div>
-        <div class="anno-stress"><span class="anno-stress-x">40,000&times;</span> the standard test dose</div>
-        <div class="anno-airflow">1.6 m/s airflow</div>
+        <div class="anno-fact"><b>136 million</b> spores per sample</div>
+        <div class="anno-fact"><b>40,000&times;</b> the standard test dose</div>
+        <div class="anno-fact"><b>1.6 m/s</b> airflow</div>
       </div>
       <span class="anno-lbl anno-lbl-nf">NanoFlashing Material</span>
       <span class="anno-lbl anno-lbl-cv">Conventional Material</span>
