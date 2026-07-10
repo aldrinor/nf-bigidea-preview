@@ -430,11 +430,43 @@ window.nfSpores = (function () {
   const isEmbedded = window.self !== window.top;
   if (reducedMotion) videoStack.classList.add('reduced');
 
+  // Position the on-video labels to TRACK the slab at any window width.
+  // The video is object-fit:cover (1280x720), so the slab's on-screen x drifts
+  // as the panel width changes. We anchor each label to a fixed x-fraction of the
+  // VIDEO frame (measured): blue-half centre 0.413, mould-half centre 0.609,
+  // whole-slab centre 0.515. Vertical (top %) is stable because cover is height-driven.
+  const ANCHOR_NF = 0.408, ANCHOR_CV = 0.620, ANCHOR_TOP = 0.520;
+  function positionAnno(){
+    const nf = document.querySelector('.anno-lbl-nf');
+    const cv = document.querySelector('.anno-lbl-cv');
+    const top = document.querySelector('.anno-top');
+    // On mobile the labels use their own CSS spread (the slab is too narrow to
+    // centre the full labels without overlap); clear any inline value there.
+    if (window.innerWidth <= 880){
+      if (nf) nf.style.left = '';
+      if (cv) cv.style.left = '';
+      if (top) top.style.left = '';
+      return;
+    }
+    const W = videoStack.clientWidth, H = videoStack.clientHeight;
+    if (!W || !H) return;
+    const s = Math.max(W/1280, H/720);
+    const offX = (W - 1280*s)/2;
+    const pct = fx => ((offX + fx*1280*s)/W*100).toFixed(2) + '%';
+    if (nf) nf.style.left = pct(ANCHOR_NF);
+    if (cv) cv.style.left = pct(ANCHOR_CV);
+    if (top) top.style.left = pct(ANCHOR_TOP);
+  }
+  positionAnno();
+  window.addEventListener('resize', positionAnno);
+  window.addEventListener('load', positionAnno);
+
   function startFilter(){
     if (reducedMotion) return;
     try { videoA.currentTime = 0; videoA.play(); } catch(e){}
     bigNumber.textContent = '0%';
     animateNumber();
+    positionAnno();
     if (window.nfSpores) window.nfSpores.start();
   }
   function stopFilter(){ try { videoA.pause(); } catch(e){} if (window.nfSpores) window.nfSpores.stop(); }
