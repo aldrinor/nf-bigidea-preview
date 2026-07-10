@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NanoFlashing — Microscope</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    color:#2a2622;
+    background:#edf0f2;
+    cursor:none;
+    -webkit-font-smoothing:antialiased;
+    --reveal:0;
+    --reveal-room:0;
+    --reveal-text:0;
+    --reveal-lens:0;
+  }
+  .env{position:fixed;inset:0;z-index:0;background:url('assets/Background_c2.png') center/cover no-repeat;opacity:var(--reveal-room,0);}
+  #scene{position:fixed;inset:0;z-index:1;cursor:none;opacity:1;}
+  body.lens-hover #scene{cursor:pointer;}
+  body.detail-active{cursor:auto;}
+  body.detail-active #scene{cursor:default;}
+  .scrim{position:fixed;top:0;left:0;width:64%;height:62%;z-index:2;pointer-events:none;
+    background:radial-gradient(120% 95% at 12% 22%, rgba(237,240,242,0.72) 0%, rgba(237,240,242,0.28) 48%, rgba(237,240,242,0) 76%);
+    opacity:var(--reveal-room,0);}
+  .brand{position:fixed;top:26px;left:32px;z-index:7;height:114px;pointer-events:none;opacity:var(--reveal-text,0);}
+  .brand img{height:100%;width:auto;display:block;}
+  .hero{position:fixed;z-index:3;left:3vw;max-width:none;pointer-events:none;
+    top:calc(26px + 114px + 5vh);opacity:var(--reveal-text,0);}
+  body.detail-active .hero{opacity:0;}
+  h1{
+    font-family:-apple-system,system-ui,'Inter','Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:49px;
+    line-height:1.1;
+    letter-spacing:-0.022em;
+    color:#1a1a1a;
+    text-wrap:balance;
+  }
+  h1 .line { display:block; white-space:nowrap; }
+  h1 .chg{
+    color:#e23b3b;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    white-space:nowrap;
+  }
+  .tag{
+    position:fixed;z-index:5;pointer-events:none;
+    display:flex;flex-direction:column;
+    background:#ffffff;
+    border-radius:8px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(20,20,20,0.07);
+    padding:10px 16px 11px;
+    opacity:0;
+    will-change:transform,opacity;
+  }
+  .tag.show{opacity:var(--reveal-lens,0);}
+  body.detail-active .tag{opacity:0 !important;}
+  .tag .name{
+    font-size:22px;font-weight:500;color:#1a1a1a;line-height:1.2;letter-spacing:-0.005em;
+  }
+  .tag .whisper{
+    font-size:11.5px;font-weight:400;color:#8a817a;line-height:1.3;margin-top:3px;
+  }
+
+  /* ---------- DETAIL MODE ---------- */
+  .detail{
+    position:fixed; z-index:6;
+    top:0; right:0; height:100%; width:54%;
+    display:flex; align-items:center;
+    padding:8vh 5vw 8vh 4vw;
+    opacity:0; visibility:hidden;
+    transform:translateX(22px);
+    transition:opacity .55s ease, transform .6s cubic-bezier(.2,.7,.2,1), visibility .55s;
+    pointer-events:none;
+    overflow-y:auto;
+  }
+  .detail.open{opacity:1; visibility:visible; transform:none; pointer-events:auto;}
+  .detail-close{
+    position:absolute; top:3.2vh; right:3vw;
+    background:none; border:0; cursor:pointer;
+    font-size:22px; color:#1a1a1a; opacity:.45;
+    padding:10px 12px; line-height:1;
+    transition:opacity .2s ease;
+    font-family:inherit;
+  }
+  .detail-close:hover{opacity:.9;}
+  .detail-inner{max-width:560px; width:100%;}
+  .kicker{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:#8a817a; font-weight:500; margin-bottom:14px;
+    display:flex; align-items:center;
+  }
+  .charge-mark{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:#e23b3b; margin-right:10px; opacity:.75;
+  }
+  .detail h2{
+    font-size:clamp(30px,3.6vw,46px); font-weight:600;
+    letter-spacing:-.022em; color:#1a1a1a; line-height:1.08;
+  }
+  .detail .sub{font-size:15px; color:#8a817a; margin-top:8px;}
+  .sec{padding:20px 0; border-top:1px solid rgba(20,20,20,0.09);}
+  .sec:first-of-type{border-top:0; padding-top:26px;}
+  .sec .lab{
+    font-size:12px; letter-spacing:0;
+    color:#8a817a; font-weight:600;
+  }
+  .sec .body{font-size:16.5px; line-height:1.6; color:#2a2622; margin-top:10px;}
+  .sec .src{font-size:12px; color:#8a7f74; margin-top:10px; font-style:italic;}
+
+  /* detail mode: solid clean background (no room) + bare specimen video (no lens) */
+  .detail-screen{position:fixed; inset:0; z-index:4; background:#edf0f2;
+    opacity:0; visibility:hidden; transition:opacity .5s ease, visibility .5s; pointer-events:none;}
+  body.detail-active .detail-screen{opacity:1; visibility:visible;}
+  .detail-vid{position:fixed; z-index:5; left:5vw; top:50%; transform:translateY(-50%);
+    width:min(40vw,500px); height:auto; opacity:0; visibility:hidden;
+    transition:opacity .5s ease, visibility .5s; pointer-events:none;
+    -webkit-mask:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);
+    mask:radial-gradient(circle at 50% 50%, #000 56%, transparent 76%);}
+  body.detail-active .detail-vid{opacity:1; visibility:visible;}
+
+  @media (max-width:720px){
+    .brand{height:90px;top:18px;left:18px;transform:none;}
+    body.detail-active .brand{opacity:0;}
+    .hero{top:calc(18px + 90px + 4vh);left:4vw;max-width:none;right:5vw;}
+    h1{font-size:clamp(26px, 8vw, 44px);}
+    h1 .line{white-space:normal;}
+    .tag{padding:9px 14px 10px;}
+    .tag .name{font-size:14px;}
+    .tag .whisper{font-size:11px;}
+    .detail{
+      width:100%; height:auto; top:42vh; bottom:0; right:0;
+      padding:22px 6vw 5vh; align-items:flex-start;
+      transform:translateY(18px);
+      overflow-y:auto;
+    }
+    .detail.open{transform:none;}
+    .detail-close{top:14px; right:16px; font-size:20px;}
+    .detail h2{font-size:clamp(26px,7vw,38px);}
+    .sec .body{font-size:15.5px;}
+    .sec{padding:16px 0;}
+    .sec:first-of-type{padding-top:20px;}
+    .detail-vid{left:50%; top:6vh; transform:translateX(-50%); width:62vw;}
+  }
+</style>
+</head>
+<body>
+<!-- act1_electric_v3 -->
+<div class="env"></div>
+<canvas id="scene"></canvas>
+<div class="scrim"></div>
+<div class="brand"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing"></div>
+<div class="hero">
+  <h1><span class="line">Most harmful pollutants</span><span class="line">carry an <span class="chg">electric charge.</span></span></h1>
+</div>
+<div class="tag" id="tag">
+  <div class="name" id="t-name">—</div>
+  <div class="whisper">Electrically Charged</div>
+</div>
+<div class="detail-screen" aria-hidden="true"></div>
+<video class="detail-vid" id="detailVid" muted loop playsinline preload="auto"></video>
+<aside class="detail" id="detail" aria-hidden="true">
+  <button class="detail-close" id="detailClose" aria-label="Close detail view">&#10005;</button>
+  <div class="detail-inner" id="detailInner"></div>
+</aside>
+<script>
+// ---------- reveal (scroll-linked dilute-in from hero) ----------
+const inPager = window.top !== window.self;
+const revealQP = new URLSearchParams(location.search).get('reveal');
+let revealTarget, currentReveal, revealFixed;
+if (revealQP !== null) {
+  const v = parseFloat(revealQP);
+  currentReveal = isNaN(v) ? 1 : Math.max(0, Math.min(1, v));
+  revealTarget = currentReveal;
+  revealFixed = true;
+} else if (!inPager) {
+  revealTarget = 1;
+  currentReveal = 1;
+  revealFixed = false;
+} else {
+  revealTarget = 0;
+  currentReveal = 0;
+  revealFixed = false;
+}
+document.body.style.setProperty('--reveal', currentReveal);
+
+// ---------- staged reveal helpers ----------
+let roomO=0, textO=0, lensO=0;
+function stageOpacity(r, start, end){
+  if(r<=start) return 0;
+  if(r>=end) return 1;
+  return (r-start)/(end-start);
+}
+
+window.addEventListener('message', function(e){
+  if (!e.data || e.data.type !== 'nf-reveal') return;
+  if (revealFixed) return;
+  revealTarget = Math.max(0, Math.min(1, e.data.p || 0));
+});
+
+const cv=document.getElementById('scene'), ctx=cv.getContext('2d');
+const tagEl=document.getElementById('tag'), tName=document.getElementById('t-name');
+const detailEl=document.getElementById('detail');
+const detailInner=document.getElementById('detailInner');
+const detailClose=document.getElementById('detailClose');
+const detailVid=document.getElementById('detailVid');
+const heroEl=document.querySelector('.hero');
+const brandEl=document.querySelector('.brand');
+
+let W=0,H=0,DPR=1,lastT=performance.now();
+
+const SPECS=[
+  {key:'Wildfire_Smoke_Particle', name:'Wildfire Smoke', rate:1.0},
+  {key:'Fungal_Spore',            name:'Fungal Spore',    rate:1.0},
+  {key:'Virus',                   name:'Virus',           rate:1.0},
+  {key:'Bacteria',                name:'Bacteria',        rate:1.0},
+  {key:'Ultrafine_Particle',      name:'Ultrafine Particle', rate:1.0},
+  {key:'PFAS',                    name:'PFAS',            rate:1.0},
+  {key:'Pollen',                  name:'Pollen',          rate:1.0},
+];
+SPECS.forEach(s=>{
+  const im=new Image(); im.src='assets/glow/'+s.key+'_glow_opt.jpg'; s.img=im; s.ready=false; im.onload=()=>s.ready=true;
+  const v=document.createElement('video');
+  v.src='assets/videos/'+s.key+'_flashloop_c2.mp4';
+  v.muted=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
+  s.vid=v; s.vReady=false;
+  const applyRate=()=>{ try{ v.playbackRate=s.rate; }catch(e){} };
+  v.addEventListener('loadeddata',()=>{ s.vReady=true; applyRate(); });
+  v.addEventListener('canplay',applyRate);
+  v.addEventListener('play',applyRate);
+  v.addEventListener('ratechange',()=>{ if(Math.abs(v.playbackRate-s.rate)>0.001){ try{v.playbackRate=s.rate;}catch(e){} } });
+});
+
+const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PROBE=new URLSearchParams(location.search).get('probe');
+const DETAIL_QP=new URLSearchParams(location.search).get('detail');
+
+const POSITIONS_DESKTOP=[
+  {x:0.46,y:0.66},
+  {x:0.66,y:0.64},
+  {x:0.56,y:0.78},
+  {x:0.72,y:0.74},
+  {x:0.42,y:0.78},
+  {x:0.62,y:0.70},
+  {x:0.52,y:0.62}
+];
+const POSITIONS_MOBILE=[
+  {x:0.60,y:0.30},
+  {x:0.82,y:0.40},
+  {x:0.48,y:0.56},
+  {x:0.74,y:0.62},
+  {x:0.36,y:0.70},
+  {x:0.86,y:0.74},
+  {x:0.58,y:0.82}
+];
+
+function pollutantPoint(i){
+  const pos = W < 720 ? POSITIONS_MOBILE : POSITIONS_DESKTOP;
+  const p = pos[i%pos.length];
+  return {x:p.x*W, y:p.y*H};
+}
+
+// ---------- dust ----------
+const NB=8;
+let dustB=[];
+function mote(){
+  const ang=Math.random()*Math.PI*2;
+  const sp=0.18+Math.random()*0.32;
+  return {
+    x:Math.random()*W, y:Math.random()*H,
+    vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
+    r:.55+Math.random()*1.7
+  };
+}
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth; H=window.innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const n=Math.round(Math.min(3800, W*H/520));
+  dustB=[]; for(let b=0;b<NB;b++) dustB.push({a:0.08+b*0.045, motes:[]});
+  for(let i=0;i<n;i++) dustB[(Math.random()*NB)|0].motes.push(mote());
+}
+function updateDust(dt){
+  const f=dt/16.67;
+  for(const bucket of dustB){
+    for(const d of bucket.motes){
+      if(!REDUCED){
+        d.vx += (Math.random()-.5)*0.018*f;
+        d.vy += (Math.random()-.5)*0.018*f;
+        d.vx *= Math.pow(0.992, f);
+        d.vy *= Math.pow(0.992, f);
+        let sp = Math.hypot(d.vx, d.vy);
+        if(sp < 0.12){
+          if(sp < 1e-6){ const a=Math.random()*Math.PI*2; d.vx=Math.cos(a)*0.18; d.vy=Math.sin(a)*0.18; }
+          else { const k=0.18/sp; d.vx*=k; d.vy*=k; }
+          sp = 0.18;
+        } else if(sp > 0.5){
+          const k=0.5/sp; d.vx*=k; d.vy*=k; sp=0.5;
+        }
+        d.x += d.vx*f; d.y += d.vy*f;
+      }
+      if(isNaN(d.x)||isNaN(d.y)||!isFinite(d.x)||!isFinite(d.y)){
+        d.x=Math.random()*W; d.y=Math.random()*H;
+        const a=Math.random()*Math.PI*2; const s=0.25;
+        d.vx=Math.cos(a)*s; d.vy=Math.sin(a)*s;
+        continue;
+      }
+      if(d.x<-4)d.x=W+4; else if(d.x>W+4)d.x=-4;
+      if(d.y<-4)d.y=H+4; else if(d.y>H+4)d.y=-4;
+    }
+  }
+}
+const moteSprite=document.createElement('canvas'); moteSprite.width=moteSprite.height=18;
+(function(){const m=moteSprite.getContext('2d');
+  const g=m.createRadialGradient(9,9,0,9,9,9);
+  g.addColorStop(0,'rgba(110,118,127,0.95)'); g.addColorStop(0.45,'rgba(110,118,127,0.55)'); g.addColorStop(1,'rgba(110,118,127,0)');
+  m.fillStyle=g; m.beginPath(); m.arc(9,9,9,0,6.2832); m.fill();})();
+function drawDust(){
+  for(const bucket of dustB){
+    ctx.globalAlpha=bucket.a*roomO;
+    for(const d of bucket.motes){
+      const s=d.r*3.0;
+      ctx.drawImage(moteSprite, d.x-s/2, d.y-s/2, s, s);
+    }
+  }
+  ctx.globalAlpha=1;
+}
+
+// ---------- lens state ----------
+const bub={x:0,y:0,tx:0,ty:0,R:0};
+let mouseActive=false,lastMove=-9999;
+let specIndex=0;
+let mode='auto';
+let autoIdx=0, autoState='glide', autoT0=0, autoStart={x:0,y:0};
+
+// ---------- detail state ----------
+let detailMode=false, detailIndex=0;
+
+const DETAIL_DATA={
+  Wildfire_Smoke_Particle:{
+    title:"Wildfire Smoke",
+    sub:"Ultrafine biomass soot",
+    sections:[
+      {label:"What it is",
+       body:"Wildfire Smoke is mostly ultrafine soot: particles under 100 nanometres. By number they make up the bulk of the smoke — far smaller than what ordinary filters are built to catch.",
+       source:"Ultrafine Particles from Residential Biomass Combustion, review (PMC6834185)"},
+      {label:"Its charge",
+       body:"Combustion leaves this soot electrically charged: a known property of flame-born particles, and enough to act on — wood-smoke collectors pull it from the air by that charge alone, no power applied. It's an inert particle — captured and held, nothing released back.",
+       source:"Naturally-charged soot collection, J. Cleaner Production 2021"},
+      {label:"How widespread",
+       body:"Exposure is effectively universal. In recent years, close to 100% of the continental U.S. population was exposed to Wildfire Smoke every year.",
+       source:"Childs et al., Environ. Sci. Technol. (PMC10543292)"},
+      {label:"Health impact",
+       body:"Now tied to about 40,000 U.S. deaths a year — and on a high-warming path, 70,000 by 2050. The ultrafine fraction crosses into the bloodstream, raising blood pressure and compounding heart and lung disease.",
+       source:"Qiu et al., Nature 2025"}
+    ]
+  },
+  Fungal_Spore:{
+    title:"Fungal Spore",
+    sub:"Airborne mold spore",
+    sections:[
+      {label:"What it is",
+       body:"Fungal spores are how mold spreads — microscopic reproductive grains, mostly 3 to 8 microns, drifting constantly through indoor and outdoor air.",
+       source:"US EPA; size, PMC9025873 (2022)"},
+      {label:"Its charge",
+       body:"A spore's wall runs net negative — its melanin coat holds a strong negative surface charge, around -40 millivolts on common mold. A living target: captured and destroyed on contact, by physical action.",
+       source:"Pihet et al., BMC Microbiology, 2009"},
+      {label:"How widespread",
+       body:"Mold grows anywhere damp. Roughly 10 to 50% of buildings carry it, and spores ride the air in every room.",
+       source:"WHO Indoor Air Quality: Dampness and Mould"},
+      {label:"Health impact",
+       body:"It triggers allergies and asthma attacks — and serious fungal infections now kill about 2.5 million people a year.",
+       source:"Denning, Lancet Infectious Diseases, 2024"}
+    ]
+  },
+  Virus:{
+    title:"Virus",
+    sub:"Airborne viral nanoparticle",
+    sections:[
+      {label:"What it is",
+       body:"A virus is a self-assembling biological nanoparticle — 20 to 300 nanometres of protein wrapped around genetic material. It can't copy itself; it has to hijack a living cell.",
+       source:"Michen and Graule, J. Applied Microbiology, 2010"},
+      {label:"Its charge",
+       body:"At the pH of the air and the airway, most viruses run net negative — their isoelectric point sits below neutral, so the surface carries negative charge. A living target: captured and destroyed on contact, by physical action.",
+       source:"Michen and Graule, Isoelectric points of viruses, 2010"},
+      {label:"How widespread",
+       body:"Airborne and relentless. Seasonal influenza alone runs to about a billion cases a year.",
+       source:"WHO, Influenza (seasonal), 2025"},
+      {label:"Health impact",
+       body:"Influenza causes 290,000 to 650,000 respiratory deaths a year; RSV kills roughly 100,000 children under five. Both move through the air.",
+       source:"WHO, Influenza and RSV fact sheets, 2025"}
+    ]
+  },
+  Bacteria:{
+    title:"Bacteria",
+    sub:"Airborne single-celled microbe",
+    sections:[
+      {label:"What it is",
+       body:"Bacteria are single-celled microbes. Airborne, they ride on droplets and dust — from a quarter of a micron up to about 20 microns across.",
+       source:"Ghosh et al., Environment International, 2015"},
+      {label:"Its charge",
+       body:"A bacterium's outer surface runs net negative — its lipopolysaccharide and teichoic acids carry ionized phosphate and carboxyl groups. A living target: captured and destroyed on contact, by physical action.",
+       source:"Wilson et al., J. Microbiological Methods, 2001"},
+      {label:"How widespread",
+       body:"In hospitals alone, about 7 of every 100 patients in wealthy countries pick up an infection during their stay.",
+       source:"WHO, Infection Prevention and Control report, 2024"},
+      {label:"Health impact",
+       body:"Drug-resistant bacteria were directly behind roughly 1.14 million deaths in 2021 and a factor in 4.7 million — with more than 39 million projected by 2050.",
+       source:"Global Burden of Bacterial AMR, The Lancet, 2024"}
+    ]
+  },
+  Ultrafine_Particle:{
+    title:"Ultrafine Particle",
+    sub:"Traffic-born nanoparticle",
+    sections:[
+      {label:"What it is",
+       body:"Ultrafine particles are under 100 nanometres — smaller even than most smoke. They add almost nothing to the weight of air pollution but dominate it by sheer number, and in cities they come mostly from traffic.",
+       source:"Schraufnagel, Exp. and Mol. Medicine, 2020"},
+      {label:"Its charge",
+       body:"These combustion particles carry an electric charge — but a mix of both signs, positive and negative, not reliably one or the other. An inert particle: captured and held, nothing released back.",
+       source:"Schraufnagel, Exp. and Mol. Medicine, 2020"},
+      {label:"How widespread",
+       body:"Concentrated wherever there's traffic. Next to busy roads, particle counts run two to three times the city background — where a large share of people live.",
+       source:"Atmos. Chem. Phys. 2025; UFP review, IJERPH 2016"},
+      {label:"Health impact",
+       body:"They slip from the lungs into the bloodstream and up the nerves to the brain, raising blood pressure and — in a 2025 study of 21 million people — the risk of dementia.",
+       source:"Incident Dementia and UFP, Environ. Sci. Technol., 2025"}
+    ]
+  },
+  PFAS:{
+    title:"PFAS",
+    sub:"Fluorinated forever chemical",
+    sections:[
+      {label:"What it is",
+       body:"PFAS are manufactured chemicals, in use since the 1940s, built to shrug off water, grease and heat. The same toughness means they barely break down — which is why they're called forever chemicals.",
+       source:"US EPA, 2026"},
+      {label:"Its charge",
+       body:"In water at normal pH, the common PFAS carry a net negative charge — the head group ionizes and stays charged down to about pH 3.8. That negative sign is exactly what a positive surface is built to attract; the water-side work is in active research and development.",
+       source:"Surface pKa of PFOA, J. Phys. Chem. C, 2024"},
+      {label:"How widespread",
+       body:"Effectively everywhere. PFAS show up in the blood of more than 95% of Americans, and the EPA's first national limit — 4 parts per trillion — is set to protect about 100 million people's drinking water.",
+       source:"NHANES 1999-2020 (2025); US EPA drinking-water rule, 2026"},
+      {label:"Health impact",
+       body:"Linked to kidney and testicular cancer, a weaker response to vaccines, and raised cholesterol.",
+       source:"US EPA, 2026; ATSDR / CDC, 2025"}
+    ]
+  },
+  Pollen:{
+    title:"Pollen",
+    sub:"Wind-borne plant grain",
+    sections:[
+      {label:"What it is",
+       body:"Pollen is the fine grain plants release to reproduce — 10 to 100 microns across. In humid air the grains burst into far smaller fragments, a quarter to a few microns, that reach deeper into the lungs.",
+       source:"Atmospheric Environment: X, 2022"},
+      {label:"Its charge",
+       body:"Pollen carries an electric charge — in nature usually negative, which is why it leaps to a bee's positive body. Airborne, the charge is more of a mix. An inert particle: captured and held, nothing released back.",
+       source:"Royal Society Interface 2024; Atmospheric Environment 2007"},
+      {label:"How widespread",
+       body:"A quarter of U.S. adults — 25% — had a seasonal allergy in 2024, and warming is stretching pollen seasons up to three weeks longer.",
+       source:"CDC / NCHS Data Brief 545 (2024); US EPA"},
+      {label:"Health impact",
+       body:"Pollen drives hay fever and sets off asthma attacks and hospital visits. In Europe, allergic reactions are projected to climb up to 200% by 2050.",
+       source:"eClinicalMedicine (Lancet), 2025; CDC"}
+    ]
+  }
+};
+
+function targetR(){
+  const mobile = W<720;
+  if(mobile) return W*0.32*0.5;
+  return Math.min(W,H)*0.36*0.5;
+}
+
+function detailLensTarget(){
+  if(W<720){
+    return {x: W*0.5, y: H*0.22, R: Math.min(W*0.34, H*0.21)};
+  }
+  return {x: W*0.27, y: H*0.5, R: Math.min(W*0.205, H*0.40)};
+}
+
+function setSpec(i){
+  specIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
+  SPECS.forEach((s,k)=>{
+    if(!s.vid) return;
+    if(k===specIndex){ s.vid.play().catch(()=>{}); try{s.vid.playbackRate=s.rate;}catch(e){} }
+    else { try{s.vid.pause();}catch(e){} }
+  });
+  tName.textContent=SPECS[specIndex].name;
+}
+
+function findNearestSpec(x,y){
+  let best=0,bd=1e9;
+  for(let i=0;i<POSITIONS_DESKTOP.length;i++){
+    const p=pollutantPoint(i);
+    const d=Math.hypot(p.x-x,p.y-y);
+    if(d<bd){bd=d;best=i;}
+  }
+  return best;
+}
+
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
+addEventListener('mousemove',e=>{
+  bub.tx=e.clientX; bub.ty=e.clientY;
+  mouseActive=true; lastMove=performance.now();
+  if(mode!=='detail') mode='mouse';
+  if(!detailMode){
+    const over=Math.hypot(e.clientX-bub.x, e.clientY-bub.y) <= bub.R*1.04;
+    document.body.classList.toggle('lens-hover', over);
+  }
+});
+addEventListener('mouseleave',()=>{mouseActive=false; document.body.classList.remove('lens-hover');});
+addEventListener('touchmove',e=>{
+  if(e.touches[0]){bub.tx=e.touches[0].clientX;bub.ty=e.touches[0].clientY;mouseActive=true;lastMove=performance.now();if(mode!=='detail')mode='mouse';}
+},{passive:true});
+addEventListener('touchend',()=>{mouseActive=false;});
+addEventListener('resize',resize);
+
+function resetClock(){ lastT=performance.now(); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') resetClock(); });
+window.addEventListener('focus',resetClock);
+
+resize();
+bub.x=W*0.5; bub.y=H*0.5; bub.tx=bub.x; bub.ty=bub.y;
+setSpec(PROBE!==null?(+PROBE||0):0);
+if(PROBE!==null){ bub.x=pollutantPoint(+PROBE||0).x; bub.y=pollutantPoint(+PROBE||0).y; }
+
+// ---------- detail enter / exit ----------
+function renderDetail(i){
+  const s=SPECS[i];
+  const d=DETAIL_DATA[s.key];
+  let html='';
+  if(d){
+    html+=`<h2>${d.title}</h2><div class="sub">${d.sub}</div>`;
+    d.sections.forEach(sec=>{
+      html+=`<div class="sec"><div class="lab">${sec.label}</div><div class="body">${sec.body}</div><div class="src">Source: ${sec.source}</div></div>`;
+    });
+  } else {
+    html+=`<h2>${s.name}</h2><div class="sub">Detail coming soon</div>`;
+  }
+  detailInner.innerHTML=html;
+}
+
+function enterDetail(i){
+  if(detailMode) return;
+  detailMode=true; detailIndex=((i%SPECS.length)+SPECS.length)%SPECS.length;
+  document.body.classList.add('detail-active');
+  document.body.classList.remove('lens-hover');
+  detailEl.classList.add('open');
+  detailEl.setAttribute('aria-hidden','false');
+  heroEl.style.opacity='0';
+  if(W<720) brandEl.style.opacity='0';
+  mode='detail';
+  if(specIndex!==detailIndex) setSpec(detailIndex);
+  renderDetail(detailIndex);
+  detailVid.src='assets/videos/'+SPECS[detailIndex].key+'_flashloop_c2.mp4';
+  detailVid.play().catch(()=>{});
+}
+
+function exitDetail(){
+  if(!detailMode) return;
+  detailMode=false;
+  document.body.classList.remove('detail-active');
+  detailEl.classList.remove('open');
+  detailEl.setAttribute('aria-hidden','true');
+  heroEl.style.opacity='';
+  brandEl.style.opacity='';
+  try{ detailVid.pause(); }catch(e){}
+  autoT0=performance.now(); autoState='glide'; autoStart={x:bub.x,y:bub.y};
+  mode='auto';
+}
+
+detailClose.addEventListener('click', exitDetail);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && detailMode) exitDetail(); });
+
+const DETAIL_URL={Wildfire_Smoke_Particle:'wildfire.html',Fungal_Spore:'fungi.html',Virus:'virus.html',Bacteria:'bacteria.html',Ultrafine_Particle:'ultrafine.html',PFAS:'pfas.html',Pollen:'pollen.html'};
+function gotoDetail(i){
+  const key=SPECS[((i%SPECS.length)+SPECS.length)%SPECS.length].key;
+  const url=DETAIL_URL[key]; if(!url) return;
+  try{ window.top.location.href=url; }catch(e){ try{ parent.location.href=url; }catch(e2){ location.href=url; } }
+}
+function lensHit(cx,cy){
+  const r=cv.getBoundingClientRect();
+  const x=cx-r.left, y=cy-r.top;
+  return Math.hypot(x-bub.x, y-bub.y) <= bub.R*1.04;
+}
+cv.addEventListener('click', e=>{
+  if(detailMode) return;
+  if(lensHit(e.clientX, e.clientY)) gotoDetail(specIndex);
+});
+let touchStart=null;
+cv.addEventListener('touchstart', e=>{
+  if(detailMode) return;
+  if(e.touches[0]) touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+cv.addEventListener('touchend', e=>{
+  if(detailMode||!touchStart) return;
+  const t=e.changedTouches[0];
+  if(t && Math.hypot(t.clientX-touchStart.x, t.clientY-touchStart.y)<10){
+    if(lensHit(t.clientX, t.clientY)) gotoDetail(specIndex);
+  }
+  touchStart=null;
+});
+
+if(DETAIL_QP!==null){
+  const idx=(+DETAIL_QP||0)%SPECS.length;
+  window.addEventListener('load', ()=>setTimeout(()=>enterDetail(idx), 900));
+}
+
+// ---------- main loop ----------
+function tick(t){
+  const dt=Math.min(40, t-lastT);
+  lastT=t;
+
+  if (!revealFixed) {
+    currentReveal += (revealTarget - currentReveal) * 0.14;
+    if (Math.abs(revealTarget - currentReveal) < 0.001) currentReveal = revealTarget;
+  }
+  document.body.style.setProperty('--reveal', currentReveal);
+
+  // staged reveal: compute per-layer opacity from currentReveal
+  roomO = stageOpacity(currentReveal, 0.00, 0.42);
+  textO = stageOpacity(currentReveal, 0.38, 0.70);
+  lensO = stageOpacity(currentReveal, 0.66, 1.00);
+  document.body.style.setProperty('--reveal-room', roomO);
+  document.body.style.setProperty('--reveal-text', textO);
+  document.body.style.setProperty('--reveal-lens', lensO);
+
+  updateDust(dt);
+
+  if(detailMode){
+    const d=detailLensTarget();
+    bub.x += (d.x-bub.x)*0.10;
+    bub.y += (d.y-bub.y)*0.10;
+    bub.R += (d.R-bub.R)*0.10;
+    if(specIndex!==detailIndex) setSpec(detailIndex);
+  } else if(PROBE!==null){
+    const p=pollutantPoint(+PROBE||0);
+    bub.x+=(p.x-bub.x)*0.2; bub.y+=(p.y-bub.y)*0.2;
+    bub.R+=(targetR()-bub.R)*0.15;
+    if(specIndex!==(+PROBE||0)) setSpec(+PROBE||0);
+  } else if(mode==='mouse' && t-lastMove<2600){
+    bub.x+=(bub.tx-bub.x)*0.16;
+    bub.y+=(bub.ty-bub.y)*0.16;
+    const near=findNearestSpec(bub.x,bub.y);
+    if(near!==specIndex) setSpec(near);
+  } else {
+    mode='auto';
+    const target=pollutantPoint(autoIdx);
+    if(autoState==='glide'){
+      const GLIDE=REDUCED?100:2400;
+      const el=t-autoT0;
+      if(el>=GLIDE){
+        bub.x=target.x; bub.y=target.y;
+        autoState='dwell'; autoT0=t;
+        if(specIndex!==autoIdx) setSpec(autoIdx);
+      } else {
+        const e=easeInOut(el/GLIDE);
+        bub.x=autoStart.x+(target.x-autoStart.x)*e;
+        bub.y=autoStart.y+(target.y-autoStart.y)*e;
+        if(el>GLIDE-30){bub.x=target.x;bub.y=target.y;}
+        if(el>GLIDE*0.55 && specIndex!==autoIdx) setSpec(autoIdx);
+      }
+    } else {
+      const DWELL=2500;
+      const el=t-autoT0;
+      bub.x=target.x; bub.y=target.y;
+      if(el>=DWELL){
+        autoIdx=(autoIdx+1)%SPECS.length;
+        autoState='glide'; autoT0=t;
+        autoStart={x:bub.x,y:bub.y};
+      }
+    }
+  }
+
+  if(!detailMode) bub.R+=(targetR()-bub.R)*0.12;
+  draw(t);
+  requestAnimationFrame(tick);
+}
+
+autoStart={x:bub.x,y:bub.y};
+autoT0=performance.now();
+
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  drawDust();
+  drawLens(t);
+  positionTag();
+}
+
+function drawLens(t){
+  if(lensO<=0.001) return;
+  const R=bub.R, x=bub.x, y=bub.y, s=SPECS[specIndex];
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.beginPath();
+  ctx.arc(x, y+8, R*0.94, 0, Math.PI*2);
+  ctx.fillStyle='rgba(30,34,40,0.18)';
+  ctx.filter='blur(14px)';
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.beginPath();
+  ctx.arc(x, y, R, 0, Math.PI*2);
+  ctx.clip();
+  const vw=(s.vReady && s.vid.videoWidth)?s.vid.videoWidth:(s.ready?s.img.naturalWidth:2);
+  const vh=(s.vReady && s.vid.videoHeight)?s.vid.videoHeight:(s.ready?s.img.naturalHeight:2);
+  const d=R*2;
+  let dw=d, dh=d;
+  if(vw&&vh){
+    const scale=Math.max(d/vw, d/vh);
+    dw=vw*scale; dh=vh*scale;
+  }
+  if(s.vReady && s.vid.readyState>=2){
+    ctx.drawImage(s.vid, x-dw/2, y-dh/2, dw, dh);
+  } else if(s.ready){
+    ctx.drawImage(s.img, x-dw/2, y-dh/2, dw, dh);
+  } else {
+    ctx.fillStyle='#e2e6ea';
+    ctx.fillRect(x-R,y-R,2*R,2*R);
+  }
+
+  const vg=ctx.createRadialGradient(x,y,R*0.74, x,y,R);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(0.7,'rgba(16,20,26,0.04)');
+  vg.addColorStop(1,'rgba(16,20,26,0.22)');
+  ctx.fillStyle=vg;
+  ctx.fillRect(x-R,y-R,2*R,2*R);
+
+  const gloss=ctx.createRadialGradient(x-R*0.42, y-R*0.42, R*0.02, x-R*0.42, y-R*0.42, R*0.95);
+  gloss.addColorStop(0,'rgba(255,255,255,0.42)');
+  gloss.addColorStop(0.35,'rgba(255,255,255,0.14)');
+  gloss.addColorStop(0.7,'rgba(255,255,255,0.0)');
+  gloss.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=gloss;
+  ctx.fillRect(x-R,y-R,2*R,2*R);
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.lineWidth=6;
+  const bezel=ctx.createLinearGradient(x-R, y-R, x+R, y+R);
+  bezel.addColorStop(0,'rgba(255,255,255,0.55)');
+  bezel.addColorStop(0.5,'rgba(170,176,184,0.28)');
+  bezel.addColorStop(1,'rgba(255,255,255,0.42)');
+  ctx.strokeStyle=bezel;
+  ctx.beginPath(); ctx.arc(x,y,R-3,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.lineWidth=1.8;
+  ctx.strokeStyle='rgba(255,255,255,0.55)';
+  ctx.beginPath(); ctx.arc(x,y,R-0.9,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.lineWidth=2.2;
+  ctx.lineCap='round';
+  const rimGrad=ctx.createLinearGradient(x-R*0.7, y-R*0.7, x+R*0.7, y+R*0.7);
+  rimGrad.addColorStop(0,'rgba(255,255,255,0.98)');
+  rimGrad.addColorStop(0.45,'rgba(255,255,255,0.75)');
+  rimGrad.addColorStop(1,'rgba(255,255,255,0.25)');
+  ctx.strokeStyle=rimGrad;
+  ctx.beginPath(); ctx.arc(x,y,R-0.9, Math.PI*0.95, Math.PI*1.7); ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.lineWidth=3.2;
+  ctx.lineCap='round';
+  ctx.strokeStyle='rgba(255,255,255,0.85)';
+  ctx.beginPath(); ctx.arc(x,y,R-1.6, Math.PI*1.08, Math.PI*1.5); ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.lineWidth=2;
+  ctx.strokeStyle='rgba(255,255,255,0.18)';
+  ctx.beginPath(); ctx.arc(x,y,R+1.2,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = lensO;
+  ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,0.30)';
+  ctx.beginPath(); ctx.arc(x,y,R-6.5,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  ctx.globalAlpha=1;
+}
+
+function positionTag(){
+  if(detailMode){ tagEl.classList.remove('show'); return; }
+  const R=bub.R, x=bub.x, y=bub.y;
+  const chipW=tagEl.offsetWidth||220, chipH=tagEl.offsetHeight||96;
+  const mobile = W < 720;
+  
+  let ax, ay, ex, ey, cx, cy;
+  if (mobile) {
+    const sideRight = (x + R + 28 + chipW/2 < W - 8);
+    const side = sideRight ? 1 : -1;
+    const placeAbove = (y - R*0.5 - chipH/2 - 12 > 8);
+    const ang = side===1 ? (placeAbove? -Math.PI*0.28 : Math.PI*0.28)
+                         : (placeAbove? -Math.PI*0.72 : Math.PI*0.72);
+    ax = x + Math.cos(ang)*R;
+    ay = y + Math.sin(ang)*R;
+    ex = x + Math.cos(ang)*(R+22);
+    ey = y + Math.sin(ang)*(R+22);
+    cx = ex + side*(chipW/2 + 6);
+    cy = ey;
+  } else {
+    const sideRight = (x + R + 28 + chipW < W - 8);
+    const side = sideRight ? 1 : -1;
+    const ang = side===1 ? 0 : Math.PI;
+    ax = x + Math.cos(ang)*R;
+    ay = y + Math.sin(ang)*R;
+    ex = x + Math.cos(ang)*(R+22);
+    ey = y + Math.sin(ang)*(R+22);
+    cx = ex + side*(chipW/2 + 6);
+    cy = ey;
+  }
+
+  const left = Math.max(8, Math.min(W-chipW-8, cx-chipW/2));
+  let top  = Math.max(8, Math.min(H-chipH-8, cy-chipH/2));
+  const safeTop = mobile ? H * 0.32 : H * 0.42;
+  if (top < safeTop) top = safeTop;
+  tagEl.style.transform=`translate(${left}px, ${top}px)`;
+  tagEl.classList.add('show');
+}
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

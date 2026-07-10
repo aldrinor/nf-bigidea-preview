@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const URL=process.argv[2], OUT=process.argv[3], WAIT=parseInt(process.argv[4]||'6500',10);
+const b=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required']});
+const p=await b.newPage({viewport:{width:1440,height:900},deviceScaleFactor:2});
+await p.goto(URL,{waitUntil:'networkidle',timeout:60000}).catch(()=>{});
+await p.waitForTimeout(WAIT);
+const info=await p.evaluate(()=>{const v=document.querySelector('video');return v?{ct:+v.currentTime.toFixed(2),dur:+v.duration.toFixed(2),paused:v.paused,rw:v.videoWidth,rh:v.videoHeight}:null;});
+await p.screenshot({path:OUT});
+console.log('live render '+URL+' video='+JSON.stringify(info));
+await b.close();

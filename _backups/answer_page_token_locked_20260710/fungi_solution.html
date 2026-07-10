@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Captures the mold. Destroys it. — NanoFlashing</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+/* === Background video block (right side) === */
+.video-stack{
+  position:absolute;
+  top:0; bottom:0; right:0;
+  width:58%;
+  z-index:0;
+  overflow:hidden;
+  background:var(--bg);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.video-stack video,
+.video-stack img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.video-stack img.poster{ opacity:0; z-index:3; }
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* ===== .anno overlay + labels + spore effect (GLM 5.2) ===== */
+.anno{position:absolute;inset:0;z-index:5;pointer-events:none;}
+
+/* Top info block: ONE font (sans --stack), centered over the WHOLE slab (x≈53%).
+   Title in ink; each fact one line, grey with the metric bolded in ink. No mono, no blue. */
+.anno-top{
+  position:absolute;
+  left:53%;
+  top:7%;
+  transform:translateX(-50%);
+  text-align:center;
+  z-index:5;
+  pointer-events:none;
+}
+.anno-top > div{ font-family:var(--stack); letter-spacing:0.01em; margin:0 0 2px; }
+.anno-top > div:last-child{ margin-bottom:0; }
+.anno-test{ color:var(--ink); font-weight:600; font-size:22px; line-height:1.2; margin-bottom:5px; }
+.anno-fact{ color:var(--muted); font-weight:400; font-size:22px; line-height:1.2; }
+.anno-fact b{ color:var(--ink); font-weight:600; }
+
+/* Bottom material labels: level row just below slab (y≈85%), each centered under its own half */
+.anno-lbl{
+  position:absolute;
+  font-family:var(--stack);
+  letter-spacing:0.01em;
+  line-height:1.25;
+  white-space:nowrap;
+  transform:translateX(-50%);
+  z-index:7;
+  pointer-events:none;
+}
+.anno-lbl-nf{ left:33.3%; top:77.5%; color:#1b7bff; font-weight:500; font-size:22px; }
+.anno-lbl-cv{ left:70.8%; top:77.5%; color:#1f2327; font-weight:500; font-size:22px; }
+
+/* ===== Spore particles ===== */
+.anno .spore{
+  position:absolute;
+  left:0; top:0;
+  border-radius:50%;
+  background:#6f7d5c;
+  filter:blur(1px) drop-shadow(0 0 2px rgba(111,125,92,0.35));
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  z-index:6;
+  opacity:0;
+  will-change:transform,opacity,left,top;
+}
+.anno .spore.captured{
+  animation:nfSporeCapture 440ms cubic-bezier(.2,.7,.3,1) forwards;
+}
+/* landed on the conventional surface -> settle in and fade (no blue flash) */
+.anno .spore.settled{
+  animation:nfSporeSettle 420ms ease-out forwards;
+}
+@keyframes nfSporeSettle{
+  0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+}
+@keyframes nfSporeCapture{
+  0%{
+    box-shadow:0 0 0 0 rgba(27,123,255,0);
+    background:#8f9c7e;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
+  }
+  18%{
+    box-shadow:0 0 14px 4px rgba(27,123,255,0.55);
+    background:#1b7bff;
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1.15);
+  }
+  100%{
+    box-shadow:0 0 0 0 rgba(27,123,255,0);
+    background:#1b7bff;
+    opacity:0;
+    transform:translate(-50%,-50%) scale(0.15);
+  }
+}
+
+/* ===== Mobile ===== */
+@media (max-width:880px){
+  .anno-top { left: 52%; top: 2%; }
+  .anno-top .anno-test { font-size: 15px; margin-bottom: 4px; }
+  .anno-top .anno-fact { font-size: 15px; }
+  .anno-lbl { top: 77%; font-size: 16px; }
+  .anno-lbl-nf { left: 30%; }
+  .anno-lbl-cv { left: 72%; }
+  .anno .spore { filter: blur(1px) drop-shadow(0 0 2px rgba(111,125,92,0.35)); }
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-top:140px;
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:12px;
+}
+.headline em{ color:var(--accent); font-style:normal; font-weight:600; padding-left:0.12em; }
+.stat-block{ display:flex; align-items:center; gap:24px; margin-bottom:8px; }
+.big-number{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--accent);
+  font-size:clamp(56px, 6vw, 96px);
+  line-height:0.9;
+  letter-spacing:-0.04em;
+  font-variant-numeric:tabular-nums;
+}
+.caption{
+  font-size:clamp(17px, 1.5vw, 20px);
+  line-height:1.45;
+  color:var(--ink);
+  max-width:26ch;
+  padding-top:6px;
+}
+.body-text{
+  max-width: 460px;
+  font-size:19px;
+  line-height:1.48;
+  margin-top:12px;
+  color: #1a1a1a;
+}
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  margin-top:14px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
+
+/* === Mobile === */
+@media (max-width: 880px){
+  section{ display:block; min-height:auto; overflow-x:hidden; padding-bottom:56px; }
+  .video-stack{
+    position:relative; top:auto; bottom:auto; right:auto; left:auto;
+    width:100%; max-width:100%; height:auto;
+    aspect-ratio:1 / 1; max-height:74vh;
+    -webkit-mask-image:none; mask-image:none; background:var(--bg);
+  }
+  .video-stack::after{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:56px; z-index:4; pointer-events:none;
+    background:linear-gradient(to bottom, rgba(237,240,242,0) 0%, rgba(237,240,242,0.15) 55%, rgba(237,240,242,0.85) 100%);
+  }
+  .text-col{
+    position:relative; z-index:3; max-width:none; width:100%;
+    padding-left:clamp(24px, 6vw, 32px); padding-right:clamp(24px, 6vw, 32px); padding-top:30px;
+  }
+  .stat-block{ flex-direction:column; gap:14px; align-items:flex-start; }
+  .caption{ padding-top:0; max-width:none; }
+  .body-text{ font-size:16px; max-width:none; margin-bottom:12px; }
+  .body-text:last-child{ margin-bottom:0; }
+  .advocacy-link{ font-size:16px; }
+}
+</style>
+</head>
+<body>
+
+<section id="section">
+  <div class="video-stack" id="videoStack">
+    <video id="videoA" src="assets/videos/fungi_mold.mp4?v=1"
+           poster="assets/videos/posters/fungi_mold.jpg?v=1"
+           muted playsinline preload="auto"
+           style="opacity:1; z-index:1;"></video>
+    <img class="poster" src="assets/videos/posters/fungi_mold.jpg?v=1" alt="">
+    <div class="anno" aria-hidden="true">
+      <div class="anno-top">
+        <div class="anno-test">Airborne mold spores</div>
+        <div class="anno-fact"><b>136 million</b> spores per sample</div>
+        <div class="anno-fact"><b>40,000&times;</b> the standard test dose</div>
+        <div class="anno-fact"><b>1.6 m/s</b> airflow</div>
+      </div>
+      <span class="anno-lbl anno-lbl-nf">NanoFlashing Material</span>
+      <span class="anno-lbl anno-lbl-cv">Conventional Material</span>
+    </div>
+  </div>
+
+  <div class="text-col">
+    <h1 class="headline">
+      NanoFlashing captures the mold <em>— and destroys it</em>
+    </h1>
+
+    <div class="stat-block">
+      <div class="big-number" id="bigNumber">0%</div>
+      <p class="caption">of the mold spores it caught — destroyed, not just trapped</p>
+    </div>
+
+    <p class="body-text">
+      A conventional filter traps mold spores but doesn't kill them. They survive in the media, and the filter becomes a source. NanoFlashing carries a patented permanent positive polarity. It pulls the negatively charged spore onto the fiber and destroys the living cell on contact — through a physical mechanism, not chemistry. Almost none of what it catches survives to grow or shed back.
+    </p>
+    <p class="body-text">
+      Researchers at Massachusetts General Hospital and Harvard Medical School, in a study with funding from the U.S. National Institutes of Health, tested NanoFlashing the hard way — more than 100 million live, dry spores, driven in by fast-moving air in just three minutes, the way mold actually reaches a filter.
+    </p>
+    <a class="advocacy-link" href="#evidence">See the evidence →</a>
+  </div>
+</section>
+
+<script>
+/* Spore-impact particle system (GLM 5.2) — window.nfSpores = { start(), stop() } */
+window.nfSpores = (function () {
+  let container = null;
+  let spores = [];
+  let running = false;
+  let spawning = false;
+  let rafId = null;
+  let lastTime = 0;
+  let spawnAccum = 0;
+  let nextSpawnInterval = 220;
+  let rect = { width: 0, height: 0 };
+  let resizeHandler = null;
+
+  function readRect() {
+    if (!container) return;
+    const r = container.getBoundingClientRect();
+    rect.width = r.width || window.innerWidth;
+    rect.height = r.height || window.innerHeight;
+  }
+
+  // Slab geometry in VIDEO-frame fractions (measured on the 1280x720 clip).
+  // Spores are placed via the same cover-mapping as the labels, so they land on
+  // the real slab at any window width.
+  const SLAB_XL = 0.40, SLAB_XR = 0.72, SLAB_SPLIT = 0.509;
+  const TOP_M = 0.201, TOP_B = 0.133;    // slab top-edge line (verified on the clip): fy = TOP_M*fx + TOP_B
+  const LAND_OFFSET = 0.06;              // land a touch onto the top face, not just its edge
+  function coverMap() {
+    const s = Math.max(rect.width / 1280, rect.height / 720);
+    return { s: s, offX: (rect.width - 1280 * s) / 2, offY: (rect.height - 720 * s) / 2 };
+  }
+
+  function createSpore() {
+    if (rect.width === 0 || rect.height === 0) return;
+    const m = coverMap();
+    const el = document.createElement('div');
+    el.className = 'spore';
+    const size = 3 + Math.random() * 3; // 3-6px
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    // spawn directly ABOVE the slab top face. Balance 50/50 across the two halves
+    // (split at SLAB_SPLIT) so an EQUAL amount of mould lands on each side.
+    const onBlue = Math.random() < 0.5;
+    const fx = onBlue ? (0.43 + Math.random() * 0.075)   // NanoFlashing half  (0.430..0.505)
+                      : (0.515 + Math.random() * 0.185); // conventional half  (0.515..0.700)
+    const topFy = TOP_M * fx + TOP_B;
+    const spawnFy = topFy - (0.12 + Math.random() * 0.26);
+    const x0 = m.offX + fx * 1280 * m.s;
+    const spore = {
+      el: el,
+      x: x0,
+      baseX: x0,
+      y: m.offY + spawnFy * 720 * m.s,
+      size: size,
+      vx: -6 + Math.random() * 12,     // almost straight down
+      vy: 340 + Math.random() * 220,   // heavy, fast fall
+      wobbleAmp: Math.random() * 1.2,  // barely any drift (not floaty)
+      wobbleFreq: 0.5 + Math.random() * 0.8,
+      wobblePhase: Math.random() * Math.PI * 2,
+      depthT: Math.random(),           // where on the face it settles (0=top edge .. 1=front)
+      age: 0,
+      done: false
+    };
+    container.appendChild(el);
+    spores.push(spore);
+  }
+
+  function update(dt) {
+    if (spawning) {
+      spawnAccum += dt;
+      if (spawnAccum >= nextSpawnInterval) {
+        spawnAccum = 0;
+        nextSpawnInterval = 25 + Math.random() * 55; // spawn very fast -> dense heavy fall (~5x)
+        const deficit = 130 - spores.length;
+        const count = deficit > 0 ? Math.min(deficit, 18) : 8;
+        for (let i = 0; i < count && spores.length < 150; i++) createSpore();
+      }
+    }
+
+    const m = coverMap();
+    for (let i = spores.length - 1; i >= 0; i--) {
+      const s = spores[i];
+      if (s.done) continue;
+      s.age += dt;
+      const sec = dt / 1000;
+      s.baseX += s.vx * sec;
+      s.y += s.vy * sec;
+      s.x = s.baseX + Math.sin((s.age / 1000) * Math.PI * 2 * s.wobbleFreq + s.wobblePhase) * s.wobbleAmp;
+
+      const fx = (s.x - m.offX) / (1280 * m.s);
+      const fy = (s.y - m.offY) / (720 * m.s);
+      // land EVENLY across the whole top face: pick a depth between the top edge
+      // and the front edge (a parabola), per-spore, so they cover the surface.
+      const fyTop = TOP_M * fx + TOP_B;
+      const fyFront = 0.665 - 1.9 * (fx - 0.55) * (fx - 0.55);
+      const faceDepth = Math.max(0.05, fyFront - fyTop - 0.06);
+      const surfaceFy = fyTop + 0.04 + s.depthT * faceDepth;
+
+      // landed on the slab surface -> vanish. Blue flash on NanoFlashing (destroyed),
+      // quiet settle on the conventional half.
+      if (fx >= SLAB_XL && fx <= SLAB_XR && fy >= surfaceFy) {
+        s.done = true;
+        s.el.style.left = s.x + 'px';
+        s.el.style.top = s.y + 'px';
+        s.el.classList.add(fx < SLAB_SPLIT ? 'captured' : 'settled');
+        const elRef = s.el;
+        setTimeout(function () { if (elRef && elRef.parentNode) elRef.parentNode.removeChild(elRef); }, 460);
+        spores.splice(i, 1);
+        continue;
+      }
+
+      // safety: missed the slab and fell off the bottom
+      if (s.y > rect.height * 1.05) {
+        if (s.el.parentNode) s.el.parentNode.removeChild(s.el);
+        spores.splice(i, 1);
+        continue;
+      }
+
+      s.el.style.left = s.x + 'px';
+      s.el.style.top = s.y + 'px';
+      s.el.style.opacity = s.age < 250 ? (s.age / 250) : 1;
+    }
+  }
+
+  function loop(time) {
+    if (!running) return;
+    if (!lastTime) lastTime = time;
+    let dt = time - lastTime;
+    lastTime = time;
+    if (dt > 100) dt = 100;
+    update(dt);
+    // once spawning has stopped and the last falling spore has landed, end the loop
+    if (!spawning && spores.length === 0) { running = false; rafId = null; return; }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function clearAll() {
+    spores.forEach(function (s) {
+      if (s.el && s.el.parentNode) s.el.parentNode.removeChild(s.el);
+    });
+    spores = [];
+  }
+
+  function beginLoop() {
+    running = true;
+    spawning = true;
+    lastTime = 0;
+    spawnAccum = 0;
+    nextSpawnInterval = 200;
+    resizeHandler = function () { readRect(); };
+    window.addEventListener('resize', resizeHandler);
+    rafId = requestAnimationFrame(loop);
+  }
+  // stop making new mold, but let the last few finish falling and landing
+  function stopSpawning() { spawning = false; }
+
+  function start() {
+    if (running) return;
+    container = document.querySelector('.anno');
+    if (!container) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+    clearAll();
+    readRect();
+    if (rect.width === 0 || rect.height === 0) {
+      requestAnimationFrame(function () {
+        readRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        beginLoop();
+      });
+      return;
+    }
+    beginLoop();
+  }
+
+  function stop() {
+    running = false;
+    spawning = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    if (resizeHandler) {
+      window.removeEventListener('resize', resizeHandler);
+      resizeHandler = null;
+    }
+    clearAll();
+  }
+
+  return { start: start, stop: stop, stopSpawning: stopSpawning };
+})();
+</script>
+<script>
+(function(){
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const videoStack = document.getElementById('videoStack');
+  const videoA = document.getElementById('videoA');
+  const bigNumber = document.getElementById('bigNumber');
+  const isEmbedded = window.self !== window.top;
+  if (reducedMotion) videoStack.classList.add('reduced');
+
+  // Position the on-video labels to TRACK the slab at any window width.
+  // The video is object-fit:cover (1280x720), so the slab's on-screen x drifts
+  // as the panel width changes. We anchor each label to a fixed x-fraction of the
+  // VIDEO frame (measured): blue-half centre 0.413, mould-half centre 0.609,
+  // whole-slab centre 0.515. Vertical (top %) is stable because cover is height-driven.
+  const ANCHOR_NF = 0.408, ANCHOR_CV = 0.620, ANCHOR_TOP = 0.520;
+  function positionAnno(){
+    const nf = document.querySelector('.anno-lbl-nf');
+    const cv = document.querySelector('.anno-lbl-cv');
+    const top = document.querySelector('.anno-top');
+    // On mobile the labels use their own CSS spread (the slab is too narrow to
+    // centre the full labels without overlap); clear any inline value there.
+    if (window.innerWidth <= 880){
+      if (nf) nf.style.left = '';
+      if (cv) cv.style.left = '';
+      if (top) top.style.left = '';
+      return;
+    }
+    const W = videoStack.clientWidth, H = videoStack.clientHeight;
+    if (!W || !H) return;
+    const s = Math.max(W/1280, H/720);
+    const offX = (W - 1280*s)/2;
+    const pct = fx => ((offX + fx*1280*s)/W*100).toFixed(2) + '%';
+    if (nf) nf.style.left = pct(ANCHOR_NF);
+    if (cv) cv.style.left = pct(ANCHOR_CV);
+    if (top) top.style.left = pct(ANCHOR_TOP);
+  }
+  positionAnno();
+  window.addEventListener('resize', positionAnno);
+  window.addEventListener('load', positionAnno);
+
+  // The mould finishes growing at ~5s (before the 3s hold). Stop making new
+  // falling mould once biofouling is complete; the last few finish landing.
+  const GROW_END = 5.0;
+  function onGrow(){
+    if (videoA.currentTime >= GROW_END){
+      videoA.removeEventListener('timeupdate', onGrow);
+      if (window.nfSpores) window.nfSpores.stopSpawning();
+    }
+  }
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = '0%';
+    animateNumber();
+    positionAnno();
+    videoA.removeEventListener('timeupdate', onGrow);
+    videoA.addEventListener('timeupdate', onGrow);
+    if (window.nfSpores) window.nfSpores.start();
+  }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} videoA.removeEventListener('timeupdate', onGrow); if (window.nfSpores) window.nfSpores.stop(); }
+
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+  function animateNumber(){
+    const DURATION = 1600, TARGET = 99.2, start = performance.now();
+    function step(now){
+      const p = Math.min(1, (now - start) / DURATION);
+      const n = easeOutCubic(p) * TARGET;
+      bigNumber.textContent = n.toFixed(1) + '%';
+      if (p < 1) requestAnimationFrame(step); else bigNumber.textContent = '99.2%';
+    }
+    requestAnimationFrame(step);
+  }
+
+  if (reducedMotion) {
+    bigNumber.textContent = '99.2%';
+  } else {
+    bigNumber.textContent = '0%';
+    if (isEmbedded) {
+      window.addEventListener('message', function(e){
+        if (!e.data) return;
+        if (e.data.type === 'nf-active') startFilter();
+        else if (e.data.type === 'nf-inactive') stopFilter();
+      });
+    } else {
+      const io = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById('section'));
+    }
+  }
+})();
+</script>
+</body>
+</html>
