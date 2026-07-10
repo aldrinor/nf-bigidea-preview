@@ -76,7 +76,7 @@ section{
 .logo-cpolar, .logo-nano { display:flex; align-items:center; justify-content:flex-start; margin-left:0; }
 /* letter heights matched: C-POLAR box is 1.5x taller so its shield doesn't shrink the wordmark */
 .logo-cpolar { height:clamp(45px, 5.1vw, 63px); margin-bottom:32px; }
-.logo-nano { height:clamp(30px, 3.4vw, 42px); margin-top:32px; margin-bottom:0; }
+.logo-nano { height:clamp(30px, 3.4vw, 42px); margin-top:21px; margin-bottom:0; }
 .logo-cpolar img, .logo-nano img { height:100%; width:auto; max-width:100%; display:block; }
 
 .body-text, .cpolar-lead{
@@ -101,20 +101,20 @@ section{
 
 .verticals{
   list-style:none;
-  margin-top:32px;
+  margin-top:18px;
   padding:0;
   width:var(--block);
   max-width:100%;
-  display:flex;
-  flex-direction:column;
-  gap:32px;
 }
-.verticals li{ }
+.verticals li{
+  border-bottom:1px solid var(--hair);
+}
+.verticals li:last-child{ border-bottom:none; }
 .verticals a{
   display:flex;
   align-items:center;
   gap:16px;
-  padding:0 2px;
+  padding:11px 2px;
   font-family:var(--stack);
   font-size:clamp(17px, 1.35vw, 20px);
   font-weight:450;
