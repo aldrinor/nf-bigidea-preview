@@ -73,9 +73,47 @@ section{
 }
 .anno-top > div{ font-family:var(--stack); letter-spacing:0.01em; margin:0 0 2px; }
 .anno-top > div:last-child{ margin-bottom:0; }
+/* numbers blue, all other words black */
 .anno-test{ color:var(--ink); font-weight:600; font-size:22px; line-height:1.2; margin-bottom:5px; transition:opacity .4s ease; }
-.anno-fact{ color:var(--muted); font-weight:400; font-size:22px; line-height:1.2; transition:opacity .4s ease; }
-.anno-fact b{ color:var(--ink); font-weight:600; }
+.anno-fact{ color:var(--ink); font-weight:400; font-size:22px; line-height:1.2; transition:opacity .4s ease; }
+.anno-fact b{ color:var(--accent); font-weight:600; }
+
+/* ===== falling bacteria particles (captured on NanoFlashing, settle on conventional) ===== */
+.anno .spore{
+  position:absolute; left:0; top:0;
+  border-radius:50%;
+  background:#a29a8c;
+  filter:blur(1px) drop-shadow(0 0 2px rgba(162,154,140,0.35));
+  pointer-events:none; transform:translate(-50%,-50%);
+  z-index:6; opacity:0; will-change:transform,opacity,left,top;
+}
+.anno .spore.captured{ animation:nfSporeCapture 440ms cubic-bezier(.2,.7,.3,1) forwards; }
+.anno .spore.settled{ animation:nfSporeSettle 420ms ease-out forwards; }
+@keyframes nfSporeSettle{
+  0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+}
+@keyframes nfSporeCapture{
+  0%{ box-shadow:0 0 0 0 rgba(27,123,255,0); background:#a29a8c; opacity:1; transform:translate(-50%,-50%) scale(1); }
+  18%{ box-shadow:0 0 14px 4px rgba(27,123,255,0.55); background:#1b7bff; opacity:1; transform:translate(-50%,-50%) scale(1.15); }
+  100%{ box-shadow:0 0 0 0 rgba(27,123,255,0); background:#1b7bff; opacity:0; transform:translate(-50%,-50%) scale(0.15); }
+}
+
+/* ===== aging timeline (only visible during the accelerated-aging test) ===== */
+.anno-timeline{
+  position:absolute; left:53%; bottom:8%;
+  transform:translateX(-50%);
+  width:min(38%, 340px);
+  z-index:8; pointer-events:none;
+  opacity:0; transition:opacity .45s ease;
+  font-family:var(--stack);
+}
+.anno-timeline.on{ opacity:1; }
+.tl-label{ color:var(--ink); font-weight:600; font-size:16px; text-align:center; margin-bottom:8px; }
+.tl-track{ position:relative; height:3px; border-radius:3px; background:rgba(20,24,28,0.14); }
+.tl-fill{ position:absolute; left:0; top:0; height:100%; width:0%; border-radius:3px; background:var(--accent); }
+.tl-marker{ position:absolute; top:50%; left:0%; width:11px; height:11px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 0 3px rgba(27,123,255,0.18); }
+.tl-scale{ display:flex; justify-content:space-between; margin-top:7px; color:var(--muted); font-size:12px; }
 
 /* Bottom material labels: level row just below slab, each centered under its own half.
    Positioned by JS (tracks the slab across widths AND the two montage stages). */
@@ -203,6 +241,11 @@ section{
       </div>
       <span class="anno-lbl anno-lbl-nf">NanoFlashing Material</span>
       <span class="anno-lbl anno-lbl-cv">Conventional Material</span>
+      <div class="anno-timeline" id="annoTimeline">
+        <div class="tl-label">Accelerated aging</div>
+        <div class="tl-track"><div class="tl-fill" id="tlFill"></div><div class="tl-marker" id="tlMarker"></div></div>
+        <div class="tl-scale"><span>new</span><span>years in service</span></div>
+      </div>
     </div>
   </div>
 
@@ -227,6 +270,56 @@ section{
 </section>
 
 <script>
+/* Falling-bacteria particle system — window.nfBact = { start(), stop(), stopSpawning() }.
+   Each particle targets a random point inside the (dry-stage) slab quad, split 50/50 into
+   two equal-area halves, so bacteria land evenly and none fall off. Captured (blue flash)
+   on the NanoFlashing half, settle on the conventional half. Spawns only during the dry
+   tests; stopSpawning() is called when the water stage begins. */
+window.nfBact = (function () {
+  let container = null, spores = [], running = false, spawning = false, rafId = null;
+  let lastTime = 0, spawnAccum = 0, nextSpawnInterval = 200, rect = { width: 0, height: 0 }, resizeHandler = null;
+  // slab TOP FACE quad in VIDEO-frame fractions (bacteria dry stage, measured on the clip)
+  const TL=[0.409,0.225], TR=[0.730,0.286], BR=[0.634,0.746], BL=[0.312,0.636], SPLIT=0.520;
+  function lerp2(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
+  function onEdge(A,B,fx){ return lerp2(A,B,(fx-A[0])/(B[0]-A[0])); }
+  const TS=onEdge(TL,TR,SPLIT), BS=onEdge(BL,BR,SPLIT);
+  const BLUEQ=[TL,TS,BS,BL], WHITEQ=[TS,TR,BR,BS];
+  function biln(q,u,v){ const top=lerp2(q[0],q[1],u), bot=lerp2(q[3],q[2],u); return lerp2(top,bot,v); }
+  function readRect(){ if(!container) return; const r=container.getBoundingClientRect(); rect.width=r.width||window.innerWidth; rect.height=r.height||window.innerHeight; }
+  function coverMap(){ const s=Math.max(rect.width/1280, rect.height/720); return { s:s, offX:(rect.width-1280*s)/2, offY:(rect.height-720*s)/2 }; }
+  function createSpore(){
+    if(rect.width===0||rect.height===0) return;
+    const m=coverMap();
+    const el=document.createElement('div'); el.className='spore';
+    const size=3+Math.random()*3; el.style.width=size+'px'; el.style.height=size+'px';
+    const onBlue=Math.random()<0.5;
+    const t=biln(onBlue?BLUEQ:WHITEQ, Math.random(), Math.random());
+    const tx=m.offX+t[0]*1280*m.s;
+    const fall=0.14+Math.random()*0.20;
+    spores.push({ el:el, tx:tx, x:tx, onBlue:onBlue, targetY:m.offY+t[1]*720*m.s, y:m.offY+(t[1]-fall)*720*m.s,
+      vy:360+Math.random()*260, wobbleAmp:Math.random()*1.0, wobbleFreq:0.5+Math.random()*0.8, wobblePhase:Math.random()*Math.PI*2, age:0, done:false });
+    container.appendChild(el);
+  }
+  function update(dt){
+    if(spawning){ spawnAccum+=dt; if(spawnAccum>=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=25+Math.random()*55; const deficit=130-spores.length; const count=deficit>0?Math.min(deficit,18):8; for(let i=0;i<count&&spores.length<150;i++) createSpore(); } }
+    for(let i=spores.length-1;i>=0;i--){
+      const s=spores[i]; if(s.done) continue;
+      s.age+=dt; const sec=dt/1000; s.y+=s.vy*sec;
+      s.x=s.tx+Math.sin((s.age/1000)*Math.PI*2*s.wobbleFreq+s.wobblePhase)*s.wobbleAmp;
+      if(s.y>=s.targetY){ s.done=true; s.el.style.left=s.x+'px'; s.el.style.top=s.targetY+'px'; s.el.classList.add(s.onBlue?'captured':'settled'); const e=s.el; setTimeout(function(){ if(e&&e.parentNode) e.parentNode.removeChild(e); },460); spores.splice(i,1); continue; }
+      s.el.style.left=s.x+'px'; s.el.style.top=s.y+'px'; s.el.style.opacity=s.age<250?(s.age/250):1;
+    }
+  }
+  function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt>100) dt=100; update(dt); if(!spawning&&spores.length===0){ running=false; rafId=null; return; } rafId=requestAnimationFrame(loop); }
+  function clearAll(){ spores.forEach(function(s){ if(s.el&&s.el.parentNode) s.el.parentNode.removeChild(s.el); }); spores=[]; }
+  function begin(){ running=true; spawning=true; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener('resize',resizeHandler); rafId=requestAnimationFrame(loop); }
+  function stopSpawning(){ spawning=false; }
+  function start(){ if(running) return; container=document.querySelector('.anno'); if(!container) return; if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; clearAll(); readRect(); if(rect.width===0||rect.height===0){ requestAnimationFrame(function(){ readRect(); if(rect.width===0||rect.height===0) return; begin(); }); return; } begin(); }
+  function stop(){ running=false; spawning=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(resizeHandler){ window.removeEventListener('resize',resizeHandler); resizeHandler=null; } clearAll(); }
+  return { start:start, stop:stop, stopSpawning:stopSpawning };
+})();
+</script>
+<script>
 (function(){
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const videoStack = document.getElementById('videoStack');
@@ -236,6 +329,10 @@ section{
   const annoDose = document.getElementById('annoDose');
   const lblNf = document.querySelector('.anno-lbl-nf');
   const lblCv = document.querySelector('.anno-lbl-cv');
+  const annoTimeline = document.getElementById('annoTimeline');
+  const tlFill = document.getElementById('tlFill');
+  const tlMarker = document.getElementById('tlMarker');
+  const AGE_START = 8.8, AGE_END = 13.2;
   const isEmbedded = window.self !== window.top;
   if (reducedMotion) videoStack.classList.add('reduced');
 
@@ -273,10 +370,11 @@ section{
       if (pc && lblCv) lblCv.style.left = pc;
       if (pt && top) top.style.left = pt;
     }
-    // material legend only makes sense while the slab is in its locked dry spot
-    const op = curWater ? '0' : '1';
-    if (lblNf) lblNf.style.opacity = op;
-    if (lblCv) lblCv.style.opacity = op;
+    // legend stays complete through every stage; during water it rides the
+    // submerged slab body instead of sitting below it.
+    const lblT = curWater ? '62%' : '80%';
+    if (lblNf) lblNf.style.top = lblT;
+    if (lblCv) lblCv.style.top = lblT;
   }
   positionAnno();
   window.addEventListener('resize', positionAnno);
@@ -291,6 +389,10 @@ section{
       curTest = i;
       curWater = TESTS[i].water;
       positionAnno();
+      // stop new falling bacteria once the slab leaves its locked dry spot (water)
+      if (TESTS[i].water && window.nfBact) window.nfBact.stopSpawning();
+      // the aging timeline shows only during the accelerated-aging test
+      if (annoTimeline){ annoTimeline.classList.toggle('on', i === 2); }
       annoTest.style.opacity = '0';
       annoDose.style.opacity = '0';
       setTimeout(function(){
@@ -301,7 +403,15 @@ section{
       }, 200);
     }
   }
-  videoA.addEventListener('timeupdate', updateTest);
+  function updateTimeline(){
+    if (!tlFill) return;
+    let p = ((videoA.currentTime || 0) - AGE_START) / (AGE_END - AGE_START);
+    p = Math.max(0, Math.min(1, p));
+    const pct = (p * 100).toFixed(1) + '%';
+    tlFill.style.width = pct;
+    if (tlMarker) tlMarker.style.left = pct;
+  }
+  videoA.addEventListener('timeupdate', function(){ updateTest(); updateTimeline(); });
 
   function startFilter(){
     if (reducedMotion) return;
@@ -309,10 +419,14 @@ section{
     curTest = -1; curWater = false; positionAnno();
     annoTest.textContent = TESTS[0].test; annoDose.innerHTML = TESTS[0].dose;
     annoTest.style.opacity = '1'; annoDose.style.opacity = '1';
+    if (annoTimeline) annoTimeline.classList.remove('on');
+    if (tlFill) tlFill.style.width = '0%';
+    if (tlMarker) tlMarker.style.left = '0%';
     bigNumber.textContent = '0%';
     animateNumber();
+    if (window.nfBact) window.nfBact.start();
   }
-  function stopFilter(){ try { videoA.pause(); } catch(e){} }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} if (window.nfBact) window.nfBact.stop(); }
 
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
   function animateNumber(){
