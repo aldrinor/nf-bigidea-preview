@@ -65,10 +65,11 @@ section{
 .anno-top{
   position:absolute;
   left:53%;
-  top:7%;
+  bottom:80%;          /* anchored by its BOTTOM so the last line always sits the
+                          same standard distance above the slab, whatever the line count */
   transform:translateX(-50%);
   text-align:center;
-  z-index:5;
+  z-index:8;            /* above the falling bacteria so the words stay clear */
   pointer-events:none;
 }
 .anno-top > div{ font-family:var(--stack); letter-spacing:0.01em; margin:0 0 2px; }
@@ -83,20 +84,20 @@ section{
   position:absolute; left:0; top:0;
   border-radius:50%;
   background:#a29a8c;
-  filter:blur(1px) drop-shadow(0 0 2px rgba(162,154,140,0.35));
+  filter:blur(0.4px);
   pointer-events:none; transform:translate(-50%,-50%);
   z-index:6; opacity:0; will-change:transform,opacity,left,top;
 }
-.anno .spore.captured{ animation:nfSporeCapture 440ms cubic-bezier(.2,.7,.3,1) forwards; }
-.anno .spore.settled{ animation:nfSporeSettle 420ms ease-out forwards; }
+.anno .spore.captured{ animation:nfSporeCapture 640ms ease-out forwards; }
+.anno .spore.settled{ animation:nfSporeSettle 520ms ease-out forwards; }
 @keyframes nfSporeSettle{
   0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.55); }
 }
 @keyframes nfSporeCapture{
-  0%{ box-shadow:0 0 0 0 rgba(27,123,255,0); background:#a29a8c; opacity:1; transform:translate(-50%,-50%) scale(1); }
-  18%{ box-shadow:0 0 14px 4px rgba(27,123,255,0.55); background:#1b7bff; opacity:1; transform:translate(-50%,-50%) scale(1.15); }
-  100%{ box-shadow:0 0 0 0 rgba(27,123,255,0); background:#1b7bff; opacity:0; transform:translate(-50%,-50%) scale(0.15); }
+  0%{   box-shadow:0 0 0 0 rgba(110,168,255,0);    background:#a29a8c; opacity:1;   transform:translate(-50%,-50%) scale(1); }
+  40%{  box-shadow:0 0 3px 1px rgba(120,175,255,0.22); background:#8fb6ff; opacity:0.9; transform:translate(-50%,-50%) scale(1.03); }
+  100%{ box-shadow:0 0 0 0 rgba(110,168,255,0);    background:#b7d3ff; opacity:0;   transform:translate(-50%,-50%) scale(0.55); }
 }
 
 /* ===== aging timeline (only visible during the accelerated-aging test) ===== */
@@ -132,7 +133,7 @@ section{
 
 /* ===== Mobile ===== */
 @media (max-width:880px){
-  .anno-top { left: 52%; top: 2%; }
+  .anno-top { left: 52%; top: auto; bottom: 80%; }
   .anno-top .anno-test { font-size: 15px; margin-bottom: 4px; }
   .anno-top .anno-fact { font-size: 15px; }
   .anno-lbl { top: 77%; font-size: 16px; }
@@ -277,11 +278,15 @@ section{
 window.nfBact = (function () {
   let container = null, spores = [], running = false, spawning = false, rafId = null;
   let lastTime = 0, spawnAccum = 0, nextSpawnInterval = 200, rect = { width: 0, height: 0 }, resizeHandler = null;
-  // slab TOP FACE quad in VIDEO-frame fractions (bacteria dry stage, measured on the clip)
-  const TL=[0.409,0.225], TR=[0.730,0.286], BR=[0.634,0.746], BL=[0.312,0.636], SPLIT=0.520;
+  // slab TOP FACE quad (bacteria dry stage) + the SLANTED blue/white boundary (measured):
+  // fx = BND_M*fy + BND_B. Splitting on the real slanted line means "blue" targets truly
+  // sit on the blue half, so the azure fires ONLY on the NanoFlashing area.
+  const TL=[0.409,0.225], TR=[0.730,0.286], BR=[0.634,0.746], BL=[0.312,0.636];
+  const BND_M=-0.198, BND_B=0.599;
+  function boundaryFx(fy){ return BND_M*fy + BND_B; }
   function lerp2(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
-  function onEdge(A,B,fx){ return lerp2(A,B,(fx-A[0])/(B[0]-A[0])); }
-  const TS=onEdge(TL,TR,SPLIT), BS=onEdge(BL,BR,SPLIT);
+  function splitOn(A,B){ const dx=B[0]-A[0], dy=B[1]-A[1]; const u=(BND_M*A[1]+BND_B-A[0])/(dx-BND_M*dy); return [A[0]+dx*u, A[1]+dy*u]; }
+  const TS=splitOn(TL,TR), BS=splitOn(BL,BR);
   const BLUEQ=[TL,TS,BS,BL], WHITEQ=[TS,TR,BR,BS];
   function biln(q,u,v){ const top=lerp2(q[0],q[1],u), bot=lerp2(q[3],q[2],u); return lerp2(top,bot,v); }
   function readRect(){ if(!container) return; const r=container.getBoundingClientRect(); rect.width=r.width||window.innerWidth; rect.height=r.height||window.innerHeight; }
@@ -290,22 +295,22 @@ window.nfBact = (function () {
     if(rect.width===0||rect.height===0) return;
     const m=coverMap();
     const el=document.createElement('div'); el.className='spore';
-    const size=3+Math.random()*3; el.style.width=size+'px'; el.style.height=size+'px';
+    const size=1.5+Math.random()*2; el.style.width=size+'px'; el.style.height=size+'px'; // small dots
     const onBlue=Math.random()<0.5;
     const t=biln(onBlue?BLUEQ:WHITEQ, Math.random(), Math.random());
     const tx=m.offX+t[0]*1280*m.s;
-    const fall=0.14+Math.random()*0.20;
-    spores.push({ el:el, tx:tx, x:tx, onBlue:onBlue, targetY:m.offY+t[1]*720*m.s, y:m.offY+(t[1]-fall)*720*m.s,
-      vy:360+Math.random()*260, wobbleAmp:Math.random()*1.0, wobbleFreq:0.5+Math.random()*0.8, wobblePhase:Math.random()*Math.PI*2, age:0, done:false });
+    const fall=0.10+Math.random()*0.22;
+    spores.push({ el:el, tx:tx, x:tx, blue:(t[0] < boundaryFx(t[1]) - 0.010), targetY:m.offY+t[1]*720*m.s, y:m.offY+(t[1]-fall)*720*m.s,
+      vy:40+Math.random()*50, wobbleAmp:4+Math.random()*6, wobbleFreq:0.4+Math.random()*0.7, wobblePhase:Math.random()*Math.PI*2, age:0, done:false });
     container.appendChild(el);
   }
   function update(dt){
-    if(spawning){ spawnAccum+=dt; if(spawnAccum>=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=25+Math.random()*55; const deficit=130-spores.length; const count=deficit>0?Math.min(deficit,18):8; for(let i=0;i<count&&spores.length<150;i++) createSpore(); } }
+    if(spawning){ spawnAccum+=dt; if(spawnAccum>=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=18+Math.random()*42; const deficit=200-spores.length; const count=deficit>0?Math.min(deficit,20):10; for(let i=0;i<count&&spores.length<220;i++) createSpore(); } }
     for(let i=spores.length-1;i>=0;i--){
       const s=spores[i]; if(s.done) continue;
       s.age+=dt; const sec=dt/1000; s.y+=s.vy*sec;
       s.x=s.tx+Math.sin((s.age/1000)*Math.PI*2*s.wobbleFreq+s.wobblePhase)*s.wobbleAmp;
-      if(s.y>=s.targetY){ s.done=true; s.el.style.left=s.x+'px'; s.el.style.top=s.targetY+'px'; s.el.classList.add(s.onBlue?'captured':'settled'); const e=s.el; setTimeout(function(){ if(e&&e.parentNode) e.parentNode.removeChild(e); },460); spores.splice(i,1); continue; }
+      if(s.y>=s.targetY){ s.done=true; s.el.style.left=s.x+'px'; s.el.style.top=s.targetY+'px'; s.el.classList.add(s.blue?'captured':'settled'); const e=s.el; setTimeout(function(){ if(e&&e.parentNode) e.parentNode.removeChild(e); },640); spores.splice(i,1); continue; }
       s.el.style.left=s.x+'px'; s.el.style.top=s.y+'px'; s.el.style.opacity=s.age<250?(s.age/250):1;
     }
   }

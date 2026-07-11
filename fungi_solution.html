@@ -64,7 +64,8 @@ section{
 .anno-top{
   position:absolute;
   left:53%;
-  top:7%;
+  bottom:80%;          /* anchored by its BOTTOM so the last line always sits the
+                          same standard distance above the slab, whatever the line count */
   transform:translateX(-50%);
   text-align:center;
   z-index:8;            /* above the falling mold so the words stay clear */
@@ -91,60 +92,46 @@ section{
 .anno-lbl-nf{ left:33.3%; top:77.5%; color:#1b7bff; font-weight:500; font-size:22px; }
 .anno-lbl-cv{ left:70.8%; top:77.5%; color:#1f2327; font-weight:500; font-size:22px; }
 
-/* ===== Spore particles ===== */
+/* ===== Spore particles (small, snow-like) ===== */
 .anno .spore{
   position:absolute;
   left:0; top:0;
   border-radius:50%;
   background:#6f7d5c;
-  filter:blur(1px) drop-shadow(0 0 2px rgba(111,125,92,0.35));
+  filter:blur(0.4px);
   pointer-events:none;
   transform:translate(-50%,-50%);
   z-index:6;
   opacity:0;
   will-change:transform,opacity,left,top;
 }
+/* landed on the NanoFlashing (blue) half -> super-gentle azure, then fade */
 .anno .spore.captured{
-  animation:nfSporeCapture 440ms cubic-bezier(.2,.7,.3,1) forwards;
+  animation:nfSporeCapture 640ms ease-out forwards;
 }
-/* landed on the conventional surface -> settle in and fade (no blue flash) */
+/* landed on the conventional half -> quiet settle, no azure */
 .anno .spore.settled{
-  animation:nfSporeSettle 420ms ease-out forwards;
+  animation:nfSporeSettle 520ms ease-out forwards;
 }
 @keyframes nfSporeSettle{
   0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.55); }
 }
 @keyframes nfSporeCapture{
-  0%{
-    box-shadow:0 0 0 0 rgba(27,123,255,0);
-    background:#8f9c7e;
-    opacity:1;
-    transform:translate(-50%,-50%) scale(1);
-  }
-  18%{
-    box-shadow:0 0 14px 4px rgba(27,123,255,0.55);
-    background:#1b7bff;
-    opacity:1;
-    transform:translate(-50%,-50%) scale(1.15);
-  }
-  100%{
-    box-shadow:0 0 0 0 rgba(27,123,255,0);
-    background:#1b7bff;
-    opacity:0;
-    transform:translate(-50%,-50%) scale(0.15);
-  }
+  0%{   box-shadow:0 0 0 0 rgba(110,168,255,0);    background:#6f7d5c; opacity:1;    transform:translate(-50%,-50%) scale(1); }
+  40%{  box-shadow:0 0 3px 1px rgba(120,175,255,0.22); background:#8fb6ff; opacity:0.9; transform:translate(-50%,-50%) scale(1.03); }
+  100%{ box-shadow:0 0 0 0 rgba(110,168,255,0);    background:#b7d3ff; opacity:0;    transform:translate(-50%,-50%) scale(0.55); }
 }
 
 /* ===== Mobile ===== */
 @media (max-width:880px){
-  .anno-top { left: 52%; top: 2%; }
+  .anno-top { left: 52%; top: auto; bottom: 80%; }
   .anno-top .anno-test { font-size: 15px; margin-bottom: 4px; }
   .anno-top .anno-fact { font-size: 15px; }
   .anno-lbl { top: 77%; font-size: 16px; }
   .anno-lbl-nf { left: 30%; }
   .anno-lbl-cv { left: 72%; }
-  .anno .spore { filter: blur(1px) drop-shadow(0 0 2px rgba(111,125,92,0.35)); }
+  .anno .spore { filter: blur(0.4px); }
 }
 
 /* === Text column === */
@@ -298,10 +285,14 @@ window.nfSpores = (function () {
   // EQUAL-area halves at the blue/white boundary, so the mould lands evenly across
   // the whole slab, 50/50 on each side, and NONE fall off (the target is on-slab).
   const TL=[0.411,0.210], TR=[0.724,0.256], BR=[0.631,0.726], BL=[0.309,0.625];
-  const SPLIT=0.515;
+  // The blue/white boundary is a SLANTED line (measured on the clip): fx = BND_M*fy + BND_B.
+  // Splitting the slab along this real line (not a vertical guess) means "blue" targets
+  // truly sit on the blue half — so the azure fires ONLY on the NanoFlashing area.
+  const BND_M=-0.203, BND_B=0.600;
+  function boundaryFx(fy){ return BND_M*fy + BND_B; }
   function lerp2(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
-  function onEdge(A,B,fx){ return lerp2(A,B,(fx-A[0])/(B[0]-A[0])); }
-  const TS=onEdge(TL,TR,SPLIT), BS=onEdge(BL,BR,SPLIT);
+  function splitOn(A,B){ const dx=B[0]-A[0], dy=B[1]-A[1]; const u=(BND_M*A[1]+BND_B-A[0])/(dx-BND_M*dy); return [A[0]+dx*u, A[1]+dy*u]; }
+  const TS=splitOn(TL,TR), BS=splitOn(BL,BR);
   const BLUEQ=[TL,TS,BS,BL], WHITEQ=[TS,TR,BR,BS];   // top-left, top-right, bot-right, bot-left
   function biln(q,u,v){ const top=lerp2(q[0],q[1],u), bot=lerp2(q[3],q[2],u); return lerp2(top,bot,v); }
   function coverMap() {
@@ -314,20 +305,21 @@ window.nfSpores = (function () {
     const m = coverMap();
     const el = document.createElement('div');
     el.className = 'spore';
-    const size = 3 + Math.random() * 3; // 3-6px
+    const size = 1.5 + Math.random() * 2; // small dots (1.5-3.5px)
     el.style.width = size + 'px';
     el.style.height = size + 'px';
     const onBlue = Math.random() < 0.5;              // 50/50 count
     const t = biln(onBlue ? BLUEQ : WHITEQ, Math.random(), Math.random()); // target [fx,fy] on the slab
     const tx = m.offX + t[0] * 1280 * m.s;
-    const fall = 0.14 + Math.random() * 0.20;        // how far above the target it starts
+    const fall = 0.10 + Math.random() * 0.22;        // how far above the target it starts
     const spore = {
-      el: el, tx: tx, x: tx, onBlue: onBlue,
+      el: el, tx: tx, x: tx,
+      blue: t[0] < boundaryFx(t[1]) - 0.010,         // azure ONLY if clearly on the blue half
       targetY: m.offY + t[1] * 720 * m.s,
       y: m.offY + (t[1] - fall) * 720 * m.s,
-      vy: 360 + Math.random() * 260,                 // heavy, fast fall
-      wobbleAmp: Math.random() * 1.0,                // barely any drift
-      wobbleFreq: 0.5 + Math.random() * 0.8,
+      vy: 40 + Math.random() * 50,                   // slow, snow-like drift (not a hard fall)
+      wobbleAmp: 4 + Math.random() * 6,              // gentle side-to-side float
+      wobbleFreq: 0.4 + Math.random() * 0.7,
       wobblePhase: Math.random() * Math.PI * 2,
       age: 0, done: false
     };
@@ -340,10 +332,10 @@ window.nfSpores = (function () {
       spawnAccum += dt;
       if (spawnAccum >= nextSpawnInterval) {
         spawnAccum = 0;
-        nextSpawnInterval = 25 + Math.random() * 55; // spawn very fast -> dense heavy fall (~5x)
-        const deficit = 130 - spores.length;
-        const count = deficit > 0 ? Math.min(deficit, 18) : 8;
-        for (let i = 0; i < count && spores.length < 150; i++) createSpore();
+        nextSpawnInterval = 18 + Math.random() * 42; // spawn fast -> dense fine snow
+        const deficit = 200 - spores.length;
+        const count = deficit > 0 ? Math.min(deficit, 20) : 10;
+        for (let i = 0; i < count && spores.length < 220; i++) createSpore();
       }
     }
 
@@ -361,9 +353,9 @@ window.nfSpores = (function () {
         s.done = true;
         s.el.style.left = s.x + 'px';
         s.el.style.top = s.targetY + 'px';
-        s.el.classList.add(s.onBlue ? 'captured' : 'settled');
+        s.el.classList.add(s.blue ? 'captured' : 'settled');
         const elRef = s.el;
-        setTimeout(function () { if (elRef && elRef.parentNode) elRef.parentNode.removeChild(elRef); }, 460);
+        setTimeout(function () { if (elRef && elRef.parentNode) elRef.parentNode.removeChild(elRef); }, 640);
         spores.splice(i, 1);
         continue;
       }
