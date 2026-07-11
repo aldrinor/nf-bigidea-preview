@@ -92,18 +92,16 @@ section{
 .anno-lbl-nf{ left:33.3%; top:77.5%; color:#1b7bff; font-weight:500; font-size:22px; }
 .anno-lbl-cv{ left:70.8%; top:77.5%; color:#1f2327; font-weight:500; font-size:22px; }
 
-/* ===== Spore particles (small, snow-like) ===== */
+/* ===== Spore particles (tiny, dense, snow-like) — positioned by transform so
+       thousands can animate without a layout storm ===== */
 .anno .spore{
   position:absolute;
   left:0; top:0;
   border-radius:50%;
   background:#6f7d5c;
-  filter:blur(0.4px);
   pointer-events:none;
-  transform:translate(-50%,-50%);
   z-index:6;
   opacity:0;
-  will-change:transform,opacity,left,top;
 }
 /* landed on the NanoFlashing (blue) half -> super-gentle azure, then fade */
 .anno .spore.captured{
@@ -114,13 +112,13 @@ section{
   animation:nfSporeSettle 520ms ease-out forwards;
 }
 @keyframes nfSporeSettle{
-  0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,-50%) scale(0.55); }
+  0%{ opacity:1; }
+  100%{ opacity:0; }
 }
 @keyframes nfSporeCapture{
-  0%{   box-shadow:0 0 0 0 rgba(110,168,255,0);    background:#6f7d5c; opacity:1;    transform:translate(-50%,-50%) scale(1); }
-  40%{  box-shadow:0 0 3px 1px rgba(120,175,255,0.22); background:#8fb6ff; opacity:0.9; transform:translate(-50%,-50%) scale(1.03); }
-  100%{ box-shadow:0 0 0 0 rgba(110,168,255,0);    background:#b7d3ff; opacity:0;    transform:translate(-50%,-50%) scale(0.55); }
+  0%{   background:#6f7d5c; opacity:1;    box-shadow:0 0 0 0 rgba(110,168,255,0); }
+  40%{  background:#8fb6ff; opacity:0.95; box-shadow:0 0 2px 1px rgba(120,175,255,0.28); }
+  100%{ background:#b7d3ff; opacity:0;    box-shadow:0 0 0 0 rgba(110,168,255,0); }
 }
 
 /* ===== Mobile ===== */
@@ -131,7 +129,6 @@ section{
   .anno-lbl { top: 77%; font-size: 16px; }
   .anno-lbl-nf { left: 30%; }
   .anno-lbl-cv { left: 72%; }
-  .anno .spore { filter: blur(0.4px); }
 }
 
 /* === Text column === */
@@ -313,7 +310,7 @@ window.nfSpores = (function () {
     const tx = m.offX + t[0] * 1280 * m.s;
     const fall = 0.10 + Math.random() * 0.22;        // how far above the target it starts
     const spore = {
-      el: el, tx: tx, x: tx,
+      el: el, tx: tx, x: tx, hs: size / 2,
       blue: t[0] < boundaryFx(t[1]) - 0.010,         // azure ONLY if clearly on the blue half
       targetY: m.offY + t[1] * 720 * m.s,
       y: m.offY + (t[1] - fall) * 720 * m.s,
@@ -323,6 +320,7 @@ window.nfSpores = (function () {
       wobblePhase: Math.random() * Math.PI * 2,
       age: 0, done: false
     };
+    el.style.transform = 'translate(' + (tx - spore.hs) + 'px,' + (spore.y - spore.hs) + 'px)';
     container.appendChild(el);
     spores.push(spore);
   }
@@ -332,10 +330,11 @@ window.nfSpores = (function () {
       spawnAccum += dt;
       if (spawnAccum >= nextSpawnInterval) {
         spawnAccum = 0;
-        nextSpawnInterval = 18 + Math.random() * 42; // spawn fast -> dense fine snow
-        const deficit = 200 - spores.length;
-        const count = deficit > 0 ? Math.min(deficit, 20) : 10;
-        for (let i = 0; i < count && spores.length < 220; i++) createSpore();
+        nextSpawnInterval = 10 + Math.random() * 20; // spawn very fast -> very dense fine snow
+        const cap = window.innerWidth > 880 ? 2200 : 700; // full density on desktop, lighter on small screens
+        const deficit = cap - spores.length;
+        const count = deficit > 0 ? Math.min(deficit, 60) : 24;
+        for (let i = 0; i < count && spores.length < cap; i++) createSpore();
       }
     }
 
@@ -351,8 +350,7 @@ window.nfSpores = (function () {
       // (captured + destroyed), quiet settle on the conventional half.
       if (s.y >= s.targetY) {
         s.done = true;
-        s.el.style.left = s.x + 'px';
-        s.el.style.top = s.targetY + 'px';
+        s.el.style.transform = 'translate(' + (s.x - s.hs) + 'px,' + (s.targetY - s.hs) + 'px)';
         s.el.classList.add(s.blue ? 'captured' : 'settled');
         const elRef = s.el;
         setTimeout(function () { if (elRef && elRef.parentNode) elRef.parentNode.removeChild(elRef); }, 640);
@@ -360,8 +358,7 @@ window.nfSpores = (function () {
         continue;
       }
 
-      s.el.style.left = s.x + 'px';
-      s.el.style.top = s.y + 'px';
+      s.el.style.transform = 'translate(' + (s.x - s.hs) + 'px,' + (s.y - s.hs) + 'px)';
       s.el.style.opacity = s.age < 250 ? (s.age / 250) : 1;
     }
   }
