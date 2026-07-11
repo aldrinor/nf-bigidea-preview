@@ -2518,15 +2518,17 @@ section{
     <img class=&quot;poster&quot; src=&quot;assets/videos/posters/bacteria_durability.jpg?v=2&quot; alt=&quot;&quot;>
     <div class=&quot;anno&quot; id=&quot;anno&quot; aria-hidden=&quot;true&quot;>
       <div class=&quot;anno-top&quot;>
-        <div class=&quot;anno-test&quot; id=&quot;annoTest&quot;>Dust-loaded filter</div>
-        <div class=&quot;anno-fact&quot; id=&quot;annoDose&quot;><b>100 million</b> live bacteria</div>
+        <div class=&quot;anno-test&quot;>Live bacteria</div>
+        <div class=&quot;anno-fact&quot;><b>100 million</b> per sample</div>
+        <div class=&quot;anno-fact&quot;><b>100×</b> the standard test dose</div>
+        <div class=&quot;anno-fact&quot; id=&quot;annoCond&quot;>Heavy dust load</div>
       </div>
       <span class=&quot;anno-lbl anno-lbl-nf&quot;>NanoFlashing Material</span>
       <span class=&quot;anno-lbl anno-lbl-cv&quot;>Conventional Material</span>
       <div class=&quot;anno-timeline&quot; id=&quot;annoTimeline&quot;>
-        <div class=&quot;tl-label&quot;>Accelerated aging</div>
+        <div class=&quot;tl-label&quot;>In service</div>
         <div class=&quot;tl-track&quot;><div class=&quot;tl-fill&quot; id=&quot;tlFill&quot;></div><div class=&quot;tl-marker&quot; id=&quot;tlMarker&quot;></div></div>
-        <div class=&quot;tl-scale&quot;><span>new</span><span>years in service</span></div>
+        <div class=&quot;tl-scale&quot;><span>new</span><span>4 years</span></div>
       </div>
     </div>
   </div>
@@ -2612,8 +2614,7 @@ window.nfBact = (function () {
   const videoStack = document.getElementById('videoStack');
   const videoA = document.getElementById('videoA');
   const bigNumber = document.getElementById('bigNumber');
-  const annoTest = document.getElementById('annoTest');
-  const annoDose = document.getElementById('annoDose');
+  const annoCond = document.getElementById('annoCond');
   const lblNf = document.querySelector('.anno-lbl-nf');
   const lblCv = document.querySelector('.anno-lbl-cv');
   const annoTimeline = document.getElementById('annoTimeline');
@@ -2630,10 +2631,10 @@ window.nfBact = (function () {
   // fall off-screen), so the material labels FADE OUT there — the &quot;Water submersion&quot;
   // caption + the blue/fouled split carry it.  Boundaries: dust<4.4 heat<8.8 aging<13.2
   const TESTS = [
-    { until: 4.4,  test: 'Dust-loaded filter', dose: '<b>100 million</b> live bacteria', water:false },
-    { until: 8.8,  test: 'Heat and humidity',  dose: 'live bacteria challenge',           water:false },
-    { until: 13.2, test: 'Accelerated aging',  dose: 'live bacteria challenge',           water:false },
-    { until: 99,   test: 'Water submersion',   dose: '<b>100×</b> dose, fully soaked',    water:true  }
+    { until: 4.4,  cond: 'Heavy dust load',                    water:false },
+    { until: 8.8,  cond: '<b>60 °C</b> heat, <b>64 days</b>',  water:false },
+    { until: 13.2, cond: '<b>4 years</b>, real time',          water:false },
+    { until: 99,   cond: 'Fully submerged in water',           water:true  }
   ];
   const NF_FRAC = 0.405, CV_FRAC = 0.597, TOP_FRAC = 0.524;  // visual centre of mass of each slab half
 
@@ -2675,14 +2676,13 @@ window.nfBact = (function () {
       if (TESTS[i].water &amp;&amp; window.nfBact) window.nfBact.stopSpawning();
       // the aging timeline shows only during the accelerated-aging test
       if (annoTimeline){ annoTimeline.classList.toggle('on', i === 2); }
-      annoTest.style.opacity = '0';
-      annoDose.style.opacity = '0';
-      setTimeout(function(){
-        annoTest.textContent = TESTS[i].test;
-        annoDose.innerHTML = TESTS[i].dose;
-        annoTest.style.opacity = '1';
-        annoDose.style.opacity = '1';
-      }, 200);
+      if (annoCond){
+        annoCond.style.opacity = '0';
+        setTimeout(function(){
+          annoCond.innerHTML = TESTS[i].cond;
+          annoCond.style.opacity = '1';
+        }, 200);
+      }
     }
   }
   function updateTimeline(){
@@ -2699,8 +2699,7 @@ window.nfBact = (function () {
     if (reducedMotion) return;
     try { videoA.currentTime = 0; videoA.play(); } catch(e){}
     curTest = -1; curWater = false; positionAnno();
-    annoTest.textContent = TESTS[0].test; annoDose.innerHTML = TESTS[0].dose;
-    annoTest.style.opacity = '1'; annoDose.style.opacity = '1';
+    if (annoCond){ annoCond.innerHTML = TESTS[0].cond; annoCond.style.opacity = '1'; }
     if (annoTimeline) annoTimeline.classList.remove('on');
     if (tlFill) tlFill.style.width = '0%';
     if (tlMarker) tlMarker.style.left = '0%';
