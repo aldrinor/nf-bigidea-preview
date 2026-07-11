@@ -44,10 +44,20 @@ make the bacteria answer page follow the same token. This folder holds the froze
 - Bacteria water stage: the slab drops and grows past the panel crop, so the two material
   labels FADE OUT during water; the "Water submersion" caption + the blue/fouled split carry it.
 
-## Falling-particle effect (fungi only — a single growth test)
-Grey-green spores fall heavily straight down onto the slab surface and vanish there — blue
-capture-flash on the NanoFlashing half, quiet settle on the fouled half. Even 50/50 across the
-two halves, ~5× density (up to ~150 at once), stops once biofouling completes (~5s), lands
-evenly across the whole top face. NOT applied to the bacteria montage (4 separate tests).
+## Falling-particle effect (fungi single test; bacteria dry stages)
+Small dots (1.5–3.5px, tiny blur, NO big halo) drift down like SNOW — slow (vy 40–90) with a
+gentle side-to-side float (wobble 4–10px), NOT a hard fast fall. Dense (~220 alive). Each dot
+targets a random point inside the slab quad, split along the REAL SLANTED blue/white boundary
+`fx = −0.20·fy + 0.60` (NOT a vertical line — a vertical split let dots land on the control side
+near the bottom). Azure fires ONLY when the target is clearly on the blue half (`fx < boundary −
+0.010`); verified 0 captures on the white side. The azure is SUPER GENTLE: pale #8fb6ff, tiny 3px
+glow, scale 1.03, slow fade — NOT a hard bright #1b7bff flash. Conventional-side dots settle
+quietly (no azure). Fungi: 50/50 even across both halves, stops at biofouling (~5s). Bacteria:
+runs during the dry tests, stops at the water stage.
+
+## Top-legend gap (standardized across the dashboard)
+The top info block is anchored by its **BOTTOM** (`bottom:80%`, `top:auto`) — NOT its top — so its
+last line sits the SAME fixed distance above the slab on every page regardless of line count.
+`.anno-top` z-index 8 (above the particles). Numbers blue, other words black.
 
 Restore either page: `cp _backups/answer_page_token_locked_20260710/<file> .`
