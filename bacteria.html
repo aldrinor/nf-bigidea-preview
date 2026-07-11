@@ -2383,23 +2383,27 @@ section{
   100%{ background:#eaf4ff; opacity:0; box-shadow:0 0 15px 5px rgba(160,205,255,0); }     /* the light softly spreads out and fades */
 }
 
-/* ===== &quot;years in service&quot; timeline — compact single row, right under the top legend,
-       shown only during the 4-year ageing stage ===== */
+/* ===== &quot;years in service&quot; timeline — engraved ruler with year marks, LOWERCASE labels,
+       right under the top legend, shown only during the ageing stage ===== */
 .anno-timeline{
-  position:absolute; left:53%; top:20%;
+  position:absolute; left:53%; top:19.5%;
   transform:translateX(-50%);
   width:min(30%, 280px);
   z-index:8; pointer-events:none;
   opacity:0; transition:opacity .4s ease;
   font-family:var(--stack);
-  display:flex; align-items:center; gap:10px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  color:var(--ink);
 }
 .anno-timeline.on{ opacity:1; }
-.tl-a{ font-size:13px; color:var(--muted); white-space:nowrap; }
-.tl-b{ font-size:13px; color:var(--accent); font-weight:600; white-space:nowrap; }
-.tl-track{ position:relative; flex:1; height:2px; border-radius:2px; background:rgba(20,24,28,0.16); }
-.tl-fill{ position:absolute; left:0; top:0; height:100%; width:0%; border-radius:2px; background:var(--accent); }
-.tl-marker{ position:absolute; top:50%; left:0%; width:8px; height:8px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 0 3px rgba(27,123,255,0.16); }
+.tl-top, .tl-bottom{ display:flex; justify-content:space-between; font-size:11px; letter-spacing:.01em; color:var(--muted); }
+.tl-bottom{ display:grid; grid-template-columns:repeat(4,1fr); text-align:center; }
+.tl-track{ position:relative; height:8px; display:flex; align-items:center; margin:3px 0; }
+.tl-track::before{ content:&quot;&quot;; position:absolute; top:50%; left:0; right:0; height:1px; background:#cdd1d4; transform:translateY(-50%); }
+.tl-fill{ position:absolute; top:50%; left:0; height:2px; width:0%; background:var(--accent); transform:translateY(-50%); }
+.tl-fill::after{ content:&quot;&quot;; position:absolute; right:0; top:50%; width:1px; height:8px; background:var(--accent); transform:translateY(-50%); }
+.tl-ticks{ width:100%; display:flex; justify-content:space-between; position:relative; z-index:2; }
+.tl-ticks span{ width:1px; height:6px; background:#cdd1d4; }
 
 /* Bottom material labels: level row just below slab, each centered under its own half.
    Positioned by JS (tracks the slab across widths AND the two montage stages). */
@@ -2528,9 +2532,9 @@ section{
       <span class=&quot;anno-lbl anno-lbl-nf&quot;>NanoFlashing Material</span>
       <span class=&quot;anno-lbl anno-lbl-cv&quot;>Conventional Material</span>
       <div class=&quot;anno-timeline&quot; id=&quot;annoTimeline&quot;>
-        <span class=&quot;tl-a&quot;>new</span>
-        <div class=&quot;tl-track&quot;><div class=&quot;tl-fill&quot; id=&quot;tlFill&quot;></div><div class=&quot;tl-marker&quot; id=&quot;tlMarker&quot;></div></div>
-        <span class=&quot;tl-b&quot;>4 years</span>
+        <div class=&quot;tl-top&quot;><span>new</span><span>4 years</span></div>
+        <div class=&quot;tl-track&quot;><div class=&quot;tl-fill&quot; id=&quot;tlFill&quot;></div><div class=&quot;tl-ticks&quot;><span></span><span></span><span></span><span></span><span></span></div></div>
+        <div class=&quot;tl-bottom&quot;><span>1</span><span>2</span><span>3</span><span>4</span></div>
       </div>
     </div>
   </div>
