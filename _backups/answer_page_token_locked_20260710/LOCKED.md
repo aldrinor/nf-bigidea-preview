@@ -35,9 +35,11 @@ make the bacteria answer page follow the same token. This folder holds the froze
 - **Label tracking (critical):** the video is object-fit:cover, so the slab slides as the window
   width changes. Position every label by cover-mapping from a fixed VIDEO-frame fraction:
   `s = max(W/1280, H/720); offX = (W-1280*s)/2; leftPct = (offX + frac*1280*s)/W*100`.
-  Anchors (measured on the clip, both pages share the SAME locked slab): blue-half **0.408**,
-  fouled-half **0.620**, whole-slab **0.520**. Re-run on load + resize + play. UAT at 1280 /
-  1440 / 1600 / 1863 — never one width.
+  Anchors = the VISUAL CENTRE OF MASS of each slab half (pixel centroid, NOT the bounding-box
+  midpoint — the slab is tilted so they differ ~4%): blue-half **0.433**, fouled-half **0.597**,
+  whole-slab **0.524**. Both pages share the SAME locked slab and the SAME anchors. Material
+  labels sit at **top 77.5%** (mobile 77%), identical in every stage (no per-stage shift).
+  Re-run on load + resize + play. UAT at 1280 / 1440 / 1600 / 1863 — never one width.
 - **Video plays ONCE (no `loop`)** and rests on the final frame.
 - Bacteria water stage: the slab drops and grows past the panel crop, so the two material
   labels FADE OUT during water; the "Water submersion" caption + the blue/fouled split carry it.
