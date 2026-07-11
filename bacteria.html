@@ -2359,6 +2359,7 @@ section{
 .anno-top > div:last-child{ margin-bottom:0; }
 /* numbers blue, all other words black */
 .anno-test{ color:var(--ink); font-weight:600; font-size:22px; line-height:1.2; margin-bottom:5px; transition:opacity .4s ease; }
+.anno-test b{ color:var(--accent); font-weight:600; }
 .anno-fact{ color:var(--ink); font-weight:400; font-size:22px; line-height:1.2; transition:opacity .4s ease; }
 .anno-fact b{ color:var(--accent); font-weight:600; }
 
@@ -2382,21 +2383,23 @@ section{
   100%{ background:#eaf4ff; opacity:0; box-shadow:0 0 15px 5px rgba(160,205,255,0); }     /* the light softly spreads out and fades */
 }
 
-/* ===== aging timeline (only visible during the accelerated-aging test) ===== */
+/* ===== &quot;years in service&quot; timeline — compact single row, right under the top legend,
+       shown only during the 4-year ageing stage ===== */
 .anno-timeline{
-  position:absolute; left:53%; bottom:8%;
+  position:absolute; left:53%; top:20%;
   transform:translateX(-50%);
-  width:min(38%, 340px);
+  width:min(30%, 280px);
   z-index:8; pointer-events:none;
-  opacity:0; transition:opacity .45s ease;
+  opacity:0; transition:opacity .4s ease;
   font-family:var(--stack);
+  display:flex; align-items:center; gap:10px;
 }
 .anno-timeline.on{ opacity:1; }
-.tl-label{ color:var(--ink); font-weight:600; font-size:16px; text-align:center; margin-bottom:8px; }
-.tl-track{ position:relative; height:3px; border-radius:3px; background:rgba(20,24,28,0.14); }
-.tl-fill{ position:absolute; left:0; top:0; height:100%; width:0%; border-radius:3px; background:var(--accent); }
-.tl-marker{ position:absolute; top:50%; left:0%; width:11px; height:11px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 0 3px rgba(27,123,255,0.18); }
-.tl-scale{ display:flex; justify-content:space-between; margin-top:7px; color:var(--muted); font-size:12px; }
+.tl-a{ font-size:13px; color:var(--muted); white-space:nowrap; }
+.tl-b{ font-size:13px; color:var(--accent); font-weight:600; white-space:nowrap; }
+.tl-track{ position:relative; flex:1; height:2px; border-radius:2px; background:rgba(20,24,28,0.16); }
+.tl-fill{ position:absolute; left:0; top:0; height:100%; width:0%; border-radius:2px; background:var(--accent); }
+.tl-marker{ position:absolute; top:50%; left:0%; width:8px; height:8px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 0 3px rgba(27,123,255,0.16); }
 
 /* Bottom material labels: level row just below slab, each centered under its own half.
    Positioned by JS (tracks the slab across widths AND the two montage stages). */
@@ -2518,17 +2521,16 @@ section{
     <img class=&quot;poster&quot; src=&quot;assets/videos/posters/bacteria_durability.jpg?v=2&quot; alt=&quot;&quot;>
     <div class=&quot;anno&quot; id=&quot;anno&quot; aria-hidden=&quot;true&quot;>
       <div class=&quot;anno-top&quot;>
-        <div class=&quot;anno-test&quot;>Live bacteria</div>
-        <div class=&quot;anno-fact&quot;><b>100 million</b> per sample</div>
+        <div class=&quot;anno-test&quot; id=&quot;annoCond&quot;>Heavy dust load</div>
+        <div class=&quot;anno-fact&quot;><b>100 million</b> live bacteria</div>
         <div class=&quot;anno-fact&quot;><b>100×</b> the standard test dose</div>
-        <div class=&quot;anno-fact&quot; id=&quot;annoCond&quot;>Heavy dust load</div>
       </div>
       <span class=&quot;anno-lbl anno-lbl-nf&quot;>NanoFlashing Material</span>
       <span class=&quot;anno-lbl anno-lbl-cv&quot;>Conventional Material</span>
       <div class=&quot;anno-timeline&quot; id=&quot;annoTimeline&quot;>
-        <div class=&quot;tl-label&quot;>In service</div>
+        <span class=&quot;tl-a&quot;>new</span>
         <div class=&quot;tl-track&quot;><div class=&quot;tl-fill&quot; id=&quot;tlFill&quot;></div><div class=&quot;tl-marker&quot; id=&quot;tlMarker&quot;></div></div>
-        <div class=&quot;tl-scale&quot;><span>new</span><span>4 years</span></div>
+        <span class=&quot;tl-b&quot;>4 years</span>
       </div>
     </div>
   </div>
@@ -2633,7 +2635,7 @@ window.nfBact = (function () {
   const TESTS = [
     { until: 4.4,  cond: 'Heavy dust load',                    water:false },
     { until: 8.8,  cond: '<b>60 °C</b> heat, <b>64 days</b>',  water:false },
-    { until: 13.2, cond: '<b>4 years</b>, real time',          water:false },
+    { until: 13.2, cond: '<b>4 years</b> ageing',              water:false },
     { until: 99,   cond: 'Fully submerged in water',           water:true  }
   ];
   const NF_FRAC = 0.405, CV_FRAC = 0.597, TOP_FRAC = 0.524;  // visual centre of mass of each slab half
@@ -2648,15 +2650,18 @@ window.nfBact = (function () {
   let curWater = false;
   function positionAnno(){
     const top = document.querySelector('.anno-top');
+    const tl = document.getElementById('annoTimeline');
     if (window.innerWidth <= 880){
       if (lblNf) lblNf.style.left = '';
       if (lblCv) lblCv.style.left = '';
       if (top) top.style.left = '';
+      if (tl) tl.style.left = '';
     } else {
       const pn = coverPct(NF_FRAC), pc = coverPct(CV_FRAC), pt = coverPct(TOP_FRAC);
       if (pn &amp;&amp; lblNf) lblNf.style.left = pn;
       if (pc &amp;&amp; lblCv) lblCv.style.left = pc;
       if (pt &amp;&amp; top) top.style.left = pt;
+      if (pt &amp;&amp; tl) tl.style.left = pt;
     }
   }
   positionAnno();
