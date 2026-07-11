@@ -126,17 +126,16 @@ section{
   transform:translateX(-50%);
   z-index:7;
   pointer-events:none;
-  transition:opacity .4s ease, top .5s ease;
 }
-.anno-lbl-nf{ left:33.3%; top:80%; color:#1b7bff; font-weight:500; font-size:22px; }
-.anno-lbl-cv{ left:70.8%; top:80%; color:#1f2327; font-weight:500; font-size:22px; }
+.anno-lbl-nf{ left:33.3%; top:77.5%; color:#1b7bff; font-weight:500; font-size:22px; }
+.anno-lbl-cv{ left:70.8%; top:77.5%; color:#1f2327; font-weight:500; font-size:22px; }
 
 /* ===== Mobile ===== */
 @media (max-width:880px){
   .anno-top { left: 52%; top: 2%; }
   .anno-top .anno-test { font-size: 15px; margin-bottom: 4px; }
   .anno-top .anno-fact { font-size: 15px; }
-  .anno-lbl { font-size: 16px; }
+  .anno-lbl { top: 77%; font-size: 16px; }
   .anno-lbl-nf { left: 30%; }
   .anno-lbl-cv { left: 72%; }
 }
@@ -370,11 +369,6 @@ window.nfBact = (function () {
       if (pc && lblCv) lblCv.style.left = pc;
       if (pt && top) top.style.left = pt;
     }
-    // legend stays complete through every stage; during water it rides the
-    // submerged slab body instead of sitting below it.
-    const lblT = curWater ? '62%' : '80%';
-    if (lblNf) lblNf.style.top = lblT;
-    if (lblCv) lblCv.style.top = lblT;
   }
   positionAnno();
   window.addEventListener('resize', positionAnno);
