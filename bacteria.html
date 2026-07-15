@@ -2595,7 +2595,7 @@ section{
    on the NanoFlashing half, settle on the conventional half. Spawns only during the dry
    tests; stopSpawning() is called when the water stage begins. */
 window.nfBact = (function () {
-  let container = null, spores = [], running = false, spawning = false, rafId = null;
+  let container = null, spores = [], running = false, spawning = false, draining = false, rafId = null;
   let lastTime = 0, spawnAccum = 0, nextSpawnInterval = 200, rect = { width: 0, height: 0 }, resizeHandler = null;
   // slab TOP FACE quad (bacteria dry stage) + the SLANTED blue/white boundary (measured):
   // fx = BND_M*fy + BND_B. Splitting on the real slanted line means &quot;blue&quot; targets truly
@@ -2628,7 +2628,7 @@ window.nfBact = (function () {
     if(spawning){ spawnAccum+=dt; if(spawnAccum>=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=10+Math.random()*20; const cap=window.innerWidth>880?2200:700; const deficit=cap-spores.length; const count=deficit>0?Math.min(deficit,60):24; for(let i=0;i<count&amp;&amp;spores.length<cap;i++) createSpore(); } }
     for(let i=spores.length-1;i>=0;i--){
       const s=spores[i]; if(s.done) continue;
-      s.age+=dt; const sec=dt/1000; s.y+=s.vy*sec;
+      s.age+=dt; const sec=dt/1000; s.y+=s.vy*(draining?5:1)*sec;
       s.x=s.tx+Math.sin((s.age/1000)*Math.PI*2*s.wobbleFreq+s.wobblePhase)*s.wobbleAmp;
       if(s.y>=s.targetY){ s.done=true; s.el.style.transform='translate('+(s.x-s.hs)+'px,'+(s.targetY-s.hs)+'px)'; s.el.classList.add(s.blue?'captured':'settled'); const e=s.el; setTimeout(function(){ if(e&amp;&amp;e.parentNode) e.parentNode.removeChild(e); },640); spores.splice(i,1); continue; }
       s.el.style.transform='translate('+(s.x-s.hs)+'px,'+(s.y-s.hs)+'px)'; s.el.style.opacity=s.age<250?(s.age/250):1;
@@ -2636,12 +2636,12 @@ window.nfBact = (function () {
   }
   function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt>100) dt=100; update(dt); rafId=requestAnimationFrame(loop); }
   function clearAll(){ spores.forEach(function(s){ if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); }); spores=[]; }
-  function begin(){ running=true; spawning=true; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener('resize',resizeHandler); rafId=requestAnimationFrame(loop); }
-  function stopSpawning(){ spawning=false; }
-  function spawnOn(){ if(running){ spawning=true; spawnAccum=0; nextSpawnInterval=60; } }
+  function begin(){ running=true; spawning=true; draining=false; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener('resize',resizeHandler); rafId=requestAnimationFrame(loop); }
+  function stopSpawning(){ spawning=false; draining=true; }
+  function spawnOn(){ if(running){ spawning=true; draining=false; spawnAccum=0; nextSpawnInterval=60; } }
   function start(){ if(running) return; container=document.querySelector('.anno'); if(!container) return; if(window.matchMedia&amp;&amp;window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; clearAll(); readRect(); if(rect.width===0||rect.height===0){ requestAnimationFrame(function(){ readRect(); if(rect.width===0||rect.height===0) return; begin(); }); return; } begin(); }
   function stop(){ running=false; spawning=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(resizeHandler){ window.removeEventListener('resize',resizeHandler); resizeHandler=null; } clearAll(); }
-  return { start:start, stop:stop, stopSpawning:stopSpawning, spawnOn:spawnOn };
+  return { start:start, stop:stop, stopSpawning:stopSpawning, spawnOn:spawnOn, count:function(){ return spores.length; } };
 })();
 </script>
 <script>
@@ -2736,7 +2736,7 @@ window.nfBact = (function () {
   // each RESETTING to a clean slab (~0 / 5.2 / 9.4 / 13.8s). For EACH test: hold the clean slab, snow
   // falls, snow STOPS, then that test plays so its biofouling appears — so all 4 read as bacteria-caused.
   const CLEAN_TIMES = [0.0, 5.2, 9.4, 13.8];
-  const SNOW_MS = 3000, SETTLE_MS = 1200;
+  const SNOW_MS = 2500;          // how long the bacteria snow keeps falling on the clean slab
   let seqStage = 0, pauseTarget = null, seqTimers = [];
   function clearSeq(){ seqTimers.forEach(function(t){ clearTimeout(t); }); seqTimers = []; }
   function runStage(i){
@@ -2745,10 +2745,18 @@ window.nfBact = (function () {
     if (window.nfBact){ if (i === 0) window.nfBact.start(); else window.nfBact.spawnOn(); }  // 1) snow falls
     seqTimers.push(setTimeout(function(){
       if (window.nfBact) window.nfBact.stopSpawning();                                       // 2) snow STOPS
-      seqTimers.push(setTimeout(function(){
-        try { videoA.play(); } catch(e){}                                                    // 3) biofouling appears
-        pauseTarget = (i < CLEAN_TIMES.length - 1) ? CLEAN_TIMES[i + 1] : null;
-      }, SETTLE_MS));
+      // 3) wait until the snow has fully CLEARED, THEN play — so the biofouling appears only AFTER the
+      //    snow is gone, and no leftover flakes fall into empty space when the water slab tilts away.
+      var clearStart = Date.now();
+      (function waitClear(){
+        var cleared = !window.nfBact || window.nfBact.count() < 30;
+        if (cleared || Date.now() - clearStart > 3200){
+          try { videoA.play(); } catch(e){}                                                  // biofouling appears
+          pauseTarget = (i < CLEAN_TIMES.length - 1) ? CLEAN_TIMES[i + 1] : null;
+        } else {
+          seqTimers.push(setTimeout(waitClear, 120));
+        }
+      })();
     }, SNOW_MS));
   }
   function onSeqTime(){
