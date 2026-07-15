@@ -2478,6 +2478,22 @@ section{
   transition:color 0.18s ease, border-color 0.18s ease;
 }
 .advocacy-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
+/* proof list (GLM 5.2 design — scannable receipts, editorial ledger) */
+.mechanism{
+  font-size:15px; line-height:1.55; color:var(--ink); max-width:54ch;
+  margin:16px 0 18px; padding-top:12px; border-top:1px solid #e6e8ea; letter-spacing:0.005em;
+}
+.proof-list{ list-style:none; margin:0 0 18px; padding:0; }
+.proof-item{ display:flex; align-items:flex-start; gap:12px; padding:9px 0; border-top:1px solid #eceef0; }
+.proof-item:first-child{ border-top:1px solid #d8dadd; }
+.proof-item:last-child{ border-bottom:1px solid #eceef0; }
+.proof-mark{
+  flex:0 0 auto; width:9px; height:9px; margin-top:9px; background:var(--accent);
+  clip-path:polygon(14% 44%, 0 58%, 38% 100%, 100% 22%, 86% 8%, 38% 70%);
+}
+.proof-text{ display:flex; flex-direction:column; gap:2px; }
+.proof-result{ font-size:17.5px; font-weight:560; line-height:1.35; color:var(--ink); letter-spacing:-0.005em; }
+.proof-source{ font-family:&quot;Space Mono&quot;, ui-monospace, monospace; font-size:11px; line-height:1.4; color:var(--muted); letter-spacing:0.02em; }
 
 /* === Mobile === */
 @media (max-width: 880px){
@@ -2525,27 +2541,62 @@ section{
   </div>
 
   <div class=&quot;text-col&quot;>
-    <h1 class=&quot;headline&quot;>
-      Put to the test <em>— every way</em>
-    </h1>
+    <h1 class=&quot;headline&quot;>Put to the test <em>— every way</em></h1>
 
     <div class=&quot;stat-block&quot;>
       <div class=&quot;big-number&quot; id=&quot;bigNumber&quot;>0%</div>
-      <p class=&quot;caption&quot;>of the bacteria it caught — destroyed, not just trapped</p>
+      <p class=&quot;caption&quot;>of the bacteria it caught — destroyed on contact, not just trapped</p>
     </div>
 
-    <p class=&quot;body-text&quot;>
-      A conventional filter traps bacteria but doesn't kill them, so the media becomes a source. NanoFlashing's patented permanent positive polarity destroys the negatively charged cell on the fiber, on contact — a physical mechanism, not chemistry.
+    <p class=&quot;mechanism&quot;>
+      Patented permanent positive polarity destroys the negatively charged cell on the fiber, on contact — a physical mechanism, not chemistry.
     </p>
-    <p class=&quot;body-text&quot;>
-      Mass General and Harvard dosed it at 100 times the ISO 20743 standard and measured the kill on Staphylococcus aureus, E. coli, Pseudomonas, Enterococcus, and Candida — up to 99.9% destroyed.
-    </p>
-    <p class=&quot;body-text&quot;>
-      And it holds: dust-clogged, heat-aged, four years of real-time aging, and fully submerged — the four tests on the right — still destroying them, across three materials.
-    </p>
-    <p class=&quot;body-text&quot;>
-      Peer-reviewed in the American Society for Microbiology's journal, by 31 scientists from 16 research institutes.
-    </p>
+
+    <ol class=&quot;proof-list&quot;>
+      <li class=&quot;proof-item&quot;>
+        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
+        <span class=&quot;proof-text&quot;>
+          <span class=&quot;proof-result&quot;>~99% destroyed, even on a dust-clogged filter</span>
+          <span class=&quot;proof-source&quot;>Harvard / Mass General</span>
+        </span>
+      </li>
+      <li class=&quot;proof-item&quot;>
+        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
+        <span class=&quot;proof-text&quot;>
+          <span class=&quot;proof-result&quot;>Hit with about 100 million live bacteria</span>
+          <span class=&quot;proof-source&quot;>100× a normal test dose</span>
+        </span>
+      </li>
+      <li class=&quot;proof-item&quot;>
+        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
+        <span class=&quot;proof-text&quot;>
+          <span class=&quot;proof-result&quot;>Still killing after years of aging</span>
+          <span class=&quot;proof-source&quot;>Hong Kong Metropolitan University</span>
+        </span>
+      </li>
+      <li class=&quot;proof-item&quot;>
+        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
+        <span class=&quot;proof-text&quot;>
+          <span class=&quot;proof-result&quot;>Five kinds of bacteria, all destroyed</span>
+          <span class=&quot;proof-source&quot;>Named-organism testing</span>
+        </span>
+      </li>
+      <li class=&quot;proof-item&quot;>
+        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
+        <span class=&quot;proof-text&quot;>
+          <span class=&quot;proof-result&quot;>Proven in real hospital buildings</span>
+          <span class=&quot;proof-source&quot;>On-site field checks</span>
+        </span>
+      </li>
+      <li class=&quot;proof-item&quot;>
+        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
+        <span class=&quot;proof-text&quot;>
+          <span class=&quot;proof-result&quot;>Reviewed by 31 scientists at 16 universities</span>
+          <span class=&quot;proof-source&quot;>Peer-reviewed</span>
+        </span>
+      </li>
+    </ol>
+
     <a class=&quot;advocacy-link&quot; href=&quot;#evidence&quot;>See the evidence →</a>
   </div>
 </section>
