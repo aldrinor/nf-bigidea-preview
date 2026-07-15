@@ -1532,42 +1532,81 @@ if (isEmbedded) {
   const DATA = {
     overview: {
       name: &quot;&quot;,
-      intro: &quot;Viruses ride the air into your lungs, and the effects don\u2019t always stop there. Most infections pass \u2014 but some leave lasting marks on the heart, brain, and other organs.&quot;,
+      intro: &quot;Viruses ride the air we share into the lungs — and the harm does not always stop there. Most infections pass, but some leave lasting marks on the heart, brain, blood, and kidneys.&quot;,
       impacts: [
-        {text:&quot;Airborne viruses drive colds, flu, and COVID; outbreak studies tie [the air-handling system to their spread indoors].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/32240078/&quot;},
-        {text:&quot;After infection, researchers document [higher long-term heart and brain risk], sometimes years later.&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35132265/&quot;}
+        {text:&quot;The World Health Organization counts [about a billion flu infections a year] — and that is before colds, RSV, and COVID are added in.&quot;, url:&quot;https://www.who.int/news-room/fact-sheets/detail/influenza-(seasonal)&quot;},
+        {text:&quot;The University of Michigan counted [about 500 million colds and other viral infections a year] in the United States alone.&quot;, url:&quot;https://doi.org/10.1001/archinte.163.4.487&quot;}
       ],
       ox:0.5, oy:0.5
     },
     lungs: {
       name:&quot;Lungs&quot;,
       impacts:[
-        {text:&quot;Respiratory viruses like flu and COVID inflame the lungs; severe cases bring [pneumonia and hospitalization].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/38104583/&quot;},
-        {text:&quot;In children, early [RSV infection raises the risk of later asthma].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/37086744/&quot;}
+        {text:&quot;A Vanderbilt University study of 251,000 children found that avoiding RSV in the first year [cut the risk of asthma by age 5 by about a quarter] — the virus leaving a lasting mark on the airway.&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/37086744/&quot;},
+        {text:&quot;An Italian study of 1,591 of the sickest COVID patients found [88% needed a ventilator] — viral pneumonia flooding the lungs until they cannot take in air.&quot;, url:&quot;https://jamanetwork.com/journals/jama/fullarticle/2764365&quot;},
+        {text:&quot;The CDC found that among children who died of the 2009 flu, [about 3 in 10 also had a bacterial pneumonia] — the flu opening the door to a second infection.&quot;, url:&quot;https://www.cdc.gov/mmwr/preview/mmwrhtml/mm5838a4.htm&quot;}
       ],
       ox:0.45, oy:0.25, label:&quot;Lungs&quot;
     },
     heart: {
       name:&quot;Heart&quot;,
       impacts:[
-        {text:&quot;In the year after COVID, people face [higher rates of heart failure, clots, and stroke].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35132265/&quot;},
-        {text:&quot;Even flu can trigger a [heart attack in the days right after infection].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/29365305/&quot;}
+        {text:&quot;A University of Toronto study found the risk of a heart attack [jumps about sixfold in the week after flu] — and stays raised for weeks.&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/29365305/&quot;},
+        {text:&quot;A Washington University study of 153,760 people found that a year after COVID, [heart-failure risk rose about 72% and irregular-heartbeat risk about 71%] — long after the infection cleared.&quot;, url:&quot;https://www.nature.com/articles/s41591-022-01689-3&quot;},
+        {text:&quot;The London School of Hygiene found a heart attack runs [3 to 8 times more likely in the two weeks after flu] in older adults.&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/15602560/&quot;}
       ],
       ox:0.53, oy:0.29, label:&quot;Heart&quot;
+    },
+    blood: {
+      name:&quot;Blood &amp; Cells&quot;,
+      impacts:[
+        {text:&quot;A Swedish study of more than a million people found the risk of a dangerous lung clot [rose 33-fold in the month after COVID] — the blood turning thick and sticky.&quot;, url:&quot;https://www.bmj.com/content/377/bmj-2021-069590&quot;},
+        {text:&quot;The same Swedish study found a deep-vein clot [nearly five times more likely] in that first month.&quot;, url:&quot;https://www.bmj.com/content/377/bmj-2021-069590&quot;},
+        {text:&quot;A Washington University study of 153,760 people found the risk of a [serious blood clot stayed more than doubled] across the year after COVID.&quot;, url:&quot;https://www.nature.com/articles/s41591-022-01689-3&quot;}
+      ],
+      ox:0.52, oy:0.15, label:&quot;Blood &amp; Cells&quot;
     },
     brain: {
       name:&quot;Brain &amp; Mind&quot;,
       impacts:[
-        {text:&quot;COVID is linked to [lasting neurological and cognitive effects].&quot;, url:&quot;https://doi.org/10.1038/s41591-022-02001-z&quot;},
-        {text:&quot;A two-year study of 1.28 million people found [raised risk of several brain and mental-health conditions].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35987197/&quot;}
+        {text:&quot;An Oxford University study of 1.28 million patients found raised rates of [brain fog, dementia, and psychosis] in the year after COVID.&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35987197/&quot;},
+        {text:&quot;A US Veterans study of over 150,000 people found COVID raised the risk of [depression by about 39% and anxiety by about 35%].&quot;, url:&quot;https://www.bmj.com/content/376/bmj-2021-068993&quot;},
+        {text:&quot;The CDC reports that measles inflames the brain in [about 1 in 1,000 children] it infects — and a rarer, delayed form is almost always fatal.&quot;, url:&quot;https://www.cdc.gov/measles/signs-symptoms/index.html&quot;}
       ],
       ox:0.50, oy:0.07, label:&quot;Brain &amp; Mind&quot;
+    },
+    kidneys: {
+      name:&quot;Kidneys&quot;,
+      impacts:[
+        {text:&quot;A New York study of 5,449 hospitalized COVID patients found [more than a third suffered kidney damage].&quot;, url:&quot;https://pmc.ncbi.nlm.nih.gov/articles/PMC7229463/&quot;},
+        {text:&quot;A study across 67 US hospitals found [about 1 in 5 of the sickest COVID patients needed dialysis].&quot;, url:&quot;https://journals.lww.com/jasn/fulltext/2021/01000/aki_treated_with_kidney_replacement_therapy_in.18.aspx&quot;},
+        {text:&quot;A Washington University study found COVID survivors carried [about three times the risk of kidney failure] in the year that followed.&quot;, url:&quot;https://journals.lww.com/jasn/fulltext/2021/11000/kidney_outcomes_in_long_covid.15.aspx&quot;}
+      ],
+      ox:0.43, oy:0.375, label:&quot;Kidneys&quot;
+    },
+    reproduction: {
+      name:&quot;Reproduction&quot;,
+      impacts:[
+        {text:&quot;A McGill University review of 42 studies found mothers who caught COVID in pregnancy faced [about 82% higher odds of premature birth] — and higher odds of stillbirth.&quot;, url:&quot;https://www.cmaj.ca/content/193/16/E540&quot;},
+        {text:&quot;The CDC reports that rubella caught early in pregnancy causes [birth defects in up to 90% of infected infants] — deafness, cataracts, and heart defects.&quot;, url:&quot;https://www.cdc.gov/rubella/pregnancy/index.html&quot;},
+        {text:&quot;The CDC finds chickenpox in early pregnancy can [scar the developing baby] — limb, eye, and skin defects in a small share of cases.&quot;, url:&quot;https://www.cdc.gov/chickenpox/hcp/clinical-guidance/index.html&quot;}
+      ],
+      ox:0.50, oy:0.49, label:&quot;Reproduction&quot;
+    },
+    immune: {
+      name:&quot;Immune System&quot;,
+      impacts:[
+        {text:&quot;A University of New South Wales review of 122 studies found children who caught an enterovirus had [about ten times the risk of type 1 diabetes] — the virus turning the immune system against the body.&quot;, url:&quot;https://doi.org/10.1136/bmj.d35&quot;},
+        {text:&quot;A Harvard study found measles erases [11 to 73% of a child&#39;s existing antibodies] — wiping out immunity the body had already built.&quot;, url:&quot;https://www.science.org/doi/10.1126/science.aay6485&quot;},
+        {text:&quot;The CDC found a dangerous whole-body inflammation, MIS-C, struck [about 316 of every million children infected with COVID].&quot;, url:&quot;https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2780861&quot;}
+      ],
+      ox:0.56, oy:0.17, label:&quot;Immune System&quot;
     }
   };
 
-  const ORDER = [&quot;overview&quot;,&quot;brain&quot;,&quot;lungs&quot;,&quot;heart&quot;];
+  const ORDER = [&quot;overview&quot;,&quot;lungs&quot;,&quot;heart&quot;,&quot;blood&quot;,&quot;brain&quot;,&quot;kidneys&quot;,&quot;reproduction&quot;,&quot;immune&quot;];
   const INDEX_LABELS = {
-    overview:&quot;Overview&quot;, lungs:&quot;Lungs&quot;, heart:&quot;Heart&quot;, brain:&quot;Brain &amp; Mind&quot;
+    overview:&quot;Overview&quot;, lungs:&quot;Lungs&quot;, heart:&quot;Heart&quot;, blood:&quot;Blood &amp; Cells&quot;, brain:&quot;Brain &amp; Mind&quot;, kidneys:&quot;Kidneys&quot;, reproduction:&quot;Reproduction&quot;, immune:&quot;Immune System&quot;
   };
 
   const hotspotsEl = document.getElementById(&#39;hotspots&#39;);
