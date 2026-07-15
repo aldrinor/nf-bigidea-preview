@@ -2634,13 +2634,14 @@ window.nfBact = (function () {
       s.el.style.transform='translate('+(s.x-s.hs)+'px,'+(s.y-s.hs)+'px)'; s.el.style.opacity=s.age<250?(s.age/250):1;
     }
   }
-  function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt>100) dt=100; update(dt); if(!spawning&amp;&amp;spores.length===0){ running=false; rafId=null; return; } rafId=requestAnimationFrame(loop); }
+  function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt>100) dt=100; update(dt); rafId=requestAnimationFrame(loop); }
   function clearAll(){ spores.forEach(function(s){ if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); }); spores=[]; }
   function begin(){ running=true; spawning=true; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener('resize',resizeHandler); rafId=requestAnimationFrame(loop); }
   function stopSpawning(){ spawning=false; }
+  function spawnOn(){ if(running){ spawning=true; spawnAccum=0; nextSpawnInterval=60; } }
   function start(){ if(running) return; container=document.querySelector('.anno'); if(!container) return; if(window.matchMedia&amp;&amp;window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; clearAll(); readRect(); if(rect.width===0||rect.height===0){ requestAnimationFrame(function(){ readRect(); if(rect.width===0||rect.height===0) return; begin(); }); return; } begin(); }
   function stop(){ running=false; spawning=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(resizeHandler){ window.removeEventListener('resize',resizeHandler); resizeHandler=null; } clearAll(); }
-  return { start:start, stop:stop, stopSpawning:stopSpawning };
+  return { start:start, stop:stop, stopSpawning:stopSpawning, spawnOn:spawnOn };
 })();
 </script>
 <script>
@@ -2710,8 +2711,6 @@ window.nfBact = (function () {
       curTest = i;
       curWater = TESTS[i].water;
       positionAnno();
-      // stop new falling bacteria once the slab leaves its locked dry spot (water)
-      if (TESTS[i].water &amp;&amp; window.nfBact) window.nfBact.stopSpawning();
       // the aging timeline shows only during the accelerated-aging test
       if (annoTimeline){ annoTimeline.classList.toggle('on', i === 2); }
       if (annoCond){
@@ -2731,17 +2730,37 @@ window.nfBact = (function () {
     tlFill.style.width = pct;
     if (tlMarker) tlMarker.style.left = pct;
   }
-  videoA.addEventListener('timeupdate', function(){ updateTest(); updateTimeline(); });
+  videoA.addEventListener('timeupdate', function(){ updateTest(); updateTimeline(); onSeqTime(); });
 
-  // Sequence (Yin 2026-07-15): snow falls on the CLEAN slab -> snow STOPS -> the video plays so the
-  // biofouling appears AFTER, so the viewer reads that the falling bacteria CAUSE the biofouling.
-  let snowTimer = null, playTimer = null;
-  function clearSeqTimers(){ if (snowTimer){ clearTimeout(snowTimer); snowTimer=null; } if (playTimer){ clearTimeout(playTimer); playTimer=null; } }
-  const SNOW_MS = 3500, SETTLE_MS = 1400;
+  // Sequence (Yin 2026-07-15): the video is 4 crossfaded biofouling tests (dust / heat / ageing / water),
+  // each RESETTING to a clean slab (~0 / 5.2 / 9.4 / 13.8s). For EACH test: hold the clean slab, snow
+  // falls, snow STOPS, then that test plays so its biofouling appears — so all 4 read as bacteria-caused.
+  const CLEAN_TIMES = [0.0, 5.2, 9.4, 13.8];
+  const SNOW_MS = 3000, SETTLE_MS = 1200;
+  let seqStage = 0, pauseTarget = null, seqTimers = [];
+  function clearSeq(){ seqTimers.forEach(function(t){ clearTimeout(t); }); seqTimers = []; }
+  function runStage(i){
+    seqStage = i; pauseTarget = null;
+    try { videoA.currentTime = CLEAN_TIMES[i]; videoA.pause(); } catch(e){}   // hold this test's CLEAN slab
+    if (window.nfBact){ if (i === 0) window.nfBact.start(); else window.nfBact.spawnOn(); }  // 1) snow falls
+    seqTimers.push(setTimeout(function(){
+      if (window.nfBact) window.nfBact.stopSpawning();                                       // 2) snow STOPS
+      seqTimers.push(setTimeout(function(){
+        try { videoA.play(); } catch(e){}                                                    // 3) biofouling appears
+        pauseTarget = (i < CLEAN_TIMES.length - 1) ? CLEAN_TIMES[i + 1] : null;
+      }, SETTLE_MS));
+    }, SNOW_MS));
+  }
+  function onSeqTime(){
+    if (pauseTarget != null &amp;&amp; (videoA.currentTime || 0) >= pauseTarget){
+      pauseTarget = null;
+      try { videoA.pause(); } catch(e){}
+      runStage(seqStage + 1);   // next test: hold clean -> snow -> stop -> foul
+    }
+  }
   function startFilter(){
     if (reducedMotion) return;
-    clearSeqTimers();
-    try { videoA.currentTime = 0; videoA.pause(); } catch(e){}   // hold the CLEAN slab
+    clearSeq();
     curTest = -1; curWater = false; positionAnno();
     if (annoCond){ annoCond.innerHTML = TESTS[0].cond; annoCond.style.opacity = '1'; }
     if (annoTimeline) annoTimeline.classList.remove('on');
@@ -2749,15 +2768,9 @@ window.nfBact = (function () {
     if (tlMarker) tlMarker.style.left = '0%';
     bigNumber.textContent = '0%';
     animateNumber();
-    if (window.nfBact) window.nfBact.start();                    // 1) snow falls on the clean slab
-    snowTimer = setTimeout(function(){
-      if (window.nfBact) window.nfBact.stopSpawning();           // 2) snow STOPS
-      playTimer = setTimeout(function(){
-        try { videoA.play(); } catch(e){}                        // 3) video plays -> biofouling appears + montage
-      }, SETTLE_MS);
-    }, SNOW_MS);
+    runStage(0);
   }
-  function stopFilter(){ clearSeqTimers(); try { videoA.pause(); } catch(e){} if (window.nfBact) window.nfBact.stop(); }
+  function stopFilter(){ clearSeq(); pauseTarget = null; try { videoA.pause(); } catch(e){} if (window.nfBact) window.nfBact.stop(); }
 
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
   function animateNumber(){
