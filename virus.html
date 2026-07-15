@@ -47,10 +47,2606 @@ body.flow-mode header{position:absolute;background:none}
 <body class="deck-mode">
 <header><a href="index.html" aria-label="NanoFlashing home"><img src="assets/brand/nanoflashing_black.svg" alt="NanoFlashing" onerror="this.style.display='none'"></a></header>
 <div class="deck" id="deck">
-  <section class="screen"><iframe data-src="virus_ball.html" loading="eager" title="Charged spore" allow="autoplay"></iframe></section>
-  <section class="screen"><iframe data-src="virus_health.html" loading="eager" title="In the body" allow="autoplay"></iframe></section>
-  <section class="screen"><iframe data-src="virus_biofouling.html" loading="lazy" title="The filter" allow="autoplay"></iframe></section>
-  <section class="screen"><iframe data-src="virus_solution.html" loading="lazy" title="The answer" allow="autoplay"></iframe></section>
+  <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;Viruses travel the air to infect — NanoFlashing&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+  :root{
+    --bg:#edf0f2;
+    --ink:#1a1a1a;
+    --muted:#8a9095;
+    --accent:#1b7bff;
+    --red:#e23b3b;
+    --hair:rgba(20,24,28,0.08);
+    --stack:-apple-system,system-ui,&#39;Inter&#39;,&#39;Space Grotesk&#39;,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--stack);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  body{
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  .hero{
+    min-height:100vh;
+    width:100%;
+    display:grid;
+    grid-template-columns:46fr 54fr;
+    align-items:center;
+    justify-items:start;
+    gap:clamp(32px,5vw,80px);
+    padding:clamp(40px,7vw,96px) clamp(24px,6vw,96px);
+    background:var(--bg);
+    position:relative;
+  }
+
+  /* faint paper grain — barely there */
+  .hero::before{
+    content:&quot;&quot;;
+    position:absolute;inset:0;
+    background:
+      radial-gradient(1200px 700px at 80% 30%, rgba(27,123,255,0.04), transparent 60%),
+      radial-gradient(900px 600px at 10% 90%, rgba(20,24,28,0.025), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .text{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:28px;
+    max-width:720px;
+  }
+
+  .headline{
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(24px,2.7vw,34px);
+    line-height:1.32;
+    letter-spacing:-0.022em;
+    color:#1a1a1a;
+  }
+  .headline .line{ display:block; }
+  .headline em{
+    color:var(--red);
+    font-style:normal;
+    font-weight:700;
+  }
+
+  .body{
+    font-family:var(--stack);
+    font-size:19px;
+    line-height:1.55;
+    color:var(--ink);
+    max-width:440px;
+    font-weight:400;
+  }
+  .body a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid rgba(20,24,28,0.22);
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .body a:hover{ color:var(--red); border-bottom-color:var(--red); }
+
+  .sources{
+    margin-top:8px;
+    padding-top:18px;
+    border-top:1px solid var(--hair);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-family:&quot;Space Mono&quot;,monospace;
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.55;
+    max-width:440px;
+  }
+  .sources .label{
+    letter-spacing:0.06em;
+    
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .sources a{
+    color:var(--muted);
+    text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .sources a:hover{
+    color:var(--ink);
+    border-bottom-color:var(--hair);
+  }
+  .sources .src-num{
+    color:var(--muted);
+    margin-right:6px;
+  }
+
+  /* minimal downward chevron — absolute bottom-center, decoupled from text column */
+  .scroll-cue{
+    position:absolute;
+    bottom:clamp(20px,4vw,40px);
+    left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+    width:28px;
+    height:28px;
+    color:var(--ink);
+    pointer-events:none;
+    animation:bob 2.4s ease-in-out infinite;
+  }
+  .scroll-cue svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  @keyframes bob{
+    0%,100%{ transform:translate(-50%,0); opacity:0.78; }
+    50%{ transform:translate(-50%,6px); opacity:1; }
+  }
+
+  /* particle / video column — centers the video+scale group as one unit */
+  .media{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+  }
+
+  .video-frame{
+    position:relative;
+    width:min(560px,100%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    filter:
+      drop-shadow(0 30px 60px rgba(20,24,28,0.08))
+      drop-shadow(0 8px 24px rgba(27,123,255,0.06));
+  }
+
+  .video-frame .video-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
+  }
+
+  video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    -webkit-mask-image:radial-gradient(circle at center, #000 60%, transparent 78%);
+            mask-image:radial-gradient(circle at center, #000 60%, transparent 78%);
+  }
+
+  /* tiny corner registration marks — editorial, restrained */
+  .reg{
+    position:absolute;
+    width:14px;height:14px;
+    border:1px solid var(--hair);
+  }
+  .reg.tl{ top:-2px;left:-2px;border-right:none;border-bottom:none; }
+  .reg.tr{ top:-2px;right:-2px;border-left:none;border-bottom:none; }
+  .reg.bl{ bottom:-2px;left:-2px;border-right:none;border-top:none; }
+  .reg.br{ bottom:-2px;right:-2px;border-left:none;border-top:none; }
+
+  /* scientific size scale — replaces the old caption, part of centered flow */
+  .scale{
+    margin-top:22px;
+    width:min(320px,80%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    font-family:var(--stack);
+    color:var(--muted);
+  }
+  .scale .bar{
+    position:relative;
+    width:100%;
+    height:1px;
+    background:var(--muted);
+  }
+  .scale .bar::before,
+  .scale .bar::after{
+    content:&quot;&quot;;
+    position:absolute;
+    top:-4px;
+    width:1px;
+    height:9px;
+    background:var(--muted);
+  }
+  .scale .bar::before{ left:0; }
+  .scale .bar::after{ right:0; }
+  .scale .label{
+    font-size:22px;
+    letter-spacing:0.01em;
+    color:var(--ink);
+    font-weight:500;
+  }
+  .scale .compare{
+    font-size:16px;
+    color:var(--ink);
+    letter-spacing:0.01em;
+  }
+
+  @media (max-width:860px){
+  .hero{
+    grid-template-columns:1fr;
+    gap:0;
+    padding:40px 22px 88px;
+    align-items:stretch;
+    min-height:auto;
+    display:flex;
+    flex-direction:column;
+  }
+  .text{
+    order:1;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .headline{
+    max-width:none;
+    font-size:clamp(26px,7vw,34px);
+    line-height:1.12;
+    letter-spacing:-0.02em;
+    margin:0 0 4px;
+  }
+  .sources{ display:none; }
+  .media{
+    order:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:6px 0 4px;
+  }
+  .video-frame{
+    width:64vw;
+    height:64vw;
+    max-width:280px;
+    max-height:280px;
+    aspect-ratio:1/1;
+  }
+  .scale{
+    width:min(200px,52vw);
+    margin-top:14px;
+  }
+  .scroll-cue{ display:none; }
+}
+
+  @media (prefers-reduced-motion: reduce){
+    .scroll-cue{ animation:none; opacity:0.7; }
+    video{ }
+  }
+
+/* wfball_landscape_v1 — landscape-phone 2-col */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+  .hero {
+    grid-template-columns: 44fr 56fr;
+    gap: clamp(16px, 3vw, 30px);
+    padding: 14px clamp(18px, 4vw, 36px);
+    align-items: center;
+  }
+  .text {
+    order: 1;
+    max-width: none;
+    gap: 12px;
+  }
+  .media {
+    order: 2;
+  }
+  .video-frame {
+    width: min(300px, 44vw);
+  }
+  .headline {
+    font-size: clamp(17px, 3vw, 23px);
+    line-height: 1.16;
+    max-width: none;
+  }
+  .scale {
+    margin-top: 10px;
+    width: min(230px, 92%);
+  }
+  .scale .label {
+    font-size: 17px;
+  }
+  .scale .compare {
+    font-size: 13px;
+  }
+  .sources {
+    display: none;
+  }
+  .scroll-cue {
+    display: none;
+  }
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;section class=&quot;hero&quot;&gt;
+    &lt;div class=&quot;text&quot;&gt;
+      &lt;h1 class=&quot;headline&quot;&gt;&lt;span class=&quot;line&quot;&gt;Viruses travel the air to infect —&lt;/span&gt;&lt;span class=&quot;line&quot;&gt;and most are &lt;em&gt;negatively charged&lt;/em&gt;&lt;/span&gt;&lt;/h1&gt;
+      &lt;p class=&quot;body&quot;&gt;Many respiratory viruses spread through shared indoor air. Outbreak investigators have traced &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/32240078/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;SARS-CoV-2 along a restaurant’s air-conditioning&lt;/a&gt; and &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/33536312/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;across a quarantined cruise ship&lt;/a&gt;. Once inhaled, they cause colds, flu, and COVID, and studies link infection to &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/35132265/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;lasting heart and brain effects&lt;/a&gt;. Most airborne viruses &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/20102425/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;carry a negative charge&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;media&quot;&gt;
+      &lt;div class=&quot;video-frame&quot;&gt;
+        &lt;div class=&quot;video-wrap&quot;&gt;
+          &lt;span class=&quot;reg tl&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;reg tr&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;reg bl&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;reg br&quot;&gt;&lt;/span&gt;
+          &lt;video poster=&quot;assets/videos/posters/Virus.jpg&quot; src=&quot;assets/videos/Virus_flashloop_c2.mp4&quot; autoplay loop muted playsinline preload=&quot;auto&quot;&gt;&lt;/video&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;scale&quot; aria-hidden=&quot;true&quot;&gt;
+          &lt;div class=&quot;bar&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;label&quot;&gt;About 100 nm&lt;/div&gt;
+          &lt;div class=&quot;compare&quot;&gt;A Human Hair: 70,000 nm&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;scroll-cue&quot; aria-hidden=&quot;true&quot;&gt;
+      &lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.1&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;&gt;
+        &lt;polyline points=&quot;6 9 12 15 18 9&quot;&gt;&lt;/polyline&gt;
+      &lt;/svg&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/body&gt;
+&lt;/html&gt;" loading="eager" title="Charged spore" allow="autoplay"></iframe></section>
+  <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;Airborne viruses spreading across America — NanoFlashing&lt;/title&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/leaflet@1.9.4/dist/leaflet.css&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+:root {
+  --bg: #edf0f2;
+  --ink: #1f2327;
+  --muted: #8a9095;
+  --faint: #aab2b8;
+  --accent: #1b7bff;
+  --red: #e23b3b;
+  --hair: rgba(20,24,28,0.08);
+  --stack: -apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--stack);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.map-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+#map {
+  width: 100%;
+  height: 100%;
+  background: #e8ecee;
+}
+
+/* Chrome */
+.chrome {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+.chrome &gt; * { pointer-events: auto; }
+
+.chrome-top-left {
+  top: 140px;
+  left: clamp(24px, 6vw, 96px);
+  max-width: 720px;
+}
+.kicker {
+  font-family: var(--stack);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.chrome-top-left h2 {
+  font-family: var(--stack);
+  font-weight: 600;
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
+  color: #1a1a1a;
+  margin-bottom: 28px;
+  letter-spacing: -0.022em;
+  text-shadow: 0 1px 8px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.9);
+}
+.chrome-top-left h2 .accent { color: var(--accent); }
+.chrome-top-left h2 .em { color: var(--red); font-weight: 700; }
+.caption {
+  font-family: var(--stack);
+  font-size: 19px;
+  line-height: 1.55;
+  color: #1a1a1a;
+  max-width: 440px;
+  text-shadow: 0 1px 6px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.95);
+}
+.caption a {
+  color: #1a1a1a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(20,24,28,0.22);
+  transition: color .15s ease, border-color .15s ease;
+}
+.caption a:hover { color: var(--red); border-bottom-color: var(--red); }
+
+/* Legend */
+.chrome-legend {
+  bottom: 22px;
+  left: 22px;
+  min-width: 270px;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+  font-size: 11px;
+}
+.legend-title {
+  font-family: var(--stack);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.legend-gradient {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right,
+    #f3cdc6 0%,
+    #eea799 25%,
+    #e87f6d 50%,
+    #e4554a 75%,
+    #e23b3b 100%);
+  margin-bottom: 4px;
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.legend-pm {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.legend-pm-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0.5px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1);
+}
+.legend-note {
+  font-family: var(--stack);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* Source */
+.chrome-source {
+  bottom: 22px;
+  right: 22px;
+  max-width: 320px;
+  text-align: right;
+  font-family: var(--stack);
+  font-size: 12px;
+  color: var(--muted);
+}
+.chrome-source a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--hair);
+  transition: color 0.15s, border-color 0.15s;
+}
+.chrome-source a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Time control */
+.time-control {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px;
+  padding: 16px 22px 18px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.12);
+  width: min(580px, calc(100vw - 44px));
+}
+.tc-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.tc-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.tc-btn:hover { background: #c92f2f; }
+.tc-btn:active { transform: scale(0.94); }
+.tc-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.tc-date {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tc-counter {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.tc-slider-wrap {
+  position: relative;
+  margin: 2px 0 0;
+}
+.tc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--faint);
+  outline: none;
+  cursor: pointer;
+}
+.tc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
+}
+.tc-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.tc-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
+
+.tc-ticks {
+  position: relative;
+  height: 24px;
+  margin-top: 7px;
+}
+.tc-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+}
+.tc-tick::before {
+  content: &#39;&#39;;
+  display: block;
+  width: 1px;
+  height: 5px;
+  background: var(--faint);
+  margin: 0 auto 2px;
+}
+
+/* Leaflet popup */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  border: none;
+}
+.leaflet-popup-content {
+  font-family: var(--stack);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 10px 14px;
+}
+.leaflet-popup-tip { box-shadow: 0 4px 18px rgba(0,0,0,0.14); }
+
+.leaflet-control-attribution {
+  font-family: var(--stack);
+  font-size: 9px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 4px 0 0 0;
+}
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+.leaflet-control-zoom a {
+  border-radius: 6px !important;
+  margin-bottom: 4px;
+  font-family: var(--stack);
+  font-weight: 500;
+}
+
+/* Leaflet tooltip */
+.leaflet-tooltip {
+  font-family: var(--stack);
+  font-size: 12px;
+  background: rgba(31, 35, 39, 0.92);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+.leaflet-tooltip-top:before { border-top-color: rgba(31,35,39,0.92); }
+.leaflet-tooltip-bottom:before { border-bottom-color: rgba(31,35,39,0.92); }
+.leaflet-tooltip-left:before { border-left-color: rgba(31,35,39,0.92); }
+.leaflet-tooltip-right:before { border-right-color: rgba(31,35,39,0.92); }
+
+/* Responsive */
+@media (max-width: 1120px) {
+  .chrome-legend { bottom: 140px; }
+}
+@media (max-width: 700px) {
+  .chrome-top-left { max-width: calc(100vw - 44px); }
+  .chrome-top-left h2 { font-size: 24px; }
+  .caption { font-size: 16px; max-width: 100%; }
+  .chrome-legend { display: none; }
+  .time-control {
+    width: calc(100vw - 24px);
+    padding: 10px 14px 8px;
+    bottom: 12px;
+  }
+  .tc-date { font-size: 12px; }
+  .tc-btn { width: 34px; height: 34px; }
+  .chrome-source { font-size: 9px; bottom: 12px; right: 12px; }
+}
+
+@media (max-height: 520px) {
+  .chrome-legend { display: none; }
+  .chrome-top-left {
+    top: 14px;
+    max-width: min(54vw, 440px);
+  }
+  .chrome-top-left h2 {
+    font-size: clamp(17px, 2.6vw, 22px);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .caption {
+    font-size: 13px;
+    line-height: 1.45;
+    max-width: min(52vw, 420px);
+  }
+  .time-control {
+    bottom: 10px;
+    padding: 8px 14px;
+  }
+  .tc-date { font-size: 13px; }
+  .tc-ticks { height: 16px; margin-top: 4px; }
+  .tc-tick { font-size: 12px; }
+  .tc-btn { width: 32px; height: 32px; }
+  .chrome-source { bottom: 10px; font-size: 10px; }
+}
+
+@media (max-height: 430px) {
+  .caption { font-size: 12px; }
+  .time-control { bottom: 8px; }
+}
+
+@media (max-width: 880px) {
+  .chrome-top-left {
+    background: rgba(237, 240, 242, 0.86);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 16px rgba(20, 24, 28, 0.10);
+    max-width: calc(100vw - 32px);
+    left: 16px;
+    right: 16px;
+    top: 76px;
+  }
+  .chrome-top-left h2 {
+    text-shadow: none;
+    font-size: clamp(22px, 6vw, 28px);
+    margin-bottom: 10px;
+  }
+  .caption {
+    text-shadow: none;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: none;
+  }
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div class=&quot;map-wrap&quot;&gt;
+  &lt;div id=&quot;map&quot;&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;chrome chrome-top-left&quot;&gt;
+    &lt;div&gt;
+      &lt;h2&gt;Airborne viruses are&lt;br&gt;&lt;span class=&quot;em&quot;&gt;spreading across America&lt;/span&gt;&lt;/h2&gt;
+      &lt;p class=&quot;caption&quot;&gt;Flu, COVID, and RSV ride the air we share indoors. Their share of emergency-room visits climbs every winter and eases each summer — this map tracks it, state by state, &lt;a href=&quot;https://www.cdc.gov/respiratory-viruses/data/activity-levels.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;updated weekly&lt;/a&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;chrome chrome-legend&quot;&gt;
+    &lt;div class=&quot;legend-title&quot;&gt;Share of ER visits · flu, COVID, RSV&lt;/div&gt;
+    &lt;div class=&quot;legend-gradient&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;legend-labels&quot;&gt;
+      &lt;span&gt;Lower&lt;/span&gt;
+      &lt;span&gt;Higher&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;chrome chrome-source&quot; id=&quot;chromeSource&quot;&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;time-control&quot; id=&quot;timeControl&quot;&gt;
+    &lt;div class=&quot;tc-top&quot;&gt;
+      &lt;button class=&quot;tc-btn&quot; id=&quot;playBtn&quot; aria-label=&quot;Play&quot;&gt;
+        &lt;svg viewBox=&quot;0 0 24 24&quot; id=&quot;playIcon&quot;&gt;&lt;path d=&quot;M8 5v14l11-7z&quot;/&gt;&lt;/svg&gt;
+      &lt;/button&gt;
+      &lt;div class=&quot;tc-date&quot; id=&quot;dateLabel&quot;&gt;2024&lt;/div&gt;
+      &lt;div class=&quot;tc-counter&quot; id=&quot;tcCounter&quot;&gt;—&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;tc-slider-wrap&quot;&gt;
+      &lt;input type=&quot;range&quot; class=&quot;tc-slider&quot; id=&quot;frameSlider&quot; min=&quot;0&quot; max=&quot;11&quot; value=&quot;11&quot; step=&quot;1&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;tc-ticks&quot; id=&quot;yearTicks&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script src=&quot;https://unpkg.com/leaflet@1.9.4/dist/leaflet.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+
+const isEmbedded = window.self !== window.top;
+const map = L.map(&#39;map&#39;, {
+  zoomControl: false, scrollWheelZoom: !isEmbedded,
+  minZoom: 3, maxZoom: 12,
+  maxBounds: [[8, -140], [62, -52]], maxBoundsViscosity: 0.85
+});
+L.control.zoom({ position: &#39;topright&#39; }).addTo(map);
+L.tileLayer(&#39;https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png&#39;, {
+  subdomains: &#39;abcd&#39;, maxZoom: 19, attribution: &#39;© OpenStreetMap © CARTO&#39;, detectRetina: true
+}).addTo(map);
+
+const US_BOUNDS = L.latLngBounds([[24.4, -124.8], [49.4, -66.9]]);
+function fitUS(){
+  const w = window.innerWidth;
+  if (w &gt; 820){ map.fitBounds(US_BOUNDS, { paddingTopLeft: [Math.min(520, w*0.40), 40], paddingBottomRight: [40, 160] }); }
+  else { map.fitBounds(US_BOUNDS, { paddingTopLeft: [16, 210], paddingBottomRight: [16, 150] }); }
+}
+
+const PLAY_INTERVAL = 120;
+const NO_DATA_COLOR = &#39;#d7dbde&#39;;
+// combined % of ER visits (flu+COVID+RSV): summer &lt;1%, winter peaks 5-12%+
+const RAMP_STOPS = [[0,&#39;#f3cdc6&#39;],[2.5,&#39;#eea799&#39;],[5,&#39;#e87f6d&#39;],[7.5,&#39;#e4554a&#39;],[10,&#39;#e23b3b&#39;]];
+const RAMP_MAX = 10;
+
+let weeks = [];
+let states = {};
+let currentIdx = 0;
+let playing = false;
+let playTimer = null;
+let stateLayer = null;
+let openTooltipLayer = null;
+
+function hexToRgb(h){ h = h.replace(&#39;#&#39;,&#39;&#39;); return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
+function rgbToHex(r,g,b){ return &#39;#&#39; + [r,g,b].map(function(x){ const s = Math.max(0, Math.min(255, Math.round(x))).toString(16); return s.length &lt; 2 ? &#39;0&#39;+s : s; }).join(&#39;&#39;); }
+function scoreColor(v){
+  if (v == null || isNaN(v)) return NO_DATA_COLOR;
+  if (v &lt;= 0) return RAMP_STOPS[0][1];
+  if (v &gt;= RAMP_MAX) return RAMP_STOPS[RAMP_STOPS.length-1][1];
+  let a = RAMP_STOPS[0], b = RAMP_STOPS[RAMP_STOPS.length-1];
+  for (let i=0;i&lt;RAMP_STOPS.length-1;i++){ if (v &gt;= RAMP_STOPS[i][0] &amp;&amp; v &lt;= RAMP_STOPS[i+1][0]){ a = RAMP_STOPS[i]; b = RAMP_STOPS[i+1]; break; } }
+  const span = (b[0]-a[0]) || 1; const k = (v-a[0])/span;
+  const ca = hexToRgb(a[1]), cb = hexToRgb(b[1]);
+  return rgbToHex(ca[0]+(cb[0]-ca[0])*k, ca[1]+(cb[1]-ca[1])*k, ca[2]+(cb[2]-ca[2])*k);
+}
+function combinedFor(name, idx){
+  const d = states[name]; if (!d) return null;
+  const c = d.covid[idx], f = d.flu[idx], r = d.rsv[idx];
+  if (c == null &amp;&amp; f == null &amp;&amp; r == null) return null;
+  return (c||0) + (f||0) + (r||0);
+}
+const MON = [&#39;Jan&#39;,&#39;Feb&#39;,&#39;Mar&#39;,&#39;Apr&#39;,&#39;May&#39;,&#39;Jun&#39;,&#39;Jul&#39;,&#39;Aug&#39;,&#39;Sep&#39;,&#39;Oct&#39;,&#39;Nov&#39;,&#39;Dec&#39;];
+function fmtWeek(w){ if(!w) return &#39;&#39;; const p=w.split(&#39;-&#39;); if(p.length&lt;3) return w; return &#39;Week of &#39; + MON[parseInt(p[1],10)-1] + &#39; &#39; + parseInt(p[2],10) + &#39;, &#39; + p[0]; }
+function fmtShort(w){ const p=(w||&#39;&#39;).split(&#39;-&#39;); if(p.length&lt;3) return w; return MON[parseInt(p[1],10)-1]+&#39; &#39;+parseInt(p[2],10)+&#39;, &#39;+p[0]; }
+function usAvg(idx){ let sum=0,n=0; for(const name in states){ const v=combinedFor(name,idx); if(v!=null){ sum+=v; n++; } } return n? sum/n : null; }
+function tooltipText(name, idx){ const v=combinedFor(name,idx); if(v==null) return name; return name + &#39; — &#39; + v.toFixed(1) + &#39;% of ER visits (&#39; + fmtShort(weeks[idx]) + &#39;)&#39;; }
+
+function recolor(idx){
+  if (!weeks.length) return;
+  idx = Math.max(0, Math.min(weeks.length-1, idx|0));
+  currentIdx = idx;
+  document.getElementById(&#39;dateLabel&#39;).textContent = fmtWeek(weeks[idx]);
+  document.getElementById(&#39;frameSlider&#39;).value = idx;
+  const a = usAvg(idx);
+  document.getElementById(&#39;tcCounter&#39;).textContent = (a==null? &#39;—&#39; : &#39;U.S. avg &#39; + a.toFixed(1) + &#39;%&#39;);
+  if (!stateLayer) return;
+  stateLayer.eachLayer(function(layer){
+    const name = layer.feature &amp;&amp; layer.feature.properties &amp;&amp; layer.feature.properties.name;
+    const v = combinedFor(name, idx);
+    const fill = (v == null) ? NO_DATA_COLOR : scoreColor(v);
+    const op  = (v == null) ? 0.35 : 0.82;
+    layer.setStyle({ fillColor: fill, fillOpacity: op });
+    if (layer === openTooltipLayer){ try { layer.setTooltipContent(tooltipText(name, idx)); } catch(e){} }
+  });
+}
+function play(){
+  playing = true;
+  document.getElementById(&#39;playIcon&#39;).innerHTML = &#39;&lt;path d=&quot;M6 4h4v16H6zM14 4h4v16h-4z&quot;/&gt;&#39;;
+  document.getElementById(&#39;playBtn&#39;).setAttribute(&#39;aria-label&#39;,&#39;Pause&#39;);
+  if (currentIdx &gt;= weeks.length - 1) recolor(0);
+  playTimer = setTimeout(playLoop, PLAY_INTERVAL);
+}
+function pause(){
+  playing = false;
+  document.getElementById(&#39;playIcon&#39;).innerHTML = &#39;&lt;path d=&quot;M8 5v14l11-7z&quot;/&gt;&#39;;
+  document.getElementById(&#39;playBtn&#39;).setAttribute(&#39;aria-label&#39;,&#39;Play&#39;);
+  if (playTimer){ clearTimeout(playTimer); playTimer = null; }
+}
+function togglePlay(){ if (playing) pause(); else play(); }
+function playLoop(){
+  if (!playing) return;
+  const next = currentIdx + 1;
+  if (next &gt;= weeks.length - 1){ recolor(weeks.length - 1); pause(); return; }
+  recolor(next);
+  playTimer = setTimeout(playLoop, PLAY_INTERVAL);
+}
+function setupTicks(){
+  const container = document.getElementById(&#39;yearTicks&#39;);
+  container.innerHTML = &#39;&#39;;
+  if (weeks.length &lt; 2) return;
+  const lastIdx = weeks.length - 1; const placed = {};
+  for (let i=0;i&lt;weeks.length;i++){
+    const parts = weeks[i].split(&#39;-&#39;); const y = parts[0];
+    if (parts[1] !== &#39;01&#39;) continue;          // tick only at January weeks -&gt; clean, evenly-spaced years (drops the partial 2023)
+    if (placed[y]) continue; placed[y] = true;
+    const pct = i / lastIdx * 100;
+    const tick = document.createElement(&#39;span&#39;); tick.className = &#39;tc-tick&#39;;
+    if (pct &gt;= 98){ tick.style.left=&#39;100%&#39;; tick.style.transform=&#39;translateX(-100%)&#39;; }
+    else { tick.style.left = pct + &#39;%&#39;; }
+    tick.textContent = y; container.appendChild(tick);
+  }
+}
+async function loadData(){
+  try {
+    const [geoResp, tsResp] = await Promise.all([
+      fetch(&#39;data/virusmap/us_states.geojson&#39;),
+      fetch(&#39;data/virusmap/activity.json&#39;)
+    ]);
+    const geo = await geoResp.json();
+    const ts = await tsResp.json();
+    weeks = ts.weeks || [];
+    states = ts.states || {};
+    if (weeks.length){
+      currentIdx = weeks.length - 1;
+      document.getElementById(&#39;frameSlider&#39;).min = 0;
+      document.getElementById(&#39;frameSlider&#39;).max = weeks.length - 1;
+      document.getElementById(&#39;frameSlider&#39;).value = currentIdx;
+      setupTicks();
+    }
+    stateLayer = L.geoJSON(geo, {
+      filter: function(feature){ const name = feature.properties.name; return name !== &#39;Alaska&#39; &amp;&amp; name !== &#39;Hawaii&#39; &amp;&amp; name !== &#39;Puerto Rico&#39;; },
+      style: function(feature){ const v = combinedFor(feature.properties.name, currentIdx); return { fillColor: (v==null?NO_DATA_COLOR:scoreColor(v)), fillOpacity: (v==null?0.35:0.82), weight: 1, color: &#39;#ffffff&#39; }; },
+      onEachFeature: function(feature, layer){
+        const name = feature.properties.name;
+        layer.bindTooltip(tooltipText(name, currentIdx), { sticky: true, direction: &#39;top&#39;, opacity: 1 });
+        layer.on(&#39;mouseover&#39;, function(){ try { layer.bringToFront(); } catch(e){} layer.setStyle({ weight: 2, color: &#39;#1f2327&#39; }); openTooltipLayer = layer; });
+        layer.on(&#39;mouseout&#39;, function(){ layer.setStyle({ weight: 1, color: &#39;#ffffff&#39; }); if (layer === openTooltipLayer) openTooltipLayer = null; });
+      }
+    }).addTo(map);
+    recolor(currentIdx);
+    fitUS();
+    if (weeks.length &amp;&amp; !window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches) play();
+  } catch (e) { fitUS(); }
+}
+(function buildSource(){ document.getElementById(&#39;chromeSource&#39;).innerHTML = &#39;CDC — National Syndromic Surveillance Program, ER visits (updated weekly) · not endorsed by CDC&#39;; })();
+loadData();
+document.getElementById(&#39;playBtn&#39;).addEventListener(&#39;click&#39;, togglePlay);
+document.getElementById(&#39;frameSlider&#39;).addEventListener(&#39;input&#39;, function(e){ if (playing) pause(); recolor(parseInt(e.target.value, 10)); });
+document.addEventListener(&#39;keydown&#39;, function(e){
+  if (e.target &amp;&amp; e.target.tagName === &#39;INPUT&#39;) return;
+  if (!weeks.length) return;
+  if (e.code === &#39;Space&#39;){ e.preventDefault(); togglePlay(); }
+  if (e.code === &#39;ArrowLeft&#39;){ pause(); recolor(Math.max(0, currentIdx - 1)); }
+  if (e.code === &#39;ArrowRight&#39;){ pause(); recolor(Math.min(weeks.length - 1, currentIdx + 1)); }
+});
+let resizeTimer = null;
+window.addEventListener(&#39;resize&#39;, function(){ if (resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(function(){ map.invalidateSize(); fitUS(); }, 100); });
+if (isEmbedded) {
+  window.addEventListener(&#39;message&#39;, function(ev){
+    const d = ev.data || {};
+    if (d.type === &#39;nf-inactive&#39;) { pause(); }
+    else if (d.type === &#39;nf-active&#39;) { if (!playing &amp;&amp; !window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches) { recolor(0); play(); } }
+  });
+}
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;" loading="eager" title="Where it&#39;s spreading" allow="autoplay"></iframe></section>
+  <section class="screen"><iframe srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;title&gt;Viruses — Health Impact — NanoFlashing&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+  :root{
+    --bg:#edf0f2;
+    --ink:#1f2327;
+    --headline-ink:#1a1a1a;
+    --muted:#8a9095;
+    --faint:#aab2b8;
+    --accent:#1b7bff;
+    --red:#e23b3b;
+    --hair:rgba(20,24,28,0.08);
+    --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
+    --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased}
+  body{min-height:100vh}
+
+  .health{
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  .grid{
+    flex:1;
+    display:grid;
+    grid-template-columns:48% 52%;
+    align-items:start;
+    width:100%;
+    min-height:0;
+  }
+
+  /* LEFT */
+  .left{
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;                 /* top-anchored so the passage never shifts vertically */
+    min-width:0;
+    max-height:100vh;
+    padding:150px clamp(24px,5vw,80px) clamp(16px,2vh,28px);
+    z-index:10;
+    position:relative;
+  }
+  h1.headline{
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(20px, 1.95vw, 28px);
+    line-height:1.32;
+    letter-spacing:-0.022em;
+    color:var(--headline-ink);
+    margin:0 0 clamp(14px,2vh,22px);
+    max-width:none;
+  }
+  h1.headline em{font-style:normal;color:var(--red)}
+
+  .card{
+    min-height:170px;
+    position:relative;
+    flex-shrink:0;
+  }
+  .card-inner{
+    opacity:1;
+    transform:none;
+    transition:opacity .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
+  }
+  .card-inner.leaving{opacity:0;transform:translateY(8px)}
+  .card-name{
+    font-family:var(--stack);
+    font-weight:600;
+    font-size:clamp(22px,2vw,28px);
+    line-height:1.15;
+    letter-spacing:-0.018em;
+    color:var(--headline-ink);
+    margin:0 0 14px;
+  }
+  .card-intro{
+    font-family:var(--stack);
+    font-size:17.5px;
+    line-height:1.5;
+    color:#1a1a1a;
+    font-weight:400;
+    margin:0 0 14px;
+    max-width:540px;
+  }
+  .card-impacts p{
+    font-family:var(--stack);
+    font-size:17.5px;
+    line-height:1.5;
+    color:#1a1a1a;
+    font-weight:400;
+    margin:0 0 12px;
+    max-width:540px;
+  }
+  .card-impacts p:last-child{margin-bottom:0}
+  .card-impacts a{
+    color:#1a1a1a;
+    text-decoration:none;
+    border-bottom:1px solid rgba(20,24,28,0.22);
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .card-impacts a:hover{color:var(--red);border-color:var(--red)}
+
+  /* ANATOMY INDEX — vertical selector */
+  .index{
+    margin-top:clamp(10px,1.4vh,18px);
+    display:flex;
+    flex-direction:column;
+    border-top:1px solid var(--hair);
+    flex-shrink:0;
+  }
+  .index-row{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    width:100%;
+    padding:8px 6px 8px 14px;
+    background:transparent;
+    border:0;
+    border-bottom:1px solid var(--hair);
+    cursor:pointer;
+    text-align:left;
+    position:relative;
+    transition:background .18s ease, color .18s ease;
+    font-family:var(--stack);
+  }
+  .index-row::before{
+    content:&quot;&quot;;
+    position:absolute;
+    left:0; top:50%;
+    transform:translateY(-50%) scaleY(0);
+    width:3px;
+    height:60%;
+    background:var(--red);
+    border-radius:2px;
+    transition:transform .22s cubic-bezier(.16,1,.3,1);
+  }
+  .index-row .idx{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+    width:26px;
+    flex:0 0 26px;
+    letter-spacing:0.02em;
+    transition:color .18s ease;
+  }
+  .index-row .nm{
+    font-family:var(--stack);
+    font-size:17px;
+    font-weight:500;
+    color:var(--ink);
+    letter-spacing:-0.005em;
+    transition:color .18s ease;
+  }
+  .index-row:hover{background:rgba(20,24,28,0.035)}
+  .index-row:hover .nm{color:var(--red)}
+  .index-row[aria-pressed=&quot;true&quot;] .nm{color:var(--red)}
+  .index-row[aria-pressed=&quot;true&quot;] .idx{color:var(--red)}
+  .index-row[aria-pressed=&quot;true&quot;]::before{transform:translateY(-50%) scaleY(1)}
+  .index-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+  /* RIGHT — WIDE AREA spanning full width */
+  .right{
+    position:absolute;
+    top:0; right:0;
+    width:100%;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    z-index:1;
+  }
+  
+  .back-btn{
+    position:absolute;
+    top:16px;
+    right:16px;
+    z-index:20;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    border:1px solid var(--hair);
+    background:rgba(237,240,242,0.9);
+    color:var(--ink);
+    font-family:var(--stack);
+    font-size:22px;
+    font-weight:600;
+    line-height:1;
+    cursor:pointer;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(-4px);
+    transition:opacity .3s ease, transform .3s ease, border-color .18s ease, color .18s ease;
+    backdrop-filter:blur(4px);
+  }
+  .back-btn.show{opacity:1;pointer-events:auto;transform:none}
+  .back-btn:hover{border-color:var(--red);color:var(--red)}
+  .back-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* FIGURE WRAPPER — pins dots to the figure precisely */
+  .figure{
+    position:relative;
+    height:100%;
+    aspect-ratio:688/962;
+    max-width:100%;
+    transform-origin:center center;
+    transition:transform .7s cubic-bezier(.16,1,.3,1);
+    will-change:transform;
+  }
+  .figure.zoomed .body-img{
+    animation:none;
+  }
+  @keyframes breathe{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.012)}
+  }
+
+  /* BODY IMG — fills the wrapper exactly */
+  .body-img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+    pointer-events:none;
+    -webkit-user-drag:none;
+    user-select:none;
+    animation:breathe 4.5s ease-in-out infinite;
+  }
+
+  /* GLOW HALO — blooms over the selected organ */
+  .glow{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:120px; height:120px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(226,59,59,0.28) 0%, rgba(226,59,59,0.08) 45%, transparent 70%);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .4s ease;
+    z-index:1;
+  }
+  .glow.show{
+    opacity:1;
+    animation:glowPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes glowPulse{
+    0%,100%{transform:translate(-50%,-50%) scale(var(--inv,1));opacity:0.85}
+    50%{transform:translate(-50%,-50%) scale(calc(var(--inv,1) * 1.15));opacity:1}
+  }
+
+  /* HOTSPOTS */
+  .hotspots{position:absolute;inset:0;pointer-events:none;z-index:2}
+  .hotspot{
+    position:absolute;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--inv,1));
+    width:18px;height:18px;
+    border:0;background:transparent;
+    padding:0;cursor:pointer;
+    pointer-events:auto;
+    transition:opacity .4s ease, width .3s ease, height .3s ease, transform .7s cubic-bezier(.16,1,.3,1);
+  }
+  .hotspot::before{
+    content:&quot;&quot;;
+    position:absolute;inset:0;
+    border-radius:50%;
+    background:var(--red);
+    transform:scale(0.38);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.6);
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .hotspot::after{
+    content:&quot;&quot;;
+    position:absolute;inset:0;
+    border-radius:50%;
+    border:1.5px solid var(--red);
+    animation:pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{transform:scale(0.5);opacity:0.9}
+    100%{transform:scale(1.9);opacity:0}
+  }
+  .hotspot:hover::before{transform:scale(0.5)}
+  .hotspot .label{
+    position:absolute;
+    left:50%;top:100%;
+    transform:translate(-50%,8px);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink);
+    background:var(--bg);
+    padding:3px 7px;
+    border:1px solid var(--hair);
+    border-radius:4px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  .hotspot:hover .label,.hotspot:focus-visible .label{opacity:1}
+  .hotspot:focus-visible{outline:none}
+  .hotspot:focus-visible::after{border-color:var(--accent);animation:none;transform:scale(1.4);opacity:1}
+
+  /* ACTIVE STATE — solid red dot + white ring */
+  .hotspot.active{
+    width:26px; height:26px;
+    z-index:3;
+  }
+  .hotspot.active::before{
+    transform:scale(1);
+    box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--red), 0 0 12px 2px rgba(226,59,59,0.4);
+  }
+  .hotspot.active::after{
+    animation:pulse 1.8s ease-out infinite;
+    border-width:2px;
+  }
+  .hotspot.dimmed{
+    opacity:0.35;
+  }
+
+  /* MOBILE */
+  @media (max-width:880px){
+    .grid{
+      grid-template-columns:1fr;
+      align-items:start;
+      min-height:auto;
+    }
+    .left{
+      order:1;
+      max-height:none;
+      padding:0 clamp(20px,6vw,32px);
+      z-index:10;
+      background:var(--bg);
+      padding-bottom:20px;
+    }
+    .right{
+      position:relative;
+      order:2;
+      height:clamp(400px, 68vh, 680px);
+      max-height:none;
+    }
+    .card{min-height:180px}
+    h1.headline{max-width:none}
+    .index-row{padding:8px 6px 8px 14px}
+    .index-row .nm{font-size:16px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .figure{animation:none;transition:transform .2s ease}
+    .glow{animation:none;transition:opacity .2s ease}
+    .hotspot::after{animation:none}
+    .card-inner{transition:opacity .2s ease}
+  }
+
+/* wfhealth_landscape_v2 — landscape-phone 2-col */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+   .grid{ grid-template-columns:46% 54%; align-items:center; }
+   .left{ order:1; display:block; max-height:100vh; overflow-y:auto; padding:10px clamp(16px,4vw,30px); }
+   .right{ order:2; position:relative; height:100vh; max-height:100vh; }
+   .figure{ height:100%; }
+   h1.headline{ font-size:clamp(16px,2.8vw,21px); line-height:1.15; margin:8px 0 8px; max-width:none; }
+   .card{ min-height:0; }
+   .card-name{ font-size:clamp(16px,2vw,20px); margin-bottom:6px; }
+   .card-intro{ font-size:13px; line-height:1.45; margin-bottom:8px; }
+   .card-impacts p{ font-size:13px; line-height:1.45; margin-bottom:7px; }
+   .index{ margin-top:10px; }
+   .index-row{ padding:7px 6px 7px 12px; }
+   .index-row .nm{ font-size:14px; }
+}
+
+/* wfhealth_phone_v2 — co-locate diagram + chips on phone */
+@media (max-width: 880px) and (orientation: portrait) {
+  .grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .left,
+  .right {
+    display: contents;
+  }
+  h1.headline {
+    order: 1;
+    font-size: clamp(20px, 5.2vw, 26px);
+    margin: 0;
+  }
+  .figure {
+    order: 2;
+    height: 42vh;
+    max-height: 42vh;
+    width: auto;
+    margin: 0 auto;
+    position: relative;
+  }
+  .index {
+    order: 3;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    border-top: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    width: 100%;
+  }
+  .card {
+    order: 4;
+  }
+  .index-row {
+    flex: 0 0 auto;
+    width: auto;
+    border: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+    border-radius: 999px;
+    padding: 8px 14px;
+    white-space: nowrap;
+  }
+  .index-row .nm {
+    font-size: 14px;
+  }
+  .back-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+  }
+  .body-img,
+  .glow,
+  .hotspots {
+    max-width: 100%;
+  }
+  .left,
+  .right,
+  .grid {
+    overflow-x: hidden;
+  }
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;section class=&quot;health&quot; aria-labelledby=&quot;health-headline&quot;&gt;
+  &lt;div class=&quot;grid&quot;&gt;
+    &lt;div class=&quot;left&quot;&gt;
+      &lt;h1 class=&quot;headline&quot; id=&quot;health-headline&quot;&gt;What the viruses do &lt;em&gt;inside you&lt;/em&gt;&lt;/h1&gt;
+
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;card-inner&quot; id=&quot;cardInner&quot; aria-live=&quot;polite&quot;&gt;
+          &lt;h2 class=&quot;card-name&quot; id=&quot;cardName&quot; style=&quot;display:none&quot;&gt;&lt;/h2&gt;
+          &lt;p class=&quot;card-intro&quot; id=&quot;cardIntro&quot;&gt;&lt;/p&gt;
+          &lt;div class=&quot;card-impacts&quot; id=&quot;cardImpacts&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class=&quot;index&quot; id=&quot;index&quot; role=&quot;group&quot; aria-label=&quot;Select an organ&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;right&quot; id=&quot;right&quot;&gt;
+      &lt;button class=&quot;back-btn&quot; id=&quot;backBtn&quot; type=&quot;button&quot; aria-label=&quot;Return to full body view&quot;&gt;&amp;lsaquo;&lt;/button&gt;
+      &lt;div class=&quot;figure&quot; id=&quot;figure&quot;&gt;
+        &lt;img class=&quot;body-img&quot; id=&quot;bodyImg&quot; src=&quot;assets/body/body_premium.png&quot; alt=&quot;Anatomical figure showing where viruses affect the body&quot; draggable=&quot;false&quot;&gt;
+        &lt;div class=&quot;glow&quot; id=&quot;glow&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;hotspots&quot; id=&quot;hotspots&quot;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;script&gt;
+(function(){
+  const DATA = {
+    overview: {
+      name: &quot;&quot;,
+      intro: &quot;Viruses ride the air into your lungs, and the effects don\u2019t always stop there. Most infections pass \u2014 but some leave lasting marks on the heart, brain, and other organs.&quot;,
+      impacts: [
+        {text:&quot;Airborne viruses drive colds, flu, and COVID; outbreak studies tie [the air-handling system to their spread indoors].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/32240078/&quot;},
+        {text:&quot;After infection, researchers document [higher long-term heart and brain risk], sometimes years later.&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35132265/&quot;}
+      ],
+      ox:0.5, oy:0.5
+    },
+    lungs: {
+      name:&quot;Lungs&quot;,
+      impacts:[
+        {text:&quot;Respiratory viruses like flu and COVID inflame the lungs; severe cases bring [pneumonia and hospitalization].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/38104583/&quot;},
+        {text:&quot;In children, early [RSV infection raises the risk of later asthma].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/37086744/&quot;}
+      ],
+      ox:0.45, oy:0.25, label:&quot;Lungs&quot;
+    },
+    heart: {
+      name:&quot;Heart&quot;,
+      impacts:[
+        {text:&quot;In the year after COVID, people face [higher rates of heart failure, clots, and stroke].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35132265/&quot;},
+        {text:&quot;Even flu can trigger a [heart attack in the days right after infection].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/29365305/&quot;}
+      ],
+      ox:0.53, oy:0.29, label:&quot;Heart&quot;
+    },
+    brain: {
+      name:&quot;Brain &amp; Mind&quot;,
+      impacts:[
+        {text:&quot;COVID is linked to [lasting neurological and cognitive effects].&quot;, url:&quot;https://doi.org/10.1038/s41591-022-02001-z&quot;},
+        {text:&quot;A two-year study of 1.28 million people found [raised risk of several brain and mental-health conditions].&quot;, url:&quot;https://pubmed.ncbi.nlm.nih.gov/35987197/&quot;}
+      ],
+      ox:0.50, oy:0.07, label:&quot;Brain &amp; Mind&quot;
+    }
+  };
+
+  const ORDER = [&quot;overview&quot;,&quot;brain&quot;,&quot;lungs&quot;,&quot;heart&quot;];
+  const INDEX_LABELS = {
+    overview:&quot;Overview&quot;, lungs:&quot;Lungs&quot;, heart:&quot;Heart&quot;, brain:&quot;Brain &amp; Mind&quot;
+  };
+
+  const hotspotsEl = document.getElementById(&#39;hotspots&#39;);
+  const backBtn = document.getElementById(&#39;backBtn&#39;);
+  const rightEl = document.getElementById(&#39;right&#39;);
+  const figure = document.getElementById(&#39;figure&#39;);
+  const glow = document.getElementById(&#39;glow&#39;);
+  const cardInner = document.getElementById(&#39;cardInner&#39;);
+  const cardName = document.getElementById(&#39;cardName&#39;);
+  const cardIntro = document.getElementById(&#39;cardIntro&#39;);
+  const cardImpacts = document.getElementById(&#39;cardImpacts&#39;);
+  const indexEl = document.getElementById(&#39;index&#39;);
+
+  let current = &quot;overview&quot;;
+  let targetScale = 1;
+  let targetX = 0;
+  let targetY = 0;
+
+  function linkify(text, url){
+    const m = text.match(/\[(.+?)\]/);
+    if(!m) return text;
+    const idx = text.indexOf(m[0]);
+    const pre = text.slice(0, idx);
+    const post = text.slice(idx + m[0].length);
+    return pre + &#39;&lt;a href=&quot;&#39;+url+&#39;&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;&#39;+m[1]+&#39;&lt;/a&gt;&#39; + post;
+  }
+
+  function renderCard(key){
+    const d = DATA[key];
+    if(key === &quot;overview&quot;){
+      cardName.style.display = &#39;none&#39;;
+      cardName.textContent = &#39;&#39;;
+    } else {
+      cardName.style.display = &#39;&#39;;
+      cardName.textContent = d.name;
+    }
+    if(d.intro){
+      cardIntro.style.display = &#39;&#39;;
+      cardIntro.textContent = d.intro;
+    } else {
+      cardIntro.style.display = &#39;none&#39;;
+    }
+    cardImpacts.innerHTML = d.impacts.map(im =&gt;
+      &#39;&lt;p&gt;&#39;+linkify(im.text, im.url)+&#39;&lt;/p&gt;&#39;
+    ).join(&#39;&#39;);
+  }
+
+  function applyTransform() {
+    figure.style.transform = `translate(${targetX}px, ${targetY}px) scale(${targetScale})`;
+  }
+
+  // Horizontal offset so the resting figure lines up with the particle on the
+  // sibling hero page (centered in the right 54% column of a 46/54 grid with
+  // clamp(24px,6vw,96px) padding + clamp(32px,5vw,80px) gap). 0 when stacked.
+  function restOffsetX(){
+    const aw = rightEl.clientWidth;
+    const vw = window.innerWidth;
+    if (vw &lt;= 880) return 0;
+    const padX = Math.min(96, Math.max(24, 0.06*vw));
+    const gap  = Math.min(80, Math.max(32, 0.05*vw));
+    const innerW = vw - 2*padX - gap;
+    const anchorX = padX + innerW*0.46 + gap + innerW*0.54/2;
+    return anchorX - aw/2;
+  }
+
+  function setHighlight(key){
+    if(key === &quot;overview&quot;){
+      backBtn.classList.remove(&#39;show&#39;);
+      glow.classList.remove(&#39;show&#39;);
+      figure.classList.remove(&#39;zoomed&#39;);
+      targetScale = 1;
+      targetX = restOffsetX();
+      targetY = 0;
+      figure.style.setProperty(&#39;--inv&#39;, &#39;1&#39;);
+      applyTransform();
+      hotspotsEl.querySelectorAll(&#39;.hotspot&#39;).forEach(h=&gt;{
+        h.classList.remove(&#39;active&#39;,&#39;dimmed&#39;);
+      });
+    } else {
+      const d = DATA[key];
+      backBtn.classList.add(&#39;show&#39;);
+      glow.style.left = (d.ox*100)+&#39;%&#39;;
+      glow.style.top = (d.oy*100)+&#39;%&#39;;
+      glow.classList.add(&#39;show&#39;);
+      figure.classList.add(&#39;zoomed&#39;);
+      
+      // Compute zoom: scale up to 2.5, but clamp so figure width never exceeds area width
+      const areaW = rightEl.clientWidth;
+      const areaH = rightEl.clientHeight;
+      const figW = figure.offsetWidth || (areaH * 688 / 962);
+
+      let scale = 0.86 / Math.max(d.oy, 0.40); scale = Math.min(2.5, Math.max(1.5, scale));
+      const maxScale = areaW / figW;
+      if (scale &gt; maxScale) scale = maxScale;
+      if (scale &lt; 1) scale = 1; // never shrink
+
+      targetScale = scale;
+      // Counter-scale the dots + labels so they keep a constant size when zoomed
+      figure.style.setProperty(&#39;--inv&#39;, (1/scale).toFixed(4));
+      
+      // The organ is a fraction (ox,oy) of the figure box; the figure is flex-
+      // centered in the area. Use the UNSCALED box size (offset*, transform-free)
+      // so this is correct even when going organ -&gt; organ. Place every organ on
+      // the SAME aligned column as the resting figure (and the hero particle),
+      // vertically centered, so the figure never jumps sideways between clicks.
+      const fW = figure.offsetWidth;
+      const fH = figure.offsetHeight;
+      targetX = restOffsetX() - (d.ox - 0.5) * fW * scale;
+      targetY = fH * (0.06 - 0.5 + 0.5 * scale);
+      
+      applyTransform();
+      
+      hotspotsEl.querySelectorAll(&#39;.hotspot&#39;).forEach(h=&gt;{
+        if(h.dataset.key === key){
+          h.classList.add(&#39;active&#39;);
+          h.classList.remove(&#39;dimmed&#39;);
+        } else {
+          h.classList.add(&#39;dimmed&#39;);
+          h.classList.remove(&#39;active&#39;);
+        }
+      });
+    }
+  }
+
+  function select(key, force){
+    if(current === key &amp;&amp; !force){
+      current = &quot;overview&quot;;
+    } else {
+      current = key;
+    }
+    cardInner.classList.add(&#39;leaving&#39;);
+    setTimeout(()=&gt;{
+      renderCard(current);
+      setHighlight(current);
+      cardInner.classList.remove(&#39;leaving&#39;);
+    }, 200);
+    indexEl.querySelectorAll(&#39;.index-row&#39;).forEach(c=&gt;{
+      c.setAttribute(&#39;aria-pressed&#39;, c.dataset.key === current ? &#39;true&#39; : &#39;false&#39;);
+    });
+  }
+
+  // Build hotspots
+  ORDER.forEach(key=&gt;{
+    if(key === &quot;overview&quot;) return;
+    const d = DATA[key];
+    const b = document.createElement(&#39;button&#39;);
+    b.type = &#39;button&#39;;
+    b.className = &#39;hotspot&#39;;
+    b.style.left = (d.ox*100)+&#39;%&#39;;
+    b.style.top = (d.oy*100)+&#39;%&#39;;
+    b.dataset.key = key;
+    b.setAttribute(&#39;aria-label&#39;, &#39;Show impact on &#39;+d.label);
+    const lab = document.createElement(&#39;span&#39;);
+    lab.className = &#39;label&#39;;
+    lab.textContent = d.label;
+    b.appendChild(lab);
+    b.addEventListener(&#39;click&#39;, (e)=&gt;{
+      e.stopPropagation();
+      select(key);
+    });
+    hotspotsEl.appendChild(b);
+  });
+
+  // Build anatomy index
+  ORDER.forEach((key, i)=&gt;{
+    const b = document.createElement(&#39;button&#39;);
+    b.type = &#39;button&#39;;
+    b.className = &#39;index-row&#39;;
+    b.dataset.key = key;
+    b.setAttribute(&#39;aria-pressed&#39;, key === &#39;overview&#39; ? &#39;true&#39; : &#39;false&#39;);
+    const nm = document.createElement(&#39;span&#39;);
+    nm.className = &#39;nm&#39;;
+    nm.textContent = INDEX_LABELS[key];
+    b.appendChild(nm);
+    b.addEventListener(&#39;click&#39;, ()=&gt;select(key));
+    indexEl.appendChild(b);
+  });
+
+  backBtn.addEventListener(&#39;click&#39;, (e)=&gt;{
+    e.stopPropagation();
+    select(&#39;overview&#39;, true);
+  });
+
+  // Clicking the background returns to overview
+  rightEl.addEventListener(&#39;click&#39;, (e)=&gt;{
+    if(e.target.closest(&#39;.hotspot&#39;) || e.target.closest(&#39;.back-btn&#39;)) return;
+    if(current !== &#39;overview&#39;) select(&#39;overview&#39;, true);
+  });
+
+  // Recalculate position/zoom on resize (rest offset is width-dependent)
+  window.addEventListener(&#39;resize&#39;, () =&gt; {
+    setHighlight(current);
+  });
+
+  // Init (UAT: ?organ=KEY preselects an organ for verification)
+  const _uat = new URLSearchParams(location.search).get(&#39;organ&#39;);
+  const _init = (_uat &amp;&amp; DATA[_uat]) ? _uat : &#39;overview&#39;;
+  current = _init;
+  renderCard(_init);
+  setHighlight(_init);
+  indexEl.querySelectorAll(&#39;.index-row&#39;).forEach(c=&gt;{
+    c.setAttribute(&#39;aria-pressed&#39;, c.dataset.key === _init ? &#39;true&#39; : &#39;false&#39;);
+  });
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;" loading="eager" title="In the body" allow="autoplay"></iframe></section>
+  <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;The air system spreads the virus it caught — NanoFlashing&lt;/title&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
+  --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* === Background video block (right side) === */
+.video-stack{
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
+  z-index:0;
+  overflow:hidden;
+  background:var(--bg);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.video-stack video,
+.video-stack img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.video-stack img.poster{
+  opacity:0;
+  z-index:3;
+}
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* === Drifting grey smoke overlay (right block) === */
+.smoke{
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
+  z-index:1;
+  pointer-events:none;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.smoke span{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  filter:blur(50px);
+  mix-blend-mode:normal;
+  will-change:transform, opacity;
+}
+.smoke .s1{
+  width:70vw; height:65vh;
+  top:-15vh; right:-12vw;
+  background:radial-gradient(circle at 50% 50%, rgba(180,194,172,0.85), rgba(180,194,172,0.45) 50%, transparent 75%);
+  animation:drift1 24s ease-in-out infinite;
+}
+.smoke .s2{
+  width:60vw; height:60vh;
+  top:15vh; right:-6vw;
+  background:radial-gradient(circle at 50% 50%, rgba(188,200,178,0.8), rgba(188,200,178,0.4) 55%, transparent 78%);
+  animation:drift2 32s ease-in-out infinite;
+}
+.smoke .s3{
+  width:50vw; height:50vh;
+  top:45vh; right:4vw;
+  background:radial-gradient(circle at 50% 50%, rgba(174,188,166,0.75), rgba(174,188,166,0.35) 55%, transparent 80%);
+  animation:drift3 28s ease-in-out infinite;
+}
+.smoke .s4{
+  width:40vw; height:45vh;
+  top:5vh; right:22vw;
+  background:radial-gradient(circle at 50% 50%, rgba(192,202,182,0.7), rgba(192,202,182,0.3) 60%, transparent 82%);
+  animation:drift4 38s ease-in-out infinite;
+}
+@keyframes drift1{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+  35%  { transform:translate3d(-8vw,4vh,0) scale(1.1); opacity:1; }
+  70%  { transform:translate3d(-4vw,-3vh,0) scale(1.05); opacity:0.7; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+}
+@keyframes drift2{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+  30%  { transform:translate3d(-6vw,-4vh,0) scale(1.12); opacity:0.95; }
+  65%  { transform:translate3d(-10vw,3vh,0) scale(1.06); opacity:0.6; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+}
+@keyframes drift3{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+  40%  { transform:translate3d(-7vw,-5vh,0) scale(1.14); opacity:0.9; }
+  75%  { transform:translate3d(-3vw,4vh,0) scale(1.08); opacity:0.5; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+}
+@keyframes drift4{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+  50%  { transform:translate3d(-9vw,3vh,0) scale(1.1); opacity:0.85; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+}
+@media (prefers-reduced-motion: reduce){
+  .smoke span{ animation:none !important; }
+  .smoke .s1{ opacity:0.8; transform:translate3d(-4vw,0,0); }
+  .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
+  .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
+  .smoke .s4{ opacity:0.55; }
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);padding-top:140px;
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:34px;
+}
+.headline em{
+  color:var(--red);
+  font-style:normal;
+  font-weight:600;
+}
+
+/* === Stat block === */
+.stat-block{
+  display:flex;
+  align-items:center;
+  gap:24px;
+  margin-bottom:8px;
+}
+.big-number{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--red);
+  font-size:clamp(56px, 6vw, 96px);
+  line-height:0.9;
+  letter-spacing:-0.04em;
+  font-variant-numeric:tabular-nums;
+}
+
+.caption{
+  font-size:clamp(17px, 1.5vw, 20px);
+  line-height:1.45;
+  color:var(--ink);
+  max-width:26ch;
+  padding-top:6px;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width: 440px;
+  font-size:19px;
+  line-height:1.55;
+  margin-top:32px;
+  color: #1a1a1a;
+}
+.body-text a{
+  color:inherit;
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.55);
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.body-text a:hover{
+  color:var(--red);
+  border-bottom-color:var(--red);
+}
+
+/* === Mobile === */
+@media (max-width: 880px){
+  section{
+    overflow-x:hidden;
+  }
+  .video-stack,
+  .smoke{
+    width:100%;
+    max-width:100%;
+    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+    mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+  }
+  .scrim{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:linear-gradient(to right,
+      var(--bg) 0%,
+      rgba(237,240,242,0.88) 35%,
+      rgba(237,240,242,0.45) 65%,
+      rgba(237,240,242,0.2) 100%);
+  }
+  .text-col{
+    max-width:none;
+    width:100%;
+    padding-left:clamp(24px, 6vw, 32px);
+    padding-right:clamp(24px, 6vw, 32px);
+  }
+  .stat-block{
+    flex-direction:column;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .caption{
+    padding-top:0;
+    max-width:none;
+  }
+  .body-text{
+    font-size:16px;
+    max-width:none;
+    margin-bottom:12px;
+  }
+  .body-text:last-child{ margin-bottom:0; }
+  .scrim{
+    background:linear-gradient(to right,
+      rgba(237,240,242,0.96) 0%,
+      rgba(237,240,242,0.82) 40%,
+      rgba(237,240,242,0.4) 72%,
+      rgba(237,240,242,0.1) 100%);
+  }
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;section id=&quot;section&quot;&gt;
+  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
+    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/filter_media_v2.mp4&quot;
+           poster=&quot;assets/videos/posters/filter_media_v2.jpg&quot;
+           muted playsinline preload=&quot;auto&quot;
+           style=&quot;opacity:1; z-index:1;&quot;&gt;&lt;/video&gt;
+    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/filter_media_v2.jpg&quot; alt=&quot;&quot;&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;smoke&quot; aria-hidden=&quot;true&quot;&gt;
+    &lt;span class=&quot;s1&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;s2&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;s3&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;s4&quot;&gt;&lt;/span&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;text-col&quot;&gt;
+    &lt;h1 class=&quot;headline&quot;&gt;
+      The filter holds the virus —&lt;br&gt;
+      the air &lt;em&gt;system&lt;/em&gt; spreads it
+    &lt;/h1&gt;
+
+    &lt;div class=&quot;stat-block&quot;&gt;
+      &lt;div class=&quot;big-number&quot; id=&quot;bigNumber&quot;&gt;~0%&lt;/div&gt;
+      &lt;p class=&quot;caption&quot;&gt;virus infections on the Diamond Princess, spread through the ship’s shared air.&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;p class=&quot;body-text&quot;&gt;
+      A conventional filter can catch virus, but it does not destroy it — and it does nothing to stop a system that keeps recirculating the air.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      Outbreak teams have traced airborne virus through the ventilation itself: in one restaurant, &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/32240078/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;SARS-CoV-2 moved table to table along the air-conditioning stream&lt;/a&gt;. One contaminated flow reaches every seat downwind.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      On the quarantined ship Diamond Princess, &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/33536312/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;712 people were infected&lt;/a&gt; as aerosols spread through the shared air — the load a conventional filter holds but never takes out of play.
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;script&gt;
+(function(){
+  const reducedMotion = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
+  const videoStack = document.getElementById(&#39;videoStack&#39;);
+  const videoA = document.getElementById(&#39;videoA&#39;);
+  const bigNumber = document.getElementById(&#39;bigNumber&#39;);
+
+  /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
+  if (reducedMotion) {
+    videoStack.classList.add(&#39;reduced&#39;);
+  }
+  const isEmbedded = window.self !== window.top;
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = &#39;0&#39;;
+    animateNumber();
+  }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} }
+
+  /* ---------- Number animation ---------- */
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+
+  function animateNumber(){
+    const DURATION = 1600;
+    const start = performance.now();
+
+    function step(now){
+      const p = Math.min(1, (now - start) / DURATION);
+      const e = easeOutCubic(p);
+
+      // count big number 0 -&gt; 95
+      const n = Math.round(e * 712);
+      bigNumber.textContent = n.toLocaleString();
+
+      if (p &lt; 1) {
+        requestAnimationFrame(step);
+      } else {
+        bigNumber.textContent = &#39;712&#39;;
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  if (reducedMotion) {
+    bigNumber.textContent = &#39;712&#39;;
+  } else {
+    bigNumber.textContent = &#39;0&#39;;
+    if (isEmbedded) {
+      // In the deck: play the discharge video + count only when this section becomes active.
+      window.addEventListener(&#39;message&#39;, function(e){
+        if (!e.data) return;
+        if (e.data.type === &#39;nf-active&#39;) startFilter();
+        else if (e.data.type === &#39;nf-inactive&#39;) stopFilter();
+      });
+    } else {
+      // Standalone: start from the top when it scrolls into view.
+      const io = new IntersectionObserver((entries, observer) =&gt; {
+        entries.forEach(entry =&gt; { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById(&#39;section&#39;));
+    }
+  }
+})();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;" loading="lazy" title="The filter" allow="autoplay"></iframe></section>
+  <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;NanoFlashing captures the mold and destroys what is alive&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+:root{
+  --bg:#edf0f2;
+  --ink:#1f2327;
+  --headline-ink:#1a1a1a;
+  --muted:#8a9095;
+  --accent:#1b7bff;
+  --red:#e23b3b;
+  --hair:rgba(20,24,28,0.08);
+  --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
+  --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  max-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  max-width:min(48%, 620px);padding-top:140px;
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
+}
+
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
+  font-size:clamp(24px, 2.7vw, 34px);
+  line-height:1.32;
+  letter-spacing:-0.022em;
+  margin-bottom:28px;
+}
+.headline &gt; span{
+  display:block;
+}
+.headline em{
+  color:var(--accent);
+  font-style:normal;
+  font-weight:600;
+}
+
+/* === Stat block === */
+.stat-block{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:22px;
+}
+.stat-row{
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+.big-number{
+  font-family:var(--stack);
+  font-weight:700;
+  font-size:clamp(52px, 6vw, 92px);
+  line-height:0.95;
+  letter-spacing:-0.03em;
+  font-variant-numeric:tabular-nums;
+  flex-shrink:0;
+  width:2.95em;
+  text-align:right;
+}
+.big-number.accent{ color:var(--accent); }
+.big-number.ink{ color:var(--ink); }
+
+.caption{
+  font-family:var(--stack);
+  font-size:clamp(16px, 1.5vw, 19px);
+  line-height:1.4;
+  color:var(--ink);
+  max-width:24ch;
+  padding-top:4px;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width:440px;
+  font-size:19px;
+  line-height:1.55;
+  color:#1a1a1a;
+  margin-bottom:22px;
+}
+
+/* === Advocacy link === */
+.advocacy-link{
+  font-family:var(--stack);
+  font-size:19px;
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom:1px solid rgba(27,123,255,0.5);
+  padding-bottom:2px;
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.advocacy-link:hover{
+  color:var(--ink);
+  border-bottom-color:var(--ink);
+}
+
+/* === Chart column === */
+.chart-col{
+  flex:1 1 0;
+  min-width:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:stretch;
+  padding:clamp(24px, 4vh, 56px) clamp(24px, 3vw, 48px) clamp(20px, 3vh, 36px);
+  position:relative;
+  z-index:2;
+}
+
+.chart-group{
+  display:flex;
+  flex-direction:column;
+  gap:clamp(20px, 3vh, 32px);
+  width:100%;
+  max-width:620px;
+  margin:0 auto;
+}
+
+/* === Antimicrobial table === */
+.table-block{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.table-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.02em;
+  color:var(--muted);
+}
+.amr-table{
+  width:100%;
+  border-collapse:collapse;
+  font-family:var(--stack);
+}
+.amr-table tr{
+  border-top:1px solid var(--hair);
+}
+.amr-table tr:last-child{
+  border-bottom:1px solid var(--hair);
+}
+.amr-table td{
+  padding:clamp(12px, 1.6vh, 18px) 4px;
+  vertical-align:middle;
+  font-size:clamp(14px, 1.2vw, 17px);
+  line-height:1.35;
+}
+.amr-table td.org{
+  color:var(--ink);
+  font-weight:400;
+}
+.amr-table td.org .paren{
+  color:var(--muted);
+}
+.amr-table td.result{
+  text-align:right;
+  color:var(--ink);
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.amr-table td.result .fig{
+  color:var(--accent);
+  font-weight:600;
+}
+.table-foot{
+  font-family:var(--stack);
+  font-size:12px;
+  line-height:1.45;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* === BAMS field-proof card === */
+.bams-card{
+  background:rgba(255,255,255,0.5);
+  border:1px solid var(--hair);
+  border-radius:12px;
+  padding:clamp(18px, 2.4vh, 26px) clamp(18px, 2vw, 28px);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.bams-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.02em;
+  color:var(--muted);
+}
+.bams-split{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+}
+.bams-side{
+  flex:1 1 0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:2px clamp(12px, 1.6vw, 22px);
+}
+.bams-side:first-child{
+  padding-left:0;
+}
+.bams-side:last-child{
+  padding-right:0;
+}
+.bams-divider{
+  width:1px;
+  background:var(--hair);
+  flex:0 0 auto;
+}
+.bams-figure{
+  font-family:var(--stack);
+  font-weight:600;
+  font-size:clamp(28px, 3.4vw, 44px);
+  line-height:1;
+  letter-spacing:-0.02em;
+  font-variant-numeric:tabular-nums;
+}
+.bams-figure.blue{ color:var(--accent); }
+.bams-figure.red{ color:var(--red); }
+.bams-caption{
+  font-family:var(--stack);
+  font-size:clamp(11px, 0.95vw, 13px);
+  line-height:1.4;
+  color:var(--muted);
+  max-width:24ch;
+}
+.bams-foot{
+  font-family:var(--stack);
+  font-size:12px;
+  line-height:1.45;
+  color:var(--muted);
+}
+
+/* === Mobile === */
+@media (max-width: 880px){
+  section{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    min-height:100vh;
+    max-height:none;
+    overflow:visible;
+  }
+  .text-col{
+    max-width:none;
+    width:100%;
+    align-items:stretch;
+    padding-left:clamp(20px,5vw,28px);
+    padding-right:clamp(20px,5vw,28px);
+    padding-top:clamp(20px,4vh,32px);
+    padding-bottom:8px;
+    flex:0 0 auto;
+  }
+  .headline{
+    font-size:clamp(26px,6.5vw,34px);
+    line-height:1.18;
+    margin-bottom:clamp(18px,3vh,24px);
+    color:var(--headline-ink);
+  }
+  .stat-block{
+    gap:clamp(18px,3vh,26px);
+    margin-bottom:clamp(20px,3vh,28px);
+  }
+  .stat-row{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+    width:100%;
+  }
+  .big-number{
+    font-size:clamp(44px,12vw,64px);
+    line-height:1;
+    width:auto;
+    text-align:left;
+  }
+  .caption{
+    font-size:clamp(13px,3.2vw,15px);
+    line-height:1.45;
+    max-width:none;
+    width:100%;
+    color:var(--muted);
+    white-space:normal;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.6;
+    margin-bottom:clamp(16px,2.5vh,22px);
+    color:var(--ink);
+  }
+  .advocacy-link{
+    font-size:16px;
+    line-height:1.4;
+    margin-bottom:clamp(8px,1.5vh,14px);
+  }
+  .chart-col{
+    flex:0 0 auto;
+    min-height:0;
+    height:auto;
+    padding:4px clamp(16px,4vw,24px) clamp(20px,3vh,32px);
+  }
+  .chart-group{
+    max-width:none;
+    gap:20px;
+  }
+  .amr-table td{
+    font-size:14px;
+    padding:11px 2px;
+  }
+  .amr-table td.result{
+    white-space:normal;
+    text-align:right;
+  }
+  .bams-figure{
+    font-size:clamp(26px, 8vw, 36px);
+  }
+  .bams-side{
+    padding:2px 10px;
+  }
+}
+
+/* === Short screens (1366×768 etc.) === */
+@media (max-height: 760px) and (min-width: 881px){
+  .headline{
+    font-size:clamp(26px, 2.6vw, 34px);
+    margin-bottom:22px;
+  }
+  .big-number{
+    font-size:clamp(46px, 5.2vw, 72px);
+  }
+  .stat-block{
+    gap:4px;
+    margin-bottom:18px;
+  }
+  .body-text{
+    font-size:17px;
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+  .chart-col{
+    padding:24px 32px 24px;
+  }
+  .amr-table td{
+    padding:10px 4px;
+  }
+  .bams-figure{
+    font-size:clamp(26px, 3vw, 38px);
+  }
+}
+@media (max-height: 680px) and (min-width: 881px){
+  .headline{
+    font-size:clamp(22px, 2.2vw, 28px);
+    margin-bottom:16px;
+  }
+  .big-number{
+    font-size:clamp(38px, 4.4vw, 58px);
+  }
+  .stat-block{
+    margin-bottom:14px;
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.45;
+    margin-bottom:14px;
+  }
+  .amr-table td{
+    padding:8px 4px;
+    font-size:14px;
+  }
+  .bams-figure{
+    font-size:clamp(24px, 2.8vw, 32px);
+  }
+  .chart-group{
+    gap:18px;
+  }
+  .bams-card{
+    padding:14px 18px;
+    gap:10px;
+  }
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;section id=&quot;section&quot;&gt;
+  &lt;div class=&quot;text-col&quot;&gt;
+    &lt;h1 class=&quot;headline&quot;&gt;
+      &lt;span&gt;NanoFlashing&lt;/span&gt;
+      &lt;span&gt;&lt;em&gt;captures&lt;/em&gt; the virus&lt;/span&gt;
+      &lt;span&gt;and destroys it on contact&lt;/span&gt;
+    &lt;/h1&gt;
+
+    &lt;div class=&quot;stat-block&quot;&gt;
+      &lt;div class=&quot;stat-row&quot;&gt;
+        &lt;div class=&quot;big-number accent&quot;&gt;99.6%&lt;/div&gt;
+        &lt;p class=&quot;caption&quot;&gt;of SARS-CoV-2 inactivated at the media in 30 minutes&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;stat-row&quot;&gt;
+        &lt;div class=&quot;big-number accent&quot;&gt;2 yr&lt;/div&gt;
+        &lt;p class=&quot;caption&quot;&gt;aged in real time, capture-and-destroy still held&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;p class=&quot;body-text&quot;&gt;
+      NanoFlashing carries a permanent positive polarity. It pulls the negatively charged virus onto the fiber and destroys it on contact — through a physical mechanism, not chemistry. Nothing infectious is left in the media to recirculate.
+    &lt;/p&gt;
+
+    &lt;a class=&quot;advocacy-link&quot; href=&quot;#evidence&quot;&gt;Evidence &amp;rarr;&lt;/a&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;chart-col&quot;&gt;
+    &lt;div class=&quot;chart-group&quot;&gt;
+
+      &lt;div class=&quot;table-block&quot;&gt;
+        &lt;div class=&quot;table-label&quot;&gt;At the Media, Against Named Viruses&lt;/div&gt;
+        &lt;table class=&quot;amr-table&quot;&gt;
+          &lt;tbody&gt;
+            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;SARS-CoV-2&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;98.0%&lt;/span&gt; at 5 min · &lt;span class=&quot;fig&quot;&gt;99.6%&lt;/span&gt; at 30 min&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;Human Coronavirus 229E&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;&amp;gt;99.9%&lt;/span&gt; inactivated&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;Coxsackievirus B6&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;&amp;gt;99.9%&lt;/span&gt; inactivated&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;Bovine Coronavirus&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;99.3%&lt;/span&gt; inactivated&lt;/td&gt;&lt;/tr&gt;
+          &lt;/tbody&gt;
+        &lt;/table&gt;
+        &lt;p class=&quot;table-foot&quot;&gt;Czech Academy of Sciences · Tampere University · University of Minnesota · captured and destroyed through a physical mechanism.&lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;div class=&quot;bams-card&quot;&gt;
+        &lt;div class=&quot;bams-label&quot;&gt;Independent Field Proof · BAMS&lt;/div&gt;
+        &lt;div class=&quot;bams-split&quot;&gt;
+          &lt;div class=&quot;bams-side&quot;&gt;
+            &lt;div class=&quot;bams-figure blue&quot;&gt;−95.44%&lt;/div&gt;
+            &lt;div class=&quot;bams-caption&quot;&gt;living airborne particles at the NanoFlashing vent&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class=&quot;bams-divider&quot;&gt;&lt;/div&gt;
+          &lt;div class=&quot;bams-side&quot;&gt;
+            &lt;div class=&quot;bams-figure red&quot;&gt;+2,092%&lt;/div&gt;
+            &lt;div class=&quot;bams-caption&quot;&gt;at the conventional filter beside it&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;p class=&quot;bams-foot&quot;&gt;Two identical hospital air-handling towers, 12 months side by side · p&amp;lt;0.001.&lt;/p&gt;
+      &lt;/div&gt;
+
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;" loading="lazy" title="The answer" allow="autoplay"></iframe></section>
 </div>
 <div id="dots" aria-hidden="true"></div>
 <script>
@@ -79,7 +2675,6 @@ body.flow-mode header{position:absolute;background:none}
     f.addEventListener('load', function(){
       try{ if(f.contentWindow && isDeck) f.contentWindow.postMessage({type: i===idx?'nf-active':'nf-inactive'}, '*'); }catch(e){}
     });
-    f.src=f.getAttribute('data-src')+'?t='+__t;
   });
 
   function setH(){
