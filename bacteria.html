@@ -2733,9 +2733,15 @@ window.nfBact = (function () {
   }
   videoA.addEventListener('timeupdate', function(){ updateTest(); updateTimeline(); });
 
+  // Sequence (Yin 2026-07-15): snow falls on the CLEAN slab -> snow STOPS -> the video plays so the
+  // biofouling appears AFTER, so the viewer reads that the falling bacteria CAUSE the biofouling.
+  let snowTimer = null, playTimer = null;
+  function clearSeqTimers(){ if (snowTimer){ clearTimeout(snowTimer); snowTimer=null; } if (playTimer){ clearTimeout(playTimer); playTimer=null; } }
+  const SNOW_MS = 3500, SETTLE_MS = 1400;
   function startFilter(){
     if (reducedMotion) return;
-    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    clearSeqTimers();
+    try { videoA.currentTime = 0; videoA.pause(); } catch(e){}   // hold the CLEAN slab
     curTest = -1; curWater = false; positionAnno();
     if (annoCond){ annoCond.innerHTML = TESTS[0].cond; annoCond.style.opacity = '1'; }
     if (annoTimeline) annoTimeline.classList.remove('on');
@@ -2743,9 +2749,15 @@ window.nfBact = (function () {
     if (tlMarker) tlMarker.style.left = '0%';
     bigNumber.textContent = '0%';
     animateNumber();
-    if (window.nfBact) window.nfBact.start();
+    if (window.nfBact) window.nfBact.start();                    // 1) snow falls on the clean slab
+    snowTimer = setTimeout(function(){
+      if (window.nfBact) window.nfBact.stopSpawning();           // 2) snow STOPS
+      playTimer = setTimeout(function(){
+        try { videoA.play(); } catch(e){}                        // 3) video plays -> biofouling appears + montage
+      }, SETTLE_MS);
+    }, SNOW_MS);
   }
-  function stopFilter(){ try { videoA.pause(); } catch(e){} if (window.nfBact) window.nfBact.stop(); }
+  function stopFilter(){ clearSeqTimers(); try { videoA.pause(); } catch(e){} if (window.nfBact) window.nfBact.stop(); }
 
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
   function animateNumber(){
