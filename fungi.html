@@ -111,7 +111,7 @@ body.flow-mode header{position:absolute;background:none}
     z-index:2;
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start; align-self:start; padding-top:calc(140px - clamp(40px,7vw,96px));
     gap:28px;
     max-width:720px;
   }
@@ -471,7 +471,7 @@ body {
 .chrome > * { pointer-events: auto; }
 
 .chrome-top-left {
-  top: calc(50% - 162px);
+  top: 140px;
   left: clamp(24px, 6vw, 96px);
   max-width: 720px;
 }
@@ -1162,14 +1162,14 @@ if (isEmbedded) {
     justify-content:flex-start;                 /* top-anchored so the passage never shifts vertically */
     min-width:0;
     max-height:100vh;
-    padding:150px clamp(24px,5vw,80px) clamp(16px,2vh,28px);
+    padding:140px clamp(24px,6vw,96px) clamp(16px,2vh,28px);
     z-index:10;
     position:relative;
   }
   h1.headline{
     font-family:var(--stack);
     font-weight:600;
-    font-size:clamp(20px, 1.95vw, 28px);
+    font-size:clamp(24px, 2.7vw, 34px);
     line-height:1.32;
     letter-spacing:-0.022em;
     color:var(--headline-ink);
@@ -1204,7 +1204,7 @@ if (isEmbedded) {
     line-height:1.5;
     color:#1a1a1a;
     font-weight:400;
-    margin:0 0 14px;
+    margin:0 0 12px;
     max-width:540px;
   }
   .card-impacts p{
@@ -1213,7 +1213,7 @@ if (isEmbedded) {
     line-height:1.5;
     color:#1a1a1a;
     font-weight:400;
-    margin:0 0 12px;
+    margin:0 0 10px;
     max-width:540px;
   }
   .card-impacts p:last-child{margin-bottom:0}
@@ -1227,7 +1227,7 @@ if (isEmbedded) {
 
   /* ANATOMY INDEX — vertical selector */
   .index{
-    margin-top:clamp(10px,1.4vh,18px);
+    margin-top:clamp(10px,1.4vh,14px);
     display:flex;
     flex-direction:column;
     border-top:1px solid var(--hair);
@@ -1238,7 +1238,7 @@ if (isEmbedded) {
     align-items:center;
     gap:18px;
     width:100%;
-    padding:8px 6px 8px 14px;
+    padding:7px 6px 7px 14px;
     background:transparent;
     border:0;
     border-bottom:1px solid var(--hair);
