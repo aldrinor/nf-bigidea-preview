@@ -898,7 +898,7 @@ function fitUS(){
 
 const PLAY_INTERVAL = 120;
 const NO_DATA_COLOR = &#39;#d7dbde&#39;;
-// combined % of ER visits (flu+COVID+RSV): summer &lt;1%, winter peaks 5-12%+
+// combined % of ER Visits (flu+COVID+RSV): summer &lt;1%, winter peaks 5-12%+
 const RAMP_STOPS = [[0,&#39;#f3cdc6&#39;],[2.5,&#39;#eea799&#39;],[5,&#39;#e87f6d&#39;],[7.5,&#39;#e4554a&#39;],[10,&#39;#e23b3b&#39;]];
 const RAMP_MAX = 10;
 
@@ -932,7 +932,7 @@ const MON = [&#39;Jan&#39;,&#39;Feb&#39;,&#39;Mar&#39;,&#39;Apr&#39;,&#39;May&#3
 function fmtWeek(w){ if(!w) return &#39;&#39;; const p=w.split(&#39;-&#39;); if(p.length&lt;3) return w; return &#39;Week of &#39; + MON[parseInt(p[1],10)-1] + &#39; &#39; + parseInt(p[2],10) + &#39;, &#39; + p[0]; }
 function fmtShort(w){ const p=(w||&#39;&#39;).split(&#39;-&#39;); if(p.length&lt;3) return w; return MON[parseInt(p[1],10)-1]+&#39; &#39;+parseInt(p[2],10)+&#39;, &#39;+p[0]; }
 function usAvg(idx){ let sum=0,n=0; for(const name in states){ const v=combinedFor(name,idx); if(v!=null){ sum+=v; n++; } } return n? sum/n : null; }
-function tooltipText(name, idx){ const v=combinedFor(name,idx); if(v==null) return name; return name + &#39; — &#39; + v.toFixed(1) + &#39;% of ER visits (&#39; + fmtShort(weeks[idx]) + &#39;)&#39;; }
+function tooltipText(name, idx){ const v=combinedFor(name,idx); if(v==null) return name; return name + &#39; — &#39; + v.toFixed(1) + &#39;% of ER Visits (&#39; + fmtShort(weeks[idx]) + &#39;)&#39;; }
 
 function recolor(idx){
   if (!weeks.length) return;
@@ -1021,7 +1021,7 @@ async function loadData(){
     if (weeks.length &amp;&amp; !window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches) play();
   } catch (e) { fitUS(); }
 }
-(function buildSource(){ document.getElementById(&#39;chromeSource&#39;).innerHTML = &#39;CDC — National Syndromic Surveillance Program, ER visits (updated weekly) · not endorsed by CDC&#39;; })();
+(function buildSource(){ document.getElementById(&#39;chromeSource&#39;).innerHTML = &#39;CDC — National Syndromic Surveillance Program, ER Visits (updated weekly) · not endorsed by CDC&#39;; })();
 loadData();
 document.getElementById(&#39;playBtn&#39;).addEventListener(&#39;click&#39;, togglePlay);
 document.getElementById(&#39;frameSlider&#39;).addEventListener(&#39;input&#39;, function(e){ if (playing) pause(); recolor(parseInt(e.target.value, 10)); });
