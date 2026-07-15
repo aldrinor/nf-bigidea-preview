@@ -2281,14 +2281,14 @@ section{
 </script>
 </body>
 </html>" title="The filter" allow="autoplay"></iframe></section>
-  <section class="screen"><iframe srcdoc="<!DOCTYPE html>
-<html lang=&quot;en&quot;>
-<head>
-<meta charset=&quot;UTF-8&quot;>
-<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-<title>Put to the test — NanoFlashing</title>
-<link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-<style>
+  <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;Put to the test — NanoFlashing&lt;/title&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
 :root{
   --bg:#edf0f2;
   --ink:#1f2327;
@@ -2297,8 +2297,8 @@ section{
   --accent:#1b7bff;
   --red:#e23b3b;
   --hair:rgba(20,24,28,0.08);
-  --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
-  --mono:'Space Mono', ui-monospace, monospace;
+  --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
+  --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{
@@ -2357,8 +2357,8 @@ section{
   width:max-content; max-width:min(90vw,760px);
   padding:0;
 }
-.anno-top > div{ font-family:var(--stack); letter-spacing:0.01em; }
-.anno-top > div:last-child{ margin-bottom:0; }
+.anno-top &gt; div{ font-family:var(--stack); letter-spacing:0.01em; }
+.anno-top &gt; div:last-child{ margin-bottom:0; }
 /* numbers blue; a soft page-toned frosted BAND hugs each line and fades at its ends (GLM 5.2 design) */
 .anno-test, .anno-fact{ display:block; width:max-content; margin:0 auto 8px; position:relative;
   font-size:22px; line-height:1.2; color:var(--ink); transition:opacity .4s ease; }
@@ -2440,15 +2440,15 @@ section{
   font-size: clamp(24px, 2.7vw, 34px);
   line-height: 1.32;
   letter-spacing:-0.022em;
-  margin-bottom:12px;
+  margin-bottom:8px;
 }
 .headline em{ color:var(--accent); font-style:normal; font-weight:600; padding-left:0.12em; }
-.stat-block{ display:flex; align-items:center; gap:24px; margin-bottom:8px; }
+.stat-block{ display:flex; align-items:center; gap:24px; margin-bottom:2px; }
 .big-number{
   font-family:var(--stack);
   font-weight:600;
   color:var(--accent);
-  font-size:clamp(56px, 6vw, 96px);
+  font-size:clamp(44px, 4vw, 60px);
   line-height:0.9;
   letter-spacing:-0.04em;
   font-variant-numeric:tabular-nums;
@@ -2458,7 +2458,7 @@ section{
   line-height:1.45;
   color:var(--ink);
   max-width:26ch;
-  padding-top:6px;
+  padding-top:0;
 }
 .body-text{
   max-width: 460px;
@@ -2474,26 +2474,26 @@ section{
   text-decoration:none;
   border-bottom:1px solid rgba(27,123,255,0.5);
   padding-bottom:2px;
-  margin-top:14px;
+  margin-top:5px;
   transition:color 0.18s ease, border-color 0.18s ease;
 }
 .advocacy-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
-/* proof list (GLM 5.2 design — scannable receipts, editorial ledger) */
+/* proof list (GLM 5.2 design — standardized to site type tokens, editorial ledger) */
 .mechanism{
-  font-size:15px; line-height:1.55; color:var(--ink); max-width:54ch;
-  margin:16px 0 18px; padding-top:12px; border-top:1px solid #e6e8ea; letter-spacing:0.005em;
+  font-size:19px; line-height:1.45; color:var(--ink); max-width:54ch;
+  margin:4px 0 6px; padding-top:6px; border-top:1px solid #e6e8ea;
 }
-.proof-list{ list-style:none; margin:0 0 18px; padding:0; }
-.proof-item{ display:flex; align-items:flex-start; gap:12px; padding:9px 0; border-top:1px solid #eceef0; }
+.proof-list{ list-style:none; margin:0 0 6px; padding:0; }
+.proof-item{ display:flex; align-items:flex-start; gap:10px; padding:3px 0; border-top:1px solid #eceef0; }
 .proof-item:first-child{ border-top:1px solid #d8dadd; }
 .proof-item:last-child{ border-bottom:1px solid #eceef0; }
 .proof-mark{
-  flex:0 0 auto; width:9px; height:9px; margin-top:9px; background:var(--accent);
+  flex:0 0 auto; width:9px; height:9px; margin-top:8px; background:var(--accent);
   clip-path:polygon(14% 44%, 0 58%, 38% 100%, 100% 22%, 86% 8%, 38% 70%);
 }
-.proof-text{ display:flex; flex-direction:column; gap:2px; }
-.proof-result{ font-size:17.5px; font-weight:560; line-height:1.35; color:var(--ink); letter-spacing:-0.005em; }
-.proof-source{ font-family:&quot;Space Mono&quot;, ui-monospace, monospace; font-size:11px; line-height:1.4; color:var(--muted); letter-spacing:0.02em; }
+.proof-text{ display:flex; flex-direction:column; gap:1px; }
+.proof-result{ font-family:var(--stack); font-size:19px; line-height:1.35; color:var(--ink); font-weight:400; }
+.proof-source{ font-family:&quot;Space Mono&quot;, ui-monospace, monospace; font-size:12px; color:var(--muted); }
 
 /* === Mobile === */
 @media (max-width: 880px){
@@ -2505,7 +2505,7 @@ section{
     -webkit-mask-image:none; mask-image:none; background:var(--bg);
   }
   .video-stack::after{
-    content:''; position:absolute; left:0; right:0; bottom:0; height:56px; z-index:4; pointer-events:none;
+    content:&#39;&#39;; position:absolute; left:0; right:0; bottom:0; height:56px; z-index:4; pointer-events:none;
     background:linear-gradient(to bottom, rgba(237,240,242,0) 0%, rgba(237,240,242,0.15) 55%, rgba(237,240,242,0.85) 100%);
   }
   .text-col{
@@ -2518,90 +2518,90 @@ section{
   .body-text:last-child{ margin-bottom:0; }
   .advocacy-link{ font-size:16px; }
 }
-</style>
-</head>
-<body>
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
 
-<section id=&quot;section&quot;>
-  <div class=&quot;video-stack&quot; id=&quot;videoStack&quot;>
-    <video id=&quot;videoA&quot; src=&quot;assets/videos/bacteria_durability.mp4?v=2&quot;
+&lt;section id=&quot;section&quot;&gt;
+  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
+    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/bacteria_durability.mp4?v=2&quot;
            poster=&quot;assets/videos/posters/bacteria_durability.jpg?v=2&quot;
            muted playsinline preload=&quot;auto&quot;
-           style=&quot;opacity:1; z-index:1;&quot;></video>
-    <img class=&quot;poster&quot; src=&quot;assets/videos/posters/bacteria_durability.jpg?v=2&quot; alt=&quot;&quot;>
-    <div class=&quot;anno&quot; id=&quot;anno&quot; aria-hidden=&quot;true&quot;>
-      <div class=&quot;anno-top&quot;>
-        <div class=&quot;anno-test&quot; id=&quot;annoCond&quot;>Heavy dust load</div>
-        <div class=&quot;anno-fact&quot;><b>100 million</b> live bacteria</div>
-        <div class=&quot;anno-fact&quot;><b>100×</b> the standard test dose</div>
-      </div>
-      <span class=&quot;anno-lbl anno-lbl-nf&quot;>NanoFlashing Material</span>
-      <span class=&quot;anno-lbl anno-lbl-cv&quot;>Conventional Material</span>
-    </div>
-  </div>
+           style=&quot;opacity:1; z-index:1;&quot;&gt;&lt;/video&gt;
+    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/bacteria_durability.jpg?v=2&quot; alt=&quot;&quot;&gt;
+    &lt;div class=&quot;anno&quot; id=&quot;anno&quot; aria-hidden=&quot;true&quot;&gt;
+      &lt;div class=&quot;anno-top&quot;&gt;
+        &lt;div class=&quot;anno-test&quot; id=&quot;annoCond&quot;&gt;Heavy dust load&lt;/div&gt;
+        &lt;div class=&quot;anno-fact&quot;&gt;&lt;b&gt;100 million&lt;/b&gt; live bacteria&lt;/div&gt;
+        &lt;div class=&quot;anno-fact&quot;&gt;&lt;b&gt;100×&lt;/b&gt; the standard test dose&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;span class=&quot;anno-lbl anno-lbl-nf&quot;&gt;NanoFlashing Material&lt;/span&gt;
+      &lt;span class=&quot;anno-lbl anno-lbl-cv&quot;&gt;Conventional Material&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-  <div class=&quot;text-col&quot;>
-    <h1 class=&quot;headline&quot;>Put to the test <em>— every way</em></h1>
+  &lt;div class=&quot;text-col&quot;&gt;
+    &lt;h1 class=&quot;headline&quot;&gt;Put to the test &lt;em&gt;— every way&lt;/em&gt;&lt;/h1&gt;
 
-    <div class=&quot;stat-block&quot;>
-      <div class=&quot;big-number&quot; id=&quot;bigNumber&quot;>0%</div>
-      <p class=&quot;caption&quot;>of the bacteria it caught — destroyed on contact, not just trapped</p>
-    </div>
+    &lt;div class=&quot;stat-block&quot;&gt;
+      &lt;div class=&quot;big-number&quot; id=&quot;bigNumber&quot;&gt;0%&lt;/div&gt;
+      &lt;p class=&quot;caption&quot;&gt;of the bacteria it caught — destroyed on contact, not just trapped&lt;/p&gt;
+    &lt;/div&gt;
 
-    <p class=&quot;mechanism&quot;>
+    &lt;p class=&quot;mechanism&quot;&gt;
       Patented permanent positive polarity destroys the negatively charged cell on the fiber, on contact — a physical mechanism, not chemistry.
-    </p>
+    &lt;/p&gt;
 
-    <ol class=&quot;proof-list&quot;>
-      <li class=&quot;proof-item&quot;>
-        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
-        <span class=&quot;proof-text&quot;>
-          <span class=&quot;proof-result&quot;>~99% destroyed, even on a dust-clogged filter</span>
-          <span class=&quot;proof-source&quot;>Harvard / Mass General</span>
-        </span>
-      </li>
-      <li class=&quot;proof-item&quot;>
-        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
-        <span class=&quot;proof-text&quot;>
-          <span class=&quot;proof-result&quot;>Hit with about 100 million live bacteria</span>
-          <span class=&quot;proof-source&quot;>100× a normal test dose</span>
-        </span>
-      </li>
-      <li class=&quot;proof-item&quot;>
-        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
-        <span class=&quot;proof-text&quot;>
-          <span class=&quot;proof-result&quot;>Still killing after years of aging</span>
-          <span class=&quot;proof-source&quot;>Hong Kong Metropolitan University</span>
-        </span>
-      </li>
-      <li class=&quot;proof-item&quot;>
-        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
-        <span class=&quot;proof-text&quot;>
-          <span class=&quot;proof-result&quot;>Five kinds of bacteria, all destroyed</span>
-          <span class=&quot;proof-source&quot;>Named-organism testing</span>
-        </span>
-      </li>
-      <li class=&quot;proof-item&quot;>
-        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
-        <span class=&quot;proof-text&quot;>
-          <span class=&quot;proof-result&quot;>Proven in real hospital buildings</span>
-          <span class=&quot;proof-source&quot;>On-site field checks</span>
-        </span>
-      </li>
-      <li class=&quot;proof-item&quot;>
-        <span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;></span>
-        <span class=&quot;proof-text&quot;>
-          <span class=&quot;proof-result&quot;>Reviewed by 31 scientists at 16 universities</span>
-          <span class=&quot;proof-source&quot;>Peer-reviewed</span>
-        </span>
-      </li>
-    </ol>
+    &lt;ol class=&quot;proof-list&quot;&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;Approximately 99% of live bacteria were destroyed on a fully dust-loaded filter.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Mass General / Harvard&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;The filter was challenged with roughly 100 million bacteria — about 100 times the standard test dose.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;vs. ISO 20743 standard&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;After two years of real-time aging, it still captured and destroyed bacteria.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Mass General / Harvard&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;All four bacteria in the test panel were destroyed.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Mass General / Harvard&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;Confirmed in occupied buildings — hospitals, airports, universities.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Independent field monitoring, 19 sites&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;Co-authored by 31 scientists across 16 research institutes, and peer-reviewed.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;American Society for Microbiology&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+    &lt;/ol&gt;
 
-    <a class=&quot;advocacy-link&quot; href=&quot;#evidence&quot;>See the evidence →</a>
-  </div>
-</section>
+    &lt;a class=&quot;advocacy-link&quot; href=&quot;#evidence&quot;&gt;See the evidence →&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
 
-<script>
+&lt;script&gt;
 /* Falling-bacteria particle system — window.nfBact = { start(), stop(), stopSpawning() }.
    Each particle targets a random point inside the (dry-stage) slab quad, split 50/50 into
    two equal-area halves, so bacteria land evenly and none fall off. Captured (blue flash)
@@ -2629,67 +2629,67 @@ window.nfBact = (function () {
   function createSpore(){
     if(rect.width===0||rect.height===0) return;
     const m=coverMap();
-    const el=document.createElement('div'); el.className='spore';
-    const size=1.5+Math.random()*2; el.style.width=size+'px'; el.style.height=size+'px'; // small dots
-    const onBlue=Math.random()<0.5;
+    const el=document.createElement(&#39;div&#39;); el.className=&#39;spore&#39;;
+    const size=1.5+Math.random()*2; el.style.width=size+&#39;px&#39;; el.style.height=size+&#39;px&#39;; // small dots
+    const onBlue=Math.random()&lt;0.5;
     const t=biln(onBlue?BLUEQ:WHITEQ, Math.random(), Math.random());
     const tx=m.offX+t[0]*1280*m.s;
     const fall=0.10+Math.random()*0.22;
-    const sp={ el:el, tx:tx, x:tx, hs:size/2, blue:(t[0] < boundaryFx(t[1]) - 0.010), targetY:m.offY+t[1]*720*m.s, y:m.offY+(t[1]-fall)*720*m.s,
+    const sp={ el:el, tx:tx, x:tx, hs:size/2, blue:(t[0] &lt; boundaryFx(t[1]) - 0.010), targetY:m.offY+t[1]*720*m.s, y:m.offY+(t[1]-fall)*720*m.s,
       vy:40+Math.random()*50, wobbleAmp:4+Math.random()*6, wobbleFreq:0.4+Math.random()*0.7, wobblePhase:Math.random()*Math.PI*2, age:0, done:false };
-    el.style.transform='translate('+(tx-sp.hs)+'px,'+(sp.y-sp.hs)+'px)';
+    el.style.transform=&#39;translate(&#39;+(tx-sp.hs)+&#39;px,&#39;+(sp.y-sp.hs)+&#39;px)&#39;;
     container.appendChild(el); spores.push(sp);
   }
   function update(dt){
-    if(spawning){ spawnAccum+=dt; if(spawnAccum>=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=10+Math.random()*20; const cap=window.innerWidth>880?2200:700; const deficit=cap-spores.length; const count=deficit>0?Math.min(deficit,60):24; for(let i=0;i<count&amp;&amp;spores.length<cap;i++) createSpore(); } }
-    for(let i=spores.length-1;i>=0;i--){
+    if(spawning){ spawnAccum+=dt; if(spawnAccum&gt;=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=10+Math.random()*20; const cap=window.innerWidth&gt;880?2200:700; const deficit=cap-spores.length; const count=deficit&gt;0?Math.min(deficit,60):24; for(let i=0;i&lt;count&amp;&amp;spores.length&lt;cap;i++) createSpore(); } }
+    for(let i=spores.length-1;i&gt;=0;i--){
       const s=spores[i]; if(s.done) continue;
       s.age+=dt; const sec=dt/1000; s.y+=s.vy*sec;
       s.x=s.tx+Math.sin((s.age/1000)*Math.PI*2*s.wobbleFreq+s.wobblePhase)*s.wobbleAmp;
-      if(s.y>=s.targetY){ s.done=true; s.el.style.transform='translate('+(s.x-s.hs)+'px,'+(s.targetY-s.hs)+'px)'; s.el.classList.add(s.blue?'captured':'settled'); const e=s.el; setTimeout(function(){ if(e&amp;&amp;e.parentNode) e.parentNode.removeChild(e); },640); spores.splice(i,1); continue; }
+      if(s.y&gt;=s.targetY){ s.done=true; s.el.style.transform=&#39;translate(&#39;+(s.x-s.hs)+&#39;px,&#39;+(s.targetY-s.hs)+&#39;px)&#39;; s.el.classList.add(s.blue?&#39;captured&#39;:&#39;settled&#39;); const e=s.el; setTimeout(function(){ if(e&amp;&amp;e.parentNode) e.parentNode.removeChild(e); },640); spores.splice(i,1); continue; }
       // once the snow has stopped, gently FADE OUT flakes still in the air (no speed change) so it clears smoothly, not a hard whoosh:
-      if(draining){ s.drainT=(s.drainT||0)+dt; if(s.drainT>=520){ s.done=true; if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); spores.splice(i,1); continue; } }
-      s.el.style.transform='translate('+(s.x-s.hs)+'px,'+(s.y-s.hs)+'px)';
-      let op=s.age<250?(s.age/250):1; if(draining) op*=Math.max(0,1-s.drainT/520); s.el.style.opacity=op;
+      if(draining){ s.drainT=(s.drainT||0)+dt; if(s.drainT&gt;=520){ s.done=true; if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); spores.splice(i,1); continue; } }
+      s.el.style.transform=&#39;translate(&#39;+(s.x-s.hs)+&#39;px,&#39;+(s.y-s.hs)+&#39;px)&#39;;
+      let op=s.age&lt;250?(s.age/250):1; if(draining) op*=Math.max(0,1-s.drainT/520); s.el.style.opacity=op;
     }
   }
-  function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt>100) dt=100; update(dt); rafId=requestAnimationFrame(loop); }
+  function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt&gt;100) dt=100; update(dt); rafId=requestAnimationFrame(loop); }
   function clearAll(){ spores.forEach(function(s){ if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); }); spores=[]; }
-  function begin(){ running=true; spawning=true; draining=false; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener('resize',resizeHandler); rafId=requestAnimationFrame(loop); }
+  function begin(){ running=true; spawning=true; draining=false; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener(&#39;resize&#39;,resizeHandler); rafId=requestAnimationFrame(loop); }
   function stopSpawning(){ spawning=false; draining=true; }
   function spawnOn(){ if(running){ spawning=true; draining=false; spawnAccum=0; nextSpawnInterval=60; } }
-  function start(){ if(running) return; container=document.querySelector('.anno'); if(!container) return; if(window.matchMedia&amp;&amp;window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; clearAll(); readRect(); if(rect.width===0||rect.height===0){ requestAnimationFrame(function(){ readRect(); if(rect.width===0||rect.height===0) return; begin(); }); return; } begin(); }
-  function stop(){ running=false; spawning=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(resizeHandler){ window.removeEventListener('resize',resizeHandler); resizeHandler=null; } clearAll(); }
+  function start(){ if(running) return; container=document.querySelector(&#39;.anno&#39;); if(!container) return; if(window.matchMedia&amp;&amp;window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches) return; clearAll(); readRect(); if(rect.width===0||rect.height===0){ requestAnimationFrame(function(){ readRect(); if(rect.width===0||rect.height===0) return; begin(); }); return; } begin(); }
+  function stop(){ running=false; spawning=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(resizeHandler){ window.removeEventListener(&#39;resize&#39;,resizeHandler); resizeHandler=null; } clearAll(); }
   return { start:start, stop:stop, stopSpawning:stopSpawning, spawnOn:spawnOn, count:function(){ return spores.length; }, useDry:function(){ setQuad(DRY_QUAD); }, useWater:function(){ setQuad(WATER_QUAD); } };
 })();
-</script>
-<script>
+&lt;/script&gt;
+&lt;script&gt;
 (function(){
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const videoStack = document.getElementById('videoStack');
-  const videoA = document.getElementById('videoA');
-  const bigNumber = document.getElementById('bigNumber');
-  const annoCond = document.getElementById('annoCond');
-  const lblNf = document.querySelector('.anno-lbl-nf');
-  const lblCv = document.querySelector('.anno-lbl-cv');
-  const annoTimeline = document.getElementById('annoTimeline');
-  const tlFill = document.getElementById('tlFill');
-  const tlMarker = document.getElementById('tlMarker');
+  const reducedMotion = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
+  const videoStack = document.getElementById(&#39;videoStack&#39;);
+  const videoA = document.getElementById(&#39;videoA&#39;);
+  const bigNumber = document.getElementById(&#39;bigNumber&#39;);
+  const annoCond = document.getElementById(&#39;annoCond&#39;);
+  const lblNf = document.querySelector(&#39;.anno-lbl-nf&#39;);
+  const lblCv = document.querySelector(&#39;.anno-lbl-cv&#39;);
+  const annoTimeline = document.getElementById(&#39;annoTimeline&#39;);
+  const tlFill = document.getElementById(&#39;tlFill&#39;);
+  const tlMarker = document.getElementById(&#39;tlMarker&#39;);
   const AGE_START = 8.8, AGE_END = 13.2;
   const isEmbedded = window.self !== window.top;
-  if (reducedMotion) videoStack.classList.add('reduced');
+  if (reducedMotion) videoStack.classList.add(&#39;reduced&#39;);
 
   // The 4-in-1 montage plays once (dust / heat+humidity / aging / water). Through the
   // three DRY stages the slab floats in one locked spot, so the material labels track
   // its two half-centres (blue 0.408, white 0.620), cover-mapped to hold at any width.
   // In the WATER stage the slab drops and grows past the panel crop (its half-centres
   // fall off-screen), so the material labels FADE OUT there — the &quot;Water submersion&quot;
-  // caption + the blue/fouled split carry it.  Boundaries: dust<4.4 heat<8.8 aging<13.2
+  // caption + the blue/fouled split carry it.  Boundaries: dust&lt;4.4 heat&lt;8.8 aging&lt;13.2
   const TESTS = [
-    { until: 4.4,  cond: 'Heavy dust load',                    water:false },
-    { until: 8.8,  cond: '<b>60 °C</b> heat, <b>64 days</b>',  water:false },
-    { until: 13.2, cond: '<b>4 years</b> ageing',              water:false },
-    { until: 99,   cond: 'Fully submerged in water',           water:true  }
+    { until: 4.4,  cond: &#39;Heavy dust load&#39;,                    water:false },
+    { until: 8.8,  cond: &#39;&lt;b&gt;60 °C&lt;/b&gt; heat, &lt;b&gt;64 days&lt;/b&gt;&#39;,  water:false },
+    { until: 13.2, cond: &#39;&lt;b&gt;4 years&lt;/b&gt; ageing&#39;,              water:false },
+    { until: 99,   cond: &#39;Fully submerged in water&#39;,           water:true  }
   ];
   const NF_FRAC = 0.405, CV_FRAC = 0.597, TOP_FRAC = 0.524;  // visual centre of mass of each slab half
 
@@ -2698,17 +2698,17 @@ window.nfBact = (function () {
     if (!W || !H) return null;
     const s = Math.max(W/1280, H/720);
     const offX = (W - 1280*s)/2;
-    return ((offX + fx*1280*s)/W*100).toFixed(2) + '%';
+    return ((offX + fx*1280*s)/W*100).toFixed(2) + &#39;%&#39;;
   }
   let curWater = false;
   function positionAnno(){
-    const top = document.querySelector('.anno-top');
-    const tl = document.getElementById('annoTimeline');
-    if (window.innerWidth <= 880){
-      if (lblNf) lblNf.style.left = '';
-      if (lblCv) lblCv.style.left = '';
-      if (top) top.style.left = '';
-      if (tl) tl.style.left = '';
+    const top = document.querySelector(&#39;.anno-top&#39;);
+    const tl = document.getElementById(&#39;annoTimeline&#39;);
+    if (window.innerWidth &lt;= 880){
+      if (lblNf) lblNf.style.left = &#39;&#39;;
+      if (lblCv) lblCv.style.left = &#39;&#39;;
+      if (top) top.style.left = &#39;&#39;;
+      if (tl) tl.style.left = &#39;&#39;;
     } else {
       const pn = coverPct(NF_FRAC), pc = coverPct(CV_FRAC), pt = coverPct(TOP_FRAC);
       if (pn &amp;&amp; lblNf) lblNf.style.left = pn;
@@ -2718,25 +2718,25 @@ window.nfBact = (function () {
     }
   }
   positionAnno();
-  window.addEventListener('resize', positionAnno);
-  window.addEventListener('load', positionAnno);
+  window.addEventListener(&#39;resize&#39;, positionAnno);
+  window.addEventListener(&#39;load&#39;, positionAnno);
 
   let curTest = -1;
   function updateTest(){
     const t = videoA.currentTime || 0;
     let i = 0;
-    while (i < TESTS.length - 1 &amp;&amp; t >= TESTS[i].until) i++;
+    while (i &lt; TESTS.length - 1 &amp;&amp; t &gt;= TESTS[i].until) i++;
     if (i !== curTest){
       curTest = i;
       curWater = TESTS[i].water;
       positionAnno();
       // the aging timeline shows only during the accelerated-aging test
-      if (annoTimeline){ annoTimeline.classList.toggle('on', i === 2); }
+      if (annoTimeline){ annoTimeline.classList.toggle(&#39;on&#39;, i === 2); }
       if (annoCond){
-        annoCond.style.opacity = '0';
+        annoCond.style.opacity = &#39;0&#39;;
         setTimeout(function(){
           annoCond.innerHTML = TESTS[i].cond;
-          annoCond.style.opacity = '1';
+          annoCond.style.opacity = &#39;1&#39;;
         }, 200);
       }
     }
@@ -2745,11 +2745,11 @@ window.nfBact = (function () {
     if (!tlFill) return;
     let p = ((videoA.currentTime || 0) - AGE_START) / (AGE_END - AGE_START);
     p = Math.max(0, Math.min(1, p));
-    const pct = (p * 100).toFixed(1) + '%';
+    const pct = (p * 100).toFixed(1) + &#39;%&#39;;
     tlFill.style.width = pct;
     if (tlMarker) tlMarker.style.left = pct;
   }
-  videoA.addEventListener('timeupdate', function(){ updateTest(); onSeqTime(); });
+  videoA.addEventListener(&#39;timeupdate&#39;, function(){ updateTest(); onSeqTime(); });
 
   // Sequence (Yin 2026-07-15): the video is 4 crossfaded biofouling tests (dust / heat / ageing / water),
   // each RESETTING to a clean slab (~0 / 5.2 / 9.4 / 13.8s). For EACH test: hold the clean slab, snow
@@ -2760,7 +2760,7 @@ window.nfBact = (function () {
   function clearSeq(){ seqTimers.forEach(function(t){ clearTimeout(t); }); seqTimers = []; }
   function runStage(i){
     seqStage = i; pauseTarget = null;
-    try { videoA.currentTime = CLEAN_TIMES[i]; videoA.pause(); } catch(e){}   // hold this test's CLEAN slab
+    try { videoA.currentTime = CLEAN_TIMES[i]; videoA.pause(); } catch(e){}   // hold this test&#39;s CLEAN slab
     if (window.nfBact){ (i === 3 ? window.nfBact.useWater() : window.nfBact.useDry());   // aim snow at the slab (submerged for water)
       if (i === 0) window.nfBact.start(); else window.nfBact.spawnOn(); }                 // 1) snow falls
     seqTimers.push(setTimeout(function(){
@@ -2769,10 +2769,10 @@ window.nfBact = (function () {
       //    snow is gone, and no leftover flakes fall into empty space when the water slab tilts away.
       var clearStart = Date.now();
       (function waitClear(){
-        var cleared = !window.nfBact || window.nfBact.count() < 30;
-        if (cleared || Date.now() - clearStart > 3200){
+        var cleared = !window.nfBact || window.nfBact.count() &lt; 30;
+        if (cleared || Date.now() - clearStart &gt; 3200){
           try { videoA.play(); } catch(e){}                                                  // biofouling appears
-          pauseTarget = (i < CLEAN_TIMES.length - 1) ? CLEAN_TIMES[i + 1] : null;
+          pauseTarget = (i &lt; CLEAN_TIMES.length - 1) ? CLEAN_TIMES[i + 1] : null;
         } else {
           seqTimers.push(setTimeout(waitClear, 120));
         }
@@ -2780,21 +2780,21 @@ window.nfBact = (function () {
     }, SNOW_MS));
   }
   function onSeqTime(){
-    if (pauseTarget != null &amp;&amp; (videoA.currentTime || 0) >= pauseTarget){
+    if (pauseTarget != null &amp;&amp; (videoA.currentTime || 0) &gt;= pauseTarget){
       pauseTarget = null;
       try { videoA.pause(); } catch(e){}
-      runStage(seqStage + 1);   // next test: hold clean -> snow -> stop -> foul
+      runStage(seqStage + 1);   // next test: hold clean -&gt; snow -&gt; stop -&gt; foul
     }
   }
   function startFilter(){
     if (reducedMotion) return;
     clearSeq();
     curTest = -1; curWater = false; positionAnno();
-    if (annoCond){ annoCond.innerHTML = TESTS[0].cond; annoCond.style.opacity = '1'; }
-    if (annoTimeline) annoTimeline.classList.remove('on');
-    if (tlFill) tlFill.style.width = '0%';
-    if (tlMarker) tlMarker.style.left = '0%';
-    bigNumber.textContent = '0%';
+    if (annoCond){ annoCond.innerHTML = TESTS[0].cond; annoCond.style.opacity = &#39;1&#39;; }
+    if (annoTimeline) annoTimeline.classList.remove(&#39;on&#39;);
+    if (tlFill) tlFill.style.width = &#39;0%&#39;;
+    if (tlMarker) tlMarker.style.left = &#39;0%&#39;;
+    bigNumber.textContent = &#39;0%&#39;;
     animateNumber();
     runStage(0);
   }
@@ -2806,33 +2806,33 @@ window.nfBact = (function () {
     function step(now){
       const p = Math.min(1, (now - start) / DURATION);
       const n = easeOutCubic(p) * TARGET;
-      bigNumber.textContent = n.toFixed(1) + '%';
-      if (p < 1) requestAnimationFrame(step); else bigNumber.textContent = '99.9%';
+      bigNumber.textContent = n.toFixed(1) + &#39;%&#39;;
+      if (p &lt; 1) requestAnimationFrame(step); else bigNumber.textContent = &#39;99.9%&#39;;
     }
     requestAnimationFrame(step);
   }
 
   if (reducedMotion) {
-    bigNumber.textContent = '99.9%';
+    bigNumber.textContent = &#39;99.9%&#39;;
   } else {
-    bigNumber.textContent = '0%';
+    bigNumber.textContent = &#39;0%&#39;;
     if (isEmbedded) {
-      window.addEventListener('message', function(e){
+      window.addEventListener(&#39;message&#39;, function(e){
         if (!e.data) return;
-        if (e.data.type === 'nf-active') startFilter();
-        else if (e.data.type === 'nf-inactive') stopFilter();
+        if (e.data.type === &#39;nf-active&#39;) startFilter();
+        else if (e.data.type === &#39;nf-inactive&#39;) stopFilter();
       });
     } else {
-      const io = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      const io = new IntersectionObserver((entries, observer) =&gt; {
+        entries.forEach(entry =&gt; { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
       }, { threshold: 0.35 });
-      io.observe(document.getElementById('section'));
+      io.observe(document.getElementById(&#39;section&#39;));
     }
   }
 })();
-</script>
-</body>
-</html>
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 " title="The answer" allow="autoplay"></iframe></section>
 </div>
 <div id="dots" aria-hidden="true"></div>
