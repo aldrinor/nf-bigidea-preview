@@ -2386,24 +2386,31 @@ section{
 /* ===== &quot;years in service&quot; timeline — engraved ruler with year marks, LOWERCASE labels,
        right under the top legend, shown only during the ageing stage ===== */
 .anno-timeline{
-  position:absolute; left:53%; top:19.5%;
+  position:absolute; top:60%; left:50%;
   transform:translateX(-50%);
-  width:min(30%, 280px);
-  z-index:8; pointer-events:none;
+  width:380px;
   opacity:0; transition:opacity .4s ease;
   font-family:var(--stack);
-  display:flex; flex-direction:column; justify-content:space-between;
-  color:var(--ink);
+  pointer-events:none; z-index:30;
 }
 .anno-timeline.on{ opacity:1; }
-.tl-top, .tl-bottom{ display:flex; justify-content:space-between; font-size:11px; letter-spacing:.01em; color:var(--muted); }
-.tl-bottom{ display:grid; grid-template-columns:repeat(4,1fr); text-align:center; }
-.tl-track{ position:relative; height:8px; display:flex; align-items:center; margin:3px 0; }
-.tl-track::before{ content:&quot;&quot;; position:absolute; top:50%; left:0; right:0; height:1px; background:#cdd1d4; transform:translateY(-50%); }
-.tl-fill{ position:absolute; top:50%; left:0; height:2px; width:0%; background:var(--accent); transform:translateY(-50%); }
-.tl-fill::after{ content:&quot;&quot;; position:absolute; right:0; top:50%; width:1px; height:8px; background:var(--accent); transform:translateY(-50%); }
-.tl-ticks{ width:100%; display:flex; justify-content:space-between; position:relative; z-index:2; }
-.tl-ticks span{ width:1px; height:6px; background:#cdd1d4; }
+.tl-chip{
+  position:relative; padding:14px 22px 16px;
+  background:rgba(255,255,255,0.74);
+  border:1px solid rgba(31,35,39,0.06);
+  border-radius:14px;
+  box-shadow:0 8px 28px rgba(31,35,39,0.10), 0 1px 2px rgba(31,35,39,0.05);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+}
+.tl-ends{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+.tl-end{ font-size:13px; line-height:1; color:var(--muted); font-weight:500; }
+.tl-end--right{ color:var(--ink); }
+.tl-track{ position:relative; height:6px; width:100%; background:rgba(31,35,39,0.10); border-radius:999px; overflow:hidden; }
+.tl-fill{ position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent); border-radius:999px; }
+.tl-ticks{ position:relative; height:22px; margin-top:6px; }
+.tl-tick{ position:absolute; top:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:4px; }
+.tl-tick i{ display:block; width:1px; height:6px; background:rgba(31,35,39,0.22); }
+.tl-tick b{ font-size:12px; line-height:1; font-weight:500; color:var(--muted); font-style:normal; }
 
 /* Bottom material labels: level row just below slab, each centered under its own half.
    Positioned by JS (tracks the slab across widths AND the two montage stages). */
@@ -2532,9 +2539,19 @@ section{
       <span class=&quot;anno-lbl anno-lbl-nf&quot;>NanoFlashing Material</span>
       <span class=&quot;anno-lbl anno-lbl-cv&quot;>Conventional Material</span>
       <div class=&quot;anno-timeline&quot; id=&quot;annoTimeline&quot;>
-        <div class=&quot;tl-top&quot;><span>new</span><span>4 years</span></div>
-        <div class=&quot;tl-track&quot;><div class=&quot;tl-fill&quot; id=&quot;tlFill&quot;></div><div class=&quot;tl-ticks&quot;><span></span><span></span><span></span><span></span><span></span></div></div>
-        <div class=&quot;tl-bottom&quot;><span>1</span><span>2</span><span>3</span><span>4</span></div>
+        <div class=&quot;tl-chip&quot;>
+          <div class=&quot;tl-ends&quot;>
+            <span class=&quot;tl-end tl-end--left&quot;>new</span>
+            <span class=&quot;tl-end tl-end--right&quot;>4 years</span>
+          </div>
+          <div class=&quot;tl-track&quot;><div class=&quot;tl-fill&quot; id=&quot;tlFill&quot;></div></div>
+          <div class=&quot;tl-ticks&quot;>
+            <span class=&quot;tl-tick&quot; style=&quot;left:0%&quot;><i></i><b>1</b></span>
+            <span class=&quot;tl-tick&quot; style=&quot;left:25%&quot;><i></i><b>2</b></span>
+            <span class=&quot;tl-tick&quot; style=&quot;left:50%&quot;><i></i><b>3</b></span>
+            <span class=&quot;tl-tick&quot; style=&quot;left:75%&quot;><i></i><b>4</b></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
