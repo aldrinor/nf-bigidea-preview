@@ -2355,12 +2355,10 @@ section{
   z-index:9;            /* above the falling bacteria so the words stay clear */
   pointer-events:none;
   width:max-content; max-width:min(90vw,760px);
-  padding:18px 30px;
-  background:rgba(255,255,255,0.74);
-  border:1px solid rgba(31,35,39,0.06);
-  border-radius:14px;
-  box-shadow:0 8px 28px rgba(31,35,39,0.10), 0 1px 2px rgba(31,35,39,0.05);
-  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  padding:40px 80px;
+  background:radial-gradient(ellipse 72% 62% at center, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.30) 42%, rgba(255,255,255,0) 72%);
+  -webkit-backdrop-filter:blur(12px) saturate(1.05);
+  backdrop-filter:blur(12px) saturate(1.05);
 }
 .anno-top > div{ font-family:var(--stack); letter-spacing:0.01em; margin:0 0 2px; }
 .anno-top > div:last-child{ margin-bottom:0; }
