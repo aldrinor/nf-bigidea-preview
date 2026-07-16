@@ -1854,7 +1854,7 @@ section{
   background:var(--bg);
 }
 
-/* === Background video block (right side) === */
+/* === Visual stack (right side) === */
 .video-stack{
   position:absolute;
   top:0;
@@ -1867,96 +1867,32 @@ section{
   -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
   mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
 }
-.video-stack video,
-.video-stack img{
+
+/* Lock image and canvas to the exact same aspect ratio box */
+.visual-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  aspect-ratio: 2688 / 1520;
+  /* Anchor the filter and loop to the right, let the empty room fade left */
+  max-width: 140%;
+  transform: translate(-42%, -50%); 
+}
+
+.video-stack img,
+.video-stack canvas {
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  object-fit:cover;
   display:block;
 }
-.video-stack img.poster{
-  opacity:0;
-  z-index:3;
-}
-.video-stack.reduced video{ opacity:0 !important; }
-.video-stack.reduced img.poster{ opacity:1; }
 
-/* === Drifting grey smoke overlay (right block) === */
-.smoke{
-  position:absolute;
-  top:0;
-  bottom:0;
-  right:0;
-  width:58%;
-  z-index:1;
-  pointer-events:none;
-  overflow:hidden;
-  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-}
-.smoke span{
-  position:absolute;
-  display:block;
-  border-radius:50%;
-  filter:blur(50px);
-  mix-blend-mode:normal;
-  will-change:transform, opacity;
-}
-.smoke .s1{
-  width:70vw; height:65vh;
-  top:-15vh; right:-12vw;
-  background:radial-gradient(circle at 50% 50%, rgba(180,194,172,0.85), rgba(180,194,172,0.45) 50%, transparent 75%);
-  animation:drift1 24s ease-in-out infinite;
-}
-.smoke .s2{
-  width:60vw; height:60vh;
-  top:15vh; right:-6vw;
-  background:radial-gradient(circle at 50% 50%, rgba(188,200,178,0.8), rgba(188,200,178,0.4) 55%, transparent 78%);
-  animation:drift2 32s ease-in-out infinite;
-}
-.smoke .s3{
-  width:50vw; height:50vh;
-  top:45vh; right:4vw;
-  background:radial-gradient(circle at 50% 50%, rgba(174,188,166,0.75), rgba(174,188,166,0.35) 55%, transparent 80%);
-  animation:drift3 28s ease-in-out infinite;
-}
-.smoke .s4{
-  width:40vw; height:45vh;
-  top:5vh; right:22vw;
-  background:radial-gradient(circle at 50% 50%, rgba(192,202,182,0.7), rgba(192,202,182,0.3) 60%, transparent 82%);
-  animation:drift4 38s ease-in-out infinite;
-}
-@keyframes drift1{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
-  35%  { transform:translate3d(-8vw,4vh,0) scale(1.1); opacity:1; }
-  70%  { transform:translate3d(-4vw,-3vh,0) scale(1.05); opacity:0.7; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
-}
-@keyframes drift2{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
-  30%  { transform:translate3d(-6vw,-4vh,0) scale(1.12); opacity:0.95; }
-  65%  { transform:translate3d(-10vw,3vh,0) scale(1.06); opacity:0.6; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
-}
-@keyframes drift3{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
-  40%  { transform:translate3d(-7vw,-5vh,0) scale(1.14); opacity:0.9; }
-  75%  { transform:translate3d(-3vw,4vh,0) scale(1.08); opacity:0.5; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
-}
-@keyframes drift4{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
-  50%  { transform:translate3d(-9vw,3vh,0) scale(1.1); opacity:0.85; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
-}
-@media (prefers-reduced-motion: reduce){
-  .smoke span{ animation:none !important; }
-  .smoke .s1{ opacity:0.8; transform:translate3d(-4vw,0,0); }
-  .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
-  .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
-  .smoke .s4{ opacity:0.55; }
+.video-stack img {
+  object-fit: contain;
+  object-position: center;
 }
 
 /* === Text column === */
@@ -2036,12 +1972,15 @@ section{
   section{
     overflow-x:hidden;
   }
-  .video-stack,
-  .smoke{
+  .video-stack{
     width:100%;
     max-width:100%;
     -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
     mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+  }
+  .visual-box {
+    transform: translate(-50%, -50%);
+    max-width: 100%;
   }
   .scrim{
     position:absolute;
@@ -2089,18 +2028,10 @@ section{
 
 &lt;section id=&quot;section&quot;&gt;
   &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
-    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/virus_reservoir.mp4&quot;
-           poster=&quot;assets/videos/posters/virus_reservoir.jpg&quot;
-           muted playsinline preload=&quot;auto&quot;
-           style=&quot;opacity:1; z-index:1;&quot;&gt;&lt;/video&gt;
-    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/virus_reservoir.jpg&quot; alt=&quot;&quot;&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;smoke&quot; aria-hidden=&quot;true&quot;&gt;
-    &lt;span class=&quot;s1&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;s2&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;s3&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;s4&quot;&gt;&lt;/span&gt;
+    &lt;div class=&quot;visual-box&quot;&gt;
+      &lt;img id=&quot;hvacImage&quot; src=&quot;assets/videos/hvac_room.webp&quot; alt=&quot;Isometric diagram of an HVAC system showing air circulation and a pleated filter.&quot;&gt;
+      &lt;canvas id=&quot;particleCanvas&quot;&gt;&lt;/canvas&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
 
   &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
@@ -2129,23 +2060,312 @@ section{
 (function(){
   const reducedMotion = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
   const videoStack = document.getElementById(&#39;videoStack&#39;);
-  const videoA = document.getElementById(&#39;videoA&#39;);
   const bigNumber = document.getElementById(&#39;bigNumber&#39;);
+  const canvas = document.getElementById(&#39;particleCanvas&#39;);
+  const ctx = canvas.getContext(&#39;2d&#39;);
 
-  /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
-  if (reducedMotion) {
-    videoStack.classList.add(&#39;reduced&#39;);
+  // Normalized 0..1 coordinates of the loop path
+  const LOOP = [
+    [0.575,0.235], [0.375,0.208], [0.238,0.336], [0.223,0.480],
+    [0.245,0.610], [0.400,0.710], [0.560,0.755], [0.655,0.775],
+    [0.720,0.792], [0.735,0.600], [0.740,0.420], [0.745,0.330],
+    [0.750,0.215], [0.680,0.230]
+  ];
+
+  const FILTER_START_T = 9 / 14;
+  const FILTER_END_T = 11 / 14;
+  const TOTAL_PARTICLES = 52;
+  const GOLDEN_RATIO = 0.6180339887;
+  const GAP_MIN = 0.9 * (1 / TOTAL_PARTICLES);
+  const MAX_HELD = 6;
+
+  let particles = [];
+  let heldParticles = [];
+  let rafId = null;
+  let lastTime = 0;
+  let dpr = 1;
+  let cw = 0, ch = 0;
+
+  // --- Spline Math ---
+  function catmullRom(p0, p1, p2, p3, t) {
+    const t2 = t * t;
+    const t3 = t2 * t;
+    return [
+      0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 + (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3),
+      0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 + (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3)
+    ];
   }
-  const isEmbedded = window.self !== window.top;
-  function startFilter(){
+
+  function getPointOnLoop(t) {
+    t = ((t % 1) + 1) % 1; // wrap 0..1
+    const scaledT = t * LOOP.length;
+    const i = Math.floor(scaledT);
+    const localT = scaledT - i;
+    const p0 = LOOP[(i - 1 + LOOP.length) % LOOP.length];
+    const p1 = LOOP[i];
+    const p2 = LOOP[(i + 1) % LOOP.length];
+    const p3 = LOOP[(i + 2) % LOOP.length];
+    return catmullRom(p0, p1, p2, p3, localT);
+  }
+
+  // Cheap value noise for smooth wobble
+  function smoothNoise(x) {
+    const i = Math.floor(x);
+    const f = x - i;
+    const a = Math.sin(i * 12.9898) * 43758.5453;
+    const b = Math.sin((i + 1) * 12.9898) * 43758.5453;
+    const v1 = a - Math.floor(a);
+    const v2 = b - Math.floor(b);
+    const smooth = f * f * (3 - 2 * f);
+    return v1 * (1 - smooth) + v2 * smooth;
+  }
+
+  // --- Particle System ---
+  function createParticle(t = 0) {
+    return {
+      t: t,
+      // ±8% speed variance
+      speed: (1 / 16) * (0.92 + Math.random() * 0.16), 
+      wobblePhase: Math.random() * 100,
+      // Halved wobble amplitude to hug the line
+      wobbleAmp: 0.004 + Math.random() * 0.006,
+      wobbleSpeed: 0.0001 + Math.random() * 0.0002,
+      radius: 2.0 + Math.random() * 0.8,
+      opacity: 0.5,
+      state: &#39;moving&#39;
+    };
+  }
+
+  function createHeldParticle() {
+    const startPt = getPointOnLoop(FILTER_START_T);
+    const endPt = getPointOnLoop(FILTER_END_T);
+    // Random point inside the filter bounds
+    const u = Math.random();
+    const v = Math.random() * 0.6 - 0.3; // Keep it more centered
+    const fx = startPt[0] + (endPt[0] - startPt[0]) * u;
+    const fy = startPt[1] + (endPt[1] - startPt[1]) * u + v * 0.02;
+    
+    return {
+      x: fx,
+      y: fy,
+      radius: 2.0 + Math.random() * 0.8,
+      opacity: 0,
+      targetOpacity: 0.6 + Math.random() * 0.2,
+      pulsePhase: Math.random() * Math.PI * 2,
+      fadeOut: false
+    };
+  }
+
+  function initParticles() {
+    particles = [];
+    heldParticles = [];
+    
+    // Golden ratio spacing to kill clumping
+    for (let i = 0; i &lt; TOTAL_PARTICLES; i++) {
+      const baseT = (i * GOLDEN_RATIO + Math.random() * 0.05) % 1;
+      particles.push(createParticle(baseT));
+    }
+  }
+
+  function updateParticle(p, dt) {
+    // Moving state
+    let currentSpeed = p.speed;
+    p.t = (p.t + currentSpeed * dt / 1000) % 1;
+
+    // Virus catches at filter face (~25% chance)
+    if (p.t &gt;= FILTER_START_T &amp;&amp; p.t &lt; FILTER_START_T + 0.01 &amp;&amp; p.state === &#39;moving&#39;) {
+      if (Math.random() &lt; 0.25) {
+        p.state = &#39;caught&#39;;
+        
+        // Add to held list
+        if (heldParticles.length &gt;= MAX_HELD) {
+          // Mark oldest for fade out
+          heldParticles[0].fadeOut = true;
+        }
+        heldParticles.push(createHeldParticle());
+        
+        // Safeguard: Immediately respawn the caught particle to maintain loop density
+        p.t = 0.0; 
+        p.state = &#39;moving&#39;;
+      }
+    }
+  }
+
+  function updateHeldParticle(p, dt) {
+    p.pulsePhase += dt * 0.002;
+    
+    if (p.fadeOut) {
+      p.opacity -= dt * 0.001; // Fade out over 1s
+    } else if (p.opacity &lt; p.targetOpacity) {
+      p.opacity = Math.min(p.targetOpacity, p.opacity + dt * 0.002); // Fade in over 0.5s
+    }
+  }
+
+  function drawParticle(p) {
+    if (p.opacity &lt;= 0) return;
+    
+    const wobble = (smoothNoise(p.wobblePhase) - 0.5) * 2 * p.wobbleAmp;
+    const pt = getPointOnLoop(p.t + wobble);
+    
+    const x = pt[0] * cw;
+    const y = pt[1] * ch;
+    const r = p.radius * dpr;
+
+    ctx.globalAlpha = p.opacity;
+    
+    // Soft wide halo
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+    grad.addColorStop(0, &#39;rgba(226, 59, 59, 0.8)&#39;);
+    grad.addColorStop(0.3, &#39;rgba(226, 59, 59, 0.4)&#39;);
+    grad.addColorStop(1, &#39;rgba(226, 59, 59, 0)&#39;);
+    
+    ctx.shadowColor = &#39;#e23b3b&#39;;
+    ctx.shadowBlur = 2 * dpr; // Minimal glow
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Small solid core
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = &#39;rgba(226, 59, 59, 1)&#39;;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  }
+
+  function drawHeldParticle(p) {
+    if (p.opacity &lt;= 0) return;
+    
+    const x = p.x * cw;
+    const y = p.y * ch;
+    const r = p.radius * dpr;
+    
+    // Gentle breathing opacity
+    const breath = 0.8 + Math.sin(p.pulsePhase) * 0.2;
+    ctx.globalAlpha = p.opacity * breath;
+    
+    // Soft wide halo
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+    grad.addColorStop(0, &#39;rgba(226, 59, 59, 0.8)&#39;);
+    grad.addColorStop(0.3, &#39;rgba(226, 59, 59, 0.4)&#39;);
+    grad.addColorStop(1, &#39;rgba(226, 59, 59, 0)&#39;);
+    
+    ctx.shadowColor = &#39;#e23b3b&#39;;
+    ctx.shadowBlur = 2 * dpr;
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Small solid core
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = &#39;rgba(226, 59, 59, 1)&#39;;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  }
+
+  function drawStaticFrame() {
+    resizeCanvas();
+    ctx.clearRect(0, 0, cw, ch);
+    particles.forEach(p =&gt; {
+      p.wobblePhase += 10; 
+      drawParticle(p);
+    });
+    heldParticles.forEach(p =&gt; drawHeldParticle(p));
+  }
+
+  function animate(time) {
+    if (!lastTime) lastTime = time;
+    const dt = Math.min(50, time - lastTime); 
+    lastTime = time;
+
+    ctx.clearRect(0, 0, cw, ch);
+    
+    particles.forEach(p =&gt; {
+      p.wobblePhase += p.wobbleSpeed * dt;
+      updateParticle(p, dt);
+    });
+
+    // Enforce minimum spacing (following distance) to kill clumping
+    // Sort by t position along the loop
+    particles.sort((a, b) =&gt; a.t - b.t);
+    
+    for (let i = 0; i &lt; particles.length; i++) {
+      const p = particles[i];
+      if (p.state !== &#39;moving&#39;) continue; // Only enforce on moving train
+      
+      const next = particles[(i + 1) % particles.length];
+      if (next.state !== &#39;moving&#39;) continue;
+      
+      let diff = next.t - p.t;
+      if (diff &lt; 0) diff += 1; // Handle wrap-around
+      
+      // If the gap is too small, clamp the particle back
+      if (diff &lt; GAP_MIN) {
+        let newT = next.t - GAP_MIN;
+        if (newT &lt; 0) newT += 1;
+        p.t = newT;
+      }
+    }
+
+    particles.forEach(p =&gt; {
+      drawParticle(p);
+    });
+
+    // Update and draw held particles
+    for (let i = heldParticles.length - 1; i &gt;= 0; i--) {
+      const p = heldParticles[i];
+      updateHeldParticle(p, dt);
+      if (p.opacity &lt;= 0 &amp;&amp; p.fadeOut) {
+        heldParticles.splice(i, 1);
+      } else {
+        drawHeldParticle(p);
+      }
+    }
+
+    rafId = requestAnimationFrame(animate);
+  }
+
+  // --- Canvas Setup ---
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    dpr = window.devicePixelRatio || 1;
+    cw = rect.width;
+    ch = rect.height;
+    canvas.width = cw * dpr;
+    canvas.height = ch * dpr;
+    ctx.scale(dpr, dpr);
+  }
+
+  // --- Activation Logic ---
+  function startFilter() {
     if (reducedMotion) return;
-    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    if (rafId) cancelAnimationFrame(rafId);
+    resizeCanvas();
+    initParticles();
+    lastTime = 0;
+    rafId = requestAnimationFrame(animate);
+    
     bigNumber.textContent = &#39;0&#39;;
     animateNumber();
   }
-  function stopFilter(){ try { videoA.pause(); } catch(e){} }
 
-  /* ---------- Number animation ---------- */
+  function stopFilter() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  // --- Number animation ---
   function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
 
   function animateNumber(){
@@ -2155,8 +2375,6 @@ section{
     function step(now){
       const p = Math.min(1, (now - start) / DURATION);
       const e = easeOutCubic(p);
-
-      // count big number 0 -&gt; 95
       const n = Math.round(e * 712);
       bigNumber.textContent = n.toLocaleString();
 
@@ -2166,28 +2384,55 @@ section{
         bigNumber.textContent = &#39;712&#39;;
       }
     }
-
     requestAnimationFrame(step);
   }
 
+  // --- Init ---
   if (reducedMotion) {
     bigNumber.textContent = &#39;712&#39;;
+    resizeCanvas();
+    initParticles();
+    // Distribute particles nicely for static frame
+    particles.forEach((p, i) =&gt; {
+      p.t = i / particles.length;
+    });
+    // Add a few held particles statically
+    for(let i=0; i&lt;4; i++) {
+        const hp = createHeldParticle();
+        hp.opacity = hp.targetOpacity;
+        heldParticles.push(hp);
+    }
+    drawStaticFrame();
   } else {
     bigNumber.textContent = &#39;0&#39;;
+    const isEmbedded = window.self !== window.top;
+    
     if (isEmbedded) {
-      // In the deck: play the discharge video + count only when this section becomes active.
       window.addEventListener(&#39;message&#39;, function(e){
         if (!e.data) return;
         if (e.data.type === &#39;nf-active&#39;) startFilter();
         else if (e.data.type === &#39;nf-inactive&#39;) stopFilter();
       });
     } else {
-      // Standalone: start from the top when it scrolls into view.
       const io = new IntersectionObserver((entries, observer) =&gt; {
-        entries.forEach(entry =&gt; { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+        entries.forEach(entry =&gt; { 
+          if (entry.isIntersecting) { 
+            startFilter(); 
+            observer.disconnect(); 
+          } 
+        });
       }, { threshold: 0.35 });
       io.observe(document.getElementById(&#39;section&#39;));
     }
+
+    window.addEventListener(&#39;resize&#39;, () =&gt; {
+      if (rafId) {
+        resizeCanvas();
+      } else {
+        resizeCanvas();
+        drawStaticFrame();
+      }
+    });
   }
 })();
 &lt;/script&gt;
