@@ -1975,11 +1975,11 @@ p.body {
   &#39;use strict&#39;;
 
   const CONFIG = {
-    riserX:        0.839,
+    riserX:        0.8345,
     riserTopY:     0.155,
     riserBotY:     0.905,
     ahuGlow:       { x: 0.78, y: 0.105 },
-    branchY:       [0.18, 0.38, 0.565, 0.755],
+    branchY:       [0.174, 0.372, 0.566, 0.754],
     diffuserFadeX: 0.66,
     source:        { x: 0.45, y: 0.84, floor: 3 },
     offices: [
@@ -2008,19 +2008,20 @@ p.body {
   let observer = null;
 
   const hazeBlobs = [];
-  let floorReached = [false, false, false, false];
+  let floorReached = [false, false, false, true]; // index 3 = source (bottom) floor, sick from t=0
   let floorReachedTime = [0, 0, 0, 0];
   let ahuPulse = 0;
   let sourceBreath = 0;
+  let allSick = false;   // becomes true once every floor is infected — then we STOP emitting (play once, no re-loop)
 
   // ---- Main path (straight riser + straight branches) ----
   // Motes follow this strictly by arc length; a mote&#39;s position is ALWAYS
   // an exact point on this polyline — never an offset.
   const PATH = [
-    [0.66,  0.755],  // 0: enter the duct at the bottom-floor diffuser end (on the branch pipe)
-    [0.839, 0.755],  // 1: RIGHT along the bottom branch to the riser
-    [0.839, 0.155],  // 2: UP the straight riser to the AHU inlet
-    [0.839, 0.905]   // 3: DOWN the straight riser
+    [0.66,   0.754],  // 0: enter the duct at the bottom-floor diffuser end (on the branch pipe)
+    [0.8345, 0.754],  // 1: RIGHT along the bottom branch to the riser
+    [0.8345, 0.155],  // 2: UP the straight riser to the AHU inlet
+    [0.8345, 0.905]   // 3: DOWN the straight riser
   ];
 
   const DOWN_SEG = 2; // segment index where motes travel DOWN the riser (path has 3 segments: 0,1,2)
@@ -2118,7 +2119,7 @@ p.body {
     const targetFloor = (moteCounter - 1) % 4;
     return {
       s: 0,
-      speed: pathTotal / 11 * (0.92 + Math.random() * 0.16),
+      speed: pathTotal / 14 * (0.94 + Math.random() * 0.12),
       r: 3.2 + Math.random() * 1.0,
       op: 0.9 + Math.random() * 0.1,
       phase: Math.random() * Math.PI * 2,
@@ -2183,16 +2184,25 @@ p.body {
         m.divertTotal = Math.abs(CONFIG.riserX - CONFIG.diffuserFadeX);
         m.x = CONFIG.riserX;
         m.y = by;
+        // Mark the floor infected the instant the air peels into it (the mote is
+        // culled at alpha&lt;=0.01, a hair before its divert reaches u&gt;=1, so setting
+        // it only on completion would usually be missed).
+        if (!floorReached[m.divertFloor]) {
+          floorReached[m.divertFloor] = true;
+          floorReachedTime[m.divertFloor] = t;
+        }
         return;
       }
     }
   }
 
-  let lastSpawn = -10;
+  let lastSpawn = 0;
   function updateMotes(dt, t) {
-    const cap = 9;
-    if (motes.length &lt; cap) {
-      if (t - lastSpawn &gt; 0.55 + Math.random() * 0.1) {
+    const cap = 6;
+    // Emit only until every floor is sick. Once allSick, stop emitting; the last
+    // motes finish their journey and the building holds fully infected (no re-loop).
+    if (!allSick &amp;&amp; motes.length &lt; cap) {
+      if (t - lastSpawn &gt; 1.7 + Math.random() * 0.3) {
         motes.push(makeMote());
         lastSpawn = t;
       }
@@ -2409,15 +2419,9 @@ p.body {
     const t = (now - startTime) / 1000;
     const dt = Math.min(0.05, (now - (loop._last || now)) / 1000);
     loop._last = now;
-    if (t &gt; 24) {
-      startTime = now;
-      motes.length = 0;
-      floorReached = [false, false, false, false];
-      floorReachedTime = [0, 0, 0, 0];
-      ahuPulse = 0;
-      lastSpawn = -10;
-      initMotes();
-    }
+    // Play ONCE: once every floor is infected, stop emitting and hold the fully-sick
+    // building. No reset, no re-loop.
+    if (!allSick &amp;&amp; floorReached.every(Boolean)) allSick = true;
     ahuPulse = Math.max(0, ahuPulse - dt * 1.2);
     updateMotes(dt, t);
     drawFrame(t);
@@ -2433,10 +2437,11 @@ p.body {
     running = true;
     startTime = 0;
     loop._last = 0;
-    floorReached = [false, false, false, false];
+    floorReached = [false, false, false, true]; // index 3 = source (bottom) floor, sick from t=0
     floorReachedTime = [0, 0, 0, 0];
     ahuPulse = 0;
-    lastSpawn = -10;
+    lastSpawn = 0;
+    allSick = false;
     initMotes();
     rafId = requestAnimationFrame(loop);
   }
@@ -2452,11 +2457,12 @@ p.body {
   function reset() {
     stop();
     motes.length = 0;
-    floorReached = [false, false, false, false];
+    floorReached = [false, false, false, true]; // index 3 = source (bottom) floor, sick from t=0
     floorReachedTime = [0, 0, 0, 0];
     ahuPulse = 0;
     startTime = 0;
-    lastSpawn = -10;
+    lastSpawn = 0;
+    allSick = false;
     ctx.clearRect(0,0,cssW,cssH);
     if (reduceMotion) drawStatic();
   }
