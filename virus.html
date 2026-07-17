@@ -1975,20 +1975,13 @@ p.body {
   &#39;use strict&#39;;
 
   const CONFIG = {
-    PATH: [
-      [0.605,0.815], [0.605,0.795], [0.760,0.798], [0.805,0.800], [0.848,0.770],
-      [0.874,0.720], [0.878,0.600], [0.878,0.400], [0.878,0.230], [0.878,0.175],
-      [0.850,0.132], [0.775,0.128], [0.715,0.130],
-      [0.775,0.128], [0.850,0.132], [0.878,0.175], [0.878,0.230], [0.878,0.400],
-      [0.878,0.600], [0.874,0.720], [0.848,0.770], [0.805,0.800], [0.760,0.802]
-    ],
-    ahu:        { x: 0.715, y: 0.130 },
-    riserX:     0.878,
-    riserTopY:  0.175,
-    riserBotY:  0.802,
-    floorCeilY: [0.235, 0.44, 0.61, 0.78],
-    source:     { x: 0.605, y: 0.815, floor: 3 },
-    sourceFloor: 3,
+    riserX:        0.839,
+    riserTopY:     0.155,
+    riserBotY:     0.905,
+    ahuGlow:       { x: 0.78, y: 0.105 },
+    branchY:       [0.18, 0.38, 0.565, 0.755],
+    diffuserFadeX: 0.66,
+    source:        { x: 0.45, y: 0.84, floor: 3 },
     offices: [
       { x0: 0.53, x1: 0.93, y0: 0.23, y1: 0.39 },
       { x0: 0.53, x1: 0.93, y0: 0.41, y1: 0.57 },
@@ -2016,20 +2009,31 @@ p.body {
 
   const hazeBlobs = [];
   let floorReached = [false, false, false, false];
+  let floorReachedTime = [0, 0, 0, 0];
   let ahuPulse = 0;
   let sourceBreath = 0;
 
-  // ---- Arc-length table for the main path ----
+  // ---- Main path (straight riser + straight branches) ----
+  // Motes follow this strictly by arc length; a mote&#39;s position is ALWAYS
+  // an exact point on this polyline — never an offset.
+  const PATH = [
+    [0.66,  0.755],  // 0: enter the duct at the bottom-floor diffuser end (on the branch pipe)
+    [0.839, 0.755],  // 1: RIGHT along the bottom branch to the riser
+    [0.839, 0.155],  // 2: UP the straight riser to the AHU inlet
+    [0.839, 0.905]   // 3: DOWN the straight riser
+  ];
+
+  const DOWN_SEG = 2; // segment index where motes travel DOWN the riser (path has 3 segments: 0,1,2)
+
   let pathTable = null;
   let pathTotal = 0;
 
   function buildPathTable() {
-    const P = CONFIG.PATH;
     pathTable = [0];
     let total = 0;
-    for (let i = 0; i &lt; P.length - 1; i++) {
-      const dx = P[i+1][0] - P[i][0];
-      const dy = P[i+1][1] - P[i][1];
+    for (let i = 0; i &lt; PATH.length - 1; i++) {
+      const dx = PATH[i+1][0] - PATH[i][0];
+      const dy = PATH[i+1][1] - PATH[i][1];
       total += Math.sqrt(dx*dx + dy*dy);
       pathTable.push(total);
     }
@@ -2038,29 +2042,27 @@ p.body {
 
   function pointOnPath(s) {
     s = Math.max(0, Math.min(pathTotal, s));
-    const P = CONFIG.PATH;
     let i = 0;
     while (i &lt; pathTable.length - 1 &amp;&amp; pathTable[i+1] &lt; s) i++;
     const segStart = pathTable[i];
     const segEnd = pathTable[i+1];
     const segLen = segEnd - segStart;
     const u = segLen &gt; 0 ? (s - segStart) / segLen : 0;
-    const x = P[i][0] + (P[i+1][0] - P[i][0]) * u;
-    const y = P[i][1] + (P[i+1][1] - P[i][1]) * u;
+    const x = PATH[i][0] + (PATH[i+1][0] - PATH[i][0]) * u;
+    const y = PATH[i][1] + (PATH[i+1][1] - PATH[i][1]) * u;
     return { x, y, seg: i };
   }
 
   function initHazeBlobs() {
     hazeBlobs.length = 0;
     for (let i = 0; i &lt; CONFIG.offices.length; i++) {
-      const o = CONFIG.offices[i];
       const count = 4;
       for (let b = 0; b &lt; count; b++) {
         hazeBlobs.push({
           floorIdx: i,
-          ox: 0.18 + Math.random() * 0.64,
-          oy: 0.22 + Math.random() * 0.56,
-          rMul: 0.55 + Math.random() * 0.5,
+          ox: 0.15 + Math.random() * 0.70,
+          oy: 0.25 + Math.random() * 0.45,
+          rMul: 0.7 + Math.random() * 0.55,
           opMul: 0.7 + Math.random() * 0.45,
           phase: Math.random() * Math.PI * 2,
           driftPhase: Math.random() * Math.PI * 2,
@@ -2107,66 +2109,90 @@ p.body {
 
   // ---- Mote factory ----
   // Each mote advances its distance s along the MAIN path at constant speed.
-  // A full loop takes ~11s. Motes NEVER leave the polyline.
+  // A full loop takes ~11s. Motes stay EXACTLY on the straight duct lines.
+  // Start EMPTY (no motes at t=0); emit gently.
 
+  let moteCounter = 0;
   function makeMote() {
+    moteCounter++;
+    const targetFloor = (moteCounter - 1) % 4;
     return {
       s: 0,
       speed: pathTotal / 11 * (0.92 + Math.random() * 0.16),
-      r: 1.8 + Math.random() * 1.2,
-      op: 0.55 + Math.random() * 0.35,
+      r: 3.2 + Math.random() * 1.0,
+      op: 0.9 + Math.random() * 0.1,
       phase: Math.random() * Math.PI * 2,
-      x: CONFIG.PATH[0][0],
-      y: CONFIG.PATH[0][1],
+      x: PATH[0][0],
+      y: PATH[0][1],
       alpha: 1,
-      lastSeg: -1
+      diverted: false,
+      divertFloor: -1,
+      divertS: 0,
+      divertTotal: 0,
+      targetFloor: targetFloor,
+      id: moteCounter
     };
   }
 
   function initMotes() {
     motes.length = 0;
-    // seed a few motes at various points so the path isn&#39;t empty at start
-    for (let i = 0; i &lt; 6; i++) {
-      const m = makeMote();
-      m.s = (i / 6) * pathTotal * 0.7;
-      motes.push(m);
-    }
+    // Start EMPTY — no motes at t=0. The first mote emerges from the bottom diffuser.
   }
 
   function updateMote(m, dt, t) {
     m.phase += dt * 1.2;
-    m.s += m.speed * dt;
 
+    if (m.diverted) {
+      // Travel straight horizontally from riser toward diffuserFadeX, fading to 0 by x=0.66.
+      m.divertS += m.speed * dt;
+      const u = Math.min(1, m.divertS / m.divertTotal);
+      m.x = CONFIG.riserX + (CONFIG.diffuserFadeX - CONFIG.riserX) * u;
+      m.y = CONFIG.branchY[m.divertFloor];
+      m.alpha = Math.max(0, 1 - u);
+      if (u &gt;= 1) {
+        if (!floorReached[m.divertFloor]) {
+          floorReached[m.divertFloor] = true;
+          floorReachedTime[m.divertFloor] = t;
+        }
+        m.alpha = 0;
+      }
+      return;
+    }
+
+    const prevS = m.s;
+    m.s += m.speed * dt;
     const pos = pointOnPath(m.s);
     m.x = pos.x;
     m.y = pos.y;
     m.alpha = 1;
 
-    // AHU pulse when a mote passes the AHU (around index 12)
-    if (pos.seg === 12) {
-      ahuPulse = Math.max(ahuPulse, 0.6);
+    // AHU glow pulse when a mote reaches the TOP of the riser (end of UP / start of DOWN)
+    if (prevS &lt; pathTable[2] &amp;&amp; m.s &gt;= pathTable[2]) {
+      ahuPulse = Math.max(ahuPulse, 1.0);
     }
 
-    // Floor haze infection: on the DESCENDING leg (seg &gt; 12, i.e. path index &gt; 12),
-    // when a mote passes a floor&#39;s ceiling y, mark that floor as reached.
-    if (pos.seg &gt; 12) {
-      for (let f = 0; f &lt; CONFIG.floorCeilY.length; f++) {
-        if (floorReached[f]) continue;
-        const fc = CONFIG.floorCeilY[f];
-        // descending: y increases. Trigger when mote&#39;s y crosses fc going down.
-        if (m.y &gt;= fc) {
-          floorReached[f] = true;
-        }
+    // Branch diversion on the DOWN leg (segment 3).
+    // A mote diverts ONLY when it reaches ITS OWN targetFloor&#39;s branchY.
+    if (pos.seg === DOWN_SEG) {
+      const by = CONFIG.branchY[m.targetFloor];
+      const prevPos = pointOnPath(prevS);
+      if (prevPos.y &lt; by &amp;&amp; m.y &gt;= by) {
+        m.diverted = true;
+        m.divertFloor = m.targetFloor;
+        m.divertS = 0;
+        m.divertTotal = Math.abs(CONFIG.riserX - CONFIG.diffuserFadeX);
+        m.x = CONFIG.riserX;
+        m.y = by;
+        return;
       }
     }
   }
 
-  let lastSpawn = 0;
+  let lastSpawn = -10;
   function updateMotes(dt, t) {
-    // emit one mote every ~450-600ms at P0, keep ~20-28 alive
-    const cap = 28;
+    const cap = 9;
     if (motes.length &lt; cap) {
-      if (t - lastSpawn &gt; 0.45 + Math.random() * 0.15) {
+      if (t - lastSpawn &gt; 0.55 + Math.random() * 0.1) {
         motes.push(makeMote());
         lastSpawn = t;
       }
@@ -2174,8 +2200,9 @@ p.body {
     for (let i = motes.length - 1; i &gt;= 0; i--) {
       const m = motes[i];
       updateMote(m, dt, t);
-      // recycle when mote has finished its journey (main path end)
-      if (m.s &gt; pathTotal) {
+      if (m.diverted) {
+        if (m.alpha &lt;= 0.01) motes.splice(i, 1);
+      } else if (m.s &gt; pathTotal) {
         motes.splice(i, 1);
       }
     }
@@ -2192,7 +2219,7 @@ p.body {
       ctx.save();
       ctx.globalAlpha = op;
       ctx.shadowColor = RED;
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = 10;
       ctx.fillStyle = RED;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -2208,7 +2235,7 @@ p.body {
     const h = y1 - y0;
     const cx = (x0 + x1) / 2;
     const cy = (y0 + y1) / 2;
-    const baseR = Math.max(1, Math.min(w, h) * 0.42);
+    const baseR = Math.max(1, Math.min(w, h) * 0.5);
 
     ctx.save();
     ctx.globalCompositeOperation = &#39;source-over&#39;;
@@ -2234,45 +2261,22 @@ p.body {
     ctx.restore();
   }
 
-  function drawAhuArrow() {
-    const c = CONFIG;
-    const x1 = nx(c.ahu.x - 0.025);
-    const y1 = ny(c.ahu.y);
-    const x2 = nx(c.ahu.x + 0.025);
-    const y2 = ny(c.ahu.y);
-    ctx.save();
-    ctx.globalAlpha = 0.32;
-    ctx.strokeStyle = RED;
-    ctx.fillStyle = RED;
-    ctx.lineWidth = 1.4;
-    ctx.lineCap = &#39;round&#39;;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2 - 4, y2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - 6, y2 - 3.5);
-    ctx.lineTo(x2 - 6, y2 + 3.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-  }
-
   function drawAhuGlow(t) {
-    // Soft red glow pulse each time a mote passes the AHU (virus through the filter)
     const c = CONFIG;
-    if (ahuPulse &lt;= 0.005) return;
-    const gx = nx(c.ahu.x);
-    const gy = ny(c.ahu.y);
+    // Soft breathing baseline so the AHU always reads as &quot;the unit&quot;
+    const breathe = 0.18 + 0.08 * Math.sin(t * 0.6);
+    const intensity = Math.max(breathe, ahuPulse * 0.5);
+    if (intensity &lt;= 0.005) return;
+    const gx = nx(c.ahuGlow.x);
+    const gy = ny(c.ahuGlow.y);
     const gr = Math.max(1, imgRect.w * 0.07);
     ctx.save();
     ctx.globalCompositeOperation = &#39;source-over&#39;;
-    ctx.globalAlpha = ahuPulse * 0.4;
+    ctx.globalAlpha = intensity * 0.7;
     const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-    grad.addColorStop(0, `rgba(226,59,59,1)`);
-    grad.addColorStop(0.35, `rgba(226,59,59,0.45)`);
-    grad.addColorStop(0.7, `rgba(226,59,59,0.12)`);
+    grad.addColorStop(0, `rgba(226,59,59,0.9)`);
+    grad.addColorStop(0.35, `rgba(226,59,59,0.4)`);
+    grad.addColorStop(0.7, `rgba(226,59,59,0.1)`);
     grad.addColorStop(1, &#39;rgba(226,59,59,0)&#39;);
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -2282,7 +2286,6 @@ p.body {
   }
 
   function drawSourceGlow(t) {
-    // Soft red glow/haze around the sick worker at P0, gently breathing
     const c = CONFIG;
     const gx = nx(c.source.x);
     const gy = ny(c.source.y);
@@ -2305,18 +2308,22 @@ p.body {
 
   function getHazeOpacity(floorIdx, t) {
     const c = CONFIG;
-    const base = 0.22;
-    const max = 0.24;
+    const max = 0.42;
     let fadeIn;
     if (floorIdx === c.source.floor) {
-      // source office haze appears 0-2s (worker is sick from the start)
+      // Bottom floor: its own infection — haze grows from the start
       fadeIn = Math.min(1, Math.max(0, t / 2));
     } else {
-      // each other floor fills once a descending mote passes its ceiling
-      fadeIn = floorReached[floorIdx] ? 1 : 0;
+      // Other floors: grow only after a descending mote reaches that floor
+      if (floorReached[floorIdx]) {
+        const elapsed = t - floorReachedTime[floorIdx];
+        fadeIn = Math.min(1, Math.max(0, elapsed / 1.5));
+      } else {
+        fadeIn = 0;
+      }
     }
     const breathe = 1 + 0.15 * Math.sin((t * Math.PI * 2) / 4 + floorIdx * 0.9);
-    return Math.min(max, fadeIn * base * breathe);
+    return Math.min(max, fadeIn * max * breathe);
   }
 
   function drawFrame(t) {
@@ -2327,43 +2334,65 @@ p.body {
     }
     drawSourceGlow(t);
     drawAhuGlow(t);
-    drawAhuArrow();
     drawMotes();
   }
 
   function drawStatic() {
+    // Reduced-motion: a few resting red dots ON the riser and one on each
+    // branch (never left of 0.66, never left of the riser, never above 0.155),
+    // the office haze, and the source glow. NO arrow, NO open-air dots.
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cssW, cssH);
-    // draw the path faintly
-    ctx.save();
-    ctx.globalAlpha = 0.18;
-    ctx.strokeStyle = RED;
-    ctx.lineWidth = 1.2;
-    ctx.lineCap = &#39;round&#39;;
-    ctx.lineJoin = &#39;round&#39;;
-    ctx.beginPath();
-    for (let i = 0; i &lt; CONFIG.PATH.length; i++) {
-      const px = nx(CONFIG.PATH[i][0]);
-      const py = ny(CONFIG.PATH[i][1]);
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-    ctx.restore();
-    // all offices lightly hazed
+
+    // Office haze (all floors gently visible)
     for (let i = 0; i &lt; CONFIG.offices.length; i++) {
       drawOfficeHaze(CONFIG.offices[i], 0.22, 0, i);
     }
+
+    // Source glow (sick worker — soft only, no discrete dot)
     drawSourceGlow(0);
-    drawAhuArrow();
-    // a few resting motes on the path
-    const resting = [0.05, 0.32, 0.55, 0.72, 0.88];
-    for (const u of resting) {
-      const pos = pointOnPath(u * pathTotal);
-      const x = nx(pos.x);
-      const y = ny(pos.y);
+
+    // AHU glow (soft radial only — no dot, no arrow)
+    const ag = CONFIG.ahuGlow;
+    const agx = nx(ag.x), agy = ny(ag.y);
+    const agr = Math.max(1, imgRect.w * 0.07);
+    ctx.save();
+    ctx.globalCompositeOperation = &#39;source-over&#39;;
+    ctx.globalAlpha = 0.22;
+    const agGrad = ctx.createRadialGradient(agx, agy, 0, agx, agy, agr);
+    agGrad.addColorStop(0, `rgba(226,59,59,0.9)`);
+    agGrad.addColorStop(0.35, `rgba(226,59,59,0.4)`);
+    agGrad.addColorStop(0.7, `rgba(226,59,59,0.1)`);
+    agGrad.addColorStop(1, &#39;rgba(226,59,59,0)&#39;);
+    ctx.fillStyle = agGrad;
+    ctx.beginPath();
+    ctx.arc(agx, agy, agr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Resting dots ON the riser (x exactly 0.839, y between 0.155 and 0.905)
+    const riserDots = [0.22, 0.40, 0.58, 0.76, 0.88];
+    for (const uy of riserDots) {
+      const x = nx(CONFIG.riserX);
+      const y = ny(uy);
       ctx.save();
       ctx.globalAlpha = 0.55;
+      ctx.shadowColor = RED;
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = RED;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // One resting dot on each branch (y exactly branchY, x between 0.66 and 0.839)
+    for (let f = 0; f &lt; CONFIG.branchY.length; f++) {
+      const ux = 0.70 + f * 0.025;
+      const x = nx(Math.min(CONFIG.riserX, Math.max(CONFIG.diffuserFadeX, ux)));
+      const y = ny(CONFIG.branchY[f]);
+      ctx.save();
+      ctx.globalAlpha = 0.5;
       ctx.shadowColor = RED;
       ctx.shadowBlur = 8;
       ctx.fillStyle = RED;
@@ -2380,15 +2409,15 @@ p.body {
     const t = (now - startTime) / 1000;
     const dt = Math.min(0.05, (now - (loop._last || now)) / 1000);
     loop._last = now;
-    if (t &gt; 15) {
-      // calm loop: reset
+    if (t &gt; 24) {
       startTime = now;
       motes.length = 0;
       floorReached = [false, false, false, false];
+      floorReachedTime = [0, 0, 0, 0];
       ahuPulse = 0;
+      lastSpawn = -10;
       initMotes();
     }
-    // decay AHU pulse
     ahuPulse = Math.max(0, ahuPulse - dt * 1.2);
     updateMotes(dt, t);
     drawFrame(t);
@@ -2405,7 +2434,9 @@ p.body {
     startTime = 0;
     loop._last = 0;
     floorReached = [false, false, false, false];
+    floorReachedTime = [0, 0, 0, 0];
     ahuPulse = 0;
+    lastSpawn = -10;
     initMotes();
     rafId = requestAnimationFrame(loop);
   }
@@ -2422,8 +2453,10 @@ p.body {
     stop();
     motes.length = 0;
     floorReached = [false, false, false, false];
+    floorReachedTime = [0, 0, 0, 0];
     ahuPulse = 0;
     startTime = 0;
+    lastSpawn = -10;
     ctx.clearRect(0,0,cssW,cssH);
     if (reduceMotion) drawStatic();
   }
