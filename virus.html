@@ -1819,7 +1819,9 @@ if (isEmbedded) {
 &lt;head&gt;
 &lt;meta charset=&quot;UTF-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-&lt;title&gt;The air system spreads the virus it caught — NanoFlashing&lt;/title&gt;
+&lt;title&gt;The filter — virus&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
 &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
 &lt;style&gt;
 :root{
@@ -1833,9 +1835,7 @@ if (isEmbedded) {
   --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
   --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
 }
-
 *{box-sizing:border-box;margin:0;padding:0;}
-
 html,body{
   background:var(--bg);
   color:var(--ink);
@@ -1843,90 +1843,46 @@ html,body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-
 section{
   position:relative;
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   min-height:100vh;
   width:100%;
   overflow:hidden;
   background:var(--bg);
 }
 
-/* === Visual stack (right side) === */
-.video-stack{
-  position:absolute;
-  top:0;
-  bottom:0;
-  right:0;
-  width:58%;
-  z-index:0;
-  overflow:hidden;
-  background:var(--bg);
-  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-}
-
-/* Lock image and canvas to the exact same aspect ratio box */
-.visual-box {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  aspect-ratio: 2688 / 1520;
-  /* Anchor the filter and loop to the right, let the empty room fade left */
-  max-width: 140%;
-  transform: translate(-42%, -50%); 
-}
-
-.video-stack img,
-.video-stack canvas {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  display:block;
-}
-
-.video-stack img {
-  object-fit: contain;
-  object-position: center;
-}
-
-/* === Text column === */
+/* text column — LEFT */
 .text-col{
   position:relative;
   z-index:3;
   display:flex;
   flex-direction:column;
-  justify-content:center;
+  justify-content:flex-start;
   align-items:flex-start;
-  max-width:min(48%, 620px);padding-top:140px;
+  max-width:min(48%, 620px);
+  padding-top:140px;
   padding-left:clamp(24px, 6vw, 96px);
   padding-right:24px;
 }
-
 .headline{
   font-family:var(--stack);
   font-weight:600;
   color:var(--headline-ink);
-  font-size: clamp(24px, 2.7vw, 34px);
-  line-height: 1.32;
+  font-size:clamp(24px, 2.7vw, 34px);
+  line-height:1.32;
   letter-spacing:-0.022em;
-  margin-bottom:34px;
+  margin-bottom:22px;
 }
 .headline em{
   color:var(--red);
   font-style:normal;
   font-weight:600;
 }
-
-/* === Stat block === */
 .stat-block{
   display:flex;
-  align-items:center;
+  align-items:flex-end;
   gap:24px;
   margin-bottom:8px;
 }
@@ -1939,501 +1895,425 @@ section{
   letter-spacing:-0.04em;
   font-variant-numeric:tabular-nums;
 }
-
 .caption{
-  font-size:clamp(17px, 1.5vw, 20px);
+  font-size:clamp(15px, 1.5vw, 18px);
   line-height:1.45;
   color:var(--ink);
   max-width:26ch;
-  padding-top:6px;
+  padding-bottom:clamp(8px,1vw,14px);
+  margin-left:12px;
+  margin-top:-4px;
 }
-
-/* === Body paragraph === */
 .body-text{
-  max-width: 440px;
+  max-width:460px;
   font-size:19px;
-  line-height:1.55;
-  margin-top:32px;
-  color: #1a1a1a;
+  line-height:1.5;
+  margin-top:22px;
+  color:#1a1a1a;
 }
 .body-text a{
   color:inherit;
-  text-decoration:none;
-  border-bottom:1px solid rgba(27,123,255,0.55);
-  transition:color 0.18s ease, border-color 0.18s ease;
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+  text-decoration-color:rgba(26,26,26,0.4);
+  transition:color 0.18s ease, text-decoration-color 0.18s ease;
 }
 .body-text a:hover{
   color:var(--red);
-  border-bottom-color:var(--red);
+  text-decoration-color:var(--red);
 }
 
-/* === Mobile === */
-@media (max-width: 880px){
-  section{
-    overflow-x:hidden;
-  }
-  .video-stack{
+/* MEDIA — right 58% */
+.filter-media{
+  position:absolute;
+  top:0;
+  right:0;
+  width:58%;
+  height:100%;
+  overflow:hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.5) 18%, #000 34%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.5) 18%, #000 34%);
+}
+.filter-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 50%;
+  display:block;
+  -webkit-filter: contrast(1.05) brightness(0.99) saturate(1);
+          filter: contrast(1.05) brightness(0.99) saturate(1);
+}
+.filter-media canvas.motes{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* MOBILE */
+@media (max-width:880px){
+  .filter-media{
     width:100%;
     max-width:100%;
     -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
     mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
-  }
-  .visual-box {
-    transform: translate(-50%, -50%);
-    max-width: 100%;
   }
   .scrim{
     position:absolute;
     inset:0;
     z-index:2;
     pointer-events:none;
-    background:linear-gradient(to right,
-      var(--bg) 0%,
-      rgba(237,240,242,0.88) 35%,
-      rgba(237,240,242,0.45) 65%,
-      rgba(237,240,242,0.2) 100%);
+    background:linear-gradient(to right, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.82) 40%, rgba(237,240,242,0.4) 72%, rgba(237,240,242,0.1) 100%);
   }
   .text-col{
     max-width:none;
     width:100%;
-    padding-left:clamp(24px, 6vw, 32px);
-    padding-right:clamp(24px, 6vw, 32px);
+    padding-left:clamp(24px,6vw,32px);
+    padding-right:clamp(24px,6vw,32px);
   }
   .stat-block{
     flex-direction:column;
-    gap:14px;
     align-items:flex-start;
-  }
-  .caption{
-    padding-top:0;
-    max-width:none;
+    gap:14px;
   }
   .body-text{
     font-size:16px;
     max-width:none;
-    margin-bottom:12px;
-  }
-  .body-text:last-child{ margin-bottom:0; }
-  .scrim{
-    background:linear-gradient(to right,
-      rgba(237,240,242,0.96) 0%,
-      rgba(237,240,242,0.82) 40%,
-      rgba(237,240,242,0.4) 72%,
-      rgba(237,240,242,0.1) 100%);
   }
 }
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-
-&lt;section id=&quot;section&quot;&gt;
-  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
-    &lt;div class=&quot;visual-box&quot;&gt;
-      &lt;img id=&quot;hvacImage&quot; src=&quot;assets/videos/hvac_room.webp&quot; alt=&quot;Isometric diagram of an HVAC system showing air circulation and a pleated filter.&quot;&gt;
-      &lt;canvas id=&quot;particleCanvas&quot;&gt;&lt;/canvas&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
-
+&lt;section id=&quot;filter&quot;&gt;
   &lt;div class=&quot;text-col&quot;&gt;
-    &lt;h1 class=&quot;headline&quot;&gt;
-      The filter holds the virus —&lt;br&gt;
-      the air &lt;em&gt;system&lt;/em&gt; spreads it
-    &lt;/h1&gt;
-
+    &lt;h1 class=&quot;headline&quot;&gt;The filter holds the virus — the air &lt;em&gt;system&lt;/em&gt; spreads it&lt;/h1&gt;
     &lt;div class=&quot;stat-block&quot;&gt;
-      &lt;div class=&quot;big-number&quot; id=&quot;bigNumber&quot;&gt;0&lt;/div&gt;
-      &lt;p class=&quot;caption&quot;&gt;virus infections on the Diamond Princess, spread through the ship’s shared air.&lt;/p&gt;
+      &lt;div class=&quot;big-number&quot; id=&quot;big-number&quot;&gt;0&lt;/div&gt;
+      &lt;div class=&quot;caption&quot;&gt;virus infections on the Diamond Princess, spread through the ship&#39;s shared air.&lt;/div&gt;
     &lt;/div&gt;
-
-    &lt;p class=&quot;body-text&quot;&gt;
-      A conventional filter is built to trap particles, not to kill them — the EPA&#39;s own ratings measure &lt;a href=&quot;https://www.epa.gov/indoor-air-quality-iaq/what-merv-rating&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;what a filter catches, not what it destroys&lt;/a&gt;. So the virus it catches sits in the fibres, still alive: the Public Health Agency of Canada found the COVID virus &lt;a href=&quot;https://www.nature.com/articles/s41598-020-80098-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;still infectious on filter material after 21 days&lt;/a&gt;.
-    &lt;/p&gt;
-    &lt;p class=&quot;body-text&quot;&gt;
-      And the air keeps moving it. The University of Nebraska found the virus at &lt;a href=&quot;https://www.nature.com/articles/s41598-020-69286-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;4 of 5 ventilation grates&lt;/a&gt; in COVID patient rooms — and when that airflow fails, everyone downstream pays: the CDC recorded an airplane whose ventilation sat off for three hours, and &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/463858/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;72% of the passengers fell ill with flu&lt;/a&gt;.
-    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;A conventional filter is built to trap particles, not to kill them — the EPA&#39;s own ratings measure &lt;a href=&quot;https://www.epa.gov/indoor-air-quality-iaq/what-merv-rating&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;what a filter catches, not what it destroys&lt;/a&gt;. So the virus it catches sits in the fibres, still alive: the Public Health Agency of Canada found the COVID virus &lt;a href=&quot;https://www.nature.com/articles/s41598-020-80098-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;still infectious on filter material after 21 days&lt;/a&gt;.&lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;And the air keeps moving it. The University of Nebraska found the virus at &lt;a href=&quot;https://www.nature.com/articles/s41598-020-69286-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;4 of 5 ventilation grates&lt;/a&gt; in COVID patient rooms — and when that airflow fails, everyone downstream pays: the CDC recorded an airplane whose ventilation sat off for three hours, and &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/463858/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;72% of the passengers fell ill with flu&lt;/a&gt;.&lt;/p&gt;
   &lt;/div&gt;
+  &lt;div class=&quot;filter-media&quot; id=&quot;filter-media&quot;&gt;
+    &lt;img src=&quot;assets/videos/filter_virus_fibre_dense.jpg&quot; alt=&quot;&quot;&gt;
+    &lt;canvas class=&quot;motes&quot; id=&quot;motes&quot;&gt;&lt;/canvas&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
 &lt;/section&gt;
 
 &lt;script&gt;
 (function(){
-  const reducedMotion = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
-  const videoStack = document.getElementById(&#39;videoStack&#39;);
-  const bigNumber = document.getElementById(&#39;bigNumber&#39;);
-  const canvas = document.getElementById(&#39;particleCanvas&#39;);
-  const ctx = canvas.getContext(&#39;2d&#39;);
+  &#39;use strict&#39;;
 
-  // Normalized 0..1 coordinates of the loop path
-  const LOOP = [
-    [0.575,0.235], [0.375,0.208], [0.238,0.336], [0.223,0.480],
-    [0.245,0.610], [0.400,0.710], [0.560,0.755], [0.655,0.775],
-    [0.720,0.792], [0.735,0.600], [0.740,0.420], [0.745,0.330],
-    [0.750,0.215], [0.680,0.230]
+  const TARGET = 712;
+  const RED = &#39;#e23b3b&#39;;
+  const RED_GLOW = &#39;rgba(226,59,59,0.45)&#39;;
+  const MAX_MOTES = 6;
+  const SPAWN_INTERVAL = 900;   // ms
+  const SPAWN_JITTER = 150;     // ms
+  const TRAVEL_TIME = 10000;    // ms
+  const TRAVEL_JITTER = 1000;   // ms
+  const WOBBLE_AMP = 0.03;      // normalized y
+  const WOBBLE_FREQ = 0.05;     // Hz
+  const CAUGHT_PERIOD = 2400;   // ms
+  const PRESEED_X = [0.10, 0.28, 0.45, 0.62];
+
+  // Always-held motes at fixed fibre points
+  const HELD_POINTS = [
+    { x: 0.45, y: 0.40, phase: 0.0 },
+    { x: 0.60, y: 0.62, phase: 0.6 },
+    { x: 0.72, y: 0.30, phase: 1.2 },
+    { x: 0.85, y: 0.55, phase: 1.8 }
   ];
 
-  const FILTER_START_T = 9 / 14;
-  const FILTER_END_T = 11 / 14;
-  const TOTAL_PARTICLES = 52;
-  const GOLDEN_RATIO = 0.6180339887;
-  const GAP_MIN = 0.9 * (1 / TOTAL_PARTICLES);
-  const MAX_HELD = 6;
+  const section = document.getElementById(&#39;filter&#39;);
+  const media = document.getElementById(&#39;filter-media&#39;);
+  const canvas = document.getElementById(&#39;motes&#39;);
+  const ctx = canvas.getContext(&#39;2d&#39;);
+  const numEl = document.getElementById(&#39;big-number&#39;);
 
-  let particles = [];
-  let heldParticles = [];
+  const isEmbedded = window.self !== window.top;
+  const prefersReduced = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
+
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  let cssW = 0, cssH = 0;
+  let motes = [];
   let rafId = null;
-  let lastTime = 0;
-  let dpr = 1;
-  let cw = 0, ch = 0;
+  let lastSpawnAt = 0;
+  let startedAt = 0;
+  let countStartAt = 0;
+  let countRafId = null;
+  let active = false;
+  let visible = true;
 
-  // --- Spline Math ---
-  function catmullRom(p0, p1, p2, p3, t) {
-    const t2 = t * t;
-    const t3 = t2 * t;
-    return [
-      0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 + (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3),
-      0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 + (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3)
-    ];
-  }
-
-  function getPointOnLoop(t) {
-    t = ((t % 1) + 1) % 1; // wrap 0..1
-    const scaledT = t * LOOP.length;
-    const i = Math.floor(scaledT);
-    const localT = scaledT - i;
-    const p0 = LOOP[(i - 1 + LOOP.length) % LOOP.length];
-    const p1 = LOOP[i];
-    const p2 = LOOP[(i + 1) % LOOP.length];
-    const p3 = LOOP[(i + 2) % LOOP.length];
-    return catmullRom(p0, p1, p2, p3, localT);
-  }
-
-  // Cheap value noise for smooth wobble
-  function smoothNoise(x) {
-    const i = Math.floor(x);
-    const f = x - i;
-    const a = Math.sin(i * 12.9898) * 43758.5453;
-    const b = Math.sin((i + 1) * 12.9898) * 43758.5453;
-    const v1 = a - Math.floor(a);
-    const v2 = b - Math.floor(b);
-    const smooth = f * f * (3 - 2 * f);
-    return v1 * (1 - smooth) + v2 * smooth;
-  }
-
-  // --- Particle System ---
-  function createParticle(t = 0) {
-    return {
-      t: t,
-      // ±8% speed variance
-      speed: (1 / 16) * (0.92 + Math.random() * 0.16), 
-      wobblePhase: Math.random() * 100,
-      // Halved wobble amplitude to hug the line
-      wobbleAmp: 0.004 + Math.random() * 0.006,
-      wobbleSpeed: 0.0001 + Math.random() * 0.0002,
-      radius: 2.0 + Math.random() * 0.8,
-      opacity: 0.5,
-      state: &#39;moving&#39;
-    };
-  }
-
-  function createHeldParticle() {
-    const startPt = getPointOnLoop(FILTER_START_T);
-    const endPt = getPointOnLoop(FILTER_END_T);
-    // Random point inside the filter bounds
-    const u = Math.random();
-    const v = Math.random() * 0.6 - 0.3; // Keep it more centered
-    const fx = startPt[0] + (endPt[0] - startPt[0]) * u;
-    const fy = startPt[1] + (endPt[1] - startPt[1]) * u + v * 0.02;
-    
-    return {
-      x: fx,
-      y: fy,
-      radius: 2.0 + Math.random() * 0.8,
-      opacity: 0,
-      targetOpacity: 0.6 + Math.random() * 0.2,
-      pulsePhase: Math.random() * Math.PI * 2,
-      fadeOut: false
-    };
-  }
-
-  function initParticles() {
-    particles = [];
-    heldParticles = [];
-    
-    // Golden ratio spacing to kill clumping
-    for (let i = 0; i &lt; TOTAL_PARTICLES; i++) {
-      const baseT = (i * GOLDEN_RATIO + Math.random() * 0.05) % 1;
-      particles.push(createParticle(baseT));
-    }
-  }
-
-  function updateParticle(p, dt) {
-    // Moving state
-    let currentSpeed = p.speed;
-    p.t = (p.t + currentSpeed * dt / 1000) % 1;
-
-    // Virus catches at filter face (~25% chance)
-    if (p.t &gt;= FILTER_START_T &amp;&amp; p.t &lt; FILTER_START_T + 0.01 &amp;&amp; p.state === &#39;moving&#39;) {
-      if (Math.random() &lt; 0.25) {
-        p.state = &#39;caught&#39;;
-        
-        // Add to held list
-        if (heldParticles.length &gt;= MAX_HELD) {
-          // Mark oldest for fade out
-          heldParticles[0].fadeOut = true;
-        }
-        heldParticles.push(createHeldParticle());
-        
-        // Safeguard: Immediately respawn the caught particle to maintain loop density
-        p.t = 0.0; 
-        p.state = &#39;moving&#39;;
-      }
-    }
-  }
-
-  function updateHeldParticle(p, dt) {
-    p.pulsePhase += dt * 0.002;
-    
-    if (p.fadeOut) {
-      p.opacity -= dt * 0.001; // Fade out over 1s
-    } else if (p.opacity &lt; p.targetOpacity) {
-      p.opacity = Math.min(p.targetOpacity, p.opacity + dt * 0.002); // Fade in over 0.5s
-    }
-  }
-
-  function drawParticle(p) {
-    if (p.opacity &lt;= 0) return;
-    
-    const wobble = (smoothNoise(p.wobblePhase) - 0.5) * 2 * p.wobbleAmp;
-    const pt = getPointOnLoop(p.t + wobble);
-    
-    const x = pt[0] * cw;
-    const y = pt[1] * ch;
-    const r = p.radius * dpr;
-
-    ctx.globalAlpha = p.opacity;
-    
-    // Soft wide halo
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
-    grad.addColorStop(0, &#39;rgba(226, 59, 59, 0.8)&#39;);
-    grad.addColorStop(0.3, &#39;rgba(226, 59, 59, 0.4)&#39;);
-    grad.addColorStop(1, &#39;rgba(226, 59, 59, 0)&#39;);
-    
-    ctx.shadowColor = &#39;#e23b3b&#39;;
-    ctx.shadowBlur = 2 * dpr; // Minimal glow
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Small solid core
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = &#39;rgba(226, 59, 59, 1)&#39;;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-  }
-
-  function drawHeldParticle(p) {
-    if (p.opacity &lt;= 0) return;
-    
-    const x = p.x * cw;
-    const y = p.y * ch;
-    const r = p.radius * dpr;
-    
-    // Gentle breathing opacity
-    const breath = 0.8 + Math.sin(p.pulsePhase) * 0.2;
-    ctx.globalAlpha = p.opacity * breath;
-    
-    // Soft wide halo
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
-    grad.addColorStop(0, &#39;rgba(226, 59, 59, 0.8)&#39;);
-    grad.addColorStop(0.3, &#39;rgba(226, 59, 59, 0.4)&#39;);
-    grad.addColorStop(1, &#39;rgba(226, 59, 59, 0)&#39;);
-    
-    ctx.shadowColor = &#39;#e23b3b&#39;;
-    ctx.shadowBlur = 2 * dpr;
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Small solid core
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = &#39;rgba(226, 59, 59, 1)&#39;;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-  }
-
-  function drawStaticFrame() {
-    resizeCanvas();
-    ctx.clearRect(0, 0, cw, ch);
-    particles.forEach(p =&gt; {
-      p.wobblePhase += 10; 
-      drawParticle(p);
-    });
-    heldParticles.forEach(p =&gt; drawHeldParticle(p));
-  }
-
-  function animate(time) {
-    if (!lastTime) lastTime = time;
-    const dt = Math.min(50, time - lastTime); 
-    lastTime = time;
-
-    ctx.clearRect(0, 0, cw, ch);
-    
-    particles.forEach(p =&gt; {
-      p.wobblePhase += p.wobbleSpeed * dt;
-      updateParticle(p, dt);
-    });
-
-    // Enforce minimum spacing (following distance) to kill clumping
-    // Sort by t position along the loop
-    particles.sort((a, b) =&gt; a.t - b.t);
-    
-    for (let i = 0; i &lt; particles.length; i++) {
-      const p = particles[i];
-      if (p.state !== &#39;moving&#39;) continue; // Only enforce on moving train
-      
-      const next = particles[(i + 1) % particles.length];
-      if (next.state !== &#39;moving&#39;) continue;
-      
-      let diff = next.t - p.t;
-      if (diff &lt; 0) diff += 1; // Handle wrap-around
-      
-      // If the gap is too small, clamp the particle back
-      if (diff &lt; GAP_MIN) {
-        let newT = next.t - GAP_MIN;
-        if (newT &lt; 0) newT += 1;
-        p.t = newT;
-      }
-    }
-
-    particles.forEach(p =&gt; {
-      drawParticle(p);
-    });
-
-    // Update and draw held particles
-    for (let i = heldParticles.length - 1; i &gt;= 0; i--) {
-      const p = heldParticles[i];
-      updateHeldParticle(p, dt);
-      if (p.opacity &lt;= 0 &amp;&amp; p.fadeOut) {
-        heldParticles.splice(i, 1);
-      } else {
-        drawHeldParticle(p);
-      }
-    }
-
-    rafId = requestAnimationFrame(animate);
-  }
-
-  // --- Canvas Setup ---
-  function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-    dpr = window.devicePixelRatio || 1;
-    cw = rect.width;
-    ch = rect.height;
-    canvas.width = cw * dpr;
-    canvas.height = ch * dpr;
+  // ---------- Resize ----------
+  function resize(){
+    const rect = media.getBoundingClientRect();
+    cssW = Math.max(1, rect.width);
+    cssH = Math.max(1, rect.height);
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(1,0,0,1,0,0);
     ctx.scale(dpr, dpr);
   }
 
-  // --- Activation Logic ---
-  function startFilter() {
-    if (reducedMotion) return;
-    if (rafId) cancelAnimationFrame(rafId);
-    resizeCanvas();
-    initParticles();
-    lastTime = 0;
-    rafId = requestAnimationFrame(animate);
-    
-    bigNumber.textContent = &#39;0&#39;;
-    animateNumber();
+  // ---------- Mote factory ----------
+  function makeMote(startX, now){
+    const y = 0.15 + Math.random() * 0.70;
+    const travelMs = TRAVEL_TIME + (Math.random()*2 - 1) * TRAVEL_JITTER;
+    const speed = 1 / travelMs; // normalized x per ms
+    const willCapture = Math.random() &lt; (1/3);
+    const captureX = willCapture ? (0.35 + Math.random() * 0.45) : null;
+    return {
+      x: startX,
+      y: y,
+      baseY: y,
+      speed: speed,
+      radius: 1.4 + Math.random() * 1.2,
+      opacity: 0.34 + Math.random() * 0.22,
+      wobblePhase: Math.random() * Math.PI * 2,
+      bornAt: now,
+      captured: false,
+      captureX: captureX,
+      capturedAt: 0
+    };
   }
 
-  function stopFilter() {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
+  function makePreseedMote(startX, now){
+    const m = makeMote(startX, now);
+    // Re-baseline bornAt so it&#39;s already drifting at startX
+    m.bornAt = now - (startX / m.speed);
+    return m;
+  }
+
+  function preseed(now){
+    motes = [];
+    for (let i = 0; i &lt; PRESEED_X.length; i++){
+      motes.push(makePreseedMote(PRESEED_X[i], now));
     }
+    lastSpawnAt = now;
   }
 
-  // --- Number animation ---
-  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+  // ---------- Draw ----------
+  function drawMote(x, y, r, opacity){
+    const rr = Math.min(r, 4.5);
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = RED;
+    ctx.shadowColor = RED_GLOW;
+    ctx.shadowBlur = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, rr, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-  function animateNumber(){
-    const DURATION = 1600;
-    const start = performance.now();
+  function drawHeld(xN, yN, phaseOffset, now){
+    const phase = ((now + phaseOffset) % CAUGHT_PERIOD) / CAUGHT_PERIOD;
+    const pulse = Math.sin(phase * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5; // 0..1
+    const scale = 1.0 + 0.25 * pulse;
+    const opacity = 0.60 + 0.25 * pulse;
+    const radius = 3.5 * scale;
+    drawMote(xN * cssW, yN * cssH, radius, opacity);
+  }
 
+  function drawFrame(now){
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.globalCompositeOperation = &#39;source-over&#39;;
+
+    // Always-held motes
+    for (let i = 0; i &lt; HELD_POINTS.length; i++){
+      const h = HELD_POINTS[i];
+      drawHeld(h.x, h.y, h.phase, now);
+    }
+
+    // Traveling motes
+    for (let i = 0; i &lt; motes.length; i++){
+      const m = motes[i];
+      if (m.captured){
+        // Snagged: pulse in place
+        const phase = ((now - m.capturedAt) % CAUGHT_PERIOD) / CAUGHT_PERIOD;
+        const pulse = Math.sin(phase * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5;
+        const scale = 1.0 + 0.25 * pulse;
+        const opacity = 0.60 + 0.25 * pulse;
+        const radius = 3.5 * scale;
+        drawMote(m.x * cssW, m.y * cssH, radius, opacity);
+      } else {
+        // Drifting
+        const wobble = Math.sin((now / 1000) * WOBBLE_FREQ * Math.PI * 2 + m.wobblePhase) * WOBBLE_AMP;
+        const y = m.baseY + wobble;
+        drawMote(m.x * cssW, y * cssH, m.radius, m.opacity);
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  // ---------- Loop ----------
+  function loop(now){
+    if (!active) return;
+    // Spawn
+    const sinceSpawn = now - lastSpawnAt;
+    const interval = SPAWN_INTERVAL + (Math.random()*2 - 1) * SPAWN_JITTER;
+    if (sinceSpawn &gt;= interval &amp;&amp; motes.length &lt; MAX_MOTES){
+      motes.push(makeMote(-0.05, now));
+      lastSpawnAt = now;
+    }
+    // Update &amp; cull
+    const dt = 16; // approx
+    motes = motes.filter(function(m){
+      if (m.captured) return true;
+      m.x += m.speed * 16; // advance based on fixed dt step
+      if (m.captureX !== null &amp;&amp; m.x &gt;= m.captureX){
+        m.captured = true;
+        m.capturedAt = now;
+        m.x = m.captureX;
+      }
+      if (m.x &gt; 1.05) return false;
+      return true;
+    });
+    drawFrame(now);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ---------- Count-up ----------
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+  function runCountUp(){
+    cancelCountUp();
+    countStartAt = performance.now() + 300;
     function step(now){
-      const p = Math.min(1, (now - start) / DURATION);
-      const e = easeOutCubic(p);
-      const n = Math.round(e * 712);
-      bigNumber.textContent = n.toLocaleString();
-
-      if (p &lt; 1) {
-        requestAnimationFrame(step);
-      } else {
-        bigNumber.textContent = &#39;712&#39;;
+      if (!active) return;
+      if (now &lt; countStartAt){
+        numEl.textContent = &#39;0&#39;;
+        countRafId = requestAnimationFrame(step);
+        return;
       }
+      const elapsed = now - countStartAt;
+      const dur = 1600;
+      if (elapsed &gt;= dur){
+        numEl.textContent = String(TARGET);
+        return;
+      }
+      const v = Math.round(easeOutCubic(elapsed / dur) * TARGET);
+      numEl.textContent = String(v);
+      countRafId = requestAnimationFrame(step);
     }
-    requestAnimationFrame(step);
+    countRafId = requestAnimationFrame(step);
+  }
+  function cancelCountUp(){
+    if (countRafId){ cancelAnimationFrame(countRafId); countRafId = null; }
   }
 
-  // --- Init ---
-  if (reducedMotion) {
-    bigNumber.textContent = &#39;712&#39;;
-    resizeCanvas();
-    initParticles();
-    // Distribute particles nicely for static frame
-    particles.forEach((p, i) =&gt; {
-      p.t = i / particles.length;
-    });
-    // Add a few held particles statically
-    for(let i=0; i&lt;4; i++) {
-        const hp = createHeldParticle();
-        hp.opacity = hp.targetOpacity;
-        heldParticles.push(hp);
+  // ---------- Static frame (reduced motion) ----------
+  function drawStatic(){
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.globalCompositeOperation = &#39;source-over&#39;;
+    // Always-held motes at base pulse
+    for (let i = 0; i &lt; HELD_POINTS.length; i++){
+      const h = HELD_POINTS[i];
+      drawMote(h.x * cssW, h.y * cssH, 3.5, 0.60);
     }
-    drawStaticFrame();
-  } else {
-    bigNumber.textContent = &#39;0&#39;;
-    const isEmbedded = window.self !== window.top;
-    
-    if (isEmbedded) {
-      window.addEventListener(&#39;message&#39;, function(e){
-        if (!e.data) return;
-        if (e.data.type === &#39;nf-active&#39;) startFilter();
-        else if (e.data.type === &#39;nf-inactive&#39;) stopFilter();
-      });
+    // A few resting travelers
+    const resting = [0.10, 0.28, 0.45];
+    for (let i = 0; i &lt; resting.length; i++){
+      const x = resting[i];
+      const y = 0.15 + (i * 0.17) % 0.7;
+      drawMote(x * cssW, y * cssH, 1.4 + (i % 3) * 0.4, 0.40);
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  // ---------- Start / Stop ----------
+  function start(){
+    if (active) return;
+    active = true;
+    visible = true;
+    if (cssW === 0) resize();
+    numEl.textContent = &#39;0&#39;;
+    if (prefersReduced){
+      numEl.textContent = String(TARGET);
+      drawStatic();
+      return;
+    }
+    const now = performance.now();
+    startedAt = now;
+    preseed(now);
+    runCountUp();
+    rafId = requestAnimationFrame(loop);
+  }
+  function stop(){
+    active = false;
+    if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+    cancelCountUp();
+    numEl.textContent = &#39;0&#39;;
+    if (ctx &amp;&amp; cssW){
+      ctx.clearRect(0, 0, cssW, cssH);
+    }
+    motes = [];
+  }
+
+  // ---------- Resize handler ----------
+  let resizeRaf = null;
+  function onResize(){
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(function(){
+      resize();
+      if (active &amp;&amp; prefersReduced) drawStatic();
+    });
+  }
+  window.addEventListener(&#39;resize&#39;, onResize);
+
+  // ---------- Visibility ----------
+  document.addEventListener(&#39;visibilitychange&#39;, function(){
+    if (document.hidden){
+      if (active){
+        visible = false;
+        if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+        cancelCountUp();
+      }
     } else {
-      const io = new IntersectionObserver((entries, observer) =&gt; {
-        entries.forEach(entry =&gt; { 
-          if (entry.isIntersecting) { 
-            startFilter(); 
-            observer.disconnect(); 
-          } 
-        });
-      }, { threshold: 0.35 });
-      io.observe(document.getElementById(&#39;section&#39;));
-    }
-
-    window.addEventListener(&#39;resize&#39;, () =&gt; {
-      if (rafId) {
-        resizeCanvas();
-      } else {
-        resizeCanvas();
-        drawStaticFrame();
+      if (active &amp;&amp; !visible){
+        visible = true;
+        const now = performance.now();
+        lastSpawnAt = now;
+        // Re-baseline mote births so they continue smoothly
+        for (let i = 0; i &lt; motes.length; i++){
+          const m = motes[i];
+          if (!m.captured){
+            m.bornAt = now - (m.x / m.speed);
+          }
+        }
+        runCountUp();
+        rafId = requestAnimationFrame(loop);
       }
+    }
+  });
+
+  // ---------- Activation wiring ----------
+  if (isEmbedded){
+    window.addEventListener(&#39;message&#39;, function(e){
+      const d = e.data;
+      if (!d || typeof d !== &#39;object&#39;) return;
+      if (d.type === &#39;nf-active&#39;) start();
+      else if (d.type === &#39;nf-inactive&#39;) stop();
     });
+  } else {
+    const io = new IntersectionObserver(function(entries){
+      for (let i = 0; i &lt; entries.length; i++){
+        if (entries[i].isIntersecting) start();
+        else stop();
+      }
+    }, { threshold: 0.35 });
+    io.observe(section);
   }
+
+  // Initial sizing
+  resize();
 })();
 &lt;/script&gt;
 &lt;/body&gt;
