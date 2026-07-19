@@ -1819,699 +1819,392 @@ if (isEmbedded) {
 &lt;head&gt;
 &lt;meta charset=&quot;UTF-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-&lt;title&gt;One sick worker, and the building breathes it in&lt;/title&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;title&gt;The filter keeps the virus it catches alive — NanoFlashing&lt;/title&gt;
 &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
 &lt;style&gt;
-:root {
+:root{
   --bg:#edf0f2;
   --ink:#1f2327;
   --headline-ink:#1a1a1a;
   --muted:#8a9095;
+  --accent:#1b7bff;
   --red:#e23b3b;
   --hair:rgba(20,24,28,0.08);
-  --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
-  --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
+  --stack:-apple-system, system-ui, &#x27;Inter&#x27;, &#x27;Space Grotesk&#x27;, sans-serif;
+  --mono:&#x27;Space Mono&#x27;, ui-monospace, monospace;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0;}
 
-html, body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--stack);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--stack);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
-section {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  overflow: hidden;
-  background: var(--bg);
-  display: block;
+section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:100vh;
+  width:100%;
+  overflow:hidden;
+  background:var(--bg);
 }
 
-.stage {
-  position: absolute;
-  inset: 0;
+/* === Background video block (right side) === */
+.video-stack{
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
+  z-index:0;
+  overflow:hidden;
+  background:var(--bg);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.video-stack video,
+.video-stack img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.video-stack img.poster{
+  opacity:0;
+  z-index:3;
+}
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* === Drifting grey smoke overlay (right block) === */
+.smoke{
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:58%;
+  z-index:1;
+  pointer-events:none;
+  opacity:0.3;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.smoke span{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  filter:blur(50px);
+  mix-blend-mode:normal;
+  will-change:transform, opacity;
+}
+.smoke .s1{
+  width:70vw; height:65vh;
+  top:-15vh; right:-12vw;
+  background:radial-gradient(circle at 50% 50%, rgba(180,194,172,0.85), rgba(180,194,172,0.45) 50%, transparent 75%);
+  animation:drift1 24s ease-in-out infinite;
+}
+.smoke .s2{
+  width:60vw; height:60vh;
+  top:15vh; right:-6vw;
+  background:radial-gradient(circle at 50% 50%, rgba(188,200,178,0.8), rgba(188,200,178,0.4) 55%, transparent 78%);
+  animation:drift2 32s ease-in-out infinite;
+}
+.smoke .s3{
+  width:50vw; height:50vh;
+  top:45vh; right:4vw;
+  background:radial-gradient(circle at 50% 50%, rgba(174,188,166,0.75), rgba(174,188,166,0.35) 55%, transparent 80%);
+  animation:drift3 28s ease-in-out infinite;
+}
+.smoke .s4{
+  width:40vw; height:45vh;
+  top:5vh; right:22vw;
+  background:radial-gradient(circle at 50% 50%, rgba(192,202,182,0.7), rgba(192,202,182,0.3) 60%, transparent 82%);
+  animation:drift4 38s ease-in-out infinite;
+}
+@keyframes drift1{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+  35%  { transform:translate3d(-8vw,4vh,0) scale(1.1); opacity:1; }
+  70%  { transform:translate3d(-4vw,-3vh,0) scale(1.05); opacity:0.7; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
+}
+@keyframes drift2{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+  30%  { transform:translate3d(-6vw,-4vh,0) scale(1.12); opacity:0.95; }
+  65%  { transform:translate3d(-10vw,3vh,0) scale(1.06); opacity:0.6; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
+}
+@keyframes drift3{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+  40%  { transform:translate3d(-7vw,-5vh,0) scale(1.14); opacity:0.9; }
+  75%  { transform:translate3d(-3vw,4vh,0) scale(1.08); opacity:0.5; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
+}
+@keyframes drift4{
+  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+  50%  { transform:translate3d(-9vw,3vh,0) scale(1.1); opacity:0.85; }
+  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
+}
+@media (prefers-reduced-motion: reduce){
+  .smoke span{ animation:none !important; }
+  .smoke .s1{ opacity:0.8; transform:translate3d(-4vw,0,0); }
+  .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
+  .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
+  .smoke .s4{ opacity:0.55; }
 }
 
-#bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  z-index: 0;
+/* === Text column === */
+.text-col{
+  position:relative;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start; align-self:flex-start;
+  align-items:flex-start;
+  max-width:min(48%, 620px);
+  padding-top:72px;
+  padding-left:clamp(24px, 6vw, 96px);
+  padding-right:24px;
 }
 
-#fx {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.text-col {
-  position: absolute;
-  z-index: 3;
-  left: 0;
-  top: 0;
-  max-width: min(42%, 560px);
-  padding-top: 140px;
-  padding-left: clamp(24px, 6vw, 96px);
-  padding-right: 24px;
-}
-
-h1.headline {
-  font-family: var(--stack);
-  font-weight: 600;
+.headline{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--headline-ink);
   font-size: clamp(24px, 2.7vw, 34px);
   line-height: 1.32;
-  letter-spacing: -0.022em;
-  color: var(--headline-ink);
+  letter-spacing:-0.022em;
+  margin-bottom:18px;
+}
+.headline em{
+  color:var(--red);
+  font-style:normal;
+  font-weight:600;
 }
 
-h1.headline em {
-  font-style: normal;
-  color: var(--red);
-  font-weight: 600;
+/* === Stat block === */
+.stat-block{
+  display:flex;
+  align-items:center;
+  gap:24px;
+  margin-bottom:4px;
+}
+.big-number{
+  font-family:var(--stack);
+  font-weight:600;
+  color:var(--red);
+  font-size:clamp(52px, 4.6vw, 72px);
+  line-height:0.9;
+  letter-spacing:-0.04em;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
 }
 
-p.body {
-  font-size: 19px;
-  line-height: 1.5;
+.caption{
+  font-size:clamp(17px, 1.5vw, 20px);
+  line-height:1.45;
+  color:var(--ink);
+  max-width:26ch;
+  padding-top:6px;
+}
+
+/* === Body paragraph === */
+.body-text{
+  max-width: 540px;
+  font-size:19px;
+  line-height:1.4;
+  margin-top:10px;
   color: #1a1a1a;
-  max-width: 440px;
-  margin-top: 22px;
+}
+.body-text a{
+  color:inherit;
+  text-decoration:none;
+  border-bottom:1px solid rgba(20,24,28,0.22);
+  transition:color 0.18s ease, border-color 0.18s ease;
+}
+.body-text a:hover{
+  color:var(--red);
+  border-bottom-color:var(--red);
 }
 
-.caption {
-  position: absolute;
-  right: 24px;
-  bottom: 20px;
-  z-index: 3;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--muted);
-  text-transform: uppercase;
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.scrim {
-  display: none;
-}
-
-@media (max-width: 880px) {
-  .text-col {
-    position: relative;
-    max-width: none;
-    width: 100%;
-    padding: 100px 20px 20px;
-    z-index: 3;
+/* === Mobile === */
+@media (max-width: 880px){
+  section{
+    overflow-x:hidden;
   }
-  .scrim {
-    display: block;
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background: linear-gradient(180deg,
-      rgba(237, 240, 242, 0.92) 0%,
-      rgba(237, 240, 242, 0.65) 30%,
-      rgba(237, 240, 242, 0) 55%);
-    pointer-events: none;
+  .video-stack,
+  .smoke{
+    width:100%;
+    max-width:100%;
+    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
+    mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
   }
-  .caption {
-    display: none;
+  .scrim{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:linear-gradient(to right,
+      var(--bg) 0%,
+      rgba(237,240,242,0.88) 35%,
+      rgba(237,240,242,0.45) 65%,
+      rgba(237,240,242,0.2) 100%);
+  }
+  .text-col{
+    max-width:none;
+    width:100%;
+    padding-left:clamp(24px, 6vw, 32px);
+    padding-right:clamp(24px, 6vw, 32px);
+  }
+  .stat-block{
+    flex-direction:column;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .caption{
+    padding-top:0;
+    max-width:none;
+  }
+  .body-text{
+    font-size:16px;
+    max-width:none;
+    margin-bottom:12px;
+  }
+  .body-text:last-child{ margin-bottom:0; }
+  .scrim{
+    background:linear-gradient(to right,
+      rgba(237,240,242,0.96) 0%,
+      rgba(237,240,242,0.82) 40%,
+      rgba(237,240,242,0.4) 72%,
+      rgba(237,240,242,0.1) 100%);
   }
 }
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-&lt;section&gt;
-  &lt;div class=&quot;stage&quot;&gt;
-    &lt;img id=&quot;bg&quot; src=&quot;assets/videos/office_spread_placeholder.jpg?v=1&quot; alt=&quot;&quot;&gt;
-    &lt;canvas id=&quot;fx&quot; style=&quot;display:none&quot;&gt;&lt;/canvas&gt;
+
+&lt;section id=&quot;section&quot;&gt;
+  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
+    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/virus_reservoir_loop.mp4?v=1&quot;
+           poster=&quot;assets/videos/posters/virus_reservoir.jpg&quot;
+           muted playsinline loop preload=&quot;auto&quot;
+           style=&quot;opacity:1; z-index:1;&quot;&gt;&lt;/video&gt;
+    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/virus_reservoir.jpg&quot; alt=&quot;&quot;&gt;
   &lt;/div&gt;
+
+  &lt;div class=&quot;smoke&quot; aria-hidden=&quot;true&quot;&gt;
+    &lt;span class=&quot;s1&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;s2&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;s3&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;s4&quot;&gt;&lt;/span&gt;
+  &lt;/div&gt;
+
   &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
+
   &lt;div class=&quot;text-col&quot;&gt;
-    &lt;h1 class=&quot;headline&quot;&gt;One sick worker, and the building &lt;em&gt;breathes it in&lt;/em&gt;&lt;/h1&gt;
-    &lt;p class=&quot;body&quot;&gt;An air-handling unit does not clean each floor on its own — it mixes the air and sends it back out to every floor. A conventional filter traps dust, but the live virus rides straight through it, so the whole building shares one person&#39;s breath.&lt;/p&gt;
+    &lt;h1 class=&quot;headline&quot;&gt;
+      The filter keeps the virus&lt;br&gt;
+      it catches &lt;em&gt;alive&lt;/em&gt;
+    &lt;/h1&gt;
+
+    &lt;div class=&quot;stat-block&quot;&gt;
+      &lt;div class=&quot;big-number&quot; id=&quot;bigNumber&quot;&gt;0 days&lt;/div&gt;
+      &lt;p class=&quot;caption&quot;&gt;a live virus stayed infectious on filter media — the media holds it, it does not kill it.&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;p class=&quot;body-text&quot;&gt;
+      A conventional filter catches the virus — but it does not kill it. Trapped in the fibers, the virus stays infectious for days.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      Canada&#x27;s National Microbiology Laboratory &lt;a href=&quot;https://www.nature.com/articles/s41598-020-80098-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;recovered live, infectious virus from filter media&lt;/a&gt; 21 days after it landed — long after the person who breathed it out had gone.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      French researchers pushed an airborne virus through a real air-handling filter — it trapped most of it, but &lt;a href=&quot;https://pmc.ncbi.nlm.nih.gov/articles/PMC7087798/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;about 500 infectious particles still passed through&lt;/a&gt;.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      In another test, virus on an air-handling filter was &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/28660425/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;still infectious after ten hours of running air&lt;/a&gt; — the airstream does not clear it out.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      The EPA tells the workers who change these filters to &lt;a href=&quot;https://www.epa.gov/coronavirus/air-cleaners-hvac-filters-and-coronavirus-covid-19&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;put on gloves, goggles, and a respirator&lt;/a&gt; first.
+    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;
+      The filter meant to clean the air becomes a store of live virus — held in the fibers the building&#x27;s air keeps passing through.
+    &lt;/p&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;caption&quot;&gt;one air system · every floor&lt;/div&gt;
 &lt;/section&gt;
 
 &lt;script&gt;
-(function() {
-  &#39;use strict&#39;;
+(function(){
+  const reducedMotion = window.matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
+  const videoStack = document.getElementById(&#x27;videoStack&#x27;);
+  const videoA = document.getElementById(&#x27;videoA&#x27;);
+  const bigNumber = document.getElementById(&#x27;bigNumber&#x27;);
 
-  const CONFIG = {
-    riserX:        0.8345,
-    riserTopY:     0.155,
-    riserBotY:     0.905,
-    ahuGlow:       { x: 0.78, y: 0.105 },
-    branchY:       [0.174, 0.372, 0.566, 0.754],
-    diffuserFadeX: 0.66,
-    source:        { x: 0.45, y: 0.84, floor: 3 },
-    offices: [
-      { x0: 0.53, x1: 0.93, y0: 0.23, y1: 0.39 },
-      { x0: 0.53, x1: 0.93, y0: 0.41, y1: 0.57 },
-      { x0: 0.53, x1: 0.93, y0: 0.59, y1: 0.74 },
-      { x0: 0.53, x1: 0.93, y0: 0.77, y1: 0.93 }
-    ]
-  };
-
-  const RED = &#39;#e23b3b&#39;;
+  /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
+  if (reducedMotion) {
+    videoStack.classList.add(&#x27;reduced&#x27;);
+  }
   const isEmbedded = window.self !== window.top;
-  const reduceMotion = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
-
-  const canvas = document.getElementById(&#39;fx&#39;);
-  const ctx = canvas.getContext(&#39;2d&#39;);
-
-  let cssW = 0, cssH = 0, dpr = 1;
-  let imgRect = { x: 0, y: 0, w: 0, h: 0 };
-  let imgReady = false;
-
-  const motes = [];
-  let startTime = 0;
-  let rafId = null;
-  let running = false;
-  let observer = null;
-
-  const hazeBlobs = [];
-  let floorReached = [false, false, false, true]; // index 3 = source (bottom) floor, sick from t=0
-  let floorReachedTime = [0, 0, 0, 0];
-  let ahuPulse = 0;
-  let sourceBreath = 0;
-  let allSick = false;   // becomes true once every floor is infected — then we STOP emitting (play once, no re-loop)
-
-  // ---- Main path (straight riser + straight branches) ----
-  // Motes follow this strictly by arc length; a mote&#39;s position is ALWAYS
-  // an exact point on this polyline — never an offset.
-  const PATH = [
-    [0.66,   0.754],  // 0: enter the duct at the bottom-floor diffuser end (on the branch pipe)
-    [0.8345, 0.754],  // 1: RIGHT along the bottom branch to the riser
-    [0.8345, 0.155],  // 2: UP the straight riser to the AHU inlet
-    [0.8345, 0.905]   // 3: DOWN the straight riser
-  ];
-
-  const DOWN_SEG = 2; // segment index where motes travel DOWN the riser (path has 3 segments: 0,1,2)
-
-  let pathTable = null;
-  let pathTotal = 0;
-
-  function buildPathTable() {
-    pathTable = [0];
-    let total = 0;
-    for (let i = 0; i &lt; PATH.length - 1; i++) {
-      const dx = PATH[i+1][0] - PATH[i][0];
-      const dy = PATH[i+1][1] - PATH[i][1];
-      total += Math.sqrt(dx*dx + dy*dy);
-      pathTable.push(total);
-    }
-    pathTotal = total;
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = &#x27;0 days&#x27;;
+    animateNumber();
+  }
+  function stopFilter(){
+    try { videoA.pause(); } catch(e){}
   }
 
-  function pointOnPath(s) {
-    s = Math.max(0, Math.min(pathTotal, s));
-    let i = 0;
-    while (i &lt; pathTable.length - 1 &amp;&amp; pathTable[i+1] &lt; s) i++;
-    const segStart = pathTable[i];
-    const segEnd = pathTable[i+1];
-    const segLen = segEnd - segStart;
-    const u = segLen &gt; 0 ? (s - segStart) / segLen : 0;
-    const x = PATH[i][0] + (PATH[i+1][0] - PATH[i][0]) * u;
-    const y = PATH[i][1] + (PATH[i+1][1] - PATH[i][1]) * u;
-    return { x, y, seg: i };
-  }
+  /* ---------- Number animation ---------- */
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
 
-  function initHazeBlobs() {
-    hazeBlobs.length = 0;
-    for (let i = 0; i &lt; CONFIG.offices.length; i++) {
-      const count = 4;
-      for (let b = 0; b &lt; count; b++) {
-        hazeBlobs.push({
-          floorIdx: i,
-          ox: 0.15 + Math.random() * 0.70,
-          oy: 0.25 + Math.random() * 0.45,
-          rMul: 0.7 + Math.random() * 0.55,
-          opMul: 0.7 + Math.random() * 0.45,
-          phase: Math.random() * Math.PI * 2,
-          driftPhase: Math.random() * Math.PI * 2,
-          driftAmp: 0.012 + Math.random() * 0.018
-        });
-      }
-    }
-  }
+  function animateNumber(){
+    const DURATION = 1600;
+    const start = performance.now();
 
-  function computeImageRect() {
-    const img = document.getElementById(&#39;bg&#39;);
-    const section = document.querySelector(&#39;section&#39;);
-    const sw = section.clientWidth;
-    const sh = section.clientHeight;
-    const iw = img.naturalWidth || 1280;
-    const ih = img.naturalHeight || 720;
-    if (!iw || !ih) return;
-    const s = Math.max(sw / iw, sh / ih);
-    const dw = iw * s;
-    const dh = ih * s;
-    imgRect = {
-      x: (sw - dw) / 2,
-      y: (sh - dh) / 2,
-      w: dw,
-      h: dh
-    };
-  }
+    function step(now){
+      const p = Math.min(1, (now - start) / DURATION);
+      const e = easeOutCubic(p);
 
-  function resize() {
-    const section = document.querySelector(&#39;section&#39;);
-    cssW = section.clientWidth;
-    cssH = section.clientHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.max(1, Math.floor(cssW * dpr));
-    canvas.height = Math.max(1, Math.floor(cssH * dpr));
-    canvas.style.width = cssW + &#39;px&#39;;
-    canvas.style.height = cssH + &#39;px&#39;;
-    computeImageRect();
-    if (reduceMotion) drawStatic();
-  }
+      // count big number 0 -&gt; 21
+      const n = Math.round(e * 21);
+      bigNumber.textContent = n + &#x27; days&#x27;;
 
-  function nx(n) { return imgRect.x + n * imgRect.w; }
-  function ny(n) { return imgRect.y + n * imgRect.h; }
-
-  // ---- Mote factory ----
-  // Each mote advances its distance s along the MAIN path at constant speed.
-  // A full loop takes ~11s. Motes stay EXACTLY on the straight duct lines.
-  // Start EMPTY (no motes at t=0); emit gently.
-
-  let moteCounter = 0;
-  function makeMote() {
-    moteCounter++;
-    const targetFloor = (moteCounter - 1) % 4;
-    return {
-      s: 0,
-      speed: pathTotal / 14 * (0.94 + Math.random() * 0.12),
-      r: 3.2 + Math.random() * 1.0,
-      op: 0.9 + Math.random() * 0.1,
-      phase: Math.random() * Math.PI * 2,
-      x: PATH[0][0],
-      y: PATH[0][1],
-      alpha: 1,
-      diverted: false,
-      divertFloor: -1,
-      divertS: 0,
-      divertTotal: 0,
-      targetFloor: targetFloor,
-      id: moteCounter
-    };
-  }
-
-  function initMotes() {
-    motes.length = 0;
-    // Start EMPTY — no motes at t=0. The first mote emerges from the bottom diffuser.
-  }
-
-  function updateMote(m, dt, t) {
-    m.phase += dt * 1.2;
-
-    if (m.diverted) {
-      // Travel straight horizontally from riser toward diffuserFadeX, fading to 0 by x=0.66.
-      m.divertS += m.speed * dt;
-      const u = Math.min(1, m.divertS / m.divertTotal);
-      m.x = CONFIG.riserX + (CONFIG.diffuserFadeX - CONFIG.riserX) * u;
-      m.y = CONFIG.branchY[m.divertFloor];
-      m.alpha = Math.max(0, 1 - u);
-      if (u &gt;= 1) {
-        if (!floorReached[m.divertFloor]) {
-          floorReached[m.divertFloor] = true;
-          floorReachedTime[m.divertFloor] = t;
-        }
-        m.alpha = 0;
-      }
-      return;
-    }
-
-    const prevS = m.s;
-    m.s += m.speed * dt;
-    const pos = pointOnPath(m.s);
-    m.x = pos.x;
-    m.y = pos.y;
-    m.alpha = 1;
-
-    // AHU glow pulse when a mote reaches the TOP of the riser (end of UP / start of DOWN)
-    if (prevS &lt; pathTable[2] &amp;&amp; m.s &gt;= pathTable[2]) {
-      ahuPulse = Math.max(ahuPulse, 1.0);
-    }
-
-    // Branch diversion on the DOWN leg (segment 3).
-    // A mote diverts ONLY when it reaches ITS OWN targetFloor&#39;s branchY.
-    if (pos.seg === DOWN_SEG) {
-      const by = CONFIG.branchY[m.targetFloor];
-      const prevPos = pointOnPath(prevS);
-      if (prevPos.y &lt; by &amp;&amp; m.y &gt;= by) {
-        m.diverted = true;
-        m.divertFloor = m.targetFloor;
-        m.divertS = 0;
-        m.divertTotal = Math.abs(CONFIG.riserX - CONFIG.diffuserFadeX);
-        m.x = CONFIG.riserX;
-        m.y = by;
-        // Mark the floor infected the instant the air peels into it (the mote is
-        // culled at alpha&lt;=0.01, a hair before its divert reaches u&gt;=1, so setting
-        // it only on completion would usually be missed).
-        if (!floorReached[m.divertFloor]) {
-          floorReached[m.divertFloor] = true;
-          floorReachedTime[m.divertFloor] = t;
-        }
-        return;
-      }
-    }
-  }
-
-  let lastSpawn = 0;
-  function updateMotes(dt, t) {
-    const cap = 6;
-    // Emit only until every floor is sick. Once allSick, stop emitting; the last
-    // motes finish their journey and the building holds fully infected (no re-loop).
-    if (!allSick &amp;&amp; motes.length &lt; cap) {
-      if (t - lastSpawn &gt; 1.7 + Math.random() * 0.3) {
-        motes.push(makeMote());
-        lastSpawn = t;
-      }
-    }
-    for (let i = motes.length - 1; i &gt;= 0; i--) {
-      const m = motes[i];
-      updateMote(m, dt, t);
-      if (m.diverted) {
-        if (m.alpha &lt;= 0.01) motes.splice(i, 1);
-      } else if (m.s &gt; pathTotal) {
-        motes.splice(i, 1);
-      }
-    }
-  }
-
-  function drawMotes() {
-    for (const m of motes) {
-      if (m.alpha &lt;= 0.01) continue;
-      const flicker = 0.85 + 0.15 * Math.sin(m.phase);
-      const op = Math.max(0, Math.min(1, m.op * flicker * m.alpha));
-      const x = nx(m.x);
-      const y = ny(m.y);
-      const r = Math.max(0.5, m.r);
-      ctx.save();
-      ctx.globalAlpha = op;
-      ctx.shadowColor = RED;
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = RED;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  function drawOfficeHaze(o, opacity, t, floorIdx) {
-    if (opacity &lt;= 0.001) return;
-    const x0 = nx(o.x0), x1 = nx(o.x1), y0 = ny(o.y0), y1 = ny(o.y1);
-    const w = x1 - x0;
-    const h = y1 - y0;
-    const cx = (x0 + x1) / 2;
-    const cy = (y0 + y1) / 2;
-    const baseR = Math.max(1, Math.min(w, h) * 0.5);
-
-    ctx.save();
-    ctx.globalCompositeOperation = &#39;source-over&#39;;
-    for (const b of hazeBlobs) {
-      if (b.floorIdx !== floorIdx) continue;
-      const driftX = Math.sin(t * 0.18 + b.driftPhase) * b.driftAmp;
-      const driftY = Math.cos(t * 0.14 + b.driftPhase * 1.3) * b.driftAmp * 0.7;
-      const breathe = 1 + 0.12 * Math.sin(t * 0.5 + b.phase);
-      const bx = cx + (b.ox - 0.5) * w + driftX * w;
-      const by = cy + (b.oy - 0.5) * h + driftY * h;
-      const br = Math.max(1, baseR * b.rMul * breathe);
-      const blobOp = opacity * b.opMul;
-      const grad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
-      grad.addColorStop(0, `rgba(226,59,59,${blobOp})`);
-      grad.addColorStop(0.45, `rgba(226,59,59,${blobOp * 0.5})`);
-      grad.addColorStop(0.78, `rgba(226,59,59,${blobOp * 0.15})`);
-      grad.addColorStop(1, &#39;rgba(226,59,59,0)&#39;);
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(bx, by, br, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function drawAhuGlow(t) {
-    const c = CONFIG;
-    // Soft breathing baseline so the AHU always reads as &quot;the unit&quot;
-    const breathe = 0.18 + 0.08 * Math.sin(t * 0.6);
-    const intensity = Math.max(breathe, ahuPulse * 0.5);
-    if (intensity &lt;= 0.005) return;
-    const gx = nx(c.ahuGlow.x);
-    const gy = ny(c.ahuGlow.y);
-    const gr = Math.max(1, imgRect.w * 0.07);
-    ctx.save();
-    ctx.globalCompositeOperation = &#39;source-over&#39;;
-    ctx.globalAlpha = intensity * 0.7;
-    const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-    grad.addColorStop(0, `rgba(226,59,59,0.9)`);
-    grad.addColorStop(0.35, `rgba(226,59,59,0.4)`);
-    grad.addColorStop(0.7, `rgba(226,59,59,0.1)`);
-    grad.addColorStop(1, &#39;rgba(226,59,59,0)&#39;);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(gx, gy, gr, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function drawSourceGlow(t) {
-    const c = CONFIG;
-    const gx = nx(c.source.x);
-    const gy = ny(c.source.y);
-    const breathe = 1 + 0.18 * Math.sin(t * 0.9);
-    const gr = Math.max(1, imgRect.w * 0.06 * breathe);
-    ctx.save();
-    ctx.globalCompositeOperation = &#39;source-over&#39;;
-    ctx.globalAlpha = 0.5;
-    const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-    grad.addColorStop(0, `rgba(226,59,59,0.55)`);
-    grad.addColorStop(0.4, `rgba(226,59,59,0.22)`);
-    grad.addColorStop(0.75, `rgba(226,59,59,0.06)`);
-    grad.addColorStop(1, &#39;rgba(226,59,59,0)&#39;);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(gx, gy, gr, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function getHazeOpacity(floorIdx, t) {
-    const c = CONFIG;
-    const max = 0.42;
-    let fadeIn;
-    if (floorIdx === c.source.floor) {
-      // Bottom floor: its own infection — haze grows from the start
-      fadeIn = Math.min(1, Math.max(0, t / 2));
-    } else {
-      // Other floors: grow only after a descending mote reaches that floor
-      if (floorReached[floorIdx]) {
-        const elapsed = t - floorReachedTime[floorIdx];
-        fadeIn = Math.min(1, Math.max(0, elapsed / 1.5));
+      if (p &lt; 1) {
+        requestAnimationFrame(step);
       } else {
-        fadeIn = 0;
+        bigNumber.textContent = &#x27;21 days&#x27;;
       }
     }
-    const breathe = 1 + 0.15 * Math.sin((t * Math.PI * 2) / 4 + floorIdx * 0.9);
-    return Math.min(max, fadeIn * max * breathe);
+
+    requestAnimationFrame(step);
   }
 
-  function drawFrame(t) {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, cssW, cssH);
-    for (let i = 0; i &lt; CONFIG.offices.length; i++) {
-      drawOfficeHaze(CONFIG.offices[i], getHazeOpacity(i, t), t, i);
-    }
-    drawSourceGlow(t);
-    drawAhuGlow(t);
-    drawMotes();
-  }
-
-  function drawStatic() {
-    // Reduced-motion: a few resting red dots ON the riser and one on each
-    // branch (never left of 0.66, never left of the riser, never above 0.155),
-    // the office haze, and the source glow. NO arrow, NO open-air dots.
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, cssW, cssH);
-
-    // Office haze (all floors gently visible)
-    for (let i = 0; i &lt; CONFIG.offices.length; i++) {
-      drawOfficeHaze(CONFIG.offices[i], 0.22, 0, i);
-    }
-
-    // Source glow (sick worker — soft only, no discrete dot)
-    drawSourceGlow(0);
-
-    // AHU glow (soft radial only — no dot, no arrow)
-    const ag = CONFIG.ahuGlow;
-    const agx = nx(ag.x), agy = ny(ag.y);
-    const agr = Math.max(1, imgRect.w * 0.07);
-    ctx.save();
-    ctx.globalCompositeOperation = &#39;source-over&#39;;
-    ctx.globalAlpha = 0.22;
-    const agGrad = ctx.createRadialGradient(agx, agy, 0, agx, agy, agr);
-    agGrad.addColorStop(0, `rgba(226,59,59,0.9)`);
-    agGrad.addColorStop(0.35, `rgba(226,59,59,0.4)`);
-    agGrad.addColorStop(0.7, `rgba(226,59,59,0.1)`);
-    agGrad.addColorStop(1, &#39;rgba(226,59,59,0)&#39;);
-    ctx.fillStyle = agGrad;
-    ctx.beginPath();
-    ctx.arc(agx, agy, agr, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    // Resting dots ON the riser (x exactly 0.839, y between 0.155 and 0.905)
-    const riserDots = [0.22, 0.40, 0.58, 0.76, 0.88];
-    for (const uy of riserDots) {
-      const x = nx(CONFIG.riserX);
-      const y = ny(uy);
-      ctx.save();
-      ctx.globalAlpha = 0.55;
-      ctx.shadowColor = RED;
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = RED;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // One resting dot on each branch (y exactly branchY, x between 0.66 and 0.839)
-    for (let f = 0; f &lt; CONFIG.branchY.length; f++) {
-      const ux = 0.70 + f * 0.025;
-      const x = nx(Math.min(CONFIG.riserX, Math.max(CONFIG.diffuserFadeX, ux)));
-      const y = ny(CONFIG.branchY[f]);
-      ctx.save();
-      ctx.globalAlpha = 0.5;
-      ctx.shadowColor = RED;
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = RED;
-      ctx.beginPath();
-      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  function loop(now) {
-    if (!running) return;
-    if (!startTime) startTime = now;
-    const t = (now - startTime) / 1000;
-    const dt = Math.min(0.05, (now - (loop._last || now)) / 1000);
-    loop._last = now;
-    // Play ONCE: once every floor is infected, stop emitting and hold the fully-sick
-    // building. No reset, no re-loop.
-    if (!allSick &amp;&amp; floorReached.every(Boolean)) allSick = true;
-    ahuPulse = Math.max(0, ahuPulse - dt * 1.2);
-    updateMotes(dt, t);
-    drawFrame(t);
-    rafId = requestAnimationFrame(loop);
-  }
-
-  function start() {
-    if (reduceMotion) {
-      drawStatic();
-      return;
-    }
-    if (running) return;
-    running = true;
-    startTime = 0;
-    loop._last = 0;
-    floorReached = [false, false, false, true]; // index 3 = source (bottom) floor, sick from t=0
-    floorReachedTime = [0, 0, 0, 0];
-    ahuPulse = 0;
-    lastSpawn = 0;
-    allSick = false;
-    initMotes();
-    rafId = requestAnimationFrame(loop);
-  }
-
-  function stop() {
-    running = false;
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-  }
-
-  function reset() {
-    stop();
-    motes.length = 0;
-    floorReached = [false, false, false, true]; // index 3 = source (bottom) floor, sick from t=0
-    floorReachedTime = [0, 0, 0, 0];
-    ahuPulse = 0;
-    startTime = 0;
-    lastSpawn = 0;
-    allSick = false;
-    ctx.clearRect(0,0,cssW,cssH);
-    if (reduceMotion) drawStatic();
-  }
-
-  window.addEventListener(&#39;resize&#39;, resize);
-
-  document.addEventListener(&#39;visibilitychange&#39;, () =&gt; {
-    if (document.hidden) stop();
-    else if (!isEmbedded &amp;&amp; observer) {
-      const r = document.querySelector(&#39;section&#39;).getBoundingClientRect();
-      if (r.top &lt; window.innerHeight &amp;&amp; r.bottom &gt; 0) start();
-    }
-  });
-
-  if (isEmbedded) {
-    window.addEventListener(&#39;message&#39;, (e) =&gt; {
-      const d = e.data || {};
-      if (d.type === &#39;nf-active&#39;) {
-        reset();
-        start();
-      } else if (d.type === &#39;nf-inactive&#39;) {
-        stop();
-      }
-    });
+  if (reducedMotion) {
+    bigNumber.textContent = &#x27;21 days&#x27;;
   } else {
-    observer = new IntersectionObserver((entries) =&gt; {
-      for (const en of entries) {
-        if (en.isIntersecting) start();
-        else stop();
-      }
-    }, { threshold: 0.35 });
-    observer.observe(document.querySelector(&#39;section&#39;));
-  }
-
-  function init() {
-    buildPathTable();
-    initHazeBlobs();
-    initMotes();
-    resize();
-    if (reduceMotion) drawStatic();
-  }
-
-  const img = document.getElementById(&#39;bg&#39;);
-  if (img.complete &amp;&amp; img.naturalWidth) {
-    init();
-  } else {
-    img.addEventListener(&#39;load&#39;, init, { once: true });
-    img.addEventListener(&#39;error&#39;, init, { once: true });
-    setTimeout(init, 600);
+    bigNumber.textContent = &#x27;0 days&#x27;;
+    if (isEmbedded) {
+      // In the deck: play the discharge video + count only when this section becomes active.
+      window.addEventListener(&#x27;message&#x27;, function(e){
+        if (!e.data) return;
+        if (e.data.type === &#x27;nf-active&#x27;) startFilter();
+        else if (e.data.type === &#x27;nf-inactive&#x27;) stopFilter();
+      });
+    } else {
+      // Standalone: start from the top when it scrolls into view.
+      const io = new IntersectionObserver((entries, observer) =&gt; {
+        entries.forEach(entry =&gt; { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById(&#x27;section&#x27;));
+    }
   }
 })();
 &lt;/script&gt;
