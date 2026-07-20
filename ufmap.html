@@ -112,7 +112,7 @@ body {
   width: 100%;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(to right, #d8dce0 0%, #0a5bd6 100%);
+  background: linear-gradient(to right, #c2c8cc 0%, #e0a0a0 40%, #e23b3b 78%, #9a1c1c 100%);
   margin-bottom: 4px;
 }
 .legend-labels {
@@ -462,7 +462,7 @@ body {
   <div class="chrome chrome-top-left">
     <div>
       <h2>Ultrafine particles <span class="accent">don't spread out evenly</span></h2>
-      <p class="caption">A global model at 1-kilometer resolution mapped ultrafine particles across the country. Over open land the count sits near 1,400 particles in a cubic centimeter of air. Along the highways and over the cities it climbs to several thousand, and past 36,000 at the worst spots. The map traces nearly every interstate and every city.</p>
+      <p class="caption">A global model at 1-kilometer resolution mapped ultrafine particles across North America. Over open land the count sits near 700 particles in a cubic centimeter of air. Along the highways and over the cities it climbs to several thousand, and past 36,000 at the worst spots. The map traces nearly every interstate and every city.</p>
     </div>
   </div>
 
@@ -470,9 +470,9 @@ body {
     <div class="legend-title">Ultrafine particles (per cubic centimeter of air)</div>
     <div class="legend-gradient"></div>
     <div class="legend-labels">
-      <span>1,400</span>
-      <span>2,600</span>
-      <span>4,600</span>
+      <span>700</span>
+      <span>2,200</span>
+      <span>4,200</span>
       <span>36,000+</span>
     </div>
   </div>
@@ -510,7 +510,8 @@ body {
 // ============================================================
 const isEmbedded = window.self !== window.top;
 
-const UFP_BOUNDS = [[24.0, -125.0], [49.5, -66.5]];
+const UFP_BOUNDS = [[22.0, -140.0], [60.0, -55.0]];
+const VIEW_BOUNDS = [[24.5, -126.0], [53.0, -62.0]];
 
 const map = L.map('map', {
   zoomControl: false, scrollWheelZoom: !isEmbedded,
@@ -523,11 +524,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 
 L.imageOverlay('data/ufmap/us_ufp_2019.png', UFP_BOUNDS, { opacity: 0.9, interactive: false }).addTo(map);
-map.fitBounds(UFP_BOUNDS);
+map.fitBounds(VIEW_BOUNDS);
 
 // Guided zoom presets
 const PRESETS = [
-  { name: 'Whole country',       fly: function() { map.flyToBounds(UFP_BOUNDS, { duration: 1.8 }); } },
+  { name: 'Whole country',       fly: function() { map.flyToBounds(VIEW_BOUNDS, { duration: 1.8 }); } },
   { name: 'The Southwest',        fly: function() { map.flyTo([35.2, -116.5], 6, { duration: 1.8 }); } },
   { name: 'Los Angeles',          fly: function() { map.flyTo([34.05, -118.24], 8, { duration: 1.8 }); } },
   { name: 'One city',             fly: function() { map.flyTo([34.05, -118.24], 9, { duration: 1.8 }); } }
