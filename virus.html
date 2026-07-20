@@ -1819,7 +1819,9 @@ if (isEmbedded) {
 &lt;head&gt;
 &lt;meta charset=&quot;UTF-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-&lt;title&gt;The filter keeps the virus it catches alive — NanoFlashing&lt;/title&gt;
+&lt;title&gt;The filter — virus&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
 &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
 &lt;style&gt;
 :root{
@@ -1833,9 +1835,7 @@ if (isEmbedded) {
   --stack:-apple-system, system-ui, &#x27;Inter&#x27;, &#x27;Space Grotesk&#x27;, sans-serif;
   --mono:&#x27;Space Mono&#x27;, ui-monospace, monospace;
 }
-
 *{box-sizing:border-box;margin:0;padding:0;}
-
 html,body{
   background:var(--bg);
   color:var(--ink);
@@ -1843,153 +1843,43 @@ html,body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-
 section{
   position:relative;
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   min-height:100vh;
   width:100%;
   overflow:hidden;
   background:var(--bg);
 }
 
-/* === Background video block (right side) === */
-.video-stack{
-  position:absolute;
-  top:0;
-  bottom:0;
-  right:0;
-  width:58%;
-  z-index:0;
-  overflow:hidden;
-  background:var(--bg);
-  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-}
-.video-stack video,
-.video-stack img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-.video-stack img.poster{
-  opacity:0;
-  z-index:3;
-}
-.video-stack.reduced video{ opacity:0 !important; }
-.video-stack.reduced img.poster{ opacity:1; }
-
-/* === Drifting grey smoke overlay (right block) === */
-.smoke{
-  position:absolute;
-  top:0;
-  bottom:0;
-  right:0;
-  width:58%;
-  z-index:1;
-  pointer-events:none;
-  opacity:0.3;
-  overflow:hidden;
-  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
-}
-.smoke span{
-  position:absolute;
-  display:block;
-  border-radius:50%;
-  filter:blur(50px);
-  mix-blend-mode:normal;
-  will-change:transform, opacity;
-}
-.smoke .s1{
-  width:70vw; height:65vh;
-  top:-15vh; right:-12vw;
-  background:radial-gradient(circle at 50% 50%, rgba(180,194,172,0.85), rgba(180,194,172,0.45) 50%, transparent 75%);
-  animation:drift1 24s ease-in-out infinite;
-}
-.smoke .s2{
-  width:60vw; height:60vh;
-  top:15vh; right:-6vw;
-  background:radial-gradient(circle at 50% 50%, rgba(188,200,178,0.8), rgba(188,200,178,0.4) 55%, transparent 78%);
-  animation:drift2 32s ease-in-out infinite;
-}
-.smoke .s3{
-  width:50vw; height:50vh;
-  top:45vh; right:4vw;
-  background:radial-gradient(circle at 50% 50%, rgba(174,188,166,0.75), rgba(174,188,166,0.35) 55%, transparent 80%);
-  animation:drift3 28s ease-in-out infinite;
-}
-.smoke .s4{
-  width:40vw; height:45vh;
-  top:5vh; right:22vw;
-  background:radial-gradient(circle at 50% 50%, rgba(192,202,182,0.7), rgba(192,202,182,0.3) 60%, transparent 82%);
-  animation:drift4 38s ease-in-out infinite;
-}
-@keyframes drift1{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
-  35%  { transform:translate3d(-8vw,4vh,0) scale(1.1); opacity:1; }
-  70%  { transform:translate3d(-4vw,-3vh,0) scale(1.05); opacity:0.7; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.85; }
-}
-@keyframes drift2{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
-  30%  { transform:translate3d(-6vw,-4vh,0) scale(1.12); opacity:0.95; }
-  65%  { transform:translate3d(-10vw,3vh,0) scale(1.06); opacity:0.6; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.8; }
-}
-@keyframes drift3{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
-  40%  { transform:translate3d(-7vw,-5vh,0) scale(1.14); opacity:0.9; }
-  75%  { transform:translate3d(-3vw,4vh,0) scale(1.08); opacity:0.5; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.7; }
-}
-@keyframes drift4{
-  0%   { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
-  50%  { transform:translate3d(-9vw,3vh,0) scale(1.1); opacity:0.85; }
-  100% { transform:translate3d(0,0,0) scale(1);     opacity:0.6; }
-}
-@media (prefers-reduced-motion: reduce){
-  .smoke span{ animation:none !important; }
-  .smoke .s1{ opacity:0.8; transform:translate3d(-4vw,0,0); }
-  .smoke .s2{ opacity:0.75; transform:translate3d(-3vw,0,0); }
-  .smoke .s3{ opacity:0.65; transform:translate3d(-3vw,0,0); }
-  .smoke .s4{ opacity:0.55; }
-}
-
-/* === Text column === */
+/* text column — LEFT */
 .text-col{
   position:relative;
   z-index:3;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start; align-self:flex-start;
+  justify-content:flex-start;
   align-items:flex-start;
-  max-width:min(48%, 620px);
-  padding-top:72px;
+  width:min(48%, 620px);
+  padding-top:40px;
   padding-left:clamp(24px, 6vw, 96px);
   padding-right:24px;
 }
-
 .headline{
   font-family:var(--stack);
   font-weight:600;
   color:var(--headline-ink);
-  font-size: clamp(24px, 2.7vw, 34px);
-  line-height: 1.32;
+  font-size:clamp(24px, 2.361vw, 34px);
+  line-height:1.32;
   letter-spacing:-0.022em;
-  margin-bottom:18px;
+  margin-bottom:10px;
 }
 .headline em{
   color:var(--red);
   font-style:normal;
   font-weight:600;
 }
-
-/* === Stat block === */
 .stat-block{
   display:flex;
   align-items:center;
@@ -2000,47 +1890,71 @@ section{
   font-family:var(--stack);
   font-weight:600;
   color:var(--red);
-  font-size:clamp(52px, 4.6vw, 72px);
-  line-height:0.9;
+  font-size:clamp(52px, 6vw, 86.4px);
+  line-height:0.88;
   letter-spacing:-0.04em;
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
 }
-
 .caption{
   font-size:clamp(17px, 1.5vw, 20px);
   line-height:1.45;
   color:var(--ink);
-  max-width:26ch;
+  max-width:34ch;
   padding-top:6px;
 }
-
-/* === Body paragraph === */
 .body-text{
-  max-width: 540px;
-  font-size:19px;
-  line-height:1.4;
-  margin-top:10px;
-  color: #1a1a1a;
+  max-width:480px;
+  font-size:clamp(16px, 1.319vw, 19px);
+  line-height:1.5;
+  margin-top:14px;
+  color:#1a1a1a;
 }
 .body-text a{
   color:inherit;
-  text-decoration:none;
-  border-bottom:1px solid rgba(20,24,28,0.22);
-  transition:color 0.18s ease, border-color 0.18s ease;
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+  text-decoration-color:rgba(26,26,26,0.4);
+  transition:color 0.18s ease, text-decoration-color 0.18s ease;
 }
 .body-text a:hover{
   color:var(--red);
-  border-bottom-color:var(--red);
+  text-decoration-color:var(--red);
 }
 
-/* === Mobile === */
-@media (max-width: 880px){
-  section{
-    overflow-x:hidden;
-  }
-  .video-stack,
-  .smoke{
+/* MEDIA — right 58% */
+.filter-media{
+  position:absolute;
+  top:0;
+  right:0;
+  width:58%;
+  height:100%;
+  overflow:hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.5) 18%, #000 34%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.5) 18%, #000 34%);
+}
+.filter-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 50%;
+  display:block;
+  -webkit-filter: contrast(1.05) brightness(0.99) saturate(1);
+          filter: contrast(1.05) brightness(0.99) saturate(1);
+}
+.filter-media canvas.motes{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* MOBILE */
+@media (max-width:880px){
+  .filter-media{
     width:100%;
     max-width:100%;
     -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
@@ -2051,17 +1965,13 @@ section{
     inset:0;
     z-index:2;
     pointer-events:none;
-    background:linear-gradient(to right,
-      var(--bg) 0%,
-      rgba(237,240,242,0.88) 35%,
-      rgba(237,240,242,0.45) 65%,
-      rgba(237,240,242,0.2) 100%);
+    background:linear-gradient(to right, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.82) 40%, rgba(237,240,242,0.4) 72%, rgba(237,240,242,0.1) 100%);
   }
   .text-col{
     max-width:none;
     width:100%;
-    padding-left:clamp(24px, 6vw, 32px);
-    padding-right:clamp(24px, 6vw, 32px);
+    padding-left:clamp(24px,6vw,32px);
+    padding-right:clamp(24px,6vw,32px);
   }
   .stat-block{
     flex-direction:column;
@@ -2075,141 +1985,346 @@ section{
   .body-text{
     font-size:16px;
     max-width:none;
-    margin-bottom:12px;
-  }
-  .body-text:last-child{ margin-bottom:0; }
-  .scrim{
-    background:linear-gradient(to right,
-      rgba(237,240,242,0.96) 0%,
-      rgba(237,240,242,0.82) 40%,
-      rgba(237,240,242,0.4) 72%,
-      rgba(237,240,242,0.1) 100%);
   }
 }
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-
-&lt;section id=&quot;section&quot;&gt;
-  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
-    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/virus_reservoir_loop.mp4?v=1&quot;
-           poster=&quot;assets/videos/posters/virus_reservoir.jpg&quot;
-           muted playsinline loop preload=&quot;auto&quot;
-           style=&quot;opacity:1; z-index:1;&quot;&gt;&lt;/video&gt;
-    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/virus_reservoir.jpg&quot; alt=&quot;&quot;&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;smoke&quot; aria-hidden=&quot;true&quot;&gt;
-    &lt;span class=&quot;s1&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;s2&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;s3&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;s4&quot;&gt;&lt;/span&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
-
+&lt;section id=&quot;filter&quot;&gt;
   &lt;div class=&quot;text-col&quot;&gt;
-    &lt;h1 class=&quot;headline&quot;&gt;
-      The filter keeps the virus&lt;br&gt;
-      it catches &lt;em&gt;alive&lt;/em&gt;
-    &lt;/h1&gt;
-
+    &lt;h1 class=&quot;headline&quot;&gt;The filter keeps the virus&lt;br&gt;it catches &lt;em&gt;alive&lt;/em&gt;.&lt;/h1&gt;
     &lt;div class=&quot;stat-block&quot;&gt;
-      &lt;div class=&quot;big-number&quot; id=&quot;bigNumber&quot;&gt;0 days&lt;/div&gt;
-      &lt;p class=&quot;caption&quot;&gt;a live virus stayed infectious on filter media — the media holds it, it does not kill it.&lt;/p&gt;
+      &lt;div class=&quot;big-number&quot; id=&quot;big-number&quot;&gt;0&lt;/div&gt;
+      &lt;div class=&quot;caption&quot;&gt;a live virus stayed infectious on filter media — the media holds it, it does not kill it.&lt;/div&gt;
     &lt;/div&gt;
-
-    &lt;p class=&quot;body-text&quot;&gt;
-      A conventional filter catches the virus — but it does not kill it. Trapped in the fibers, the virus stays infectious for days.
-    &lt;/p&gt;
-    &lt;p class=&quot;body-text&quot;&gt;
-      Canada&#x27;s National Microbiology Laboratory &lt;a href=&quot;https://www.nature.com/articles/s41598-020-80098-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;recovered live, infectious virus from filter media&lt;/a&gt; 21 days after it landed — long after the person who breathed it out had gone.
-    &lt;/p&gt;
-    &lt;p class=&quot;body-text&quot;&gt;
-      French researchers pushed an airborne virus through a real air-handling filter — it trapped most of it, but &lt;a href=&quot;https://pmc.ncbi.nlm.nih.gov/articles/PMC7087798/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;about 500 infectious particles still passed through&lt;/a&gt;.
-    &lt;/p&gt;
-    &lt;p class=&quot;body-text&quot;&gt;
-      In another test, virus on an air-handling filter was &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/28660425/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;still infectious after ten hours of running air&lt;/a&gt; — the airstream does not clear it out.
-    &lt;/p&gt;
-    &lt;p class=&quot;body-text&quot;&gt;
-      The EPA tells the workers who change these filters to &lt;a href=&quot;https://www.epa.gov/coronavirus/air-cleaners-hvac-filters-and-coronavirus-covid-19&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;put on gloves, goggles, and a respirator&lt;/a&gt; first.
-    &lt;/p&gt;
-    &lt;p class=&quot;body-text&quot;&gt;
-      The filter meant to clean the air becomes a store of live virus — held in the fibers the building&#x27;s air keeps passing through.
-    &lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;A conventional filter catches the virus — but it does not kill it. Trapped in the fibers, the virus stays infectious for days.&lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;Canada&#x27;s National Microbiology Laboratory &lt;a href=&quot;https://www.nature.com/articles/s41598-020-80098-3&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;recovered live, infectious virus from filter media&lt;/a&gt; 21 days after it landed — long after the person who breathed it out had gone.&lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;French researchers pushed an airborne virus through a real air-handling filter — it trapped most of it, but &lt;a href=&quot;https://pmc.ncbi.nlm.nih.gov/articles/PMC7087798/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;about 500 infectious particles still passed through&lt;/a&gt;.&lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;In another test, virus on an air-handling filter was &lt;a href=&quot;https://pubmed.ncbi.nlm.nih.gov/28660425/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;still infectious after ten hours of running air&lt;/a&gt; — the airstream does not clear it out.&lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;The EPA tells the workers who change these filters to &lt;a href=&quot;https://www.epa.gov/coronavirus/air-cleaners-hvac-filters-and-coronavirus-covid-19&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;put on gloves, goggles, and a respirator&lt;/a&gt; first.&lt;/p&gt;
+    &lt;p class=&quot;body-text&quot;&gt;The filter meant to clean the air becomes a store of live virus — held in the fibers the building&#x27;s air keeps passing through.&lt;/p&gt;
   &lt;/div&gt;
+  &lt;div class=&quot;filter-media&quot; id=&quot;filter-media&quot;&gt;
+    &lt;img src=&quot;assets/videos/filter_virus_fibre_dense.jpg&quot; alt=&quot;&quot;&gt;
+    &lt;canvas class=&quot;motes&quot; id=&quot;motes&quot;&gt;&lt;/canvas&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
 &lt;/section&gt;
 
 &lt;script&gt;
 (function(){
-  const reducedMotion = window.matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
-  const videoStack = document.getElementById(&#x27;videoStack&#x27;);
-  const videoA = document.getElementById(&#x27;videoA&#x27;);
-  const bigNumber = document.getElementById(&#x27;bigNumber&#x27;);
+  &#x27;use strict&#x27;;
 
-  /* ---------- Video: do NOT autoplay on load; play from the start only on arrival ---------- */
-  if (reducedMotion) {
-    videoStack.classList.add(&#x27;reduced&#x27;);
-  }
+  const TARGET = 21;
+  const RED = &#x27;#e23b3b&#x27;;
+  const RED_GLOW = &#x27;rgba(226,59,59,0.45)&#x27;;
+  const MAX_MOTES = 6;
+  const SPAWN_INTERVAL = 900;   // ms
+  const SPAWN_JITTER = 150;     // ms
+  const TRAVEL_TIME = 10000;    // ms
+  const TRAVEL_JITTER = 1000;   // ms
+  const WOBBLE_AMP = 0.03;      // normalized y
+  const WOBBLE_FREQ = 0.05;     // Hz
+  const CAUGHT_PERIOD = 2400;   // ms
+  const PRESEED_X = [0.10, 0.28, 0.45, 0.62];
+
+  // Always-held motes at fixed fibre points
+  const HELD_POINTS = [
+    { x: 0.45, y: 0.40, phase: 0.0 },
+    { x: 0.60, y: 0.62, phase: 0.6 },
+    { x: 0.72, y: 0.30, phase: 1.2 },
+    { x: 0.85, y: 0.55, phase: 1.8 }
+  ];
+
+  const section = document.getElementById(&#x27;filter&#x27;);
+  const media = document.getElementById(&#x27;filter-media&#x27;);
+  const canvas = document.getElementById(&#x27;motes&#x27;);
+  const ctx = canvas.getContext(&#x27;2d&#x27;);
+  const numEl = document.getElementById(&#x27;big-number&#x27;);
+
   const isEmbedded = window.self !== window.top;
-  function startFilter(){
-    if (reducedMotion) return;
-    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
-    bigNumber.textContent = &#x27;0 days&#x27;;
-    animateNumber();
+  const prefersReduced = window.matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
+
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  let cssW = 0, cssH = 0;
+  let motes = [];
+  let rafId = null;
+  let lastSpawnAt = 0;
+  let startedAt = 0;
+  let countStartAt = 0;
+  let countRafId = null;
+  let active = false;
+  let visible = true;
+
+  // ---------- Resize ----------
+  function resize(){
+    const rect = media.getBoundingClientRect();
+    cssW = Math.max(1, rect.width);
+    cssH = Math.max(1, rect.height);
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(dpr, dpr);
   }
-  function stopFilter(){
-    try { videoA.pause(); } catch(e){}
+
+  // ---------- Mote factory ----------
+  function makeMote(startX, now){
+    const y = 0.15 + Math.random() * 0.70;
+    const travelMs = TRAVEL_TIME + (Math.random()*2 - 1) * TRAVEL_JITTER;
+    const speed = 1 / travelMs; // normalized x per ms
+    const willCapture = Math.random() &lt; (1/3);
+    const captureX = willCapture ? (0.35 + Math.random() * 0.45) : null;
+    return {
+      x: startX,
+      y: y,
+      baseY: y,
+      speed: speed,
+      radius: 1.4 + Math.random() * 1.2,
+      opacity: 0.34 + Math.random() * 0.22,
+      wobblePhase: Math.random() * Math.PI * 2,
+      bornAt: now,
+      captured: false,
+      captureX: captureX,
+      capturedAt: 0
+    };
   }
 
-  /* ---------- Number animation ---------- */
-  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+  function makePreseedMote(startX, now){
+    const m = makeMote(startX, now);
+    // Re-baseline bornAt so it&#x27;s already drifting at startX
+    m.bornAt = now - (startX / m.speed);
+    return m;
+  }
 
-  function animateNumber(){
-    const DURATION = 1600;
-    const start = performance.now();
+  function preseed(now){
+    motes = [];
+    for (let i = 0; i &lt; PRESEED_X.length; i++){
+      motes.push(makePreseedMote(PRESEED_X[i], now));
+    }
+    lastSpawnAt = now;
+  }
 
-    function step(now){
-      const p = Math.min(1, (now - start) / DURATION);
-      const e = easeOutCubic(p);
+  // ---------- Draw ----------
+  function drawMote(x, y, r, opacity){
+    const rr = Math.min(r, 4.5);
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = RED;
+    ctx.shadowColor = RED_GLOW;
+    ctx.shadowBlur = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, rr, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-      // count big number 0 -&gt; 21
-      const n = Math.round(e * 21);
-      bigNumber.textContent = n + &#x27; days&#x27;;
+  function drawHeld(xN, yN, phaseOffset, now){
+    const phase = ((now + phaseOffset) % CAUGHT_PERIOD) / CAUGHT_PERIOD;
+    const pulse = Math.sin(phase * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5; // 0..1
+    const scale = 1.0 + 0.25 * pulse;
+    const opacity = 0.60 + 0.25 * pulse;
+    const radius = 3.5 * scale;
+    drawMote(xN * cssW, yN * cssH, radius, opacity);
+  }
 
-      if (p &lt; 1) {
-        requestAnimationFrame(step);
+  function drawFrame(now){
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.globalCompositeOperation = &#x27;source-over&#x27;;
+
+    // Always-held motes
+    for (let i = 0; i &lt; HELD_POINTS.length; i++){
+      const h = HELD_POINTS[i];
+      drawHeld(h.x, h.y, h.phase, now);
+    }
+
+    // Traveling motes
+    for (let i = 0; i &lt; motes.length; i++){
+      const m = motes[i];
+      if (m.captured){
+        // Snagged: pulse in place
+        const phase = ((now - m.capturedAt) % CAUGHT_PERIOD) / CAUGHT_PERIOD;
+        const pulse = Math.sin(phase * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5;
+        const scale = 1.0 + 0.25 * pulse;
+        const opacity = 0.60 + 0.25 * pulse;
+        const radius = 3.5 * scale;
+        drawMote(m.x * cssW, m.y * cssH, radius, opacity);
       } else {
-        bigNumber.textContent = &#x27;21 days&#x27;;
+        // Drifting
+        const wobble = Math.sin((now / 1000) * WOBBLE_FREQ * Math.PI * 2 + m.wobblePhase) * WOBBLE_AMP;
+        const y = m.baseY + wobble;
+        drawMote(m.x * cssW, y * cssH, m.radius, m.opacity);
       }
     }
 
-    requestAnimationFrame(step);
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
   }
 
-  if (reducedMotion) {
-    bigNumber.textContent = &#x27;21 days&#x27;;
-  } else {
-    bigNumber.textContent = &#x27;0 days&#x27;;
-    if (isEmbedded) {
-      // In the deck: play the discharge video + count only when this section becomes active.
-      window.addEventListener(&#x27;message&#x27;, function(e){
-        if (!e.data) return;
-        if (e.data.type === &#x27;nf-active&#x27;) startFilter();
-        else if (e.data.type === &#x27;nf-inactive&#x27;) stopFilter();
-      });
-    } else {
-      // Standalone: start from the top when it scrolls into view.
-      const io = new IntersectionObserver((entries, observer) =&gt; {
-        entries.forEach(entry =&gt; { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
-      }, { threshold: 0.35 });
-      io.observe(document.getElementById(&#x27;section&#x27;));
+  // ---------- Loop ----------
+  function loop(now){
+    if (!active) return;
+    // Spawn
+    const sinceSpawn = now - lastSpawnAt;
+    const interval = SPAWN_INTERVAL + (Math.random()*2 - 1) * SPAWN_JITTER;
+    if (sinceSpawn &gt;= interval &amp;&amp; motes.length &lt; MAX_MOTES){
+      motes.push(makeMote(-0.05, now));
+      lastSpawnAt = now;
     }
+    // Update &amp; cull
+    const dt = 16; // approx
+    motes = motes.filter(function(m){
+      if (m.captured) return true;
+      m.x += m.speed * 16; // advance based on fixed dt step
+      if (m.captureX !== null &amp;&amp; m.x &gt;= m.captureX){
+        m.captured = true;
+        m.capturedAt = now;
+        m.x = m.captureX;
+      }
+      if (m.x &gt; 1.05) return false;
+      return true;
+    });
+    drawFrame(now);
+    rafId = requestAnimationFrame(loop);
   }
+
+  // ---------- Count-up ----------
+  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+  function runCountUp(){
+    cancelCountUp();
+    countStartAt = performance.now() + 300;
+    function step(now){
+      if (!active) return;
+      if (now &lt; countStartAt){
+        numEl.textContent = &#x27;0 days&#x27;;
+        countRafId = requestAnimationFrame(step);
+        return;
+      }
+      const elapsed = now - countStartAt;
+      const dur = 1600;
+      if (elapsed &gt;= dur){
+        numEl.textContent = TARGET + &#x27; days&#x27;;
+        return;
+      }
+      const v = Math.round(easeOutCubic(elapsed / dur) * TARGET);
+      numEl.textContent = v + &#x27; days&#x27;;
+      countRafId = requestAnimationFrame(step);
+    }
+    countRafId = requestAnimationFrame(step);
+  }
+  function cancelCountUp(){
+    if (countRafId){ cancelAnimationFrame(countRafId); countRafId = null; }
+  }
+
+  // ---------- Static frame (reduced motion) ----------
+  function drawStatic(){
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.globalCompositeOperation = &#x27;source-over&#x27;;
+    // Always-held motes at base pulse
+    for (let i = 0; i &lt; HELD_POINTS.length; i++){
+      const h = HELD_POINTS[i];
+      drawMote(h.x * cssW, h.y * cssH, 3.5, 0.60);
+    }
+    // A few resting travelers
+    const resting = [0.10, 0.28, 0.45];
+    for (let i = 0; i &lt; resting.length; i++){
+      const x = resting[i];
+      const y = 0.15 + (i * 0.17) % 0.7;
+      drawMote(x * cssW, y * cssH, 1.4 + (i % 3) * 0.4, 0.40);
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  // ---------- Start / Stop ----------
+  function start(){
+    if (active) return;
+    active = true;
+    visible = true;
+    if (cssW === 0) resize();
+    numEl.textContent = &#x27;0 days&#x27;;
+    if (prefersReduced){
+      numEl.textContent = TARGET + &#x27; days&#x27;;
+      drawStatic();
+      return;
+    }
+    const now = performance.now();
+    startedAt = now;
+    preseed(now);
+    runCountUp();
+    rafId = requestAnimationFrame(loop);
+  }
+  function stop(){
+    active = false;
+    if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+    cancelCountUp();
+    numEl.textContent = &#x27;0 days&#x27;;
+    if (ctx &amp;&amp; cssW){
+      ctx.clearRect(0, 0, cssW, cssH);
+    }
+    motes = [];
+  }
+
+  // ---------- Resize handler ----------
+  let resizeRaf = null;
+  function onResize(){
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(function(){
+      resize();
+      if (active &amp;&amp; prefersReduced) drawStatic();
+    });
+  }
+  window.addEventListener(&#x27;resize&#x27;, onResize);
+
+  // ---------- Visibility ----------
+  document.addEventListener(&#x27;visibilitychange&#x27;, function(){
+    if (document.hidden){
+      if (active){
+        visible = false;
+        if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+        cancelCountUp();
+      }
+    } else {
+      if (active &amp;&amp; !visible){
+        visible = true;
+        const now = performance.now();
+        lastSpawnAt = now;
+        // Re-baseline mote births so they continue smoothly
+        for (let i = 0; i &lt; motes.length; i++){
+          const m = motes[i];
+          if (!m.captured){
+            m.bornAt = now - (m.x / m.speed);
+          }
+        }
+        runCountUp();
+        rafId = requestAnimationFrame(loop);
+      }
+    }
+  });
+
+  // ---------- Activation wiring ----------
+  if (isEmbedded){
+    window.addEventListener(&#x27;message&#x27;, function(e){
+      const d = e.data;
+      if (!d || typeof d !== &#x27;object&#x27;) return;
+      if (d.type === &#x27;nf-active&#x27;) start();
+      else if (d.type === &#x27;nf-inactive&#x27;) stop();
+    });
+  } else {
+    const io = new IntersectionObserver(function(entries){
+      for (let i = 0; i &lt; entries.length; i++){
+        if (entries[i].isIntersecting) start();
+        else stop();
+      }
+    }, { threshold: 0.35 });
+    io.observe(section);
+  }
+
+  // Initial sizing
+  resize();
 })();
 &lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;" loading="lazy" title="The filter" allow="autoplay"></iframe></section>
+&lt;/html&gt;&quot; loading=&quot;lazy&quot;" loading="lazy" title="The filter" allow="autoplay"></iframe></section>
   <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
