@@ -1,9 +1,13 @@
 {
  "legend": {
-  "low": 721,
-  "typical": 2179,
-  "high": 4172
+  "low": 691,
+  "typical": 2096,
+  "high": 4034
  },
- "source": "Georgiades et al., Scientific Data, 2025 (CC-BY 4.0)",
- "year": 2019
+ "bbox": {
+  "W": -140.0,
+  "E": -55.0,
+  "S": 22.0,
+  "N": 60.0
+ }
 }
