@@ -485,40 +485,71 @@
   const DATA = {
     overview: {
       name: "",
-      intro: "Ultrafine particles are so small they pass from the lungs into the bloodstream, reaching organs far beyond the airway \u2014 even the brain.",
+      intro: "Ultrafine particles are the smallest and most numerous part of fine-particle pollution, known as PM2.5. They are small enough to pass from the lungs into the bloodstream and reach organs far beyond the airway, even the brain. Some findings below measured ultrafine particles directly; others measured PM2.5, the wider family they belong to.",
       impacts: [
-        {text:"They are the most common airborne particle by number, yet [no air-quality standard limits them].", url:"https://en.wikipedia.org/wiki/Ultrafine_particle"},
-        {text:"Fine particle pollution like this is tied to about [4.2 million early deaths a year].", url:"https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health"}
+        {text:"The World Health Organization ties outdoor fine-particle pollution to about [4.2 million early deaths a year].", url:"https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health"}
       ],
       ox:0.5, oy:0.5
     },
     lungs: {
       name:"Lungs",
       impacts:[
-        {text:"They [inflame the airways and worsen asthma], cutting lung function over time.", url:"https://www.epa.gov/pm-pollution/health-and-environmental-effects-particulate-matter-pm"}
+        {text:"The USC Children's Health Study found that as PM2.5 fell over 13 years, [clinically low lung function dropped to 3.6%] of children, from 7.9%.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC4430551/"},
+        {text:"Cincinnati Children's Hospital researchers found a 10-fold rise in ultrafine particle exposure [cut a teenager's lung function by 0.04 litres] about 90 minutes later.", url:"https://academic.oup.com/annalsats/article-abstract/19/9/1516/8417871"},
+        {text:"The WHO cancer agency IARC ranks outdoor particle pollution a [Group 1 cause of lung cancer] - its top proven category.", url:"https://www.iarc.who.int/news-events/iarc-outdoor-air-pollution-a-leading-environmental-cause-of-cancer-deaths/"}
       ],
       ox:0.44, oy:0.25, label:"Lungs"
     },
     heart: {
       name:"Heart",
       impacts:[
-        {text:"Short spikes can [trigger heart attacks and strokes], especially with existing heart disease.", url:"https://www.epa.gov/air-research/air-pollution-and-cardiovascular-disease-basics"},
-        {text:"Long exposure [raises cardiovascular death and shortens life].", url:"https://www.epa.gov/air-research/air-pollution-and-cardiovascular-disease-basics"}
+        {text:"Harvard researchers in Circulation found a rise of 25 micrograms of PM2.5 per cubic metre raised [the odds of a heart attack about 48%] within hours.", url:"https://pubmed.ncbi.nlm.nih.gov/11401937/"},
+        {text:"An American Cancer Society study in Circulation found each 10 micrograms of long-term PM2.5 per cubic metre raised [ischemic heart disease deaths about 18%].", url:"https://www.ahajournals.org/doi/10.1161/01.cir.0000108927.80044.7f"},
+        {text:"A University of Toronto study of 1.1 million adults found each step up in long-term ultrafine particle exposure was tied to [about 5% more heart attacks].", url:"https://academic.oup.com/aje/article/188/1/151/5085353"}
       ],
       ox:0.53, oy:0.29, label:"Heart"
     },
     brain: {
       name:"Brain & Mind",
       impacts:[
-        {text:"Fine particles reach the brain, where long exposure is [linked to a higher risk of dementia].", url:"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12092285/"}
+        {text:"Lancaster University researchers found combustion particles smaller than 200 nm can reach the brain through the nerve behind the nose, with [millions per gram of brain].", url:"https://pubmed.ncbi.nlm.nih.gov/27601646/"},
+        {text:"An Emory University study of about 21 million older Americans found each rise of roughly 3,700 ultrafine particles per cubic centimetre raised [Alzheimer's risk 2.6%].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11948469/"},
+        {text:"A Harvard-led review in The BMJ found every extra 2 micrograms of PM2.5 per cubic metre raised [dementia risk 17%] in studies that screened everyone.", url:"https://hsph.harvard.edu/news/air-pollution-may-increase-risk-for-dementia/"}
       ],
       ox:0.50, oy:0.075, label:"Brain & Mind"
+    },
+    metabolic: {
+      name:"Metabolism",
+      impacts:[
+        {text:"Washington University and VA researchers tied PM2.5 to [about 3.2 million new diabetes cases worldwide] in one year, roughly 14% of all new cases.", url:"https://medicine.washu.edu/news/air-pollution-contributes-significantly-to-diabetes-globally/"},
+        {text:"A Helmholtz Munich study of 2,944 adults found a rise in particle pollution went with [15.6% higher insulin resistance].", url:"https://pubmed.ncbi.nlm.nih.gov/27605624/"},
+        {text:"Helmholtz Munich and LMU Munich researchers found each 1,000 extra ultrafine particles per cubic centimetre went with [3% higher odds of high blood pressure] and higher blood sugar.", url:"https://pubmed.ncbi.nlm.nih.gov/40992322/"}
+      ],
+      ox:0.50, oy:0.40, label:"Metabolism"
+    },
+    reproduction: {
+      name:"Reproduction",
+      impacts:[
+        {text:"UCLA researchers found mothers most exposed to ultrafine particles near Los Angeles airport had [14% higher odds of a preterm birth] than those least exposed.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC7228090/"},
+        {text:"A University of York study tied PM2.5 to [2.7 million early births worldwide] in one year, about 18% of all preterm births.", url:"https://pubmed.ncbi.nlm.nih.gov/28196630/"},
+        {text:"Kaiser Permanente and USC researchers found aircraft ultrafine particles during pregnancy raised [the child's odds of autism about 1.6%] for each step up in exposure.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC10472925/"}
+      ],
+      ox:0.50, oy:0.50, label:"Reproduction"
+    },
+    blood: {
+      name:"Blood & Cells",
+      impacts:[
+        {text:"A study in the American Heart Association journal Circulation found inhaled ultrafine particles [crossed into the blood within 1 minute].", url:"https://pubmed.ncbi.nlm.nih.gov/11815420/"},
+        {text:"Chinese Academy of Sciences researchers found [combustion soot particles in the blood of all 37 people tested], measuring 50 to 200 nm.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC7244483"},
+        {text:"The Harvard VA Normative Aging Study found soot and PM2.5 altered an inflammation gene, with each small rise in soot tied to [a 0.9% drop in methylation].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC3491965/"}
+      ],
+      ox:0.28, oy:0.49, label:"Blood & Cells"
     }
   };
 
-  const ORDER = ["overview","brain","lungs","heart"];
+  const ORDER = ["overview","brain","heart","lungs","metabolic","reproduction","blood"];
   const INDEX_LABELS = {
-    overview:"Overview", lungs:"Lungs", heart:"Heart", brain:"Brain & Mind"
+    overview:"Overview", brain:"Brain & Mind", heart:"Heart", lungs:"Lungs", metabolic:"Metabolism", reproduction:"Reproduction", blood:"Blood & Cells"
   };
 
   const hotspotsEl = document.getElementById('hotspots');

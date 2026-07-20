@@ -1,0 +1,32 @@
+{
+ "bbox": {
+  "west": -125.0,
+  "east": -66.5,
+  "south": 24.0,
+  "north": 49.5
+ },
+ "var": "UFP",
+ "units": "cm-3",
+ "colorLow": 1439,
+ "colorHigh": 4649,
+ "legend": {
+  "low": 1439,
+  "typical": 2628,
+  "high": 4649
+ },
+ "range": {
+  "2": 1236,
+  "5": 1439,
+  "25": 2111,
+  "50": 2628,
+  "75": 3083,
+  "90": 3858,
+  "95": 4649,
+  "98": 5558,
+  "99": 6300,
+  "min": 456,
+  "max": 36563
+ },
+ "year": 2019,
+ "source": "Global 1 km ultrafine particle number concentrations (Scientific Data, 2025), CC-BY 4.0, Zenodo 10.5281/zenodo.14832351"
+}

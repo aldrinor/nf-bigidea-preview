@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultrafine particles across the US</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #edf0f2;
+  --ink: #1f2327;
+  --muted: #8a9095;
+  --faint: #aab2b8;
+  --accent: #1b7bff;
+  --red: #e23b3b;
+  --hair: rgba(20,24,28,0.08);
+  --stack: -apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--stack);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.map-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+#map {
+  width: 100%;
+  height: 100%;
+  background: #e8ecee;
+}
+
+/* Chrome */
+.chrome {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+.chrome > * { pointer-events: auto; }
+
+.chrome-top-left {
+  top: 140px;
+  left: clamp(24px, 6vw, 96px);
+  max-width: 720px;
+}
+.kicker {
+  font-family: var(--stack);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.chrome-top-left h2 {
+  font-family: var(--stack);
+  font-weight: 600;
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
+  color: #1a1a1a;
+  margin-bottom: 28px;
+  letter-spacing: -0.022em;
+  text-shadow: 0 1px 8px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.9);
+}
+.chrome-top-left h2 .accent { color: var(--accent); }
+.caption {
+  font-family: var(--stack);
+  font-size: 19px;
+  line-height: 1.55;
+  color: #1a1a1a;
+  max-width: 440px;
+  text-shadow: 0 1px 6px rgba(237,240,242,0.95), 0 0 2px rgba(237,240,242,0.95);
+}
+.caption a {
+  color: #1a1a1a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(20,24,28,0.22);
+  transition: color .15s ease, border-color .15s ease;
+}
+.caption a:hover { color: var(--red); border-bottom-color: var(--red); }
+
+/* Legend */
+.chrome-legend {
+  bottom: 22px;
+  left: 22px;
+  min-width: 270px;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+  font-size: 11px;
+}
+.legend-title {
+  font-family: var(--stack);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.legend-gradient {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #d8dce0 0%, #0a5bd6 100%);
+  margin-bottom: 4px;
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.legend-pm {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.legend-pm-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+}
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 0.5px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1);
+}
+
+/* Source */
+.chrome-source {
+  bottom: 22px;
+  right: 22px;
+  font-family: var(--stack);
+  font-size: 12px;
+  color: var(--muted);
+}
+.chrome-source a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--hair);
+  transition: color 0.15s, border-color 0.15s;
+}
+.chrome-source a:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Zoom control (repurposed time-control) */
+.time-control {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px;
+  padding: 16px 22px 18px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.12);
+  width: min(580px, calc(100vw - 44px));
+}
+.tc-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.tc-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.tc-btn:hover { background: #c92f2f; }
+.tc-btn:active { transform: scale(0.94); }
+.tc-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.tc-date {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tc-counter {
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.tc-slider-wrap {
+  position: relative;
+  margin: 2px 0 0;
+}
+.tc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--faint);
+  outline: none;
+  cursor: pointer;
+}
+.tc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
+}
+.tc-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.tc-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--red);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
+
+.tc-ticks {
+  position: relative;
+  height: 24px;
+  margin-top: 7px;
+}
+.tc-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--stack);
+  font-size: 16px;
+  color: var(--muted);
+}
+.tc-tick::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 5px;
+  background: var(--faint);
+  margin: 0 auto 2px;
+}
+
+/* Loading hint */
+.loading-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  font-family: var(--stack);
+  font-size: 13px;
+  color: var(--muted);
+  background: rgba(255,255,255,0.92);
+  padding: 14px 22px;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+  transition: opacity 0.5s;
+  text-align: center;
+  white-space: nowrap;
+}
+.loading-hint.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-bar {
+  width: 160px;
+  height: 3px;
+  background: var(--faint);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.loading-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.1s;
+}
+
+/* Leaflet popup */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  border: none;
+}
+.leaflet-popup-content {
+  font-family: var(--stack);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 10px 14px;
+}
+.leaflet-popup-tip { box-shadow: 0 4px 18px rgba(0,0,0,0.14); }
+
+.leaflet-control-attribution {
+  font-family: var(--stack);
+  font-size: 9px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 4px 0 0 0;
+}
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+.leaflet-control-zoom a {
+  border-radius: 6px !important;
+  margin-bottom: 4px;
+  font-family: var(--stack);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1120px) {
+  .chrome-legend { bottom: 140px; }
+}
+@media (max-width: 700px) {
+  .chrome-top-left { max-width: calc(100vw - 44px); }
+  .chrome-top-left h2 { font-size: 24px; }
+  .caption { font-size: 16px; max-width: 100%; }
+  .chrome-legend { display: none; }
+  .time-control {
+    width: calc(100vw - 24px);
+    padding: 10px 14px 8px;
+    bottom: 12px;
+  }
+  .tc-date { font-size: 12px; }
+  .tc-btn { width: 34px; height: 34px; }
+  .chrome-source { font-size: 9px; bottom: 12px; right: 12px; }
+}
+
+@media (max-height: 520px) {
+  .chrome-legend {
+    display: none;
+  }
+
+  .chrome-top-left {
+    top: 14px;
+    max-width: min(54vw, 440px);
+  }
+
+  .chrome-top-left h2 {
+    font-size: clamp(17px, 2.6vw, 22px);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .caption {
+    font-size: 13px;
+    line-height: 1.45;
+    max-width: min(52vw, 420px);
+  }
+
+  .time-control {
+    bottom: 10px;
+    padding: 8px 14px;
+  }
+
+  .tc-date {
+    font-size: 13px;
+  }
+
+  .tc-ticks {
+    height: 16px;
+    margin-top: 4px;
+  }
+
+  .tc-tick {
+    font-size: 12px;
+  }
+
+  .tc-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chrome-source {
+    bottom: 10px;
+    font-size: 10px;
+  }
+}
+
+@media (max-height: 430px) {
+  .caption {
+    font-size: 12px;
+  }
+
+  .time-control {
+    bottom: 8px;
+  }
+}
+
+@media (max-width: 880px) {
+  .chrome-top-left {
+    background: rgba(237, 240, 242, 0.86);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 16px rgba(20, 24, 28, 0.10);
+    max-width: calc(100vw - 32px);
+    left: 16px;
+    right: 16px;
+    top: 76px;
+  }
+
+  .chrome-top-left h2 {
+    text-shadow: none;
+    font-size: clamp(22px, 6vw, 28px);
+    margin-bottom: 10px;
+  }
+
+  .caption {
+    text-shadow: none;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="map-wrap">
+  <div id="map"></div>
+
+  <div class="chrome chrome-top-left">
+    <div>
+      <h2>Ultrafine particles <span class="accent">don't spread out evenly</span></h2>
+      <p class="caption">A global model at 1-kilometer resolution mapped ultrafine particles across the country. Over open land the count sits near 1,400 particles in a cubic centimeter of air. Along the highways and over the cities it climbs to several thousand, and past 36,000 at the worst spots. The map traces nearly every interstate and every city.</p>
+    </div>
+  </div>
+
+  <div class="chrome chrome-legend">
+    <div class="legend-title">Ultrafine particles (per cubic centimeter of air)</div>
+    <div class="legend-gradient"></div>
+    <div class="legend-labels">
+      <span>1,400</span>
+      <span>2,600</span>
+      <span>4,600</span>
+      <span>36,000+</span>
+    </div>
+  </div>
+
+  <div class="chrome chrome-source">
+    <a href="https://www.nature.com/sdata/" target="_blank" rel="noopener">Georgiades et al., Scientific Data, 2025 · 1 km global model</a>
+  </div>
+
+  <div class="time-control" id="timeControl" style="display:none">
+    <div class="tc-top">
+      <button class="tc-btn" id="playBtn" aria-label="Play">
+        <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="tc-date" id="dateLabel">Whole country</div>
+    </div>
+    <div class="tc-slider-wrap">
+      <input type="range" class="tc-slider" id="frameSlider" min="0" max="3" value="0" step="1">
+    </div>
+    <div class="tc-ticks">
+      <span class="tc-tick" style="left:0;transform:none">Whole country</span>
+      <span class="tc-tick" style="left:100%;transform:translateX(-100%)">One city</span>
+    </div>
+  </div>
+
+  <div class="loading-hint" id="loadingHint">
+    loading the map…
+    <div class="loading-bar"><div class="loading-bar-fill" id="loadingBarFill"></div></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============================================================
+//  Ultrafine Particle Map — static heat-map overlay + guided zoom
+// ============================================================
+const isEmbedded = window.self !== window.top;
+
+const UFP_BOUNDS = [[24.0, -125.0], [49.5, -66.5]];
+
+const map = L.map('map', {
+  zoomControl: false, scrollWheelZoom: !isEmbedded,
+  center: [39, -96], zoom: 5, minZoom: 3, maxZoom: 16,
+  maxBounds: [[12, -150], [74, -48]], maxBoundsViscosity: 0.85
+});
+L.control.zoom({ position: 'topright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO', detectRetina: true
+}).addTo(map);
+
+L.imageOverlay('data/ufmap/us_ufp_2019.png', UFP_BOUNDS, { opacity: 0.9, interactive: false }).addTo(map);
+map.fitBounds(UFP_BOUNDS);
+
+// Guided zoom presets
+const PRESETS = [
+  { name: 'Whole country',       fly: function() { map.flyToBounds(UFP_BOUNDS, { duration: 1.8 }); } },
+  { name: 'The Southwest',        fly: function() { map.flyTo([35.2, -116.5], 6, { duration: 1.8 }); } },
+  { name: 'Los Angeles',          fly: function() { map.flyTo([34.05, -118.24], 8, { duration: 1.8 }); } },
+  { name: 'One city',             fly: function() { map.flyTo([34.05, -118.24], 9, { duration: 1.8 }); } }
+];
+
+let currentPreset = 0, playing = false, playTimer = null;
+
+function setPreset(i) {
+  i = Math.max(0, Math.min(PRESETS.length - 1, i));
+  currentPreset = i;
+  document.getElementById('dateLabel').textContent = PRESETS[i].name;
+  document.getElementById('frameSlider').value = i;
+  PRESETS[i].fly();
+}
+
+function play() {
+  playing = true;
+  if (currentPreset >= PRESETS.length - 1) setPreset(0);
+  document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label', 'Pause');
+  playStep();
+}
+
+function playStep() {
+  if (!playing) return;
+  var next = currentPreset + 1;
+  if (next >= PRESETS.length) { pause(); return; }
+  setPreset(next);
+  playTimer = setTimeout(playStep, 2400);
+}
+
+function pause() {
+  playing = false;
+  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playBtn').setAttribute('aria-label', 'Play');
+  if (playTimer) { clearTimeout(playTimer); playTimer = null; }
+}
+
+function togglePlay() { if (playing) pause(); else play(); }
+
+// Boot
+document.getElementById('timeControl').style.display = 'block';
+document.getElementById('loadingHint').classList.add('hidden');
+
+var slider = document.getElementById('frameSlider');
+slider.addEventListener('input', function(e) {
+  if (playing) pause();
+  setPreset(parseInt(e.target.value));
+});
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowLeft')  { pause(); setPreset(Math.max(0, currentPreset - 1)); }
+  if (e.code === 'ArrowRight') { pause(); setPreset(Math.min(PRESETS.length - 1, currentPreset + 1)); }
+});
+
+var resizeTimer = null;
+window.addEventListener('resize', function() {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() { map.invalidateSize(); }, 100);
+});
+</script>
+</body>
+</html>
