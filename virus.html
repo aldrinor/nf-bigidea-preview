@@ -2076,9 +2076,7 @@ section{
 &lt;head&gt;
 &lt;meta charset=&quot;UTF-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-&lt;title&gt;NanoFlashing captures the mold and destroys what is alive&lt;/title&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;title&gt;Captures the virus. Destroys it. — NanoFlashing&lt;/title&gt;
 &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
 &lt;style&gt;
 :root{
@@ -2092,9 +2090,7 @@ section{
   --stack:-apple-system, system-ui, &#39;Inter&#39;, &#39;Space Grotesk&#39;, sans-serif;
   --mono:&#39;Space Mono&#39;, ui-monospace, monospace;
 }
-
 *{box-sizing:border-box;margin:0;padding:0;}
-
 html,body{
   background:var(--bg);
   color:var(--ink);
@@ -2102,16 +2098,121 @@ html,body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-
 section{
   position:relative;
   display:flex;
   align-items:center;
   min-height:100vh;
-  max-height:100vh;
   width:100%;
   overflow:hidden;
   background:var(--bg);
+}
+/* === Background video block (right side) === */
+.video-stack{
+  position:absolute;
+  top:0; bottom:0; right:0;
+  width:58%;
+  z-index:0;
+  overflow:hidden;
+  background:var(--bg);
+  -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%);
+}
+.video-stack video,
+.video-stack img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.video-stack img.poster{ opacity:0; z-index:3; }
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* ===== .anno overlay + labels (matches sisters&#39; design tokens) ===== */
+.anno{position:absolute;inset:0;z-index:5;pointer-events:none;}
+
+.anno-top{
+  position:absolute;
+  left:53%;
+  bottom:80%;
+  transform:translateX(-50%);
+  text-align:center;
+  z-index:9;
+  pointer-events:none;
+  width:max-content; max-width:min(90vw,760px);
+  padding:0;
+}
+.anno-top &gt; div{ font-family:var(--stack); letter-spacing:0.01em; }
+.anno-top &gt; div:last-child{ margin-bottom:0; }
+.anno-test, .anno-fact{ display:block; width:max-content; margin:0 auto 8px; position:relative;
+  font-size:22px; line-height:1.2; color:var(--ink); transition:opacity .4s ease; }
+.anno-test{ font-weight:600; }
+.anno-fact{ font-weight:400; }
+.anno-test b, .anno-fact b{ color:var(--accent); font-weight:600; }
+.anno-test::before, .anno-fact::before{
+  content:&quot;&quot;; position:absolute; top:-5px; left:-20px; right:-20px; bottom:-5px; z-index:-1;
+  background:rgba(237,240,242,0.40);
+  -webkit-backdrop-filter:blur(10px) saturate(1.6); backdrop-filter:blur(10px) saturate(1.6);
+  border-radius:12px;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,0.50);
+  -webkit-mask-image:linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  mask-image:linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* ===== falling virus particles (captured on NanoFlashing, settle on conventional) ===== */
+.anno .spore{
+  position:absolute; left:0; top:0;
+  border-radius:50%;
+  background:#e23b3b;
+  pointer-events:none;
+  z-index:6; opacity:0;
+}
+.anno .spore.captured{ animation:nfSporeCapture 640ms ease-out forwards; }
+.anno .spore.settled{ animation:nfSporeSettle 2200ms ease-out forwards; }
+@keyframes nfSporeSettle{
+  0%{ opacity:0.48; }
+  18%{ opacity:0.26; }
+  100%{ opacity:0; }
+}
+@keyframes nfSporeCapture{
+  0%{   background:#e23b3b; opacity:0.48; box-shadow:0 0 0 0 rgba(150,195,255,0); }
+  22%{  background:#e8f3ff; opacity:0.9; box-shadow:0 0 7px 2px rgba(150,195,255,0.5); }
+  100%{ background:#eaf4ff; opacity:0; box-shadow:0 0 15px 5px rgba(160,205,255,0); }
+}
+
+/* Bottom material labels */
+.anno-lbl{
+  position:absolute;
+  font-family:var(--stack);
+  letter-spacing:0.01em;
+  line-height:1.25;
+  white-space:nowrap;
+  transform:translateX(-50%);
+  z-index:7;
+  pointer-events:none;
+}
+.anno-lbl-nf{ left:33.3%; top:77.5%; color:#1b7bff; font-weight:700; font-size:22px; }
+.anno-lbl-cv{ left:70.8%; top:77.5%; color:#1f2327; font-weight:500; font-size:22px; }
+
+/* ===== Mobile ===== */
+@media (max-width:880px){
+  .anno-top { left: 52%; top: auto; bottom: 80%; }
+  .anno-top .anno-test { font-size: 15px; margin-bottom: 4px; }
+  .anno-top .anno-fact { font-size: 15px; }
+  .anno-lbl { top: 77%; font-size: 16px; }
+  .anno-lbl-nf { left: 30%; }
+  .anno-lbl-cv { left: 72%; }
+}
+@media (max-width:430px){
+  .anno-lbl { font-size: 13px; top: 77.5%; }
+  .anno-lbl-nf { left: 25%; }
+  .anno-lbl-cv { left: 75%; }
+}
+@media (max-width:380px){
+  .anno-lbl { font-size: 11px; top: 77.5%; }
+  .anno-lbl-nf { left: 22%; }
+  .anno-lbl-cv { left: 78%; }
 }
 
 /* === Text column === */
@@ -2120,76 +2221,47 @@ section{
   z-index:3;
   display:flex;
   flex-direction:column;
-  justify-content:center;
+  justify-content:flex-start; align-self:flex-start;
   align-items:flex-start;
-  max-width:min(48%, 620px);padding-top:140px;
+  max-width:min(48%, 620px);
+  padding-top:140px;
   padding-left:clamp(24px, 6vw, 96px);
   padding-right:24px;
 }
-
 .headline{
   font-family:var(--stack);
   font-weight:600;
   color:var(--headline-ink);
-  font-size:clamp(24px, 2.7vw, 34px);
-  line-height:1.32;
+  font-size: clamp(24px, 2.7vw, 34px);
+  line-height: 1.32;
   letter-spacing:-0.022em;
-  margin-bottom:28px;
+  margin-bottom:8px;
 }
-.headline &gt; span{
-  display:block;
-}
-.headline em{
-  color:var(--accent);
-  font-style:normal;
-  font-weight:600;
-}
-
-/* === Stat block === */
-.stat-block{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  margin-bottom:22px;
-}
-.stat-row{
-  display:flex;
-  align-items:center;
-  gap:22px;
-}
+.headline em{ color:var(--accent); font-style:normal; font-weight:600; padding-left:0.12em; }
+.stat-block{ display:flex; align-items:center; gap:24px; margin-bottom:2px; }
 .big-number{
   font-family:var(--stack);
-  font-weight:700;
-  font-size:clamp(52px, 6vw, 92px);
-  line-height:0.95;
-  letter-spacing:-0.03em;
+  font-weight:600;
+  color:var(--accent);
+  font-size:clamp(44px, 4vw, 60px);
+  line-height:0.9;
+  letter-spacing:-0.04em;
   font-variant-numeric:tabular-nums;
-  flex-shrink:0;
-  width:2.95em;
-  text-align:right;
 }
-.big-number.accent{ color:var(--accent); }
-.big-number.ink{ color:var(--ink); }
-
 .caption{
-  font-family:var(--stack);
-  font-size:clamp(16px, 1.5vw, 19px);
-  line-height:1.4;
+  font-size:clamp(17px, 1.5vw, 20px);
+  line-height:1.45;
   color:var(--ink);
-  max-width:24ch;
-  padding-top:4px;
+  max-width:26ch;
+  padding-top:0;
 }
-
-/* === Body paragraph === */
 .body-text{
-  max-width:440px;
+  max-width: 460px;
   font-size:19px;
-  line-height:1.55;
-  color:#1a1a1a;
-  margin-bottom:22px;
+  line-height:1.44;
+  margin-top:9px;
+  color: #1a1a1a;
 }
-
-/* === Advocacy link === */
 .advocacy-link{
   font-family:var(--stack);
   font-size:19px;
@@ -2197,370 +2269,265 @@ section{
   text-decoration:none;
   border-bottom:1px solid rgba(27,123,255,0.5);
   padding-bottom:2px;
+  margin-top:5px;
   transition:color 0.18s ease, border-color 0.18s ease;
 }
-.advocacy-link:hover{
-  color:var(--ink);
-  border-bottom-color:var(--ink);
+.advocacy-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
+/* proof list */
+.mechanism{
+  font-size:19px; line-height:1.45; color:var(--ink); max-width:54ch;
+  margin:4px 0 6px; padding-top:6px; border-top:1px solid #e6e8ea;
 }
-
-/* === Chart column === */
-.chart-col{
-  flex:1 1 0;
-  min-width:0;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:stretch;
-  padding:clamp(24px, 4vh, 56px) clamp(24px, 3vw, 48px) clamp(20px, 3vh, 36px);
-  position:relative;
-  z-index:2;
+.proof-list{ list-style:none; margin:0 0 6px; padding:0; }
+.proof-item{ display:flex; align-items:flex-start; gap:10px; padding:3px 0; border-top:1px solid #eceef0; }
+.proof-item:first-child{ border-top:1px solid #d8dadd; }
+.proof-item:last-child{ border-bottom:1px solid #eceef0; }
+.proof-mark{
+  flex:0 0 auto; width:9px; height:9px; margin-top:8px; background:var(--accent);
+  clip-path:polygon(14% 44%, 0 58%, 38% 100%, 100% 22%, 86% 8%, 38% 70%);
 }
-
-.chart-group{
-  display:flex;
-  flex-direction:column;
-  gap:clamp(20px, 3vh, 32px);
-  width:100%;
-  max-width:620px;
-  margin:0 auto;
-}
-
-/* === Antimicrobial table === */
-.table-block{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.table-label{
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:0.02em;
-  color:var(--muted);
-}
-.amr-table{
-  width:100%;
-  border-collapse:collapse;
-  font-family:var(--stack);
-}
-.amr-table tr{
-  border-top:1px solid var(--hair);
-}
-.amr-table tr:last-child{
-  border-bottom:1px solid var(--hair);
-}
-.amr-table td{
-  padding:clamp(12px, 1.6vh, 18px) 4px;
-  vertical-align:middle;
-  font-size:clamp(14px, 1.2vw, 17px);
-  line-height:1.35;
-}
-.amr-table td.org{
-  color:var(--ink);
-  font-weight:400;
-}
-.amr-table td.org .paren{
-  color:var(--muted);
-}
-.amr-table td.result{
-  text-align:right;
-  color:var(--ink);
-  font-weight:600;
-  font-variant-numeric:tabular-nums;
-  white-space:nowrap;
-}
-.amr-table td.result .fig{
-  color:var(--accent);
-  font-weight:600;
-}
-.table-foot{
-  font-family:var(--stack);
-  font-size:12px;
-  line-height:1.45;
-  color:var(--muted);
-  margin-top:4px;
-}
-
-/* === BAMS field-proof card === */
-.bams-card{
-  background:rgba(255,255,255,0.5);
-  border:1px solid var(--hair);
-  border-radius:12px;
-  padding:clamp(18px, 2.4vh, 26px) clamp(18px, 2vw, 28px);
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.bams-label{
-  font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:0.02em;
-  color:var(--muted);
-}
-.bams-split{
-  display:flex;
-  align-items:stretch;
-  gap:0;
-}
-.bams-side{
-  flex:1 1 0;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  padding:2px clamp(12px, 1.6vw, 22px);
-}
-.bams-side:first-child{
-  padding-left:0;
-}
-.bams-side:last-child{
-  padding-right:0;
-}
-.bams-divider{
-  width:1px;
-  background:var(--hair);
-  flex:0 0 auto;
-}
-.bams-figure{
-  font-family:var(--stack);
-  font-weight:600;
-  font-size:clamp(28px, 3.4vw, 44px);
-  line-height:1;
-  letter-spacing:-0.02em;
-  font-variant-numeric:tabular-nums;
-}
-.bams-figure.blue{ color:var(--accent); }
-.bams-figure.red{ color:var(--red); }
-.bams-caption{
-  font-family:var(--stack);
-  font-size:clamp(11px, 0.95vw, 13px);
-  line-height:1.4;
-  color:var(--muted);
-  max-width:24ch;
-}
-.bams-foot{
-  font-family:var(--stack);
-  font-size:12px;
-  line-height:1.45;
-  color:var(--muted);
-}
+.proof-text{ display:flex; flex-direction:column; gap:1px; }
+.proof-result{ font-family:var(--stack); font-size:19px; line-height:1.35; color:var(--ink); font-weight:400; }
+.proof-source{ font-family:&quot;Space Mono&quot;, ui-monospace, monospace; font-size:12px; color:var(--muted); }
 
 /* === Mobile === */
 @media (max-width: 880px){
-  section{
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:stretch;
-    min-height:100vh;
-    max-height:none;
-    overflow:visible;
+  section{ display:block; min-height:auto; overflow-x:hidden; padding-bottom:56px; }
+  .video-stack{
+    position:relative; top:auto; bottom:auto; right:auto; left:auto;
+    width:100%; max-width:100%; height:auto;
+    aspect-ratio:1 / 1; max-height:74vh;
+    -webkit-mask-image:none; mask-image:none; background:var(--bg);
+  }
+  .video-stack::after{
+    content:&#39;&#39;; position:absolute; left:0; right:0; bottom:0; height:56px; z-index:4; pointer-events:none;
+    background:linear-gradient(to bottom, rgba(237,240,242,0) 0%, rgba(237,240,242,0.15) 55%, rgba(237,240,242,0.85) 100%);
   }
   .text-col{
-    max-width:none;
-    width:100%;
-    align-items:stretch;
-    padding-left:clamp(20px,5vw,28px);
-    padding-right:clamp(20px,5vw,28px);
-    padding-top:clamp(20px,4vh,32px);
-    padding-bottom:8px;
-    flex:0 0 auto;
+    position:relative; z-index:3; max-width:none; width:100%;
+    padding-left:clamp(24px, 6vw, 32px); padding-right:clamp(24px, 6vw, 32px); padding-top:30px;
   }
-  .headline{
-    font-size:clamp(26px,6.5vw,34px);
-    line-height:1.18;
-    margin-bottom:clamp(18px,3vh,24px);
-    color:var(--headline-ink);
-  }
-  .stat-block{
-    gap:clamp(18px,3vh,26px);
-    margin-bottom:clamp(20px,3vh,28px);
-  }
-  .stat-row{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:6px;
-    width:100%;
-  }
-  .big-number{
-    font-size:clamp(44px,12vw,64px);
-    line-height:1;
-    width:auto;
-    text-align:left;
-  }
-  .caption{
-    font-size:clamp(13px,3.2vw,15px);
-    line-height:1.45;
-    max-width:none;
-    width:100%;
-    color:var(--muted);
-    white-space:normal;
-    word-break:break-word;
-    overflow-wrap:anywhere;
-  }
-  .body-text{
-    font-size:16px;
-    line-height:1.6;
-    margin-bottom:clamp(16px,2.5vh,22px);
-    color:var(--ink);
-  }
-  .advocacy-link{
-    font-size:16px;
-    line-height:1.4;
-    margin-bottom:clamp(8px,1.5vh,14px);
-  }
-  .chart-col{
-    flex:0 0 auto;
-    min-height:0;
-    height:auto;
-    padding:4px clamp(16px,4vw,24px) clamp(20px,3vh,32px);
-  }
-  .chart-group{
-    max-width:none;
-    gap:20px;
-  }
-  .amr-table td{
-    font-size:14px;
-    padding:11px 2px;
-  }
-  .amr-table td.result{
-    white-space:normal;
-    text-align:right;
-  }
-  .bams-figure{
-    font-size:clamp(26px, 8vw, 36px);
-  }
-  .bams-side{
-    padding:2px 10px;
-  }
-}
-
-/* === Short screens (1366×768 etc.) === */
-@media (max-height: 760px) and (min-width: 881px){
-  .headline{
-    font-size:clamp(26px, 2.6vw, 34px);
-    margin-bottom:22px;
-  }
-  .big-number{
-    font-size:clamp(46px, 5.2vw, 72px);
-  }
-  .stat-block{
-    gap:4px;
-    margin-bottom:18px;
-  }
-  .body-text{
-    font-size:17px;
-    line-height:1.5;
-    margin-bottom:18px;
-  }
-  .chart-col{
-    padding:24px 32px 24px;
-  }
-  .amr-table td{
-    padding:10px 4px;
-  }
-  .bams-figure{
-    font-size:clamp(26px, 3vw, 38px);
-  }
-}
-@media (max-height: 680px) and (min-width: 881px){
-  .headline{
-    font-size:clamp(22px, 2.2vw, 28px);
-    margin-bottom:16px;
-  }
-  .big-number{
-    font-size:clamp(38px, 4.4vw, 58px);
-  }
-  .stat-block{
-    margin-bottom:14px;
-  }
-  .body-text{
-    font-size:16px;
-    line-height:1.45;
-    margin-bottom:14px;
-  }
-  .amr-table td{
-    padding:8px 4px;
-    font-size:14px;
-  }
-  .bams-figure{
-    font-size:clamp(24px, 2.8vw, 32px);
-  }
-  .chart-group{
-    gap:18px;
-  }
-  .bams-card{
-    padding:14px 18px;
-    gap:10px;
-  }
+  .stat-block{ flex-direction:column; gap:14px; align-items:flex-start; }
+  .caption{ padding-top:0; max-width:none; }
+  .body-text{ font-size:16px; max-width:none; margin-bottom:12px; }
+  .body-text:last-child{ margin-bottom:0; }
+  .advocacy-link{ font-size:16px; }
 }
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
 
 &lt;section id=&quot;section&quot;&gt;
-  &lt;div class=&quot;text-col&quot;&gt;
-    &lt;h1 class=&quot;headline&quot;&gt;
-      &lt;span&gt;NanoFlashing&lt;/span&gt;
-      &lt;span&gt;&lt;em&gt;captures&lt;/em&gt; the virus&lt;/span&gt;
-      &lt;span&gt;and destroys it on contact&lt;/span&gt;
-    &lt;/h1&gt;
-
-    &lt;div class=&quot;stat-block&quot;&gt;
-      &lt;div class=&quot;stat-row&quot;&gt;
-        &lt;div class=&quot;big-number accent&quot;&gt;99.6%&lt;/div&gt;
-        &lt;p class=&quot;caption&quot;&gt;of SARS-CoV-2 inactivated at the media in 30 minutes&lt;/p&gt;
+  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
+    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/virus_slab.mp4?v=1&quot;
+           poster=&quot;assets/videos/posters/virus_slab.jpg&quot;
+           muted playsinline preload=&quot;auto&quot;
+           style=&quot;opacity:1; z-index:1;&quot;&gt;&lt;/video&gt;
+    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/virus_slab.jpg&quot; alt=&quot;&quot;&gt;
+    &lt;div class=&quot;anno&quot; id=&quot;anno&quot; aria-hidden=&quot;true&quot;&gt;
+      &lt;div class=&quot;anno-top&quot;&gt;
+        &lt;div class=&quot;anno-test&quot;&gt;Airborne virus&lt;/div&gt;
+        &lt;div class=&quot;anno-fact&quot;&gt;about &lt;b&gt;1 million&lt;/b&gt; infectious units per trial&lt;/div&gt;
+        &lt;div class=&quot;anno-fact&quot;&gt;&lt;b&gt;1.3 m/s&lt;/b&gt; airflow&lt;/div&gt;
       &lt;/div&gt;
-      &lt;div class=&quot;stat-row&quot;&gt;
-        &lt;div class=&quot;big-number accent&quot;&gt;2 yr&lt;/div&gt;
-        &lt;p class=&quot;caption&quot;&gt;aged in real time, capture-and-destroy still held&lt;/p&gt;
-      &lt;/div&gt;
+      &lt;span class=&quot;anno-lbl anno-lbl-nf&quot;&gt;NanoFlashing Material&lt;/span&gt;
+      &lt;span class=&quot;anno-lbl anno-lbl-cv&quot;&gt;Conventional Material&lt;/span&gt;
     &lt;/div&gt;
-
-    &lt;p class=&quot;body-text&quot;&gt;
-      NanoFlashing carries a permanent positive polarity. It pulls the negatively charged virus onto the fiber and destroys it on contact — through a physical mechanism, not chemistry. Nothing infectious is left in the media to recirculate.
-    &lt;/p&gt;
-
-    &lt;a class=&quot;advocacy-link&quot; href=&quot;#evidence&quot;&gt;Evidence &amp;rarr;&lt;/a&gt;
   &lt;/div&gt;
 
-  &lt;div class=&quot;chart-col&quot;&gt;
-    &lt;div class=&quot;chart-group&quot;&gt;
+  &lt;div class=&quot;text-col&quot;&gt;
+    &lt;h1 class=&quot;headline&quot;&gt;NanoFlashing captures the virus &lt;em&gt;— and destroys it&lt;/em&gt;&lt;/h1&gt;
 
-      &lt;div class=&quot;table-block&quot;&gt;
-        &lt;div class=&quot;table-label&quot;&gt;At the Media, Against Named Viruses&lt;/div&gt;
-        &lt;table class=&quot;amr-table&quot;&gt;
-          &lt;tbody&gt;
-            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;SARS-CoV-2&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;98.0%&lt;/span&gt; at 5 min · &lt;span class=&quot;fig&quot;&gt;99.6%&lt;/span&gt; at 30 min&lt;/td&gt;&lt;/tr&gt;
-            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;Human Coronavirus 229E&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;&amp;gt;99.9%&lt;/span&gt; inactivated&lt;/td&gt;&lt;/tr&gt;
-            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;Coxsackievirus B6&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;&amp;gt;99.9%&lt;/span&gt; inactivated&lt;/td&gt;&lt;/tr&gt;
-            &lt;tr&gt;&lt;td class=&quot;org&quot;&gt;Bovine Coronavirus&lt;/td&gt;&lt;td class=&quot;result&quot;&gt;&lt;span class=&quot;fig&quot;&gt;99.3%&lt;/span&gt; inactivated&lt;/td&gt;&lt;/tr&gt;
-          &lt;/tbody&gt;
-        &lt;/table&gt;
-        &lt;p class=&quot;table-foot&quot;&gt;Czech Academy of Sciences · Tampere University · University of Minnesota · captured and destroyed through a physical mechanism.&lt;/p&gt;
-      &lt;/div&gt;
-
-      &lt;div class=&quot;bams-card&quot;&gt;
-        &lt;div class=&quot;bams-label&quot;&gt;Independent Field Proof · BAMS&lt;/div&gt;
-        &lt;div class=&quot;bams-split&quot;&gt;
-          &lt;div class=&quot;bams-side&quot;&gt;
-            &lt;div class=&quot;bams-figure blue&quot;&gt;−95.44%&lt;/div&gt;
-            &lt;div class=&quot;bams-caption&quot;&gt;living airborne particles at the NanoFlashing vent&lt;/div&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;bams-divider&quot;&gt;&lt;/div&gt;
-          &lt;div class=&quot;bams-side&quot;&gt;
-            &lt;div class=&quot;bams-figure red&quot;&gt;+2,092%&lt;/div&gt;
-            &lt;div class=&quot;bams-caption&quot;&gt;at the conventional filter beside it&lt;/div&gt;
-          &lt;/div&gt;
-        &lt;/div&gt;
-        &lt;p class=&quot;bams-foot&quot;&gt;Two identical hospital air-handling towers, 12 months side by side · p&amp;lt;0.001.&lt;/p&gt;
-      &lt;/div&gt;
-
+    &lt;div class=&quot;stat-block&quot;&gt;
+      &lt;div class=&quot;big-number&quot; id=&quot;bigNumber&quot;&gt;0%&lt;/div&gt;
+      &lt;p class=&quot;caption&quot;&gt;of the virus it caught — destroyed, not just trapped&lt;/p&gt;
     &lt;/div&gt;
+
+    &lt;p class=&quot;mechanism&quot;&gt;
+      Patented permanent positive polarity destroys the negatively charged virus on the fiber, on contact — a physical mechanism, not chemistry.
+    &lt;/p&gt;
+
+    &lt;ol class=&quot;proof-list&quot;&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;98% of live SARS-CoV-2 was destroyed in five minutes, and 99.6% in thirty.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Mass General / Harvard&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;99.3% of an airborne coronavirus was removed at real air-handling speed.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;University of Minnesota&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;99.9% of two very different viruses was captured within five minutes.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Tampere University&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;Co-authored by 31 scientists across 16 research institutes, and peer-reviewed.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;American Society for Microbiology&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class=&quot;proof-item&quot;&gt;
+        &lt;span class=&quot;proof-mark&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+        &lt;span class=&quot;proof-text&quot;&gt;
+          &lt;span class=&quot;proof-result&quot;&gt;On two of three treated filters, no live virus could be found at all.&lt;/span&gt;
+          &lt;span class=&quot;proof-source&quot;&gt;Scientific Reports, 2023&lt;/span&gt;
+        &lt;/span&gt;
+      &lt;/li&gt;
+    &lt;/ol&gt;
+
+    &lt;a class=&quot;advocacy-link&quot; href=&quot;#evidence&quot;&gt;See the evidence →&lt;/a&gt;
   &lt;/div&gt;
 &lt;/section&gt;
 
+&lt;script&gt;
+/* Virus particle system — window.nfVirus = { start(), stop(), stopSpawning() }.
+   Each particle targets a random point inside the slab quad, split 50/50 into
+   two equal-area halves, so virus lands evenly and none fall off. Captured (blue flash)
+   on the NanoFlashing half, settle on the conventional half. */
+window.nfVirus = (function () {
+  let container = null, spores = [], running = false, spawning = false, draining = false, rafId = null;
+  let lastTime = 0, spawnAccum = 0, nextSpawnInterval = 200, rect = { width: 0, height: 0 }, resizeHandler = null;
+  const TL=[0.411,0.210], TR=[0.724,0.256], BR=[0.631,0.726], BL=[0.309,0.625];
+  const BND_M=-0.203, BND_B=0.600;
+  function boundaryFx(fy){ return BND_M*fy + BND_B; }
+  function lerp2(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
+  function splitOn(A,B){ const dx=B[0]-A[0], dy=B[1]-A[1]; const u=(BND_M*A[1]+BND_B-A[0])/(dx-BND_M*dy); return [A[0]+dx*u, A[1]+dy*u]; }
+  const TS=splitOn(TL,TR), BS=splitOn(BL,BR);
+  const BLUEQ=[TL,TS,BS,BL], WHITEQ=[TS,TR,BR,BS];
+  function biln(q,u,v){ const top=lerp2(q[0],q[1],u), bot=lerp2(q[3],q[2],u); return lerp2(top,bot,v); }
+  function readRect(){ if(!container) return; const r=container.getBoundingClientRect(); rect.width=r.width||window.innerWidth; rect.height=r.height||window.innerHeight; }
+  function coverMap(){ const s=Math.max(rect.width/1280, rect.height/720); return { s:s, offX:(rect.width-1280*s)/2, offY:(rect.height-720*s)/2 }; }
+  function createSpore(){
+    if(rect.width===0||rect.height===0) return;
+    const m=coverMap();
+    const el=document.createElement(&#39;div&#39;); el.className=&#39;spore&#39;;
+    const size=1.5+Math.random()*2; el.style.width=size+&#39;px&#39;; el.style.height=size+&#39;px&#39;;
+    const onBlue=Math.random()&lt;0.5;
+    const t=biln(onBlue?BLUEQ:WHITEQ, Math.random(), Math.random());
+    const tx=m.offX+t[0]*1280*m.s;
+    const fall=0.10+Math.random()*0.22;
+    const sp={ el:el, tx:tx, x:tx, hs:size/2, blue:(t[0] &lt; boundaryFx(t[1]) - 0.010), targetY:m.offY+t[1]*720*m.s, y:m.offY+(t[1]-fall)*720*m.s,
+      vy:40+Math.random()*50, wobbleAmp:4+Math.random()*6, wobbleFreq:0.4+Math.random()*0.7, wobblePhase:Math.random()*Math.PI*2, age:0, done:false };
+    el.style.transform=&#39;translate(&#39;+(tx-sp.hs)+&#39;px,&#39;+(sp.y-sp.hs)+&#39;px)&#39;;
+    container.appendChild(el); spores.push(sp);
+  }
+  function update(dt){
+    if(spawning){ spawnAccum+=dt; if(spawnAccum&gt;=nextSpawnInterval){ spawnAccum=0; nextSpawnInterval=40+Math.random()*40; const cap=window.innerWidth&gt;880?600:220; const deficit=cap-spores.length; const count=deficit&gt;0?Math.min(deficit,18):6; for(let i=0;i&lt;count&amp;&amp;spores.length&lt;cap;i++) createSpore(); } }
+    for(let i=spores.length-1;i&gt;=0;i--){
+      const s=spores[i]; if(s.done) continue;
+      s.age+=dt; const sec=dt/1000; s.y+=s.vy*sec;
+      s.x=s.tx+Math.sin((s.age/1000)*Math.PI*2*s.wobbleFreq+s.wobblePhase)*s.wobbleAmp;
+      if(s.y&gt;=s.targetY){ s.done=true; s.el.style.transform=&#39;translate(&#39;+(s.x-s.hs)+&#39;px,&#39;+(s.targetY-s.hs)+&#39;px)&#39;; s.el.classList.add(s.blue?&#39;captured&#39;:&#39;settled&#39;); const e=s.el; setTimeout(function(){ if(e&amp;&amp;e.parentNode) e.parentNode.removeChild(e); }, s.blue?640:2200); spores.splice(i,1); continue; }
+      if(draining){ s.drainT=(s.drainT||0)+dt; if(s.drainT&gt;=520){ s.done=true; if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); spores.splice(i,1); continue; } }
+      s.el.style.transform=&#39;translate(&#39;+(s.x-s.hs)+&#39;px,&#39;+(s.y-s.hs)+&#39;px)&#39;;
+      let op=s.age&lt;250?(s.age/250)*0.48:0.48; if(draining) op*=Math.max(0,1-s.drainT/520); s.el.style.opacity=op;
+    }
+  }
+  function loop(time){ if(!running) return; if(!lastTime) lastTime=time; let dt=time-lastTime; lastTime=time; if(dt&gt;100) dt=100; update(dt); if(!spawning&amp;&amp;spores.length===0){ running=false; rafId=null; return; } rafId=requestAnimationFrame(loop); }
+  function clearAll(){ spores.forEach(function(s){ if(s.el&amp;&amp;s.el.parentNode) s.el.parentNode.removeChild(s.el); }); spores=[]; }
+  function begin(){ running=true; spawning=true; draining=false; lastTime=0; spawnAccum=0; nextSpawnInterval=200; resizeHandler=function(){ readRect(); }; window.addEventListener(&#39;resize&#39;,resizeHandler); rafId=requestAnimationFrame(loop); }
+  function stopSpawning(){ spawning=false; draining=true; }
+  function start(){ if(running) return; container=document.querySelector(&#39;.anno&#39;); if(!container) return; if(window.matchMedia&amp;&amp;window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches) return; clearAll(); readRect(); if(rect.width===0||rect.height===0){ requestAnimationFrame(function(){ readRect(); if(rect.width===0||rect.height===0) return; begin(); }); return; } begin(); }
+  function stop(){ running=false; spawning=false; if(rafId) cancelAnimationFrame(rafId); rafId=null; if(resizeHandler){ window.removeEventListener(&#39;resize&#39;,resizeHandler); resizeHandler=null; } clearAll(); }
+  return { start:start, stop:stop, stopSpawning:stopSpawning, count:function(){ return spores.length; } };
+})();
+&lt;/script&gt;
+&lt;script&gt;
+(function(){
+  const reducedMotion = window.matchMedia(&#39;(prefers-reduced-motion: reduce)&#39;).matches;
+  const videoStack = document.getElementById(&#39;videoStack&#39;);
+  const videoA = document.getElementById(&#39;videoA&#39;);
+  const bigNumber = document.getElementById(&#39;bigNumber&#39;);
+  const isEmbedded = window.self !== window.top;
+  if (reducedMotion) videoStack.classList.add(&#39;reduced&#39;);
+
+  const ANCHOR_NF = 0.405, ANCHOR_CV = 0.597, ANCHOR_TOP = 0.524;
+  function positionAnno(){
+    const nf = document.querySelector(&#39;.anno-lbl-nf&#39;);
+    const cv = document.querySelector(&#39;.anno-lbl-cv&#39;);
+    const top = document.querySelector(&#39;.anno-top&#39;);
+    if (window.innerWidth &lt;= 880){
+      if (nf) nf.style.left = &#39;&#39;;
+      if (cv) cv.style.left = &#39;&#39;;
+      if (top) top.style.left = &#39;&#39;;
+      return;
+    }
+    const W = videoStack.clientWidth, H = videoStack.clientHeight;
+    if (!W || !H) return;
+    const s = Math.max(W/1280, H/720);
+    const offX = (W - 1280*s)/2;
+    const pct = fx =&gt; ((offX + fx*1280*s)/W*100).toFixed(2) + &#39;%&#39;;
+    if (nf) nf.style.left = pct(ANCHOR_NF);
+    if (cv) cv.style.left = pct(ANCHOR_CV);
+    if (top) top.style.left = pct(ANCHOR_TOP);
+  }
+  positionAnno();
+  window.addEventListener(&#39;resize&#39;, positionAnno);
+  window.addEventListener(&#39;load&#39;, positionAnno);
+
+  const GROW_END = 5.0;
+  function onGrow(){
+    if (videoA.currentTime &gt;= GROW_END){
+      videoA.removeEventListener(&#39;timeupdate&#39;, onGrow);
+      if (window.nfVirus) window.nfVirus.stopSpawning();
+    }
+  }
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = &#39;0%&#39;;
+    animateNumber();
+    positionAnno();
+    videoA.removeEventListener(&#39;timeupdate&#39;, onGrow);
+    videoA.addEventListener(&#39;timeupdate&#39;, onGrow);
+    if (window.nfVirus) window.nfVirus.start();
+  }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} videoA.removeEventListener(&#39;timeupdate&#39;, onGrow); if (window.nfVirus) window.nfVirus.stop(); }
+
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+  function animateNumber(){
+    const DURATION = 1600, TARGET = 99.6, start = performance.now();
+    function step(now){
+      const p = Math.min(1, (now - start) / DURATION);
+      const n = easeOutCubic(p) * TARGET;
+      bigNumber.textContent = n.toFixed(1) + &#39;%&#39;;
+      if (p &lt; 1) requestAnimationFrame(step); else bigNumber.textContent = &#39;99.6%&#39;;
+    }
+    requestAnimationFrame(step);
+  }
+
+  if (reducedMotion) {
+    bigNumber.textContent = &#39;99.6%&#39;;
+  } else {
+    bigNumber.textContent = &#39;0%&#39;;
+    if (isEmbedded) {
+      window.addEventListener(&#39;message&#39;, function(e){
+        if (!e.data) return;
+        if (e.data.type === &#39;nf-active&#39;) startFilter();
+        else if (e.data.type === &#39;nf-inactive&#39;) stopFilter();
+      });
+    } else {
+      const io = new IntersectionObserver((entries, observer) =&gt; {
+        entries.forEach(entry =&gt; { if (entry.isIntersecting) { startFilter(); observer.disconnect(); } });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById(&#39;section&#39;));
+    }
+  }
+})();
+&lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;" loading="lazy" title="The answer" allow="autoplay"></iframe></section>
+&lt;/html&gt;
+" loading="lazy" title="The answer" allow="autoplay"></iframe></section>
 </div>
 <div id="dots" aria-hidden="true"></div>
 <script>
