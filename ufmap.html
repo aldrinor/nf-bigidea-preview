@@ -481,26 +481,6 @@ body {
     <a href="https://www.nature.com/sdata/" target="_blank" rel="noopener">Georgiades et al., Scientific Data, 2025 · 1 km global model</a>
   </div>
 
-  <div class="time-control" id="timeControl" style="display:none">
-    <div class="tc-top">
-      <button class="tc-btn" id="playBtn" aria-label="Play">
-        <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <div class="tc-date" id="dateLabel">Whole country</div>
-    </div>
-    <div class="tc-slider-wrap">
-      <input type="range" class="tc-slider" id="frameSlider" min="0" max="3" value="0" step="1">
-    </div>
-    <div class="tc-ticks">
-      <span class="tc-tick" style="left:0;transform:none">Whole country</span>
-      <span class="tc-tick" style="left:100%;transform:translateX(-100%)">One city</span>
-    </div>
-  </div>
-
-  <div class="loading-hint" id="loadingHint">
-    loading the map…
-    <div class="loading-bar"><div class="loading-bar-fill" id="loadingBarFill"></div></div>
-  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -525,66 +505,6 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 L.imageOverlay('data/ufmap/us_ufp_2019.png', UFP_BOUNDS, { opacity: 0.9, interactive: false }).addTo(map);
 map.fitBounds(VIEW_BOUNDS);
-
-// Guided zoom presets
-const PRESETS = [
-  { name: 'Whole country',       fly: function() { map.flyToBounds(VIEW_BOUNDS, { duration: 1.8 }); } },
-  { name: 'The Southwest',        fly: function() { map.flyTo([35.2, -116.5], 6, { duration: 1.8 }); } },
-  { name: 'Los Angeles',          fly: function() { map.flyTo([34.05, -118.24], 8, { duration: 1.8 }); } },
-  { name: 'One city',             fly: function() { map.flyTo([34.05, -118.24], 9, { duration: 1.8 }); } }
-];
-
-let currentPreset = 0, playing = false, playTimer = null;
-
-function setPreset(i) {
-  i = Math.max(0, Math.min(PRESETS.length - 1, i));
-  currentPreset = i;
-  document.getElementById('dateLabel').textContent = PRESETS[i].name;
-  document.getElementById('frameSlider').value = i;
-  PRESETS[i].fly();
-}
-
-function play() {
-  playing = true;
-  if (currentPreset >= PRESETS.length - 1) setPreset(0);
-  document.getElementById('playIcon').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
-  document.getElementById('playBtn').setAttribute('aria-label', 'Pause');
-  playStep();
-}
-
-function playStep() {
-  if (!playing) return;
-  var next = currentPreset + 1;
-  if (next >= PRESETS.length) { pause(); return; }
-  setPreset(next);
-  playTimer = setTimeout(playStep, 2400);
-}
-
-function pause() {
-  playing = false;
-  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
-  document.getElementById('playBtn').setAttribute('aria-label', 'Play');
-  if (playTimer) { clearTimeout(playTimer); playTimer = null; }
-}
-
-function togglePlay() { if (playing) pause(); else play(); }
-
-// Boot
-document.getElementById('timeControl').style.display = 'block';
-document.getElementById('loadingHint').classList.add('hidden');
-
-var slider = document.getElementById('frameSlider');
-slider.addEventListener('input', function(e) {
-  if (playing) pause();
-  setPreset(parseInt(e.target.value));
-});
-document.getElementById('playBtn').addEventListener('click', togglePlay);
-document.addEventListener('keydown', function(e) {
-  if (e.target.tagName === 'INPUT') return;
-  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-  if (e.code === 'ArrowLeft')  { pause(); setPreset(Math.max(0, currentPreset - 1)); }
-  if (e.code === 'ArrowRight') { pause(); setPreset(Math.min(PRESETS.length - 1, currentPreset + 1)); }
-});
 
 var resizeTimer = null;
 window.addEventListener('resize', function() {
