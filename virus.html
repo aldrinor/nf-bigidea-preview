@@ -1856,7 +1856,7 @@ section{
 /* text column — LEFT */
 .text-col{
   position:relative;
-  z-index:3;
+  z-index:2;
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
@@ -1923,48 +1923,41 @@ section{
   text-decoration-color:var(--red);
 }
 
-/* MEDIA — right 58% */
-.filter-media{
-  position:absolute;
-  top:0;
-  right:0;
-  width:58%;
-  height:100%;
-  overflow:hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.5) 18%, #000 34%);
-          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.5) 18%, #000 34%);
-}
-.filter-media img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:50% 50%;
-  display:block;
-  -webkit-filter: contrast(1.05) brightness(0.99) saturate(1);
-          filter: contrast(1.05) brightness(0.99) saturate(1);
-}
-.filter-media canvas.motes{
+/* FULL-BLEED VIDEO STACK */
+.video-stack{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+.video-stack video,
+.video-stack img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+.video-stack img.poster{ opacity:0; }
+.video-stack.reduced video{ opacity:0 !important; }
+.video-stack.reduced img.poster{ opacity:1; }
+
+/* SCRIM — left-to-right gradient over video, behind text */
+.scrim{
+  position:absolute;
+  inset:0;
   z-index:1;
+  pointer-events:none;
+  background:linear-gradient(90deg, var(--bg) 0%, var(--bg) 34%, rgba(237,240,242,0.86) 50%, rgba(237,240,242,0.0) 68%);
 }
 
 /* MOBILE */
 @media (max-width:880px){
-  .filter-media{
-    width:100%;
-    max-width:100%;
-    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
-    mask-image:linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,1) 100%);
-  }
   .scrim{
-    position:absolute;
-    inset:0;
-    z-index:2;
-    pointer-events:none;
     background:linear-gradient(to right, rgba(237,240,242,0.96) 0%, rgba(237,240,242,0.82) 40%, rgba(237,240,242,0.4) 72%, rgba(237,240,242,0.1) 100%);
   }
   .text-col{
@@ -2004,327 +1997,80 @@ section{
     &lt;p class=&quot;body-text&quot;&gt;The EPA tells the workers who change these filters to &lt;a href=&quot;https://www.epa.gov/coronavirus/air-cleaners-hvac-filters-and-coronavirus-covid-19&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;put on gloves, goggles, and a respirator&lt;/a&gt; first.&lt;/p&gt;
     &lt;p class=&quot;body-text&quot;&gt;The filter meant to clean the air becomes a store of live virus — held in the fibers the building&#x27;s air keeps passing through.&lt;/p&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;filter-media&quot; id=&quot;filter-media&quot;&gt;
-    &lt;img src=&quot;assets/videos/filter_virus_fibre_dense.jpg&quot; alt=&quot;&quot;&gt;
-    &lt;canvas class=&quot;motes&quot; id=&quot;motes&quot;&gt;&lt;/canvas&gt;
+  &lt;div class=&quot;video-stack&quot; id=&quot;videoStack&quot;&gt;
+    &lt;video id=&quot;videoA&quot; src=&quot;assets/videos/virus_building_spread.mp4?v=1&quot;
+           poster=&quot;assets/videos/posters/virus_building_spread.jpg?v=1&quot;
+           muted playsinline preload=&quot;auto&quot;&gt;&lt;/video&gt;
+    &lt;img class=&quot;poster&quot; src=&quot;assets/videos/posters/virus_building_spread.jpg?v=1&quot; alt=&quot;&quot;&gt;
   &lt;/div&gt;
   &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
 &lt;/section&gt;
 
 &lt;script&gt;
 (function(){
-  &#x27;use strict&#x27;;
-
+  const reducedMotion = window.matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
+  const videoStack = document.getElementById(&#x27;videoStack&#x27;);
+  const videoA = document.getElementById(&#x27;videoA&#x27;);
+  const bigNumber = document.getElementById(&#x27;big-number&#x27;);
   const TARGET = 21;
-  const RED = &#x27;#e23b3b&#x27;;
-  const RED_GLOW = &#x27;rgba(226,59,59,0.45)&#x27;;
-  const MAX_MOTES = 6;
-  const SPAWN_INTERVAL = 900;   // ms
-  const SPAWN_JITTER = 150;     // ms
-  const TRAVEL_TIME = 10000;    // ms
-  const TRAVEL_JITTER = 1000;   // ms
-  const WOBBLE_AMP = 0.03;      // normalized y
-  const WOBBLE_FREQ = 0.05;     // Hz
-  const CAUGHT_PERIOD = 2400;   // ms
-  const PRESEED_X = [0.10, 0.28, 0.45, 0.62];
 
-  // Always-held motes at fixed fibre points
-  const HELD_POINTS = [
-    { x: 0.45, y: 0.40, phase: 0.0 },
-    { x: 0.60, y: 0.62, phase: 0.6 },
-    { x: 0.72, y: 0.30, phase: 1.2 },
-    { x: 0.85, y: 0.55, phase: 1.8 }
-  ];
-
-  const section = document.getElementById(&#x27;filter&#x27;);
-  const media = document.getElementById(&#x27;filter-media&#x27;);
-  const canvas = document.getElementById(&#x27;motes&#x27;);
-  const ctx = canvas.getContext(&#x27;2d&#x27;);
-  const numEl = document.getElementById(&#x27;big-number&#x27;);
+  if (reducedMotion) { videoStack.classList.add(&#x27;reduced&#x27;); }
 
   const isEmbedded = window.self !== window.top;
-  const prefersReduced = window.matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
 
-  let dpr = Math.max(1, window.devicePixelRatio || 1);
-  let cssW = 0, cssH = 0;
-  let motes = [];
-  let rafId = null;
-  let lastSpawnAt = 0;
-  let startedAt = 0;
-  let countStartAt = 0;
-  let countRafId = null;
-  let active = false;
-  let visible = true;
-
-  // ---------- Resize ----------
-  function resize(){
-    const rect = media.getBoundingClientRect();
-    cssW = Math.max(1, rect.width);
-    cssH = Math.max(1, rect.height);
-    dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.scale(dpr, dpr);
+  function startFilter(){
+    if (reducedMotion) return;
+    try { videoA.currentTime = 0; videoA.play(); } catch(e){}
+    bigNumber.textContent = &#x27;0 days&#x27;;
+    animateNumber();
   }
+  function stopFilter(){ try { videoA.pause(); } catch(e){} }
 
-  // ---------- Mote factory ----------
-  function makeMote(startX, now){
-    const y = 0.15 + Math.random() * 0.70;
-    const travelMs = TRAVEL_TIME + (Math.random()*2 - 1) * TRAVEL_JITTER;
-    const speed = 1 / travelMs; // normalized x per ms
-    const willCapture = Math.random() &lt; (1/3);
-    const captureX = willCapture ? (0.35 + Math.random() * 0.45) : null;
-    return {
-      x: startX,
-      y: y,
-      baseY: y,
-      speed: speed,
-      radius: 1.4 + Math.random() * 1.2,
-      opacity: 0.34 + Math.random() * 0.22,
-      wobblePhase: Math.random() * Math.PI * 2,
-      bornAt: now,
-      captured: false,
-      captureX: captureX,
-      capturedAt: 0
-    };
-  }
+  function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
 
-  function makePreseedMote(startX, now){
-    const m = makeMote(startX, now);
-    // Re-baseline bornAt so it&#x27;s already drifting at startX
-    m.bornAt = now - (startX / m.speed);
-    return m;
-  }
-
-  function preseed(now){
-    motes = [];
-    for (let i = 0; i &lt; PRESEED_X.length; i++){
-      motes.push(makePreseedMote(PRESEED_X[i], now));
-    }
-    lastSpawnAt = now;
-  }
-
-  // ---------- Draw ----------
-  function drawMote(x, y, r, opacity){
-    const rr = Math.min(r, 4.5);
-    ctx.globalAlpha = opacity;
-    ctx.fillStyle = RED;
-    ctx.shadowColor = RED_GLOW;
-    ctx.shadowBlur = 4;
-    ctx.beginPath();
-    ctx.arc(x, y, rr, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  function drawHeld(xN, yN, phaseOffset, now){
-    const phase = ((now + phaseOffset) % CAUGHT_PERIOD) / CAUGHT_PERIOD;
-    const pulse = Math.sin(phase * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5; // 0..1
-    const scale = 1.0 + 0.25 * pulse;
-    const opacity = 0.60 + 0.25 * pulse;
-    const radius = 3.5 * scale;
-    drawMote(xN * cssW, yN * cssH, radius, opacity);
-  }
-
-  function drawFrame(now){
-    ctx.clearRect(0, 0, cssW, cssH);
-    ctx.globalCompositeOperation = &#x27;source-over&#x27;;
-
-    // Always-held motes
-    for (let i = 0; i &lt; HELD_POINTS.length; i++){
-      const h = HELD_POINTS[i];
-      drawHeld(h.x, h.y, h.phase, now);
-    }
-
-    // Traveling motes
-    for (let i = 0; i &lt; motes.length; i++){
-      const m = motes[i];
-      if (m.captured){
-        // Snagged: pulse in place
-        const phase = ((now - m.capturedAt) % CAUGHT_PERIOD) / CAUGHT_PERIOD;
-        const pulse = Math.sin(phase * Math.PI * 2 - Math.PI/2) * 0.5 + 0.5;
-        const scale = 1.0 + 0.25 * pulse;
-        const opacity = 0.60 + 0.25 * pulse;
-        const radius = 3.5 * scale;
-        drawMote(m.x * cssW, m.y * cssH, radius, opacity);
-      } else {
-        // Drifting
-        const wobble = Math.sin((now / 1000) * WOBBLE_FREQ * Math.PI * 2 + m.wobblePhase) * WOBBLE_AMP;
-        const y = m.baseY + wobble;
-        drawMote(m.x * cssW, y * cssH, m.radius, m.opacity);
-      }
-    }
-
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
-  }
-
-  // ---------- Loop ----------
-  function loop(now){
-    if (!active) return;
-    // Spawn
-    const sinceSpawn = now - lastSpawnAt;
-    const interval = SPAWN_INTERVAL + (Math.random()*2 - 1) * SPAWN_JITTER;
-    if (sinceSpawn &gt;= interval &amp;&amp; motes.length &lt; MAX_MOTES){
-      motes.push(makeMote(-0.05, now));
-      lastSpawnAt = now;
-    }
-    // Update &amp; cull
-    const dt = 16; // approx
-    motes = motes.filter(function(m){
-      if (m.captured) return true;
-      m.x += m.speed * 16; // advance based on fixed dt step
-      if (m.captureX !== null &amp;&amp; m.x &gt;= m.captureX){
-        m.captured = true;
-        m.capturedAt = now;
-        m.x = m.captureX;
-      }
-      if (m.x &gt; 1.05) return false;
-      return true;
-    });
-    drawFrame(now);
-    rafId = requestAnimationFrame(loop);
-  }
-
-  // ---------- Count-up ----------
-  function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
-
-  function runCountUp(){
-    cancelCountUp();
-    countStartAt = performance.now() + 300;
+  function animateNumber(){
+    const DURATION = 1600;
+    const DELAY = 300;
+    const start = performance.now() + DELAY;
     function step(now){
-      if (!active) return;
-      if (now &lt; countStartAt){
-        numEl.textContent = &#x27;0 days&#x27;;
-        countRafId = requestAnimationFrame(step);
+      if (now &lt; start){
+        bigNumber.textContent = &#x27;0 days&#x27;;
+        requestAnimationFrame(step);
         return;
       }
-      const elapsed = now - countStartAt;
-      const dur = 1600;
-      if (elapsed &gt;= dur){
-        numEl.textContent = TARGET + &#x27; days&#x27;;
-        return;
-      }
-      const v = Math.round(easeOutCubic(elapsed / dur) * TARGET);
-      numEl.textContent = v + &#x27; days&#x27;;
-      countRafId = requestAnimationFrame(step);
+      const p = Math.min(1, (now - start) / DURATION);
+      const e = easeOutCubic(p);
+      const n = Math.round(e * TARGET);
+      bigNumber.textContent = n + &#x27; days&#x27;;
+      if (p &lt; 1) requestAnimationFrame(step);
+      else bigNumber.textContent = TARGET + &#x27; days&#x27;;
     }
-    countRafId = requestAnimationFrame(step);
-  }
-  function cancelCountUp(){
-    if (countRafId){ cancelAnimationFrame(countRafId); countRafId = null; }
+    requestAnimationFrame(step);
   }
 
-  // ---------- Static frame (reduced motion) ----------
-  function drawStatic(){
-    ctx.clearRect(0, 0, cssW, cssH);
-    ctx.globalCompositeOperation = &#x27;source-over&#x27;;
-    // Always-held motes at base pulse
-    for (let i = 0; i &lt; HELD_POINTS.length; i++){
-      const h = HELD_POINTS[i];
-      drawMote(h.x * cssW, h.y * cssH, 3.5, 0.60);
-    }
-    // A few resting travelers
-    const resting = [0.10, 0.28, 0.45];
-    for (let i = 0; i &lt; resting.length; i++){
-      const x = resting[i];
-      const y = 0.15 + (i * 0.17) % 0.7;
-      drawMote(x * cssW, y * cssH, 1.4 + (i % 3) * 0.4, 0.40);
-    }
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
-  }
-
-  // ---------- Start / Stop ----------
-  function start(){
-    if (active) return;
-    active = true;
-    visible = true;
-    if (cssW === 0) resize();
-    numEl.textContent = &#x27;0 days&#x27;;
-    if (prefersReduced){
-      numEl.textContent = TARGET + &#x27; days&#x27;;
-      drawStatic();
-      return;
-    }
-    const now = performance.now();
-    startedAt = now;
-    preseed(now);
-    runCountUp();
-    rafId = requestAnimationFrame(loop);
-  }
-  function stop(){
-    active = false;
-    if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
-    cancelCountUp();
-    numEl.textContent = &#x27;0 days&#x27;;
-    if (ctx &amp;&amp; cssW){
-      ctx.clearRect(0, 0, cssW, cssH);
-    }
-    motes = [];
-  }
-
-  // ---------- Resize handler ----------
-  let resizeRaf = null;
-  function onResize(){
-    if (resizeRaf) cancelAnimationFrame(resizeRaf);
-    resizeRaf = requestAnimationFrame(function(){
-      resize();
-      if (active &amp;&amp; prefersReduced) drawStatic();
-    });
-  }
-  window.addEventListener(&#x27;resize&#x27;, onResize);
-
-  // ---------- Visibility ----------
-  document.addEventListener(&#x27;visibilitychange&#x27;, function(){
-    if (document.hidden){
-      if (active){
-        visible = false;
-        if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
-        cancelCountUp();
-      }
-    } else {
-      if (active &amp;&amp; !visible){
-        visible = true;
-        const now = performance.now();
-        lastSpawnAt = now;
-        // Re-baseline mote births so they continue smoothly
-        for (let i = 0; i &lt; motes.length; i++){
-          const m = motes[i];
-          if (!m.captured){
-            m.bornAt = now - (m.x / m.speed);
-          }
-        }
-        runCountUp();
-        rafId = requestAnimationFrame(loop);
-      }
-    }
-  });
-
-  // ---------- Activation wiring ----------
-  if (isEmbedded){
-    window.addEventListener(&#x27;message&#x27;, function(e){
-      const d = e.data;
-      if (!d || typeof d !== &#x27;object&#x27;) return;
-      if (d.type === &#x27;nf-active&#x27;) start();
-      else if (d.type === &#x27;nf-inactive&#x27;) stop();
-    });
+  if (reducedMotion) {
+    bigNumber.textContent = TARGET + &#x27; days&#x27;;
   } else {
-    const io = new IntersectionObserver(function(entries){
-      for (let i = 0; i &lt; entries.length; i++){
-        if (entries[i].isIntersecting) start();
-        else stop();
-      }
-    }, { threshold: 0.35 });
-    io.observe(section);
+    bigNumber.textContent = &#x27;0 days&#x27;;
+    if (isEmbedded) {
+      window.addEventListener(&#x27;message&#x27;, function(e){
+        if (!e.data) return;
+        if (e.data.type === &#x27;nf-active&#x27;) startFilter();
+        else if (e.data.type === &#x27;nf-inactive&#x27;) stopFilter();
+      });
+    } else {
+      const io = new IntersectionObserver((entries, observer) =&gt; {
+        entries.forEach(entry =&gt; {
+          if (entry.isIntersecting) { startFilter(); observer.disconnect(); }
+        });
+      }, { threshold: 0.35 });
+      io.observe(document.getElementById(&#x27;filter&#x27;));
+    }
   }
-
-  // Initial sizing
-  resize();
 })();
 &lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;&quot; loading=&quot;lazy&quot;" loading="lazy" title="The filter" allow="autoplay"></iframe></section>
+&lt;/html&gt;" loading="lazy" title="The filter" allow="autoplay"></iframe></section>
   <section class="screen"><iframe srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
