@@ -48,18 +48,18 @@
     justify-content:flex-start;                 /* top-anchored so the passage never shifts vertically */
     min-width:0;
     max-height:100vh;
-    padding:150px clamp(24px,5vw,80px) clamp(16px,2vh,28px);
+    padding:140px clamp(24px,6vw,96px) clamp(16px,2vh,28px);
     z-index:10;
     position:relative;
   }
   h1.headline{
     font-family:var(--stack);
     font-weight:600;
-    font-size:clamp(20px, 1.95vw, 28px);
-    line-height:1.32;
+    font-size:clamp(24px, 2.7vw, 34px);
+    line-height:1.3;
     letter-spacing:-0.022em;
     color:var(--headline-ink);
-    margin:0 0 clamp(14px,2vh,22px);
+    margin:0 0 clamp(10px,1.5vh,16px);
     max-width:none;
   }
   h1.headline em{font-style:normal;color:var(--red)}
@@ -90,14 +90,10 @@
     line-height:1.5;
     color:#1a1a1a;
     font-weight:400;
-    margin:0 0 14px;
+    margin:0 0 12px;
     max-width:540px;
   }
   .card-impacts{
-    overflow-y:auto;
-    max-height:calc(100vh - 380px);
-    -webkit-overflow-scrolling:touch;
-    padding-right:4px;
   }
   .card-impacts p{
     font-family:var(--stack);
@@ -105,7 +101,7 @@
     line-height:1.5;
     color:#1a1a1a;
     font-weight:400;
-    margin:0 0 12px;
+    margin:0 0 10px;
     max-width:540px;
   }
   .card-impacts p:last-child{margin-bottom:0}
@@ -119,7 +115,7 @@
 
   /* ANATOMY INDEX — vertical selector */
   .index{
-    margin-top:clamp(10px,1.4vh,18px);
+    margin-top:clamp(10px,1.4vh,14px);
     display:flex;
     flex-direction:column;
     border-top:1px solid var(--hair);
@@ -130,7 +126,7 @@
     align-items:center;
     gap:18px;
     width:100%;
-    padding:8px 6px 8px 14px;
+    padding:7px 6px 7px 14px;
     background:transparent;
     border:0;
     border-bottom:1px solid var(--hair);
@@ -360,9 +356,8 @@
       max-height:none;
     }
     .card{min-height:180px}
-    .card-impacts{max-height:none;overflow:visible}
     h1.headline{max-width:none}
-    .index-row{padding:8px 6px 8px 14px}
+    .index-row{padding:11px 6px 11px 14px}
     .index-row .nm{font-size:16px}
   }
 
@@ -509,9 +504,6 @@
         {text:"The Health Effects Institute, Institute for Health Metrics and Evaluation and UNICEF counted [8.1 million air-pollution deaths in 2021], with fine particles driving about 90% of the burden.", url:"https://www.stateofglobalair.org/news-events/2024/new-state-global-air-report-finds-air-pollution-second-leading-risk-factor-death"},
         {text:"A George Washington University study tied fine particles to [5 to 10 million asthma emergency-room visits worldwide each year].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC6371661/"},
         {text:"The WHO's International Agency for Research on Cancer classified outdoor air pollution and particulate matter as [carcinogenic to humans, Group 1], with sufficient evidence that they cause lung cancer.", url:"https://www.iarc.who.int/news-events/iarc-outdoor-air-pollution-a-leading-environmental-cause-of-cancer-deaths/"},
-        {text:"A University of Southern California study found children in the most PM2.5-polluted communities were [4.9 times more likely to reach adulthood with clinically low lung function].", url:"https://pubmed.ncbi.nlm.nih.gov/15356303/"},
-        {text:"A study in Annals of Translational Medicine found [41% to 68% of inhaled particles around 40 nm lodged in the lungs], reaching the deepest gas-exchange sacs.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC4930526/"},
-        {text:"A landmark American Cancer Society study of roughly 500,000 US adults tied each 10-microgram rise in long-term PM2.5 exposure to [8% higher lung-cancer mortality].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC4037163/"}
       ],
       ox:0.44, oy:0.25, label:"Lungs"
     },
@@ -521,9 +513,6 @@
         {text:"The Health Effects Institute and Institute for Health Metrics and Evaluation linked fine-particle pollution to [4.14 million deaths worldwide in 2019], with heart disease and stroke among the leading causes.", url:"https://www.stateofglobalair.org/health/pm"},
         {text:"A Max Planck Institute-led study found ultrafine particles are tied to [about 1.99 million premature deaths each year], roughly half from cardiovascular disease.", url:"https://doi.org/10.1093/cvr/cvag136"},
         {text:"A Xi'an Jiaotong University-led analysis tied ambient PM2.5 to [977,140 ischemic heart-disease deaths in 2017].", url:"https://pubmed.ncbi.nlm.nih.gov/33297122/"},
-        {text:"A Global Burden of Disease analysis linked fine-particle pollution to [about 0.90 million ischemic-stroke deaths worldwide in 2021].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12307462/"},
-        {text:"Harvard researchers found a spike in fine particles raised the odds of [a heart attack within the next 2 hours by 48%], and a spike the day before raised them 69%.", url:"https://pubmed.ncbi.nlm.nih.gov/11401937/"},
-        {text:"A University of Washington study following 6,795 adults for 10 years found each additional 5 micrograms of PM2.5 per cubic metre sped coronary-calcium buildup by [about 4.1 Agatston units a year].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC5082281/"}
       ],
       ox:0.53, oy:0.29, label:"Heart"
     },
@@ -533,9 +522,6 @@
         {text:"A Global Burden of Disease study found fine-particle pollution was linked to [about 1.99 million stroke deaths worldwide in 2021].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12041061/"},
         {text:"A Lancaster University study in PNAS found pollution-made magnetite nanoparticles in [the brain tissue of all 37 people examined].", url:"https://www.pnas.org/doi/10.1073/pnas.1605941113"},
         {text:"A University of Montana study of 179 brains found Alzheimer's tau protein in [84% of the smell-processing bulbs by the second decade of life], alongside combustion-derived nanoparticles.", url:"https://pubmed.ncbi.nlm.nih.gov/29935448/"},
-        {text:"A University of Washington review covering 36.3 million people found dementia risk was [about 37% higher at a typical PM2.5 level of 15.5 micrograms per cubic metre] than with clean air.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12092285/"},
-        {text:"A Boston College review found each extra 1 microgram of PM2.5 per cubic metre was tied to [about 0.27 fewer full-scale IQ points in children].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC11572473/"},
-        {text:"A UK Biobank study of 389,185 adults linked long-term PM2.5 exposure to [15% higher depression risk], even below current air-quality guidelines.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC10077109/"}
       ],
       ox:0.50, oy:0.075, label:"Brain & Mind"
     },
@@ -545,9 +531,6 @@
         {text:"A Washington University and VA St. Louis study linked fine-particle pollution to [about 3.2 million new type 2 diabetes cases worldwide in 2016].", url:"https://www.thelancet.com/journals/lanpla/article/PIIS2542-5196(18)30140-2/fulltext"},
         {text:"A VA St. Louis and Washington University study of 2.48 million veterans attributed [44,793 new US kidney-disease cases each year] to PM2.5 above the cleanest background levels.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC5748906/"},
         {text:"A University of Southern California study found higher near-road PM2.5 exposure was tied to [21.6% lower insulin sensitivity] in overweight Latino children.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC5482082/"},
-        {text:"An Ohio State University study found mice exposed to concentrated PM2.5 developed [whole-body insulin resistance and inflamed abdominal fat] compared with mice breathing filtered air.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC3845676/"},
-        {text:"A Helmholtz Zentrum München study of nearly 3,000 adults linked each additional 7.9 micrograms of particulate pollution per cubic metre to [a 15.6% higher insulin-resistance score].", url:"https://diabetesjournals.org/diabetes/article-abstract/65/11/3314/17176/Association-Between-Long-term-Exposure-to-Air"},
-        {text:"A University of Toronto-led study found each step up in ultrafine-particle exposure was tied to [a diabetes hazard ratio of 1.06].", url:"https://journals.lww.com/epidem/FullText/2018/05000/Exposure_to_Ambient_Ultrafine_Particles_and.2.aspx"}
       ],
       ox:0.50, oy:0.40, label:"Metabolism"
     },
@@ -557,9 +540,6 @@
         {text:"A UCSF and Institute for Health Metrics and Evaluation study linked fine-particle pollution to [5,870,103 preterm births worldwide in 2019], about 36% of the total.", url:"https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1003718"},
         {text:"A Peking University study attributed [about 0.83 million stillbirths a year] to PM2.5 above 10 micrograms per cubic metre.", url:"https://www.nature.com/articles/s41467-022-34250-4"},
         {text:"A Hasselt University and University of Aberdeen study found black-carbon particles in [fetal liver, lung and brain tissue as early as 7 to 20 weeks].", url:"https://www.thelancet.com/journals/lanplh/article/PIIS2542-5196(22)00200-5/fulltext"},
-        {text:"A Universidad del Valle de Mexico and University of Montana study found metal nanoparticles [inside fetal brain neurons and glia at 8 to 15 weeks].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC8962421/"},
-        {text:"A Hasselt University study found black-carbon particles on the baby-facing side of [all 20 placentas screened], with higher loads in more-exposed mothers.", url:"https://www.nature.com/articles/s41467-019-11654-3"},
-        {text:"A Health Canada study of 2,183,324 births linked prenatal exposure to the sulfate in PM2.5 with [an autism hazard ratio of 1.15 per exposure step].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC12550638/"}
       ],
       ox:0.50, oy:0.50, label:"Reproduction"
     },
@@ -569,10 +549,8 @@
         {text:"A KU Leuven study found inhaled ultrafine carbon particles entered healthy people's blood [within 1 minute].", url:"https://pubmed.ncbi.nlm.nih.gov/11815420/"},
         {text:"A Hasselt University and University of Aberdeen study found black-carbon particles in [all 60 mothers, all 60 cord-blood samples and all 60 placentas tested].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC9553674/"},
         {text:"A Lancaster University study found [millions of pollution-made magnetite nanoparticles per gram of brain tissue], with particles present in all 37 people examined.", url:"https://pubmed.ncbi.nlm.nih.gov/27601646/"},
-        {text:"A Harvard and University of Milan study of 718 older men found recent black-carbon and PM2.5 exposure [lowered methylation of blood DNA], a marker linked to gene regulation.", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC2720123/"},
-        {text:"A University of Rochester study found breathing ultrafine carbon particles around 25 nm across [changed surface markers on circulating immune cells].", url:"https://pmc.ncbi.nlm.nih.gov/articles/PMC1332656/"}
       ],
-      ox:0.28, oy:0.49, label:"Blood & Cells"
+      ox:0.50, oy:0.15, label:"Blood & Cells"
     }
   };
 
@@ -687,7 +665,7 @@
       const fW = figure.offsetWidth;
       const fH = figure.offsetHeight;
       targetX = restOffsetX() - (d.ox - 0.5) * fW * scale;
-      targetY = fH * (0.06 - 0.5 + 0.5 * scale);
+      targetY = Math.max(-Math.max(0,(fH*scale-areaH)/2), Math.min(Math.max(0,(fH*scale-areaH)/2), (0.5 - d.oy) * fH * scale));
       
       applyTransform();
       
