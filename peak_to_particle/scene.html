@@ -24,32 +24,42 @@ const q = new URLSearchParams(location.search);
 const hud = document.getElementById('hud');
 
 /* ---------------------------------------------------------------
-   PALETTE — sampled from real Banff alpine photography, not invented.
+   PALETTE — cold luminous near-white, set against the reference render.
    Pale blue zenith, warm-white haze at the horizon, grey limestone rock.
    --------------------------------------------------------------- */
-const SKY_TOP   = new THREE.Color('#8fa9c4');
-const SKY_MID   = new THREE.Color('#c2d2e0');
-const SKY_HORIZ = new THREE.Color('#e6ecf1');
-const HAZE      = new THREE.Color('#dfe7ee');
-const SUN_TINT  = new THREE.Color('#fff4e6');
+const SKY_TOP   = new THREE.Color('#aebfd2');
+const SKY_MID   = new THREE.Color('#d8e2ea');
+const SKY_HORIZ = new THREE.Color('#f3f6f8');
+const HAZE      = new THREE.Color('#eef3f7');
+const SUN_TINT  = new THREE.Color('#f7fbff');
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(HAZE, 0.000042);
+scene.fog = new THREE.FogExp2(HAZE, 0.000072);
 
-const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 5, 90000);
+const camera = new THREE.PerspectiveCamera(26, innerWidth/innerHeight, 5, 90000);
 
 // real positions, in metres, derived from the DEM
 const VICTORIA = new THREE.Vector3(-3883, 3459, 2117);
 const LOUISE   = new THREE.Vector3( 2220, 1742, -1956);
+const TEMPLE   = new THREE.Vector3( 2552, 3490,  4757);   // highest peak in frame — the hero
 const CLOUD_Y  = 2620;            // cloud sea sits below the summits, above the valleys
 
+// Hero framing per the gate: ~85mm equivalent, camera close and BELOW the summit so
+// the massif dominates ~60% of the frame and the summit sits high, cloud wrapping the flanks.
 const SHOTS = {
-  hero:  { pos:[ 3100, 3760, -2050], look:[VICTORIA.x, VICTORIA.y-120, VICTORIA.z] },
+  hero:  { pos:[-151, 2980, 6650], look:[TEMPLE.x, 3260, TEMPLE.z], fov:28 },
   above: { pos:[ 1500, 5200,  -900], look:[VICTORIA.x, 2600, VICTORIA.z] },
-  close: { pos:[VICTORIA.x+2600, VICTORIA.y+380, VICTORIA.z-2200], look:[VICTORIA.x, VICTORIA.y-140, VICTORIA.z] },
+  close: { pos:[VICTORIA.x + 1750, 3150, VICTORIA.z - 1500], look:[VICTORIA.x, VICTORIA.y + 90, VICTORIA.z] },
   lake:  { pos:[LOUISE.x+700, LOUISE.y+90, LOUISE.z-500], look:[VICTORIA.x, VICTORIA.y-900, VICTORIA.z] },
 };
-const shot = SHOTS[q.get('shot')] || SHOTS.hero;
+// free camera via URL for framing surveys: ?cam=x,y,z&look=x,y,z&fov=deg
+let shot = SHOTS[q.get('shot')] || SHOTS.hero;
+if(q.get('cam')){
+  const c=q.get('cam').split(',').map(Number), l=(q.get('look')||'0,3000,0').split(',').map(Number);
+  shot={pos:c, look:l};
+}
+if(shot.fov){ camera.fov = shot.fov; camera.updateProjectionMatrix(); }
+if(q.get('fov')){ camera.fov = Number(q.get('fov')); camera.updateProjectionMatrix(); }
 camera.position.set(...shot.pos);
 camera.lookAt(...shot.look);
 
@@ -79,12 +89,12 @@ const skyMat = new THREE.ShaderMaterial({
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(60000, 32, 24), skyMat));
 
 /* ---------------- LIGHT ---------------- */
-const sun = new THREE.DirectionalLight(0xfff2e2, 3.1);
+const sun = new THREE.DirectionalLight(0xf6faff, 1.45);
 sun.position.copy(SUN_DIR).multiplyScalar(20000);
 scene.add(sun);
-scene.add(new THREE.HemisphereLight(0xd9e6f2, 0x8d9aa6, 0.85));
+scene.add(new THREE.HemisphereLight(0xeaf1f8, 0xa8b6c2, 2.05));
 // cool fill from the opposite side so shadowed faces keep shape instead of going flat black
-const fill = new THREE.DirectionalLight(0xb9cde0, 0.7);
+const fill = new THREE.DirectionalLight(0xcfdeed, 0.45);
 fill.position.set(-SUN_DIR.x*15000, 4000, -SUN_DIR.z*15000);
 scene.add(fill);
 
@@ -94,30 +104,62 @@ const normalMap = tex.load('./terrain/out/banff_normal_q95.webp');
 normalMap.colorSpace = THREE.NoColorSpace;
 
 const terrainMat = new THREE.MeshStandardMaterial({
-  color: 0xffffff, roughness: 0.93, metalness: 0.0,
-  normalMap, normalScale: new THREE.Vector2(1.15, 1.15),
+  color: 0xffffff, roughness: 0.985, metalness: 0.0,
+  normalMap, normalScale: new THREE.Vector2(0.72, 0.72),
 });
 // slope + altitude drive snow vs rock. Steep faces shed snow — that contrast is
 // what makes a real mountain read as a mountain instead of a white blob.
 terrainMat.onBeforeCompile = (sh) => {
   sh.uniforms.uSnowLine = { value: 2780.0 };
+  sh.uniforms.uRelief = { value: Number(q.get('relief') ?? 2.2) };
   sh.vertexShader = sh.vertexShader
     .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vNrmW;')
     .replace('#include <begin_vertex>', '#include <begin_vertex>\n vWPos = (modelMatrix*vec4(position,1.0)).xyz;\n vNrmW = normalize(mat3(modelMatrix)*normal);');
   sh.fragmentShader = sh.fragmentShader
-    .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vNrmW;\nuniform float uSnowLine;')
+    .replace('#include <common>', `#include <common>
+varying vec3 vWPos; varying vec3 vNrmW; uniform float uSnowLine; uniform float uRelief;
+vec3 nPerturbW;
+float rhash(vec3 p){ p=fract(p*0.3183099+vec3(0.71,0.113,0.419)); p*=17.0;
+  return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
+float rnoise(vec3 x){ vec3 i=floor(x), f=fract(x); f=f*f*(3.0-2.0*f);
+  return mix(mix(mix(rhash(i+vec3(0,0,0)),rhash(i+vec3(1,0,0)),f.x),
+                 mix(rhash(i+vec3(0,1,0)),rhash(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(rhash(i+vec3(0,0,1)),rhash(i+vec3(1,0,1)),f.x),
+                 mix(rhash(i+vec3(0,1,1)),rhash(i+vec3(1,1,1)),f.x),f.y),f.z); }
+float rfbm(vec3 p){ float s=0.0,a=0.5;
+  for(int i=0;i<5;i++){ s+=a*rnoise(p); p=p*2.11+vec3(3.1,7.7,1.3); a*=0.5; } return s; }
+`)
+    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+// ---- procedural micro-relief -------------------------------------------------
+// The elevation data is ~30 m per sample, so at close range the mesh is a smooth
+// dune. Real macro form plus procedural detail below the data's resolution is how
+// terrain is always rendered. Two bands: broad gullies, then fine rock grain.
+{
+  vec3 P1 = vWPos * vec3(0.0135, 0.0042, 0.0135);   // stretched in Y -> gullies
+  vec3 P2 = vWPos * vec3(0.0610, 0.0195, 0.0610);
+  vec2 g1 = vec2(rfbm(P1+vec3(0.55,0.0,0.0))-rfbm(P1-vec3(0.55,0.0,0.0)),
+                 rfbm(P1+vec3(0.0,0.0,0.55))-rfbm(P1-vec3(0.0,0.0,0.55)));
+  vec2 g2 = vec2(rfbm(P2+vec3(0.55,0.0,0.0))-rfbm(P2-vec3(0.55,0.0,0.0)),
+                 rfbm(P2+vec3(0.0,0.0,0.55))-rfbm(P2-vec3(0.0,0.0,0.55)));
+  float steep = smoothstep(0.10, 0.62, 1.0 - clamp(vNrmW.y, 0.0, 1.0));
+  vec3 relief = vec3(g1.x*2.6 + g2.x*1.5, 0.0, g1.y*2.6 + g2.y*1.5);
+  vec3 reliefW = relief * (0.28 + 0.72*steep) * uRelief;
+  nPerturbW = normalize(vNrmW + reliefW * 0.16);
+  normal = normalize(normal + reliefW);
+}
+`)
     .replace('#include <color_fragment>', `#include <color_fragment>
       float slope = 1.0 - clamp(vNrmW.y, 0.0, 1.0);
       float byAlt   = smoothstep(uSnowLine - 420.0, uSnowLine + 300.0, vWPos.y);
       float bySlope = 1.0 - smoothstep(0.26, 0.54, slope);
       float snow = clamp(byAlt * bySlope, 0.0, 1.0);
-      vec3 rockDark  = vec3(0.235, 0.243, 0.262);
-      vec3 rockLight = vec3(0.405, 0.412, 0.430);
+      vec3 rockDark  = vec3(0.310, 0.330, 0.360);
+      vec3 rockLight = vec3(0.470, 0.492, 0.520);
       vec3 rock = mix(rockDark, rockLight, smoothstep(0.35, 0.85, vNrmW.y));
-      vec3 snowC = vec3(0.955, 0.970, 0.985);
+      vec3 snowC = vec3(0.930, 0.958, 0.995);
       diffuseColor.rgb *= mix(rock, snowC, snow);
     `);
-  terrainMat.userData.shader = sh;
+  terrainMat.userData.shader = sh; window.__terrainShader = sh;
 };
 
 /* ---------------- RENDERER ---------------- */
@@ -125,14 +167,14 @@ const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.02;
+renderer.toneMappingExposure = 1.16;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 /* ---------------- VOLUMETRIC CLOUDS ---------------- */
 const clouds = makeCloudPass(renderer, {
-  sunDir: SUN_DIR, sunCol:'#fff3e0', skyCol:'#cad9e7', cloudCol:'#ffffff',
-  bottom: 2150, top: 3180, cover: 0.36, density: 2.1, sigma: 0.0017, anim: 0.0014,
+  sunDir: SUN_DIR, sunCol:'#f9fcff', skyCol:'#dfe9f1', cloudCol:'#ffffff',
+  bottom: 2150, top: 3060, cover: 0.34, density: 2.6, sigma: 0.0021, anim: 0.0013,
 });
 
 
