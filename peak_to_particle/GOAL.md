@@ -47,9 +47,12 @@ blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
 
 Sequence: **6.8** — separate pages 5.4 → 6.2, continuous 6.0, micrograph screen 2 6.2,
 both micro screens sharing one instrument **6.8**.
-Samples on the current build: 6.2, 6.4, 6.6, 6.8, 6.8, 7.0, 7.1, 7.3 → mean **6.8**. The
-spread is ±0.5, so only a move of about a whole point is real. Treat anything smaller as noise
-and do not chase it.
+Samples on the current build: 6.6, 6.7, 6.8, 7.0 → mean **6.78**. Across the previous build
+too the mean was 6.8. The spread is ±0.5, so only a move of about a whole point is real.
+
+**The sequence has now held at 6.8 across three consecutive builds** — the micrograph screen 3,
+the hero-plate experiment, and the hero-copy pass. It is a plateau, not a wobble. See NEXT
+ACTION: the remaining complaint is structural, not a matter of any single screen.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -61,9 +64,9 @@ a number from a run whose output was partly truncated.
 
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.6** | weakest — but NOT a plate problem |
-| 2 | Down into cloud — the pollutant | **7.0** | best it has been |
-| 3 | NanoFlashing pulls them in | **7.0** | best it has been |
+| 1 | Mountain — C-POLAR + 5 applications | **7.0** | copy gave it a job; plate/crop ruled out |
+| 2 | Down into cloud — the pollutant | **6.3** | noisy: read 5.8–7.8 across samples |
+| 3 | NanoFlashing pulls them in | **7.1** | best it has been |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -205,6 +208,22 @@ travelling minus is effectively invisible"* its number-one problem — a phantom
 a phantom element. **Re-read the gate prompt every time the build changes.** It must describe
 what is actually on screen and nothing else.
 
+## THE HERO CROP IS NOT THE PROBLEM EITHER — measured, do not retry
+After the plate was ruled out, the second half of that action was tested: a much tighter frame
+on the summit (`135%` centred on the peak) so the hero would be about air rather than about a
+landscape. Four samples: **6.1, 6.8, 6.8, 6.2 → 6.48**, against **6.75** for the full frame.
+Reverted.
+
+What DID help screen 1 was the copy. It now opens with *"Up here the air is as clean as it
+gets."*, which gives the mountain a job — it is the clean-air reference the page descends from,
+not scenery. The cue names the destination: *"Scroll down — summit to a single particle"*.
+Screen 1's own readings went 6.6 → about 7.0. The sequence did not move, but the hero stopped
+being the weakest screen.
+
+Also fixed while in there: **the cues were in all caps**, which breaks the house rule and does
+not match the reference either — mont-fort sets its own cue in sentence case at 12px. All cues
+are now sentence case.
+
 ## THE HERO PLATE IS NOT THE PROBLEM — measured, do not retry
 The mountain is the weakest screen, so three replacement plates were generated and tested,
 all deliberately unlike the reference: a small blade-like summit alone in a vast cold void, an
@@ -223,31 +242,38 @@ pulls it into the same near-monochrome tonal range as the two micrographs. Every
 a dark subject on a pale ground in cool neutral grey.
 
 ## NEXT ACTION
-Current: sequence 6.8 · S1 6.6 · S2 7.0 · S3 7.0. Bar is 9.
+Current: sequence 6.8 · S1 7.0 · S2 6.3 · S3 7.1. Bar is 9.
 
-The hero is the weakest and the fix is **meaning, not imagery** (see the section above — three
-replacement plates were tested and all were worse or equal).
+**The sequence has been 6.8 for three builds.** Screen-level work is no longer moving it, and
+three separate hero experiments (new plate, tighter crop, new copy) confirm that. Per this
+file's own rule — when something stalls twice at the same number, stop tuning and ask what is
+still fake — the remaining problem is structural, and the judge has named it the same way in
+every gate since the continuous page was built:
 
-1. **Give the mountain a job in the story.** The judge, twice: *"the mountain has little
-   conceptual connection to charge or particle capture"*, *"borrowed grandeur"*. Right now it
-   is a beautiful backdrop for a claim. The page's actual idea is a descent of scale — from a
-   summit down to one soot particle. Make the hero say that. Cheapest test first: the cue line
-   and the supporting paragraph, not the picture. Something that names where the scroll is
-   going, so the peak becomes the top of a measured journey rather than decoration.
-   Copy must stay inside approved claims — no new claims, ever.
+> *"Cross-fading plates does not create a continuous experience. It reads as three hero
+> sections dissolving into one another. Keep the particle permanently rendered above the
+> backgrounds, overlap transitions for 20–30vh, and let each incoming environment physically
+> affect it. There must be a causal transformation, not just an opacity change."*
 
-2. **If copy alone does not move it, tighten the crop.** A far tighter frame on the summit,
-   with the cloud sea as a clean horizontal, makes the hero about *air* rather than about a
-   landscape — and air is what the next two screens are about. This is a CSS change on the
-   existing plate, so it is cheap to measure.
+1. **Replace the opacity cross-fades with physical entrances.** The fibre mat should *move
+   into frame* while the pollutant scene is still on screen — a translate, not a fade — so the
+   two overlap for a real distance of scroll. Same for the descent out of the summit: the
+   cloud layer should rise past the camera rather than dissolve. `index.html` already drives
+   everything from one scroll value `p`, so this is transform work on `#stage img`, not a
+   rewrite.
 
-3. **Do not add a charge symbol.** Four attempts have failed. The charge is carried by the
-   headline and by the photographed capture.
+2. **Let the incoming environment act on the contaminant.** Right now the contaminant travels
+   on a fixed path regardless of what is behind it. It should accelerate as the fibre enters,
+   and stop dead when it meets it. That is the *"causal transformation"* the judge keeps asking
+   for, and it is cheap: the path already exists in `moteAt(p)`.
+
+3. **Do not** regenerate the hero plate, retry the crop, or add a charge symbol. All three are
+   measured dead ends and are documented above.
 
 4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
-   When they are built, use the three rules that have actually worked here:
-   one instrument shared by adjacent screens; ask for the specimen darker than its ground;
-   and no drawn overlay on top of a photograph.
+   When they are built, use the rules that have actually worked here: one instrument shared by
+   adjacent screens; ask for the specimen darker than its ground; no drawn overlay on top of a
+   photograph; and give every screen a job in the story, not just a picture.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
