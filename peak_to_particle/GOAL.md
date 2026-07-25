@@ -50,13 +50,14 @@ both micro screens sharing one instrument **6.8**.
 There are now TWO instruments, and they measure different things. Report both.
 
 - **3-row strip** (three scroll positions, ref left / ours right) — comparable with every
-  earlier number in this file. Current: 5.8, 6.7, 7.4 → **6.6**.
+  earlier number in this file. Current: 6.6, 6.7, 7.2 → **6.8**.
 - **7-frame scroll strip** (`gate_scroll.png`, prompt `/tmp/gate_scroll.txt`) — seven
   consecutive frames of the descent, the only instrument that can judge continuity.
   It was **5.0** three passes ago (*"reads as separate sticky slides"*), rose to **6.0** when
-  the cross-fades were replaced with real entrances, and now reads **5.0, 5.8, 6.0, 6.2 → 5.75**.
-  Its spread is wide — single samples have come back anywhere from 4.5 to 6.5 on one image — so
-  it needs four samples, not two.
+  the cross-fades were replaced with real entrances, sat at 5.7 for three builds, and now reads
+  **6.0, 6.2, 6.8, 6.8 → 6.45** — its best, and the largest single move since the transitions
+  were rebuilt. Its spread is wide — single samples have come back anywhere from 4.5 to 6.8 on
+  one image — so it needs four samples, not two.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -72,7 +73,7 @@ a number from a run whose output was partly truncated.
 | 2 | Down into cloud — the pollutant | **6.7** | |
 | 3 | NanoFlashing pulls them in | **6.9** | |
 
-Scroll continuity (7-frame instrument): **5.7**. Flat across the last three builds.
+Scroll continuity (7-frame instrument): **6.45**, up from 5.75.
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -351,29 +352,46 @@ Every one of those fixes is visibly right and all of them stay. But incremental 
 stopped buying points, and it has stopped four times. The remaining gap to 9 is very unlikely
 to be another detail.
 
+## REAL MOTION WORKS — scroll 5.75 → 6.45, the first real move in four passes
+The diagnosis was that the remaining gap was categorical: our page was three still photographs
+moved by CSS, and the reference is a live moving world. Putting genuine footage into ONE plate
+moved the scroll instrument +0.7 — more than the previous four passes of refinement combined.
+
+`hero_img/sem_turn.mp4` (Seedance 2.0, from `sem_light.png` as the start frame, ten seconds,
+transcoded to 1920-wide H.264 with `+faststart`, audio stripped). The specimen turns under the
+beam; the camera is locked; nothing else in the frame moves.
+
+**Its time is driven by the SCROLL, not by a clock.** This matters and should be repeated for
+the other plates:
+- The travelling contaminant is a cutout of **frame 0**. If the video ran on its own clock the
+  two would drift apart and show as a doubled, mismatched specimen.
+- So the video is parked on frame 0 until the pull begins at p = 1.20 — registration is exact
+  through the whole hand-over — and only then advances, at about seven video-seconds per unit
+  of scroll, turning as the descent carries past it.
+- `shot_scroll.mjs` accepts `p@seconds` and the page accepts `?vt=`, so a frame can be pinned
+  for rendering. In practice the plain `p` values already show the motion, because the time is
+  a function of `p`.
+
 ## NEXT ACTION
-Current: 3-row 6.6 · scroll 5.75 · bar 9.
+Current: 3-row 6.8 · scroll 6.45 · bar 9.
 
-**Stop refining. The remaining gap is categorical.**
+One plate of real footage bought +0.7 on the scroll instrument after four passes of refinement
+bought nothing. **Do the other two.**
 
-Our page is three still photographs moved by CSS. The reference is a live, continuously moving
-world. When the judge says *"polished template"* and *"expensive CGI landing-page template
-whose scroll logic has not yet earned the cinematic imagery"*, that is what it is comparing
-against — and no amount of easing curves or contact shadows closes it.
-
-1. **Put real motion in the plates.** Seedance 2.0 is available and is the tool for this
-   (see `reference_seedance2_prompting_playbook` in memory: image-to-video from start and end
-   keyframes, edit the END frame from the START one, short motion prompt, locked camera).
-   Start with ONE plate and measure it before doing the others — the pollutant screen is the
-   obvious first candidate: the agglomerate turning very slowly under the beam, everything else
-   still. Keyframes already exist (`sem_light.png`).
-   Swap the `<img>` for a muted autoplay looping `<video>`; everything else in `index.html`
-   already drives off `p` and needs no change.
-2. **Measure honestly.** A video cannot be judged from a still strip, so the gate needs frames
-   sampled from the video itself, in sequence, the same way `shot_scroll.mjs` samples the page.
-3. **Do not** regenerate the hero plate, retry the hero crop, add a charge symbol, do more seam
-   work, or raise the landing size. All measured dead ends, all documented above.
-4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
+1. **The hero.** Its cloud is still a hand-drawn canvas pass — the last painted thing on the
+   page. Replace it with real footage of cloud moving around the summit, generated from
+   `hero_img/peak_d.png` as the start frame. This is the screen that sets the whole first
+   impression and it is where the reference puts its own motion. No registration constraint
+   here, so it can simply loop on its own clock and the `#mist` canvas can be deleted.
+2. **The filter mat.** Fibres shifting very slightly, or the depth of field breathing, from
+   `mat_used_light.png`. Careful: the landing point and the occlusion mask are both measured
+   off that exact frame, so this one must be scroll-driven and parked at frame 0 until after
+   contact, exactly like the pollutant plate.
+3. **Watch the page weight.** `sem_turn.mp4` is 4.3 MB. Three videos is a real download; keep
+   each under ~4 MB, `preload="auto"` only on the first, `preload="metadata"` on the rest.
+4. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
+   do more seam work, or raise the landing size. All measured dead ends.
+5. Screens 4–10 are still not built. Do not start them until the first three clear 9.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)

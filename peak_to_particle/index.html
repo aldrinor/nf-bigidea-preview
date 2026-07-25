@@ -31,7 +31,7 @@
 
   /* ---- the backdrop stack: one fixed layer, plates cross-fading as you descend ---- */
   #stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
-  #stage img{position:absolute;object-fit:cover;will-change:opacity,transform}
+  #stage img,#stage video{position:absolute;object-fit:cover;will-change:opacity,transform}
   #pl_peak {left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.16) saturate(.38) brightness(0.99)}
   #pl_smoke{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
@@ -92,7 +92,13 @@
 <body>
 <div id="stage">
   <img id="pl_peak"  src="./hero_img/peak_d.png"  alt="A snow-covered summit rising through cloud.">
-  <img id="pl_smoke" src="./hero_img/sem_light.png" alt="An electron micrograph of a single airborne soot agglomerate.">
+  <!-- Real motion, not a still moved by CSS. The specimen turns under the beam; everything
+       else in the frame is held. Its time is driven BY THE SCROLL, not by a clock: it is
+       parked on frame 0 — the exact frame the travelling cutout was taken from — until the
+       pull begins, so registration is perfect, and it then turns as we descend past it. -->
+  <video id="pl_smoke" poster="./hero_img/sem_light.png" muted playsinline preload="auto" aria-label="An electron micrograph of a single airborne soot agglomerate.">
+    <source src="./hero_img/sem_turn.mp4" type="video/mp4">
+  </video>
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
@@ -153,6 +159,7 @@ var mix=function(a,b,t){return a+(b-a)*t;};
 
 var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var P = 0;
+var PARKED = false;   // set when the render harness pins the video to a fixed second
 var PLATE = {l:-0.06, t:-0.06, w:1.12, h:1.12, iw:2688, ih:1520};
 var MOTE_SRC = {cx:0.6827, cy:0.5082, w:0.4509, ar:1.1312};
 function moteHome(){
@@ -250,6 +257,11 @@ function layout(){
 
   el.smoke.style.opacity   = band(p, 0.50, 1.10, 1.16, 2.10);
   el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px)';
+  // the specimen turns under the beam as the descent carries past it
+  if(el.smoke.tagName === 'VIDEO' && el.smoke.readyState >= 1 && !PARKED){
+    var want = clamp((p - 1.20) * 7.0, 0, (el.smoke.duration || 10) - 0.12);
+    if(Math.abs(el.smoke.currentTime - want) > 0.04){ try{ el.smoke.currentTime = want; }catch(e){} }
+  }
 
   // the mat begins arriving well before the pollutant beat ends, so the middle of the
   // scroll is a continuous overlap rather than two held states either side of a cut
@@ -380,6 +392,15 @@ if(!reduced) requestAnimationFrame(frame);
 /* the render harness parks the page at a stop: ?p=0 | 1 | 2 */
 (function(){
   var q=new URLSearchParams(location.search);
+  // the render harness parks the video at a chosen second so a strip can show the motion
+  if(q.has('vt')){
+    var v=document.getElementById('pl_smoke');
+    if(v && v.tagName==='VIDEO'){
+      PARKED = true; v.autoplay=false; v.loop=false;
+      var park=function(){ try{ v.pause(); v.currentTime=parseFloat(q.get('vt')); }catch(e){} };
+      v.addEventListener('loadeddata', park); park();
+    }
+  }
   if(q.has('p')){
     var max=document.getElementById('scroller').offsetHeight - innerHeight;
     scrollTo(0, max * (parseFloat(q.get('p'))/2.4));

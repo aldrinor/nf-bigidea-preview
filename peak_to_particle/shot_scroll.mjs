@@ -6,16 +6,19 @@ const srv=http.createServer((q,r)=>{const u=decodeURIComponent(q.url.split('?')[
   r.setHeader('Content-Type',MIME[path.extname(fp)]||'application/octet-stream');fs.createReadStream(fp).pipe(r);});
 await new Promise(r=>srv.listen(0,r)); const port=srv.address().port;
 const b=await chromium.launch({headless:true,args:['--enable-features=Vulkan','--use-angle=default','--ignore-gpu-blocklist']});
+// each stop may be 'p' or 'p@videoSeconds', so one strip can show scroll AND motion
 const stops = process.argv.slice(2).length ? process.argv.slice(2) : ['0','1','2'];
 for(const s of stops){
   const p=await b.newPage({viewport:{width:1440,height:900},deviceScaleFactor:Number(process.env.DPR||1.5)});
   const errs=[]; p.on('pageerror',e=>errs.push(e.message.slice(0,140)));
-  await p.goto(`http://127.0.0.1:${port}/index.html?p=${s}`,{waitUntil:'load',timeout:60000});
+  const [ps, vt] = String(s).split('@');
+  const q = `p=${ps}` + (vt!==undefined ? `&vt=${vt}` : '');
+  await p.goto(`http://127.0.0.1:${port}/index.html?${q}`,{waitUntil:'load',timeout:60000});
   await p.waitForFunction('window.__ready===true',{timeout:60000}).catch(()=>{});
   await p.waitForTimeout(4200);
   const i=await p.evaluate(()=>({f:window.__fps, y:Math.round(scrollY)}));
-  await p.screenshot({path:`sc_p${s}.png`});
-  console.log(`  p=${s}  fps=${i.f||'-'}  scrollY=${i.y}` + (errs.length?`  ERR: ${errs[0]}`:''));
+  await p.screenshot({path:`sc_p${String(s).replace('@','v')}.png`});
+  console.log(`  ${s}  fps=${i.f||'-'}  scrollY=${i.y}` + (errs.length?`  ERR: ${errs[0]}`:''));
   await p.close();
 }
 await b.close(); srv.close();
