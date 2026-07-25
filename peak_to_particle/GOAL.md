@@ -47,8 +47,9 @@ blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
 
 Sequence: **6.8** — separate pages 5.4 → 6.2, continuous 6.0, micrograph screen 2 6.2,
 both micro screens sharing one instrument **6.8**.
-Samples on the current build: 6.2, 6.4, 7.0, 7.1, 7.3 → mean 6.8. The spread is ±0.5, so only
-a move of about a whole point is real. Treat anything smaller as noise and do not chase it.
+Samples on the current build: 6.2, 6.4, 6.6, 6.8, 6.8, 7.0, 7.1, 7.3 → mean **6.8**. The
+spread is ±0.5, so only a move of about a whole point is real. Treat anything smaller as noise
+and do not chase it.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -60,7 +61,7 @@ a number from a run whose output was partly truncated.
 
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.6** | now the weakest |
+| 1 | Mountain — C-POLAR + 5 applications | **6.6** | weakest — but NOT a plate problem |
 | 2 | Down into cloud — the pollutant | **7.0** | best it has been |
 | 3 | NanoFlashing pulls them in | **7.0** | best it has been |
 | 4 | Clean sky — Air | — | not built |
@@ -204,38 +205,49 @@ travelling minus is effectively invisible"* its number-one problem — a phantom
 a phantom element. **Re-read the gate prompt every time the build changes.** It must describe
 what is actually on screen and nothing else.
 
+## THE HERO PLATE IS NOT THE PROBLEM — measured, do not retry
+The mountain is the weakest screen, so three replacement plates were generated and tested,
+all deliberately unlike the reference: a small blade-like summit alone in a vast cold void, an
+aerial ridge above cloud, and a tight high-contrast near-monochrome summit. The best of them
+(`hero_img/peak_x.png`, the tight monochrome summit) was built into the page and gated four
+times: **6.6, 6.3, 6.8, 6.4 → 6.53**, against **6.8** for the existing `peak_d.png` over more
+samples. It was reverted.
+
+`peak_x.png` and `peak_y.png` are kept in `hero_img/` but **do not spend another pass
+generating alpine plates.** The judge's objection is not that the photograph is bad — it is
+*"the mountain has little conceptual connection to charge or particle capture"*. That is a
+meaning problem, not a picture problem.
+
+One thing was kept from the experiment: the hero is now desaturated to `saturate(.34)`, which
+pulls it into the same near-monochrome tonal range as the two micrographs. Every screen is now
+a dark subject on a pale ground in cool neutral grey.
+
 ## NEXT ACTION
 Current: sequence 6.8 · S1 6.6 · S2 7.0 · S3 7.0. Bar is 9.
 
-**The mountain hero is now the weakest screen**, and the judge's objection is specific and
-repeated: *"clean, but generic and visibly derivative of the reference"*, *"the mountain has
-little conceptual connection to charge or particle capture"*, *"competent luxury-tech
-shorthand, not a distinct identity"*.
+The hero is the weakest and the fix is **meaning, not imagery** (see the section above — three
+replacement plates were tested and all were worse or equal).
 
-Rule 7 still holds — **keep the mountain, Yin specified it.** The problem is not the subject,
-it is that our peak plate looks like mont-fort's peak plate. Change the execution, not the idea.
+1. **Give the mountain a job in the story.** The judge, twice: *"the mountain has little
+   conceptual connection to charge or particle capture"*, *"borrowed grandeur"*. Right now it
+   is a beautiful backdrop for a claim. The page's actual idea is a descent of scale — from a
+   summit down to one soot particle. Make the hero say that. Cheapest test first: the cue line
+   and the supporting paragraph, not the picture. Something that names where the scroll is
+   going, so the peak becomes the top of a measured journey rather than decoration.
+   Copy must stay inside approved claims — no new claims, ever.
 
-1. **Regenerate the hero plate to be ours rather than a look-alike.** The reference owns a
-   pale, hazy, warm-white alpine hero. Move away from it deliberately: colder and starker, a
-   harder graphic silhouette, a different light (low raking light rather than flat haze), and
-   a composition that is not "peak right of centre in soft cloud". Generate 3 variants and
-   gate the best against the current plate before swapping — screen 1 is at 6.6 and a bad
-   swap can cost a point.
+2. **If copy alone does not move it, tighten the crop.** A far tighter frame on the summit,
+   with the cloud sea as a clean horizontal, makes the hero about *air* rather than about a
+   landscape — and air is what the next two screens are about. This is a CSS change on the
+   existing plate, so it is cheap to measure.
 
-2. **Then look for the hero's own thread to the rest.** Screens 2 and 3 are bound by one
-   instrument. The hero cannot be an electron image, so its binding has to be something else:
-   the same cold neutral greyscale and the same near-white ground would already do most of it.
-   Consider desaturating the peak plate toward the micrographs' tonal range and testing that
-   on its own — it is a one-line change and cheap to measure.
-
-3. **Do not add a charge symbol.** Four attempts have now failed: an outlined minus (*"a
-   zoom-out button"*), a ring-and-orbit field (*"decorative HUD graphics"*), a bare minus
-   (*"too insignificant to carry the narrative"*), and a phantom one the gate prompt invented.
-   The charge is carried by the headline and by the photographed capture.
+3. **Do not add a charge symbol.** Four attempts have failed. The charge is carried by the
+   headline and by the photographed capture.
 
 4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
-   When they are built, use the two rules above: one instrument per adjacent pair, and ask
-   for the specimen darker than its ground.
+   When they are built, use the three rules that have actually worked here:
+   one instrument shared by adjacent screens; ask for the specimen darker than its ground;
+   and no drawn overlay on top of a photograph.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
