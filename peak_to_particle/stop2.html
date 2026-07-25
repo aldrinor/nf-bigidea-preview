@@ -15,12 +15,20 @@
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
   #plate{position:fixed;left:-4%;top:-4%;width:108%;height:108%;object-fit:cover;z-index:0;
-    filter:contrast(1.02) brightness(1.02);}
+    filter:contrast(1.14) saturate(1.06) brightness(0.99);}
   /* one soft veil only, to seat the copy — never enough to flatten the photograph */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(100deg, rgba(238,242,246,.92) 0%, rgba(238,242,246,.64) 26%,
-      rgba(238,242,246,.10) 48%, rgba(238,242,246,0) 62%);}
+    background:linear-gradient(180deg, rgba(240,244,248,.34) 0%, rgba(240,244,248,0) 14%);}
   #dust{position:fixed;inset:0;z-index:2;pointer-events:none}
+  /* readability comes from a LOCAL scrim behind the copy, never from draining the
+     whole image — that is what bleached all three screens */
+  #scrim{position:fixed;left:0;top:0;width:min(56%,760px);height:100%;z-index:2;
+    pointer-events:none;
+    background:linear-gradient(100deg, rgba(244,247,250,.94) 0%, rgba(244,247,250,.86) 30%,
+      rgba(244,247,250,.55) 56%, rgba(244,247,250,.14) 80%, rgba(244,247,250,0) 100%);}
+  @media (max-width:760px){ #scrim{width:100%;
+    background:linear-gradient(180deg, rgba(244,247,250,.95) 0%, rgba(244,247,250,.80) 46%,
+      rgba(244,247,250,.20) 74%, rgba(244,247,250,0) 100%);} }
   .chrome{position:fixed;inset:0;z-index:4;padding:clamp(52px,6.4vw,92px) var(--rail)}
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
@@ -48,6 +56,7 @@
 <body>
 <img id="plate" src="./hero_img/cloud_in.png" alt="Dense billowing cloud seen from inside it.">
 <div id="veil"></div>
+<div id="scrim"></div>
 <canvas id="dust"></canvas>
 
 <div class="chrome">
@@ -85,16 +94,24 @@ function sizeDust(){
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 34 : 78;
+  var n = innerWidth<760 ? 120 : 300;
   parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
 }
 
 function spawn(anywhere){
   var depth=Math.pow(Math.random(),0.7);
-  return { x:Math.random()*innerWidth, y: anywhere?Math.random()*innerHeight:-50,
-    r:0.35+Math.pow(depth,3.6)*10.0, vy:4+depth*20, drift:(Math.random()-0.5)*16,
-    ph:Math.random()*Math.PI*2, jit:0.5+Math.random()*1.6,
-    a:0.10+Math.pow(depth,1.8)*0.60, mark:Math.random()<0.22, depth:depth };
+  // every particle belongs to ONE plume — a dense concentrated body of charged pollution,
+  // not an even sprinkle. Scattered dots read as noise; a plume reads as an event.
+  var a1=Math.random()*Math.PI*2, rr=Math.pow(Math.random(),0.45);
+  return {
+    ang:a1, rad:rr,
+    r:0.5+Math.pow(depth,2.6)*9.5,
+    vr:(0.5+Math.random()*0.5),
+    ph:Math.random()*Math.PI*2,
+    a:0.10+Math.pow(depth,1.5)*0.70,
+    mark:Math.random()<0.30, depth:depth,
+    x:0, y:0
+  };
 }
 sizeDust(); addEventListener('resize', sizeDust);
 var t0=performance.now(), last=t0, frames=0, winStart=t0;
@@ -103,19 +120,28 @@ function frame(now){
   dx.clearRect(0,0,innerWidth,innerHeight);
   parts.sort(function(a,b){return a.depth-b.depth;});
 
+  // the plume: a dense rolling mass, drifting slowly across the frame
+  var PX = innerWidth*(0.60 + Math.sin(t*0.045)*0.06);
+  var PY = innerHeight*(0.50 + Math.sin(t*0.031)*0.05);
+  var PR = Math.min(innerWidth,innerHeight)*0.30;
   for(var i=0;i<parts.length;i++){
     var p=parts[i];
-    p.y+=p.vy*dt; p.x+=Math.sin(t*0.22+p.ph)*p.drift*p.jit*dt;
-    if(p.y>innerHeight+60){ parts[i]=spawn(false); continue; }
+    p.ang += (0.10 + (1-p.rad)*0.20) * p.vr * dt;      // slow internal churn
+    var wob = Math.sin(t*0.5 + p.ph)*0.035;
+    p.x = PX + Math.cos(p.ang)*PR*(p.rad+wob)*1.35;
+    p.y = PY + Math.sin(p.ang)*PR*(p.rad+wob);
+    // density falls off toward the edge of the plume, so it has a readable silhouette
+    var fall = 1.0 - Math.pow(p.rad, 2.2);
+    var A = p.a * (0.25 + 0.95*fall);
     var sp=SPRITES[Math.min(5,Math.round((1-p.depth)*5))];
     var sz=p.r*(3.0+(1-p.depth)*3.4);
-    dx.globalAlpha=p.a; dx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);
-    if(p.depth>0.955 && p.mark){
-      var rr=p.r*1.45, gx=p.x+p.r*2.9;
-      dx.globalAlpha=p.a*0.80; dx.strokeStyle='rgba(38,52,66,1)';
+    dx.globalAlpha=A; dx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);
+    if(p.depth>0.93 && p.mark && p.rad<0.72){
+      var rr2=p.r*1.45, gx=p.x+p.r*2.9;
+      dx.globalAlpha=A*0.85; dx.strokeStyle='rgba(38,52,66,1)';
       dx.lineWidth=Math.max(0.7,p.r*0.20);
-      dx.beginPath(); dx.arc(gx,p.y,rr,0,Math.PI*2); dx.stroke();
-      dx.beginPath(); dx.moveTo(gx-rr*0.52,p.y); dx.lineTo(gx+rr*0.52,p.y); dx.stroke();
+      dx.beginPath(); dx.arc(gx,p.y,rr2,0,Math.PI*2); dx.stroke();
+      dx.beginPath(); dx.moveTo(gx-rr2*0.52,p.y); dx.lineTo(gx+rr2*0.52,p.y); dx.stroke();
     }
     dx.globalAlpha=1;
   }

@@ -15,11 +15,10 @@
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
   #plate{position:fixed;left:-4%;top:-4%;width:108%;height:108%;object-fit:cover;z-index:0;
-    filter:contrast(1.02) brightness(1.03);}
+    filter:contrast(1.12) saturate(1.04) brightness(1.00);}
   /* one soft veil only, to seat the copy — never enough to flatten the photograph */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(100deg, rgba(238,242,246,.92) 0%, rgba(238,242,246,.64) 26%,
-      rgba(238,242,246,.10) 48%, rgba(238,242,246,0) 62%);}
+    background:linear-gradient(180deg, rgba(240,244,248,.34) 0%, rgba(240,244,248,0) 14%);}
   /* the charged material — capture has to happen ON something visible */
   /* the clean side: below the capture band the media is lifted, so the eye reads
      dirty air above -> capture band -> visibly cleaner beyond */
@@ -30,6 +29,15 @@
     -webkit-mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);
             mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);}
   #dust{position:fixed;inset:0;z-index:4;pointer-events:none}
+  /* readability comes from a LOCAL scrim behind the copy, never from draining the
+     whole image — that is what bleached all three screens */
+  #scrim{position:fixed;left:0;top:0;width:min(56%,760px);height:100%;z-index:2;
+    pointer-events:none;
+    background:linear-gradient(100deg, rgba(244,247,250,.94) 0%, rgba(244,247,250,.86) 30%,
+      rgba(244,247,250,.55) 56%, rgba(244,247,250,.14) 80%, rgba(244,247,250,0) 100%);}
+  @media (max-width:760px){ #scrim{width:100%;
+    background:linear-gradient(180deg, rgba(244,247,250,.95) 0%, rgba(244,247,250,.80) 46%,
+      rgba(244,247,250,.20) 74%, rgba(244,247,250,0) 100%);} }
   .chrome{position:fixed;inset:0;z-index:6;padding:clamp(52px,6.4vw,92px) var(--rail)}
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
@@ -61,6 +69,7 @@
 <img id="plate" src="./hero_img/cloud_clear.png" alt="Cloud torn open around a clearing of pure calm air.">
 <img id="media" src="./hero_img/fibre.jpg" alt="A charged nonwoven filter surface holding captured particles.">
 <div id="veil"></div>
+<div id="scrim"></div>
 <canvas id="dust"></canvas>
 <div id="clean"></div>
 <img id="mark" src="./brand/nanoflashing_bluegrey.png" alt="NanoFlashing">
