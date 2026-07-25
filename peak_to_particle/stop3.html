@@ -28,6 +28,7 @@
   @media (max-width:760px){ #scrim{width:100%;
     background:linear-gradient(180deg, rgba(244,247,250,.95) 0%, rgba(244,247,250,.80) 46%,
       rgba(244,247,250,.20) 74%, rgba(244,247,250,0) 100%);} }
+  #pull{position:fixed;inset:0;z-index:3;pointer-events:none}
   .chrome{position:fixed;inset:0;z-index:6;padding:clamp(52px,6.4vw,92px) var(--rail)}
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
@@ -60,6 +61,7 @@
 
 <div id="veil"></div>
 <div id="scrim"></div>
+<canvas id="pull"></canvas>
 
 
 
@@ -80,7 +82,63 @@
   <span class="cue">THE AIR CLEARS</span>
 </div>
 
-<script>window.__ready=true;</script>
+<script>
+/* Live inward convergence. The plate shows the accumulated deposit; this layer shows the
+   ARRIVAL. Trails taper wide-and-faint behind to tight-and-dark at the leading edge, so
+   direction is unambiguous even in a single frame. */
+var pc=document.getElementById('pull'), px=pc.getContext('2d'), P=[];
+var CX, CY, R0;
+function fit(){
+  var dpr=Math.min(devicePixelRatio||1,2);
+  pc.width=Math.floor(innerWidth*dpr); pc.height=Math.floor(innerHeight*dpr);
+  pc.style.width=innerWidth+'px'; pc.style.height=innerHeight+'px';
+  px.setTransform(dpr,0,0,dpr,0,0);
+  CX=innerWidth*0.545; CY=innerHeight*0.50;              // the black core on the plate
+  R0=Math.max(innerWidth,innerHeight)*0.62;
+  var n = innerWidth<760 ? 30 : 64;
+  P=[]; for(var i=0;i<n;i++) P.push(mk(Math.random()));
+}
+function mk(seed){
+  var a=Math.random()*Math.PI*2;
+  var r=R0*(0.55+Math.random()*0.55);
+  return { a:a, r:r, r0:r, v:0.16+Math.random()*0.20, w:1.1+Math.random()*3.0,
+           k:0.55+Math.random()*0.5 };
+}
+fit(); addEventListener('resize', fit);
+var t0=performance.now(), fr=0, ws=t0;
+function loop(now){
+  var dt=Math.min(0.05,(now-(loop.l||now))/1000); loop.l=now;
+  px.clearRect(0,0,innerWidth,innerHeight);
+  for(var i=0;i<P.length;i++){
+    var p=P[i];
+    // accelerate as it closes — the charge takes hold
+    p.r -= (p.v*R0*dt) * (1.0 + 2.6*Math.pow(1-p.r/p.r0, 2.0));
+    if(p.r < R0*0.035){ P[i]=mk(); continue; }
+    var cx=CX+Math.cos(p.a)*p.r, cy=CY+Math.sin(p.a)*p.r*0.62;
+    // trail sits BEHIND (further out); taper it wide+faint -> tight+dark toward the core
+    var seg=10, len=R0*0.16*p.k;
+    for(var q=0;q<seg;q++){
+      var f1=q/seg, f2=(q+1)/seg;                        // 0 leading edge .. 1 tail
+      var ra=p.r+len*f1, rb=p.r+len*f2;
+      var ax=CX+Math.cos(p.a)*ra, ay=CY+Math.sin(p.a)*ra*0.62;
+      var bx=CX+Math.cos(p.a)*rb, by=CY+Math.sin(p.a)*rb*0.62;
+      px.strokeStyle='rgba(18,24,32,1)';
+      px.globalAlpha=0.72*Math.pow(1-f1,2.2);            // dark at the front, fading back
+      px.lineWidth=Math.max(0.4, p.w*(0.35+1.5*(1-f1))); // tight at the front, wide behind
+      px.lineCap='round';
+      px.beginPath(); px.moveTo(ax,ay); px.lineTo(bx,by); px.stroke();
+    }
+    // the leading head
+    px.globalAlpha=0.92; px.fillStyle='rgba(12,18,26,1)';
+    px.beginPath(); px.arc(cx,cy,p.w*0.62,0,Math.PI*2); px.fill();
+  }
+  px.globalAlpha=1;
+  fr++; if(now-ws>=1000){ window.__fps=Math.round(fr*1000/(now-ws)); fr=0; ws=now; }
+  requestAnimationFrame(loop);
+}
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(loop);
+window.__ready=true;
+</script>
 
 </body>
 </html>
