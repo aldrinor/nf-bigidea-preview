@@ -25,9 +25,10 @@
   #clean{position:fixed;left:0;bottom:0;width:100%;height:30%;z-index:3;pointer-events:none;
     background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 46%,
       rgba(255,255,255,.82) 100%);}
-  #media{position:fixed;left:0;bottom:0;width:100%;height:52%;object-fit:cover;z-index:2;
-    -webkit-mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);
-            mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);}
+  #media{position:fixed;left:0;bottom:0;width:100%;height:62%;object-fit:cover;object-position:center top;z-index:2;
+    filter:contrast(1.10) brightness(1.01);
+    -webkit-mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.70) 9%, #000 20%, #000 100%);
+            mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.70) 9%, #000 20%, #000 100%);}
   #dust{position:fixed;inset:0;z-index:4;pointer-events:none}
   /* readability comes from a LOCAL scrim behind the copy, never from draining the
      whole image — that is what bleached all three screens */
@@ -67,11 +68,11 @@
 </head>
 <body>
 <img id="plate" src="./hero_img/cloud_clear.png" alt="Cloud torn open around a clearing of pure calm air.">
-<img id="media" src="./hero_img/fibre.jpg" alt="A charged nonwoven filter surface holding captured particles.">
+<img id="media" src="./hero_img/loaded.png" alt="A charged filter surface heavily loaded with captured dark particles.">
 <div id="veil"></div>
 <div id="scrim"></div>
 <canvas id="dust"></canvas>
-<div id="clean"></div>
+
 <img id="mark" src="./brand/nanoflashing_bluegrey.png" alt="NanoFlashing">
 <div class="chrome">
   <div class="navshelf"></div>
@@ -109,7 +110,7 @@ function sizeDust(){
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 30 : 64;
+  var n = innerWidth<760 ? 26 : 54;
   parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
 }
 
@@ -120,7 +121,7 @@ function sizeDust(){
 var SURF, ZONE, HOT, ANCHORS = [], LANES = [];
 
 function buildField(){
-  SURF = innerHeight * 0.615;                      // the fibre surface
+  SURF = innerHeight * 0.455;   // the top of the real soot ridge                      // the fibre surface
   ZONE = innerHeight * 0.055;
   HOT  = innerWidth  * 0.615;                      // THE contact point — the climax
   // converging lanes: the airstream funnels toward the charged material
@@ -179,42 +180,13 @@ function frame(now){
   dx.clearRect(0,0,innerWidth,innerHeight);
   parts.sort(function(a,b){return a.depth-b.depth;});
 
-  // --- contact bloom: the reaction where the stream meets the material ---
-  {
-    var bg = dx.createRadialGradient(HOT, SURF, 0, HOT, SURF, innerWidth*0.16);
-    bg.addColorStop(0,   'rgba(255,255,255,0.92)');
-    bg.addColorStop(0.35,'rgba(255,255,255,0.42)');
-    bg.addColorStop(1,   'rgba(255,255,255,0)');
-    dx.fillStyle = bg;
-    dx.beginPath(); dx.arc(HOT, SURF, innerWidth*0.16, 0, Math.PI*2); dx.fill();
-  }
-
-  // --- deposits already captured: drawn first, they sit IN the mat ---
-  for (var k = 0; k < ANCHORS.length; k++){
-    var A = ANCHORS[k];
-    if (A.n <= 0) continue;
-    var cnt = Math.min(A.n, 18);
-    for (var q = 0; q < cnt; q++){
-      var ang = (q * 2.399 + k), rad = Math.sqrt(q + 0.4) * 3.6;
-      var sx = A.x + Math.cos(ang) * rad, sy = A.y + Math.sin(ang) * rad * 0.55;
-      var sp2 = SPRITES[0], sz2 = 5.8 + (q % 3) * 2.2;
-      dx.globalAlpha = 0.78;
-      dx.drawImage(sp2, sx - sz2/2, sy - sz2/2, sz2, sz2);
-    }
-    dx.globalAlpha = 1;
-  }
-
   for (var i = 0; i < parts.length; i++){
     var p = parts[i];
 
     if (p.anchor){
-      // held on the fibre — it stays put; the deposit is what remains
       p.held += dt;
-      if (p.held > 0.30){
-        p.anchor.n = Math.min(p.anchor.n + 1, 18);
-        parts[i] = spawn(false);
-        continue;
-      }
+      p.a *= (1 - dt*3.2);                          // merges into the real deposit
+      if (p.held > 0.22){ parts[i] = spawn(false); continue; }
     } else {
       p.trail.push(p.x, p.y); if(p.trail.length>16) p.trail.splice(0,2);
       // accelerate toward the material as the charge takes hold
