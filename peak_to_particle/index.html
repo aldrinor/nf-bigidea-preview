@@ -27,7 +27,7 @@
     -webkit-font-smoothing:antialiased}
   /* three stops, one document. The stops used to be three separate pages, which is exactly
      why the sequence read as three slides — nothing could survive a seam. */
-  #scroller{height:340vh}
+  #scroller{height:440vh}
 
   /* ---- the backdrop stack: one fixed layer, plates cross-fading as you descend ---- */
   #stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
@@ -44,6 +44,7 @@
     filter:contrast(1.02) brightness(1.01);
     -webkit-mask-image:radial-gradient(ellipse 9% 19% at 72.5% 50.4%, #000 0%, #000 46%, transparent 88%);
     mask-image:radial-gradient(ellipse 9% 19% at 72.5% 50.4%, #000 0%, #000 46%, transparent 88%)}
+  #pl_sky  {left:-6%;top:-6%;width:112%;height:112%;opacity:0;filter:contrast(1.02) saturate(.92)}
   #pl_fibre{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
 
   canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
@@ -68,6 +69,7 @@
   #c1{top:52%;transform:translateY(-50%)}
   #c2{top:0;bottom:auto;max-width:min(42ch,35vw)}
   #c3{top:0;bottom:auto}
+  #c4{top:52%;transform:translateY(-50%)}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
   .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
   h1,h2{font-size:var(--display);font-weight:300;line-height:1.10;letter-spacing:-.022em;
@@ -86,6 +88,7 @@
     #c1{top:auto;bottom:22vh;transform:none}
     #c2{bottom:20vh}
     #c3{top:auto;bottom:20vh;transform:none}
+    #c4{top:auto;bottom:22vh;transform:none}
   }
 </style>
 </head>
@@ -109,6 +112,7 @@
        while everything else cross-fades and is drawn into the fibre. -->
   <div id="shadow"></div>
   <img id="mote" src="./hero_img/sem_cut.png" alt="">
+  <img id="pl_sky" src="./hero_img/sky_clean.png" alt="Clean cold blue sky above a flat sea of cloud.">
   <img id="pl_fibre" src="./hero_img/mat_used_light.png" alt="An electron micrograph of nonwoven filter media.">
 </div>
 <!-- A second copy of the filter plate, revealed only in a soft ellipse around the contact
@@ -146,6 +150,12 @@
   <p>NanoFlashing&trade; is a patented permanent positive polarity (3P) technology,
      engineered into the material. It attracts and captures ultrafine particles, wildfire
      smoke, PFAS, and pollen through a physical mechanism.</p>
+</section>
+
+<section class="stop" id="c4">
+  <h2>Proven first in <em>air</em>.</h2>
+  <p>Installed in 441 facilities across 7 countries since 2020. The same material carries
+     into water, protective wear, food packaging and medical devices.</p>
 </section>
 
 <span class="cue" id="cue">Scroll down &mdash; summit to a single particle</span>
@@ -208,7 +218,7 @@ function moteAt(p){
            innerWidth*0.235, Math.pow(e,0.85)),
     // held right through contact, then merged once it is registered on top of the deposit
     // it does NOT fade out. It lands and stays: it is the deposit.
-    o: smooth(0.26, 0.66, p)
+    o: smooth(0.26, 0.66, p) * (1 - smooth(2.45, 2.95, p))
   };
 }
 
@@ -222,6 +232,8 @@ var el = {
   c1:    document.getElementById('c1'),
   c2:    document.getElementById('c2'),
   c3:    document.getElementById('c3'),
+  c4:    document.getElementById('c4'),
+  sky:   document.getElementById('pl_sky'),
   cue:   document.getElementById('cue')
 };
 
@@ -276,13 +288,19 @@ function layout(){
 
   // the mat begins arriving well before the pollutant beat ends, so the middle of the
   // scroll is a continuous overlap rather than two held states either side of a cut
+  /* the fourth stop: the camera comes back out of the material into clean air. The capture
+     has happened; this is what it was for. */
+  var skyIn = smooth(2.45, 3.00, p);
+  el.sky.style.opacity   = skyIn;
+  el.sky.style.transform = 'scale(' + (1.14 - skyIn*0.14).toFixed(4) + ')';
+
   var fEnter = Math.max(0, 2.10 - p);   // begins the moment the pollutant beat settles
-  el.fibre.style.opacity   = smooth(1.02, 2.10, p);
+  el.fibre.style.opacity   = band(p, 1.02, 2.10, 2.45, 3.00);
   var fTf = 'translateX(' + (fEnter*0.042*vw).toFixed(1) + 'px) scale(' +
             (1 + fEnter*0.030).toFixed(4) + ')';
   el.fibre.style.transform = fTf;
   // the same plate again, on top of the contaminant, closing over it as it lands
-  el.front.style.opacity   = smooth(1.86, 2.22, p);
+  el.front.style.opacity   = band(p, 1.86, 2.22, 2.45, 2.95);
   el.front.style.transform = fTf;
 
   var m = moteAt(p);
@@ -301,7 +319,8 @@ function layout(){
   // copy: each block rises in and lifts away, so the page reads as motion not as slides
   copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
   copyBesides(el.c2, band(p, 0.66, 1.08, 1.30, 1.58), (1 - p) * 62, m.y);
-  copyBesides(el.c3, smooth(1.62, 2.04, p),            (2 - p) * 62, m.y);
+  copyBesides(el.c3, band(p, 1.62, 2.04, 2.36, 2.62),   (2 - p) * 62, m.y);
+  copyState(el.c4, { o: smooth(2.66, 3.02, p), dy: (3 - p) * 62 }, true);
   el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
 
 
@@ -309,7 +328,7 @@ function layout(){
 
 function onScroll(){
   var max = document.getElementById('scroller').offsetHeight - innerHeight;
-  P = clamp(scrollY / Math.max(1, max), 0, 1) * 2.4;
+  P = clamp(scrollY / Math.max(1, max), 0, 1) * 3.2;
   layout();
 }
 addEventListener('scroll', onScroll, {passive:true});
@@ -338,7 +357,7 @@ if(!reduced) requestAnimationFrame(frame);
   }
   if(q.has('p')){
     var max=document.getElementById('scroller').offsetHeight - innerHeight;
-    scrollTo(0, max * (parseFloat(q.get('p'))/2.4));
+    scrollTo(0, max * (parseFloat(q.get('p'))/3.2));
     setTimeout(onScroll, 30);
   }
 })();

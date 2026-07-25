@@ -428,28 +428,56 @@ Do not spend another pass on it. This is the second time a repeated complaint ha
 not to track what is on screen — the first was the phantom charge symbol the gate hunted for
 after it had been deleted.
 
+## THE LENGTH HYPOTHESIS IS ANSWERED: MORE STOPS DOES NOT HELP
+Stop 4 (clean sky → **Air**) is built: `hero_img/sky_clean.png`, the scroll extended from
+p 0–2.4 to 0–3.2, a fourth copy block, and the fibre plate handing over to open sky. Gated as
+a nine-frame strip against four reference screens.
+
+**Four stops: 5.8, 6.0, 6.0, 6.4, 6.5 → 6.15. Three stops measured 6.58.** Adding a stop did
+not help, and the judge said why in as many words:
+
+> *"It still feels like a short demo. Four stops are enough structurally, but these stops do
+> not develop into four substantial chapters... The mountain-to-micrograph transition and the
+> particle capture are real events; the remaining scroll mostly explains or holds those events.
+> It demonstrates a mechanism rather than sustaining a world."*
+
+**So the finding is better than the hypothesis was.** The problem is not the COUNT of stops —
+it is that stops 1→2→3 contain two real EVENTS (the white-field match transition, and the
+capture) and stop 4 contains none. It is a picture with a caption.
+
+**The rule this gives us, and it governs stops 5–10: every stop must contain an event, not a
+statement over a backdrop.** Building six more caption-over-photograph stops will not reach 9.
+
+**Stop 4 is kept even though it measures lower.** Yin's brief is a ten-stop page and Air is one
+of the five applications he named; removing it to protect a score would be optimising the
+metric against the brief. The cost is about 0.4 and the reason is understood.
+
+Its copy now carries real evidence rather than a blue-sky platitude — *"Installed in 441
+facilities across 7 countries since 2020"* — taken from the approved deployment pedigree.
+**Note the trap in the records:** there is a logged "441-footprint-vs-19-measured overstatement"
+warning. 441 is FACILITIES DEPLOYED, not tests or measured sites. Do not conflate them.
+
 ## NEXT ACTION
-Current: 3-row 6.7 · scroll 6.58 · bar 9. (The build is back to the state that measured those.)
+Current: three-stop scroll 6.58 · four-stop scroll 6.15 · 3-row 6.7 · bar 9.
 
-Two things left, one untested and one expensive. Do the untested one first.
+**Give stop 4 an event.** It is the only stop with nothing happening in it, and that is
+measurably what it costs. The gate's own fix: *"finish with a concrete consequence — captured
+loading, removal performance or a specific tested application — while retaining a subtle visual
+trace of the fibre/specimen world. 'Clean air' needs evidence, not merely blue sky."*
 
-1. **Test the length hypothesis — this has never been tried.** The page resolves in three stops
-   and stops; the reference is long and sustained. Build stop 4 (clean sky / Air) from
-   `PLAN.md` and gate the FOUR together. If four stops score materially better than three, the
-   answer is to build stops 5–10 rather than to keep polishing three. If it makes no
-   difference, that is settled too and worth knowing.
-   Keep it cheap: one generated plate in the same instrument language, the copy pattern that
-   already exists, and the same scroll driver — `p` simply runs further.
-
-2. **The specimen itself may be the ceiling.** The gate: *"the pollutant looks like generic
-   CGI/AI foam. Its regular spherical clusters, soft surface and clean silhouette do not
-   resemble convincing soot."* Real soot is irregular, angular and rough, not a heap of even
-   spheres. Regenerating it would mean redoing `sem_light.png`, `sem_cut.png` AND `sem_turn.mp4`
-   and re-measuring every registration constant, so only attempt it after the length test.
-
+1. Options, cheapest first:
+   - **Carry the fibre world into the sky.** The mat should not vanish at the seam; let the
+     loaded fibre stay faintly present as the camera pulls out, so stop 4 is visibly the
+     consequence of stop 3 rather than a new picture.
+   - **Show loading over time.** A second micrograph of the SAME junction with a heavy
+     accumulated deposit, cross-faded against the single-particle frame — the event is the
+     filter filling up. Same instrument, same registration discipline as everything else.
+2. **Then re-gate four stops against the 6.58 three-stop baseline.** If an event on stop 4
+   closes the 0.4 gap, that is the pattern for stops 5–10 and they can be built. If it does
+   not, stop building stops and say so.
 3. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
-   do more seam or collision work, raise the landing size, retry the mat video, or try to
-   break the two-column composition again. All measured dead ends.
+   do more seam or collision work, raise the landing size, retry the mat video, or try to break
+   the two-column composition again. All measured dead ends, all documented above.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
