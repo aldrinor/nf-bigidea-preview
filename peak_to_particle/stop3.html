@@ -21,11 +21,16 @@
     background:linear-gradient(100deg, rgba(238,242,246,.92) 0%, rgba(238,242,246,.64) 26%,
       rgba(238,242,246,.10) 48%, rgba(238,242,246,0) 62%);}
   /* the charged material — capture has to happen ON something visible */
+  /* the clean side: below the capture band the media is lifted, so the eye reads
+     dirty air above -> capture band -> visibly cleaner beyond */
+  #clean{position:fixed;left:0;bottom:0;width:100%;height:38%;z-index:3;pointer-events:none;
+    background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 46%,
+      rgba(255,255,255,.82) 100%);}
   #media{position:fixed;left:0;bottom:0;width:100%;height:52%;object-fit:cover;z-index:2;
     -webkit-mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);
             mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);}
-  #dust{position:fixed;inset:0;z-index:3;pointer-events:none}
-  .chrome{position:fixed;inset:0;z-index:5;padding:clamp(52px,6.4vw,92px) var(--rail)}
+  #dust{position:fixed;inset:0;z-index:4;pointer-events:none}
+  .chrome{position:fixed;inset:0;z-index:6;padding:clamp(52px,6.4vw,92px) var(--rail)}
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
     pointer-events:none}
@@ -41,7 +46,7 @@
   p{font-size:clamp(16px,1.5vw,19px);line-height:1.55;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
     font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
-  #mark{position:fixed;z-index:4;left:62%;top:30%;transform:translate(-50%,-50%);
+  #mark{position:fixed;z-index:5;left:62%;top:30%;transform:translate(-50%,-50%);
     width:clamp(200px,23vw,360px);height:auto;opacity:.95;pointer-events:none;
     filter:drop-shadow(0 0 40px rgba(255,255,255,.95))}
   @media (max-width:760px){ #mark{width:56vw;left:50%;top:22%} #media{height:44%} }
@@ -57,6 +62,7 @@
 <img id="media" src="./hero_img/fibre.jpg" alt="A charged nonwoven filter surface holding captured particles.">
 <div id="veil"></div>
 <canvas id="dust"></canvas>
+<div id="clean"></div>
 <img id="mark" src="./brand/nanoflashing_bluegrey.png" alt="NanoFlashing">
 <div class="chrome">
   <div class="navshelf"></div>
@@ -102,10 +108,11 @@ function sizeDust(){
    - particles arrive on a few converging STREAMS and leave short trails
    - they land on fixed ANCHORS in the fibre mat and CLUMP there, building visible deposits
    - the airstream is dense at the top and thins as it descends: clean air is the result */
-var SURF, ANCHORS = [], LANES = [];
+var SURF, ZONE, ANCHORS = [], LANES = [];
 
 function buildField(){
-  SURF = innerHeight * 0.50;
+  SURF = innerHeight * 0.50;                       // the top face of the capture zone
+  ZONE = innerHeight * 0.13;                       // the bounded band where capture happens
   // converging lanes: the airstream funnels toward the charged material
   LANES = [];
   var nL = innerWidth < 760 ? 3 : 5;
@@ -119,11 +126,11 @@ function buildField(){
   }
   // anchors: real capture points on the mat. Particles clump ON these.
   ANCHORS = [];
-  var nA = innerWidth < 760 ? 16 : 34;
+  var nA = innerWidth < 760 ? 22 : 46;
   for (var k = 0; k < nA; k++){
     ANCHORS.push({
       x: innerWidth * (0.06 + Math.random() * 0.90),
-      y: SURF + Math.random() * innerHeight * 0.30,
+      y: SURF + Math.pow(Math.random(), 0.6) * ZONE,   // all capture inside the band
       n: 0                                          // how much has accumulated here
     });
   }
@@ -134,7 +141,7 @@ function spawn(anywhere){
   var lane  = LANES[(Math.random() * LANES.length) | 0];
   var jit   = (Math.random() - 0.5) * lane.w;
   // density gradient: most particles are born high, where the air is still dirty
-  var y = anywhere ? Math.pow(Math.random(), 1.9) * SURF : -40 - Math.random() * 260;
+  var y = anywhere ? Math.pow(Math.random(), 1.45) * SURF : -40 - Math.random() * 260;
   var prog = Math.max(0, Math.min(1, y / SURF));
   return {
     lane: lane, jit: jit,
@@ -164,12 +171,12 @@ function frame(now){
   for (var k = 0; k < ANCHORS.length; k++){
     var A = ANCHORS[k];
     if (A.n <= 0) continue;
-    var cnt = Math.min(A.n, 9);
+    var cnt = Math.min(A.n, 14);
     for (var q = 0; q < cnt; q++){
       var ang = (q * 2.399 + k), rad = Math.sqrt(q + 0.4) * 3.6;
       var sx = A.x + Math.cos(ang) * rad, sy = A.y + Math.sin(ang) * rad * 0.55;
       var sp2 = SPRITES[1], sz2 = 5.2 + (q % 3) * 1.8;
-      dx.globalAlpha = 0.50;
+      dx.globalAlpha = 0.62;
       dx.drawImage(sp2, sx - sz2/2, sy - sz2/2, sz2, sz2);
     }
     dx.globalAlpha = 1;
@@ -182,7 +189,7 @@ function frame(now){
       // held on the fibre — it stays put; the deposit is what remains
       p.held += dt;
       if (p.held > 0.30){
-        p.anchor.n = Math.min(p.anchor.n + 1, 9);
+        p.anchor.n = Math.min(p.anchor.n + 1, 14);
         parts[i] = spawn(false);
         continue;
       }
@@ -204,7 +211,7 @@ function frame(now){
         var reach = innerWidth * 0.055;               // only a NEARBY fibre can catch it
         for (var k2 = 0; k2 < ANCHORS.length; k2++){
           var A2 = ANCHORS[k2];
-          if (A2.n >= 9) continue;
+          if (A2.n >= 14) continue;
           var d2 = Math.abs(A2.x - p.x) + Math.abs(A2.y - p.y) * 0.35;
           if (d2 < bd){ bd = d2; best = A2; }
         }
@@ -212,8 +219,8 @@ function frame(now){
           p.anchor = best;
           p.x = best.x + (Math.random()-0.5)*7; p.y = best.y;
           p.px = 0; p.py = 0;                          // kill the trail so no streak is drawn
-        } else if (p.y > SURF + innerHeight*0.30){
-          parts[i] = spawn(false); continue;           // fell past the mat, recycle
+        } else if (p.y > SURF + ZONE){
+          parts[i] = spawn(false); continue;           // never passes the zone — clean beyond
         }
       }
       if (p.x < -160 || p.x > innerWidth + 160){ parts[i] = spawn(false); continue; }
