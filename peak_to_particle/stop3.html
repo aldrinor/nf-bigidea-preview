@@ -22,7 +22,7 @@
   /* the charged material — capture has to happen ON something visible */
   /* the clean side: below the capture band the media is lifted, so the eye reads
      dirty air above -> capture band -> visibly cleaner beyond */
-  #clean{position:fixed;left:0;bottom:0;width:100%;height:38%;z-index:3;pointer-events:none;
+  #clean{position:fixed;left:0;bottom:0;width:100%;height:30%;z-index:3;pointer-events:none;
     background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 46%,
       rgba(255,255,255,.82) 100%);}
   #media{position:fixed;left:0;bottom:0;width:100%;height:52%;object-fit:cover;z-index:2;
@@ -31,7 +31,7 @@
   #dust{position:fixed;inset:0;z-index:4;pointer-events:none}
   /* readability comes from a LOCAL scrim behind the copy, never from draining the
      whole image — that is what bleached all three screens */
-  #scrim{position:fixed;left:0;top:0;width:min(56%,760px);height:100%;z-index:2;
+  #scrim{position:fixed;left:0;top:0;width:min(40%,540px);height:100%;z-index:2;
     pointer-events:none;
     background:linear-gradient(100deg, rgba(244,247,250,.94) 0%, rgba(244,247,250,.86) 30%,
       rgba(244,247,250,.55) 56%, rgba(244,247,250,.14) 80%, rgba(244,247,250,0) 100%);}
@@ -47,17 +47,17 @@
     padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
-  .lockup{position:absolute;left:var(--rail);top:56%;transform:translateY(-50%);max-width:min(30ch,40vw)}
+  .lockup{position:absolute;left:var(--rail);top:40%;transform:translateY(-50%);max-width:min(26ch,32vw)}
   h2{font-size:clamp(24px,2.7vw,34px);font-weight:600;line-height:1.32;letter-spacing:-.022em;
     color:var(--headline-ink);margin:0 0 clamp(16px,2vh,24px)}
   h2 em{font-style:normal;color:var(--accent)}
   p{font-size:clamp(16px,1.5vw,19px);line-height:1.55;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
     font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
-  #mark{position:fixed;z-index:5;left:62%;top:30%;transform:translate(-50%,-50%);
-    width:clamp(200px,23vw,360px);height:auto;opacity:.95;pointer-events:none;
+  #mark{position:fixed;z-index:5;left:61.5%;top:26%;transform:translate(-50%,-50%);
+    width:clamp(160px,17vw,262px);height:auto;opacity:.92;pointer-events:none;
     filter:drop-shadow(0 0 40px rgba(255,255,255,.95))}
-  @media (max-width:760px){ #mark{width:56vw;left:50%;top:22%} #media{height:44%} }
+  @media (max-width:760px){ #mark{width:50vw;left:50%;top:20%} #media{height:44%} }
   @media (max-width:760px){
     nav{gap:14px} .lockup{max-width:none;right:var(--rail);top:52%}
     #veil{background:linear-gradient(180deg, rgba(238,242,246,.94) 0%, rgba(238,242,246,.55) 46%, rgba(238,242,246,0) 72%)}
@@ -117,30 +117,33 @@ function sizeDust(){
    - particles arrive on a few converging STREAMS and leave short trails
    - they land on fixed ANCHORS in the fibre mat and CLUMP there, building visible deposits
    - the airstream is dense at the top and thins as it descends: clean air is the result */
-var SURF, ZONE, ANCHORS = [], LANES = [];
+var SURF, ZONE, HOT, ANCHORS = [], LANES = [];
 
 function buildField(){
-  SURF = innerHeight * 0.50;                       // the top face of the capture zone
-  ZONE = innerHeight * 0.085;                       // the bounded band where capture happens
+  SURF = innerHeight * 0.615;                      // the fibre surface
+  ZONE = innerHeight * 0.055;
+  HOT  = innerWidth  * 0.615;                      // THE contact point — the climax
   // converging lanes: the airstream funnels toward the charged material
   LANES = [];
   var nL = innerWidth < 760 ? 3 : 5;
   for (var i = 0; i < nL; i++){
     var f = (i + 0.5) / nL;
     LANES.push({
-      x0: innerWidth * (0.06 + f * 0.88),          // where it enters, up top
-      x1: innerWidth * (0.30 + f * 0.42),          // where it meets the material — converged
-      w:  innerWidth * (0.030 + Math.random() * 0.035)
+      x0: innerWidth * (0.30 + f * 0.66),          // spread out up top
+      x1: HOT + (f - 0.5) * innerWidth * 0.055,    // funnels into ONE contact point
+      w:  innerWidth * (0.022 + Math.random() * 0.028)
     });
   }
   // anchors: real capture points on the mat. Particles clump ON these.
   ANCHORS = [];
   var nA = innerWidth < 760 ? 34 : 74;
   for (var k = 0; k < nA; k++){
+    var off = (Math.random()*2-1);
+    off = Math.sign(off) * Math.pow(Math.abs(off), 2.1);   // tight cluster, fast falloff
     ANCHORS.push({
-      x: innerWidth * (0.06 + Math.random() * 0.90),
-      y: SURF + Math.pow(Math.random(), 1.5) * ZONE,   // hugging the top of the band
-      n: 6 + ((Math.random()*8)|0)                  // already loaded — capture has been running
+      x: HOT + off * innerWidth * 0.30,
+      y: SURF + Math.pow(Math.random(), 1.5) * ZONE,
+      n: Math.max(0, Math.round(15 * (1 - Math.abs(off)) + (Math.random()*4-2)))
     });
   }
 }
