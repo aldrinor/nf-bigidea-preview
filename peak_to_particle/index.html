@@ -108,7 +108,7 @@
 <div id="stage">
   <!-- Real cloud, not a hand-drawn canvas pass. No registration constraint on this plate, so
        it simply loops on its own clock. -->
-  <video id="pl_peak" poster="./hero_img/peak_d.png" muted playsinline autoplay loop
+  <video id="pl_peak" poster="./hero_img/peak_d.webp" muted playsinline autoplay loop data-autoloop="1"
          preload="auto" aria-label="A snow-covered summit rising through cloud.">
     <source src="./hero_img/peak_cloud.mp4" type="video/mp4">
   </video>
@@ -116,19 +116,19 @@
        else in the frame is held. Its time is driven BY THE SCROLL, not by a clock: it is
        parked on frame 0 — the exact frame the travelling cutout was taken from — until the
        pull begins, so registration is perfect, and it then turns as we descend past it. -->
-  <video id="pl_smoke" poster="./hero_img/soot_real.png" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
+  <video id="pl_smoke" poster="./hero_img/soot_real.webp" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
     <source src="./hero_img/soot_turn.mp4" type="video/mp4">
   </video>
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
   <div id="shadow"></div>
-  <img id="mote" src="./hero_img/soot_cut.png" alt="">
+  <img id="mote" src="./hero_img/soot_cut.webp" alt="">
   <!-- the same junction later in its life. Cross-faded over the single-particle frame, so the
        event on this stop is the filter FILLING UP rather than a caption over a backdrop. -->
-  <img id="pl_load" src="./hero_img/mat_loaded.png" alt="The same filter junction, heavily loaded with captured soot.">
-  <img id="pl_sky" src="./hero_img/sky_clean.png" alt="Clean cold blue sky above a flat sea of cloud.">
-  <img id="pl_fibre" src="./hero_img/mat_used_light.png" alt="An electron micrograph of nonwoven filter media.">
+  <img id="pl_load" src="./hero_img/mat_loaded.webp" alt="The same filter junction, heavily loaded with captured soot.">
+  <img id="pl_sky" src="./hero_img/sky_clean.webp" alt="Clean cold blue sky above a flat sea of cloud.">
+  <img id="pl_fibre" src="./hero_img/mat_used_light.webp" alt="An electron micrograph of nonwoven filter media.">
 </div>
 <!-- A second copy of the filter plate, revealed only in a soft ellipse around the contact
      and sitting ABOVE the travelling contaminant, so one fibre crosses IN FRONT of part of
@@ -137,7 +137,7 @@
      The mat itself is now CLEAN. The deposit on the fibre is the very particle the viewer has
      been following since the summit — the gate three times running: "its scale, silhouette
      and structure change, so it looks swapped for different soot renders." -->
-<img id="pl_front" src="./hero_img/mat_used_light.png" alt="">
+<img id="pl_front" src="./hero_img/mat_used_light.webp" alt="">
 <div id="veil"></div>
 
 
@@ -277,6 +277,25 @@ var el = {
 /* The headline and the paragraph are staged, not faded as one slab: the headline arrives
    first and the paragraph follows a beat later, each rising as it comes. A block that fades
    in one piece reads as a slide; a staged one reads as a composition being set. */
+/* A fully transparent full-bleed layer still costs the compositor a paint every frame, and
+   this page stacks six of them. Hiding the ones at zero opacity is the difference between a
+   scroll that stutters and one that does not. */
+function setLayer(node, o){
+  node.style.opacity = o;
+  var off = o <= 0.004;
+  if(off !== (node.__off === true)){
+    node.style.visibility = off ? 'hidden' : 'visible';
+    node.__off = off;
+    /* A video keeps decoding while it is invisible, and measured on this page two of them
+       cost 28 fps on desktop — 21 up to 49 with them gone. So a hidden video is stopped
+       outright, and only started again when its layer comes back. */
+    if(node.tagName === 'VIDEO'){
+      if(off){ try{ node.pause(); }catch(e){} }
+      else if(node.dataset.autoloop === '1'){ try{ node.play(); }catch(e){} }
+    }
+  }
+}
+
 function copyState(node, v, centred){
   node.style.opacity = 1;                       // the children carry the fade now
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
@@ -332,49 +351,46 @@ function layout(){
      into its own cloud until the frame is white; the micrograph starts already inside that
      white field and pulls back out of it. The two white fields coincide, so there is no cut. */
   var pkZoom = 1 + 0.62 * smooth(0.18, 1.08, p);
-  el.peak.style.opacity   = 1 - smooth(0.45, 1.10, p);
+  setLayer(el.peak, 1 - smooth(0.45, 1.10, p));
   el.peak.style.transform = 'translateY(' + (-p*0.070*vh).toFixed(1) + 'px) scale(' +
                             pkZoom.toFixed(4) + ')';
 
-  el.smoke.style.opacity   = band(p, 0.50, 1.10, 1.16, 2.10);
+  setLayer(el.smoke, band(p, 0.50, 1.10, 1.16, 2.10));
   el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px) scale(' +
                              smokeScale(p).toFixed(4) + ')';
   // the specimen turns under the beam as the descent carries past it
-  if(el.smoke.tagName === 'VIDEO' && el.smoke.readyState >= 1 && !PARKED){
+  // seeked, not played: measured 21 fps seeking vs 14 fps playing on this page
+  if(el.smoke.tagName === 'VIDEO' && el.smoke.readyState >= 1 && !PARKED && el.smoke.__off !== true){
     var want = clamp((p - 1.20) * 7.0, 0, (el.smoke.duration || 10) - 0.12);
     if(Math.abs(el.smoke.currentTime - want) > 0.04){ try{ el.smoke.currentTime = want; }catch(e){} }
   }
 
-  // the mat begins arriving well before the pollutant beat ends, so the middle of the
-  // scroll is a continuous overlap rather than two held states either side of a cut
-  /* the fourth stop: the camera comes back out of the material into clean air. The capture
-     has happened; this is what it was for. */
-  /* the event: the same junction fills up, and only then does the camera pull out */
+  /* the event: the same junction fills up, and only then does the camera pull out to clean air */
   var loadIn = band(p, 2.30, 2.72, 2.88, 3.14);
-  el.load.style.opacity   = loadIn;
+  setLayer(el.load, loadIn);
   el.load.style.transform = 'scale(' + (1 + (1-smooth(2.30,2.72,p))*0.04).toFixed(4) + ')';
 
   var skyIn = smooth(2.86, 3.16, p);
-  el.sky.style.opacity   = skyIn;
+  setLayer(el.sky, skyIn);
   el.sky.style.transform = 'scale(' + (1.12 - skyIn*0.12).toFixed(4) + ')';
 
   var fEnter = Math.max(0, 2.10 - p);   // begins the moment the pollutant beat settles
-  el.fibre.style.opacity   = band(p, 1.02, 2.10, 2.34, 2.70);
+  setLayer(el.fibre, band(p, 1.02, 2.10, 2.34, 2.70));
   var fTf = 'translateX(' + (fEnter*0.042*vw).toFixed(1) + 'px) scale(' +
             (1 + fEnter*0.030).toFixed(4) + ')';
   el.fibre.style.transform = fTf;
   // the same plate again, on top of the contaminant, closing over it as it lands
-  el.front.style.opacity   = band(p, 1.86, 2.22, 2.34, 2.66);
+  setLayer(el.front, band(p, 1.86, 2.22, 2.34, 2.66));
   el.front.style.transform = fTf;
 
   var m = moteAt(p);
-  el.mote.style.opacity = m.o;
+  setLayer(el.mote, m.o);
   el.mote.style.width = m.w.toFixed(1) + 'px';
   el.mote.style.transform = 'translate(' + (m.x - m.w/2).toFixed(1) + 'px,' +
                             (m.y - m.w*MOTE_SRC.ar/2).toFixed(1) + 'px)';
   // the pool of shade it casts onto the fibre once it is actually resting there
   var sw = m.w*1.02, sh = m.w*0.34;
-  el.shadow.style.opacity = (smooth(1.94, 2.20, p) * 0.80).toFixed(3);
+  setLayer(el.shadow, +(smooth(1.94, 2.20, p) * 0.80).toFixed(3));
   el.shadow.style.width  = sw.toFixed(1) + 'px';
   el.shadow.style.height = sh.toFixed(1) + 'px';
   el.shadow.style.transform = 'translate(' + (m.x - sw/2).toFixed(1) + 'px,' +

@@ -144,6 +144,55 @@ photography 7.0), now confirmed on a second, completely different subject:
 `hero_img/substrate.png` (an empty SEM stage, generated for the 3D version to sit on) is kept
 in case a future attempt needs it.
 
+## ⚠ LIVE UAT — RUN AT LAST, AND IT FOUND A SERIOUS DEFECT
+A standing rule says interactive work gets a live UAT: weight, load, FPS, phone. It had never
+been done on this page. Eleven passes were spent judging nine frames I chose; nobody had asked
+what a visitor actually receives. `uat.mjs` and `fps_probe.mjs` now do it.
+
+**The page was shipping ~21 MB of plates.** Six PNGs at 4–6 MB each, full-bleed. On a phone that
+is unusable and it burns the visitor's data. Nothing about art direction survives that.
+
+| | before | after |
+|---|---|---|
+| plate weight | **21.2 MB** | **0.5 MB** (40×) |
+| video weight | 2.7 MB | 0.9 MB (3×) |
+| load event, desktop | **3035 ms** | **228 ms** (13×) |
+
+WebP at quality 84, capped at 2048 px wide — nothing on this page is ever displayed above about
+2160 CSS px at DPR 1.5, so there is no visible loss. Verified by rendering every stop and
+comparing: identical.
+
+### The FPS question, honestly
+Scrolling measured **21 fps on desktop, 53–55 on phone**. An ablation (`fps_probe.mjs`) located
+the cost precisely rather than by guessing:
+
+| condition | fps |
+|---|---|
+| as shipped | 21 |
+| front-overlay **mask** removed | 21 — **the mask costs nothing** |
+| **videos removed** | **49** |
+| all plates removed | 60 |
+
+So the two videos carry the cost. Three fixes were tried and measured:
+- halving video resolution to 1280 → 24 fps (marginal; also a real 3× weight win, kept)
+- pausing hidden videos → no change during a full scroll, but correct, kept
+- **playing instead of seeking → 14 fps, worse. Reverted.** Seeking is cheaper here.
+
+**Unresolved and stated plainly.** Desktop readings swing between 14 and 24 across runs on this
+machine — 16 fps at devicePixelRatio 1 versus 21 at ratio 2, which is backwards — so the
+absolute desktop number is not trustworthy here and should be re-measured on real hardware.
+The phone figure was stable and fine. The *relative* ablation is solid and is what was acted on.
+
+**A caution about `uat.mjs`:** its "network idle" reading is meaningless on this page (a constant
+~64 s). A looping video never lets the network go idle, so that number is an artefact of the
+measurement, not a defect. Use the load event instead.
+
+### And a self-inflicted bug worth remembering
+Mid-pass a scripted splice left a stray `}` that closed `layout()` early. Every copy block and
+every plate rendered at once. **It was caught only because I looked at the render.** A
+scripted edit is not verified until the page has been looked at — the syntax check alone
+passed a broken build earlier in this project too.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -669,25 +718,18 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-All three of the reference's pillars have now been addressed:
-- **Scroll engine** — Lenis + ScrollTrigger, in and measured (329 px glide, snaps to stop).
-- **Motion craft** — masked word reveals and a load entrance, in and measured.
-- **WebGL** — built, measured, rejected with evidence. Photography wins at this scale.
-
-**There is no further structural lever available in-house.** Everything remaining sits with Yin:
-
-1. **What does "done" mean now?** The 9/10 bar is void — the judge scores mont-fort itself at 4.
-   Options: Yin's own review; an A/B against the current live site; or a small panel of A/Bs.
-2. **May we license real imagery?** Still the one untried fidelity lever, and the ledger says
-   fidelity is the only thing that ever moved this page.
-
-If a session must act without those answers, the honest work is narrow:
-- Re-run the A/B (`gate_ab_prompt.txt`, **both orders**) after any composition or asset change.
-- Re-run `check_engine.mjs` and `check_reveal.mjs` after any motion change.
-- Keep the live deploy verified.
+1. **Re-measure scroll FPS on real hardware.** The headless desktop figure here is unstable
+   (14–24 across runs, and inverted with pixel ratio). Phone was fine at 53–55. If a real
+   machine also shows ~20 fps on desktop, the fix is fewer simultaneous video layers — the
+   ablation says videos cost 28 fps and the mask costs nothing.
+2. **Yin still owns the two open decisions** (see the calibration section): what "done" means
+   now the 9/10 bar is void, and whether we may license real imagery.
+3. **Housekeeping:** `hero_img/` still holds ~128 MB of superseded originals and rejects. The
+   eight files the page actually loads are listed in the commit. They are untracked now but
+   still on disk; a future pass can prune the folder safely.
 
 **Do not** retry: the WebGL specimen, more stops, layout breaks, seam or collision work, the
-hero plate or crop, charge symbols, the mat video. Every one is measured and documented above.
+hero plate or crop, charge symbols, the mat video. All measured, all documented above.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
