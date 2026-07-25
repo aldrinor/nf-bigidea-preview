@@ -47,12 +47,17 @@ blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
 
 Sequence: **6.8** — separate pages 5.4 → 6.2, continuous 6.0, micrograph screen 2 6.2,
 both micro screens sharing one instrument **6.8**.
-Samples on the current build: 6.6, 6.7, 6.8, 7.0 → mean **6.78**. Across the previous build
-too the mean was 6.8. The spread is ±0.5, so only a move of about a whole point is real.
+There are now TWO instruments, and they measure different things. Report both.
 
-**The sequence has now held at 6.8 across three consecutive builds** — the micrograph screen 3,
-the hero-plate experiment, and the hero-copy pass. It is a plateau, not a wobble. See NEXT
-ACTION: the remaining complaint is structural, not a matter of any single screen.
+- **3-row strip** (three scroll positions, ref left / ours right) — comparable with every
+  earlier number in this file. Current: 6.3, 6.7, 6.8 → **6.6**. It has sat at 6.6–6.8 across
+  four builds. Three stills cannot show a transition, so this instrument is blind to the thing
+  that was built this pass.
+- **7-frame scroll strip** (`gate_scroll.png`, prompt `/tmp/gate_scroll.txt`) — seven
+  consecutive frames of the descent, which is the only way to judge continuity. Before this
+  pass: **5.0**, and the judge's verdict was *"it reads as separate sticky slides"*. After:
+  **5.8, 6.2 → 6.0**, verdict *"continuous: yes"*. That is a full point on the instrument that
+  actually measures what was changed.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -65,8 +70,10 @@ a number from a run whose output was partly truncated.
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **7.0** | copy gave it a job; plate/crop ruled out |
-| 2 | Down into cloud — the pollutant | **6.3** | noisy: read 5.8–7.8 across samples |
-| 3 | NanoFlashing pulls them in | **7.1** | best it has been |
+| 2 | Down into cloud — the pollutant | **6.7** | |
+| 3 | NanoFlashing pulls them in | **6.9** | |
+
+Scroll continuity (7-frame instrument): **6.0**, up from 5.0 this pass.
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -241,39 +248,56 @@ One thing was kept from the experiment: the hero is now desaturated to `saturate
 pulls it into the same near-monochrome tonal range as the two micrographs. Every screen is now
 a dark subject on a pale ground in cool neutral grey.
 
+## THE TRANSITION IS NOW PHYSICAL — 5.0 → 6.0 on the scroll instrument
+The cross-fades are gone. What happens now:
+- the summit **rises past the camera** and scales up as we drop through it;
+- the pollutant micrograph **comes up from below** and keeps descending;
+- the filter mat **sweeps in from the right and scales down into place** while the pollutant is
+  still on screen, so the two scenes overlap for a real distance of scroll;
+- **every plate moves for the whole scroll**, not just during its own hand-over. The gate's
+  exact complaint was *"the pacing is hold-cut-hold-cut... too much scroll produces almost no
+  visible change, followed by major state changes."* No frame pair is identical now.
+- the contaminant **accelerates once the mat starts entering** (cubic ease-in, not a symmetric
+  ease) and **stops dead at contact** — the *"causal transformation"* the judge kept asking for.
+- it **lands on the deposit that is already in the photograph, at that deposit's own size**, so
+  the two register as one object. It used to shrink to a dot beside a much larger photographed
+  deposit, which read as *"pasted over the mat, then a different-sized deposit"*.
+
+Two implementation notes worth keeping:
+- **Every plate is oversized to 112% with a −6% offset.** A full-bleed plate that translates
+  shows its own hard edge. All travel is kept inside that 6% margin.
+- **A real bug was found and fixed: the copy blocks were overlapping into an unreadable pile**
+  during hand-over. The gate saw it twice — *"the duplicated fading text makes it look even
+  more like stacked slides"*. An earlier attempt to fix it silently failed to match the line in
+  the file; always `grep` the line back after a scripted edit.
+
 ## NEXT ACTION
-Current: sequence 6.8 · S1 7.0 · S2 6.3 · S3 7.1. Bar is 9.
+Current: 3-row 6.6 · scroll 6.0 · S1 7.0 · S2 6.7 · S3 6.9. Bar is 9.
 
-**The sequence has been 6.8 for three builds.** Screen-level work is no longer moving it, and
-three separate hero experiments (new plate, tighter crop, new copy) confirm that. Per this
-file's own rule — when something stalls twice at the same number, stop tuning and ask what is
-still fake — the remaining problem is structural, and the judge has named it the same way in
-every gate since the continuous page was built:
+The scroll gate now names two specific things, both about the seams:
 
-> *"Cross-fading plates does not create a continuous experience. It reads as three hero
-> sections dissolving into one another. Keep the particle permanently rendered above the
-> backgrounds, overlap transitions for 20–30vh, and let each incoming environment physically
-> affect it. There must be a causal transformation, not just an opacity change."*
+1. **The collision still is not convincing.** Judge: *"lock one identifiable portion of the
+   particle to a continuous motion path... then progressively occlude and compress that same
+   geometry into the deposit. The fibre should pass behind some branches and in front of
+   others at impact."*
+   Concretely: add a second copy of the fibre plate ABOVE the travelling contaminant, masked to
+   just the fibre band, and fade it in over the last stretch of the pull. The fibre then passes
+   in front of part of the particle while the rest stays behind it, which is what real contact
+   looks like. Everything needed is already in `index.html`.
 
-1. **Replace the opacity cross-fades with physical entrances.** The fibre mat should *move
-   into frame* while the pollutant scene is still on screen — a translate, not a fade — so the
-   two overlap for a real distance of scroll. Same for the descent out of the summit: the
-   cloud layer should rise past the camera rather than dissolve. `index.html` already drives
-   everything from one scroll value `p`, so this is transform work on `#stage img`, not a
-   rewrite.
+2. **The mountain-to-micrograph handoff has no spatial logic.** Judge: *"a summit disappears
+   and a large soot specimen appears against empty white... introduce the particle while the
+   final mountain contours are still visible, align its upward movement with the summit's
+   trajectory, and use fog/atmosphere as the continuous depth layer. Extend that coexistence
+   substantially before the mountain vanishes."*
+   Concretely: bring the contaminant on screen earlier (it currently appears at p≈0.55, after
+   the summit is mostly gone), move it upward along the same path the summit is taking, and
+   hold the mist canvas alive across the seam instead of fading it out at p≈1.0.
 
-2. **Let the incoming environment act on the contaminant.** Right now the contaminant travels
-   on a fixed path regardless of what is behind it. It should accelerate as the fibre enters,
-   and stop dead when it meets it. That is the *"causal transformation"* the judge keeps asking
-   for, and it is cheap: the path already exists in `moteAt(p)`.
-
-3. **Do not** regenerate the hero plate, retry the crop, or add a charge symbol. All three are
-   measured dead ends and are documented above.
+3. **Do not** regenerate the hero plate, retry the hero crop, or add a charge symbol. All
+   measured dead ends, documented above.
 
 4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
-   When they are built, use the rules that have actually worked here: one instrument shared by
-   adjacent screens; ask for the specimen darker than its ground; no drawn overlay on top of a
-   photograph; and give every screen a job in the story, not just a picture.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
