@@ -23,9 +23,9 @@
   #stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
   #stage img{position:absolute;object-fit:cover;will-change:opacity}
   #pl_peak {left:0;top:0;width:100%;height:100%;filter:contrast(.94) saturate(.96) brightness(1.01)}
-  #pl_smoke{left:-12.65%;top:-6.86%;width:114%;height:114%;filter:contrast(1.03) brightness(1.01)}
+  #pl_smoke{left:0;top:0;width:100%;height:100%;filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
-  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.04) saturate(.40) brightness(1.02)}
+  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.10) saturate(.42) brightness(1.0)}
 
   canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
   #veil{position:fixed;inset:0;z-index:3;pointer-events:none;
@@ -47,7 +47,7 @@
   .stop{position:fixed;z-index:5;left:var(--rail);max-width:min(46ch,40vw);
     will-change:opacity,transform}
   #c1{top:52%;transform:translateY(-50%)}
-  #c2{bottom:clamp(112px,15vh,190px)}
+  #c2{bottom:clamp(112px,15vh,190px);max-width:min(38ch,32vw)}
   #c3{top:50%;transform:translateY(-50%)}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
   .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
@@ -73,12 +73,12 @@
 <body>
 <div id="stage">
   <img id="pl_peak"  src="./hero_img/peak_d.png"  alt="A snow-covered summit rising through cloud.">
-  <img id="pl_smoke" src="./hero_img/mote_in.png" alt="A single dark soot particle suspended in pale smoke.">
+  <img id="pl_smoke" src="./hero_img/sem_light.png" alt="An electron micrograph of a single airborne soot agglomerate.">
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
-  <img id="mote" src="./hero_img/mote_cut.png" alt="">
-  <img id="pl_fibre" src="./hero_img/mat_hot.png"   alt="Charged nonwoven filter media holding one knot of captured particles.">>
+  <img id="mote" src="./hero_img/sem_cut.png" alt="">
+  <img id="pl_fibre" src="./hero_img/mat_close.png" alt="A charged nonwoven fibre junction holding a dense knot of captured particles.">>
 </div>
 <canvas class="fx" id="mist"></canvas>
 <canvas class="fx" id="pull"></canvas>
@@ -126,8 +126,8 @@ var mix=function(a,b,t){return a+(b-a)*t;};
 
 var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var P = 0;
-var PLATE = {l:-0.1265, t:-0.0686, w:1.14, h:1.14, iw:2688, ih:1520};
-var MOTE_SRC = {cx:0.7284, cy:0.5059, w:0.2143};
+var PLATE = {l:0, t:0, w:1, h:1, iw:2688, ih:1520};
+var MOTE_SRC = {cx:0.6827, cy:0.5082, w:0.4509, ar:1.1312};
 function moteHome(){
   var bw=innerWidth*PLATE.w, bh=innerHeight*PLATE.h;
   var bx=PLATE.l*innerWidth,  by=PLATE.t*innerHeight;
@@ -139,7 +139,7 @@ function moteHome(){
 /* where the contaminant is at any point of the descent, in real pixels */
 function moteAt(p){
   var h=moteHome();
-  var K=innerWidth*0.787, L=innerHeight*0.460;         // the deposit, measured off the plate
+  var K=innerWidth*0.775, L=innerHeight*0.492;         // the deposit, measured off the plate
   var t=smooth(1.30, 2.24, p);                          // the pull, once it takes hold
   var e=t*t*(3-2*t);
   return {
@@ -188,7 +188,7 @@ function layout(){
   el.mote.style.opacity = m.o;
   el.mote.style.width = m.w.toFixed(1) + 'px';
   el.mote.style.transform = 'translate(' + (m.x - m.w/2).toFixed(1) + 'px,' +
-                            (m.y - m.w*0.472).toFixed(1) + 'px)';
+                            (m.y - m.w*MOTE_SRC.ar/2).toFixed(1) + 'px)';
 
 }
 
@@ -268,7 +268,7 @@ function sizePull(){
   el.pull.style.width=innerWidth+'px'; el.pull.style.height=innerHeight+'px';
   pctx.setTransform(dpr,0,0,dpr,0,0);
   var narrow=innerWidth<760;
-  CX=innerWidth*(narrow?0.58:0.787); CY=innerHeight*(narrow?0.34:0.46);
+  CX=innerWidth*(narrow?0.58:0.775); CY=innerHeight*(narrow?0.34:0.492);
   PARTS=[]; var n=narrow?9:15;
   for(var i=0;i<n;i++){ var q=mkMote(); q.u=0.15+Math.random()*0.85; PARTS.push(q); }
 }

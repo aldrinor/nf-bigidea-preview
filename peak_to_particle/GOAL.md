@@ -45,7 +45,9 @@ codex exec -s read-only --skip-git-repo-check -i gate_pair.png - < /tmp/gate_pro
 The deliverable is `index.html`, one document. Numbers are the mean of repeated runs of the
 blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
 
-Sequence: **6.0** — separate pages 5.4 → 6.2, continuous build 6.0, and it has stayed there.
+Sequence: **6.2** — separate pages 5.4 → 6.2, continuous build 6.0, micrograph build 6.2.
+Samples this pass: 5.8, 5.8, 6.0, 6.1, 6.1, 6.2, 6.2, 6.4, 6.7. The spread is ±0.5, so only
+a move of about a whole point is real. Treat anything smaller as noise and do not chase it.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -57,9 +59,9 @@ a number from a run whose output was partly truncated.
 
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.6** | iterating |
-| 2 | Down into cloud — charged particle | **5.2** | weakest, oscillating in the 5s |
-| 3 | NanoFlashing pulls them in | **6.2** | iterating |
+| 1 | Mountain — C-POLAR + 5 applications | **6.9** | iterating |
+| 2 | Down into cloud — the pollutant | **6.6** | UNSTUCK — see below |
+| 3 | NanoFlashing pulls them in | **6.1** | now the weakest |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -157,37 +159,54 @@ convention and asked to *"hold one compositional axis"*. The consistent point un
 is that the scenes feel newly introduced — that is an object-continuity problem, not a layout
 problem. Fix continuity, leave the layout alone.
 
+## SCREEN 2 IS UNSTUCK — real microscopy language was the answer
+Screen 2 had been pinned in the 5s across five treatments: painted particles 3.0,
+photographed smoke 5.8, three pasted specimens 4.9, one pasted specimen 5.4, a soot particle
+inside a fog photograph 4.7–6.1.
+
+Replacing it with a **generated electron-micrograph** — `hero_img/sem_light.png`, a branched
+soot agglomerate of fused nanospheres, dark on a bright near-white substrate — took it to
+**7.5 in one reading and 6.0–6.2 in others**, its best numbers in the project. The judge on
+that frame: *"the strongest frame. Clear contrast, strong object scale, and immediately
+understandable copy."*
+
+Two things mattered, and both should be reused on screens 4–10:
+- **The visual REGISTER, not just the subject.** "A rock in fog" and "a micrograph of soot"
+  are the same object; only one of them is credible. Ask what instrument would really show
+  this thing, and generate in that instrument's language.
+- **Ask for the specimen DARKER than its ground.** The first micrograph came back on mid-grey
+  and fought the light palette. Adding "rendered clearly darker than its background, on a
+  bright near-white substrate" fixed it in one shot. Keep that phrasing.
+
 ## NEXT ACTION
-Current: sequence 6.0 · S1 6.6 · S2 5.2 · S3 6.2. Bar is 9.
+Current: sequence 6.2 · S1 6.9 · S2 6.6 · S3 6.1. Bar is 9.
 
-**Screen 2 is the blocker and it has now stalled.** Its history: painted particles 3.0 →
-photographed smoke 5.8 → three pasted specimens 4.9 → one pasted specimen 5.4 → soot particle
-inside the photograph 6.1 → and back down to 4.7–5.8 on re-sampling. It oscillates in the 5s.
-GOAL.md's own rule applies: when a screen stalls twice at the same number, stop tuning and ask
-what is still fake.
+**Screen 3 is now the weakest and the judge's words are specific:** *"weak climax... washed
+out, visually vague... the most important moment has the least impact"*, and *"the absorption
+moment looks like dirt sitting on fibres rather than a physical mechanism completing."*
 
-What the judge says is fake about it, in its own words across today's gates: *"a floating coal
-meatball"*, *"an AI-generated asteroid"*, *"a floating charcoal render"*, *"a lump of slag
-pasted into a product diagram"*. The subject is not credible as pollution.
+1. **Rebuild screen 3 in the same register that just unstuck screen 2.** It is currently a
+   soft-focus studio macro. Generate it as an **electron micrograph of the same soot
+   agglomerate caught on a charged fibre** — same greyscale instrument language, same
+   dark-specimen-on-pale-substrate phrasing, the fibre resolved as real spun media, the
+   agglomerate visibly deformed and gripped where it meets the fibre. That also fixes the
+   judge's third note (*"three premium campaign tropes rather than one world"*), because
+   screens 2 and 3 would then share one instrument, one grain and one tonal range.
+   `mat_close.png` and `mat_hot.png` stay in `hero_img/` as fallbacks.
 
-1. **Try real microscopy language for screen 2.** A generated SEM-style micrograph of a soot
-   agglomerate — greyscale, branched chain structure, fused nanospheres, empty substrate —
-   is a completely different visual register from "a rock floating in fog", and it is the one
-   register the judge keeps asking for: *"use credible microscopy"*, *"a specific, ownable
-   visual system based on the actual material and pollutants"*.
-   A first candidate is already generated: job `e4495034-dfdd-4b05-81b2-5580451ed358`.
-   If it works, the travelling cutout must be re-cut from the new plate to keep registration.
+2. **Then re-cut the travelling contaminant from the new screen-3 plate too**, so the object
+   that lands is literally the object in the photograph. Registration constants live in
+   `PLATE` and `MOTE_SRC` in `index.html`.
 
-2. **If microscopy also lands in the 5s, the concept is wrong, not the asset.** In that case
-   change what screen 2 shows: not one particle, but the air itself — e.g. the same frame
-   twice, loaded and clean, so the screen carries a comparison rather than a portrait.
+3. **Leave the mountain hero alone** unless screens 2 and 3 clear 8 — it is not the blocker,
+   and Yin specified it (rule 7).
 
-3. **Do not re-add any charge annotation.** Two attempts, both rejected. See above.
+4. **Do not re-add any charge annotation.** Three attempts now: an outlined minus (*"a
+   zoom-out button"*), a ring-and-orbit field (*"decorative HUD graphics"*), and a bare minus
+   (*"too insignificant to carry the narrative"*). The judge wants the charge shown as
+   physical behaviour — deformation, gripping, absorption — not as a symbol.
 
-4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
-
-**Do not** act on the judge's repeated request to delete the mountain hero — Yin specified
-it (rule 7).
+5. Screens 4–10 are still not built. Do not start them until the first three clear 9.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
