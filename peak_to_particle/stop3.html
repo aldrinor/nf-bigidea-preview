@@ -55,8 +55,8 @@
   p{font-size:clamp(16px,1.5vw,19px);line-height:1.55;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
     font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
-  #mark{position:fixed;z-index:5;left:61.5%;top:26%;transform:translate(-50%,-50%);
-    width:clamp(160px,17vw,262px);height:auto;opacity:.92;pointer-events:none;
+  #mark{position:fixed;z-index:5;left:62%;top:30%;transform:translate(-50%,-50%);
+    width:clamp(230px,26vw,420px);height:auto;opacity:.96;pointer-events:none;
     filter:drop-shadow(0 0 40px rgba(255,255,255,.95))}
   @media (max-width:760px){ #mark{width:50vw;left:50%;top:20%} #media{height:44%} }
   @media (max-width:760px){
@@ -110,7 +110,7 @@ function sizeDust(){
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 26 : 54;
+  var n = innerWidth<760 ? 54 : 120;
   parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
 }
 
@@ -121,17 +121,17 @@ function sizeDust(){
 var SURF, ZONE, HOT, ANCHORS = [], LANES = [];
 
 function buildField(){
-  SURF = innerHeight * 0.455;   // the top of the real soot ridge                      // the fibre surface
-  ZONE = innerHeight * 0.055;
-  HOT  = innerWidth  * 0.615;                      // THE contact point — the climax
+  SURF = innerHeight * 0.760;   // the SUMMIT of the photographed soot ridge                      // the fibre surface
+  ZONE = innerHeight * 0.030;
+  HOT  = innerWidth  * 0.620;                      // THE contact point — the climax
   // converging lanes: the airstream funnels toward the charged material
   LANES = [];
   var nL = innerWidth < 760 ? 3 : 5;
   for (var i = 0; i < nL; i++){
     var f = (i + 0.5) / nL;
     LANES.push({
-      x0: innerWidth * (0.30 + f * 0.66),          // spread out up top
-      x1: HOT + (f - 0.5) * innerWidth * 0.055,    // funnels into ONE contact point
+      x0: innerWidth * (0.26 + f * 0.70),          // spread out up top
+      x1: HOT + (f - 0.5) * innerWidth * 0.020,    // collapses onto the summit
       w:  innerWidth * (0.022 + Math.random() * 0.028)
     });
   }
@@ -188,7 +188,7 @@ function frame(now){
       p.a *= (1 - dt*3.2);                          // merges into the real deposit
       if (p.held > 0.22){ parts[i] = spawn(false); continue; }
     } else {
-      p.trail.push(p.x, p.y); if(p.trail.length>16) p.trail.splice(0,2);
+      p.trail.push(p.x, p.y); if(p.trail.length>26) p.trail.splice(0,2);
       // accelerate toward the material as the charge takes hold
       var gap  = Math.max(10, SURF - p.y);
       var pull = 520 / Math.max(0.30, gap / innerHeight * 3.2);
@@ -196,7 +196,7 @@ function frame(now){
       // follow the converging lane
       var prog = Math.max(0, Math.min(1, p.y / SURF));
       var want = p.lane.x0 + (p.lane.x1 - p.lane.x0) * prog + p.jit;
-      var squeeze = 1.0 + 2.4 * Math.pow(prog, 2.0);   // lanes tighten toward the point
+      var squeeze = 1.0 + 5.0 * Math.pow(prog, 1.6);   // lanes tighten toward the point
       p.x += (want - p.x) * Math.min(1, dt * 3.4 * squeeze);
       p.x += Math.sin(t * 0.7 + p.ph) * 6 * dt * (1 - prog);
 
@@ -228,7 +228,7 @@ function frame(now){
         dx.lineCap = 'round';
         for (var q = 0; q < tr.length - 2; q += 2){
           var f0 = q / (tr.length - 2);                 // 0 oldest .. 1 newest
-          dx.globalAlpha = p.a * 0.55 * f0 * f0;
+          dx.globalAlpha = p.a * 0.80 * f0 * f0;
           dx.lineWidth = Math.max(0.4, p.r * 0.75 * f0);
           dx.beginPath(); dx.moveTo(tr[q], tr[q+1]); dx.lineTo(tr[q+2], tr[q+3]); dx.stroke();
         }
