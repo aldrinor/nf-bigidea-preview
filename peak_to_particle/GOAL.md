@@ -30,7 +30,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **9.1** | ✅ PASSED the gate |
-| 2 | Down into cloud — charged particles | **~5** | built, iterating — cloud volume is the blocker |
+| 2 | Down into cloud — charged particles | **9.1** | ✅ PASSED the gate |
 | 3 | NanoFlashing pulls them in — cloud clears | — | not built |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
@@ -73,23 +73,33 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Screen 2 (`stop2.html`) is built and iterating. Codex 4.6 on the first pass; three rebuilds
-since. Still below 9. **The blocker is cloud VOLUME, nothing else.**
+Screens 1 and 2 both PASSED. Build **stop 3 — NanoFlashing pulls the particles in and the
+cloud clears.** This is the signature moment of the whole page: the charged particles from
+stop 2 are drawn to the NanoFlashing mark and captured, and the vapour thins to clean air.
 
-Codex's standing diagnosis, in its words: the layers "collapse into a luminous, surface-like
-diagonal object" — the next pass must solve *material identity, physical separation and depth*,
-not add more texture. Specifically:
-- The three bodies must not share one halo. Separate them physically — different sizes,
-  clearly different opacities, one genuinely behind another with visible overlap.
-- Interiors cooler and darker blue-grey; warm near-white ONLY on exposed rims.
-- Truly clear air: rightmost 30-35% between y=22-58% should be near-empty grain.
-- Exactly ~8 minus marks in TWO arcs (4-5 upper-left→centre, 3-4 centre→lower-right).
-- Raise nav and copy contrast — they currently read as disabled, not atmospheric.
+Reuse from stop 2 (`stop2.html`): the baked-lobe cloud bodies, the sprite particles, the
+occlusion pass. Stop 3 is the same world with the particles now converging on a centre and
+the cloud density falling away.
 
-Performance is solved and must not regress: 60 fps. Two lessons banked —
-(a) canvas `filter:blur()` per particle cost 187 offscreen passes/frame and pinned it at
-10 fps; use pre-baked sprites. (b) per-frame fBm over the viewport (~1M noise calls) is far
-too slow; bake fields once, then draw them.
+Language rule: this is CAPTURE, not destroy — particles are attracted and held. Approved
+copy only.
+
+Then gate it the same way: render → stack under `scratchpad/montfort/shot_s1.png` →
+Codex → iterate to >= 9.
+
+## Screen 2 — how it got from 4.6 to 9.1 (banked technique)
+Eleven passes. What actually moved the number:
+- Per-frame fBm across the viewport = ~1M noise calls, 10 fps. **Bake fields once, then draw.**
+- `canvas filter:blur()` per particle = 187 offscreen passes/frame. **Use pre-baked sprites.**
+- A domain-warped noise field reads as **satin or water**, not cloud. Build masses from many
+  overlapping ROUND lobes instead.
+- Baked tiles clip at their border and cut straight lines. **Fade density to zero at the edge.**
+- Depth needs THREE explicit lobe scales, not just blur and opacity.
+- The lavender cast came from blue staying high while red/green fell. Pull all three down
+  together; let blue lead only in deep shadow.
+- The last 0.8 came entirely from a **high-frequency curdle in the density transition band** —
+  sharp cauliflower detail at the boundary, smooth interior. It has to be strong (~1.5
+  amplitude) and the alpha curve steep, or it is suppressed before it reaches the screen.
 
 
 ## Where things are
