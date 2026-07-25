@@ -121,7 +121,7 @@
   /* their in-chapter scale: 14px bold eyebrow, 50px display, 16px body, 12px micro */
   .eyebrow{font-family:var(--util);font-size:11.5px;font-weight:400;letter-spacing:.20em;
     color:var(--muted);margin:0 0 clamp(14px,1.8vh,22px);display:block}
-  .stop h1,.stop h2,.stop p,.stop .mark,.stop .eyebrow,.stop .wordmark{will-change:opacity,transform}
+  .stop h1,.stop h2,.stop p,.stop .mark,.stop .eyebrow,.stop .wordmark,.stop .apps{will-change:opacity,transform}
   /* Words ride up from behind their own edge. A block that simply fades in reads as a slide;
      a masked reveal reads as type being set. This is the reference's signature move. */
   .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 0 .06em}
@@ -130,6 +130,18 @@
   #c2{top:0;bottom:auto}
   /* the specimen runs into this column at full width, so this chapter takes a shorter measure */
   #c2 .col{grid-column:4 / span 9}
+  #c4 .col{grid-column:4 / span 9}
+  /* the structured right-hand block their chapters carry, holding the five applications */
+  .apps{grid-column:15 / span 9;align-self:end}
+  .apps-label{font-family:var(--util);font-size:11.5px;letter-spacing:.20em;color:var(--muted);
+    display:block;margin:0 0 14px}
+  .apps ol{list-style:none;margin:0;padding:0}
+  .apps li{display:flex;align-items:baseline;gap:14px;padding:11px 0;
+    border-top:1px solid rgba(120,150,175,.30);
+    font-size:clamp(14px,1.05vw,16px);color:var(--ink)}
+  .apps li:last-child{border-bottom:1px solid rgba(120,150,175,.30)}
+  .apps li span{font-family:var(--util);font-size:10.5px;letter-spacing:.14em;color:var(--muted)}
+  @media (max-width:900px){ .apps{grid-column:1 / -1;margin-top:28px} }
   #c3{top:0;bottom:auto}
   #c4{top:52%;transform:translateY(-50%)}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
@@ -229,7 +241,18 @@
   <h2>Proven first in <em>air</em>.</h2>
   <p>Installed in 441 facilities across 7 countries since 2020. The same material carries
      into water, protective wear, food packaging and medical devices.</p>
-  </div></div>
+    </div>
+  <aside class="apps">
+    <span class="apps-label">Five applications</span>
+    <ol>
+      <li><span>01</span> Air</li>
+      <li><span>02</span> Water</li>
+      <li><span>03</span> Protective wear</li>
+      <li><span>04</span> Food packaging</li>
+      <li><span>05</span> Medical devices</li>
+    </ol>
+  </aside>
+</div>
 </section>
 
 <span class="cue" id="cue">Scroll down &mdash; summit to a single particle</span>
@@ -365,6 +388,10 @@ function copyState(node, v, centred){
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
   node.style.transform = centred ? 'translateY(-50%) ' + t : t;
   var head = node.querySelector('h1,h2'), body = node.querySelector('p'), mark = node.querySelector('.mark'), eyeb = node.querySelector('.eyebrow');
+  var apps = node.querySelector('.apps');
+  if(apps){ var ao = clamp((v.o - 0.34)/0.66, 0, 1);
+            apps.style.opacity = ao;
+            apps.style.transform = 'translateY(' + ((1-ao)*22).toFixed(1) + 'px)'; }
   var word = node.querySelector('.wordmark');
   if(word){ var wo = clamp(v.o*1.4,0,1);
             word.style.opacity = wo;

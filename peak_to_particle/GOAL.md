@@ -333,6 +333,23 @@ collision that no measurement had ever caught. Chapter 2 now takes a shorter mea
 **The lesson, again:** stacking their screen above ours at the same size found in one minute
 what eleven passes of scoring never surfaced. It is the cheapest instrument here.
 
+## CHAPTER 4 GETS THEIR DENSITY — and the five applications come back
+Stacking chapter 4 (`vs_c4.png`) showed the next obvious gap. **Their chapter is a dense
+two-column block**: a display headline, prose on the left, and on the right a structured panel —
+tabs, a paragraph, a labelled row of five marks — using the full width. **Ours was a headline and
+two lines in a large field of empty blue.**
+
+Ours now carries the same structure: prose on columns 4–12, and a **structured right-hand panel
+on columns 15–23 listing the five applications** — Air, Water, Protective wear, Food packaging,
+Medical devices — numbered, on hairline rules, in the utility face.
+
+**That also repairs something I broke.** Yin's original brief put "the C-POLAR logo, what C-POLAR
+is, and the 5 applications" on the front page. When the hero was stripped to the wordmark to
+match theirs, the five applications were lost. They now live where their own structure puts a
+list like this — in the chapter's right column — rather than crowding the hero.
+
+The panel is staged like the rest of the copy: it arrives after the headline and paragraph.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -858,19 +875,20 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-1. **Keep stacking.** `vs_c2/c3/c4.png` are in this folder; regenerate them after every change
-   and fix whatever is obvious. That loop is now the primary method — the /10 gate is void and
-   measurement missed the dark/light register entirely.
-2. **Their page is 19.6 viewports; ours is 4.4.** Still the largest structural difference, and
-   still gated on the fact that adding stops measured worse twice. Length only helps if every
-   chapter carries an event.
-3. **Yin's two decisions**, unchanged: what "done" means now the 9/10 bar is void, and whether
-   we may license real imagery.
-4. **Scroll FPS** diagnosed, not fixable against this machine's meter — one look on real
-   hardware settles it.
+1. **Keep stacking — chapters 2 and 3 are next.** `vs_c2.png` and `vs_c3.png` are regenerated in
+   this folder. Chapter 4 was the thinnest and is now fixed; 2 and 3 still carry only a headline
+   and a paragraph against a full-bleed plate, where theirs carry a structured second element.
+   Candidates already in the project: the four studies behind the capture claim, or the loading
+   sequence, as a right-hand panel in the same form as the applications list.
+2. **Their page is 19.6 viewports; ours is 4.4.** Adding stops measured worse twice — but note
+   that chapter 4 just gained substance *without* gaining a stop. **Density per chapter, not more
+   chapters, is the way to close that gap.** That is a new and better read of the length problem.
+3. **Yin's two decisions**, unchanged: what "done" means now the 9/10 bar is void, and whether we
+   may license real imagery.
+4. **Scroll FPS** diagnosed, not fixable against this machine's meter.
 
-**Do not** retry: the WebGL specimen, more stops without events, seam or collision work, the
-hero plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap.
+**Do not** retry: the WebGL specimen, more stops without events, seam or collision work, the hero
+plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
