@@ -85,23 +85,21 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 7 / 5. Screen 3 has now scored 5 twice and 4 three times before that. Every
-incremental fix — bounded band, single contact point, trajectories, contact bloom, arrest,
-quietened foreground — has failed to move it. Codex keeps returning the same verdict:
-*"another technical explainer... no decisive visual payoff."*
+Sequence is 6 / 7 / 5.
 
-**Applying the rule at the bottom of this file, properly this time.** What is still painted
-on screen 3? The arriving particles and their trails. The deposit became real and the score
-moved 4 -> 5; the CONVERGENCE is still canvas dots over a photograph, and that is what keeps
-failing.
+Screen 3 is now ONE photograph — the whole composite (cloud plate, loaded mat, painted
+particles) was deleted and replaced with a single high-speed macro of soot hitting white
+fibre. Codex: climax now reads **partly** — *"it has impact, but reads more like an explosion
+or a stain than particles being captured. Reverse the motion cues: make particles visibly
+converge INWARD toward a dominant capture point; the current outward radial burst
+contradicts 'what pulls them in'."*
 
-In progress: generating the entire capture moment as ONE photograph — a high-speed macro of
-dark soot streaming down, converging on a single point of white charged fibre, motion-blurred
-on approach and stopped dead at contact. When it lands, screen 3 becomes that plate with at
-most a whisper of live motion over it, exactly as screen 2 became a real cloud photograph.
+That is exactly right and it is a semantic error, not a craft one: a spray hitting a surface
+radiates OUTWARD, which says the opposite of attraction. In progress: regenerating the plate
+with all motion streaks pointing INWARD from the frame edges toward a single dark clump —
+iron-filings-to-a-magnet, converging, nothing radiating away. Swap it in and re-gate.
 
-After screen 3 clears: screens 1 and 2 both sit at 6-7 and need the same thing — one element
-that decisively owns the frame.
+After that, screens 1 (6) and 2 (7) both still need one element that decisively owns the frame.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
