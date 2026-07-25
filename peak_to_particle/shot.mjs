@@ -14,7 +14,7 @@ for(const s of shots){
   await p.goto(`http://127.0.0.1:${port}/${page_}?shot=${s}`,{waitUntil:'load',timeout:60000});
   await p.waitForFunction('window.__ready!==undefined',{timeout:60000}).catch(()=>{});
   await p.waitForTimeout(4500);
-  const i=await p.evaluate(()=>({r:window.__ready,f:window.__fps,h:document.getElementById('hud').textContent}));
+  const i=await p.evaluate(()=>({r:window.__ready,f:window.__fps,h:(document.getElementById('hud')?document.getElementById('hud').textContent:'')}));
   await p.screenshot({path:`sc_${s}.png`});
   console.log(`  ${s.padEnd(6)} ready=${i.r} fps=${i.f||'-'} | ${i.h}`);
   if(errs.length) console.log(`     ERR: ${errs.slice(0,2).join(' || ')}`);

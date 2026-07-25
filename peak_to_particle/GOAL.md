@@ -29,7 +29,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **7.8** | authored peak v2; 3 gaps left to 9 |
+| 1 | Mountain — C-POLAR + 5 applications | **8.5** | composed page live; mountain hierarchy is the last gap |
 | 2 | Down into cloud — charged particles | — | not built |
 | 3 | NanoFlashing pulls them in — cloud clears | — | not built |
 | 4 | Clean sky — Air | — | not built |
@@ -40,7 +40,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | 9 | Earth from space | — | not built |
 | 10 | Contact | — | not built |
 
-Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → **7.8**.
+Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → 7.8 → 7.9 → **8.5** (page composed).
 
 ## What was learned (do not redo these)
 - **Public tile elevation dies at ~30 m.** Measured: detail per ground-metre FALLS with
@@ -55,15 +55,18 @@ Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → **7.8**.
 - Yin: *"use any mountain, or just use reference mountain, make our life simple"* — the peak
   does not have to be a real named Banff summit.
 
-## Codex's open gaps on screen 1 (from the 7.8 pass)
-CLOSED at 7.8: atmospheric integration — cloud now convincingly wraps and obscures the base.
-Still open:
-1. **Generic silhouette** → shift/crop the summit toward centre; simplify to ONE unmistakable
-   pyramidal form, a sculptural icon rather than a conventional alpine photograph.
-2. **Over-detailed rock texture** → reduce clarity and local contrast, especially on the
-   foreground faces; keep sharpness only near the summit.
-3. **Clouds read as horizontal layers** → contour-following wisps and partial face occlusion,
-   so mist moves THROUGH the mountain rather than across it.
+## Codex's open gaps on screen 1 (from the 8.5 pass, v4)
+LANDED so far: atmospheric integration · content no longer bottom-loaded · duplicated app
+list removed · nav/lockup separation · C-POLAR mark recoloured to #52677A (had to be done
+at the PIXEL level — a CSS filter cannot reach that target) · body copy in the same family.
+
+Still open — Codex: *"the remaining problem is primarily mountain hierarchy, not colour"*:
+1. Left content rail out to ~130-145px.
+2. Mountain another 5-8% smaller, or shifted slightly right and down.
+3. A broader mist veil through the MIDDLE-RIGHT, not only along the bottom, to break the
+   continuous ridge and face.
+4. Local clarity/contrast down another 10-15% on the darkest central and right-facing crags.
+
 
 ## NEXT ACTION
 Generate hero v3 against the three gaps above (centred pyramidal icon, softer foreground
