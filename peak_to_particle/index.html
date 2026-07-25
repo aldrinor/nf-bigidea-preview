@@ -4,12 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C-POLAR — peak to particle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
   :root{
     --rail: clamp(50px, 13.7vw, 300px);
     --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#4a545e; --accent:#1b7bff;
-    --display: clamp(28px, 3.45vw, 50px);
-    --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+    --display: clamp(30px, 3.85vw, 56px);
+    /* Two faces doing two different jobs, which is the structure the reference uses and the
+       one thing our type never had — it was the system default sans doing everything, and the
+       gate called it "generic sans-serif typography".
+       Space Grotesk is C-POLAR's own face. Space Mono carries the utility layer: on a page
+       built out of electron micrographs, monospaced labelling is the language of the
+       instrument, so it is ours by subject rather than by decoration. */
+    --stack:'Space Grotesk', -apple-system, system-ui, sans-serif;
+    --util:'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:auto}
@@ -44,25 +54,27 @@
   /* ---- chrome ---- */
   nav{position:fixed;z-index:6;left:var(--rail);top:clamp(46px,5.4vw,74px);
     display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
-  nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#333c45;
-    padding-bottom:6px;transition:color .2s}
+  nav a{font-family:var(--util);font-size:12.5px;letter-spacing:.04em;text-decoration:none;
+    color:#262d34;padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
 
   .stop{position:fixed;z-index:5;left:var(--rail);max-width:min(46ch,40vw);
     will-change:opacity,transform}
   #c1{top:52%;transform:translateY(-50%)}
-  #c2{bottom:clamp(112px,15vh,190px);max-width:min(38ch,32vw)}
-  #c3{top:50%;transform:translateY(-50%)}
+  #c2{top:0;bottom:auto;max-width:min(42ch,35vw)}
+  #c3{top:0;bottom:auto}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
   .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
-  h1,h2{font-size:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.015em;
-    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:19ch}
+  h1,h2{font-size:var(--display);font-weight:300;line-height:1.10;letter-spacing:-.022em;
+    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:23ch}
   #c3 h2{max-width:13ch}
   em{font-style:normal;color:var(--accent)}
-  p{font-size:clamp(17px,1.55vw,22px);line-height:1.55;color:#141719;margin:0;max-width:42ch}
+  p{font-size:clamp(17px,1.52vw,21px);line-height:1.58;font-weight:400;color:#12171b;
+    margin:0;max-width:42ch}
   .cue{position:fixed;z-index:6;left:var(--rail);bottom:clamp(40px,5vw,68px);
-    font-size:12.5px;letter-spacing:.055em;color:var(--muted);will-change:opacity}
+    font-family:var(--util);font-size:12px;letter-spacing:.04em;color:#3d464f;
+    will-change:opacity}
 
   @media (max-width:760px){
     nav{gap:14px}
@@ -197,6 +209,18 @@ function copyState(node, v, centred){
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
   node.style.transform = centred ? 'translateY(-50%) ' + t : t;
 }
+/* The two lower blocks are positioned FROM the specimen rather than from the page. The gate
+   asked three times to "compose the copy around the moving specimen instead of repeatedly
+   placing a standard left-aligned marketing block". They now ride with it, so the words and
+   the thing they describe stay on one optical line the whole way down. */
+function copyBesides(node, o, dy, targetY){
+  node.style.opacity = o;
+  if(o <= 0.004){ return; }
+  var h = node.offsetHeight || 320;
+  var top = clamp(targetY - h*0.52, innerHeight*0.17, innerHeight - h - innerHeight*0.09);
+  node.style.top = top.toFixed(1) + 'px';
+  node.style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+}
 
 function layout(){
   var p = P;
@@ -232,17 +256,18 @@ function layout(){
   el.front.style.opacity   = smooth(1.86, 2.22, p);
   el.front.style.transform = fTf;
 
-  // copy: each block rises in and lifts away, so the page reads as motion not as slides
-  copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
-  copyState(el.c2, { o: band(p, 0.66, 1.08, 1.30, 1.58), dy: (1 - p) * 62 }, false);
-  copyState(el.c3, { o: smooth(1.62, 2.04, p), dy: (2 - p) * 62 }, true);
-  el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
-
   var m = moteAt(p);
   el.mote.style.opacity = m.o;
   el.mote.style.width = m.w.toFixed(1) + 'px';
   el.mote.style.transform = 'translate(' + (m.x - m.w/2).toFixed(1) + 'px,' +
                             (m.y - m.w*MOTE_SRC.ar/2).toFixed(1) + 'px)';
+
+  // copy: each block rises in and lifts away, so the page reads as motion not as slides
+  copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
+  copyBesides(el.c2, band(p, 0.66, 1.08, 1.30, 1.58), (1 - p) * 62, m.y);
+  copyBesides(el.c3, smooth(1.62, 2.04, p),            (2 - p) * 62, m.y);
+  el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
+
 
 }
 

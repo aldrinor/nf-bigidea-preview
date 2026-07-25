@@ -50,12 +50,13 @@ both micro screens sharing one instrument **6.8**.
 There are now TWO instruments, and they measure different things. Report both.
 
 - **3-row strip** (three scroll positions, ref left / ours right) — comparable with every
-  earlier number in this file. Current: 6.3, 7.1, 7.1 → **6.8**. It has sat at 6.6–6.8 across
-  five builds.
+  earlier number in this file. Current: 6.6, 7.1, 7.1 → **6.9**, the best it has been.
 - **7-frame scroll strip** (`gate_scroll.png`, prompt `/tmp/gate_scroll.txt`) — seven
   consecutive frames of the descent, the only instrument that can judge continuity.
-  It was **5.0** two passes ago (*"reads as separate sticky slides"*), rose to **6.0** when the
-  cross-fades were replaced with real entrances, and is now **5.5, 5.5, 6.0 → 5.7**. Flat.
+  It was **5.0** three passes ago (*"reads as separate sticky slides"*), rose to **6.0** when
+  the cross-fades were replaced with real entrances, and now reads **4.5, 6.0, 6.2, 6.2 → 5.7**.
+  Note the 4.5: this instrument's spread is wider than the 3-row one, so it needs four samples,
+  not two.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -71,7 +72,7 @@ a number from a run whose output was partly truncated.
 | 2 | Down into cloud — the pollutant | **6.7** | |
 | 3 | NanoFlashing pulls them in | **6.9** | |
 
-Scroll continuity (7-frame instrument): **5.7**. Flat across the last two builds.
+Scroll continuity (7-frame instrument): **5.7**. Flat across the last three builds.
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -292,37 +293,56 @@ fixes are correct and should stay — they are visibly right, and the underlying
 real. But closing named seam complaints has now stopped buying points, which is the signal to
 change target. See NEXT ACTION.
 
+## A TYPE SYSTEM OF OUR OWN — 3-row 6.8 → 6.9, its best
+The page ran on the system default sans at one weight doing every job, which the gate called
+*"generic sans-serif typography"*. It now has two faces doing two jobs, the structure the
+reference uses:
+- **Space Grotesk Light** for display, large — C-POLAR's own face, with a real point of view
+  in its letterforms rather than a system default.
+- **Space Mono** for the whole utility layer — nav and cue. On a page built out of electron
+  micrographs, monospaced labelling is the language of the instrument, so it is ours by
+  subject rather than by decoration.
+Fonts load from Google Fonts, the same way every other page in this repo already does.
+
+**The copy now rides with the specimen.** Asked for three times: *"compose the copy around the
+moving specimen instead of repeatedly placing a standard left-aligned marketing block."* The
+two lower blocks are positioned from `moteAt(p).y`, clamped on screen, so the words and the
+thing they describe stay on one optical line the whole way down.
+
+Two changes were tested inside this pass and **reverted** — record them:
+- **Landing size raised 0.235 → 0.330 of viewport.** Meant to lock the silhouette against the
+  gate's *"looks like swapped renders"*. It made the particle straddle the fibre instead of
+  gripping it, and the scroll score fell 6.2 → 5.65. Back to 0.235.
+- **Stop-3 headline measure widened 13ch → 16ch.** Orphaned "in." on its own line. Back to 13ch.
+Kept from that same batch: nav 12.5px, cue 12px, body up to 21px and darker — the gate's
+*"the navigation is nearly invisible, the body copy is tiny"* is unambiguous and those stay.
+
 ## NEXT ACTION
-Current: 3-row 6.8 · scroll 5.7 · bar 9.
+Current: 3-row 6.9 · scroll 5.7 · bar 9.
 
-Seam work is done and it stopped paying. The judge's remaining complaint is now, every time,
-the same one, and it is the one thing on this page that has never been touched:
+The scroll gate's remaining note is the painted-versus-real lesson again, pointed at the one
+asset that has never been questioned — the filter mat:
 
-> *"Generic sans-serif typography, tiny permanent navigation, large empty white fields... it
-> gives it an AI-generated stock-page quality. Build a more distinctive typographic system,
-> use the micrograph at a more cinematic full-bleed scale, strengthen contrast, and compose
-> the copy around the moving specimen instead of repeatedly placing a standard left-aligned
-> marketing block."*
+> *"The spherical soot clumps, immaculate white fibres, pale background... introduce authentic
+> micrograph irregularity, fibre texture, depth of field, contact shadows and particulate
+> debris. The soot must visibly sit AMONG fibres, not appear composited over smooth tubes."*
 
-Every screen since the first day has been: nav top-left, headline left, paragraph under it.
-That layout was measured off the reference and it is not wrong — but it is also the single
-most template-like thing here, and it is now the only complaint left standing.
+`mat_clean.png` was generated to be perfectly clean so the travelling particle could be the
+only deposit. That worked, but it made the mat too perfect: smooth tubes on a flat pale ground,
+with no dirt, no grain and no depth. A real micrograph of used media has scattered fine debris,
+uneven fibre surfaces and shallow focus. A particle composited onto a flawless field will
+always look composited.
 
-1. **Build a typographic system of our own.** The current stack is the system default sans at
-   one weight. The reference runs a characterful display face at weight 300 with very wide
-   tracking against a plain utility face for labels — two faces doing two different jobs.
-   Ours does one job with one face. Choose a display face with a real point of view, pair it
-   with a plain utility face for the nav and cue, and set a scale that is ours rather than a
-   copy of the reference's proportions.
-
-2. **Compose the copy around the specimen, not beside it.** Asked for three times. The
-   specimen moves down the page on a known path (`moteAt(p)`); the copy could sit in relation
-   to it — above it early, tucked against the fibre at the end — instead of a fixed left block
-   on all three stops.
-
-3. **Do not** regenerate the hero plate, retry the hero crop, add a charge symbol, or do more
-   seam work. All measured dead ends or already done.
-
+1. **Regenerate the mat with authentic irregularity** — fibre surface texture, scattered fine
+   particulate debris away from the landing point, shallow depth of field so the back fibres
+   are soft, and a substrate that is not a flat wash. Keep it clean AT the landing point so the
+   travelling particle is still the only deposit there. Ask for the same instrument language
+   that has worked twice: greyscale, specimen darker than its ground.
+2. **Add a contact shadow under the landed particle** — a soft dark pool where it meets the
+   fibre. Named by the gate twice. Cheap: a radial-gradient div behind `#mote`, faded in with
+   the last stretch of the pull.
+3. **Do not** regenerate the hero plate, retry the hero crop, add a charge symbol, do more seam
+   work, or raise the landing size again. All measured dead ends.
 4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
 
 ## Where things are
