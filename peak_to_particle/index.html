@@ -130,6 +130,13 @@
   #c2{top:0;bottom:auto}
   /* the specimen runs into this column at full width, so this chapter takes a shorter measure */
   #c2 .col{grid-column:4 / span 9}
+  #c3 .col{grid-column:4 / span 10}
+  /* the scale panel carries a value rather than an index, so its first column is wider */
+  .apps.scale li span{min-width:106px}
+  /* on the micrograph chapters the subject owns the right half, so the panel stacks under the
+     prose instead of colliding with it. Chapter 4 keeps its right column - its plate is open. */
+  #c2 .apps{grid-column:4 / span 9;align-self:start;margin-top:30px}
+  #c3 .apps{grid-column:4 / span 10;align-self:start;margin-top:30px}
   #c4 .col{grid-column:4 / span 9}
   /* the structured right-hand block their chapters carry, holding the five applications */
   .apps{grid-column:15 / span 9;align-self:end}
@@ -222,7 +229,17 @@
   <h2>Most pollutants carry <em>a negative charge</em>.</h2>
   <p>The microbes and smoke in the air, the PFAS in water, the biofilm on a surface &mdash;
      completely different problems that mostly share one trait: a negative charge.</p>
-  </div></div>
+    </div>
+  <aside class="apps scale">
+    <span class="apps-label">Scale</span>
+    <ol>
+      <li><span>2 500 nm</span> PM 2.5</li>
+      <li><span>under 100 nm</span> Ultrafine particles</li>
+      <li><span>20&ndash;300 nm</span> Viruses</li>
+      <li><span>10&ndash;50 nm</span> Soot primary particles</li>
+    </ol>
+  </aside>
+</div>
 </section>
 
 <section class="stop" id="c3">
@@ -232,7 +249,15 @@
   <p>NanoFlashing&trade; is a patented permanent positive polarity (3P) technology,
      engineered into the material. It attracts and captures ultrafine particles, wildfire
      smoke, PFAS, and pollen through a physical mechanism.</p>
-  </div></div>
+    </div>
+  <aside class="apps">
+    <span class="apps-label">Peer-reviewed science</span>
+    <ol>
+      <li><span>31</span> Authors</li>
+      <li><span>16</span> Institutions</li>
+    </ol>
+  </aside>
+</div>
 </section>
 
 <section class="stop" id="c4">

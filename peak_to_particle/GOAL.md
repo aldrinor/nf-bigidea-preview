@@ -350,6 +350,26 @@ list like this — in the chapter's right column — rather than crowding the he
 
 The panel is staged like the rest of the copy: it arrives after the headline and paragraph.
 
+## ALL FOUR CHAPTERS NOW CARRY A SECOND ELEMENT
+Chapters 2 and 3 had a headline and a paragraph against a full-bleed plate; theirs each carry a
+structured second block. Both now do, and both add **new information rather than restating the
+paragraph** — which is what their panels do:
+
+- **02 The pollutant — a scale table.** PM 2.5 at 2 500 nm, ultrafine under 100 nm, viruses
+  20–300 nm, soot primary particles 10–50 nm. Textbook physical sizes, not product claims, and
+  they give the micrograph on screen a sense of magnitude it did not have.
+- **03 The capture — the peer review.** 31 authors, 16 institutions.
+  **The country count was deliberately left out.** The records carry a logged discrepancy
+  ("I3. Institution list discrepancy — 4 vs. 5"), and the phrase in circulation is "16
+  institutions across four countries". Until that is settled, only the two counts the records
+  agree on are used. **Do not add the country figure without resolving that note first.**
+- **04 Air — the five applications** (previous pass).
+
+**Placement differs by plate, and that is deliberate.** Chapter 4's sky is open, so its panel sits
+in the right column like theirs. On chapters 2 and 3 the specimen owns the right half — the
+scale table landed directly on top of it and was unreadable — so those panels stack under the
+prose instead. Same component, placed to suit the image.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -875,20 +895,19 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-1. **Keep stacking — chapters 2 and 3 are next.** `vs_c2.png` and `vs_c3.png` are regenerated in
-   this folder. Chapter 4 was the thinnest and is now fixed; 2 and 3 still carry only a headline
-   and a paragraph against a full-bleed plate, where theirs carry a structured second element.
-   Candidates already in the project: the four studies behind the capture claim, or the loading
-   sequence, as a right-hand panel in the same form as the applications list.
-2. **Their page is 19.6 viewports; ours is 4.4.** Adding stops measured worse twice — but note
-   that chapter 4 just gained substance *without* gaining a stop. **Density per chapter, not more
-   chapters, is the way to close that gap.** That is a new and better read of the length problem.
+1. **Keep stacking.** Regenerate `vs_c2/c3/c4.png` against the current build and fix the next
+   obvious thing. That loop has now found, in order: misalignment, an empty sky, a missing
+   chrome cluster, the dark/light register, a specimen sitting on top of a paragraph, and three
+   thin chapters. None of those ever appeared in a score.
+2. **Density, not length.** Their 19.6 viewports against our 4.4 is still the largest structural
+   gap, but the last two passes closed part of it *without adding a stop*. Adding stops measured
+   worse twice; adding substance to existing chapters has worked twice. Continue that way.
 3. **Yin's two decisions**, unchanged: what "done" means now the 9/10 bar is void, and whether we
    may license real imagery.
 4. **Scroll FPS** diagnosed, not fixable against this machine's meter.
 
-**Do not** retry: the WebGL specimen, more stops without events, seam or collision work, the hero
-plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap.
+**Do not** retry: the WebGL specimen, more stops, seam or collision work, the hero plate or crop,
+charge symbols, the mat video, the hero-zoom-to-still swap.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
