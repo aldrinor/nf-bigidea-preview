@@ -14,21 +14,21 @@
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
-  #plate{position:fixed;left:-3%;top:-3%;width:106%;height:106%;object-fit:cover;object-position:62% 50%;z-index:0;
+  #plate{position:fixed;left:-18%;top:-14%;width:150%;height:142%;object-fit:cover;object-position:44% 38%;z-index:0;
     filter:contrast(1.12) brightness(1.01);}
   /* one soft veil only, to seat the copy — never enough to flatten the photograph */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(240,244,248,.34) 0%, rgba(240,244,248,0) 14%);}
   /* readability comes from a LOCAL scrim behind the copy, never from draining the
      whole image — that is what bleached all three screens */
-  #scrim{position:fixed;left:0;top:0;width:min(40%,540px);height:100%;z-index:2;
+  #scrim{position:fixed;left:0;top:0;width:min(42%,580px);height:100%;z-index:2;
     pointer-events:none;
     background:linear-gradient(100deg, rgba(244,247,250,.94) 0%, rgba(244,247,250,.86) 30%,
       rgba(244,247,250,.55) 56%, rgba(244,247,250,.14) 80%, rgba(244,247,250,0) 100%);}
   @media (max-width:760px){ #scrim{width:100%;
     background:linear-gradient(180deg, rgba(244,247,250,.95) 0%, rgba(244,247,250,.80) 46%,
       rgba(244,247,250,.20) 74%, rgba(244,247,250,0) 100%);} }
-  #pull{position:fixed;inset:0;z-index:3;pointer-events:none}
+  #pull{position:fixed;inset:0;z-index:1;pointer-events:none}
   .chrome{position:fixed;inset:0;z-index:6;padding:clamp(52px,6.4vw,92px) var(--rail)}
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
@@ -95,13 +95,16 @@ function fit(){
   px.setTransform(dpr,0,0,dpr,0,0);
   CX=innerWidth*0.545; CY=innerHeight*0.50;              // the black core on the plate
   R0=Math.max(innerWidth,innerHeight)*0.62;
-  var n = innerWidth<760 ? 30 : 64;
+  var n = innerWidth<760 ? 38 : 86;
   P=[]; for(var i=0;i<n;i++) P.push(mk(Math.random()));
 }
 function mk(seed){
-  var a=Math.random()*Math.PI*2;
-  var r=R0*(0.55+Math.random()*0.55);
-  return { a:a, r:r, r0:r, v:0.16+Math.random()*0.20, w:1.1+Math.random()*3.0,
+  // directional approach: a broad arc from upper-left rather than a full circle, so the
+  // silhouette is not a symmetric starburst and the flow has an obvious origin
+  var base = -2.55;                                  // upper-left
+  var a = base + (Math.random()-0.5) * 2.5;          // ~143 degree fan, not 360
+  var r = R0*(0.62+Math.random()*0.55);
+  return { a:a, r:r, r0:r, v:0.15+Math.random()*0.20, w:1.0+Math.random()*3.2,
            k:0.55+Math.random()*0.5 };
 }
 fit(); addEventListener('resize', fit);
@@ -115,22 +118,26 @@ function loop(now){
     p.r -= (p.v*R0*dt) * (1.0 + 2.6*Math.pow(1-p.r/p.r0, 2.0));
     if(p.r < R0*0.035){ P[i]=mk(); continue; }
     var cx=CX+Math.cos(p.a)*p.r, cy=CY+Math.sin(p.a)*p.r*0.62;
-    // trail sits BEHIND (further out); taper it wide+faint -> tight+dark toward the core
-    var seg=10, len=R0*0.16*p.k;
+    // keep the convergence out of the copy column — text must stay clean
+    if(cx < innerWidth*0.40 && innerWidth > 760){ continue; }
+    // trails SHORTEN as they close, so the core is a destination, not a sunburst centre
+    var closeness = 1 - Math.min(1, p.r/p.r0);       // 0 far .. 1 at the core
+    var seg=10, len=R0*0.17*p.k*(1 - 0.82*closeness);
     for(var q=0;q<seg;q++){
       var f1=q/seg, f2=(q+1)/seg;                        // 0 leading edge .. 1 tail
       var ra=p.r+len*f1, rb=p.r+len*f2;
       var ax=CX+Math.cos(p.a)*ra, ay=CY+Math.sin(p.a)*ra*0.62;
       var bx=CX+Math.cos(p.a)*rb, by=CY+Math.sin(p.a)*rb*0.62;
       px.strokeStyle='rgba(18,24,32,1)';
-      px.globalAlpha=0.72*Math.pow(1-f1,2.2);            // dark at the front, fading back
+      px.globalAlpha=0.72*Math.pow(1-f1,2.2)*(1-0.75*closeness);   // trail thins as it lands
       px.lineWidth=Math.max(0.4, p.w*(0.35+1.5*(1-f1))); // tight at the front, wide behind
       px.lineCap='round';
       px.beginPath(); px.moveTo(ax,ay); px.lineTo(bx,by); px.stroke();
     }
     // the leading head
-    px.globalAlpha=0.92; px.fillStyle='rgba(12,18,26,1)';
-    px.beginPath(); px.arc(cx,cy,p.w*0.62,0,Math.PI*2); px.fill();
+    px.globalAlpha=0.55+0.42*(1-closeness);            // distinct out wide, merges at the core
+    px.fillStyle='rgba(12,18,26,1)';
+    px.beginPath(); px.arc(cx,cy,p.w*(0.50+0.55*(1-closeness)),0,Math.PI*2); px.fill();
   }
   px.globalAlpha=1;
   fr++; if(now-ws>=1000){ window.__fps=Math.round(fr*1000/(now-ws)); fr=0; ws=now; }
