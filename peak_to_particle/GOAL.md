@@ -41,9 +41,9 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
-| 2 | Down into cloud — charged particles | **5.0** | iterating — real cloud plate now |
-| 3 | NanoFlashing pulls them in — cloud clears | **3.0** | iterating — capture not yet a legible EVENT |
+| 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating — too pale/diffuse |
+| 2 | Down into cloud — charged particles | **5.0** | iterating — too pale/diffuse |
+| 3 | NanoFlashing pulls them in — cloud clears | **5.0** | iterating — capture band reads, still needs weight |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,22 +85,32 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence scores 6 / 5 / 3 (were 5 / 3 / 2). Screens 2 and 3 now read as DIFFERENT moments —
-that is fixed. Screen 3 is the lowest and is the next job.
+Sequence is 6 / 5 / 5 (from 5 / 3 / 2 when Yin rejected it). Screen 3 moved 3 -> 4 -> 5 by
+making capture a bounded, measurable event (dark-pixel density: 1.0% above the band, 11.0%
+on it, 0.1% below).
 
-Codex on screen 3: *"the particles remain a random overlay... show particles converging
-toward, contacting, and accumulating on individual FIBRES, with visibly cleaner space beyond
-them. Right now the fibre texture is merely a new background."*
+**Codex has now named ONE root cause for all three screens** — this is the next job and it
+is a single fix applied three times:
 
-Concretely, screen 3 needs:
-1. Particles must converge along visible **paths** — a legible flow into the material, not
-   scattered dots falling.
-2. They must **accumulate on individual fibres** — clumping at contact points, not resting on
-   a flat line.
-3. The air **beyond/above** the material must be visibly CLEANER than the air arriving —
-   a density gradient, so the eye reads before-and-after in one frame.
+> *"Lack of a dominant, sharply defined focal event. The reference builds the entire frame
+> around one monumental, high-detail peak and logo. Across yours, the mountain, cloud
+> particles, and capture layer remain pale, diffuse, and similarly weighted. Nothing
+> decisively owns each screen, so the sequence feels like three washed-out backgrounds with
+> text placed over them rather than three deliberately staged visual moments."*
 
-Then re-gate the SEQUENCE (never a single screen alone — see the gate-method flaw above).
+So for EACH screen, decide what OWNS the frame and make everything else recede:
+1. **Mountain** — the peak must be monumental and high-detail. It is currently small,
+   pale and bleached by veils. Fill the frame; restore contrast and detail on the rock.
+2. **Cloud** — one dominant billow mass, close and structured, not an even wash of vapour.
+3. **Capture** — the loaded fibre band must be the subject, close and sharp, not a thin
+   horizontal line in the lower third.
+
+The common error is the same each time: I have been REDUCING contrast to make text readable,
+and it has bleached every screen. Fix readability with placement and a local scrim, never by
+draining the whole image.
+
+Re-gate the SEQUENCE after.
+
 
 ## THE ONE LESSON THAT KEEPS REPEATING
 Every score jump in this project has come from replacing something PAINTED with something
