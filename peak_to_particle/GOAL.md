@@ -41,9 +41,9 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **5.0** | ❌ REOPENED — see gate-method flaw |
-| 2 | Down into cloud — charged particles | **3.0** | ❌ REOPENED — painted noise, not cloud |
-| 3 | NanoFlashing pulls them in — cloud clears | **2.0** | ❌ capture is not visible |
+| 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
+| 2 | Down into cloud — charged particles | **5.0** | iterating — real cloud plate now |
+| 3 | NanoFlashing pulls them in — cloud clears | **3.0** | iterating — capture not yet a legible EVENT |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,33 +85,31 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Screens 1 and 2 both PASSED. Build **stop 3 — NanoFlashing pulls the particles in and the
-cloud clears.** This is the signature moment of the whole page: the charged particles from
-stop 2 are drawn to the NanoFlashing mark and captured, and the vapour thins to clean air.
+Sequence scores 6 / 5 / 3 (were 5 / 3 / 2). Screens 2 and 3 now read as DIFFERENT moments —
+that is fixed. Screen 3 is the lowest and is the next job.
 
-Reuse from stop 2 (`stop2.html`): the baked-lobe cloud bodies, the sprite particles, the
-occlusion pass. Stop 3 is the same world with the particles now converging on a centre and
-the cloud density falling away.
+Codex on screen 3: *"the particles remain a random overlay... show particles converging
+toward, contacting, and accumulating on individual FIBRES, with visibly cleaner space beyond
+them. Right now the fibre texture is merely a new background."*
 
-Language rule: this is CAPTURE, not destroy — particles are attracted and held. Approved
-copy only.
+Concretely, screen 3 needs:
+1. Particles must converge along visible **paths** — a legible flow into the material, not
+   scattered dots falling.
+2. They must **accumulate on individual fibres** — clumping at contact points, not resting on
+   a flat line.
+3. The air **beyond/above** the material must be visibly CLEANER than the air arriving —
+   a density gradient, so the eye reads before-and-after in one frame.
 
-Then gate it the same way: render → stack under `scratchpad/montfort/shot_s1.png` →
-Codex → iterate to >= 9.
+Then re-gate the SEQUENCE (never a single screen alone — see the gate-method flaw above).
 
-## Screen 2 — how it got from 4.6 to 9.1 (banked technique)
-Eleven passes. What actually moved the number:
-- Per-frame fBm across the viewport = ~1M noise calls, 10 fps. **Bake fields once, then draw.**
-- `canvas filter:blur()` per particle = 187 offscreen passes/frame. **Use pre-baked sprites.**
-- A domain-warped noise field reads as **satin or water**, not cloud. Build masses from many
-  overlapping ROUND lobes instead.
-- Baked tiles clip at their border and cut straight lines. **Fade density to zero at the edge.**
-- Depth needs THREE explicit lobe scales, not just blur and opacity.
-- The lavender cast came from blue staying high while red/green fell. Pull all three down
-  together; let blue lead only in deep shadow.
-- The last 0.8 came entirely from a **high-frequency curdle in the density transition band** —
-  sharp cauliflower detail at the boundary, smooth interior. It has to be strong (~1.5
-  amplitude) and the alpha curve steep, or it is suppressed before it reaches the screen.
+## THE ONE LESSON THAT KEEPS REPEATING
+Every score jump in this project has come from replacing something PAINTED with something
+REAL, never from more shader work:
+- screen 1: procedural terrain 5.8 → authored photoreal peak 7.0
+- screen 2: painted noise 3.0 → real cloud photograph 5.0
+- screen 3: abstract capture 2.0 → real charged fibre media 3.0
+When a screen is stuck, the question is not "what parameter do I tune" but "what part of
+this is fake, and what real thing replaces it".
 
 
 ## Where things are
