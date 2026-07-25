@@ -1,0 +1,10 @@
+node_modules/
+package*.json
+terrain/banff_dem.npy
+terrain/out/banff_terrain.glb
+terrain/out/banff_normal.png
+terrain/out/banff_height.png
+terrain/out/dem_small.npy
+shot_*.png
+cmp_*.png
+_*.mjs
