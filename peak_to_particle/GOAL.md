@@ -97,6 +97,26 @@ anyone may use. So: same libraries, same pattern, our own assets and words.
 **Copy is staged now, not slabbed.** The headline arrives first and the paragraph follows a beat
 later, each rising as it comes. A block that fades in one piece reads as a slide.
 
+## SIGNATURE MOTION ADDED — masked word reveals and a load entrance
+The engine gave the page weight; this gives it craft. Both verified live, not assumed
+(`check_reveal.mjs`).
+
+- **Masked word reveals.** Every headline is split into words at runtime, each in its own
+  overflow-hidden mask, and the words ride up from behind their own edge with a left-to-right
+  stagger. The accent colour survives the split. Measured: 8 words, each starting 63 px below
+  its mask; at 420 ms the first word has travelled to 39 px while the last is still at 63 px —
+  the stagger is real — and all are seated by 900 ms. No page errors.
+- **A page-load entrance.** `INTRO` ramps 0 → 1 over 1.25 s on open and multiplies the hero's
+  reveal, so the page sets itself rather than simply being there. It multiplies rather than
+  replaces the scroll-driven value, so it never fights the scroll.
+- The render harness sets `INTRO = 1` and skips it, because a screenshot needs the resting
+  state.
+
+**A/B of the engine build against the pre-engine build, both column orders: EQUAL.** That is
+the correct answer and worth understanding — inertia, snap and a load entrance cannot appear in
+a still frame. **Motion work must be verified by measuring the running page, not by the A/B.**
+The A/B is for composition, typography and asset quality only.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -622,22 +642,26 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-**Take the calibration result to Yin. The objective as written is not achievable and the page
-is in better shape than eleven passes of scores suggested.**
+The scroll engine and the motion craft are in and measured. Two things remain.
 
-Two questions only he can answer:
-1. **What is "done" now?** "9/10 by Codex" is void — the reference itself scores 4. Options:
-   his own review; an A/B against the current live site; or a small panel of A/B comparisons.
-2. **May we license real imagery?** Still the one untried fidelity lever (see the ledger above).
-   Less urgent now that the scoreboard is known to be broken, but still the biggest remaining
-   quality question.
+1. **The third pillar: WebGL, but not for the mountain.** The reference leans on three.js
+   heavily. Our own ledger says built terrain LOST to authored photography (5.8 vs 7.0), so the
+   hero is not the place. The honest place is the **specimen**: a true 3D object with real
+   lighting and parallax instead of a video of a flat picture. That is exactly the criticism
+   that survived every asset pass — *"flat", "composited", "looks like swapped renders"*.
+   It is the last untried structural lever and it needs a full pass.
+2. **Yin still owns two decisions** (see the calibration section above): what "done" means now
+   that the 9/10 bar is void, and whether we may license real imagery.
 
-Meanwhile, if a session must build:
-- **Re-run the A/B whenever the build changes**, both orders, and record the verdict and margin
-  instead of a score. That is now the only trustworthy signal in this project.
-- **Do not** resume the ruled-out list (more stops, layout breaks, seam work, hero plate/crop,
-  charge symbols, the mat video). Those were all measured on the broken instrument, but three of
-  them were also visibly wrong, so leave them alone.
+**Verification rules from here:**
+- **Motion** → measure the running page (`check_engine.mjs`, `check_reveal.mjs`). Never judge
+  motion from stills.
+- **Composition, type, assets** → `gate_ab_prompt.txt`, both column orders, keep only the
+  verdict that survives the swap.
+- **Never** an absolute /10 from this judge. It scores mont-fort itself at 4.
+
+**Do not** resume: more stops, layout breaks, seam or collision work, the hero plate or crop,
+charge symbols, the mat video. All measured, all documented above.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)

@@ -74,6 +74,10 @@
   .stop{position:fixed;z-index:5;left:var(--rail);max-width:min(46ch,40vw);
     will-change:transform}
   .stop h1,.stop h2,.stop p,.stop .mark{will-change:opacity,transform}
+  /* Words ride up from behind their own edge. A block that simply fades in reads as a slide;
+     a masked reveal reads as type being set. This is the reference's signature move. */
+  .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 0 .06em}
+  .w > i{display:inline-block;font-style:inherit;color:inherit;will-change:transform,opacity}
   #c1{top:52%;transform:translateY(-50%)}
   #c2{top:0;bottom:auto;max-width:min(42ch,35vw)}
   #c3{top:0;bottom:auto}
@@ -233,6 +237,27 @@ function moteAt(p){
   };
 }
 
+/* split every headline into words, each in its own mask, keeping the accent colour */
+function splitWords(node){
+  if(!node || node.dataset.split) return;
+  var out = document.createDocumentFragment();
+  function emit(text, em){
+    text.split(/(\s+)/).forEach(function(tok){
+      if(!tok) return;
+      if(/^\s+$/.test(tok)){ out.appendChild(document.createTextNode(' ')); return; }
+      var w = document.createElement('span'); w.className = 'w';
+      var i = document.createElement('i'); i.textContent = tok;
+      if(em) i.style.color = 'var(--accent)';
+      w.appendChild(i); out.appendChild(w);
+    });
+  }
+  Array.prototype.slice.call(node.childNodes).forEach(function(n){
+    if(n.nodeType === 3) emit(n.textContent, false);
+    else emit(n.textContent, n.tagName === 'EM');
+  });
+  node.innerHTML = ''; node.appendChild(out); node.dataset.split = '1';
+}
+
 var el = {
   peak:  document.getElementById('pl_peak'),
   smoke: document.getElementById('pl_smoke'),
@@ -257,13 +282,22 @@ function copyState(node, v, centred){
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
   node.style.transform = centred ? 'translateY(-50%) ' + t : t;
   var head = node.querySelector('h1,h2'), body = node.querySelector('p'), mark = node.querySelector('.mark');
-  var o = v.o;
+  var o = v.o * INTRO;
   var lead = clamp(o*1.35, 0, 1);               // headline leads
-  var trail = clamp((o - 0.22)/0.78, 0, 1);     // paragraph follows
-  if(mark){ mark.style.opacity = clamp(o*1.5,0,1);
-            mark.style.transform = 'translateY(' + ((1-clamp(o*1.5,0,1))*14).toFixed(1) + 'px)'; }
-  if(head){ head.style.opacity = lead;
-            head.style.transform = 'translateY(' + ((1-lead)*20).toFixed(1) + 'px)'; }
+  var trail = clamp((o - 0.26)/0.74, 0, 1);     // paragraph follows a beat later
+  if(mark){ var mo = clamp(o*1.6,0,1);
+            mark.style.opacity = mo; mark.style.transform = 'translateY(' + ((1-mo)*14).toFixed(1) + 'px)'; }
+  if(head){
+    head.style.opacity = 1;
+    var words = head.querySelectorAll('.w > i'), n = words.length || 1;
+    for(var k=0;k<words.length;k++){
+      // each word starts a little after the one before it, so the line builds left to right
+      var wp = clamp((lead - (k/n)*0.42) / 0.58, 0, 1);
+      var e  = wp*wp*(3-2*wp);
+      words[k].style.transform = 'translateY(' + ((1-e)*104).toFixed(1) + '%)';
+      words[k].style.opacity = (0.15 + 0.85*e).toFixed(3);
+    }
+  }
   if(body){ body.style.opacity = trail;
             body.style.transform = 'translateY(' + ((1-trail)*26).toFixed(1) + 'px)'; }
 }
@@ -370,7 +404,20 @@ addEventListener('scroll', onScroll, {passive:true});
    ScrollTrigger adds the settle: the four stops are snap points, so the page comes to
    rest ON a stop instead of anywhere. The render harness turns both off, because a
    screenshot needs an exact scroll position, not an easing one. */
+/* the page sets itself when it opens: the hero words ride up rather than being there already */
+var INTRO = 1;
 var PARKED_SHOT = new URLSearchParams(location.search).has('p');
+if(!PARKED_SHOT && !reduced){
+  INTRO = 0;
+  var introStart = 0;
+  requestAnimationFrame(function step(now){
+    if(!introStart) introStart = now;
+    var t = clamp((now - introStart - 160) / 1250, 0, 1);
+    INTRO = t*t*(3-2*t);
+    layout();
+    if(t < 1) requestAnimationFrame(step);
+  });
+}
 if(!PARKED_SHOT && !reduced && window.Lenis && window.gsap && window.ScrollTrigger){
   gsap.registerPlugin(ScrollTrigger);
   var lenis = new Lenis({
@@ -397,6 +444,9 @@ function frame(now){
   if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }
   requestAnimationFrame(frame);
 }
+['c1','c2','c3','c4'].forEach(function(id){
+  var n = document.getElementById(id); if(n) splitWords(n.querySelector('h1,h2'));
+});
 onScroll();
 if(!reduced) requestAnimationFrame(frame);
 
