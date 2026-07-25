@@ -14,7 +14,7 @@
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
-  #plate{position:fixed;left:-3%;top:-3%;width:106%;height:106%;object-fit:cover;z-index:0;
+  #plate{position:fixed;left:-3%;top:-3%;width:106%;height:106%;object-fit:cover;object-position:62% 50%;z-index:0;
     filter:contrast(1.12) brightness(1.01);}
   /* one soft veil only, to seat the copy — never enough to flatten the photograph */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -44,10 +44,10 @@
   p{font-size:clamp(16px,1.5vw,19px);line-height:1.55;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
     font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
-  #mark{position:fixed;z-index:5;left:76%;top:80%;transform:translate(-50%,-50%);
+  #mark{position:fixed;z-index:5;left:26%;top:83%;transform:translate(-50%,-50%);
     width:clamp(190px,21vw,330px);height:auto;opacity:.95;pointer-events:none;
     filter:drop-shadow(0 0 40px rgba(255,255,255,.95))}
-  @media (max-width:760px){ #mark{width:52vw;left:50%;top:88%} }
+  @media (max-width:760px){ #mark{width:52vw;left:50%;top:90%} }
   @media (max-width:760px){
     nav{gap:14px} .lockup{max-width:none;right:var(--rail);top:52%}
     #veil{background:linear-gradient(180deg, rgba(238,242,246,.94) 0%, rgba(238,242,246,.55) 46%, rgba(238,242,246,0) 72%)}
@@ -56,7 +56,7 @@
 </style>
 </head>
 <body>
-<img id="plate" src="./hero_img/impact.png" alt="Black airborne soot converging and stopping dead on a white charged filter fibre.">
+<img id="plate" src="./hero_img/converge.png" alt="Black soot drawn inward from every direction and held at a single point on white charged fibre.">
 
 <div id="veil"></div>
 <div id="scrim"></div>
