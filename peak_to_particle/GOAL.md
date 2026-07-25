@@ -30,7 +30,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **9.1** | ✅ PASSED the gate |
-| 2 | Down into cloud — charged particles | — | not built |
+| 2 | Down into cloud — charged particles | **~5** | built, iterating — cloud volume is the blocker |
 | 3 | NanoFlashing pulls them in — cloud clears | — | not built |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
@@ -73,12 +73,23 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Screen 1 is done. Build **stop 2 — the descent into cloud**: the camera falls from the peak
-into the cloud layer, and charged pollutant particles become visible drifting in it. Then
-gate it the same way (render → stack under the reference → Codex → iterate to >= 9).
+Screen 2 (`stop2.html`) is built and iterating. Codex 4.6 on the first pass; three rebuilds
+since. Still below 9. **The blocker is cloud VOLUME, nothing else.**
 
-Content for stop 2 comes from the existing approved copy: pollutants carry a negative charge.
-Capture language only. No new claims.
+Codex's standing diagnosis, in its words: the layers "collapse into a luminous, surface-like
+diagonal object" — the next pass must solve *material identity, physical separation and depth*,
+not add more texture. Specifically:
+- The three bodies must not share one halo. Separate them physically — different sizes,
+  clearly different opacities, one genuinely behind another with visible overlap.
+- Interiors cooler and darker blue-grey; warm near-white ONLY on exposed rims.
+- Truly clear air: rightmost 30-35% between y=22-58% should be near-empty grain.
+- Exactly ~8 minus marks in TWO arcs (4-5 upper-left→centre, 3-4 centre→lower-right).
+- Raise nav and copy contrast — they currently read as disabled, not atmospheric.
+
+Performance is solved and must not regress: 60 fps. Two lessons banked —
+(a) canvas `filter:blur()` per particle cost 187 offscreen passes/frame and pinned it at
+10 fps; use pre-baked sprites. (b) per-frame fBm over the viewport (~1M noise calls) is far
+too slow; bake fields once, then draw them.
 
 
 ## Where things are

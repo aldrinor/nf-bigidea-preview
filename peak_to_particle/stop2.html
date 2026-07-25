@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peak to Particle — inside the cloud</title>
+<style>
+  :root{
+    --rail: clamp(50px, 13.7vw, 300px);          /* measured off the reference */
+    --ink:#52677A; --soft:#6b8093; --faint:#93a2ae;
+    --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#e2eaf1;
+    font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
+  /* deep inside the cloud: no horizon, no mountain — only drifting vapour */
+  #cloud{position:fixed;inset:0;z-index:0}
+  /* tonal range: warm near-white where the light comes from, a restrained darker
+     blue-grey recess opposite it — the reference gets volume from local contrast */
+  #grade{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:
+      radial-gradient(85% 70% at 22% 18%, rgba(255,254,252,.62) 0%, rgba(255,254,252,0) 60%),
+      radial-gradient(95% 85% at 82% 78%, rgba(176,193,210,.42) 0%, rgba(176,193,210,0) 62%),
+      linear-gradient(160deg, rgba(255,255,255,.24) 0%, rgba(196,211,225,.30) 100%);}
+  #dust{position:fixed;inset:0;z-index:2;pointer-events:none}
+  /* a second vapour pass ABOVE the text, so cloud drifts in front of the content */
+  #fore{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:.95}
+  .chrome{position:fixed;inset:0;z-index:3;text-shadow:0 0 22px rgba(240,246,251,.85);
+    padding:clamp(52px,6.4vw,92px) var(--rail)}
+  nav{display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
+  nav a{font-size:12px;letter-spacing:.085em;text-decoration:none;color:var(--faint);
+    padding-bottom:7px;transition:color .2s}
+  nav a:hover{color:var(--soft)}
+  nav a.on{color:var(--ink);border-bottom:1px solid #b9c6d1}
+  .lockup{position:absolute;left:var(--rail);top:58%;transform:translateY(-50%);
+    max-width:min(32ch,44vw)}
+  h2{font-size:clamp(22px,2.35vw,34px);font-weight:400;line-height:1.42;letter-spacing:-.014em;
+    color:var(--ink);margin:0 0 clamp(14px,1.8vh,22px)}
+  h2 em{font-style:normal;color:var(--soft)}
+  p{font-size:clamp(14px,1.08vw,16.5px);line-height:1.72;color:var(--soft);margin:0;max-width:44ch}
+  .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
+    font-size:11.5px;letter-spacing:.14em;color:var(--faint)}
+  @media (max-width:760px){
+    nav{gap:14px} h2{font-size:clamp(20px,5.6vw,27px)} .lockup{max-width:none;right:var(--rail)}
+  }
+  @media (prefers-reduced-motion:reduce){ #dust,#fore{display:none} }
+</style>
+</head>
+<body>
+<canvas id="cloud"></canvas>
+<div id="grade"></div>
+<canvas id="dust"></canvas>
+
+<canvas id="fore"></canvas>
+
+<div class="chrome">
+  <nav aria-label="Applications">
+    <a class="on" href="#">C-POLAR</a>
+    <a href="#">Air</a><a href="#">Water</a><a href="#">Protective Wear</a>
+    <a href="#">Food Packaging</a><a href="#">Medical Devices</a>
+  </nav>
+  <div class="lockup">
+    <h2>Most pollutants carry <em>a negative charge</em>.</h2>
+    <p>The microbes and smoke in the air, the PFAS in water, the biofilm on a surface —
+       completely different problems that mostly share one trait.</p>
+  </div>
+  <span class="cue">KEEP DESCENDING</span>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Inside the cloud. Two layers:
+   A) #cloud — slow-rolling vapour, fBm sampled at low resolution and upscaled.
+      No horizon and no terrain, so the viewer reads as being INSIDE it.
+   B) #dust  — the pollutant particles. Each carries a faint negative mark.
+      Drawn small, sparse and unhurried; the charge is legible but never loud.
+   --------------------------------------------------------------------------- */
+const P = new Uint8Array(512);
+for (let i=0;i<256;i++) P[i]=P[i+256]=(Math.random()*256)|0;
+const fade=t=>t*t*t*(t*(t*6-15)+10), lerp=(a,b,t)=>a+t*(b-a);
+const grad=(h,x,y)=>((h&1)?x:-x)+((h&2)?y:-y);
+function noise2(x,y){
+  const X=Math.floor(x)&255, Y=Math.floor(y)&255;
+  x-=Math.floor(x); y-=Math.floor(y);
+  const u=fade(x), v=fade(y), A=P[X]+Y, B=P[X+1]+Y;
+  return lerp(lerp(grad(P[A],x,y), grad(P[B],x-1,y), u),
+              lerp(grad(P[A+1],x,y-1), grad(P[B+1],x-1,y-1), u), v);
+}
+function fbm(x,y,oct){ let s=0,a=0.5; for(let i=0;i<oct;i++){ s+=a*noise2(x,y); x*=2.03; y*=2.03; a*=0.5; } return s; }
+
+/* ---- A. vapour: BAKED tiles, drifted per frame ----------------------------
+   Computing three fBm fields per frame cost ~1M noise calls and ran at 10 fps.
+   Instead each layer is baked ONCE into a seamlessly-tiling offscreen canvas and
+   then scrolled at its own speed. Same volume and torn edges, ~free per frame. */
+function bakeLayer(size, freq, oct, warp, gamma, cut, gain, opts){
+  opts = opts || {};
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  const g=c.getContext('2d'), im=g.createImageData(size,size), d=im.data;
+  const TAU=Math.PI*2;
+  // sample the field twice at a small offset so we can read its GRADIENT — the edge of a
+  // cloud body. Bright scattering goes on the lit edge, a darker recess in the core.
+  const dens = new Float32Array(size*size);
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const u=x/size, v=y/size;
+    const sx=Math.cos(u*TAU)*freq, sy=Math.sin(u*TAU)*freq;
+    const tx=Math.cos(v*TAU)*freq, ty=Math.sin(v*TAU)*freq;
+    const wx = warp ? fbm(sx*0.7+tx*0.7, sy*0.7+ty*0.7, 3)*warp : 0;
+    let n = fbm(sx+wx, sy+wx, oct)*0.35 + fbm(tx+wx, ty+wx, oct)*0.35 + 0.5;
+    let a = (Math.pow(Math.max(n,0), gamma) - cut) * gain;
+    dens[y*size+x] = a>0 ? Math.min(a,1) : 0;
+  }
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const i0=y*size+x, a=dens[i0];
+    if(a<=0.002){ d[i0*4+3]=0; continue; }
+    // gradient toward the light (upper-left) marks the scattering rim
+    const xm=(x-3+size)%size, ym=(y-3+size)%size;
+    const rim = Math.max(0, a - dens[ym*size+xm]);
+    const core = Math.max(0, a - rim*3.0);
+    const lift = Math.min(1, rim*4.2);                 // 0 interior .. 1 lit edge
+    const i=i0*4;
+    // interior sits COOLER and slightly darker; edge goes warm near-white
+    d[i]   = 236 + 19*lift + 6*core*(opts.warm||0);
+    d[i+1] = 241 + 14*lift;
+    d[i+2] = 248 +  7*lift;
+    d[i+3] = (Math.min(1, a*(opts.boost||1))*255)|0;
+  }
+  g.putImageData(im,0,0);
+  return c;
+}
+const cc = document.getElementById('cloud'), cx = cc.getContext('2d');
+let CW,CH;
+function sizeCloud(){
+  const dpr=Math.min(devicePixelRatio||1,1.5);
+  CW=Math.floor(innerWidth*dpr); CH=Math.floor(innerHeight*dpr);
+  cc.width=CW; cc.height=CH; cc.style.width=innerWidth+'px'; cc.style.height=innerHeight+'px';
+  cx.setTransform(dpr,0,0,dpr,0,0);
+}
+/* ---- C. foreground vapour (above the content), also baked ---- */
+const fc = document.getElementById('fore'), fx2 = fc.getContext('2d');
+let FW,FH;
+function sizeFore(){
+  const dpr=Math.min(devicePixelRatio||1,1.5);
+  FW=Math.floor(innerWidth*dpr); FH=Math.floor(innerHeight*dpr);
+  fc.width=FW; fc.height=FH; fc.style.width=innerWidth+'px'; fc.style.height=innerHeight+'px';
+  fx2.setTransform(dpr,0,0,dpr,0,0);
+}
+
+/* ---- B. charged particles ---- */
+const dc = document.getElementById('dust'), dx = dc.getContext('2d');
+let DW,DH, parts=[];
+function sizeDust(){
+  const dpr=Math.min(devicePixelRatio||1, 2);
+  DW=Math.floor(innerWidth*dpr); DH=Math.floor(innerHeight*dpr);
+  dc.width=DW; dc.height=DH; dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
+  dx.setTransform(dpr,0,0,dpr,0,0);
+  const target = innerWidth<760 ? 30 : 62;
+  parts = Array.from({length:target}, () => spawn(true));
+}
+/* Soft particle sprites, baked once. canvas filter:blur() per particle was costing
+   ~187 offscreen passes per frame and pinned the page at 10 fps. */
+const SPRITES = (()=>{
+  const out=[];
+  for(let i=0;i<6;i++){
+    const soft=i/5;                       // 0 crisp .. 1 very soft
+    const R=Math.round(10+soft*22), S=R*2;
+    const c=document.createElement('canvas'); c.width=c.height=S;
+    const g=c.getContext('2d');
+    const grd=g.createRadialGradient(R,R,0,R,R,R);
+    const core=Math.max(0.05, 0.42-soft*0.36);
+    grd.addColorStop(0,'rgba(70,88,106,1)');
+    grd.addColorStop(core,'rgba(70,88,106,0.92)');
+    grd.addColorStop(1,'rgba(70,88,106,0)');
+    g.fillStyle=grd; g.beginPath(); g.arc(R,R,R,0,Math.PI*2); g.fill();
+    out.push(c);
+  }
+  return out;
+})();
+
+/* clusters: real airborne dust arrives in drifts, not an even sprinkle */
+// stratified so drifts cover the frame instead of clumping by luck
+const CLUSTERS = (()=>{ const out=[];
+  // two currents only: upper-centre and lower-right. Middle-right and lower-left stay empty.
+  out.push({ cx:0.46, cy:0.22, r:0.17 });
+  out.push({ cx:0.72, cy:0.74, r:0.19 });
+  return out; })();
+function spawn(anywhere){
+  const depth = Math.pow(Math.random(), 0.7);      // 0 far .. 1 near, biased to depth
+  const useCluster = Math.random() < 0.94;   // strong drifts, large empty space
+  let x, y;
+  if(useCluster){
+    const c = CLUSTERS[(Math.random()*CLUSTERS.length)|0];
+    const ang = Math.random()*Math.PI*2, rad = Math.pow(Math.random(),0.6)*c.r;
+    x = (c.cx + Math.cos(ang)*rad) * innerWidth;
+    y = (c.cy + Math.sin(ang)*rad) * innerHeight;
+  } else {
+    x = Math.random()*innerWidth; y = Math.random()*innerHeight;
+  }
+  if(!anywhere) y = -40 - Math.random()*120;
+  return {
+    x, y,
+    r: 0.35 + Math.pow(depth,3.6)*9.5,   // far field tiny, a handful genuinely large                      // near ones markedly larger
+    vy: 3 + depth*22,
+    drift: (Math.random()-0.5)*16,
+    ph: Math.random()*Math.PI*2,
+    a: 0.022 + Math.pow(depth,2.0)*0.36,
+    blur: (1-depth)*3.4,                           // far ones genuinely out of focus
+    depth,
+  };
+}
+// bake once: three vapour layers + one foreground layer
+/* Three placed cloud BODIES, not a tiling wash. Each is baked once as an irregular
+   blob with a blue-grey core and a warm near-white scattering rim, then drifted slowly.
+   Between them the background shows through as genuine negative space. */
+function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  const g=c.getContext('2d'), im=g.createImageData(size,size), d=im.data;
+  const dens=new Float32Array(size*size);
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const u=(x/size-0.5)*2, v=(y/size-0.5)*2;
+    const wx = fbm(u*freq*0.6+11.3, v*freq*0.6+4.1, 3)*warp;
+    let n = fbm(u*freq+wx, v*freq+wx, oct)*0.5+0.5;
+    // radial falloff makes it a BODY with a silhouette, not an infinite field
+    const r = Math.sqrt(u*u+v*v);
+    const shape = 1.0 - Math.min(1, Math.pow(r/0.95, 1.7));
+    let a = (n*shape - cut) * gain;
+    dens[y*size+x] = a>0 ? Math.min(a,1) : 0;
+  }
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const i0=y*size+x, a=dens[i0];
+    if(a<=0.003){ d[i0*4+3]=0; continue; }
+    const xm=(x-4+size)%size, ym=(y-4+size)%size;
+    const rim=Math.max(0, a-dens[ym*size+xm]);
+    const lit=Math.min(1, rim*5.0);            // 0 deep interior .. 1 lit edge
+    const deep=Math.max(0, 1-a*1.6);           // how buried this pixel is
+    const i=i0*4;
+    // interior: blue-grey and darker.  edge: warm near-white scattering.
+    d[i]   = 196 + 58*lit - coreDark*34*(1-lit);
+    d[i+1] = 208 + 46*lit - coreDark*26*(1-lit);
+    d[i+2] = 222 + 32*lit - coreDark*12*(1-lit);
+    d[i+3] = (Math.min(1, a*1.15)*255)|0;
+  }
+  g.putImageData(im,0,0); return c;
+}
+// upper-left overhang · central diagonal veil · lower-right bank
+const BODIES = [
+  { tile: bakeBody(320, 2.1, 5, 1.30, 0.26, 2.9, 1.0), x:0.06, y:-0.12, w:0.86, h:0.90, vx: 0.0035, vy: 0.0020, alpha:0.96 },
+  { tile: bakeBody(288, 2.8, 4, 1.55, 0.30, 2.7, 0.6), x:0.24, y: 0.30, w:1.04, h:0.62, vx:-0.0052, vy:-0.0016, alpha:0.72 },
+  { tile: bakeBody(320, 1.9, 5, 1.15, 0.24, 3.1, 1.0), x:0.46, y: 0.44, w:0.98, h:0.86, vx: 0.0028, vy:-0.0030, alpha:0.92 },
+];
+const LAYERS = [];
+const FORE = { tile: bakeBody(288, 1.6, 4, 1.70, 0.34, 3.0, 0.3), alpha:0.62 };
+
+sizeCloud(); sizeDust(); sizeFore();
+addEventListener('resize', ()=>{ // bake once: three vapour layers + one foreground layer
+/* Three placed cloud BODIES, not a tiling wash. Each is baked once as an irregular
+   blob with a blue-grey core and a warm near-white scattering rim, then drifted slowly.
+   Between them the background shows through as genuine negative space. */
+function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  const g=c.getContext('2d'), im=g.createImageData(size,size), d=im.data;
+  const dens=new Float32Array(size*size);
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const u=(x/size-0.5)*2, v=(y/size-0.5)*2;
+    const wx = fbm(u*freq*0.6+11.3, v*freq*0.6+4.1, 3)*warp;
+    let n = fbm(u*freq+wx, v*freq+wx, oct)*0.5+0.5;
+    // radial falloff makes it a BODY with a silhouette, not an infinite field
+    const r = Math.sqrt(u*u+v*v);
+    const shape = 1.0 - Math.min(1, Math.pow(r/0.95, 1.7));
+    let a = (n*shape - cut) * gain;
+    dens[y*size+x] = a>0 ? Math.min(a,1) : 0;
+  }
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const i0=y*size+x, a=dens[i0];
+    if(a<=0.003){ d[i0*4+3]=0; continue; }
+    const xm=(x-4+size)%size, ym=(y-4+size)%size;
+    const rim=Math.max(0, a-dens[ym*size+xm]);
+    const lit=Math.min(1, rim*5.0);            // 0 deep interior .. 1 lit edge
+    const deep=Math.max(0, 1-a*1.6);           // how buried this pixel is
+    const i=i0*4;
+    // interior: blue-grey and darker.  edge: warm near-white scattering.
+    d[i]   = 196 + 58*lit - coreDark*34*(1-lit);
+    d[i+1] = 208 + 46*lit - coreDark*26*(1-lit);
+    d[i+2] = 222 + 32*lit - coreDark*12*(1-lit);
+    d[i+3] = (Math.min(1, a*1.15)*255)|0;
+  }
+  g.putImageData(im,0,0); return c;
+}
+// upper-left overhang · central diagonal veil · lower-right bank
+const BODIES = [
+  { tile: bakeBody(320, 2.1, 5, 1.30, 0.26, 2.9, 1.0), x:0.06, y:-0.12, w:0.86, h:0.90, vx: 0.0035, vy: 0.0020, alpha:0.96 },
+  { tile: bakeBody(288, 2.8, 4, 1.55, 0.30, 2.7, 0.6), x:0.24, y: 0.30, w:1.04, h:0.62, vx:-0.0052, vy:-0.0016, alpha:0.72 },
+  { tile: bakeBody(320, 1.9, 5, 1.15, 0.24, 3.1, 1.0), x:0.46, y: 0.44, w:0.98, h:0.86, vx: 0.0028, vy:-0.0030, alpha:0.92 },
+];
+const LAYERS = [];
+const FORE = { tile: bakeBody(288, 1.6, 4, 1.70, 0.34, 3.0, 0.3), alpha:0.62 };
+
+sizeCloud(); sizeDust(); sizeFore(); });
+
+let t0=performance.now(), last=t0, frames=0, winStart=t0;
+function frame(now){
+  const t=(now-t0)/1000, dt=Math.min(0.05,(now-last)/1000); last=now;
+
+  // vapour — three placed bodies drifting slowly; gaps between them are real
+  cx.clearRect(0,0,innerWidth,innerHeight);
+  for(const B of BODIES){
+    const w=innerWidth*B.w, h=innerHeight*B.h;
+    const x=innerWidth*B.x + Math.sin(t*B.vx*6.0)*innerWidth*0.045 + t*B.vx*22;
+    const y=innerHeight*B.y + Math.cos(t*B.vy*6.0)*innerHeight*0.038 + t*B.vy*18;
+    cx.globalAlpha=B.alpha;
+    cx.drawImage(B.tile, x, y, w, h);
+  }
+  cx.globalAlpha=1;
+
+  // particles — sorted far-to-near so depth stacks correctly
+  dx.clearRect(0,0,innerWidth,innerHeight);
+  parts.sort((a,b)=>a.depth-b.depth);
+  for(let i=0;i<parts.length;i++){
+    const p=parts[i];
+    p.y += p.vy*dt;
+    p.x += Math.sin(t*0.22 + p.ph)*p.drift*dt;
+    if(p.y > innerHeight+60) parts[i]=spawn(false);
+    // stamp a pre-blurred sprite instead of running a per-particle filter
+    const sp = SPRITES[Math.min(5, Math.round((1-p.depth)*5))];
+    const sz = p.r * (3.0 + (1-p.depth)*3.4);
+    dx.globalAlpha = p.a;
+    dx.drawImage(sp, p.x-sz/2, p.y-sz/2, sz, sz);
+    // the charge, drawn as a real circled minus on the particles close enough to read
+    if(p.depth > 0.93){        // only ~8 resolved marks in frame        // only the very nearest band resolves a charge mark
+      const rr = p.r*1.45, gx = p.x + p.r*2.9;
+      dx.globalAlpha = p.a*0.80;
+      dx.strokeStyle = 'rgba(70,88,106,1)';
+      dx.lineWidth = Math.max(0.7, p.r*0.20);
+      dx.beginPath(); dx.arc(gx, p.y, rr, 0, Math.PI*2); dx.stroke();
+      dx.beginPath(); dx.moveTo(gx-rr*0.52, p.y); dx.lineTo(gx+rr*0.52, p.y); dx.stroke();
+    }
+    dx.globalAlpha = 1;
+  }
+
+  // foreground vapour, over the content
+  fx2.clearRect(0,0,innerWidth,innerHeight);
+  {
+    // one narrow veil crossing the copy, so the text sits IN the weather
+    const L=FORE, w=innerWidth*1.35, h=innerHeight*0.46;
+    const x=-innerWidth*0.18 + Math.sin(t*0.055)*innerWidth*0.10 - t*4.2;
+    const y=innerHeight*0.42 + Math.sin(t*0.037)*innerHeight*0.06;
+    fx2.globalAlpha=L.alpha;
+    fx2.drawImage(L.tile, ((x % (w*1.6)) + w*1.6) % (w*1.6) - w*0.8, y, w, h);
+    fx2.globalAlpha=1;
+  }
+
+  frames++;
+  if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }
+  requestAnimationFrame(frame);
+}
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(frame);
+window.__ready = true;
+</script>
+</body>
+</html>
