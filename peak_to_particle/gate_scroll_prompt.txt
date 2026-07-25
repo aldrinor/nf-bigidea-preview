@@ -1,0 +1,25 @@
+The attached image is a 7-row, 2-column grid.
+
+LEFT column  = screens from mont-fort.com, repeated. Treat that site as a 10/10.
+RIGHT column = SEVEN consecutive frames of ONE continuous scrolling page I am building,
+in order, top to bottom. They are not seven pages.
+
+Two of the three backdrops are REAL FOOTAGE, not stills: cloud rolls around the summit, and
+the electron micrograph of the pollutant turns under the beam as the scroll carries past it.
+Across the frames the summit rises past the camera; the same photographed soot particle rises
+out of the cloud beside it and grows as the view descends; then the filter mat sweeps in from
+the right while the pollutant is still on screen. The particle accelerates once the mat starts
+entering, stops dead when it meets a fibre, is partly occluded by a fibre crossing in front of
+it, casts a contact shadow, and stays there as the deposit. There is no symbol, icon or drawn
+overlay anywhere.
+
+Judge the RIGHT column only, as one scroll experience.
+
+Give me:
+1. A single score out of 10 for the whole scroll.
+2. Whether the frames read as one continuous move or as separate slides, and why.
+3. The three worst problems, worst first, each with a concrete fix.
+
+Be blunt. Do not be encouraging. If it looks like a template, an AI-generated stock page,
+or an amateur build, say so plainly and score it accordingly. I need the real number, not
+a kind one.

@@ -91,12 +91,17 @@
 </head>
 <body>
 <div id="stage">
-  <img id="pl_peak"  src="./hero_img/peak_d.png"  alt="A snow-covered summit rising through cloud.">
+  <!-- Real cloud, not a hand-drawn canvas pass. No registration constraint on this plate, so
+       it simply loops on its own clock. -->
+  <video id="pl_peak" poster="./hero_img/peak_d.png" muted playsinline autoplay loop
+         preload="auto" aria-label="A snow-covered summit rising through cloud.">
+    <source src="./hero_img/peak_cloud.mp4" type="video/mp4">
+  </video>
   <!-- Real motion, not a still moved by CSS. The specimen turns under the beam; everything
        else in the frame is held. Its time is driven BY THE SCROLL, not by a clock: it is
        parked on frame 0 — the exact frame the travelling cutout was taken from — until the
        pull begins, so registration is perfect, and it then turns as we descend past it. -->
-  <video id="pl_smoke" poster="./hero_img/sem_light.png" muted playsinline preload="auto" aria-label="An electron micrograph of a single airborne soot agglomerate.">
+  <video id="pl_smoke" poster="./hero_img/sem_light.png" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
     <source src="./hero_img/sem_turn.mp4" type="video/mp4">
   </video>
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
@@ -114,7 +119,6 @@
      been following since the summit — the gate three times running: "its scale, silhouette
      and structure change, so it looks swapped for different soot renders." -->
 <img id="pl_front" src="./hero_img/mat_used_light.png" alt="">
-<canvas class="fx" id="mist"></canvas>
 <div id="veil"></div>
 
 
@@ -207,7 +211,6 @@ var el = {
   peak:  document.getElementById('pl_peak'),
   smoke: document.getElementById('pl_smoke'),
   fibre: document.getElementById('pl_fibre'),
-  mist:  document.getElementById('mist'),
   mote:  document.getElementById('mote'),
   shadow:document.getElementById('shadow'),
   front: document.getElementById('pl_front'),
@@ -253,7 +256,6 @@ function layout(){
                             (1 + p*0.035).toFixed(4) + ')';
   // atmosphere is the one layer carried across the seam, so the scale change has
   // somewhere to happen rather than being a straight swap of assets
-  el.mist.style.opacity   = (1 - smooth(0.70, 1.55, p)) * (1 - 0.45*smooth(0.30, 0.90, p));
 
   el.smoke.style.opacity   = band(p, 0.50, 1.10, 1.16, 2.10);
   el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px)';
@@ -302,86 +304,10 @@ function onScroll(){
   layout();
 }
 addEventListener('scroll', onScroll, {passive:true});
-addEventListener('resize', function(){ onScroll(); sizeMist(); });
+addEventListener('resize', onScroll);
 
-/* ---------- section 1: cloud banks drifting across the peak ---------- */
-var NP = new Uint8Array(512);
-for (var i=0;i<256;i++) NP[i]=NP[i+256]=(Math.random()*256)|0;
-function nfade(t){return t*t*t*(t*(t*6-15)+10);}
-function nlerp(a,b,t){return a+t*(b-a);}
-function ngrad(h,x,y){return ((h&1)?x:-x)+((h&2)?y:-y);}
-function noise2(x,y){
-  var X=Math.floor(x)&255, Y=Math.floor(y)&255;
-  x-=Math.floor(x); y-=Math.floor(y);
-  var u=nfade(x), v=nfade(y), A=NP[X]+Y, B=NP[X+1]+Y;
-  return nlerp(nlerp(ngrad(NP[A],x,y), ngrad(NP[B],x-1,y), u),
-               nlerp(ngrad(NP[A+1],x,y-1), ngrad(NP[B+1],x-1,y-1), u), v);
-}
-function fbm(x,y,oct){ var s=0,a=0.5; for(var i=0;i<oct;i++){ s+=a*noise2(x,y); x*=2.03; y*=2.03; a*=0.5; } return s; }
-function bakeBank(size, nLobes, spread, cut, gain){
-  var c=document.createElement('canvas'); c.width=size; c.height=Math.round(size*0.5);
-  var W=c.width, H=c.height, g=c.getContext('2d');
-  var im=g.createImageData(W,H), d=im.data, dens=new Float32Array(W*H), lobes=[];
-  for(var k=0;k<nLobes;k++) lobes.push({ x:0.5+(Math.random()-0.5)*spread, y:0.5+(Math.random()-0.5)*0.52,
-                                         r:0.10+Math.random()*0.20, w:0.40+Math.random()*0.60 });
-  for(var y=0;y<H;y++) for(var x=0;x<W;x++){
-    var u=x/W, v=y/H, acc=0;
-    for(var q2=0;q2<lobes.length;q2++){
-      var L=lobes[q2], dx=(u-L.x)*1.9, dy=(v-L.y), qq=Math.sqrt(dx*dx+dy*dy)/L.r;
-      if(qq<1.35) acc += L.w*Math.pow(Math.max(0,1-qq*qq*0.55),3.4);
-    }
-    var n1=fbm(u*5.2+7.1, v*5.2+2.9, 4)*0.5+0.5, n2=fbm(u*13.0+19.4, v*13.0+8.3, 3)*0.5+0.5;
-    var a=(acc*(0.30+0.95*n1)*(0.55+0.72*n2)-cut)*gain;
-    var eu=Math.min(u,1-u), ev=Math.min(v,1-v), e=Math.min(1, Math.min(eu,ev)/0.14);
-    a*=e*e*(3-2*e);
-    dens[y*W+x]=a>0?Math.min(a,1):0;
-  }
-  for(var y2=0;y2<H;y2++) for(var x2=0;x2<W;x2++){
-    var i0=y2*W+x2, av=dens[i0];
-    if(av<=0.004){ d[i0*4+3]=0; continue; }
-    var xm=(x2-2+W)%W, ym=(y2-2+H)%H;
-    var rim=Math.max(0,av-dens[ym*W+xm]);
-    var broken=fbm(x2*0.09+31.7,y2*0.09+13.3,3)*0.5+0.5;
-    var lit=Math.min(1,rim*8.5)*(0.25+0.95*Math.pow(broken,1.6));
-    var ii=i0*4;
-    d[ii]=250+5*lit; d[ii+1]=252+3*lit; d[ii+2]=254;
-    d[ii+3]=(Math.min(1,Math.pow(av,0.9)*0.96)*255)|0;
-  }
-  g.putImageData(im,0,0); return c;
-}
-var mctx = el.mist.getContext('2d');
-function sizeMist(){
-  var dpr=Math.min(devicePixelRatio||1,1.5);
-  el.mist.width=Math.floor(innerWidth*dpr); el.mist.height=Math.floor(innerHeight*dpr);
-  el.mist.style.width=innerWidth+'px'; el.mist.style.height=innerHeight+'px';
-  mctx.setTransform(dpr,0,0,dpr,0,0);
-}
-sizeMist();
-var BANKS = [
-  { tile: bakeBank(512, 16, 0.86, 0.26, 2.7), y:0.30, h:0.30, w:1.90, v: 0.0115, a:0.34, blur:3.0 },
-  { tile: bakeBank(512, 13, 0.92, 0.24, 2.9), y:0.52, h:0.34, w:2.10, v:-0.0082, a:0.60, blur:1.4 },
-  { tile: bakeBank(576, 24, 1.10, 0.23, 2.5), y:0.68, h:0.42, w:2.40, v: 0.0062, a:0.56, blur:2.2 },
-  { tile: bakeBank(512, 14, 0.90, 0.30, 2.6), y:0.16, h:0.24, w:1.80, v:-0.0140, a:0.22, blur:4.4 }
-];
-
-/* ---------- section 3: motes arriving at the knot ---------- */
 var t0=performance.now(), lastT=t0, frames=0, winStart=t0;
 function frame(now){
-  var t=(now-t0)/1000, dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
-
-  if(parseFloat(el.mist.style.opacity||'1') > 0.01){
-    mctx.clearRect(0,0,innerWidth,innerHeight);
-    for(var b=0;b<BANKS.length;b++){
-      var B=BANKS[b], w=innerWidth*B.w, h=innerHeight*B.h;
-      var x=(-t*B.v*w)%w; if(x>0) x-=w;
-      var y=innerHeight*B.y + Math.sin(t*0.06+B.y*9)*innerHeight*0.012;
-      mctx.globalAlpha=B.a; mctx.filter = B.blur>0.05 ? 'blur('+B.blur+'px)' : 'none';
-      for(var X=x-w; X<innerWidth+w; X+=w) mctx.drawImage(B.tile, X, y, w, h);
-      mctx.filter='none';
-    }
-    mctx.globalAlpha=1;
-  }
-
   frames++;
   if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }
   requestAnimationFrame(frame);
