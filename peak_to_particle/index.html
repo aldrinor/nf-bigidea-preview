@@ -25,7 +25,7 @@
   #pl_peak {left:0;top:0;width:100%;height:100%;filter:contrast(.94) saturate(.96) brightness(1.01)}
   #pl_smoke{left:0;top:0;width:100%;height:100%;filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
-  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.10) saturate(.42) brightness(1.0)}
+  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.02) brightness(1.01)}
 
   canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
   #veil{position:fixed;inset:0;z-index:3;pointer-events:none;
@@ -61,8 +61,6 @@
 
   @media (max-width:760px){
     nav{gap:14px}
-    #pl_smoke{left:-30%;top:-4%;width:150%;height:150%}
-    #pl_fibre{left:-26%;top:-4%;width:152%;height:152%}
     .stop{max-width:none;right:var(--rail)}
     #c1{top:auto;bottom:22vh;transform:none}
     #c2{bottom:20vh}
@@ -78,10 +76,9 @@
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
   <img id="mote" src="./hero_img/sem_cut.png" alt="">
-  <img id="pl_fibre" src="./hero_img/mat_close.png" alt="A charged nonwoven fibre junction holding a dense knot of captured particles.">>
+  <img id="pl_fibre" src="./hero_img/sem_catch_a.png" alt="An electron micrograph of a soot agglomerate held on a filter fibre.">>>
 </div>
 <canvas class="fx" id="mist"></canvas>
-<canvas class="fx" id="pull"></canvas>
 <div id="veil"></div>
 
 
@@ -139,7 +136,7 @@ function moteHome(){
 /* where the contaminant is at any point of the descent, in real pixels */
 function moteAt(p){
   var h=moteHome();
-  var K=innerWidth*0.775, L=innerHeight*0.492;         // the deposit, measured off the plate
+  var K=innerWidth*0.712, L=innerHeight*0.568;         // the contact, measured off the plate
   var t=smooth(1.30, 2.24, p);                          // the pull, once it takes hold
   var e=t*t*(3-2*t);
   return {
@@ -155,7 +152,6 @@ var el = {
   smoke: document.getElementById('pl_smoke'),
   fibre: document.getElementById('pl_fibre'),
   mist:  document.getElementById('mist'),
-  pull:  document.getElementById('pull'),
   mote:  document.getElementById('mote'),
   c1:    document.getElementById('c1'),
   c2:    document.getElementById('c2'),
@@ -176,7 +172,6 @@ function layout(){
   el.smoke.style.opacity = band(p, 0.55, 1.02, 1.45, 2.02);
   el.fibre.style.opacity = smooth(1.45, 2.02, p);
   el.mist.style.opacity  = 1 - smooth(0.45, 0.95, p);
-  el.pull.style.opacity  = smooth(1.75, 2.16, p);
 
   // copy: each block rises in and lifts away, so the page reads as motion not as slides
   copyState(el.c1, { o: 1 - smooth(0.30, 0.72, p), dy: -p * 46 }, true);
@@ -198,7 +193,7 @@ function onScroll(){
   layout();
 }
 addEventListener('scroll', onScroll, {passive:true});
-addEventListener('resize', function(){ onScroll(); sizeMist(); sizePull(); });
+addEventListener('resize', function(){ onScroll(); sizeMist(); });
 
 /* ---------- section 1: cloud banks drifting across the peak ---------- */
 var NP = new Uint8Array(512);
@@ -261,25 +256,6 @@ var BANKS = [
 ];
 
 /* ---------- section 3: motes arriving at the knot ---------- */
-var pctx = el.pull.getContext('2d'), PARTS=[], CX, CY;
-function sizePull(){
-  var dpr=Math.min(devicePixelRatio||1,2);
-  el.pull.width=Math.floor(innerWidth*dpr); el.pull.height=Math.floor(innerHeight*dpr);
-  el.pull.style.width=innerWidth+'px'; el.pull.style.height=innerHeight+'px';
-  pctx.setTransform(dpr,0,0,dpr,0,0);
-  var narrow=innerWidth<760;
-  CX=innerWidth*(narrow?0.58:0.775); CY=innerHeight*(narrow?0.34:0.492);
-  PARTS=[]; var n=narrow?9:15;
-  for(var i=0;i<n;i++){ var q=mkMote(); q.u=0.15+Math.random()*0.85; PARTS.push(q); }
-}
-function mkMote(){
-  var sx, sy;
-  if(Math.random()<0.58){ sx=innerWidth*(0.58+Math.random()*0.32); sy=innerHeight*(0.03+Math.random()*0.27); }
-  else                  { sx=innerWidth*(0.57+Math.random()*0.15); sy=innerHeight*(0.28+Math.random()*0.32); }
-  return { sx:sx, sy:sy, u:1.0, v:0.058+Math.random()*0.055, w:1.9+Math.random()*2.5, k:0.7+Math.random()*0.5 };
-}
-sizePull();
-
 var t0=performance.now(), lastT=t0, frames=0, winStart=t0;
 function frame(now){
   var t=(now-t0)/1000, dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
@@ -296,29 +272,6 @@ function frame(now){
     }
     mctx.globalAlpha=1;
   }
-
-  if(parseFloat(el.pull.style.opacity||'0') > 0.01){
-    pctx.clearRect(0,0,innerWidth,innerHeight); pctx.lineCap='round';
-    for(var i=0;i<PARTS.length;i++){
-      var p=PARTS[i];
-      p.u -= p.v*dt*(1.0 + 2.6*Math.pow(1-p.u,2.0));
-      if(p.u<=0.02){ PARTS[i]=mkMote(); continue; }
-      var dxp=p.sx-CX, dyp=p.sy-CY, cx=CX+dxp*p.u, cy=CY+dyp*p.u;
-      if(cx < innerWidth*0.545 && innerWidth>760) continue;
-      var fade=Math.min(1,(p.u-0.02)/0.11), len=0.115*p.k*p.u;
-      for(var q=0;q<8;q++){
-        var f1=q/8, f2=(q+1)/8, u1=p.u+len*f1, u2=p.u+len*f2;
-        pctx.strokeStyle='rgba(46,58,72,1)';
-        pctx.globalAlpha=0.27*Math.pow(1-f1,2.2)*(0.45+0.55*p.u)*fade;
-        pctx.lineWidth=Math.max(0.35,p.w*(0.30+1.30*(1-f1)));
-        pctx.beginPath(); pctx.moveTo(CX+dxp*u1,CY+dyp*u1); pctx.lineTo(CX+dxp*u2,CY+dyp*u2); pctx.stroke();
-      }
-      pctx.globalAlpha=(0.30+0.26*p.u)*fade; pctx.fillStyle='rgba(38,50,64,1)';
-      pctx.beginPath(); pctx.arc(cx,cy,p.w*(0.46+0.44*p.u),0,Math.PI*2); pctx.fill();
-    }
-    pctx.globalAlpha=1;
-  }
-
 
   frames++;
   if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }

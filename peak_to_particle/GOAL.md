@@ -45,8 +45,9 @@ codex exec -s read-only --skip-git-repo-check -i gate_pair.png - < /tmp/gate_pro
 The deliverable is `index.html`, one document. Numbers are the mean of repeated runs of the
 blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
 
-Sequence: **6.2** — separate pages 5.4 → 6.2, continuous build 6.0, micrograph build 6.2.
-Samples this pass: 5.8, 5.8, 6.0, 6.1, 6.1, 6.2, 6.2, 6.4, 6.7. The spread is ±0.5, so only
+Sequence: **6.8** — separate pages 5.4 → 6.2, continuous 6.0, micrograph screen 2 6.2,
+both micro screens sharing one instrument **6.8**.
+Samples on the current build: 6.2, 6.4, 7.0, 7.1, 7.3 → mean 6.8. The spread is ±0.5, so only
 a move of about a whole point is real. Treat anything smaller as noise and do not chase it.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
@@ -59,9 +60,9 @@ a number from a run whose output was partly truncated.
 
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.9** | iterating |
-| 2 | Down into cloud — the pollutant | **6.6** | UNSTUCK — see below |
-| 3 | NanoFlashing pulls them in | **6.1** | now the weakest |
+| 1 | Mountain — C-POLAR + 5 applications | **6.6** | now the weakest |
+| 2 | Down into cloud — the pollutant | **7.0** | best it has been |
+| 3 | NanoFlashing pulls them in | **7.0** | best it has been |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -178,35 +179,63 @@ Two things mattered, and both should be reused on screens 4–10:
   and fought the light palette. Adding "rendered clearly darker than its background, on a
   bright near-white substrate" fixed it in one shot. Keep that phrasing.
 
+## ONE INSTRUMENT FOR BOTH MICRO SCREENS — this is what moved 6.2 → 6.8
+Screen 3 was a soft-focus studio macro of glowing fibres. The judge called it *"a weak
+climax — washed out, visually vague — the most important moment has the least impact"* and
+*"dirt sitting on fibres rather than a physical mechanism completing"*.
+
+It is now `hero_img/sem_catch_a.png`: **the same electron-microscope language as screen 2** —
+a nonwoven mesh of pale fibres with the dark soot agglomerate clamped onto one of them,
+visibly moulded at the contact, with finer particles caught along the same fibre. Screen 3
+went 6.1 → 7.0 and screen 2 held at 7.0.
+
+Two things did the work, and both generalise to screens 4–10:
+- **Two adjacent screens must share ONE instrument.** Same greyscale, same grain, same tonal
+  range, same magnification language. The judge's standing complaint was *"three premium
+  campaign tropes rather than one world"*; making screens 2 and 3 one instrument answered it.
+- **Every drawn overlay is now gone from the page** except the hero's cloud banks. The
+  converging dashes on screen 3 came out with the charge field. On an electron image a drawn
+  dash is out of register with the instrument and reads as paint. The photograph does it all.
+
+## ⚠ GATE-PROMPT ACCURACY — a fault that cost a whole pass
+`/tmp/gate_prompt2.txt` still described the charge field **after I had deleted it**. The judge
+went looking for a symbol that was not in the picture, could not find it, and made *"the
+travelling minus is effectively invisible"* its number-one problem — a phantom complaint about
+a phantom element. **Re-read the gate prompt every time the build changes.** It must describe
+what is actually on screen and nothing else.
+
 ## NEXT ACTION
-Current: sequence 6.2 · S1 6.9 · S2 6.6 · S3 6.1. Bar is 9.
+Current: sequence 6.8 · S1 6.6 · S2 7.0 · S3 7.0. Bar is 9.
 
-**Screen 3 is now the weakest and the judge's words are specific:** *"weak climax... washed
-out, visually vague... the most important moment has the least impact"*, and *"the absorption
-moment looks like dirt sitting on fibres rather than a physical mechanism completing."*
+**The mountain hero is now the weakest screen**, and the judge's objection is specific and
+repeated: *"clean, but generic and visibly derivative of the reference"*, *"the mountain has
+little conceptual connection to charge or particle capture"*, *"competent luxury-tech
+shorthand, not a distinct identity"*.
 
-1. **Rebuild screen 3 in the same register that just unstuck screen 2.** It is currently a
-   soft-focus studio macro. Generate it as an **electron micrograph of the same soot
-   agglomerate caught on a charged fibre** — same greyscale instrument language, same
-   dark-specimen-on-pale-substrate phrasing, the fibre resolved as real spun media, the
-   agglomerate visibly deformed and gripped where it meets the fibre. That also fixes the
-   judge's third note (*"three premium campaign tropes rather than one world"*), because
-   screens 2 and 3 would then share one instrument, one grain and one tonal range.
-   `mat_close.png` and `mat_hot.png` stay in `hero_img/` as fallbacks.
+Rule 7 still holds — **keep the mountain, Yin specified it.** The problem is not the subject,
+it is that our peak plate looks like mont-fort's peak plate. Change the execution, not the idea.
 
-2. **Then re-cut the travelling contaminant from the new screen-3 plate too**, so the object
-   that lands is literally the object in the photograph. Registration constants live in
-   `PLATE` and `MOTE_SRC` in `index.html`.
+1. **Regenerate the hero plate to be ours rather than a look-alike.** The reference owns a
+   pale, hazy, warm-white alpine hero. Move away from it deliberately: colder and starker, a
+   harder graphic silhouette, a different light (low raking light rather than flat haze), and
+   a composition that is not "peak right of centre in soft cloud". Generate 3 variants and
+   gate the best against the current plate before swapping — screen 1 is at 6.6 and a bad
+   swap can cost a point.
 
-3. **Leave the mountain hero alone** unless screens 2 and 3 clear 8 — it is not the blocker,
-   and Yin specified it (rule 7).
+2. **Then look for the hero's own thread to the rest.** Screens 2 and 3 are bound by one
+   instrument. The hero cannot be an electron image, so its binding has to be something else:
+   the same cold neutral greyscale and the same near-white ground would already do most of it.
+   Consider desaturating the peak plate toward the micrographs' tonal range and testing that
+   on its own — it is a one-line change and cheap to measure.
 
-4. **Do not re-add any charge annotation.** Three attempts now: an outlined minus (*"a
-   zoom-out button"*), a ring-and-orbit field (*"decorative HUD graphics"*), and a bare minus
-   (*"too insignificant to carry the narrative"*). The judge wants the charge shown as
-   physical behaviour — deformation, gripping, absorption — not as a symbol.
+3. **Do not add a charge symbol.** Four attempts have now failed: an outlined minus (*"a
+   zoom-out button"*), a ring-and-orbit field (*"decorative HUD graphics"*), a bare minus
+   (*"too insignificant to carry the narrative"*), and a phantom one the gate prompt invented.
+   The charge is carried by the headline and by the photographed capture.
 
-5. Screens 4–10 are still not built. Do not start them until the first three clear 9.
+4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
+   When they are built, use the two rules above: one instrument per adjacent pair, and ask
+   for the specimen darker than its ground.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
