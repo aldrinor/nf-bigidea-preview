@@ -41,9 +41,9 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating — too pale/diffuse |
-| 2 | Down into cloud — charged particles | **5.0** | iterating — too pale/diffuse |
-| 3 | NanoFlashing pulls them in — cloud clears | **5.0** | iterating — capture band reads, still needs weight |
+| 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
+| 2 | Down into cloud — charged particles | **7.0** | ⬆ best of the three — the PLUME recipe works |
+| 3 | NanoFlashing pulls them in — cloud clears | **4.0** | iterating — layers compete, no climax |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,31 +85,24 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 5 / 5 (from 5 / 3 / 2 when Yin rejected it). Screen 3 moved 3 -> 4 -> 5 by
-making capture a bounded, measurable event (dark-pixel density: 1.0% above the band, 11.0%
-on it, 0.1% below).
+Sequence is 6 / 7 / 4. Screen 2 jumped 4 -> 7 and Codex called it *"the only screen with
+decisive tension and depth."* **That happened because its particles were concentrated into
+ONE dense plume with a readable silhouette, instead of sprinkled evenly.** That is the
+recipe — apply it to the other two.
 
-**Codex has now named ONE root cause for all three screens** — this is the next job and it
-is a single fix applied three times:
+Screen 3 is now lowest (4). Codex: *"The headline, particle band, logo, body copy and fibre
+texture all compete. Nothing reads as the capture moment... the supposed climax has no
+visual climax."* Fix:
+1. Concentrate the captured particles into ONE visible convergence / contact zone on the
+   fibres — not a band spread across the full width.
+2. **Clear that zone of everything else** — move the NanoFlashing logo and the body copy out
+   of it. Right now they sit on top of the very thing they are describing.
+3. The convergence must be the brightest, densest, highest-contrast thing in the frame.
 
-> *"Lack of a dominant, sharply defined focal event. The reference builds the entire frame
-> around one monumental, high-detail peak and logo. Across yours, the mountain, cloud
-> particles, and capture layer remain pale, diffuse, and similarly weighted. Nothing
-> decisively owns each screen, so the sequence feels like three washed-out backgrounds with
-> text placed over them rather than three deliberately staged visual moments."*
+Screen 1 (6) after that: the peak owns the frame only *partly*. It needs to be larger and
+higher-contrast still, or moved so it is unmistakably the subject.
 
-So for EACH screen, decide what OWNS the frame and make everything else recede:
-1. **Mountain** — the peak must be monumental and high-detail. It is currently small,
-   pale and bleached by veils. Fill the frame; restore contrast and detail on the rock.
-2. **Cloud** — one dominant billow mass, close and structured, not an even wash of vapour.
-3. **Capture** — the loaded fibre band must be the subject, close and sharp, not a thin
-   horizontal line in the lower third.
-
-The common error is the same each time: I have been REDUCING contrast to make text readable,
-and it has bleached every screen. Fix readability with placement and a local scrim, never by
-draining the whole image.
-
-Re-gate the SEQUENCE after.
+Re-gate the SEQUENCE after each change.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
