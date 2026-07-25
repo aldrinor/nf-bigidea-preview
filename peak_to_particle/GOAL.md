@@ -43,7 +43,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
 | 2 | Down into cloud — charged particles | **7.0** | iterating |
-| 3 | NanoFlashing pulls them in — cloud clears | **4.0** | ⚠ CONCEPT WRONG — see below |
+| 3 | NanoFlashing pulls them in — cloud clears | **5.0** | reframed to elegant; needs ONE hotspot |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,26 +85,30 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 7 / 4.
+Sequence is 6 / 7 / 5.
 
-**Screen 3 is regressing and the concept is wrong.** History: 2 → 3 → 4 → 4 → 4 → 5 → 5 → 5
-→ 6 → 5 → 4. Codex has now described the same plate as *"an explosion"*, *"an ink stain"*,
-*"a dirty ink explosion"* and *"an impact crater"* across four separate passes, through three
-different crops and two lightenings.
+Screen 3 was reframed away from the dirty burst (which Codex called an explosion, ink stain,
+dirty ink explosion and impact crater across four passes) to an elegant charged fibre holding
+captured particles. That fixed the "dirty" problem and the "too small" problem, 4 -> 5.
 
-**Stop tuning it.** The diagnosis is not craft, it is subject matter:
-1. A radial burst is geometrically ambiguous — it reads as exploding no matter the direction
-   of the animation on top of it.
-2. **Dirt is inherently un-premium.** The reference wins by showing something beautiful and
-   restrained. Every version of this screen has led with filth, which fights the whole
-   atmosphere the first two screens establish.
+Codex's remaining note, and it is now the SAME note it has given on every screen:
+*"create one unmistakable capture hotspot... concentrate the particles and strongest glow
+there; suppress the competing clumps elsewhere."*
+On screen 1 it says the same in different words: *"clean but generic; the small, low mountain
+lacks the reference's authority and scale."*
 
-**The reframe:** show the RESULT as beautiful, not the dirt as dramatic. A single pristine
-white fibre in a huge quiet empty frame, a few precise dark particles held against it, a
-faint cool charge tracing the fibre. Elegant and minimal — the same restraint that makes the
-reference work. Generating that plate now; swap it in and re-gate.
+**One rule now covers the whole page:** every screen needs ONE hotspot that owns it, with
+everything else deliberately suppressed. Screen 2 scores highest (7) precisely because it has
+one — the concentrated plume.
 
-Screens 1 and 2 (6 and 7) still need one element that decisively owns the frame.
+Next, in order:
+1. Screen 3: concentrate the particle clumps and the charge glow into ONE junction on the
+   fibre; suppress the other clumps so nothing competes.
+2. Screen 1: the peak must gain authority and scale — it still reads small and generic.
+
+**Pace note, honestly:** screen 3 has taken far more passes than any other and has oscillated
+(2,3,4,4,4,5,5,5,6,5,4,4,5). The gains came from concept changes, never from tuning. The
+oscillation came from over-correcting a single parameter each pass.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
