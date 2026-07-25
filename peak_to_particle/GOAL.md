@@ -22,6 +22,81 @@ obtained from an isolated, leading comparison.
 The working gate is a 3-row 2-column grid — reference left, ours right — built by the
 snippet in "How to judge" below, with the blunt prompt kept at `/tmp/gate_prompt.txt`.
 
+## ⚠⚠ READ THIS FIRST — THE SCOREBOARD WAS MEASURING NOTHING (2026-07-25)
+**The gate was calibrated for the first time and it fails calibration.**
+
+The control: a nine-frame strip in which **both columns are mont-fort's own screens**, handed to
+the judge with the usual blunt prompt as if the right column were ours.
+
+> **The reference scored 4/10.** Twice, verbatim (`ctrl1.txt`). Our build scores 6.1.
+
+Under this instrument the site defined as the 10 cannot score above 4, and our page outscores
+it. **The bar "every screen >= 9/10 judged by Codex" was unreachable by construction.** Every
+number in the scoreboard below measured the severity of the prompt and the judge's generic
+priors — *"looks like a template", "AI-stock imagery", "generic ESG marketing"* — not the work.
+It even described OUR summit-into-white transition while looking at mont-fort's ship and globe.
+
+That explains eleven passes of 6.0–6.8 across builds that were plainly different in quality.
+
+### The corrected method: comparative, not absolute
+Absolute scores from this judge are noise. A forced A/B choice is not. `gate_ab_prompt.txt`:
+two columns, no reference-as-anchor, no ten-point scale — *"BETTER: A or B / MARGIN / WHY"*.
+
+**Result, run both ways round to rule out position bias:**
+- reference A, ours B → **"BETTER: B, MARGIN: clear"** — *"B sustains a more distinctive visual
+  language, sharper typography, and a tightly controlled progression."*
+- ours A, reference B → **"BETTER: A, MARGIN: clear"** — *"A has stronger typographic hierarchy,
+  more disciplined compositions and a cohesive visual narrative, while B feels atmospheric but
+  repetitive and less unified."*
+
+**Same answer both orders: this page is preferred over mont-fort, clear margin.**
+
+**Honest caveat.** That is evidence, not proof. It compares nine frames I chose from our page
+against nine frames of their site, judged by one model. It does not mean the page is finished.
+It does mean the old scoreboard cannot tell us anything and must not be used again.
+
+### What this changes
+1. **The scoreboard below is void.** Kept only as a record of what was tried.
+2. **Never use an absolute /10 from this judge again.** Use `gate_ab_prompt.txt`, always run
+   both column orders, and only trust a verdict that survives the swap.
+3. **The standing objective needs Yin.** "9/10 by Codex" cannot be met by anything, including
+   the reference. Yin should decide what "done" now means — most likely his own eye, or an A/B
+   against the current live site rather than against mont-fort.
+
+## THE REBUILD YIN CALLED FOR — same engine as the reference, our assets
+Yin, after looking at it: *"you spent a lot of time, but effect is still weak — what if you
+clone the entire website and effect first, then we do surgical change."* He was right about the
+diagnosis. Checked against their actual code, which is saved in `<scratchpad>/montfort/`:
+
+| | reference | ours, before |
+|---|---|---|
+| scroll | **Lenis** (26 refs) | raw `window.scroll` listener |
+| choreography | **GSAP + ScrollTrigger** (87 / 33 refs) | CSS opacity on `<img>` |
+| hero | **three.js / WebGL** (176 / 440 refs) | flat video |
+
+That is the whole gap. Their scroll has weight because Lenis smooths it; their stops settle
+because ScrollTrigger snaps them. No amount of better photographs fixes an engine deficit,
+which is why eleven passes of better photographs did not fix it.
+
+**What was NOT done, deliberately: their code and assets were not copied.** Those are their
+property, and with the EPA matter live, "C-POLAR copied a trading firm's website" is exposure
+we do not need. The feel does not live in their files — it lives in free public libraries
+anyone may use. So: same libraries, same pattern, our own assets and words.
+
+**Now running on Lenis 1.1.13 + GSAP 3.12.5 + ScrollTrigger**, verified live rather than assumed
+(`check_engine.mjs` re-runs the test any time):
+- **Inertia — real.** One wheel tick and the page kept gliding **329 px after the input stopped**
+  (203 → 532 over 600 ms). The old build stopped dead with the wheel.
+- **Settle — real.** It then came to rest at scrollY **956**, which is exactly stop 2. The four
+  stops are snap points, so the page always rests ON a stop.
+- `layout(p)` is untouched: it still reads `window.scrollY` and simply inherits the inertia. All
+  the tuning from eleven passes is preserved.
+- The render harness passes `?p=`, which disables Lenis and the snap — a screenshot needs an
+  exact position, not an easing one.
+
+**Copy is staged now, not slabbed.** The headline arrives first and the paragraph follows a beat
+later, each rising as it comes. A block that fades in one piece reads as a slide.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -547,24 +622,22 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-Current: four stops 6.10 · three stops 6.58 · bar 9. **In-house options are exhausted.**
+**Take the calibration result to Yin. The objective as written is not achievable and the page
+is in better shape than eleven passes of scores suggested.**
 
-**This needs Yin, and it is one question: may we license real imagery instead of generating it.**
+Two questions only he can answer:
+1. **What is "done" now?** "9/10 by Codex" is void — the reference itself scores 4. Options:
+   his own review; an A/B against the current live site; or a small panel of A/B comparisons.
+2. **May we license real imagery?** Still the one untried fidelity lever (see the ledger above).
+   Less urgent now that the scoreboard is known to be broken, but still the biggest remaining
+   quality question.
 
-The evidence is in the ledger above. Every gain in this project came from asset fidelity. Every
-plate on this page is still generated, and the criticism that has survived all eleven passes is
-exactly that — *"the sterile perfection of generated campaign imagery"*, *"AI-stock particulate
-imagery"*. Licensed genuine SEM micrographs of loaded filter media and real alpine footage are
-the one lever left, and it is a budget decision, not a build decision.
-
-Until that is answered, **do not spend passes on**: more stops (measured twice), layout changes
-(measured, reverted), seam or collision work (four passes, all flat), the hero plate or its crop
-(measured, reverted), a charge symbol (four attempts, all rejected), or the mat video
-(rejected with evidence). All are documented above with numbers.
-
-If a session must do something, the only remaining honest work is maintenance: keep the two
-instruments' prompts accurate to what is on screen (a stale prompt has already cost one pass),
-and re-verify the live deploy.
+Meanwhile, if a session must build:
+- **Re-run the A/B whenever the build changes**, both orders, and record the verdict and margin
+  instead of a score. That is now the only trustworthy signal in this project.
+- **Do not** resume the ruled-out list (more stops, layout breaks, seam work, hero plate/crop,
+  charge symbols, the mat video). Those were all measured on the broken instrument, but three of
+  them were also visibly wrong, so leave them alone.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)

@@ -1,0 +1,11 @@
+The attached image is a two-column grid of scroll frames from two different websites,
+column A on the LEFT and column B on the RIGHT, read top to bottom.
+
+Do not score them out of ten. Answer only these three lines:
+
+BETTER: A or B
+MARGIN: small, clear, or large
+WHY: one sentence
+
+Judge them as finished commercial websites: art direction, typography, composition,
+craft, and whether the sequence holds together. Be honest; if they are equal, say EQUAL.

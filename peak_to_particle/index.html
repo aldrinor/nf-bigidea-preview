@@ -7,6 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<!-- The same scroll machinery the reference runs on. Their site is Lenis + GSAP ScrollTrigger
+     + three.js; ours was a raw scroll listener fading images. That was the gap Yin felt: no
+     inertia, no settle. These are free public libraries, used with our own assets. -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <style>
   :root{
     --rail: clamp(50px, 13.7vw, 300px);
@@ -66,7 +72,8 @@
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
 
   .stop{position:fixed;z-index:5;left:var(--rail);max-width:min(46ch,40vw);
-    will-change:opacity,transform}
+    will-change:transform}
+  .stop h1,.stop h2,.stop p,.stop .mark{will-change:opacity,transform}
   #c1{top:52%;transform:translateY(-50%)}
   #c2{top:0;bottom:auto;max-width:min(42ch,35vw)}
   #c3{top:0;bottom:auto}
@@ -242,17 +249,30 @@ var el = {
   cue:   document.getElementById('cue')
 };
 
+/* The headline and the paragraph are staged, not faded as one slab: the headline arrives
+   first and the paragraph follows a beat later, each rising as it comes. A block that fades
+   in one piece reads as a slide; a staged one reads as a composition being set. */
 function copyState(node, v, centred){
-  node.style.opacity = v.o;
+  node.style.opacity = 1;                       // the children carry the fade now
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
   node.style.transform = centred ? 'translateY(-50%) ' + t : t;
+  var head = node.querySelector('h1,h2'), body = node.querySelector('p'), mark = node.querySelector('.mark');
+  var o = v.o;
+  var lead = clamp(o*1.35, 0, 1);               // headline leads
+  var trail = clamp((o - 0.22)/0.78, 0, 1);     // paragraph follows
+  if(mark){ mark.style.opacity = clamp(o*1.5,0,1);
+            mark.style.transform = 'translateY(' + ((1-clamp(o*1.5,0,1))*14).toFixed(1) + 'px)'; }
+  if(head){ head.style.opacity = lead;
+            head.style.transform = 'translateY(' + ((1-lead)*20).toFixed(1) + 'px)'; }
+  if(body){ body.style.opacity = trail;
+            body.style.transform = 'translateY(' + ((1-trail)*26).toFixed(1) + 'px)'; }
 }
 /* The two lower blocks are positioned FROM the specimen rather than from the page. The gate
    asked three times to "compose the copy around the moving specimen instead of repeatedly
    placing a standard left-aligned marketing block". They now ride with it, so the words and
    the thing they describe stay on one optical line the whole way down. */
 function copyBesides(node, o, dy, targetY){
-  node.style.opacity = o;
+  copyState(node, { o: o, dy: 0 }, false);
   if(o <= 0.004){ return; }
   var h = node.offsetHeight || 320;
   var top = clamp(targetY - h*0.52, innerHeight*0.17, innerHeight - h - innerHeight*0.09);
@@ -342,6 +362,33 @@ function onScroll(){
   layout();
 }
 addEventListener('scroll', onScroll, {passive:true});
+
+/* ---- the scroll itself -------------------------------------------------------------
+   Lenis gives the scroll weight and glide: the wheel sets a velocity that decays rather
+   than jumping the page. Everything downstream still reads window.scrollY, so layout()
+   is unchanged — it simply inherits the inertia.
+   ScrollTrigger adds the settle: the four stops are snap points, so the page comes to
+   rest ON a stop instead of anywhere. The render harness turns both off, because a
+   screenshot needs an exact scroll position, not an easing one. */
+var PARKED_SHOT = new URLSearchParams(location.search).has('p');
+if(!PARKED_SHOT && !reduced && window.Lenis && window.gsap && window.ScrollTrigger){
+  gsap.registerPlugin(ScrollTrigger);
+  var lenis = new Lenis({
+    duration: 1.15,
+    easing: function(t){ return Math.min(1, 1.001 - Math.pow(2, -10*t)); },
+    smoothWheel: true, wheelMultiplier: 0.9, touchMultiplier: 1.5
+  });
+  lenis.on('scroll', function(){ ScrollTrigger.update(); onScroll(); });
+  gsap.ticker.add(function(time){ lenis.raf(time*1000); });
+  gsap.ticker.lagSmoothing(0);
+  // the four stops, as fractions of the whole scroll (p = 0, 1, 2, 3.1 of 3.2)
+  ScrollTrigger.create({
+    trigger: '#scroller', start: 'top top', end: 'bottom bottom',
+    snap: { snapTo: [0, 1/3.2, 2/3.2, 3.1/3.2],
+            duration: {min:0.30, max:0.80}, delay: 0.08, ease: 'power2.inOut' }
+  });
+  window.__engine = 'lenis+scrolltrigger';
+}
 addEventListener('resize', onScroll);
 
 var t0=performance.now(), lastT=t0, frames=0, winStart=t0;
