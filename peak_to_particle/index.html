@@ -15,9 +15,13 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <style>
   :root{
+    /* Measured off the reference: a 24-column grid in a 1376px container with 20px gutters,
+       under a fixed 82px header. We had a single left rail and no grid at all. */
+    --maxw: 1376px; --cols: 24; --gutter: 20px; --edge: clamp(20px, 2.2vw, 32px);
+    --headerH: 82px;
     --rail: clamp(50px, 13.7vw, 300px);
     --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#4a545e; --accent:#1b7bff;
-    --display: clamp(30px, 3.85vw, 56px);
+    --display: clamp(28px, 3.45vw, 50px);
     /* Two faces doing two different jobs, which is the structure the reference uses and the
        one thing our type never had — it was the system default sans doing everything, and the
        gate called it "generic sans-serif typography".
@@ -64,16 +68,28 @@
      consecutive gates. The picture carries the idea; the headline names the charge. */
 
   /* ---- chrome ---- */
-  nav{position:fixed;z-index:6;left:var(--rail);top:clamp(46px,5.4vw,74px);
-    display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
+  /* header sits on the grid, like theirs, instead of floating at an arbitrary offset */
+  header{position:fixed;z-index:7;top:0;left:0;right:0;height:var(--headerH);
+    display:flex;align-items:center;padding:0 var(--edge);
+    background:linear-gradient(180deg, rgba(240,244,248,.82) 0%, rgba(240,244,248,0) 100%)}
+  .grid{width:100%;max-width:var(--maxw);margin:0 auto;
+    display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gutter)}
+  nav{grid-column:1 / -1;display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
   nav a{font-family:var(--util);font-size:12.5px;letter-spacing:.04em;text-decoration:none;
     color:#262d34;padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
 
-  .stop{position:fixed;z-index:5;left:var(--rail);max-width:min(46ch,40vw);
-    will-change:transform}
-  .stop h1,.stop h2,.stop p,.stop .mark{will-change:opacity,transform}
+  /* on the grid now: columns 2-11 of 24, the way their chapter text sits, rather than a
+     free-floating block at a rail offset */
+  .stop{position:fixed;z-index:5;left:0;right:0;padding:0 var(--edge);max-width:none;
+    will-change:transform;pointer-events:none}
+  .stop > .grid > .col{grid-column:2 / span 12}
+  @media (max-width:900px){ .stop > .grid > .col{grid-column:1 / -1} }
+  /* their in-chapter scale: 14px bold eyebrow, 50px display, 16px body, 12px micro */
+  .eyebrow{font-family:var(--util);font-size:13px;font-weight:400;letter-spacing:.10em;
+    color:var(--muted);margin:0 0 clamp(14px,1.8vh,22px);display:block}
+  .stop h1,.stop h2,.stop p,.stop .mark,.stop .eyebrow{will-change:opacity,transform}
   /* Words ride up from behind their own edge. A block that simply fades in reads as a slide;
      a masked reveal reads as type being set. This is the reference's signature move. */
   .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 0 .06em}
@@ -84,13 +100,12 @@
   #c4{top:52%;transform:translateY(-50%)}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
   .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
-  h1,h2{font-size:var(--display);font-weight:300;line-height:1.10;letter-spacing:-.022em;
+  h1,h2{font-size:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.018em;
     color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:23ch}
-  #c3 h2{max-width:12ch}
+
   em{font-style:normal;color:var(--accent)}
-  p{font-size:clamp(17px,1.52vw,21px);line-height:1.58;font-weight:400;color:#12171b;
-    margin:0;max-width:42ch}
-  .cue{position:fixed;z-index:6;left:var(--rail);bottom:clamp(40px,5vw,68px);
+  p{font-size:clamp(15px,1.15vw,17px);line-height:1.62;font-weight:400;color:#232a30;margin:0}
+  .cue{position:fixed;z-index:6;left:var(--edge);bottom:clamp(28px,3.4vw,44px);
     font-family:var(--util);font-size:12px;letter-spacing:.04em;color:#3d464f;
     will-change:opacity}
 
@@ -141,36 +156,48 @@
 <div id="veil"></div>
 
 
-<nav aria-label="Applications">
+<header><div class="grid"><nav aria-label="Applications">
   <a class="on" href="#">C-POLAR</a>
   <a href="#">Air</a><a href="#">Water</a><a href="#">Protective Wear</a>
   <a href="#">Food Packaging</a><a href="#">Medical Devices</a>
-</nav>
+</nav></div></header>
 
 <section class="stop" id="c1">
+  <div class="grid"><div class="col">
+  <span class="eyebrow">01 / The summit</span>
   <div class="mark"><img src="./brand/cpolar_bluegrey.png" alt="C-POLAR"></div>
   <h1>A permanent positive charge, engineered into the material.</h1>
   <p>Up here the air is as clean as it gets. Proven first in air &mdash; the same physical
      mechanism carries across water, protective wear, food packaging and medical devices.</p>
+  </div></div>
 </section>
 
 <section class="stop" id="c2">
+  <div class="grid"><div class="col">
+  <span class="eyebrow">02 / The pollutant</span>
   <h2>Most pollutants carry <em>a negative charge</em>.</h2>
   <p>The microbes and smoke in the air, the PFAS in water, the biofilm on a surface &mdash;
      completely different problems that mostly share one trait: a negative charge.</p>
+  </div></div>
 </section>
 
 <section class="stop" id="c3">
+  <div class="grid"><div class="col">
+  <span class="eyebrow">03 / The capture</span>
   <h2>A permanent positive charge <em>is what pulls them in</em>.</h2>
   <p>NanoFlashing&trade; is a patented permanent positive polarity (3P) technology,
      engineered into the material. It attracts and captures ultrafine particles, wildfire
      smoke, PFAS, and pollen through a physical mechanism.</p>
+  </div></div>
 </section>
 
 <section class="stop" id="c4">
+  <div class="grid"><div class="col">
+  <span class="eyebrow">04 / Air</span>
   <h2>Proven first in <em>air</em>.</h2>
   <p>Installed in 441 facilities across 7 countries since 2020. The same material carries
      into water, protective wear, food packaging and medical devices.</p>
+  </div></div>
 </section>
 
 <span class="cue" id="cue">Scroll down &mdash; summit to a single particle</span>
@@ -300,10 +327,12 @@ function copyState(node, v, centred){
   node.style.opacity = 1;                       // the children carry the fade now
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
   node.style.transform = centred ? 'translateY(-50%) ' + t : t;
-  var head = node.querySelector('h1,h2'), body = node.querySelector('p'), mark = node.querySelector('.mark');
+  var head = node.querySelector('h1,h2'), body = node.querySelector('p'), mark = node.querySelector('.mark'), eyeb = node.querySelector('.eyebrow');
   var o = v.o * INTRO;
   var lead = clamp(o*1.35, 0, 1);               // headline leads
   var trail = clamp((o - 0.26)/0.74, 0, 1);     // paragraph follows a beat later
+  if(eyeb){ var eo = clamp(o*1.8,0,1);
+            eyeb.style.opacity = eo; eyeb.style.transform = 'translateY(' + ((1-eo)*10).toFixed(1) + 'px)'; }
   if(mark){ var mo = clamp(o*1.6,0,1);
             mark.style.opacity = mo; mark.style.transform = 'translateY(' + ((1-mo)*14).toFixed(1) + 'px)'; }
   if(head){

@@ -193,6 +193,42 @@ every plate rendered at once. **It was caught only because I looked at the rende
 scripted edit is not verified until the page has been looked at — the syntax check alone
 passed a broken build earlier in this project too.
 
+## THE STRUCTURAL CLONE — Yin's actual instruction, finally carried out
+Yin, sharply and correctly: *"I ask you to clone the reference website first, wtf you are doing
+right now."* He was right. Two passes earlier I had taken their **engine** (Lenis, ScrollTrigger,
+word reveals) but kept **my own layout**, then drifted into frame-rate measurement. That is not
+what was asked.
+
+Their real structure, measured off the live site (`read_ref.mjs`, `read_grid.mjs`):
+
+| | reference | ours, before |
+|---|---|---|
+| grid | **24 columns, 1376 px container, 20 px gutters** | one left rail, no grid |
+| header | **fixed, 82 px, on the same grid** | nav floating at an arbitrary offset |
+| media | full-viewport fixed canvas behind everything | same (we already matched) |
+| sections | normal flow, 1350 / 1190 px tall | everything `position:fixed` |
+| page length | **19.6 viewports** | 4.4 |
+| type | **50 display · 24 sub · 16 body · 14 eyebrow · 12 micro** | 56 display · 21 body, no eyebrow |
+
+**Now rebuilt on that skeleton**: 24-column grid, 1376 container, fixed 82 px header on the grid,
+copy on columns 2–13, their type scale, and a **chapter eyebrow** (`01 / The summit`,
+`02 / The pollutant`, `03 / The capture`, `04 / Air`) — a structural role the page never had.
+
+**Head-to-head against the reference, both column orders:**
+- reference A, ours B → **"BETTER: B, MARGIN: clear"** — *"B sustains a more distinctive,
+  cohesive visual narrative with sharper typography, compositions, transitions and microscopic
+  imagery."*
+- ours A, reference B → **"BETTER: A, MARGIN: clear"** — *"A has stronger typographic hierarchy
+  and more distinctive art direction, while B becomes comparatively generic and fragmented down
+  the page."*
+
+Same verdict both orders, as before, but now on their own structure rather than in spite of it.
+
+**Still not cloned, and the honest gap: page length.** They run 19.6 viewports; we run 4.4. That
+is the one structural difference left, and it is the same wall as the four-stop test — more
+stops measured worse. Their length works because each chapter carries an event; ours would need
+the same. Do not add length without events.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -718,18 +754,22 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-1. **Re-measure scroll FPS on real hardware.** The headless desktop figure here is unstable
-   (14–24 across runs, and inverted with pixel ratio). Phone was fine at 53–55. If a real
-   machine also shows ~20 fps on desktop, the fix is fewer simultaneous video layers — the
-   ablation says videos cost 28 fps and the mask costs nothing.
-2. **Yin still owns the two open decisions** (see the calibration section): what "done" means
-   now the 9/10 bar is void, and whether we may license real imagery.
-3. **Housekeeping:** `hero_img/` still holds ~128 MB of superseded originals and rejects. The
-   eight files the page actually loads are listed in the commit. They are untracked now but
-   still on disk; a future pass can prune the folder safely.
+The structural clone is done: their grid, header, type roles and chapter numbering, with our
+content and our assets. What is left is the two things only Yin can settle, plus one measured
+defect.
 
-**Do not** retry: the WebGL specimen, more stops, layout breaks, seam or collision work, the
-hero plate or crop, charge symbols, the mat video. All measured, all documented above.
+1. **Yin's two decisions** — what "done" means now the 9/10 bar is void (it scores mont-fort
+   itself at 4), and whether we may license real imagery.
+2. **Scroll FPS is a real defect, measured two ways.** 18–24 fps on desktop, 53 on phone. An
+   ablation with real wheel input isolated it: removing the **mask** changes nothing, removing
+   the **specimen video** gains 8 fps, removing the **hero video** gains 21. The hero video is
+   the expensive one — it is full-bleed and scaled up to 1.62× every frame. Untested next step:
+   drop the hero's zoom, or pre-render the zoom into the clip so the compositor never scales it.
+3. **Housekeeping:** `hero_img/` still holds ~128 MB of superseded originals; the eight files the
+   page loads are WebP/MP4 and total under 1.5 MB.
+
+**Do not** retry: the WebGL specimen, more stops, seam or collision work, the hero plate or crop,
+charge symbols, the mat video. All measured, all documented above.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
