@@ -10,3 +10,6 @@ _balance.mjs
 _gap_check.mjs
 _lifecycle.mjs
 _verify_widths.mjs
+
+# local-only replica of the reference site — never deploy: their code and images
+_ref_clone/
