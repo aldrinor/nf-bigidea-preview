@@ -43,7 +43,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
 | 2 | Down into cloud — charged particles | **7.0** | ⬆ best of the three — the PLUME recipe works |
-| 3 | NanoFlashing pulls them in — cloud clears | **4.0** | iterating — layers compete, no climax |
+| 3 | NanoFlashing pulls them in — cloud clears | **4.0** | stuck at 4 x3 — painted deposit is the cause |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,24 +85,24 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 7 / 4. Screen 2 jumped 4 -> 7 and Codex called it *"the only screen with
-decisive tension and depth."* **That happened because its particles were concentrated into
-ONE dense plume with a readable silhouette, instead of sprinkled evenly.** That is the
-recipe — apply it to the other two.
+Sequence is 6 / 7 / 4. Screen 2 holds at 7 and remains the model: ONE concentrated mass,
+high contrast, against a clean field.
 
-Screen 3 is now lowest (4). Codex: *"The headline, particle band, logo, body copy and fibre
-texture all compete. Nothing reads as the capture moment... the supposed climax has no
-visual climax."* Fix:
-1. Concentrate the captured particles into ONE visible convergence / contact zone on the
-   fibres — not a band spread across the full width.
-2. **Clear that zone of everything else** — move the NanoFlashing logo and the body copy out
-   of it. Right now they sit on top of the very thing they are describing.
-3. The convergence must be the brightest, densest, highest-contrast thing in the frame.
+**Screen 3 has now failed at 4 THREE TIMES** — bounded band, then one contact point, then
+real trajectories with a contact bloom. Codex says the same thing each time: *"a pale
+explanatory scene, not a forceful capture event... lacks impact."*
 
-Screen 1 (6) after that: the peak owns the frame only *partly*. It needs to be larger and
-higher-contrast still, or moved so it is unmistakably the subject.
+The cause is the lesson at the bottom of this file, unheeded again: **the deposit is painted
+canvas dots on a pale mat.** Screen 2 only worked once the cloud was a real photograph. The
+captured load has to be real too — a photographed filter surface heavy with dark trapped
+dust, high contrast against clean white media. Painted dots on a pale background can never
+carry the climax.
 
-Re-gate the SEQUENCE after each change.
+In progress: generating that macro plate (heavily loaded fibre band, dark and dramatic,
+thinning to clean white). When it lands: use it as the lower plate for stop 3, keep only a
+thin live particle stream arriving into it, and re-gate the sequence.
+
+Screen 1 (6) after that: the peak still owns the frame only partly.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
