@@ -20,8 +20,12 @@
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(100deg, rgba(238,242,246,.92) 0%, rgba(238,242,246,.64) 26%,
       rgba(238,242,246,.10) 48%, rgba(238,242,246,0) 62%);}
-  #dust{position:fixed;inset:0;z-index:2;pointer-events:none}
-  .chrome{position:fixed;inset:0;z-index:4;padding:clamp(52px,6.4vw,92px) var(--rail)}
+  /* the charged material — capture has to happen ON something visible */
+  #media{position:fixed;left:0;bottom:0;width:100%;height:52%;object-fit:cover;z-index:2;
+    -webkit-mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);
+            mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 16%, #000 38%, #000 100%);}
+  #dust{position:fixed;inset:0;z-index:3;pointer-events:none}
+  .chrome{position:fixed;inset:0;z-index:5;padding:clamp(52px,6.4vw,92px) var(--rail)}
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
     pointer-events:none}
@@ -37,10 +41,10 @@
   p{font-size:clamp(16px,1.5vw,19px);line-height:1.55;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
     font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
-  #mark{position:fixed;z-index:3;left:61.5%;top:50%;transform:translate(-50%,-50%);
+  #mark{position:fixed;z-index:4;left:62%;top:30%;transform:translate(-50%,-50%);
     width:clamp(200px,23vw,360px);height:auto;opacity:.95;pointer-events:none;
     filter:drop-shadow(0 0 40px rgba(255,255,255,.95))}
-  @media (max-width:760px){ #mark{width:56vw;left:50%;top:30%} }
+  @media (max-width:760px){ #mark{width:56vw;left:50%;top:22%} #media{height:44%} }
   @media (max-width:760px){
     nav{gap:14px} .lockup{max-width:none;right:var(--rail);top:52%}
     #veil{background:linear-gradient(180deg, rgba(238,242,246,.94) 0%, rgba(238,242,246,.55) 46%, rgba(238,242,246,0) 72%)}
@@ -50,6 +54,7 @@
 </head>
 <body>
 <img id="plate" src="./hero_img/cloud_clear.png" alt="Cloud torn open around a clearing of pure calm air.">
+<img id="media" src="./hero_img/fibre.jpg" alt="A charged nonwoven filter surface holding captured particles.">
 <div id="veil"></div>
 <canvas id="dust"></canvas>
 <img id="mark" src="./brand/nanoflashing_bluegrey.png" alt="NanoFlashing">
@@ -89,7 +94,7 @@ function sizeDust(){
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 46 : 104;
+  var n = innerWidth<760 ? 70 : 165;
   parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
 }
 
@@ -97,15 +102,12 @@ function sizeDust(){
    taken out of the airstream. The plate already shows the cloud torn open behind it. */
 function spawn(anywhere){
   var depth=Math.pow(Math.random(),0.7), x, y;
-  if(anywhere){ x=Math.random()*innerWidth; y=Math.random()*innerHeight; }
-  else { var s=(Math.random()*4)|0;
-    if(s===0){x=Math.random()*innerWidth;y=-60;}
-    else if(s===1){x=Math.random()*innerWidth;y=innerHeight+60;}
-    else if(s===2){x=-60;y=Math.random()*innerHeight;}
-    else {x=innerWidth+60;y=Math.random()*innerHeight;} }
+  x=Math.random()*innerWidth;
+  y = anywhere ? Math.random()*innerHeight*0.52 : -60-Math.random()*220;
   return { x:x, y:y, r:0.35+Math.pow(depth,3.6)*10.0, vy:3+depth*12,
     drift:(Math.random()-0.5)*14, ph:Math.random()*Math.PI*2, jit:0.5+Math.random()*1.6,
-    a:0.10+Math.pow(depth,1.8)*0.60, mark:Math.random()<0.26, held:0, depth:depth };
+    a:0.10+Math.pow(depth,1.8)*0.60, mark:Math.random()<0.26, held:0, stuck:false,
+    stickY: Math.random()*innerHeight*0.34, depth:depth };
 }
 sizeDust(); addEventListener('resize', sizeDust);
 var t0=performance.now(), last=t0, frames=0, winStart=t0;
@@ -114,18 +116,22 @@ function frame(now){
   dx.clearRect(0,0,innerWidth,innerHeight);
   parts.sort(function(a,b){return a.depth-b.depth;});
 
-  var CX=innerWidth*0.615, CY=innerHeight*0.50;
+  var SURF=innerHeight*0.52;                 // the top of the charged material
   for(var i=0;i<parts.length;i++){
     var p=parts[i];
-    var ddx=CX-p.x, ddy=CY-p.y, dist=Math.max(26,Math.sqrt(ddx*ddx+ddy*ddy));
-    var pull=(1600/dist)*(0.55+p.depth*0.90);
-    p.x+=(ddx/dist)*pull*dt; p.y+=(ddy/dist)*pull*dt;
-    var grip=Math.min(1,220/dist);
-    p.y+=p.vy*dt*(1-grip)*0.5;
-    p.x+=Math.sin(t*0.22+p.ph)*p.drift*p.jit*dt*(1-grip);
-    if(dist<40){ p.held+=dt; p.a*=(1-dt*1.8); }
-    if(p.held>0.6 || p.y>innerHeight+80 || p.y<-160 || p.x<-160 || p.x>innerWidth+160){
-      parts[i]=spawn(false); continue; }
+    if(p.stuck){
+      // held on the material: it stays put and stops being airborne
+      p.held+=dt;
+      if(p.held>2.4){ parts[i]=spawn(false); continue; }
+    } else {
+      // drawn DOWN into the charged surface, accelerating as it closes
+      var gap=Math.max(14, SURF - p.y);
+      var pull=(900/gap)*(0.60+p.depth*0.95);
+      p.y += (p.vy + pull)*dt;
+      p.x += Math.sin(t*0.22+p.ph)*p.drift*p.jit*dt*Math.min(1,gap/260);
+      if(p.y >= SURF + p.stickY){ p.stuck=true; p.y = SURF + p.stickY; }
+      if(p.x<-160 || p.x>innerWidth+160){ parts[i]=spawn(false); continue; }
+    }
     var sp=SPRITES[Math.min(5,Math.round((1-p.depth)*5))];
     var sz=p.r*(3.0+(1-p.depth)*3.4);
     dx.globalAlpha=p.a; dx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);
