@@ -41,9 +41,9 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
+| 1 | Mountain — C-POLAR + 5 applications | **7.0** | iterating |
 | 2 | Down into cloud — charged particles | **7.0** | iterating |
-| 3 | NanoFlashing pulls them in — cloud clears | **5.0** | iterating — climax 'partly', foreground competes |
+| 3 | NanoFlashing pulls them in — cloud clears | **6.0** | iterating — radial silhouette still reads as burst |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,21 +85,23 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 7 / 5.
+Sequence is **7 / 7 / 6** — up from 6/7/5, and from 5/3/2 when Yin rejected the set.
 
-Screen 3 is now ONE photograph — the whole composite (cloud plate, loaded mat, painted
-particles) was deleted and replaced with a single high-speed macro of soot hitting white
-fibre. Codex: climax now reads **partly** — *"it has impact, but reads more like an explosion
-or a stain than particles being captured. Reverse the motion cues: make particles visibly
-converge INWARD toward a dominant capture point; the current outward radial burst
-contradicts 'what pulls them in'."*
+Screen 3 reached 6 by: replacing the composite with one real photograph, then fixing the
+motion SEMANTICS (the first plate radiated outward, which contradicted "pulls them in"), then
+adding a live inward-converging layer whose trails taper the correct way.
 
-That is exactly right and it is a semantic error, not a craft one: a spray hitting a surface
-radiates OUTWARD, which says the opposite of attraction. In progress: regenerating the plate
-with all motion streaks pointing INWARD from the frame edges toward a single dark clump —
-iron-filings-to-a-magnet, converging, nothing radiating away. Swap it in and re-gate.
+Codex on what remains (screen 3, lowest): *"Break the perfect radial-burst silhouette. Show
+more distinct particles approaching from the perimeter with fewer, shorter trails near the
+core; the current black starburst overwhelms the intended inward motion."*
+So:
+1. The plate's dense black core is too symmetric — crop or offset it so the silhouette is
+   not a perfect starburst, or generate a plate with an asymmetric, directional approach.
+2. Live layer: fewer trails near the core, more distinct individual particles further out.
+3. Shorten trails as they close, so the core is a destination rather than a sunburst centre.
 
-After that, screens 1 (6) and 2 (7) both still need one element that decisively owns the frame.
+Screens 1 and 2 both sit at 7. Their standing note is unchanged: one element must decisively
+own the frame.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
