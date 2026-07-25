@@ -109,7 +109,7 @@ function sizeDust(){
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 22 : 46;
+  var n = innerWidth<760 ? 30 : 64;
   parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
 }
 
@@ -159,9 +159,9 @@ function spawn(anywhere){
     lane: lane, jit: jit,
     x: lane.x0 + (lane.x1 - lane.x0) * prog + jit,
     y: y,
-    px: 0, py: 0,                                   // previous position, for the trail
+    trail: [],                                      // real path history -> visible trajectory
     r: 0.9 + Math.pow(depth, 2.4) * 6.2,
-    v: 300 + depth * 420,          // through the air fast: few are ever airborne                           // fall speed
+    v: 420 + depth * 620,          // through the air fast: few are ever airborne                           // fall speed
     ph: Math.random() * Math.PI * 2,
     a: 0.14 + Math.pow(depth, 1.6) * 0.62,
     mark: Math.random() < 0.16,
@@ -178,6 +178,16 @@ function frame(now){
   var t=(now-t0)/1000, dt=Math.min(0.05,(now-last)/1000); last=now;
   dx.clearRect(0,0,innerWidth,innerHeight);
   parts.sort(function(a,b){return a.depth-b.depth;});
+
+  // --- contact bloom: the reaction where the stream meets the material ---
+  {
+    var bg = dx.createRadialGradient(HOT, SURF, 0, HOT, SURF, innerWidth*0.16);
+    bg.addColorStop(0,   'rgba(255,255,255,0.92)');
+    bg.addColorStop(0.35,'rgba(255,255,255,0.42)');
+    bg.addColorStop(1,   'rgba(255,255,255,0)');
+    dx.fillStyle = bg;
+    dx.beginPath(); dx.arc(HOT, SURF, innerWidth*0.16, 0, Math.PI*2); dx.fill();
+  }
 
   // --- deposits already captured: drawn first, they sit IN the mat ---
   for (var k = 0; k < ANCHORS.length; k++){
@@ -206,15 +216,16 @@ function frame(now){
         continue;
       }
     } else {
-      p.px = p.x; p.py = p.y;
+      p.trail.push(p.x, p.y); if(p.trail.length>16) p.trail.splice(0,2);
       // accelerate toward the material as the charge takes hold
       var gap  = Math.max(10, SURF - p.y);
-      var pull = 260 / Math.max(0.35, gap / innerHeight * 3.2);
+      var pull = 520 / Math.max(0.30, gap / innerHeight * 3.2);
       p.y += (p.v + pull) * dt;
       // follow the converging lane
       var prog = Math.max(0, Math.min(1, p.y / SURF));
       var want = p.lane.x0 + (p.lane.x1 - p.lane.x0) * prog + p.jit;
-      p.x += (want - p.x) * Math.min(1, dt * 3.4);
+      var squeeze = 1.0 + 2.4 * Math.pow(prog, 2.0);   // lanes tighten toward the point
+      p.x += (want - p.x) * Math.min(1, dt * 3.4 * squeeze);
       p.x += Math.sin(t * 0.7 + p.ph) * 6 * dt * (1 - prog);
 
       if (p.y >= SURF){
@@ -237,12 +248,18 @@ function frame(now){
       }
       if (p.x < -160 || p.x > innerWidth + 160){ parts[i] = spawn(false); continue; }
 
-      // TRAIL — this is what turns scattered dots into a visible flow
-      if (p.py && p.depth > 0.30 && Math.abs(p.y-p.py) < innerHeight*0.06 && Math.abs(p.x-p.px) < innerWidth*0.04){
-        dx.globalAlpha = p.a * 0.34;
+      // TRAJECTORY — a long tapered track along the real path. This is what makes a still
+      // frame read as particles ARRIVING at speed rather than resting on a surface.
+      var tr = p.trail;
+      if (tr.length >= 4 && p.depth > 0.22){
         dx.strokeStyle = 'rgba(38,52,66,1)';
-        dx.lineWidth = Math.max(0.5, p.r * 0.42);
-        dx.beginPath(); dx.moveTo(p.px, p.py); dx.lineTo(p.x, p.y); dx.stroke();
+        dx.lineCap = 'round';
+        for (var q = 0; q < tr.length - 2; q += 2){
+          var f0 = q / (tr.length - 2);                 // 0 oldest .. 1 newest
+          dx.globalAlpha = p.a * 0.55 * f0 * f0;
+          dx.lineWidth = Math.max(0.4, p.r * 0.75 * f0);
+          dx.beginPath(); dx.moveTo(tr[q], tr[q+1]); dx.lineTo(tr[q+2], tr[q+3]); dx.stroke();
+        }
       }
     }
 
