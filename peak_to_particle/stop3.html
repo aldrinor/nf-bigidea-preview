@@ -14,8 +14,8 @@
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
-  #plate{position:fixed;left:-18%;top:-14%;width:150%;height:142%;object-fit:cover;object-position:44% 38%;z-index:0;
-    filter:contrast(1.12) brightness(1.01);}
+  #plate{position:fixed;left:-2%;top:-2%;width:104%;height:104%;object-fit:cover;object-position:58% 46%;z-index:0;
+    filter:contrast(0.86) brightness(1.13) saturate(0.96);}
   /* one soft veil only, to seat the copy — never enough to flatten the photograph */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(240,244,248,.34) 0%, rgba(240,244,248,0) 14%);}
@@ -95,7 +95,7 @@ function fit(){
   px.setTransform(dpr,0,0,dpr,0,0);
   CX=innerWidth*0.545; CY=innerHeight*0.50;              // the black core on the plate
   R0=Math.max(innerWidth,innerHeight)*0.62;
-  var n = innerWidth<760 ? 38 : 86;
+  var n = innerWidth<760 ? 30 : 62;
   P=[]; for(var i=0;i<n;i++) P.push(mk(Math.random()));
 }
 function mk(seed){
@@ -128,7 +128,7 @@ function loop(now){
       var ra=p.r+len*f1, rb=p.r+len*f2;
       var ax=CX+Math.cos(p.a)*ra, ay=CY+Math.sin(p.a)*ra*0.62;
       var bx=CX+Math.cos(p.a)*rb, by=CY+Math.sin(p.a)*rb*0.62;
-      px.strokeStyle='rgba(18,24,32,1)';
+      px.strokeStyle='rgba(46,58,72,1)';
       px.globalAlpha=0.72*Math.pow(1-f1,2.2)*(1-0.75*closeness);   // trail thins as it lands
       px.lineWidth=Math.max(0.4, p.w*(0.35+1.5*(1-f1))); // tight at the front, wide behind
       px.lineCap='round';
@@ -136,7 +136,7 @@ function loop(now){
     }
     // the leading head
     px.globalAlpha=0.55+0.42*(1-closeness);            // distinct out wide, merges at the core
-    px.fillStyle='rgba(12,18,26,1)';
+    px.fillStyle='rgba(38,50,64,1)';
     px.beginPath(); px.arc(cx,cy,p.w*(0.50+0.55*(1-closeness)),0,Math.PI*2); px.fill();
   }
   px.globalAlpha=1;
