@@ -29,7 +29,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **7.0** | authored peak; closing the last 3 gaps |
+| 1 | Mountain — C-POLAR + 5 applications | **7.8** | authored peak v2; 3 gaps left to 9 |
 | 2 | Down into cloud — charged particles | — | not built |
 | 3 | NanoFlashing pulls them in — cloud clears | — | not built |
 | 4 | Clean sky — Air | — | not built |
@@ -40,7 +40,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | 9 | Earth from space | — | not built |
 | 10 | Contact | — | not built |
 
-Screen 1 history: 3.5 → 5.0 → 5.8 → **7.0**.
+Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → **7.8**.
 
 ## What was learned (do not redo these)
 - **Public tile elevation dies at ~30 m.** Measured: detail per ground-metre FALLS with
@@ -55,16 +55,21 @@ Screen 1 history: 3.5 → 5.0 → 5.8 → **7.0**.
 - Yin: *"use any mountain, or just use reference mountain, make our life simple"* — the peak
   does not have to be a real named Banff summit.
 
-## Codex's three open gaps on screen 1 (from the 7.0 pass)
-1. Peak too small / conventional → crop much closer, one glaciated mass dominating.
-2. Weak atmospheric integration → dense foreground cloud wrapping and obscuring the base.
-3. Tonality flat and grey → push luminous ice-blue separation, softer dreamlike depth.
+## Codex's open gaps on screen 1 (from the 7.8 pass)
+CLOSED at 7.8: atmospheric integration — cloud now convincingly wraps and obscures the base.
+Still open:
+1. **Generic silhouette** → shift/crop the summit toward centre; simplify to ONE unmistakable
+   pyramidal form, a sculptural icon rather than a conventional alpine photograph.
+2. **Over-detailed rock texture** → reduce clarity and local contrast, especially on the
+   foreground faces; keep sharpness only near the summit.
+3. **Clouds read as horizontal layers** → contour-following wisps and partial face occlusion,
+   so mist moves THROUGH the mountain rather than across it.
 
 ## NEXT ACTION
-Collect the two re-generated peaks (closer crop + wrapping cloud + ice-blue tonality),
-pick the stronger, re-gate. Then put the live volumetric cloud pass over the chosen still,
-add the C-POLAR logo and the 5 applications, and re-gate for >= 9.
-Then build stop 2 (descent into cloud) and continue down the list.
+Generate hero v3 against the three gaps above (centred pyramidal icon, softer foreground
+rock, mist threading through the faces). Gate it. Repeat until >= 9.
+Then: put the live volumetric cloud pass over the chosen still so it breathes, add the
+C-POLAR logo and the 5 applications, re-gate. Then build stop 2 (descent into cloud).
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\`
