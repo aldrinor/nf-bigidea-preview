@@ -166,6 +166,8 @@ var P = 0;
 var PARKED = false;   // set when the render harness pins the video to a fixed second
 var PLATE = {l:-0.06, t:-0.06, w:1.12, h:1.12, iw:2688, ih:1520};
 var MOTE_SRC = {cx:0.6827, cy:0.5082, w:0.4509, ar:1.1312};
+/* how far the micrograph is still pulled back out of the summit's white field */
+function smokeScale(p){ return 1 + 0.40 * (1 - smooth(0.30, 1.15, p)); }
 function moteHome(){
   var bw=innerWidth*PLATE.w, bh=innerHeight*PLATE.h;
   var bx=PLATE.l*innerWidth,  by=PLATE.t*innerHeight;
@@ -177,6 +179,9 @@ function moteHome(){
 /* where the contaminant is at any point of the descent, in real pixels */
 function moteAt(p){
   var h=moteHome();
+  // the cutout has to ride the micrograph's own pull-back, or it drifts off its registration
+  var S=smokeScale(p), mx=innerWidth/2, my=innerHeight/2;
+  h={ x: mx+(h.x-mx)*S, y: my+(h.y-my)*S, w: h.w*S };
   /* It lands ON the deposit that is already in the photograph, at that deposit's own size,
      so the two register as one object. It used to shrink to a dot beside a much larger
      photographed deposit, which the gate read as "pasted over the mat, then a different-sized
@@ -251,14 +256,18 @@ function layout(){
      the seven-frame strip: "the pacing is hold-cut-hold-cut... too much scroll produces
      almost no visible change, followed by major state changes." Nothing is allowed to sit
      still now; the opacity ramps are also wider so no change lands as a cut. */
+  /* A MATCH TRANSITION, not a fade. The judge: "let the summit cloud become the micrograph's
+     white field while the camera remains locked onto the same particle." The summit zooms hard
+     into its own cloud until the frame is white; the micrograph starts already inside that
+     white field and pulls back out of it. The two white fields coincide, so there is no cut. */
+  var pkZoom = 1 + 0.62 * smooth(0.18, 1.08, p);
   el.peak.style.opacity   = 1 - smooth(0.45, 1.10, p);
   el.peak.style.transform = 'translateY(' + (-p*0.070*vh).toFixed(1) + 'px) scale(' +
-                            (1 + p*0.035).toFixed(4) + ')';
-  // atmosphere is the one layer carried across the seam, so the scale change has
-  // somewhere to happen rather than being a straight swap of assets
+                            pkZoom.toFixed(4) + ')';
 
   el.smoke.style.opacity   = band(p, 0.50, 1.10, 1.16, 2.10);
-  el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px)';
+  el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px) scale(' +
+                             smokeScale(p).toFixed(4) + ')';
   // the specimen turns under the beam as the descent carries past it
   if(el.smoke.tagName === 'VIDEO' && el.smoke.readyState >= 1 && !PARKED){
     var want = clamp((p - 1.20) * 7.0, 0, (el.smoke.duration || 10) - 0.12);

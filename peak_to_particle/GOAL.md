@@ -50,12 +50,12 @@ both micro screens sharing one instrument **6.8**.
 There are now TWO instruments, and they measure different things. Report both.
 
 - **3-row strip** (three scroll positions, ref left / ours right) — comparable with every
-  earlier number in this file. Current: 6.6, 6.7, 7.6 → **7.0**, the best it has been.
+  earlier number in this file. Current: 6.3, 6.7, 7.1 → **6.7**.
 - **7-frame scroll strip** (`gate_scroll.png`, prompt `/tmp/gate_scroll.txt`) — seven
   consecutive frames of the descent, the only instrument that can judge continuity.
   It was **5.0** three passes ago (*"reads as separate sticky slides"*), rose to **6.0** when
   the cross-fades were replaced with real entrances, sat at 5.7 for three builds, and now reads
-  6.45 last pass and now **6.0, 6.0, 6.5, 6.8 → 6.33**, flat. Its spread is wide — single samples have come back anywhere from 4.5 to 6.8 on
+  and now **6.0, 6.5, 6.5, 7.3 → 6.58**, its best. Its spread is wide — single samples have come back anywhere from 4.5 to 6.8 on
   one image — so it needs four samples, not two.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
@@ -72,7 +72,7 @@ a number from a run whose output was partly truncated.
 | 2 | Down into cloud — the pollutant | **6.7** | |
 | 3 | NanoFlashing pulls them in | **6.9** | |
 
-Scroll continuity (7-frame instrument): **6.33**.
+Scroll continuity (7-frame instrument): **6.58**, its best.
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -393,24 +393,49 @@ whole `#mist` layer have been **deleted**. Nothing on this page is painted any m
    breaks the capture. Parking it at frame 0 to protect registration would leave no motion
    where it matters, which is the whole point. The mat stays a still.
 
+## A MATCH TRANSITION FROM SUMMIT TO MICROGRAPH — scroll 6.33 → 6.58
+A fresh blunt read was taken first, rather than working from this file's history, and its
+number-two note came with an exact fix: *"let the summit cloud become the micrograph's white
+field while the camera remains locked onto the same particle. Keep its screen position and
+scale progression continuous while mountain detail dissolves gradually into fibre detail."*
+
+That is now built. The summit plate **zooms hard into its own cloud** (scale 1 → 1.62) until the
+frame is white; the micrograph **starts already inside that white field** (scale 1.40) and pulls
+back out of it. The two white fields coincide, so there is nothing to see as a cut — at p ≈ 0.8
+the mountain ridge is still faintly visible dissolving into the micrograph's substrate while
+the specimen sits locked in frame.
+
+**One trap to know:** the cutout's home position is computed from the plate's `object-fit:cover`
+geometry, which knows nothing about a CSS `scale`. Scaling the micrograph without applying the
+same scale to the cutout drifts it straight off its registration. `moteAt()` now transforms the
+home position and size by `smokeScale(p)` about the viewport centre.
+
 ## NEXT ACTION
-Current: 3-row 7.0 · scroll 6.33 · bar 9.
+Current: 3-row 6.7 · scroll 6.58 · bar 9.
 
-Both remaining plates that CAN move now move, and the mat is ruled out with evidence. The two
-instruments now disagree slightly — the stills read 7.0, the scroll reads 6.33 — and the scroll
-gate's standing complaint is no longer about motion or seams. Re-read its latest notes before
-choosing, then:
+The fresh read named three problems. Number two is now closed (the match transition above).
+Number one — the collision — has been worked four times and each fix was correct but bought
+nothing; leave it. **Number three has never been touched and its fix is specific:**
 
-1. **Get a fresh, blunt read of what is now worst.** Four of the last six passes were spent
-   closing a complaint that had already been named. Run the scroll gate once for notes only,
-   and pick the target from what it actually says now rather than from this file's history.
-2. **Likely candidate from the last few reads: the page is only three stops long.** The
-   reference is a long, sustained world; ours resolves in three screens and stops. Screens 4–10
-   exist in `PLAN.md` and have never been built. It is possible the sequence cannot reach 9 at
-   three stops no matter how good those three are — worth testing by building stop 4 (clean
-   sky / Air) cheaply and re-gating the four together.
-3. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
-   do more seam work, raise the landing size, or retry the mat video. All measured dead ends.
+> *"The art direction looks like a generic technology template. Tiny navigation, left-aligned
+> grey headline, blue keyword and small paragraph are conventional SaaS styling. Against the
+> ambitious footage, the typography feels timid and interchangeable. Large areas look
+> unfinished rather than intentionally minimal.
+> Fix: larger and more decisive type, stronger contrast, fewer copy changes, and text movement
+> synchronised with the physical event. **Treat the particle capture as the composition — not
+> as imagery occupying the right half of a standard two-column hero.**"*
+
+1. **Break the two-column split.** Every stop is copy-left / picture-right. Let the specimen
+   own the whole frame and make the copy subordinate to it — small, set against the empty part
+   of the image, moving with the capture rather than parked in a column. This is the one
+   structural thing on the page that has never changed since the first day.
+2. **Fewer copy changes.** Three full headline swaps in three stops is part of why it reads as
+   three slides. Consider one headline that persists with only its final clause changing.
+3. **If that does not move it, test the length hypothesis.** The page resolves in three stops
+   and stops; the reference is long and sustained. Build stop 4 (clean sky / Air) cheaply from
+   `PLAN.md` and gate the four together. This is still untested.
+4. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
+   do more seam or collision work, raise the landing size, or retry the mat video.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
