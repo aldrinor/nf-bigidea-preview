@@ -42,8 +42,8 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
-| 2 | Down into cloud — charged particles | **7.0** | ⬆ best of the three — the PLUME recipe works |
-| 3 | NanoFlashing pulls them in — cloud clears | **4.0** | stuck at 4 x3 — painted deposit is the cause |
+| 2 | Down into cloud — charged particles | **6.0** | iterating |
+| 3 | NanoFlashing pulls them in — cloud clears | **5.0** | iterating — climax 'partly', foreground competes |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -85,24 +85,28 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 7 / 4. Screen 2 holds at 7 and remains the model: ONE concentrated mass,
-high contrast, against a clean field.
+Sequence is 6 / 6 / 5.
 
-**Screen 3 has now failed at 4 THREE TIMES** — bounded band, then one contact point, then
-real trajectories with a contact bloom. Codex says the same thing each time: *"a pale
-explanatory scene, not a forceful capture event... lacks impact."*
+Screen 3 moved 4 -> 5 once the painted deposit was replaced with a real macro plate of a
+filter loaded with black captured soot, and the streams were aimed at the summit of that
+ridge. Codex now says the climax reads **partly**.
 
-The cause is the lesson at the bottom of this file, unheeded again: **the deposit is painted
-canvas dots on a pale mat.** Screen 2 only worked once the cloud was a real photograph. The
-captured load has to be real too — a photographed filter surface heavy with dark trapped
-dust, high contrast against clean white media. Painted dots on a pale background can never
-carry the climax.
+Its remaining note: *"the chaotic foreground and scattered particles obscure the exact
+moment of impact... funnel the particles into a clearly defined charged surface where they
+visibly stop and accumulate; reduce the foreground debris competing with that moment."*
+So:
+1. Quieten the FOREGROUND of the loaded plate — the loose fibres in the bottom third compete
+   with the impact. Darken/blur/crop them so the summit is the only sharp thing.
+2. Make the particles visibly STOP at the summit — a brief held state before they fade,
+   not a continuous rain through it.
+3. Fewer, larger, higher-contrast arrivals. Volume is currently reading as noise again.
 
-In progress: generating that macro plate (heavily loaded fibre band, dark and dramatic,
-thinning to clean white). When it lands: use it as the lower plate for stop 3, keep only a
-thin live particle stream arriving into it, and re-gate the sequence.
+Screens 1 and 2 both sit at 6 and need the same thing they have always needed: one element
+that decisively owns the frame.
 
-Screen 1 (6) after that: the peak still owns the frame only partly.
+**Honest note on pace:** screen 3 has taken many passes (2 -> 3 -> 4 -> 4 -> 4 -> 5). The
+gains came only from replacing painted elements with real photography. When a screen stalls
+twice at the same number, stop tuning parameters and ask what is still painted.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
