@@ -410,32 +410,46 @@ geometry, which knows nothing about a CSS `scale`. Scaling the micrograph withou
 same scale to the cutout drifts it straight off its registration. `moteAt()` now transforms the
 home position and size by `smokeScale(p)` about the viewport centre.
 
+## THE TWO-COLUMN BREAK WAS BUILT, MEASURED AND REVERTED
+The gate's third note was: *"treat the particle capture as the composition — not as imagery
+occupying the right half of a standard two-column hero."* That was built in full: the plates
+were shifted so the specimen sits near the middle of the frame rather than in the right third,
+and all three copy blocks became a low title block over the empty corner instead of a centred
+column beside the picture.
+
+**It measured worse.** Scroll 6.0, 6.0, 6.4, 6.4, 6.5 → **6.26** against 6.58; 3-row 6.4, 6.6 →
+**6.5** against 6.7. Reverted.
+
+**And here is the useful part: the same gate run that scored the rebuilt composition still said
+*"left-aligned corporate headline and a large object on the right repeat almost unchanged...
+break the repeated two-column composition."*** The copy was at the bottom and the specimen was
+centred when it wrote that. **That note is boilerplate, not a reading of the actual frames.**
+Do not spend another pass on it. This is the second time a repeated complaint has turned out
+not to track what is on screen — the first was the phantom charge symbol the gate hunted for
+after it had been deleted.
+
 ## NEXT ACTION
-Current: 3-row 6.7 · scroll 6.58 · bar 9.
+Current: 3-row 6.7 · scroll 6.58 · bar 9. (The build is back to the state that measured those.)
 
-The fresh read named three problems. Number two is now closed (the match transition above).
-Number one — the collision — has been worked four times and each fix was correct but bought
-nothing; leave it. **Number three has never been touched and its fix is specific:**
+Two things left, one untested and one expensive. Do the untested one first.
 
-> *"The art direction looks like a generic technology template. Tiny navigation, left-aligned
-> grey headline, blue keyword and small paragraph are conventional SaaS styling. Against the
-> ambitious footage, the typography feels timid and interchangeable. Large areas look
-> unfinished rather than intentionally minimal.
-> Fix: larger and more decisive type, stronger contrast, fewer copy changes, and text movement
-> synchronised with the physical event. **Treat the particle capture as the composition — not
-> as imagery occupying the right half of a standard two-column hero.**"*
+1. **Test the length hypothesis — this has never been tried.** The page resolves in three stops
+   and stops; the reference is long and sustained. Build stop 4 (clean sky / Air) from
+   `PLAN.md` and gate the FOUR together. If four stops score materially better than three, the
+   answer is to build stops 5–10 rather than to keep polishing three. If it makes no
+   difference, that is settled too and worth knowing.
+   Keep it cheap: one generated plate in the same instrument language, the copy pattern that
+   already exists, and the same scroll driver — `p` simply runs further.
 
-1. **Break the two-column split.** Every stop is copy-left / picture-right. Let the specimen
-   own the whole frame and make the copy subordinate to it — small, set against the empty part
-   of the image, moving with the capture rather than parked in a column. This is the one
-   structural thing on the page that has never changed since the first day.
-2. **Fewer copy changes.** Three full headline swaps in three stops is part of why it reads as
-   three slides. Consider one headline that persists with only its final clause changing.
-3. **If that does not move it, test the length hypothesis.** The page resolves in three stops
-   and stops; the reference is long and sustained. Build stop 4 (clean sky / Air) cheaply from
-   `PLAN.md` and gate the four together. This is still untested.
-4. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
-   do more seam or collision work, raise the landing size, or retry the mat video.
+2. **The specimen itself may be the ceiling.** The gate: *"the pollutant looks like generic
+   CGI/AI foam. Its regular spherical clusters, soft surface and clean silhouette do not
+   resemble convincing soot."* Real soot is irregular, angular and rough, not a heap of even
+   spheres. Regenerating it would mean redoing `sem_light.png`, `sem_cut.png` AND `sem_turn.mp4`
+   and re-measuring every registration constant, so only attempt it after the length test.
+
+3. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
+   do more seam or collision work, raise the landing size, retry the mat video, or try to
+   break the two-column composition again. All measured dead ends.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
