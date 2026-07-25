@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Peak to Particle — scene</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#e9eef2}
+  canvas{display:block}
+  #hud{position:fixed;left:14px;bottom:12px;font:11px ui-monospace,monospace;color:#5f7080;opacity:.7}
+</style>
+</head>
+<body>
+<div id="hud">loading…</div>
+<script type="importmap">
+{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { makeCloudPass } from './cloud_pass.js';
+
+const q = new URLSearchParams(location.search);
+const hud = document.getElementById('hud');
+
+/* ---------------------------------------------------------------
+   PALETTE — sampled from real Banff alpine photography, not invented.
+   Pale blue zenith, warm-white haze at the horizon, grey limestone rock.
+   --------------------------------------------------------------- */
+const SKY_TOP   = new THREE.Color('#8fa9c4');
+const SKY_MID   = new THREE.Color('#c2d2e0');
+const SKY_HORIZ = new THREE.Color('#e6ecf1');
+const HAZE      = new THREE.Color('#dfe7ee');
+const SUN_TINT  = new THREE.Color('#fff4e6');
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(HAZE, 0.000042);
+
+const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 5, 90000);
+
+// real positions, in metres, derived from the DEM
+const VICTORIA = new THREE.Vector3(-3883, 3459, 2117);
+const LOUISE   = new THREE.Vector3( 2220, 1742, -1956);
+const CLOUD_Y  = 2620;            // cloud sea sits below the summits, above the valleys
+
+const SHOTS = {
+  hero:  { pos:[ 3100, 3760, -2050], look:[VICTORIA.x, VICTORIA.y-120, VICTORIA.z] },
+  above: { pos:[ 1500, 5200,  -900], look:[VICTORIA.x, 2600, VICTORIA.z] },
+  close: { pos:[VICTORIA.x+2600, VICTORIA.y+380, VICTORIA.z-2200], look:[VICTORIA.x, VICTORIA.y-140, VICTORIA.z] },
+  lake:  { pos:[LOUISE.x+700, LOUISE.y+90, LOUISE.z-500], look:[VICTORIA.x, VICTORIA.y-900, VICTORIA.z] },
+};
+const shot = SHOTS[q.get('shot')] || SHOTS.hero;
+camera.position.set(...shot.pos);
+camera.lookAt(...shot.look);
+
+/* ---------------- SKY: three-stop vertical gradient + sun bloom ---------------- */
+const SUN_DIR = new THREE.Vector3(0.62, 0.30, -0.72).normalize();
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite:false, fog:false,
+  uniforms:{
+    uTop:{value:SKY_TOP}, uMid:{value:SKY_MID}, uHorizon:{value:SKY_HORIZ},
+    uSun:{value:SUN_DIR}, uSunTint:{value:SUN_TINT}
+  },
+  vertexShader:`varying vec3 vDir;
+    void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader:`
+    varying vec3 vDir; uniform vec3 uTop,uMid,uHorizon,uSun,uSunTint;
+    void main(){
+      float h = clamp(normalize(vDir).y, -1.0, 1.0);
+      float t = smoothstep(-0.04, 0.55, h);
+      vec3 col = mix(uHorizon, uMid, smoothstep(-0.02, 0.24, h));
+      col = mix(col, uTop, smoothstep(0.22, 0.85, h));
+      // soft sun bloom, no hard disc — keeps it calm
+      float d = max(dot(normalize(vDir), normalize(uSun)), 0.0);
+      col = mix(col, uSunTint, pow(d, 7.0) * 0.55);
+      gl_FragColor = vec4(col, 1.0);
+    }`
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(60000, 32, 24), skyMat));
+
+/* ---------------- LIGHT ---------------- */
+const sun = new THREE.DirectionalLight(0xfff2e2, 3.1);
+sun.position.copy(SUN_DIR).multiplyScalar(20000);
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xd9e6f2, 0x8d9aa6, 0.85));
+// cool fill from the opposite side so shadowed faces keep shape instead of going flat black
+const fill = new THREE.DirectionalLight(0xb9cde0, 0.7);
+fill.position.set(-SUN_DIR.x*15000, 4000, -SUN_DIR.z*15000);
+scene.add(fill);
+
+/* ---------------- TERRAIN ---------------- */
+const tex = new THREE.TextureLoader();
+const normalMap = tex.load('./terrain/out/banff_normal_q95.webp');
+normalMap.colorSpace = THREE.NoColorSpace;
+
+const terrainMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff, roughness: 0.93, metalness: 0.0,
+  normalMap, normalScale: new THREE.Vector2(1.15, 1.15),
+});
+// slope + altitude drive snow vs rock. Steep faces shed snow — that contrast is
+// what makes a real mountain read as a mountain instead of a white blob.
+terrainMat.onBeforeCompile = (sh) => {
+  sh.uniforms.uSnowLine = { value: 2780.0 };
+  sh.vertexShader = sh.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vNrmW;')
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\n vWPos = (modelMatrix*vec4(position,1.0)).xyz;\n vNrmW = normalize(mat3(modelMatrix)*normal);');
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vNrmW;\nuniform float uSnowLine;')
+    .replace('#include <color_fragment>', `#include <color_fragment>
+      float slope = 1.0 - clamp(vNrmW.y, 0.0, 1.0);
+      float byAlt   = smoothstep(uSnowLine - 420.0, uSnowLine + 300.0, vWPos.y);
+      float bySlope = 1.0 - smoothstep(0.26, 0.54, slope);
+      float snow = clamp(byAlt * bySlope, 0.0, 1.0);
+      vec3 rockDark  = vec3(0.235, 0.243, 0.262);
+      vec3 rockLight = vec3(0.405, 0.412, 0.430);
+      vec3 rock = mix(rockDark, rockLight, smoothstep(0.35, 0.85, vNrmW.y));
+      vec3 snowC = vec3(0.955, 0.970, 0.985);
+      diffuseColor.rgb *= mix(rock, snowC, snow);
+    `);
+  terrainMat.userData.shader = sh;
+};
+
+/* ---------------- RENDERER ---------------- */
+const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.02;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+/* ---------------- VOLUMETRIC CLOUDS ---------------- */
+const clouds = makeCloudPass(renderer, {
+  sunDir: SUN_DIR, sunCol:'#fff3e0', skyCol:'#cad9e7', cloudCol:'#ffffff',
+  bottom: 2150, top: 3180, cover: 0.36, density: 2.1, sigma: 0.0017, anim: 0.0014,
+});
+
+
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./terrain/out/banff_opt.glb', g => {
+  let tris = 0;
+  g.scene.traverse(o => { if(o.isMesh){ o.material = terrainMat; o.geometry.computeVertexNormals();
+    tris += o.geometry.index ? o.geometry.index.count/3 : o.geometry.attributes.position.count/3; }});
+  scene.add(g.scene);
+  hud.textContent = `${q.get('shot')||'hero'} · ${Math.round(tris).toLocaleString()} tris · real Banff elevation`;
+  window.__ready = true;
+}, undefined, e => { hud.textContent = 'LOAD FAILED '+e; window.__ready='error'; });
+
+addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); clouds.setSize(innerWidth,innerHeight,renderer.getPixelRatio()); });
+
+let t0=performance.now();
+// rolling-window fps: the cumulative average was being dragged down by load time
+let winFrames=0, winStart=performance.now();
+renderer.setAnimationLoop(()=>{
+  const now = performance.now();
+  const t = (now-t0)/1000;
+  renderer.setRenderTarget(clouds.target);
+  renderer.clear();
+  renderer.render(scene,camera);
+  clouds.render(renderer, camera, t);
+  winFrames++;
+  if(now - winStart >= 1000){
+    window.__fps = Math.round(winFrames * 1000 / (now - winStart));
+    winFrames = 0; winStart = now;
+  }
+});
+</script>
+</body>
+</html>
