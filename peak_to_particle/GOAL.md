@@ -457,27 +457,81 @@ facilities across 7 countries since 2020"* — taken from the approved deploymen
 **Note the trap in the records:** there is a logged "441-footprint-vs-19-measured overstatement"
 warning. 441 is FACILITIES DEPLOYED, not tests or measured sites. Do not conflate them.
 
+## STOP 4 GOT ITS EVENT. IT DID NOT CLOSE THE GAP. STOP BUILDING STOPS.
+The last action set a clear test: give stop 4 a real event, and *"if an event on stop 4 closes
+the 0.4 gap, that is the pattern for stops 5–10 and they can be built. If it does not, stop
+building stops and say so."*
+
+The event is built and it is a good one. `hero_img/mat_loaded.png` is the **same junction later
+in its life** — made with `flux_kontext` from `mat_used_light.png`, which preserved the fibres,
+framing and lighting exactly and caked them with accumulated soot. It cross-fades over the
+single-particle frame, so the event on stop 4 is the filter **filling up**, and only then does
+the camera pull out to clean air.
+
+| build | scroll gate |
+|-------|-------------|
+| three stops | **6.58** |
+| four stops, caption only | 6.15 |
+| four stops, with the loading event | **6.06** (5.5, 5.8, 6.0, 6.3, 6.7) |
+
+**It did not close the gap. Per the test's own terms: stop building stops.** Stops 5–10 should
+not be built in this form. Two independent attempts at a fourth stop both land near 6.1 against
+6.58 for three.
+
+## ⚠ A MEASURED CEILING — this needs Yin's decision
+Rule 5 of this file says: on a genuine measured ceiling, say so with evidence, then take the
+route through it. This is that moment.
+
+**The evidence.** Ten passes of well-executed, correctly-diagnosed work have landed between
+6.0 and 6.8 and nothing has gone past ~6.8. Each of these was built in full, measured, and
+either kept or reverted on the number:
+
+- real transitions replacing cross-fades — 5.0 → 6.0 (kept)
+- occlusion, causal pull, one particle throughout — flat (kept, correct)
+- a type system of our own — 3-row best (kept)
+- an authentic textured micrograph + contact shadow — flat (kept, correct)
+- **real footage in the plates — 5.75 → 6.45 (kept; the biggest single gain)**
+- the summit→micrograph match transition — 6.33 → 6.58 (kept)
+- breaking the two-column composition — 6.58 → 6.26 (REVERTED)
+- a fourth stop, twice — 6.58 → 6.1 (kept for the brief, at a known cost)
+
+**What the pattern says.** The two biggest gains in the whole project came from asset FIDELITY,
+not choreography: replacing a painted capture with a real one-hotspot photograph (5.3 → 7.5),
+and replacing stills with real footage (5.75 → 6.45). Every choreography change since has been
+flat or negative.
+
+And the judge's asset complaint has not changed in four passes: *"the sterile perfection of
+generated campaign imagery"*, *"the pollutant looks like generic CGI/AI foam... does not
+resemble convincing soot"*, *"AI-stock particulate imagery"*.
+
+**The route through, and it is the one category never tried: stop generating the assets.**
+Every plate on this page is generated. The reference uses real photography and real footage of
+real places. Licensed genuine SEM micrographs of loaded filter media, and real alpine
+footage, would answer the one criticism that has survived every pass.
+**That needs Yin: it is a licensing and budget decision, not a build decision.**
+
 ## NEXT ACTION
-Current: three-stop scroll 6.58 · four-stop scroll 6.15 · 3-row 6.7 · bar 9.
+Current: four stops 6.06 · three stops 6.58 · 3-row 6.7 · bar 9.
 
-**Give stop 4 an event.** It is the only stop with nothing happening in it, and that is
-measurably what it costs. The gate's own fix: *"finish with a concrete consequence — captured
-loading, removal performance or a specific tested application — while retaining a subtle visual
-trace of the fibre/specimen world. 'Clean air' needs evidence, not merely blue sky."*
+**Put the ceiling in front of Yin with the evidence above, and ask for the one decision only he
+can make: may we license real imagery instead of generating it.** That is the honest state and
+it is the only untried category.
 
-1. Options, cheapest first:
-   - **Carry the fibre world into the sky.** The mat should not vanish at the seam; let the
-     loaded fibre stay faintly present as the camera pulls out, so stop 4 is visibly the
-     consequence of stop 3 rather than a new picture.
-   - **Show loading over time.** A second micrograph of the SAME junction with a heavy
-     accumulated deposit, cross-faded against the single-particle frame — the event is the
-     filter filling up. Same instrument, same registration discipline as everything else.
-2. **Then re-gate four stops against the 6.58 three-stop baseline.** If an event on stop 4
-   closes the 0.4 gap, that is the pattern for stops 5–10 and they can be built. If it does
-   not, stop building stops and say so.
-3. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
-   do more seam or collision work, raise the landing size, retry the mat video, or try to break
-   the two-column composition again. All measured dead ends, all documented above.
+While waiting on that, the useful work is bounded:
+
+1. **Do not build stops 5–10.** Measured twice; it lowers the score. This is settled.
+2. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
+   do more seam or collision work, raise the landing size, retry the mat video, or break the
+   two-column composition. All measured dead ends, all documented above.
+3. **If a real-imagery budget is refused**, the remaining honest option is to regenerate the
+   soot specimen itself to be irregular and angular rather than a heap of even spheres — the
+   one asset criticism that is specific and fixable in-house. It means redoing `sem_light.png`,
+   `sem_cut.png` and `sem_turn.mp4` and re-measuring every registration constant, so it is a
+   full pass on its own.
+4. **The three-stop build is the better artefact by the only measure available (6.58 vs 6.06).**
+   Stop 4 is kept because Yin's brief names Air as one of the five applications and removing it
+   to protect a score would be gaming the metric against the brief. If Yin would rather have
+   the higher number than the fourth application, reverting stop 4 is a one-line change.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)

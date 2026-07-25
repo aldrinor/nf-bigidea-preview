@@ -44,6 +44,7 @@
     filter:contrast(1.02) brightness(1.01);
     -webkit-mask-image:radial-gradient(ellipse 9% 19% at 72.5% 50.4%, #000 0%, #000 46%, transparent 88%);
     mask-image:radial-gradient(ellipse 9% 19% at 72.5% 50.4%, #000 0%, #000 46%, transparent 88%)}
+  #pl_load {left:-6%;top:-6%;width:112%;height:112%;opacity:0;filter:contrast(1.02) brightness(1.01)}
   #pl_sky  {left:-6%;top:-6%;width:112%;height:112%;opacity:0;filter:contrast(1.02) saturate(.92)}
   #pl_fibre{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
 
@@ -112,6 +113,9 @@
        while everything else cross-fades and is drawn into the fibre. -->
   <div id="shadow"></div>
   <img id="mote" src="./hero_img/sem_cut.png" alt="">
+  <!-- the same junction later in its life. Cross-faded over the single-particle frame, so the
+       event on this stop is the filter FILLING UP rather than a caption over a backdrop. -->
+  <img id="pl_load" src="./hero_img/mat_loaded.png" alt="The same filter junction, heavily loaded with captured soot.">
   <img id="pl_sky" src="./hero_img/sky_clean.png" alt="Clean cold blue sky above a flat sea of cloud.">
   <img id="pl_fibre" src="./hero_img/mat_used_light.png" alt="An electron micrograph of nonwoven filter media.">
 </div>
@@ -218,7 +222,7 @@ function moteAt(p){
            innerWidth*0.235, Math.pow(e,0.85)),
     // held right through contact, then merged once it is registered on top of the deposit
     // it does NOT fade out. It lands and stays: it is the deposit.
-    o: smooth(0.26, 0.66, p) * (1 - smooth(2.45, 2.95, p))
+    o: smooth(0.26, 0.66, p) * (1 - smooth(2.30, 2.66, p))
   };
 }
 
@@ -234,6 +238,7 @@ var el = {
   c3:    document.getElementById('c3'),
   c4:    document.getElementById('c4'),
   sky:   document.getElementById('pl_sky'),
+  load:  document.getElementById('pl_load'),
   cue:   document.getElementById('cue')
 };
 
@@ -290,17 +295,22 @@ function layout(){
   // scroll is a continuous overlap rather than two held states either side of a cut
   /* the fourth stop: the camera comes back out of the material into clean air. The capture
      has happened; this is what it was for. */
-  var skyIn = smooth(2.45, 3.00, p);
+  /* the event: the same junction fills up, and only then does the camera pull out */
+  var loadIn = band(p, 2.30, 2.72, 2.88, 3.14);
+  el.load.style.opacity   = loadIn;
+  el.load.style.transform = 'scale(' + (1 + (1-smooth(2.30,2.72,p))*0.04).toFixed(4) + ')';
+
+  var skyIn = smooth(2.86, 3.16, p);
   el.sky.style.opacity   = skyIn;
-  el.sky.style.transform = 'scale(' + (1.14 - skyIn*0.14).toFixed(4) + ')';
+  el.sky.style.transform = 'scale(' + (1.12 - skyIn*0.12).toFixed(4) + ')';
 
   var fEnter = Math.max(0, 2.10 - p);   // begins the moment the pollutant beat settles
-  el.fibre.style.opacity   = band(p, 1.02, 2.10, 2.45, 3.00);
+  el.fibre.style.opacity   = band(p, 1.02, 2.10, 2.34, 2.70);
   var fTf = 'translateX(' + (fEnter*0.042*vw).toFixed(1) + 'px) scale(' +
             (1 + fEnter*0.030).toFixed(4) + ')';
   el.fibre.style.transform = fTf;
   // the same plate again, on top of the contaminant, closing over it as it lands
-  el.front.style.opacity   = band(p, 1.86, 2.22, 2.45, 2.95);
+  el.front.style.opacity   = band(p, 1.86, 2.22, 2.34, 2.66);
   el.front.style.transform = fTf;
 
   var m = moteAt(p);
@@ -320,7 +330,7 @@ function layout(){
   copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
   copyBesides(el.c2, band(p, 0.66, 1.08, 1.30, 1.58), (1 - p) * 62, m.y);
   copyBesides(el.c3, band(p, 1.62, 2.04, 2.36, 2.62),   (2 - p) * 62, m.y);
-  copyState(el.c4, { o: smooth(2.66, 3.02, p), dy: (3 - p) * 62 }, true);
+  copyState(el.c4, { o: smooth(2.78, 3.10, p), dy: (3 - p) * 62 }, true);
   el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
 
 
