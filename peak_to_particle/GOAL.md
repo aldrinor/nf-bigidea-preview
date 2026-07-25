@@ -50,13 +50,13 @@ both micro screens sharing one instrument **6.8**.
 There are now TWO instruments, and they measure different things. Report both.
 
 - **3-row strip** (three scroll positions, ref left / ours right) — comparable with every
-  earlier number in this file. Current: 6.6, 7.1, 7.1 → **6.9**, the best it has been.
+  earlier number in this file. Current: 5.8, 6.7, 7.4 → **6.6**.
 - **7-frame scroll strip** (`gate_scroll.png`, prompt `/tmp/gate_scroll.txt`) — seven
   consecutive frames of the descent, the only instrument that can judge continuity.
   It was **5.0** three passes ago (*"reads as separate sticky slides"*), rose to **6.0** when
-  the cross-fades were replaced with real entrances, and now reads **4.5, 6.0, 6.2, 6.2 → 5.7**.
-  Note the 4.5: this instrument's spread is wider than the 3-row one, so it needs four samples,
-  not two.
+  the cross-fades were replaced with real entrances, and now reads **5.0, 5.8, 6.0, 6.2 → 5.75**.
+  Its spread is wide — single samples have come back anywhere from 4.5 to 6.5 on one image — so
+  it needs four samples, not two.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -317,32 +317,62 @@ Two changes were tested inside this pass and **reverted** — record them:
 Kept from that same batch: nav 12.5px, cue 12px, body up to 21px and darker — the gate's
 *"the navigation is nearly invisible, the body copy is tiny"* is unambiguous and those stay.
 
+## THE MAT NOW LOOKS LIKE A REAL MICROGRAPH — and the number still did not move
+`mat_clean.png` was too perfect: smooth tubes on a flat pale wash. Anything dropped onto a
+flawless field looks dropped on, which is why the gate kept saying *"the soot must visibly sit
+AMONG fibres, not appear composited over smooth tubes."*
+
+It is now `mat_used_light.png`: fibrillated, pitted fibre surfaces, scattered fine dark debris
+through the field, shallow depth of field with the back fibres soft, on a bright near-white
+ground. The particle lands where a clean smooth fibre crosses a textured one, so it sits in the
+mat rather than on it. A **contact shadow** was added underneath — a soft pool that fades in
+over the last stretch of the pull, named by the gate twice.
+
+Two notes for whoever generates the next micrograph:
+- **Ask for the pale ground explicitly.** The first attempt came back mid-grey and unusable,
+  exactly as the first screen-2 micrograph did. The clause that works is *"on a BRIGHT
+  NEAR-WHITE background, rendered clearly DARKER than that ground."* `mat_used.png` is the
+  mid-grey reject, kept for reference.
+- **A `radial-gradient` shadow needs `closest-side`.** The default `farthest-corner` leaves the
+  gradient non-zero along the box edges and the div renders as a visible grey rectangle.
+
+## ⚠ FOUR PASSES, FOUR CLOSED COMPLAINTS, NO MOVEMENT
+This is the fourth pass in a row that closed the judge's own named number-one problem and left
+the score inside the noise band:
+
+| pass | what was closed | 3-row | scroll |
+|------|-----------------|-------|--------|
+| real transitions | *"cross-fading is not continuity"* | 6.6 | 5.0 → 6.0 |
+| occlusion + hand-over + one particle | *"looks like swapped renders"* | 6.8 | 5.7 |
+| type system + copy rides the specimen | *"generic sans-serif typography"* | 6.9 | 5.7 |
+| textured mat + contact shadow | *"composited over smooth tubes"* | 6.6 | 5.75 |
+
+Every one of those fixes is visibly right and all of them stay. But incremental refinement has
+stopped buying points, and it has stopped four times. The remaining gap to 9 is very unlikely
+to be another detail.
+
 ## NEXT ACTION
-Current: 3-row 6.9 · scroll 5.7 · bar 9.
+Current: 3-row 6.6 · scroll 5.75 · bar 9.
 
-The scroll gate's remaining note is the painted-versus-real lesson again, pointed at the one
-asset that has never been questioned — the filter mat:
+**Stop refining. The remaining gap is categorical.**
 
-> *"The spherical soot clumps, immaculate white fibres, pale background... introduce authentic
-> micrograph irregularity, fibre texture, depth of field, contact shadows and particulate
-> debris. The soot must visibly sit AMONG fibres, not appear composited over smooth tubes."*
+Our page is three still photographs moved by CSS. The reference is a live, continuously moving
+world. When the judge says *"polished template"* and *"expensive CGI landing-page template
+whose scroll logic has not yet earned the cinematic imagery"*, that is what it is comparing
+against — and no amount of easing curves or contact shadows closes it.
 
-`mat_clean.png` was generated to be perfectly clean so the travelling particle could be the
-only deposit. That worked, but it made the mat too perfect: smooth tubes on a flat pale ground,
-with no dirt, no grain and no depth. A real micrograph of used media has scattered fine debris,
-uneven fibre surfaces and shallow focus. A particle composited onto a flawless field will
-always look composited.
-
-1. **Regenerate the mat with authentic irregularity** — fibre surface texture, scattered fine
-   particulate debris away from the landing point, shallow depth of field so the back fibres
-   are soft, and a substrate that is not a flat wash. Keep it clean AT the landing point so the
-   travelling particle is still the only deposit there. Ask for the same instrument language
-   that has worked twice: greyscale, specimen darker than its ground.
-2. **Add a contact shadow under the landed particle** — a soft dark pool where it meets the
-   fibre. Named by the gate twice. Cheap: a radial-gradient div behind `#mote`, faded in with
-   the last stretch of the pull.
+1. **Put real motion in the plates.** Seedance 2.0 is available and is the tool for this
+   (see `reference_seedance2_prompting_playbook` in memory: image-to-video from start and end
+   keyframes, edit the END frame from the START one, short motion prompt, locked camera).
+   Start with ONE plate and measure it before doing the others — the pollutant screen is the
+   obvious first candidate: the agglomerate turning very slowly under the beam, everything else
+   still. Keyframes already exist (`sem_light.png`).
+   Swap the `<img>` for a muted autoplay looping `<video>`; everything else in `index.html`
+   already drives off `p` and needs no change.
+2. **Measure honestly.** A video cannot be judged from a still strip, so the gate needs frames
+   sampled from the video itself, in sequence, the same way `shot_scroll.mjs` samples the page.
 3. **Do not** regenerate the hero plate, retry the hero crop, add a charge symbol, do more seam
-   work, or raise the landing size again. All measured dead ends.
+   work, or raise the landing size. All measured dead ends, all documented above.
 4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
 
 ## Where things are

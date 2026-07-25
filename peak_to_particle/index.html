@@ -35,11 +35,15 @@
   #pl_peak {left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.16) saturate(.38) brightness(0.99)}
   #pl_smoke{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
+  #shadow{position:fixed;left:0;top:0;z-index:1;pointer-events:none;opacity:0;
+    will-change:opacity,transform;
+    background:radial-gradient(ellipse closest-side at 50% 50%, rgba(26,32,38,.34) 0%,
+      rgba(26,32,38,.20) 40%, rgba(26,32,38,.06) 70%, rgba(26,32,38,0) 100%)}
   #pl_front{position:fixed;left:-6%;top:-6%;width:112%;height:112%;object-fit:cover;z-index:2;
     pointer-events:none;opacity:0;will-change:opacity,transform;
     filter:contrast(1.02) brightness(1.01);
-    -webkit-mask-image:radial-gradient(ellipse 10% 21% at 71.5% 53%, #000 0%, #000 46%, transparent 88%);
-    mask-image:radial-gradient(ellipse 10% 21% at 71.5% 53%, #000 0%, #000 46%, transparent 88%)}
+    -webkit-mask-image:radial-gradient(ellipse 9% 19% at 72.5% 50.4%, #000 0%, #000 46%, transparent 88%);
+    mask-image:radial-gradient(ellipse 9% 19% at 72.5% 50.4%, #000 0%, #000 46%, transparent 88%)}
   #pl_fibre{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
 
   canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
@@ -68,7 +72,7 @@
   .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
   h1,h2{font-size:var(--display);font-weight:300;line-height:1.10;letter-spacing:-.022em;
     color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:23ch}
-  #c3 h2{max-width:13ch}
+  #c3 h2{max-width:12ch}
   em{font-style:normal;color:var(--accent)}
   p{font-size:clamp(17px,1.52vw,21px);line-height:1.58;font-weight:400;color:#12171b;
     margin:0;max-width:42ch}
@@ -92,8 +96,9 @@
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
+  <div id="shadow"></div>
   <img id="mote" src="./hero_img/sem_cut.png" alt="">
-  <img id="pl_fibre" src="./hero_img/mat_clean.png" alt="An electron micrograph of clean nonwoven filter media.">
+  <img id="pl_fibre" src="./hero_img/mat_used_light.png" alt="An electron micrograph of nonwoven filter media.">
 </div>
 <!-- A second copy of the filter plate, revealed only in a soft ellipse around the contact
      and sitting ABOVE the travelling contaminant, so one fibre crosses IN FRONT of part of
@@ -102,7 +107,7 @@
      The mat itself is now CLEAN. The deposit on the fibre is the very particle the viewer has
      been following since the summit — the gate three times running: "its scale, silhouette
      and structure change, so it looks swapped for different soot renders." -->
-<img id="pl_front" src="./hero_img/mat_clean.png" alt="">
+<img id="pl_front" src="./hero_img/mat_used_light.png" alt="">
 <canvas class="fx" id="mist"></canvas>
 <div id="veil"></div>
 
@@ -165,7 +170,7 @@ function moteAt(p){
      so the two register as one object. It used to shrink to a dot beside a much larger
      photographed deposit, which the gate read as "pasted over the mat, then a different-sized
      deposit... no clear instant of contact". */
-  var K=innerWidth*0.700, L=innerHeight*0.560;         // the fibre crossing, measured off the plate
+  var K=innerWidth*0.779, L=innerHeight*0.504;         // the fibre crossing, measured off the plate
   /* The arriving material acts on it. The pull starts exactly when the mat begins to enter
      the frame, accelerates the whole way in (cubic ease-IN, not a symmetric ease), and then
      stops dead at contact. It used to travel on a fixed eased path regardless of what was
@@ -197,6 +202,7 @@ var el = {
   fibre: document.getElementById('pl_fibre'),
   mist:  document.getElementById('mist'),
   mote:  document.getElementById('mote'),
+  shadow:document.getElementById('shadow'),
   front: document.getElementById('pl_front'),
   c1:    document.getElementById('c1'),
   c2:    document.getElementById('c2'),
@@ -261,6 +267,13 @@ function layout(){
   el.mote.style.width = m.w.toFixed(1) + 'px';
   el.mote.style.transform = 'translate(' + (m.x - m.w/2).toFixed(1) + 'px,' +
                             (m.y - m.w*MOTE_SRC.ar/2).toFixed(1) + 'px)';
+  // the pool of shade it casts onto the fibre once it is actually resting there
+  var sw = m.w*1.02, sh = m.w*0.34;
+  el.shadow.style.opacity = (smooth(1.94, 2.20, p) * 0.80).toFixed(3);
+  el.shadow.style.width  = sw.toFixed(1) + 'px';
+  el.shadow.style.height = sh.toFixed(1) + 'px';
+  el.shadow.style.transform = 'translate(' + (m.x - sw/2).toFixed(1) + 'px,' +
+                              (m.y + m.w*MOTE_SRC.ar*0.26).toFixed(1) + 'px)';
 
   // copy: each block rises in and lifts away, so the page reads as motion not as slides
   copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
