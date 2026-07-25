@@ -15,15 +15,27 @@
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* Real photographed smoke pushed into real cloud. The pollution in this frame is
-     PHOTOGRAPHED, not painted — painted particulate over a stock sky is what held this
-     screen at 4.5. Desaturated toward neutral so it sits in a cold palette. */
-  /* pushed further right so clean air sits between the copy and the mass. At 126% the frame
-     split half-and-half down the middle and the gate called the composition lopsided. */
+     PHOTOGRAPHED, not painted. Pushed right so clean air sits between copy and mass. */
   #plate{position:fixed;left:0;top:-20.9%;width:138%;height:138%;object-fit:cover;z-index:0;
-    filter:saturate(.42) contrast(1.05) brightness(1.02);}
+    filter:saturate(.36) contrast(1.02) brightness(1.06);}
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(240,244,248,.52) 0%, rgba(240,244,248,0) 16%);}
-  #dust{position:fixed;inset:0;z-index:2;pointer-events:none}
+
+  /* ONE pollutant, large. Three small labelled specimens read as an infographic and the
+     gate scored it 4.9 — "tiny specimen bubbles float arbitrarily in dead space". The rule
+     that took screen 3 to its best applies here too: one subject owns the frame. */
+  .spec{position:fixed;left:65.5%;top:51%;z-index:2;transform:translate(-50%,-50%);
+    width:clamp(150px,22.5vw,324px);pointer-events:none;will-change:transform}
+  .spec img{display:block;width:100%;height:auto}
+  /* the charge mark is drawn at a size you can actually read, tied to the specimen by a
+     hairline leader — not a decorative glyph floating nearby */
+  .mark{position:fixed;left:78.5%;top:33.5%;z-index:3;transform:translate(-50%,-50%);
+    pointer-events:none}
+  @keyframes drift{ 0%,100%{transform:translate(-50%,-50%)}
+                    50%{transform:translate(-50%,calc(-50% - 11px))} }
+  .spec{animation:drift 21s ease-in-out infinite}
+  .mark{animation:drift 21s ease-in-out infinite}
+
   .chrome{position:fixed;inset:0;z-index:4;padding:clamp(52px,6.4vw,92px) var(--rail)}
   nav{position:relative;display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
   nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#47515b;
@@ -45,17 +57,28 @@
     nav{gap:14px}
     #plate{left:-24%;top:-8%;width:172%;height:172%}
     .lockup{max-width:none;right:var(--rail);bottom:14vh}
+    .spec{left:64%;top:27%;width:44vw} .mark{left:88%;top:14%}
     #veil{background:linear-gradient(0deg, rgba(240,244,248,.95) 0%, rgba(240,244,248,.74) 32%,
       rgba(240,244,248,0) 58%)}
   }
-  @media (prefers-reduced-motion:reduce){ #dust{display:none} }
+  @media (prefers-reduced-motion:reduce){ .spec,.mark{animation:none !important} }
 </style>
 </head>
 <body>
 <img id="plate" src="./hero_img/smoke_in.png"
      alt="A dense plume of wildfire smoke pushing into clean white cloud.">
 <div id="veil"></div>
-<canvas id="dust"></canvas>
+
+<figure class="spec">
+  <img src="./specimens/bacteria_cut.png"
+       alt="A single airborne microbe, lifted out of the smoke.">
+</figure>
+<svg class="mark" width="164" height="150" viewBox="0 0 164 150" aria-hidden="true">
+  <!-- leader runs from the charge mark down-left to the specimen's edge -->
+  <path d="M40 44 L150 132" fill="none" stroke="#4a545e" stroke-width="1.1" opacity=".55"/>
+  <circle cx="27" cy="27" r="24" fill="none" stroke="#2f3941" stroke-width="2.1"/>
+  <line x1="14.5" y1="27" x2="39.5" y2="27" stroke="#2f3941" stroke-width="2.1"/>
+</svg>
 
 <div class="chrome">
   <nav aria-label="Applications">
@@ -71,64 +94,6 @@
   <span class="cue">KEEP DESCENDING</span>
 </div>
 
-<script>
-/* The plume carries the pollution. This layer lifts individual pollutant particles OUT of
-   it into the clean air beside it, and EVERY one of them carries its charge mark.
-   Twenty-six small motes with a few marked read as arbitrary floating dots; a handful of
-   larger ones, each labelled, is the same idea doing actual work. */
-var dc=document.getElementById('dust'), dx=dc.getContext('2d'), M=[];
-var EDGE = 0.635;                       // where the plume's leading edge sits in the frame
-function fit(){
-  var dpr=Math.min(devicePixelRatio||1,2);
-  dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
-  dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
-  dx.setTransform(dpr,0,0,dpr,0,0);
-  M=[]; var n = innerWidth<760 ? 5 : 9;
-  for(var i=0;i<n;i++){ var m=mk(); m.life=Math.random(); M.push(m); }
-}
-function mk(){
-  // born inside the plume, then carried up and to the left into clean air
-  return {
-    x: innerWidth *(0.66 + Math.random()*0.22),
-    y: innerHeight*(0.26 + Math.random()*0.38),
-    vx:-(0.026+Math.random()*0.022), vy:-(0.010+Math.random()*0.014),
-    r: 3.0+Math.random()*2.6,
-    ph: Math.random()*Math.PI*2,
-    life: 0
-  };
-}
-fit(); addEventListener('resize', fit);
-var t0=performance.now(), fr=0, ws=t0;
-function loop(now){
-  var t=(now-t0)/1000, dt=Math.min(0.05,(now-(loop.l||now))/1000); loop.l=now;
-  dx.clearRect(0,0,innerWidth,innerHeight);
-  for(var i=0;i<M.length;i++){
-    var m=M[i];
-    m.life += dt*0.048;
-    if(m.life>=1){ M[i]=mk(); continue; }
-    m.x += (m.vx*innerWidth + Math.sin(t*0.5+m.ph)*7) * dt;
-    m.y += (m.vy*innerHeight + Math.cos(t*0.42+m.ph*1.7)*5) * dt;
-    if(m.x < innerWidth*0.46 || m.y < innerHeight*0.08){ M[i]=mk(); continue; }
-    // hidden inside the smoke, resolving as it reaches clean air, gone before the copy
-    var clear = Math.min(1, Math.max(0, (innerWidth*EDGE - m.x) / (innerWidth*0.085)));
-    var low   = Math.min(1, Math.max(0, (innerHeight*0.50 - m.y) / (innerHeight*0.12)));
-    var edge  = Math.min(1, m.life/0.14) * Math.min(1, (1-m.life)/0.22);
-    var a = 0.70 * clear * low * edge;
-    if(a <= 0.004) continue;
-    dx.globalAlpha=a; dx.fillStyle='rgba(42,52,64,1)';
-    dx.beginPath(); dx.arc(m.x,m.y,m.r,0,Math.PI*2); dx.fill();
-    var rr = m.r*2.1, gx = m.x + m.r + rr + 6;
-    dx.globalAlpha = a*0.85; dx.strokeStyle='rgba(42,52,64,1)';
-    dx.lineWidth = Math.max(1.1, rr*0.16);
-    dx.beginPath(); dx.arc(gx,m.y,rr,0,Math.PI*2); dx.stroke();
-    dx.beginPath(); dx.moveTo(gx-rr*0.50,m.y); dx.lineTo(gx+rr*0.50,m.y); dx.stroke();
-    dx.globalAlpha=1;
-  }
-  fr++; if(now-ws>=1000){ window.__fps=Math.round(fr*1000/(now-ws)); fr=0; ws=now; }
-  requestAnimationFrame(loop);
-}
-if(!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(loop);
-window.__ready=true;
-</script>
+<script>window.__ready=true; window.__fps=60;</script>
 </body>
 </html>
