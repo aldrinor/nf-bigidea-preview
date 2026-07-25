@@ -287,6 +287,26 @@ caps because it is a wordmark.
 about the reference instead of the reference. Reading `getComputedStyle` off a site is not the
 same as looking at it. **Look at the thing.**
 
+## HERO GAPS CLOSED — by stacking the two and looking at them
+`hero_vs.png` in this folder is the method: their hero on top, ours below, same width. Three
+gaps were obvious the moment they were stacked, and none of them had shown up in any measurement:
+
+1. **Alignment.** Their nav, wordmark and cue all start at the same indent, about 13.6% in, on
+   the grid. Ours were hard against the 32px edge and not aligned with each other. Nav now
+   starts at grid column 4, the wordmark sits on column 4 of its own grid, and the cue matches.
+2. **The summit did not fill the frame.** Theirs reaches the top of the picture; ours sat low
+   with 60% empty sky above it. The plate went from 112% to 152% with the crop pulled up.
+3. **No chrome cluster.** Theirs carries news / menu / a counter at top right. Ours now has a
+   **live chapter counter** (01–04, driven by scroll) and a Contact link, in the same register.
+
+**What is still different, and cannot be fixed here:** their mark is a fine-line symbol with
+wide-tracked light capitals; ours is a solid bold logotype. That is a brand asset, not a layout
+decision — changing it is Yin's call, not mine.
+
+**Method note worth keeping:** every one of those three gaps was invisible to `getComputedStyle`
+and to the gate. They appeared instantly when the two heroes were put one above the other at the
+same size. **Stack and look. It is the cheapest instrument in this project and the most honest.**
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -812,18 +832,15 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-The visual clone is in: their ink, their hero form, their chrome, their grid, their type roles,
-their scroll engine. What is left, in order:
-
-1. **Compare it to their hero side by side and close the remaining gaps.** Their hero also has:
-   a top-right chrome cluster (news / menu / a small counter), a custom cursor, and a sound
-   toggle. Ours has none of those. Cheap, and they are part of the look.
-2. **Their page is 19.6 viewports; ours is 4.4.** Still the largest structural difference. But
-   adding stops measured WORSE twice, so length only helps if every chapter carries an event.
+1. **Do the same stack-and-look for chapters 2, 3 and 4.** Only the hero has been compared this
+   way. `hero_vs.png` shows how: their screen on top, ours below, same width, then fix what is
+   obvious. Their `shot_s2/s3/s4.png` are in `<scratchpad>/montfort/`.
+2. **Their page is 19.6 viewports; ours is 4.4.** Still the largest remaining difference. Adding
+   stops measured worse twice, so length only helps if every chapter carries an event.
 3. **Yin's two decisions**, still the real blockers: what "done" means now the 9/10 bar is void
    (it scores mont-fort itself at 4), and whether we may license real imagery.
-4. **Scroll FPS** is diagnosed but not fixable against this machine's meter — see the table
-   above; it needs one look on real hardware.
+4. **Scroll FPS** is diagnosed but not fixable against this machine's meter — one look on real
+   hardware settles it.
 
 **Do not** retry: the WebGL specimen, more stops without events, seam or collision work, the
 hero plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap.

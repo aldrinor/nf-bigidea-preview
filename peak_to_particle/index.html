@@ -42,7 +42,7 @@
   /* ---- the backdrop stack: one fixed layer, plates cross-fading as you descend ---- */
   #stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
   #stage img,#stage video{position:absolute;object-fit:cover;will-change:opacity,transform}
-  #pl_peak {left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.16) saturate(.38) brightness(0.99)}
+  #pl_peak {left:-26%;top:-38%;width:152%;height:152%;filter:contrast(1.16) saturate(.38) brightness(0.99)}
   #pl_smoke{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
   #shadow{position:fixed;left:0;top:0;z-index:1;pointer-events:none;opacity:0;
@@ -74,20 +74,33 @@
     background:linear-gradient(180deg, rgba(240,244,248,.82) 0%, rgba(240,244,248,0) 100%)}
   .grid{width:100%;max-width:var(--maxw);margin:0 auto;
     display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gutter)}
-  nav{grid-column:1 / -1;display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
+  nav{grid-column:4 / span 15;display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
   nav a{font-family:var(--util);font-size:12px;letter-spacing:.20em;text-decoration:none;
     color:#6b8ba3;padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
+  /* the small cluster their header carries at top right */
+  .chrome{grid-column:22 / -1;display:flex;align-items:center;justify-content:flex-end;
+    gap:14px;font-family:var(--util);font-size:11.5px;letter-spacing:.20em}
+  .chrome a{color:#6b8ba3;text-decoration:none}
+  .chrome a:hover{color:var(--ink)}
+  .chrome .count{display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;background:#2f5c7c;color:#eef3f6;
+    font-size:10px;letter-spacing:0}
 
   /* on the grid now: columns 2-11 of 24, the way their chapter text sits, rather than a
      free-floating block at a rail offset */
   .stop{position:fixed;z-index:5;left:0;right:0;padding:0 var(--edge);max-width:none;
     will-change:transform;pointer-events:none}
-  .stop > .grid > .col{grid-column:2 / span 12}
+  .stop > .grid > .col{grid-column:4 / span 12}
   /* Their hero holds one thing: the wordmark, large, light, hugely tracked, and nothing else.
      No sentence, no paragraph. Ours does the same — the claim moves to the next chapter. */
-  #c1{display:flex;align-items:center;padding-left:var(--edge)}
+  /* the wordmark sits on the same column the nav starts on — theirs are aligned, ours were not */
+  #c1{display:block}
+  #c1 .wordmark{max-width:var(--maxw);margin:0 auto;padding-left:calc((100% - 0px) * 0)}
+  #c1 > .wordmark{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gutter);
+    max-width:var(--maxw);margin:0 auto}
+  #c1 > .wordmark img{grid-column:4 / span 12}
   .wordmark img{height:clamp(38px,4.6vw,66px);width:auto;display:block;opacity:.95}
   @media (max-width:900px){ .stop > .grid > .col{grid-column:1 / -1} }
   /* their in-chapter scale: 14px bold eyebrow, 50px display, 16px body, 12px micro */
@@ -109,7 +122,7 @@
 
   em{font-style:normal;color:var(--accent)}
   p{font-size:clamp(15px,1.15vw,17px);line-height:1.62;font-weight:400;color:#3d6b8a;margin:0}
-  .cue{position:fixed;z-index:6;left:var(--edge);bottom:clamp(28px,3.4vw,44px);
+  .cue{position:fixed;z-index:6;left:calc(var(--edge) + 13.6vw - var(--edge));bottom:clamp(28px,3.4vw,44px);
     font-family:var(--util);font-size:11.5px;letter-spacing:.20em;color:#6b8ba3;
     will-change:opacity}
 
@@ -164,7 +177,9 @@
   <a class="on" href="#">C-POLAR</a>
   <a href="#">Air</a><a href="#">Water</a><a href="#">Protective Wear</a>
   <a href="#">Food Packaging</a><a href="#">Medical Devices</a>
-</nav></div></header>
+</nav>
+  <div class="chrome"><span class="count" id="chapterCount">01</span><a href="#">Contact</a></div>
+</div></header>
 
 <section class="stop" id="c1">
   <div class="wordmark">
@@ -298,7 +313,8 @@ var el = {
   c4:    document.getElementById('c4'),
   sky:   document.getElementById('pl_sky'),
   load:  document.getElementById('pl_load'),
-  cue:   document.getElementById('cue')
+  cue:   document.getElementById('cue'),
+  count: document.getElementById('chapterCount')
 };
 
 /* The headline and the paragraph are staged, not faded as one slab: the headline arrives
@@ -436,6 +452,8 @@ function layout(){
   copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
   copyBesides(el.c2, band(p, 0.66, 1.08, 1.30, 1.58), (1 - p) * 62, m.y);
   copyBesides(el.c3, band(p, 1.62, 2.04, 2.36, 2.62),   (2 - p) * 62, m.y);
+  { var n = p < 0.9 ? '01' : p < 1.9 ? '02' : p < 2.7 ? '03' : '04';
+    if(el.count && el.count.textContent !== n) el.count.textContent = n; }
   copyState(el.c4, { o: smooth(2.78, 3.10, p), dy: (3 - p) * 62 }, true);
   el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
 
