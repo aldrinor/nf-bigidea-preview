@@ -14,7 +14,7 @@
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
-  #plate{position:fixed;left:-2%;top:-2%;width:104%;height:104%;object-fit:cover;object-position:56% 50%;z-index:0;
+  #plate{position:fixed;left:-32%;top:-30%;width:186%;height:178%;object-fit:cover;object-position:52% 44%;z-index:0;
     filter:contrast(1.04) brightness(1.02);}
   /* one soft veil only, to seat the copy — never enough to flatten the photograph */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -93,7 +93,7 @@ function fit(){
   pc.width=Math.floor(innerWidth*dpr); pc.height=Math.floor(innerHeight*dpr);
   pc.style.width=innerWidth+'px'; pc.style.height=innerHeight+'px';
   px.setTransform(dpr,0,0,dpr,0,0);
-  CX=innerWidth*0.62; CY=innerHeight*0.56;              // a point on the fibre
+  CX=innerWidth*0.60; CY=innerHeight*0.52;              // a point on the fibre
   R0=Math.max(innerWidth,innerHeight)*0.62;
   var n = innerWidth<760 ? 10 : 22;
   P=[]; for(var i=0;i<n;i++) P.push(mk(Math.random()));
@@ -104,7 +104,7 @@ function mk(seed){
   var base = -2.55;                                  // upper-left
   var a = base + (Math.random()-0.5) * 2.5;          // ~143 degree fan, not 360
   var r = R0*(0.62+Math.random()*0.55);
-  return { a:a, r:r, r0:r, v:0.15+Math.random()*0.20, w:1.0+Math.random()*3.2,
+  return { a:a, r:r, r0:r, v:0.13+Math.random()*0.17, w:2.0+Math.random()*4.6,
            k:0.55+Math.random()*0.5 };
 }
 fit(); addEventListener('resize', fit);
