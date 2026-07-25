@@ -105,14 +105,14 @@
        else in the frame is held. Its time is driven BY THE SCROLL, not by a clock: it is
        parked on frame 0 — the exact frame the travelling cutout was taken from — until the
        pull begins, so registration is perfect, and it then turns as we descend past it. -->
-  <video id="pl_smoke" poster="./hero_img/sem_light.png" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
-    <source src="./hero_img/sem_turn.mp4" type="video/mp4">
+  <video id="pl_smoke" poster="./hero_img/soot_real.png" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
+    <source src="./hero_img/soot_turn.mp4" type="video/mp4">
   </video>
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
   <div id="shadow"></div>
-  <img id="mote" src="./hero_img/sem_cut.png" alt="">
+  <img id="mote" src="./hero_img/soot_cut.png" alt="">
   <!-- the same junction later in its life. Cross-faded over the single-particle frame, so the
        event on this stop is the filter FILLING UP rather than a caption over a backdrop. -->
   <img id="pl_load" src="./hero_img/mat_loaded.png" alt="The same filter junction, heavily loaded with captured soot.">
@@ -179,7 +179,7 @@ var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var P = 0;
 var PARKED = false;   // set when the render harness pins the video to a fixed second
 var PLATE = {l:-0.06, t:-0.06, w:1.12, h:1.12, iw:2688, ih:1520};
-var MOTE_SRC = {cx:0.6827, cy:0.5082, w:0.4509, ar:1.1312};
+var MOTE_SRC = {cx:0.7158, cy:0.4980, w:0.4985, ar:0.8358};
 /* how far the micrograph is still pulled back out of the summit's white field */
 function smokeScale(p){ return 1 + 0.40 * (1 - smooth(0.30, 1.15, p)); }
 function moteHome(){

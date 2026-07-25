@@ -510,28 +510,61 @@ real places. Licensed genuine SEM micrographs of loaded filter media, and real a
 footage, would answer the one criticism that has survived every pass.
 **That needs Yin: it is a licensing and budget decision, not a build decision.**
 
+## THE SPECIMEN WAS REBUILT TOO. FLAT. IN-HOUSE OPTIONS ARE NOW EXHAUSTED.
+The last item on the in-house list was the soot specimen itself — the one asset criticism that
+was specific and fixable here: *"the pollutant looks like generic CGI/AI foam. Its regular
+spherical clusters, soft surface and clean silhouette do not resemble convincing soot."*
+
+It is rebuilt and it is genuinely better. `hero_img/soot_real.png` is a ragged open chain of
+fused primary particles of clearly **unequal** sizes, angular and faceted, with broken stubby
+branches, voids through the structure and a pitted crust — the way real combustion soot looks,
+not a heap of identical spheres. `soot_cut.png` and `soot_turn.mp4` were regenerated from it
+and every registration constant re-measured (`MOTE_SRC` is now cx 0.7158, cy 0.4980, w 0.4985,
+ar 0.8358).
+
+**Score: 6.0, 6.0, 6.0, 6.4 → 6.10, against 6.06. Flat.**
+
+It is kept — it is more credible, it closes a named criticism, and it is not a regression. But
+it did not move the number, and **that was the last option on the in-house list.**
+
+### The full ledger of what has been tried
+| change | result |
+|--------|--------|
+| painted → real one-hotspot photograph (screen 3) | **5.3 → 7.5** |
+| stills → real footage | **5.75 → 6.45** |
+| summit→micrograph match transition | 6.33 → 6.58 |
+| real transitions replacing cross-fades | 5.0 → 6.0 |
+| a type system of our own | 3-row best |
+| occlusion, causal pull, one particle throughout | flat, kept |
+| authentic textured mat + contact shadow | flat, kept |
+| **an irregular, credible soot specimen** | **flat, kept** |
+| breaking the two-column composition | 6.58 → 6.26, REVERTED |
+| a fourth stop, plain | 6.58 → 6.15 |
+| a fourth stop, with a real event | 6.58 → 6.06 |
+
+Everything that moved the number was **asset fidelity**. Everything that was choreography,
+layout or length was flat or negative. And the only fidelity lever left is the one we cannot
+pull ourselves.
+
 ## NEXT ACTION
-Current: four stops 6.06 · three stops 6.58 · 3-row 6.7 · bar 9.
+Current: four stops 6.10 · three stops 6.58 · bar 9. **In-house options are exhausted.**
 
-**Put the ceiling in front of Yin with the evidence above, and ask for the one decision only he
-can make: may we license real imagery instead of generating it.** That is the honest state and
-it is the only untried category.
+**This needs Yin, and it is one question: may we license real imagery instead of generating it.**
 
-While waiting on that, the useful work is bounded:
+The evidence is in the ledger above. Every gain in this project came from asset fidelity. Every
+plate on this page is still generated, and the criticism that has survived all eleven passes is
+exactly that — *"the sterile perfection of generated campaign imagery"*, *"AI-stock particulate
+imagery"*. Licensed genuine SEM micrographs of loaded filter media and real alpine footage are
+the one lever left, and it is a budget decision, not a build decision.
 
-1. **Do not build stops 5–10.** Measured twice; it lowers the score. This is settled.
-2. **Do not** regenerate the hero plate as a still, retry the hero crop, add a charge symbol,
-   do more seam or collision work, raise the landing size, retry the mat video, or break the
-   two-column composition. All measured dead ends, all documented above.
-3. **If a real-imagery budget is refused**, the remaining honest option is to regenerate the
-   soot specimen itself to be irregular and angular rather than a heap of even spheres — the
-   one asset criticism that is specific and fixable in-house. It means redoing `sem_light.png`,
-   `sem_cut.png` and `sem_turn.mp4` and re-measuring every registration constant, so it is a
-   full pass on its own.
-4. **The three-stop build is the better artefact by the only measure available (6.58 vs 6.06).**
-   Stop 4 is kept because Yin's brief names Air as one of the five applications and removing it
-   to protect a score would be gaming the metric against the brief. If Yin would rather have
-   the higher number than the fourth application, reverting stop 4 is a one-line change.
+Until that is answered, **do not spend passes on**: more stops (measured twice), layout changes
+(measured, reverted), seam or collision work (four passes, all flat), the hero plate or its crop
+(measured, reverted), a charge symbol (four attempts, all rejected), or the mat video
+(rejected with evidence). All are documented above with numbers.
+
+If a session must do something, the only remaining honest work is maintenance: keep the two
+instruments' prompts accurate to what is on screen (a stale prompt has already cost one pass),
+and re-verify the live deploy.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
