@@ -259,6 +259,34 @@ figure has been stable and fine throughout (49–55).
 The lever, when someone can measure properly: **fewer simultaneous full-bleed layers**, not
 smaller videos (halving resolution bought 3 fps) and not the mask (free).
 
+## THE ACTUAL CLONE — Yin had to say it three times
+*"Why is the whole thing very different from the reference site. I said clone it first. Do you
+know what the meaning of clone is."* Fair. I had been lifting numbers — a grid width, a font
+size, a library — and calling that a clone. **I had never opened their hero and looked at it.**
+
+When I finally did, the differences were not subtle:
+
+| | reference | ours, before |
+|---|---|---|
+| ink | **one blue-grey (rgb 45,98,140) for everything** | near-black text |
+| hero content | **the wordmark. Nothing else.** | logo + headline + paragraph |
+| image | **full bleed, edge to edge** | squeezed into the right half |
+| white space | **none — the photograph is the page** | a large empty left column |
+| chrome | small, wide-tracked, muted | tight tracking, dark |
+
+**Now matched.** One ink across nav, headline, body and cue. The hero carries only the C-POLAR
+wordmark against a full-bleed summit — the claim moved down to chapter 3, exactly as their hero
+defers to the chapter below it. Chrome is wide-tracked (0.20em) mono at 11.5–12px.
+
+**One deliberate deviation, stated rather than smuggled:** their entire site is set in capitals.
+Yin's standing rule is that he hates all-caps. So the *form* is cloned — the light weight, the
+wide tracking, the single ink, the tiny chrome — but sentence case is kept. The wordmark is
+caps because it is a wordmark.
+
+**Method lesson, and it is the same one as the calibration failure:** I was working from numbers
+about the reference instead of the reference. Reading `getComputedStyle` off a site is not the
+same as looking at it. **Look at the thing.**
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -784,18 +812,21 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-1. **Re-measure scroll FPS on real hardware, once.** Load the live URL on a normal desktop and
-   a phone and just watch it. If desktop scrolling is visibly rough, the fix is fewer
-   simultaneous full-bleed layers (see the table above) — not video size, not the mask, both
-   already measured. If it looks fine, close this out; the headless numbers are unreliable.
-2. **Yin's two decisions**, unchanged and still the real blockers: what "done" means now the
-   9/10 bar is void (it scores mont-fort itself at 4), and whether we may license real imagery.
-3. **Housekeeping:** `hero_img/` holds ~128 MB of superseded originals. The page itself now
-   loads eight files totalling under 1.5 MB.
+The visual clone is in: their ink, their hero form, their chrome, their grid, their type roles,
+their scroll engine. What is left, in order:
 
-**Do not** retry: the WebGL specimen, more stops, layout breaks, seam or collision work, the
-hero plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap. All measured,
-all documented above.
+1. **Compare it to their hero side by side and close the remaining gaps.** Their hero also has:
+   a top-right chrome cluster (news / menu / a small counter), a custom cursor, and a sound
+   toggle. Ours has none of those. Cheap, and they are part of the look.
+2. **Their page is 19.6 viewports; ours is 4.4.** Still the largest structural difference. But
+   adding stops measured WORSE twice, so length only helps if every chapter carries an event.
+3. **Yin's two decisions**, still the real blockers: what "done" means now the 9/10 bar is void
+   (it scores mont-fort itself at 4), and whether we may license real imagery.
+4. **Scroll FPS** is diagnosed but not fixable against this machine's meter — see the table
+   above; it needs one look on real hardware.
+
+**Do not** retry: the WebGL specimen, more stops without events, seam or collision work, the
+hero plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)

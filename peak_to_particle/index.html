@@ -20,7 +20,7 @@
     --maxw: 1376px; --cols: 24; --gutter: 20px; --edge: clamp(20px, 2.2vw, 32px);
     --headerH: 82px;
     --rail: clamp(50px, 13.7vw, 300px);
-    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#4a545e; --accent:#1b7bff;
+    --bg:#edf0f2; --ink:#33607f; --headline-ink:#2f5c7c; --muted:#6b8ba3; --accent:#1b7bff;
     --display: clamp(28px, 3.45vw, 50px);
     /* Two faces doing two different jobs, which is the structure the reference uses and the
        one thing our type never had — it was the system default sans doing everything, and the
@@ -75,8 +75,8 @@
   .grid{width:100%;max-width:var(--maxw);margin:0 auto;
     display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gutter)}
   nav{grid-column:1 / -1;display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
-  nav a{font-family:var(--util);font-size:12.5px;letter-spacing:.04em;text-decoration:none;
-    color:#262d34;padding-bottom:6px;transition:color .2s}
+  nav a{font-family:var(--util);font-size:12px;letter-spacing:.20em;text-decoration:none;
+    color:#6b8ba3;padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
 
@@ -85,11 +85,15 @@
   .stop{position:fixed;z-index:5;left:0;right:0;padding:0 var(--edge);max-width:none;
     will-change:transform;pointer-events:none}
   .stop > .grid > .col{grid-column:2 / span 12}
+  /* Their hero holds one thing: the wordmark, large, light, hugely tracked, and nothing else.
+     No sentence, no paragraph. Ours does the same — the claim moves to the next chapter. */
+  #c1{display:flex;align-items:center;padding-left:var(--edge)}
+  .wordmark img{height:clamp(38px,4.6vw,66px);width:auto;display:block;opacity:.95}
   @media (max-width:900px){ .stop > .grid > .col{grid-column:1 / -1} }
   /* their in-chapter scale: 14px bold eyebrow, 50px display, 16px body, 12px micro */
-  .eyebrow{font-family:var(--util);font-size:13px;font-weight:400;letter-spacing:.10em;
+  .eyebrow{font-family:var(--util);font-size:11.5px;font-weight:400;letter-spacing:.20em;
     color:var(--muted);margin:0 0 clamp(14px,1.8vh,22px);display:block}
-  .stop h1,.stop h2,.stop p,.stop .mark,.stop .eyebrow{will-change:opacity,transform}
+  .stop h1,.stop h2,.stop p,.stop .mark,.stop .eyebrow,.stop .wordmark{will-change:opacity,transform}
   /* Words ride up from behind their own edge. A block that simply fades in reads as a slide;
      a masked reveal reads as type being set. This is the reference's signature move. */
   .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 0 .06em}
@@ -104,9 +108,9 @@
     color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:23ch}
 
   em{font-style:normal;color:var(--accent)}
-  p{font-size:clamp(15px,1.15vw,17px);line-height:1.62;font-weight:400;color:#232a30;margin:0}
+  p{font-size:clamp(15px,1.15vw,17px);line-height:1.62;font-weight:400;color:#3d6b8a;margin:0}
   .cue{position:fixed;z-index:6;left:var(--edge);bottom:clamp(28px,3.4vw,44px);
-    font-family:var(--util);font-size:12px;letter-spacing:.04em;color:#3d464f;
+    font-family:var(--util);font-size:11.5px;letter-spacing:.20em;color:#6b8ba3;
     will-change:opacity}
 
   @media (max-width:760px){
@@ -163,13 +167,9 @@
 </nav></div></header>
 
 <section class="stop" id="c1">
-  <div class="grid"><div class="col">
-  <span class="eyebrow">01 / The summit</span>
-  <div class="mark"><img src="./brand/cpolar_bluegrey.png" alt="C-POLAR"></div>
-  <h1>A permanent positive charge, engineered into the material.</h1>
-  <p>Up here the air is as clean as it gets. Proven first in air &mdash; the same physical
-     mechanism carries across water, protective wear, food packaging and medical devices.</p>
-  </div></div>
+  <div class="wordmark">
+    <img src="./brand/cpolar_bluegrey.png" alt="C-POLAR">
+  </div>
 </section>
 
 <section class="stop" id="c2">
@@ -331,6 +331,10 @@ function copyState(node, v, centred){
   var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
   node.style.transform = centred ? 'translateY(-50%) ' + t : t;
   var head = node.querySelector('h1,h2'), body = node.querySelector('p'), mark = node.querySelector('.mark'), eyeb = node.querySelector('.eyebrow');
+  var word = node.querySelector('.wordmark');
+  if(word){ var wo = clamp(v.o*1.4,0,1);
+            word.style.opacity = wo;
+            word.style.transform = 'translateY(' + ((1-wo)*16).toFixed(1) + 'px)'; }
   var o = v.o * INTRO;
   var lead = clamp(o*1.35, 0, 1);               // headline leads
   var trail = clamp((o - 0.26)/0.74, 0, 1);     // paragraph follows a beat later
