@@ -229,6 +229,36 @@ is the one structural difference left, and it is the same wall as the four-stop 
 stops measured worse. Their length works because each chapter carries an event; ours would need
 the same. Do not add length without events.
 
+## SCROLL FPS — DIAGNOSED, AND THE MEASUREMENT IS THE BLOCKER
+Two fixes were built and measured against the named next step ("drop the hero's zoom, or
+pre-render it"):
+
+- **Hand the zoom from the video to a still** so the compositor scales an image, not a video
+  texture. **Made it worse: 24 → 17 fps.** And with videos removed it fell 53 → 30. Reverted.
+  That result reframes the whole problem: **the cost is per full-bleed LAYER, not per video.**
+  Adding a seventh layer cost about 7 fps on its own.
+- **Hidden layers now leave the layer tree** (`display:none`, not `visibility:hidden`). Measured
+  20 fps against 24 — inside the noise. Kept anyway: a hidden layer should not be in the tree,
+  and it costs nothing.
+
+**The honest blocker is the instrument, not the page.** Identical builds have measured 14, 16,
+17, 20, 21 and 24 fps on this machine across runs, and lower at devicePixelRatio 1 than at 2,
+which is backwards. **Nothing under about a 10 fps difference is readable here.** The phone
+figure has been stable and fine throughout (49–55).
+
+**Stop tuning FPS on this machine.** What is solid and worth carrying forward:
+
+| condition | fps | reading |
+|---|---|---|
+| all plates removed | 60 | the ceiling |
+| videos removed | 49–53 | **videos cost ~30** |
+| hero video removed only | 32 | hero alone costs ~21 |
+| specimen video removed only | 32 → 24 | specimen costs ~8 |
+| front-overlay **mask** removed | no change | **the mask is free** |
+
+The lever, when someone can measure properly: **fewer simultaneous full-bleed layers**, not
+smaller videos (halving resolution bought 3 fps) and not the mask (free).
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -754,22 +784,18 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-The structural clone is done: their grid, header, type roles and chapter numbering, with our
-content and our assets. What is left is the two things only Yin can settle, plus one measured
-defect.
+1. **Re-measure scroll FPS on real hardware, once.** Load the live URL on a normal desktop and
+   a phone and just watch it. If desktop scrolling is visibly rough, the fix is fewer
+   simultaneous full-bleed layers (see the table above) — not video size, not the mask, both
+   already measured. If it looks fine, close this out; the headless numbers are unreliable.
+2. **Yin's two decisions**, unchanged and still the real blockers: what "done" means now the
+   9/10 bar is void (it scores mont-fort itself at 4), and whether we may license real imagery.
+3. **Housekeeping:** `hero_img/` holds ~128 MB of superseded originals. The page itself now
+   loads eight files totalling under 1.5 MB.
 
-1. **Yin's two decisions** — what "done" means now the 9/10 bar is void (it scores mont-fort
-   itself at 4), and whether we may license real imagery.
-2. **Scroll FPS is a real defect, measured two ways.** 18–24 fps on desktop, 53 on phone. An
-   ablation with real wheel input isolated it: removing the **mask** changes nothing, removing
-   the **specimen video** gains 8 fps, removing the **hero video** gains 21. The hero video is
-   the expensive one — it is full-bleed and scaled up to 1.62× every frame. Untested next step:
-   drop the hero's zoom, or pre-render the zoom into the clip so the compositor never scales it.
-3. **Housekeeping:** `hero_img/` still holds ~128 MB of superseded originals; the eight files the
-   page loads are WebP/MP4 and total under 1.5 MB.
-
-**Do not** retry: the WebGL specimen, more stops, seam or collision work, the hero plate or crop,
-charge symbols, the mat video. All measured, all documented above.
+**Do not** retry: the WebGL specimen, more stops, layout breaks, seam or collision work, the
+hero plate or crop, charge symbols, the mat video, the hero-zoom-to-still swap. All measured,
+all documented above.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)

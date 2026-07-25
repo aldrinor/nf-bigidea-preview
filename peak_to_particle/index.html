@@ -95,7 +95,7 @@
   .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 0 .06em}
   .w > i{display:inline-block;font-style:inherit;color:inherit;will-change:transform,opacity}
   #c1{top:52%;transform:translateY(-50%)}
-  #c2{top:0;bottom:auto;max-width:min(42ch,35vw)}
+  #c2{top:0;bottom:auto}
   #c3{top:0;bottom:auto}
   #c4{top:52%;transform:translateY(-50%)}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
@@ -311,7 +311,10 @@ function setLayer(node, o){
   node.style.opacity = o;
   var off = o <= 0.004;
   if(off !== (node.__off === true)){
-    node.style.visibility = off ? 'hidden' : 'visible';
+    /* display:none, not visibility:hidden. Measured on this page: the compositor cost is per
+       full-bleed LAYER, not per video — adding a seventh layer cost 7 fps on its own. A hidden
+       layer must leave the layer tree, not merely stop painting. */
+    node.style.display = off ? 'none' : '';
     node.__off = off;
     /* A video keeps decoding while it is invisible, and measured on this page two of them
        cost 28 fps on desktop — 21 up to 49 with them gone. So a hidden video is stopped
