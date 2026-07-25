@@ -255,6 +255,18 @@ function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
     const n1 = fbm(u*freq*1.7+7.1, v*freq*1.7+2.9, oct)*0.5+0.5;
     const n2 = fbm(u*freq*5.2+19.4, v*freq*5.2+8.3, 3)*0.5+0.5;
     let a = (acc*(0.30+0.95*n1)*(0.55+0.72*n2) - cut) * gain;
+    // HIGH-FREQUENCY CURDLE, applied only in the transition band. This is where a real
+    // cloud resolves into sharp cauliflower detail instead of a smooth translucent edge.
+    const edgeBand = Math.max(0, 1.0 - Math.abs(a - 0.45) / 0.62);   // wider transition band
+    if(edgeBand > 0){
+      const hi1 = fbm(u*freq*17.0+41.3, v*freq*17.0+23.7, 3)*0.5+0.5;
+      const hi2 = fbm(u*freq*34.0+ 5.9, v*freq*34.0+61.1, 2)*0.5+0.5;
+      // sharpen the noise into lobed clumps rather than smooth wobble
+      let cr = (hi1*0.60 + hi2*0.40);
+      cr = cr*cr*(3-2*cr);
+      const curdle = cr - 0.5;
+      a += curdle * edgeBand * 1.55;          // wider band, far stronger bite
+    }
     // fade to nothing at the tile border, or lobes clip into straight edges
     const eu = Math.min(u, 1-u), ev = Math.min(v, 1-v);
     const edge = Math.min(1, Math.min(eu, ev) / 0.16);
@@ -264,11 +276,11 @@ function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
   for(let y=0;y<size;y++) for(let x=0;x<size;x++){
     const i0=y*size+x, a=dens[i0];
     if(a<=0.004){ d[i0*4+3]=0; continue; }
-    const xm=(x-4+size)%size, ym=(y-4+size)%size;
+    const xm=(x-2+size)%size, ym=(y-2+size)%size;
     const rim=Math.max(0, a-dens[ym*size+xm]);
     // BROKEN rim: only short segments catch the light, never a continuous white edge
     const broken = fbm(x*0.09+31.7, y*0.09+13.3, 3)*0.5+0.5;
-    const lit=Math.min(1, rim*5.4) * (0.25 + 0.95*Math.pow(broken,1.6));
+    const lit=Math.min(1, rim*8.5) * (0.25 + 0.95*Math.pow(broken,1.6));
     const i=i0*4;
     // interior: cool but TRANSLUCENT and lifted — not a solid blue substrate
     // neutral white-grey scattering; blue only in the recessed pockets
@@ -281,7 +293,7 @@ function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
     d[i+2] = 255 - 56*fold;                            // blue falls least -> cool shadow only
     // small near-white crests survive
     if(lit > 0.72){ d[i]=255; d[i+1]=255; d[i+2]=255; }
-    d[i+3] = (Math.min(1, Math.pow(a,1.35)*0.92)*255)|0;
+    d[i+3] = (Math.min(1, Math.pow(a,0.82)*0.97)*255)|0;   // steeper -> crisper silhouette
   }
   g.putImageData(im,0,0); return c;
 }
@@ -293,7 +305,7 @@ const BODIES = [
   { tile: bakeBody(200, 2.7, 4, 0, 0.36, 2.3, 1.0), x: 0.66, y:-0.06, w:0.38, h:0.46,
     vx: 0.0014, vy: 0.0012, alpha:0.18, blur:6.4 },
   // THE EVENT: one dense, high-contrast wall filling the right, with a clear pocket left
-  { tile: bakeBody(360, 1.15, 5, 0, 0.16, 3.4, 1.0), x: 0.40, y: 0.06, w:1.16, h:1.10,
+  { tile: bakeBody(448, 1.15, 5, 0, 0.16, 3.4, 1.0), x: 0.40, y: 0.06, w:1.16, h:1.10,
     vx: 0.0020, vy:-0.0012, alpha:0.96, blur:0.0, warmLit:1 },
   // a strongly occluded middle-distance form crossing in front of the wall's lower edge
   { tile: bakeBody(288, 2.0, 4, 0, 0.28, 2.8, 0.6), x: 0.10, y: 0.58, w:0.86, h:0.46,
@@ -333,6 +345,18 @@ function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
     const n1 = fbm(u*freq*1.7+7.1, v*freq*1.7+2.9, oct)*0.5+0.5;
     const n2 = fbm(u*freq*5.2+19.4, v*freq*5.2+8.3, 3)*0.5+0.5;
     let a = (acc*(0.30+0.95*n1)*(0.55+0.72*n2) - cut) * gain;
+    // HIGH-FREQUENCY CURDLE, applied only in the transition band. This is where a real
+    // cloud resolves into sharp cauliflower detail instead of a smooth translucent edge.
+    const edgeBand = Math.max(0, 1.0 - Math.abs(a - 0.45) / 0.62);   // wider transition band
+    if(edgeBand > 0){
+      const hi1 = fbm(u*freq*17.0+41.3, v*freq*17.0+23.7, 3)*0.5+0.5;
+      const hi2 = fbm(u*freq*34.0+ 5.9, v*freq*34.0+61.1, 2)*0.5+0.5;
+      // sharpen the noise into lobed clumps rather than smooth wobble
+      let cr = (hi1*0.60 + hi2*0.40);
+      cr = cr*cr*(3-2*cr);
+      const curdle = cr - 0.5;
+      a += curdle * edgeBand * 1.55;          // wider band, far stronger bite
+    }
     // fade to nothing at the tile border, or lobes clip into straight edges
     const eu = Math.min(u, 1-u), ev = Math.min(v, 1-v);
     const edge = Math.min(1, Math.min(eu, ev) / 0.16);
@@ -342,11 +366,11 @@ function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
   for(let y=0;y<size;y++) for(let x=0;x<size;x++){
     const i0=y*size+x, a=dens[i0];
     if(a<=0.004){ d[i0*4+3]=0; continue; }
-    const xm=(x-4+size)%size, ym=(y-4+size)%size;
+    const xm=(x-2+size)%size, ym=(y-2+size)%size;
     const rim=Math.max(0, a-dens[ym*size+xm]);
     // BROKEN rim: only short segments catch the light, never a continuous white edge
     const broken = fbm(x*0.09+31.7, y*0.09+13.3, 3)*0.5+0.5;
-    const lit=Math.min(1, rim*5.4) * (0.25 + 0.95*Math.pow(broken,1.6));
+    const lit=Math.min(1, rim*8.5) * (0.25 + 0.95*Math.pow(broken,1.6));
     const i=i0*4;
     // interior: cool but TRANSLUCENT and lifted — not a solid blue substrate
     // neutral white-grey scattering; blue only in the recessed pockets
@@ -359,7 +383,7 @@ function bakeBody(size, freq, oct, warp, cut, gain, coreDark){
     d[i+2] = 255 - 56*fold;                            // blue falls least -> cool shadow only
     // small near-white crests survive
     if(lit > 0.72){ d[i]=255; d[i+1]=255; d[i+2]=255; }
-    d[i+3] = (Math.min(1, Math.pow(a,1.35)*0.92)*255)|0;
+    d[i+3] = (Math.min(1, Math.pow(a,0.82)*0.97)*255)|0;   // steeper -> crisper silhouette
   }
   g.putImageData(im,0,0); return c;
 }
@@ -371,7 +395,7 @@ const BODIES = [
   { tile: bakeBody(200, 2.7, 4, 0, 0.36, 2.3, 1.0), x: 0.66, y:-0.06, w:0.38, h:0.46,
     vx: 0.0014, vy: 0.0012, alpha:0.18, blur:6.4 },
   // THE EVENT: one dense, high-contrast wall filling the right, with a clear pocket left
-  { tile: bakeBody(360, 1.15, 5, 0, 0.16, 3.4, 1.0), x: 0.40, y: 0.06, w:1.16, h:1.10,
+  { tile: bakeBody(448, 1.15, 5, 0, 0.16, 3.4, 1.0), x: 0.40, y: 0.06, w:1.16, h:1.10,
     vx: 0.0020, vy:-0.0012, alpha:0.96, blur:0.0, warmLit:1 },
   // a strongly occluded middle-distance form crossing in front of the wall's lower edge
   { tile: bakeBody(288, 2.0, 4, 0, 0.28, 2.8, 0.6), x: 0.10, y: 0.58, w:0.86, h:0.46,
@@ -436,7 +460,7 @@ function frame(now){
     const B=BODIES[2], w=innerWidth*B.w, h=innerHeight*B.h;
     const x=innerWidth*B.x + Math.sin(t*B.vx*6.0)*innerWidth*0.045 + t*B.vx*22;
     const y=innerHeight*B.y + Math.cos(t*B.vy*6.0)*innerHeight*0.038 + t*B.vy*18;
-    ox2.globalAlpha=B.alpha*0.9; ox2.filter='blur(1.4px)';
+    ox2.globalAlpha=B.alpha*0.55; ox2.filter='blur(0.6px)';
     ox2.drawImage(B.tile, x, y, w, h);
     ox2.filter='none'; ox2.globalAlpha=1;
   }
