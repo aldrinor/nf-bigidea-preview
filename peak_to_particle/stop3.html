@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Peak to Particle — inside the cloud</title>
+<title>Peak to Particle — the charge captures them</title>
 <style>
   :root{
     --rail: clamp(50px, 13.7vw, 300px);          /* measured off the reference */
@@ -32,6 +32,11 @@
   #fore{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:.95}
   .chrome{position:fixed;inset:0;z-index:5;text-shadow:0 0 22px rgba(240,246,251,.85);
     padding:clamp(52px,6.4vw,92px) var(--rail)}
+  /* the mark sits at the centre of the capture; particles converge on it */
+  #mark{position:fixed;z-index:4;left:63%;top:50%;transform:translate(-50%,-50%);
+    width:clamp(200px,23vw,360px);height:auto;opacity:.95;pointer-events:none;
+    filter:drop-shadow(0 0 34px rgba(255,255,255,.85));}
+  @media (max-width:760px){ #mark{width:58vw;left:50%;top:34%} }
   .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
     background:linear-gradient(180deg, rgba(248,251,253,.90) 0%, rgba(248,251,253,.62) 62%, rgba(248,251,253,0) 100%);
     pointer-events:none}
@@ -62,6 +67,8 @@
 
 <canvas id="fore"></canvas>
 
+<img id="mark" src="./brand/nanoflashing_bluegrey.png" alt="NanoFlashing">
+
 <div class="chrome">
   <div class="navshelf"></div>
   <nav aria-label="Applications">
@@ -70,11 +77,12 @@
     <a href="#">Food Packaging</a><a href="#">Medical Devices</a>
   </nav>
   <div class="lockup">
-    <h2>Most pollutants carry <em>a negative charge</em>.</h2>
-    <p>The microbes and smoke in the air, the PFAS in water, the biofilm on a surface —
-       completely different problems that mostly share one trait: a negative charge.</p>
+    <h2>A permanent positive charge <em>is what pulls them in</em>.</h2>
+    <p>NanoFlashing™ is a patented permanent positive polarity (3P) technology, engineered
+       into the material. It attracts and captures ultrafine particles, wildfire smoke,
+       PFAS, and pollen through a physical mechanism.</p>
   </div>
-  <span class="cue">KEEP DESCENDING</span>
+  <span class="cue">THE AIR CLEARS</span>
 </div>
 
 <script>
@@ -166,7 +174,7 @@ function sizeDust(){
   DW=Math.floor(innerWidth*dpr); DH=Math.floor(innerHeight*dpr);
   dc.width=DW; dc.height=DH; dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  const target = innerWidth<760 ? 22 : 44;
+  const target = innerWidth<760 ? 34 : 78;
   parts = Array.from({length:target}, () => spawn(true));
 }
 /* Soft particle sprites, baked once. canvas filter:blur() per particle was costing
@@ -211,7 +219,14 @@ function spawn(anywhere){
   } else {
     x = Math.random()*innerWidth; y = Math.random()*innerHeight;
   }
-  if(!anywhere) y = -40 - Math.random()*120;
+  if(!anywhere){
+    // re-enter from a random edge so the inbound stream is continuous
+    const side=(Math.random()*4)|0;
+    if(side===0){ x=Math.random()*innerWidth; y=-60; }
+    else if(side===1){ x=Math.random()*innerWidth; y=innerHeight+60; }
+    else if(side===2){ x=-60; y=Math.random()*innerHeight; }
+    else { x=innerWidth+60; y=Math.random()*innerHeight; }
+  }
   return {
     x, y,
     r: 0.30 + Math.pow(depth,4.2)*13.0,   // far tiny, near markedly large   // far field tiny, a handful genuinely large                      // near ones markedly larger
@@ -221,7 +236,7 @@ function spawn(anywhere){
     jit: 0.5+Math.random()*1.6,       // break the even spacing
     a: 0.022 + Math.pow(depth,2.0)*0.36,
     blur: (1-depth)*3.4,
-    mark: Math.random() < 0.16,       // only one or two keep a recognisable circle                           // far ones genuinely out of focus
+    mark: Math.random() < 0.22,       // only one or two keep a recognisable circle                           // far ones genuinely out of focus
     depth,
   };
 }
@@ -312,7 +327,7 @@ const BODIES = [
     vx:-0.0032, vy:-0.0008, alpha:0.50, blur:2.2 },
 ];
 const LAYERS = [];
-const FORE = { tile: bakeBody(288, 1.6, 4, 1.70, 0.34, 3.0, 0.3), alpha:0.62 };
+const FORE = { tile: bakeBody(288, 1.6, 4, 1.70, 0.34, 3.0, 0.3), alpha:0.30 };
 
 sizeCloud(); sizeDust(); sizeFore();
 addEventListener('resize', ()=>{ // bake once: three vapour layers + one foreground layer
@@ -402,7 +417,7 @@ const BODIES = [
     vx:-0.0032, vy:-0.0008, alpha:0.50, blur:2.2 },
 ];
 const LAYERS = [];
-const FORE = { tile: bakeBody(288, 1.6, 4, 1.70, 0.34, 3.0, 0.3), alpha:0.62 };
+const FORE = { tile: bakeBody(288, 1.6, 4, 1.70, 0.34, 3.0, 0.3), alpha:0.30 };
 
 sizeCloud(); sizeDust(); sizeFore(); });
 
@@ -410,7 +425,7 @@ let t0=performance.now(), last=t0, frames=0, winStart=t0;
 function frame(now){
   const t=(now-t0)/1000, dt=Math.min(0.05,(now-last)/1000); last=now;
 
-  // vapour — three placed bodies drifting slowly; gaps between them are real
+  // vapour — the bodies drift, but the air CLEARS around the mark as the charge works
   cx.clearRect(0,0,innerWidth,innerHeight);
   for(const B of BODIES){
     const w=innerWidth*B.w, h=innerHeight*B.h;
@@ -422,15 +437,43 @@ function frame(now){
     cx.filter='none';
   }
   cx.globalAlpha=1;
+  // punch a clearing: everything the charge has swept is now clean air
+  {
+    const CX2=innerWidth*0.63, CY2=innerHeight*0.50;
+    const R = Math.min(innerWidth,innerHeight) * (0.30 + Math.sin(t*0.28)*0.012);
+    cx.save();
+    cx.globalCompositeOperation='destination-out';
+    const g=cx.createRadialGradient(CX2,CY2,R*0.14, CX2,CY2,R);
+    g.addColorStop(0,   'rgba(0,0,0,1)');
+    g.addColorStop(0.55,'rgba(0,0,0,0.86)');
+    g.addColorStop(1,   'rgba(0,0,0,0)');
+    cx.fillStyle=g; cx.beginPath(); cx.arc(CX2,CY2,R,0,Math.PI*2); cx.fill();
+    cx.restore();
+  }
+  cx.globalAlpha=1;
 
   // particles — sorted far-to-near so depth stacks correctly
   dx.clearRect(0,0,innerWidth,innerHeight);
   parts.sort((a,b)=>a.depth-b.depth);
+  const CX = innerWidth*0.63, CY = innerHeight*0.50;      // the mark
   for(let i=0;i<parts.length;i++){
     const p=parts[i];
-    p.y += p.vy*dt;
-    p.x += Math.sin(t*0.22 + p.ph)*p.drift*p.jit*dt;
-    if(p.y > innerHeight+60) parts[i]=spawn(false);
+    // CAPTURE: the permanent positive charge draws each negatively charged particle in.
+    // Attraction rises as it closes, so the motion accelerates the way a real field does.
+    const ddx = CX - p.x, ddy = CY - p.y;
+    const dist = Math.max(28, Math.hypot(ddx, ddy));
+    const pull = (1400 / dist) * (0.55 + p.depth*0.85);
+    p.x += (ddx/dist) * pull * dt;
+    p.y += (ddy/dist) * pull * dt;
+    // residual drift, fading as the charge takes hold
+    const grip = Math.min(1, 220/dist);
+    p.y += p.vy*dt*(1-grip)*0.5;
+    p.x += Math.sin(t*0.22 + p.ph)*p.drift*p.jit*dt*(1-grip);
+    // held on the material: once captured it stops and fades out of the airstream
+    if(dist < 42){ p.held = (p.held||0) + dt; }
+    if(p.held > 0.55){ parts[i]=spawn(false); continue; }
+    if(p.held){ p.a *= (1 - dt*1.5); }
+    if(p.y > innerHeight+60 || p.y < -140 || p.x < -140 || p.x > innerWidth+140) parts[i]=spawn(false);
     // stamp a pre-blurred sprite instead of running a per-particle filter
     const sp = SPRITES[Math.min(5, Math.round((1-p.depth)*5))];
     const sz = p.r * (3.0 + (1-p.depth)*3.4);
@@ -460,7 +503,7 @@ function frame(now){
     const B=BODIES[2], w=innerWidth*B.w, h=innerHeight*B.h;
     const x=innerWidth*B.x + Math.sin(t*B.vx*6.0)*innerWidth*0.045 + t*B.vx*22;
     const y=innerHeight*B.y + Math.cos(t*B.vy*6.0)*innerHeight*0.038 + t*B.vy*18;
-    ox2.globalAlpha=B.alpha*0.55; ox2.filter='blur(0.6px)';
+    ox2.globalAlpha=B.alpha*0.30; ox2.filter='blur(0.6px)';
     ox2.drawImage(B.tile, x, y, w, h);
     ox2.filter='none'; ox2.globalAlpha=1;
   }
