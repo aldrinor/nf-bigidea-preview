@@ -7,7 +7,7 @@
 <style>
   :root{
     --rail: clamp(50px, 13.7vw, 300px);
-    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#5a646e; --accent:#1b7bff;
+    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#4a545e; --accent:#1b7bff;
     --display: clamp(28px, 3.45vw, 50px);
     --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
   }
@@ -24,24 +24,22 @@
   #stage img{position:absolute;object-fit:cover;will-change:opacity}
   #pl_peak {left:0;top:0;width:100%;height:100%;filter:contrast(.94) saturate(.96) brightness(1.01)}
   #pl_smoke{left:-12.65%;top:-6.86%;width:114%;height:114%;filter:contrast(1.03) brightness(1.01)}
-  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.02) brightness(1.005)}
+  #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
+  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.04) saturate(.40) brightness(1.02)}
 
   canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
   #veil{position:fixed;inset:0;z-index:3;pointer-events:none;
     background:linear-gradient(180deg, rgba(240,244,248,.46) 0%, rgba(240,244,248,0) 15%)}
 
-  /* ---- the one element that never dies: the charge mark ----
-     It is born in the cloud beside the peak, settles onto the pollutant, is then pulled
-     down the page and lands on the fibre. It is an annotation, not a fake photographed
-     object, so it can cross a seam without looking pasted. */
-  #charge{position:fixed;z-index:4;pointer-events:none;will-change:transform,opacity;
-    transform-origin:50% 50%}
-  #charge .ring{transition:stroke .35s linear}
+  /* The element that never dies is the CONTAMINANT itself (#mote above), cut out of its own
+     photograph. Two earlier attempts to annotate it failed: an outlined minus read as a
+     zoom-out button, and a ring-and-orbit field was called decorative HUD graphics in three
+     consecutive gates. The picture carries the idea; the headline names the charge. */
 
   /* ---- chrome ---- */
   nav{position:fixed;z-index:6;left:var(--rail);top:clamp(46px,5.4vw,74px);
     display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
-  nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#47515b;
+  nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#333c45;
     padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
@@ -57,7 +55,7 @@
     color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:19ch}
   #c3 h2{max-width:13ch}
   em{font-style:normal;color:var(--accent)}
-  p{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:var(--ink);margin:0;max-width:44ch}
+  p{font-size:clamp(17px,1.55vw,22px);line-height:1.55;color:#141719;margin:0;max-width:42ch}
   .cue{position:fixed;z-index:6;left:var(--rail);bottom:clamp(40px,5vw,68px);
     font-size:12px;letter-spacing:.09em;color:var(--muted);will-change:opacity}
 
@@ -67,7 +65,8 @@
     #pl_fibre{left:-26%;top:-4%;width:152%;height:152%}
     .stop{max-width:none;right:var(--rail)}
     #c1{top:auto;bottom:22vh;transform:none}
-    #c2{bottom:20vh} #c3{top:auto;bottom:20vh;transform:none}
+    #c2{bottom:20vh}
+    #c3{top:auto;bottom:20vh;transform:none}
   }
 </style>
 </head>
@@ -75,18 +74,16 @@
 <div id="stage">
   <img id="pl_peak"  src="./hero_img/peak_d.png"  alt="A snow-covered summit rising through cloud.">
   <img id="pl_smoke" src="./hero_img/mote_in.png" alt="A single dark soot particle suspended in pale smoke.">
-  <img id="pl_fibre" src="./hero_img/mat_hot.png" alt="Charged nonwoven filter media holding one knot of captured particles.">
+  <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
+       over the plate at the middle stop, so there is no seam, and then it stays on screen
+       while everything else cross-fades and is drawn into the fibre. -->
+  <img id="mote" src="./hero_img/mote_cut.png" alt="">
+  <img id="pl_fibre" src="./hero_img/mat_hot.png"   alt="Charged nonwoven filter media holding one knot of captured particles.">>
 </div>
 <canvas class="fx" id="mist"></canvas>
 <canvas class="fx" id="pull"></canvas>
 <div id="veil"></div>
 
-<svg id="charge" width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
-  <!-- solid marker, minus knocked out. An outlined ring with generous padding reads as a
-       zoom-out button; a filled charge marker sitting on the particle reads as physics. -->
-  <circle class="ring" cx="30" cy="30" r="24" fill="#2f3941" stroke="#eef1f4" stroke-width="4.5"/>
-  <rect class="bar" x="16" y="26.6" width="28" height="6.8" rx="3.4" fill="#edf0f2"/>
-</svg>
 
 <nav aria-label="Applications">
   <a class="on" href="#">C-POLAR</a>
@@ -129,27 +126,28 @@ var mix=function(a,b,t){return a+(b-a)*t;};
 
 var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var P = 0;
-
-/* ---------- the charge mark's path down the page ----------
-   Keyframes are viewport fractions, so the path holds at any window size. */
-var KEY = [
-  { p:0.42, x:0.792, y:0.196, s:0.30, o:0.00 },   // appears in the cloud beside the peak
-  { p:0.80, x:0.786, y:0.286, s:0.40, o:0.85 },
-  { p:1.05, x:0.772, y:0.352, s:0.60, o:1.00 },   // ON the pollutant, not beside it
-  { p:1.60, x:0.764, y:0.372, s:0.58, o:1.00 },
-  { p:1.95, x:0.782, y:0.418, s:0.46, o:1.00 },   // the pull takes hold
-  { p:2.22, x:0.787, y:0.460, s:0.20, o:1.00 },   // lands on the junction
-  { p:2.40, x:0.787, y:0.460, s:0.11, o:0.00 }    // absorbed into the deposit
-];
-function chargeAt(p){
-  if(p <= KEY[0].p) return KEY[0];
-  for(var i=1;i<KEY.length;i++){
-    if(p <= KEY[i].p){
-      var a=KEY[i-1], b=KEY[i], t=smooth(a.p,b.p,p);
-      return { x:mix(a.x,b.x,t), y:mix(a.y,b.y,t), s:mix(a.s,b.s,t), o:mix(a.o,b.o,t) };
-    }
-  }
-  return KEY[KEY.length-1];
+var PLATE = {l:-0.1265, t:-0.0686, w:1.14, h:1.14, iw:2688, ih:1520};
+var MOTE_SRC = {cx:0.7284, cy:0.5059, w:0.2143};
+function moteHome(){
+  var bw=innerWidth*PLATE.w, bh=innerHeight*PLATE.h;
+  var bx=PLATE.l*innerWidth,  by=PLATE.t*innerHeight;
+  var sc=Math.max(bw/PLATE.iw, bh/PLATE.ih);
+  var rw=PLATE.iw*sc, rh=PLATE.ih*sc;
+  var ox=bx+(bw-rw)/2,  oy=by+(bh-rh)/2;
+  return { x: ox+MOTE_SRC.cx*rw, y: oy+MOTE_SRC.cy*rh, w: MOTE_SRC.w*rw };
+}
+/* where the contaminant is at any point of the descent, in real pixels */
+function moteAt(p){
+  var h=moteHome();
+  var K=innerWidth*0.787, L=innerHeight*0.460;         // the deposit, measured off the plate
+  var t=smooth(1.30, 2.24, p);                          // the pull, once it takes hold
+  var e=t*t*(3-2*t);
+  return {
+    x: mix(h.x, K, e),
+    y: mix(h.y, L, e),
+    w: mix(h.w, innerWidth*0.013, Math.pow(e,1.5)),     // shrinks into the deposit
+    o: band(p, 0.62, 0.94, 1.86, 2.10)   // gone before it can read as pasted on
+  };
 }
 
 var el = {
@@ -158,9 +156,7 @@ var el = {
   fibre: document.getElementById('pl_fibre'),
   mist:  document.getElementById('mist'),
   pull:  document.getElementById('pull'),
-  charge:document.getElementById('charge'),
-  ring:  document.querySelector('#charge .ring'),
-  bar:   document.querySelector('#charge .bar'),
+  mote:  document.getElementById('mote'),
   c1:    document.getElementById('c1'),
   c2:    document.getElementById('c2'),
   c3:    document.getElementById('c3'),
@@ -177,8 +173,8 @@ function layout(){
   var p = P;
   // plates cross-fade; the descent never cuts
   el.peak.style.opacity  = 1 - smooth(0.55, 1.02, p);
-  el.smoke.style.opacity = band(p, 0.55, 1.02, 1.62, 2.06);
-  el.fibre.style.opacity = smooth(1.62, 2.06, p);
+  el.smoke.style.opacity = band(p, 0.55, 1.02, 1.45, 2.02);
+  el.fibre.style.opacity = smooth(1.45, 2.02, p);
   el.mist.style.opacity  = 1 - smooth(0.45, 0.95, p);
   el.pull.style.opacity  = smooth(1.75, 2.16, p);
 
@@ -188,18 +184,12 @@ function layout(){
   copyState(el.c3, { o: smooth(1.70, 2.06, p), dy: (2 - p) * 46 }, true);
   el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
 
-  var c = chargeAt(p);
-  var side = Math.min(innerWidth, innerHeight);
-  var px = innerWidth * c.x, py = innerHeight * c.y;
-  el.charge.style.opacity = c.o;
-  el.charge.style.left = '0px'; el.charge.style.top = '0px';
-  el.charge.style.transform =
-    'translate(' + (px - 30).toFixed(1) + 'px,' + (py - 30).toFixed(1) + 'px) ' +
-    'scale(' + (c.s * side * 0.105 / 60).toFixed(3) + ')';
-  // it is neutralised as it is taken: the minus goes, the mark warms to the charge blue
-  var neutral = smooth(2.05, 2.30, p);
-  el.bar.style.opacity = 1 - neutral;
-  el.ring.setAttribute('fill', neutral > 0.5 ? '#1b7bff' : '#2f3941');
+  var m = moteAt(p);
+  el.mote.style.opacity = m.o;
+  el.mote.style.width = m.w.toFixed(1) + 'px';
+  el.mote.style.transform = 'translate(' + (m.x - m.w/2).toFixed(1) + 'px,' +
+                            (m.y - m.w*0.472).toFixed(1) + 'px)';
+
 }
 
 function onScroll(){
@@ -328,6 +318,7 @@ function frame(now){
     }
     pctx.globalAlpha=1;
   }
+
 
   frames++;
   if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }

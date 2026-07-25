@@ -42,16 +42,24 @@ codex exec -s read-only --skip-git-repo-check -i gate_pair.png - < /tmp/gate_pro
 ```
 
 ## Scoreboard — gated as a SEQUENCE on the CONTINUOUS page, 2026-07-25
-The deliverable is now `index.html`, one document. Numbers below are the mean of TWO runs
-of the blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
+The deliverable is `index.html`, one document. Numbers are the mean of repeated runs of the
+blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
 
-Sequence: **7.0** — separate pages 5.4 → 6.2, first continuous build 6.0, now 7.0.
+Sequence: **6.0** — separate pages 5.4 → 6.2, continuous build 6.0, and it has stayed there.
+
+### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
+The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
+sequence line was lost to a grep and I recorded the surviving number as if it were the mean.
+Six further blunt samples across today's builds landed at 5.8, 5.8, 6.1, 6.1, 6.2, 6.2.
+**The level is 6.0.** The 7.0 was the top of the variance band, not a level.
+Rule from now on: sample the SEQUENCE line at least twice and report the mean. Never record
+a number from a run whose output was partly truncated.
 
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **7.4** | iterating |
-| 2 | Down into cloud — charged particle | **6.1** | weakest |
-| 3 | NanoFlashing pulls them in | **6.8** | iterating |
+| 1 | Mountain — C-POLAR + 5 applications | **6.6** | iterating |
+| 2 | Down into cloud — charged particle | **5.2** | weakest, oscillating in the 5s |
+| 3 | NanoFlashing pulls them in | **6.2** | iterating |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -122,39 +130,64 @@ REAL, never from more shader work:
 When a screen is stuck, the question is not "what parameter do I tune" but "what part of
 this is fake, and what real thing replaces it".
 
+## What this pass tried, and what it cost (honest)
+Four things were added; the score did not move off 6.0 and two of them had to come out.
+
+- **Kept — the contaminant now survives every seam.** The soot particle is cut out of its own
+  plate (`mote_cut.png` from `mote_in.png`), so it registers exactly over the photograph at
+  the middle stop and there is no seam. It then stays on screen while everything else
+  cross-fades, and is drawn into the fibre. This is the continuity the judge has asked for in
+  six consecutive gates, and it is the only way to get it without a pasted-looking asset.
+- **Kept — UI contrast and body copy up.** Judge: body copy was *"decorative texture rather
+  than information"*; nav was *"washed out"*. Body 19 → 22px, nav #47515b → #333c45.
+- **REMOVED — the ring-and-orbit charge field.** Called *"thin HUD rings"*, *"decorative
+  circles orbiting an object"* and *"decorative HUD graphics"* in three consecutive gates.
+  Before it, an outlined minus was called *"a carousel control"* and *"a zoom-out button"*.
+  **Two different attempts to annotate the charge both failed. Do not try a third.** The
+  headline names the charge; the picture does not need a diagram on top of it.
+- **REVERTED — `mat_close.png` (the tight fibre plate) and the alternating left/right copy.**
+  The tight plate's saturated blue scored *worse* (bottom 6.8 → 5.4, *"generic future
+  filtration advertising"*), and mirroring beat 2 was called *"a template convention that
+  makes each scene feel newly introduced"*. Both are back to the earlier configuration.
+  `mat_close.png` is still in `hero_img/` if a desaturated version is worth retrying.
+
+**Note the contradiction in the judge's own advice**, and do not chase it: one pass asked for
+*"a different compositional job per beat"*, the next called alternating sides a template
+convention and asked to *"hold one compositional axis"*. The consistent point underneath both
+is that the scenes feel newly introduced — that is an object-continuity problem, not a layout
+problem. Fix continuity, leave the layout alone.
+
 ## NEXT ACTION
-Current: sequence 7.0 · S1 7.4 · S2 6.1 · S3 6.8. Bar is 9. Screen 2 is still the weakest.
+Current: sequence 6.0 · S1 6.6 · S2 5.2 · S3 6.2. Bar is 9.
 
-Do these in order:
+**Screen 2 is the blocker and it has now stalled.** Its history: painted particles 3.0 →
+photographed smoke 5.8 → three pasted specimens 4.9 → one pasted specimen 5.4 → soot particle
+inside the photograph 6.1 → and back down to 4.7–5.8 on re-sampling. It oscillates in the 5s.
+GOAL.md's own rule applies: when a screen stalls twice at the same number, stop tuning and ask
+what is still fake.
 
-1. **Take the circle off the charge mark.** The judge, twice: *"the circled minus looks like
-   a carousel control / a zoom-out button... a perfect UI-style badge sitting above the
-   imagery."* Its fix: *"represent charge through a subtle field, glow, displacement, or
-   particles orbiting the contaminant, then visibly collapsing as capture occurs."*
-   So: no badge. A faint field around the particle that collapses into the fibre at capture.
+What the judge says is fake about it, in its own words across today's gates: *"a floating coal
+meatball"*, *"an AI-generated asteroid"*, *"a floating charcoal render"*, *"a lump of slag
+pasted into a product diagram"*. The subject is not credible as pollution.
 
-2. **Give each beat a different compositional job.** Right now all three are
-   nav / left headline / small paragraph / object right / big empty field.
-   Judge's fix: *"start with a centred thesis, let the pollutant interrupt or pass through
-   the typography in the second beat, and make the final capture nearly full-frame with the
-   copy closer to the interaction."*
+1. **Try real microscopy language for screen 2.** A generated SEM-style micrograph of a soot
+   agglomerate — greyscale, branched chain structure, fused nanospheres, empty substrate —
+   is a completely different visual register from "a rock floating in fog", and it is the one
+   register the judge keeps asking for: *"use credible microscopy"*, *"a specific, ownable
+   visual system based on the actual material and pollutants"*.
+   A first candidate is already generated: job `e4495034-dfdd-4b05-81b2-5580451ed358`.
+   If it works, the travelling cutout must be re-cut from the new plate to keep registration.
 
-3. **Body copy up in size and contrast** — *"currently treated as decorative texture rather
-   than information."*
+2. **If microscopy also lands in the 5s, the concept is wrong, not the asset.** In that case
+   change what screen 2 shows: not one particle, but the air itself — e.g. the same frame
+   twice, loaded and clean, so the screen carries a comparison rather than a portrait.
 
-4. **Gate the TRANSITION, not just the three endpoints.** Three stills cannot show a scroll.
-   `shot_scroll.mjs` takes any `p` value, so render p = 0, 0.5, 1, 1.5, 2, 2.3 and put the
-   mid-transition frames in the strip. Continuity is the thing being built; it has to be the
-   thing being judged.
+3. **Do not re-add any charge annotation.** Two attempts, both rejected. See above.
 
-5. Screens 4–10 are still not built. Do not start them until the first three clear 9.
+4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
 
 **Do not** act on the judge's repeated request to delete the mountain hero — Yin specified
 it (rule 7).
-
-**Pace note, honestly:** screen 3 oscillated for many passes (2,3,4,4,4,5,5,5,6,5,4,4,5)
-before real assets moved it. Every gain came from a concept change or a real asset. Every
-regression came from over-correcting one parameter per pass.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
