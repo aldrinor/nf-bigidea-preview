@@ -6,8 +6,12 @@
 <title>Peak to Particle — hero</title>
 <style>
   :root{
-    --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#8a9095;
+    /* Type scale measured off the reference at 1440px: display 62px/300, labels 12px, and
+       ONE ink for everything — no black headline over grey chrome. Ours keeps C-POLAR's
+       ink and accent, but takes the reference's proportions. */
+    --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#5a646e;
     --accent:#1b7bff; --hair:rgba(20,24,28,0.10);
+    --display: clamp(28px, 3.45vw, 50px);
     --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
   }
   *{box-sizing:border-box}
@@ -38,30 +42,27 @@
     padding:clamp(52px,6.4vw,92px) clamp(50px,13.7vw,300px)}
   /* one restrained lockup, vertically centred on the left — not bottom-loaded */
   .lockup{position:absolute;left:clamp(50px,13.7vw,300px);top:52%;transform:translateY(-50%);
-    max-width:min(30ch,42vw)}
+    max-width:min(46ch,40vw)}
   nav{display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
-  nav a{font-size:12px;letter-spacing:.085em;text-decoration:none;color:#93a2ae;
+  nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#47515b;
     padding-bottom:7px;transition:color .2s}
-  nav a:hover{color:#4d6478}
+  nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
   .spacer{flex:1}
-  .mark{display:flex;align-items:center;gap:clamp(14px,1.6vw,22px);margin-bottom:clamp(10px,1.4vh,18px)}
+  .mark{display:flex;align-items:center;gap:clamp(14px,1.6vw,22px);margin-bottom:clamp(14px,2vh,26px)}
   /* mark recoloured at the pixel level to #52677A — a CSS filter could not get there */
   .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
-  h1{font-size:clamp(24px,2.7vw,34px);font-weight:600;line-height:1.32;letter-spacing:-.022em;
-    color:var(--headline-ink);margin:0;max-width:34ch}
+  /* light weight at large size — heavy weight at this scale reads as a slide, not a page */
+  h1{font-size:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.015em;
+    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:19ch}
   h1 em{font-style:normal;color:var(--accent)}
-  .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
-    margin-top:clamp(18px,3vh,40px)}
+  p{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:clamp(50px,13.7vw,300px);bottom:clamp(36px,4.8vw,68px);
-    font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
-  .apps{display:flex;gap:clamp(14px,2vw,30px);flex-wrap:wrap}
-  .apps span{font-size:12.5px;letter-spacing:.05em;color:var(--muted)}
-  .apps span b{font-weight:400;color:var(--ink)}
+    font-size:12px;letter-spacing:.09em;color:var(--muted)}
   @media (max-width:760px){
     nav{gap:14px} nav a{font-size:12px}
-    h1{font-size:clamp(19px,5.4vw,26px);max-width:22ch}
-    .foot{flex-direction:column;align-items:flex-start}
+    .lockup{max-width:none;right:clamp(50px,13.7vw,300px)}
+    h1{max-width:16ch}
   }
   @media (prefers-reduced-motion:reduce){ canvas#mist{display:none} }
 </style>
@@ -81,7 +82,11 @@
   </nav>
   <div class="lockup">
     <div class="mark"><img src="./brand/cpolar_bluegrey.png" alt="C-POLAR"></div>
-    <h1>A permanent positive charge, engineered into the material — <em>proven first in air</em>.</h1>
+    <!-- one ink, no accent: the reference runs its whole hero in a single colour, and the
+         boldness here should be the scale of the type, not a second colour -->
+    <h1>A permanent positive charge, engineered into the material.</h1>
+    <p>Proven first in air. The same physical mechanism carries across water,
+       protective wear, food packaging and medical devices.</p>
   </div>
   <span class="cue">SCROLL TO DESCEND</span>
 
@@ -155,7 +160,9 @@ addEventListener('resize', resize); resize();
 const BANKS = [
   { tile: bakeBank(512, 16, 0.86, 0.26, 2.7), y:0.30, h:0.30, w:1.90, v: 0.0115, a:0.34, blur:3.0 },
   { tile: bakeBank(512, 13, 0.92, 0.24, 2.9), y:0.52, h:0.34, w:2.10, v:-0.0082, a:0.60, blur:1.4 },
-  { tile: bakeBank(576, 11, 0.98, 0.20, 3.1), y:0.68, h:0.42, w:2.40, v: 0.0062, a:0.88, blur:0.0 },
+  /* many small lobes, softened. Few large lobes at full alpha bake into one solid white
+     ellipse that reads as a lens artefact sitting on top of the photograph. */
+  { tile: bakeBank(576, 24, 1.10, 0.23, 2.5), y:0.68, h:0.42, w:2.40, v: 0.0062, a:0.56, blur:2.2 },
   { tile: bakeBank(512, 14, 0.90, 0.30, 2.6), y:0.16, h:0.24, w:1.80, v:-0.0140, a:0.22, blur:4.4 },
 ];
 

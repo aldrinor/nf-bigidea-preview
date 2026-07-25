@@ -7,60 +7,57 @@
 <style>
   :root{
     --rail: clamp(50px, 13.7vw, 300px);
-    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#8a9095; --accent:#1b7bff;
+    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#5a646e; --accent:#1b7bff;
+    --display: clamp(28px, 3.45vw, 50px);
     --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
-  /* the plate IS the scene — real photographed cloud, full bleed, no painted noise */
-  #plate{position:fixed;left:-4%;top:-4%;width:108%;height:108%;object-fit:cover;z-index:0;
-    filter:contrast(1.14) saturate(1.06) brightness(0.99);}
-  /* one soft veil only, to seat the copy — never enough to flatten the photograph */
+  /* Real photographed smoke pushed into real cloud. The pollution in this frame is
+     PHOTOGRAPHED, not painted — painted particulate over a stock sky is what held this
+     screen at 4.5. Desaturated toward neutral so it sits in a cold palette. */
+  /* pushed further right so clean air sits between the copy and the mass. At 126% the frame
+     split half-and-half down the middle and the gate called the composition lopsided. */
+  #plate{position:fixed;left:0;top:-20.9%;width:138%;height:138%;object-fit:cover;z-index:0;
+    filter:saturate(.42) contrast(1.05) brightness(1.02);}
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg, rgba(240,244,248,.34) 0%, rgba(240,244,248,0) 14%);}
+    background:linear-gradient(180deg, rgba(240,244,248,.52) 0%, rgba(240,244,248,0) 16%);}
   #dust{position:fixed;inset:0;z-index:2;pointer-events:none}
-  /* readability comes from a LOCAL scrim behind the copy, never from draining the
-     whole image — that is what bleached all three screens */
-  #scrim{position:fixed;left:0;top:0;width:min(56%,760px);height:100%;z-index:2;
-    pointer-events:none;
-    background:linear-gradient(100deg, rgba(244,247,250,.94) 0%, rgba(244,247,250,.86) 30%,
-      rgba(244,247,250,.55) 56%, rgba(244,247,250,.14) 80%, rgba(244,247,250,0) 100%);}
-  @media (max-width:760px){ #scrim{width:100%;
-    background:linear-gradient(180deg, rgba(244,247,250,.95) 0%, rgba(244,247,250,.80) 46%,
-      rgba(244,247,250,.20) 74%, rgba(244,247,250,0) 100%);} }
   .chrome{position:fixed;inset:0;z-index:4;padding:clamp(52px,6.4vw,92px) var(--rail)}
-  .navshelf{position:absolute;left:0;right:0;top:0;height:clamp(96px,11vw,150px);
-    background:linear-gradient(180deg, rgba(240,244,248,.88) 0%, rgba(240,244,248,0) 100%);
-    pointer-events:none}
   nav{position:relative;display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
-  nav a{font-size:13px;letter-spacing:.075em;text-decoration:none;color:var(--muted);
+  nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#47515b;
     padding-bottom:6px;transition:color .2s}
   nav a:hover{color:var(--ink)}
   nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
-  .lockup{position:absolute;left:var(--rail);top:56%;transform:translateY(-50%);max-width:min(30ch,40vw)}
-  h2{font-size:clamp(24px,2.7vw,34px);font-weight:600;line-height:1.32;letter-spacing:-.022em;
-    color:var(--headline-ink);margin:0 0 clamp(16px,2vh,24px)}
+  /* This stop anchors its copy LOW. Three stops with an identical centred-left block read
+     as three template slides; the descent should feel like it changes altitude. */
+  .lockup{position:absolute;left:var(--rail);bottom:clamp(112px,15vh,190px);
+    max-width:min(46ch,40vw)}
+  h2{font-size:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.015em;
+    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:19ch}
   h2 em{font-style:normal;color:var(--accent)}
-  p{font-size:clamp(16px,1.5vw,19px);line-height:1.55;color:var(--ink);margin:0;max-width:44ch}
+  p{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
-    font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
+    font-size:12px;letter-spacing:.09em;color:var(--muted)}
 
   @media (max-width:760px){
-    nav{gap:14px} .lockup{max-width:none;right:var(--rail);top:52%}
-    #veil{background:linear-gradient(180deg, rgba(238,242,246,.94) 0%, rgba(238,242,246,.55) 46%, rgba(238,242,246,0) 72%)}
+    nav{gap:14px}
+    #plate{left:-24%;top:-8%;width:172%;height:172%}
+    .lockup{max-width:none;right:var(--rail);bottom:14vh}
+    #veil{background:linear-gradient(0deg, rgba(240,244,248,.95) 0%, rgba(240,244,248,.74) 32%,
+      rgba(240,244,248,0) 58%)}
   }
   @media (prefers-reduced-motion:reduce){ #dust{display:none} }
 </style>
 </head>
 <body>
-<img id="plate" src="./hero_img/cloud_in.png" alt="Dense billowing cloud seen from inside it.">
+<img id="plate" src="./hero_img/smoke_in.png"
+     alt="A dense plume of wildfire smoke pushing into clean white cloud.">
 <div id="veil"></div>
-<div id="scrim"></div>
 <canvas id="dust"></canvas>
 
 <div class="chrome">
-  <div class="navshelf"></div>
   <nav aria-label="Applications">
     <a class="on" href="#">C-POLAR</a>
     <a href="#">Air</a><a href="#">Water</a><a href="#">Protective Wear</a>
@@ -75,81 +72,62 @@
 </div>
 
 <script>
-/* Particles only. The cloud is a photograph, not painted noise — painted noise is what
-   held screens 2 and 3 at 3/10 and 2/10. */
-const dc=document.getElementById('dust'), dx=dc.getContext('2d');
-let parts=[];
-const SPRITES=(function(){var out=[];
-  for(var i=0;i<6;i++){
-    var soft=i/5, R=Math.round(10+soft*22), S=R*2;
-    var c=document.createElement('canvas'); c.width=c.height=S; var g=c.getContext('2d');
-    var grd=g.createRadialGradient(R,R,0,R,R,R);
-    grd.addColorStop(0,'rgba(38,52,66,1)');
-    grd.addColorStop(Math.max(0.05,0.42-soft*0.36),'rgba(38,52,66,0.92)');
-    grd.addColorStop(1,'rgba(38,52,66,0)');
-    g.fillStyle=grd; g.beginPath(); g.arc(R,R,R,0,Math.PI*2); g.fill(); out.push(c);
-  } return out;})();
-function sizeDust(){
+/* The plume carries the pollution. This layer lifts individual pollutant particles OUT of
+   it into the clean air beside it, and EVERY one of them carries its charge mark.
+   Twenty-six small motes with a few marked read as arbitrary floating dots; a handful of
+   larger ones, each labelled, is the same idea doing actual work. */
+var dc=document.getElementById('dust'), dx=dc.getContext('2d'), M=[];
+var EDGE = 0.635;                       // where the plume's leading edge sits in the frame
+function fit(){
   var dpr=Math.min(devicePixelRatio||1,2);
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 120 : 300;
-  parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
+  M=[]; var n = innerWidth<760 ? 5 : 9;
+  for(var i=0;i<n;i++){ var m=mk(); m.life=Math.random(); M.push(m); }
 }
-
-function spawn(anywhere){
-  var depth=Math.pow(Math.random(),0.7);
-  // every particle belongs to ONE plume — a dense concentrated body of charged pollution,
-  // not an even sprinkle. Scattered dots read as noise; a plume reads as an event.
-  var a1=Math.random()*Math.PI*2, rr=Math.pow(Math.random(),0.45);
+function mk(){
+  // born inside the plume, then carried up and to the left into clean air
   return {
-    ang:a1, rad:rr,
-    r:0.5+Math.pow(depth,2.6)*9.5,
-    vr:(0.5+Math.random()*0.5),
-    ph:Math.random()*Math.PI*2,
-    a:0.10+Math.pow(depth,1.5)*0.70,
-    mark:Math.random()<0.30, depth:depth,
-    x:0, y:0
+    x: innerWidth *(0.66 + Math.random()*0.22),
+    y: innerHeight*(0.26 + Math.random()*0.38),
+    vx:-(0.026+Math.random()*0.022), vy:-(0.010+Math.random()*0.014),
+    r: 3.0+Math.random()*2.6,
+    ph: Math.random()*Math.PI*2,
+    life: 0
   };
 }
-sizeDust(); addEventListener('resize', sizeDust);
-var t0=performance.now(), last=t0, frames=0, winStart=t0;
-function frame(now){
-  var t=(now-t0)/1000, dt=Math.min(0.05,(now-last)/1000); last=now;
+fit(); addEventListener('resize', fit);
+var t0=performance.now(), fr=0, ws=t0;
+function loop(now){
+  var t=(now-t0)/1000, dt=Math.min(0.05,(now-(loop.l||now))/1000); loop.l=now;
   dx.clearRect(0,0,innerWidth,innerHeight);
-  parts.sort(function(a,b){return a.depth-b.depth;});
-
-  // the plume: a dense rolling mass, drifting slowly across the frame
-  var PX = innerWidth*(0.60 + Math.sin(t*0.045)*0.06);
-  var PY = innerHeight*(0.50 + Math.sin(t*0.031)*0.05);
-  var PR = Math.min(innerWidth,innerHeight)*0.30;
-  for(var i=0;i<parts.length;i++){
-    var p=parts[i];
-    p.ang += (0.10 + (1-p.rad)*0.20) * p.vr * dt;      // slow internal churn
-    var wob = Math.sin(t*0.5 + p.ph)*0.035;
-    p.x = PX + Math.cos(p.ang)*PR*(p.rad+wob)*1.35;
-    p.y = PY + Math.sin(p.ang)*PR*(p.rad+wob);
-    // density falls off toward the edge of the plume, so it has a readable silhouette
-    var fall = 1.0 - Math.pow(p.rad, 2.2);
-    var A = p.a * (0.25 + 0.95*fall);
-    var sp=SPRITES[Math.min(5,Math.round((1-p.depth)*5))];
-    var sz=p.r*(3.0+(1-p.depth)*3.4);
-    dx.globalAlpha=A; dx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);
-    if(p.depth>0.93 && p.mark && p.rad<0.72){
-      var rr2=p.r*1.45, gx=p.x+p.r*2.9;
-      dx.globalAlpha=A*0.85; dx.strokeStyle='rgba(38,52,66,1)';
-      dx.lineWidth=Math.max(0.7,p.r*0.20);
-      dx.beginPath(); dx.arc(gx,p.y,rr2,0,Math.PI*2); dx.stroke();
-      dx.beginPath(); dx.moveTo(gx-rr2*0.52,p.y); dx.lineTo(gx+rr2*0.52,p.y); dx.stroke();
-    }
+  for(var i=0;i<M.length;i++){
+    var m=M[i];
+    m.life += dt*0.048;
+    if(m.life>=1){ M[i]=mk(); continue; }
+    m.x += (m.vx*innerWidth + Math.sin(t*0.5+m.ph)*7) * dt;
+    m.y += (m.vy*innerHeight + Math.cos(t*0.42+m.ph*1.7)*5) * dt;
+    if(m.x < innerWidth*0.46 || m.y < innerHeight*0.08){ M[i]=mk(); continue; }
+    // hidden inside the smoke, resolving as it reaches clean air, gone before the copy
+    var clear = Math.min(1, Math.max(0, (innerWidth*EDGE - m.x) / (innerWidth*0.085)));
+    var low   = Math.min(1, Math.max(0, (innerHeight*0.50 - m.y) / (innerHeight*0.12)));
+    var edge  = Math.min(1, m.life/0.14) * Math.min(1, (1-m.life)/0.22);
+    var a = 0.70 * clear * low * edge;
+    if(a <= 0.004) continue;
+    dx.globalAlpha=a; dx.fillStyle='rgba(42,52,64,1)';
+    dx.beginPath(); dx.arc(m.x,m.y,m.r,0,Math.PI*2); dx.fill();
+    var rr = m.r*2.1, gx = m.x + m.r + rr + 6;
+    dx.globalAlpha = a*0.85; dx.strokeStyle='rgba(42,52,64,1)';
+    dx.lineWidth = Math.max(1.1, rr*0.16);
+    dx.beginPath(); dx.arc(gx,m.y,rr,0,Math.PI*2); dx.stroke();
+    dx.beginPath(); dx.moveTo(gx-rr*0.50,m.y); dx.lineTo(gx+rr*0.50,m.y); dx.stroke();
     dx.globalAlpha=1;
   }
-  frames++;
-  if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }
-  requestAnimationFrame(frame);
+  fr++; if(now-ws>=1000){ window.__fps=Math.round(fr*1000/(now-ws)); fr=0; ws=now; }
+  requestAnimationFrame(loop);
 }
-if(!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(frame);
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(loop);
 window.__ready=true;
 </script>
 </body>
