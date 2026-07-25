@@ -117,6 +117,33 @@ the correct answer and worth understanding — inertia, snap and a load entrance
 a still frame. **Motion work must be verified by measuring the running page, not by the A/B.**
 The A/B is for composition, typography and asset quality only.
 
+## THE THIRD PILLAR WAS BUILT AND REJECTED — WebGL specimen, do not retry
+The last untried structural lever: replace the flat specimen with a **real 3D object**, so it
+turns with true shading, occludes itself and shows parallax. That is precisely the criticism
+that survived every asset pass — *"flat"*, *"composited"*, *"looks like swapped renders"* — and
+it cannot be fixed inside a flat image.
+
+It is built, in full, and kept in the repo as `specimen3d.js`. It is not a toy: the aggregate
+is grown by **ballistic accretion** (a primary particle arrives from a random direction and
+sticks where it first touches — the rule that produces real soot's ragged open branches),
+primaries are of unequal size, each is an icosphere displaced by two scales of value noise for
+a pitted crust, all 46 merged into one buffer, lit with a hard raking key plus cold fill the way
+an electron image reads, with the camera drifting for parallax.
+
+**It looks markedly worse than the photograph.** `webgl_specimen_evidence.png` is the render:
+against the photographic aggregate it is a flat, faceted, untextured dark blob. The gap is not
+a tuning gap. What sells an electron image is micro-texture — crust, pitting, grain at the
+scale of a few pixels — and geometry cannot carry that at this magnification.
+
+**Reverted.** This is the same finding as the terrain experiment (built terrain 5.8 vs authored
+photography 7.0), now confirmed on a second, completely different subject:
+
+> **Procedural 3D loses to real photography whenever the subject fills the frame.**
+> WebGL earns its place for motion, depth and interaction — not for standing in for a photograph.
+
+`hero_img/substrate.png` (an empty SEM stage, generated for the 3D version to sit on) is kept
+in case a future attempt needs it.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -642,26 +669,25 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-The scroll engine and the motion craft are in and measured. Two things remain.
+All three of the reference's pillars have now been addressed:
+- **Scroll engine** — Lenis + ScrollTrigger, in and measured (329 px glide, snaps to stop).
+- **Motion craft** — masked word reveals and a load entrance, in and measured.
+- **WebGL** — built, measured, rejected with evidence. Photography wins at this scale.
 
-1. **The third pillar: WebGL, but not for the mountain.** The reference leans on three.js
-   heavily. Our own ledger says built terrain LOST to authored photography (5.8 vs 7.0), so the
-   hero is not the place. The honest place is the **specimen**: a true 3D object with real
-   lighting and parallax instead of a video of a flat picture. That is exactly the criticism
-   that survived every asset pass — *"flat", "composited", "looks like swapped renders"*.
-   It is the last untried structural lever and it needs a full pass.
-2. **Yin still owns two decisions** (see the calibration section above): what "done" means now
-   that the 9/10 bar is void, and whether we may license real imagery.
+**There is no further structural lever available in-house.** Everything remaining sits with Yin:
 
-**Verification rules from here:**
-- **Motion** → measure the running page (`check_engine.mjs`, `check_reveal.mjs`). Never judge
-  motion from stills.
-- **Composition, type, assets** → `gate_ab_prompt.txt`, both column orders, keep only the
-  verdict that survives the swap.
-- **Never** an absolute /10 from this judge. It scores mont-fort itself at 4.
+1. **What does "done" mean now?** The 9/10 bar is void — the judge scores mont-fort itself at 4.
+   Options: Yin's own review; an A/B against the current live site; or a small panel of A/Bs.
+2. **May we license real imagery?** Still the one untried fidelity lever, and the ledger says
+   fidelity is the only thing that ever moved this page.
 
-**Do not** resume: more stops, layout breaks, seam or collision work, the hero plate or crop,
-charge symbols, the mat video. All measured, all documented above.
+If a session must act without those answers, the honest work is narrow:
+- Re-run the A/B (`gate_ab_prompt.txt`, **both orders**) after any composition or asset change.
+- Re-run `check_engine.mjs` and `check_reveal.mjs` after any motion change.
+- Keep the live deploy verified.
+
+**Do not** retry: the WebGL specimen, more stops, layout breaks, seam or collision work, the
+hero plate or crop, charge symbols, the mat video. Every one is measured and documented above.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
