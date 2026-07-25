@@ -50,14 +50,12 @@ both micro screens sharing one instrument **6.8**.
 There are now TWO instruments, and they measure different things. Report both.
 
 - **3-row strip** (three scroll positions, ref left / ours right) — comparable with every
-  earlier number in this file. Current: 6.3, 6.7, 6.8 → **6.6**. It has sat at 6.6–6.8 across
-  four builds. Three stills cannot show a transition, so this instrument is blind to the thing
-  that was built this pass.
+  earlier number in this file. Current: 6.3, 7.1, 7.1 → **6.8**. It has sat at 6.6–6.8 across
+  five builds.
 - **7-frame scroll strip** (`gate_scroll.png`, prompt `/tmp/gate_scroll.txt`) — seven
-  consecutive frames of the descent, which is the only way to judge continuity. Before this
-  pass: **5.0**, and the judge's verdict was *"it reads as separate sticky slides"*. After:
-  **5.8, 6.2 → 6.0**, verdict *"continuous: yes"*. That is a full point on the instrument that
-  actually measures what was changed.
+  consecutive frames of the descent, the only instrument that can judge continuity.
+  It was **5.0** two passes ago (*"reads as separate sticky slides"*), rose to **6.0** when the
+  cross-fades were replaced with real entrances, and is now **5.5, 5.5, 6.0 → 5.7**. Flat.
 
 ### ⚠ CORRECTION: the 7.0 recorded earlier was wrong, and it was my error
 The previous entry claimed 7.0. That came from **one** sequence reading — the other run's
@@ -73,7 +71,7 @@ a number from a run whose output was partly truncated.
 | 2 | Down into cloud — the pollutant | **6.7** | |
 | 3 | NanoFlashing pulls them in | **6.9** | |
 
-Scroll continuity (7-frame instrument): **6.0**, up from 5.0 this pass.
+Scroll continuity (7-frame instrument): **5.7**. Flat across the last two builds.
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -271,31 +269,59 @@ Two implementation notes worth keeping:
   more like stacked slides"*. An earlier attempt to fix it silently failed to match the line in
   the file; always `grep` the line back after a scripted edit.
 
-## NEXT ACTION
-Current: 3-row 6.6 · scroll 6.0 · S1 7.0 · S2 6.7 · S3 6.9. Bar is 9.
+## THE SEAMS ARE NOW FIXED — and the number did not move
+Three things were built this pass, each answering a complaint the judge had made by name:
 
-The scroll gate now names two specific things, both about the seams:
-
-1. **The collision still is not convincing.** Judge: *"lock one identifiable portion of the
-   particle to a continuous motion path... then progressively occlude and compress that same
-   geometry into the deposit. The fibre should pass behind some branches and in front of
+1. **Contact occlusion.** A second copy of the filter plate sits ABOVE the travelling
+   contaminant, masked to a narrow patch on one fibre, and fades in over the last stretch of
+   the pull. One fibre now crosses IN FRONT of part of the particle while the rest stays in
+   front of the mat. Judge: *"the fibre should pass behind some branches and in front of
    others at impact."*
-   Concretely: add a second copy of the fibre plate ABOVE the travelling contaminant, masked to
-   just the fibre band, and fade it in over the last stretch of the pull. The fibre then passes
-   in front of part of the particle while the rest stays behind it, which is what real contact
-   looks like. Everything needed is already in `index.html`.
+2. **A real hand-over from the summit.** The contaminant now appears at p≈0.26, while the
+   summit is still on screen, RISES into place along the same upward path the summit is
+   taking, and GROWS as we descend. The mist canvas is held alive across the seam as the
+   continuous depth layer. Judge: *"introduce the particle while the final mountain contours
+   are still visible... use fog/atmosphere as the continuous depth layer."*
+3. **The mat is now CLEAN** (`hero_img/mat_clean.png`) and the particle the viewer has
+   followed since the summit IS the deposit. It no longer fades out at contact — it lands and
+   stays. Judge, three gates running: *"its scale, silhouette and structure change, so it
+   looks swapped for different soot renders."* One silhouette now runs the whole descent.
 
-2. **The mountain-to-micrograph handoff has no spatial logic.** Judge: *"a summit disappears
-   and a large soot specimen appears against empty white... introduce the particle while the
-   final mountain contours are still visible, align its upward movement with the summit's
-   trajectory, and use fog/atmosphere as the continuous depth layer. Extend that coexistence
-   substantially before the mountain vanishes."*
-   Concretely: bring the contaminant on screen earlier (it currently appears at p≈0.55, after
-   the summit is mostly gone), move it upward along the same path the summit is taking, and
-   hold the mist canvas alive across the seam instead of fading it out at p≈1.0.
+**Result: the scroll instrument did not move (6.0 → 5.7, inside the noise band).** All three
+fixes are correct and should stay — they are visibly right, and the underlying criticisms were
+real. But closing named seam complaints has now stopped buying points, which is the signal to
+change target. See NEXT ACTION.
 
-3. **Do not** regenerate the hero plate, retry the hero crop, or add a charge symbol. All
-   measured dead ends, documented above.
+## NEXT ACTION
+Current: 3-row 6.8 · scroll 5.7 · bar 9.
+
+Seam work is done and it stopped paying. The judge's remaining complaint is now, every time,
+the same one, and it is the one thing on this page that has never been touched:
+
+> *"Generic sans-serif typography, tiny permanent navigation, large empty white fields... it
+> gives it an AI-generated stock-page quality. Build a more distinctive typographic system,
+> use the micrograph at a more cinematic full-bleed scale, strengthen contrast, and compose
+> the copy around the moving specimen instead of repeatedly placing a standard left-aligned
+> marketing block."*
+
+Every screen since the first day has been: nav top-left, headline left, paragraph under it.
+That layout was measured off the reference and it is not wrong — but it is also the single
+most template-like thing here, and it is now the only complaint left standing.
+
+1. **Build a typographic system of our own.** The current stack is the system default sans at
+   one weight. The reference runs a characterful display face at weight 300 with very wide
+   tracking against a plain utility face for labels — two faces doing two different jobs.
+   Ours does one job with one face. Choose a display face with a real point of view, pair it
+   with a plain utility face for the nav and cue, and set a scale that is ours rather than a
+   copy of the reference's proportions.
+
+2. **Compose the copy around the specimen, not beside it.** Asked for three times. The
+   specimen moves down the page on a known path (`moteAt(p)`); the copy could sit in relation
+   to it — above it early, tucked against the fibre at the end — instead of a fixed left block
+   on all three stops.
+
+3. **Do not** regenerate the hero plate, retry the hero crop, add a charge symbol, or do more
+   seam work. All measured dead ends or already done.
 
 4. Screens 4–10 are still not built. Do not start them until the first three clear 9.
 

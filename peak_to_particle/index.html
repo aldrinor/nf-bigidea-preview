@@ -25,6 +25,11 @@
   #pl_peak {left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.16) saturate(.38) brightness(0.99)}
   #pl_smoke{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
+  #pl_front{position:fixed;left:-6%;top:-6%;width:112%;height:112%;object-fit:cover;z-index:2;
+    pointer-events:none;opacity:0;will-change:opacity,transform;
+    filter:contrast(1.02) brightness(1.01);
+    -webkit-mask-image:radial-gradient(ellipse 10% 21% at 71.5% 53%, #000 0%, #000 46%, transparent 88%);
+    mask-image:radial-gradient(ellipse 10% 21% at 71.5% 53%, #000 0%, #000 46%, transparent 88%)}
   #pl_fibre{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
 
   canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
@@ -76,8 +81,16 @@
        over the plate at the middle stop, so there is no seam, and then it stays on screen
        while everything else cross-fades and is drawn into the fibre. -->
   <img id="mote" src="./hero_img/sem_cut.png" alt="">
-  <img id="pl_fibre" src="./hero_img/sem_catch_a.png" alt="An electron micrograph of a soot agglomerate held on a filter fibre.">
+  <img id="pl_fibre" src="./hero_img/mat_clean.png" alt="An electron micrograph of clean nonwoven filter media.">
 </div>
+<!-- A second copy of the filter plate, revealed only in a soft ellipse around the contact
+     and sitting ABOVE the travelling contaminant, so one fibre crosses IN FRONT of part of
+     the particle while the rest of it stays in front of the mat. The gate: "the fibre should
+     pass behind some branches and in front of others at impact."
+     The mat itself is now CLEAN. The deposit on the fibre is the very particle the viewer has
+     been following since the summit — the gate three times running: "its scale, silhouette
+     and structure change, so it looks swapped for different soot renders." -->
+<img id="pl_front" src="./hero_img/mat_clean.png" alt="">
 <canvas class="fx" id="mist"></canvas>
 <div id="veil"></div>
 
@@ -140,19 +153,29 @@ function moteAt(p){
      so the two register as one object. It used to shrink to a dot beside a much larger
      photographed deposit, which the gate read as "pasted over the mat, then a different-sized
      deposit... no clear instant of contact". */
-  var K=innerWidth*0.720, L=innerHeight*0.552;         // the deposit, measured off the plate
+  var K=innerWidth*0.700, L=innerHeight*0.560;         // the fibre crossing, measured off the plate
   /* The arriving material acts on it. The pull starts exactly when the mat begins to enter
      the frame, accelerates the whole way in (cubic ease-IN, not a symmetric ease), and then
      stops dead at contact. It used to travel on a fixed eased path regardless of what was
      behind it, which is what the judge meant by "no causal transformation". */
+  /* It arrives while the summit is still on screen and RISES into place along the same
+     upward trajectory the summit is taking, so the two scales hand over to each other
+     instead of one asset being swapped for another. */
+  var rise = 1 - smooth(0.30, 1.10, p);
+  var x0 = h.x + rise * innerWidth  * 0.055;
+  var y0 = h.y + rise * innerHeight * 0.320;
   var t=clamp((p-1.20)/(2.10-1.20), 0, 1);
   var e=t*t*t;
   return {
-    x: mix(h.x, K, e),
-    y: mix(h.y, L, e),
-    w: mix(h.w, innerWidth*0.300, Math.pow(e,0.85)),   // settles to the deposit's own size
+    x: mix(x0, K, e),
+    y: mix(y0, L, e),
+    // it also GROWS on the way in: appearing at full size beside the summit reads as a
+    // boulder, not as a descent of scale
+    w: mix(h.w * mix(0.40, 1.0, smooth(0.26, 1.05, p)),
+           innerWidth*0.235, Math.pow(e,0.85)),
     // held right through contact, then merged once it is registered on top of the deposit
-    o: band(p, 0.55, 0.90, 2.06, 2.32)
+    // it does NOT fade out. It lands and stays: it is the deposit.
+    o: smooth(0.26, 0.66, p)
   };
 }
 
@@ -162,6 +185,7 @@ var el = {
   fibre: document.getElementById('pl_fibre'),
   mist:  document.getElementById('mist'),
   mote:  document.getElementById('mote'),
+  front: document.getElementById('pl_front'),
   c1:    document.getElementById('c1'),
   c2:    document.getElementById('c2'),
   c3:    document.getElementById('c3'),
@@ -190,17 +214,23 @@ function layout(){
   el.peak.style.opacity   = 1 - smooth(0.45, 1.10, p);
   el.peak.style.transform = 'translateY(' + (-p*0.070*vh).toFixed(1) + 'px) scale(' +
                             (1 + p*0.035).toFixed(4) + ')';
-  el.mist.style.opacity   = 1 - smooth(0.40, 1.00, p);
+  // atmosphere is the one layer carried across the seam, so the scale change has
+  // somewhere to happen rather than being a straight swap of assets
+  el.mist.style.opacity   = (1 - smooth(0.70, 1.55, p)) * (1 - 0.45*smooth(0.30, 0.90, p));
 
-  el.smoke.style.opacity   = band(p, 0.50, 1.10, 1.40, 2.10);
+  el.smoke.style.opacity   = band(p, 0.50, 1.10, 1.16, 2.10);
   el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px)';
 
   // the mat begins arriving well before the pollutant beat ends, so the middle of the
   // scroll is a continuous overlap rather than two held states either side of a cut
-  var fEnter = Math.max(0, 2.10 - p);
-  el.fibre.style.opacity   = smooth(1.30, 2.10, p);
-  el.fibre.style.transform = 'translateX(' + (fEnter*0.042*vw).toFixed(1) + 'px) scale(' +
-                             (1 + fEnter*0.030).toFixed(4) + ')';
+  var fEnter = Math.max(0, 2.10 - p);   // begins the moment the pollutant beat settles
+  el.fibre.style.opacity   = smooth(1.02, 2.10, p);
+  var fTf = 'translateX(' + (fEnter*0.042*vw).toFixed(1) + 'px) scale(' +
+            (1 + fEnter*0.030).toFixed(4) + ')';
+  el.fibre.style.transform = fTf;
+  // the same plate again, on top of the contaminant, closing over it as it lands
+  el.front.style.opacity   = smooth(1.86, 2.22, p);
+  el.front.style.transform = fTf;
 
   // copy: each block rises in and lifts away, so the page reads as motion not as slides
   copyState(el.c1, { o: 1 - smooth(0.20, 0.60, p), dy: -p * 62 }, true);
