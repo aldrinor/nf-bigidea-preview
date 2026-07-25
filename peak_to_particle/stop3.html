@@ -25,10 +25,14 @@
   #clean{position:fixed;left:0;bottom:0;width:100%;height:30%;z-index:3;pointer-events:none;
     background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 46%,
       rgba(255,255,255,.82) 100%);}
-  #media{position:fixed;left:0;bottom:0;width:100%;height:62%;object-fit:cover;object-position:center top;z-index:2;
-    filter:contrast(1.10) brightness(1.01);
+  #media{position:fixed;left:0;bottom:0;width:100%;height:66%;object-fit:cover;object-position:center top;z-index:2;
+    filter:contrast(1.26) brightness(0.97) saturate(0.96);
     -webkit-mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.70) 9%, #000 20%, #000 100%);
             mask-image:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.70) 9%, #000 20%, #000 100%);}
+  /* the plate's loose foreground fibres competed with the moment of impact — fade them */
+  #quiet{position:fixed;left:0;bottom:0;width:100%;height:20%;z-index:3;pointer-events:none;
+    background:linear-gradient(180deg, rgba(244,247,250,0) 0%, rgba(244,247,250,.55) 58%,
+      rgba(244,247,250,.86) 100%);}
   #dust{position:fixed;inset:0;z-index:4;pointer-events:none}
   /* readability comes from a LOCAL scrim behind the copy, never from draining the
      whole image — that is what bleached all three screens */
@@ -71,6 +75,7 @@
 <img id="media" src="./hero_img/loaded.png" alt="A charged filter surface heavily loaded with captured dark particles.">
 <div id="veil"></div>
 <div id="scrim"></div>
+<div id="quiet"></div>
 <canvas id="dust"></canvas>
 
 <img id="mark" src="./brand/nanoflashing_bluegrey.png" alt="NanoFlashing">
@@ -110,7 +115,7 @@ function sizeDust(){
   dc.width=Math.floor(innerWidth*dpr); dc.height=Math.floor(innerHeight*dpr);
   dc.style.width=innerWidth+'px'; dc.style.height=innerHeight+'px';
   dx.setTransform(dpr,0,0,dpr,0,0);
-  var n = innerWidth<760 ? 54 : 120;
+  var n = innerWidth<760 ? 20 : 42;
   parts=[]; for(var i=0;i<n;i++) parts.push(spawn(true));
 }
 
@@ -161,10 +166,10 @@ function spawn(anywhere){
     x: lane.x0 + (lane.x1 - lane.x0) * prog + jit,
     y: y,
     trail: [],                                      // real path history -> visible trajectory
-    r: 0.9 + Math.pow(depth, 2.4) * 6.2,
+    r: 1.6 + Math.pow(depth, 1.9) * 9.0,
     v: 420 + depth * 620,          // through the air fast: few are ever airborne                           // fall speed
     ph: Math.random() * Math.PI * 2,
-    a: 0.14 + Math.pow(depth, 1.6) * 0.62,
+    a: 0.34 + Math.pow(depth, 1.4) * 0.60,
     mark: Math.random() < 0.16,
     anchor: null, held: 0, depth: depth
   };
@@ -184,9 +189,20 @@ function frame(now){
     var p = parts[i];
 
     if (p.anchor){
+      // ARRESTED: it stops dead on the charged surface, holds visibly, then merges in
       p.held += dt;
-      p.a *= (1 - dt*3.2);                          // merges into the real deposit
-      if (p.held > 0.22){ parts[i] = spawn(false); continue; }
+      if (p.held < 0.16){
+        // the moment of capture — briefly brighter and larger, so impact is legible
+        var kk = 1 - p.held/0.16;
+        var sph = SPRITES[0], szh = p.r * (5.0 + 5.0*kk);
+        dx.globalAlpha = Math.min(1, p.a * (1.0 + 1.4*kk));
+        dx.drawImage(sph, p.x - szh/2, p.y - szh/2, szh, szh);
+        dx.globalAlpha = 1;
+      } else {
+        p.a *= (1 - dt*4.0);
+      }
+      if (p.held > 0.46){ parts[i] = spawn(false); continue; }
+      continue;                                     // held: no further motion, it has stopped
     } else {
       p.trail.push(p.x, p.y); if(p.trail.length>26) p.trail.splice(0,2);
       // accelerate toward the material as the charge takes hold
@@ -228,7 +244,7 @@ function frame(now){
         dx.lineCap = 'round';
         for (var q = 0; q < tr.length - 2; q += 2){
           var f0 = q / (tr.length - 2);                 // 0 oldest .. 1 newest
-          dx.globalAlpha = p.a * 0.80 * f0 * f0;
+          dx.globalAlpha = p.a * 0.92 * f0 * f0;
           dx.lineWidth = Math.max(0.4, p.r * 0.75 * f0);
           dx.beginPath(); dx.moveTo(tr[q], tr[q+1]); dx.lineTo(tr[q+2], tr[q+3]); dx.stroke();
         }
