@@ -14,23 +14,22 @@
   html,body{margin:0;height:100%;overflow:hidden;background:#eef2f6;
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* the still peak sits under a live cloud canvas, so the hero breathes */
-  #plate{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
-    filter:contrast(.80) saturate(.88) brightness(1.075)}
+  #plate{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;
+    transform:scale(1.0) translate(0%, 0%);transform-origin:center;
+    filter:contrast(.94) saturate(.96) brightness(1.01)}
   /* two veils: top haze for the nav, plus a soft wash that lifts the right and lower
      slopes so their detail recedes and the left column stays the quiet side */
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg, rgba(242,246,250,.62) 0%, rgba(242,246,250,0) 30%);}
+    background:linear-gradient(180deg, rgba(242,246,250,.34) 0%, rgba(242,246,250,0) 26%);}
   #veil2{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:
-      linear-gradient(100deg, rgba(238,244,249,.34) 0%, rgba(238,244,249,0) 44%),
-      linear-gradient(0deg, rgba(244,248,252,.62) 0%, rgba(244,248,252,.24) 22%, rgba(244,248,252,0) 40%),
-      radial-gradient(115% 80% at 82% 82%, rgba(242,247,251,.52) 0%, rgba(242,247,251,0) 60%);}
+      linear-gradient(100deg, rgba(238,244,249,.16) 0%, rgba(238,244,249,0) 40%);}
   canvas#mist{position:fixed;inset:0;z-index:2;pointer-events:none}
   .chrome{position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;
-    padding:clamp(34px,4.6vw,64px) clamp(46px,9vw,150px)}
+    padding:clamp(52px,6.4vw,92px) clamp(50px,13.7vw,300px)}
   /* one restrained lockup, vertically centred on the left — not bottom-loaded */
-  .lockup{position:absolute;left:clamp(46px,9vw,150px);top:60%;transform:translateY(-50%);
-    max-width:min(46ch,44vw)}
+  .lockup{position:absolute;left:clamp(50px,13.7vw,300px);top:60%;transform:translateY(-50%);
+    max-width:min(30ch,42vw)}
   nav{display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
   nav a{font-size:12px;letter-spacing:.085em;text-decoration:none;color:#93a2ae;
     padding-bottom:7px;transition:color .2s}
@@ -39,13 +38,13 @@
   .spacer{flex:1}
   .mark{display:flex;align-items:center;gap:clamp(14px,1.6vw,22px);margin-bottom:clamp(10px,1.4vh,18px)}
   /* mark recoloured at the pixel level to #52677A — a CSS filter could not get there */
-  .mark img{height:clamp(20px,2.05vw,27px);width:auto;display:block;opacity:.95}
-  h1{font-size:clamp(18px,1.72vw,25px);font-weight:400;line-height:1.5;letter-spacing:-.008em;
+  .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
+  h1{font-size:clamp(22px,2.35vw,34px);font-weight:400;line-height:1.42;letter-spacing:-.014em;
     color:#52677A;margin:0;max-width:34ch}
   h1 em{font-style:normal;color:#6b8093}
   .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
     margin-top:clamp(18px,3vh,40px)}
-  .cue{position:absolute;left:clamp(46px,9vw,150px);bottom:clamp(34px,4.6vw,64px);
+  .cue{position:absolute;left:clamp(50px,13.7vw,300px);bottom:clamp(36px,4.8vw,68px);
     font-size:11.5px;letter-spacing:.14em;color:#93a2ae}
   .apps{display:flex;gap:clamp(14px,2vw,30px);flex-wrap:wrap}
   .apps span{font-size:12.5px;letter-spacing:.05em;color:var(--muted)}
@@ -59,7 +58,7 @@
 </style>
 </head>
 <body>
-<img id="plate" alt="A snow-covered mountain summit rising through cloud." src="./hero_img/peak_c.png">
+<img id="plate" alt="A snow-covered mountain summit rising through cloud." src="./hero_img/peak_d.png">
 <div id="veil"></div>
 <div id="veil2"></div>
 <canvas id="mist"></canvas>

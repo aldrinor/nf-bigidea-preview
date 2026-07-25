@@ -29,7 +29,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **8.5** | composed page live; mountain hierarchy is the last gap |
+| 1 | Mountain — C-POLAR + 5 applications | **9.1** | ✅ PASSED the gate |
 | 2 | Down into cloud — charged particles | — | not built |
 | 3 | NanoFlashing pulls them in — cloud clears | — | not built |
 | 4 | Clean sky — Air | — | not built |
@@ -40,7 +40,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | 9 | Earth from space | — | not built |
 | 10 | Contact | — | not built |
 
-Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → 7.8 → 7.9 → **8.5** (page composed).
+Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → 7.8 → 7.9 → 8.5 → 8.7 → 8.8 → **9.1 PASSED**.
 
 ## What was learned (do not redo these)
 - **Public tile elevation dies at ~30 m.** Measured: detail per ground-metre FALLS with
@@ -55,24 +55,31 @@ Screen 1 history: 3.5 → 5.0 → 5.8 → 7.0 → 7.8 → 7.9 → **8.5** (page 
 - Yin: *"use any mountain, or just use reference mountain, make our life simple"* — the peak
   does not have to be a real named Banff summit.
 
-## Codex's open gaps on screen 1 (from the 8.5 pass, v4)
-LANDED so far: atmospheric integration · content no longer bottom-loaded · duplicated app
-list removed · nav/lockup separation · C-POLAR mark recoloured to #52677A (had to be done
-at the PIXEL level — a CSS filter cannot reach that target) · body copy in the same family.
+## Screen 1 — PASSED at 9.1. What finally worked
+The score only moved when the BACKDROP changed, not when CSS changed:
+- Terrain grown from elevation data plateaued at 5.8. Dead end.
+- An authored photoreal peak jumped it to 7.0 immediately.
+- Composing the real page (nav, lockup, headline) took it to 7.9 → 8.5.
+- The last 0.6 came from a NEW backdrop built to Codex's exact diagnosis: a narrow focal
+  peak, a ridge descending to exit LOW on the right, and three separated depth planes
+  fading into white — instead of one continuous wall of snow.
 
-Still open — Codex: *"the remaining problem is primarily mountain hierarchy, not colour"*:
-1. Left content rail out to ~130-145px.
-2. Mountain another 5-8% smaller, or shifted slightly right and down.
-3. A broader mist veil through the MIDDLE-RIGHT, not only along the bottom, to break the
-   continuous ridge and face.
-4. Local clarity/contrast down another 10-15% on the darkest central and right-facing crags.
+Techniques that carried:
+- Recolour a logo at the PIXEL level, not with a CSS filter. The filter route failed twice.
+- MEASURE against the reference where it is unambiguous. The left rail was set by measuring
+  the reference's nav at 13.7% of viewport width; ours landed at 13.8% and the gate passed it.
+- Where my own measurement contradicted the judge (apex height), I said so rather than
+  silently following — and the judge's re-read found the real problem (continuous massif).
 
 
 ## NEXT ACTION
-Generate hero v3 against the three gaps above (centred pyramidal icon, softer foreground
-rock, mist threading through the faces). Gate it. Repeat until >= 9.
-Then: put the live volumetric cloud pass over the chosen still so it breathes, add the
-C-POLAR logo and the 5 applications, re-gate. Then build stop 2 (descent into cloud).
+Screen 1 is done. Build **stop 2 — the descent into cloud**: the camera falls from the peak
+into the cloud layer, and charged pollutant particles become visible drifting in it. Then
+gate it the same way (render → stack under the reference → Codex → iterate to >= 9).
+
+Content for stop 2 comes from the existing approved copy: pollutants carry a negative charge.
+Capture language only. No new claims.
+
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\`
