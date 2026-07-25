@@ -15,9 +15,9 @@
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* ONE hotspot owns this screen. The photograph carries it — a single charged fibre with a
-     single knot of captured particles. The box is sized and offset so that knot lands at
-     66% across / 50% down, clear of the copy column. Nothing else is in the frame. */
-  #plate{position:fixed;left:0;top:-16%;width:141%;height:141%;object-fit:cover;z-index:0;
+     single knot of captured particles, on real matte nonwoven media rather than a glass
+     rod. Shown full bleed so the generated composition and its negative space survive. */
+  #plate{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;
     filter:contrast(1.02) brightness(1.005);}
   /* a whisper of haze under the nav only — the plate is already near-white, so a copy scrim
      would show as a visible vertical band and read as a paste-up */
@@ -39,7 +39,7 @@
   .mark{margin:0 0 clamp(14px,1.8vh,22px)}
   .mark img{height:clamp(22px,2.2vw,29px);width:auto;display:block;opacity:.95}
   h2{font-size:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.015em;
-    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:16ch}
+    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:13ch}
   h2 em{font-style:normal;color:var(--accent)}
   p{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:var(--ink);margin:0;max-width:44ch}
   .cue{position:absolute;left:var(--rail);bottom:clamp(52px,6.4vw,92px);
@@ -47,7 +47,7 @@
   @media (max-width:760px){
     nav{gap:14px}
     .lockup{max-width:none;right:var(--rail);top:auto;bottom:16vh;transform:none}
-    #plate{left:-30%;top:-6%;width:190%;height:190%}
+    #plate{left:-26%;top:-4%;width:152%;height:152%}
     #veil{background:linear-gradient(0deg, rgba(240,244,248,.94) 0%, rgba(240,244,248,.72) 30%,
       rgba(240,244,248,0) 56%)}
   }
@@ -55,8 +55,8 @@
 </style>
 </head>
 <body>
-<img id="plate" src="./hero_img/hot_b.png"
-     alt="A single charged filter fibre holding one dense knot of captured ultrafine particles.">
+<img id="plate" src="./hero_img/mat_hot.png"
+     alt="Charged nonwoven filter media, one fibre junction holding a knot of captured particles.">
 <div id="veil"></div>
 <canvas id="pull"></canvas>
 
@@ -91,8 +91,8 @@ function fit(){
   pc.style.width=innerWidth+'px'; pc.style.height=innerHeight+'px';
   px.setTransform(dpr,0,0,dpr,0,0);
   var narrow = innerWidth<760;
-  CX = innerWidth  * (narrow ? 0.52 : 0.665);  // the knot, measured off the render
-  CY = innerHeight * (narrow ? 0.36 : 0.52);
+  CX = innerWidth  * (narrow ? 0.58 : 0.787);  // the junction, measured off the plate
+  CY = innerHeight * (narrow ? 0.34 : 0.46);
   P=[]; var n = narrow ? 9 : 15;
   for(var i=0;i<n;i++){ var p=mk(); p.u = 0.15+Math.random()*0.85; P.push(p); }
 }
@@ -102,12 +102,12 @@ function fit(){
    earlier versions of this screen. */
 function mk(){
   var sx, sy;
-  if (Math.random() < 0.62){                    // the open field right of the knot
-    sx = innerWidth *(0.71 + Math.random()*0.32);
-    sy = innerHeight*(0.05 + Math.random()*0.58);
-  } else {                                      // and the open field above it
-    sx = innerWidth *(0.50 + Math.random()*0.22);
+  if (Math.random() < 0.58){                    // the open field above the junction
+    sx = innerWidth *(0.58 + Math.random()*0.32);
     sy = innerHeight*(0.03 + Math.random()*0.27);
+  } else {                                      // and the clean band left of it
+    sx = innerWidth *(0.57 + Math.random()*0.15);
+    sy = innerHeight*(0.28 + Math.random()*0.32);
   }
   return { sx:sx, sy:sy, u:1.0, v:0.058+Math.random()*0.055,
            w:1.9+Math.random()*2.5, k:0.7+Math.random()*0.5 };
@@ -125,7 +125,7 @@ function loop(now){
     if(p.u <= 0.02){ P[i]=mk(); continue; }
     var dxp=p.sx-CX, dyp=p.sy-CY;
     var cx=CX+dxp*p.u, cy=CY+dyp*p.u;
-    if(cx < innerWidth*0.44 && innerWidth > 760) continue;  // copy column stays clean
+    if(cx < innerWidth*0.545 && innerWidth > 760) continue; // copy column stays clean
     var fade = Math.min(1, (p.u-0.02)/0.11);
     var len  = 0.115*p.k*p.u;                    // trail shortens as it closes
     var seg  = 8;

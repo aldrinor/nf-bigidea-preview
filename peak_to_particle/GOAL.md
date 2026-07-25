@@ -41,14 +41,17 @@ DPR=1.5 node shot.mjs hero.html s1 && node shot.mjs stop2.html s2 && node shot.m
 codex exec -s read-only --skip-git-repo-check -i gate_pair.png - < /tmp/gate_prompt.txt
 ```
 
-## Scoreboard — gated as a SEQUENCE, 2026-07-25
-Sequence: **6.8** (was 5.8, was 5.4 earlier the same day)
+## Scoreboard — gated as a SEQUENCE on the CONTINUOUS page, 2026-07-25
+The deliverable is now `index.html`, one document. Numbers below are the mean of TWO runs
+of the blunt critique prompt (`/tmp/gate_prompt2.txt`) on the same strip.
+
+Sequence: **7.0** — separate pages 5.4 → 6.2, first continuous build 6.0, now 7.0.
 
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **7.2** | iterating |
-| 2 | Down into cloud — charged particles | **5.8** | weakest — real specimens next |
-| 3 | NanoFlashing pulls them in | **7.5** | best so far |
+| 1 | Mountain — C-POLAR + 5 applications | **7.4** | iterating |
+| 2 | Down into cloud — charged particle | **6.1** | weakest |
+| 3 | NanoFlashing pulls them in | **6.8** | iterating |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
@@ -57,7 +60,19 @@ Sequence: **6.8** (was 5.8, was 5.4 earlier the same day)
 | 9 | Earth from space | — | not built |
 | 10 | Contact | — | not built |
 
-## What moved the numbers this pass (5.4 → 6.8)
+## ⚠ TWO MORE GATE-METHOD FAULTS FOUND — both cost real time
+1. **`shot.mjs` writes `sc_<label>.png`, so reusing a label silently overwrites.** Two gates
+   were run against a STALE screen-3 frame that still showed a mark I had already deleted.
+   The judge kept flagging it and I kept "fixing" something that was already fixed.
+   **Always re-render every screen immediately before building the strip.**
+2. **The score is extremely prompt-sensitive.** On one identical image, a terse
+   "reply with four lines" prompt returned **8.1**, while the blunt critique prompt returned
+   **7.0**. A prompt that does not demand faults will not find them.
+   **Only the blunt critique prompt counts. Never report a short-form number.**
+3. **Run-to-run variance is about ±0.6 per screen even on the same prompt and image.**
+   Sample the gate TWICE and report the mean. A single reading is not a number.
+
+## What moved the numbers this pass (5.4 → 7.0)
 1. **Screen 3 rebuilt on a real one-hotspot photograph** (`hero_img/hot_b.png`): one fibre,
    one knot of captured particles, glow concentrated exactly there, everything else empty.
    5.3 → 7.5. Biggest single gain in the project.
@@ -75,6 +90,16 @@ Sequence: **6.8** (was 5.8, was 5.4 earlier the same day)
    distance from the target and the eye reads the ring, not the destination. That starburst
    is what held screen 3 in the 4s for many passes.
 6. **Screen 2's copy moved low-left** so the three stops stop repeating one layout.
+7. **The three pages became ONE document** (`index.html`). Plates cross-fade, copy blocks
+   rise and lift away, and a single charge mark travels the whole descent: it appears in
+   the cloud, sits on the pollutant, is drawn down onto the fibre and is absorbed there.
+   The judge had asked for exactly this in five consecutive gates. 6.0 → 7.0.
+8. **Stop compositing objects onto photographs.** Every version that pasted a specimen
+   render over a plate was called "pasted on" — three separate specimens scored 4.9, one
+   large specimen 5.4. Generating a plate with the particle ALREADY IN the photograph
+   (`mote_in.png`) scored 6.1 with no compositing at all.
+9. **The fibre is now real nonwoven media** (`mat_hot.png`) — matte spun fibres and a real
+   junction, not the glass rod the judge called "a neon glass cable".
 
 ## What was learned (do not redo these)
 - **Public tile elevation dies at ~30 m.** Measured: detail per ground-metre FALLS with
@@ -98,43 +123,47 @@ When a screen is stuck, the question is not "what parameter do I tune" but "what
 this is fake, and what real thing replaces it".
 
 ## NEXT ACTION
-The judge has now named the SAME #1 problem three passes running, in three different
-wordings: *"nothing visibly persists across the sequence"*, *"three separate presentation
-slides"*, *"introduce one continuous particle or charge motif that travels between stops"*.
-This is the biggest remaining lever and it is no longer a matter of opinion.
+Current: sequence 7.0 · S1 7.4 · S2 6.1 · S3 6.8. Bar is 9. Screen 2 is still the weakest.
 
-Do these two, in order:
+Do these in order:
 
-1. **Screen 2 — real specimen pollutants (it is the weakest at 5.8).**
-   The judge: *"mostly dead white space beside an AI/stock-looking smoke cloud... no
-   meaningful relationship to the copy... show several pollutant types carrying visible
-   negative-charge markers, emerging from the cloud."*
-   The copy on that screen literally names microbes, smoke, PFAS and biofilm. Show those
-   four as distinct, recognisable specimens emerging from the plume, each carrying its
-   charge mark — not identical grey dots.
-   **Use the REAL specimen assets already built for the Big Idea WebGL section**: PubChem
-   SDF molecules, the RCSB PDB virus capsid, the procedural soot aggregate. That is the
-   painted → real move again, and it is what lifted every other screen.
+1. **Take the circle off the charge mark.** The judge, twice: *"the circled minus looks like
+   a carousel control / a zoom-out button... a perfect UI-style badge sitting above the
+   imagery."* Its fix: *"represent charge through a subtle field, glow, displacement, or
+   particles orbiting the contaminant, then visibly collapsing as capture occurs."*
+   So: no badge. A faint field around the particle that collapses into the fibre at capture.
 
-2. **One element alive across the seam (the continuity fix).**
-   Build it into `scene.html`: a single charge-marked particle that ends screen 1, travels
-   through screen 2, and physically lands on the fibre knot in screen 3 — same size, same
-   ink, same screen position at each seam. See the playbook note in memory
-   (`reference_frontier_transition_playbook.md`): keep ONE element alive across the seam.
+2. **Give each beat a different compositional job.** Right now all three are
+   nav / left headline / small paragraph / object right / big empty field.
+   Judge's fix: *"start with a centred thesis, let the pollutant interrupt or pass through
+   the typography in the second beat, and make the final capture nearly full-frame with the
+   copy closer to the interaction."*
 
-**Do not** act on the judge's request to delete the mountain hero — Yin specified it (rule 7).
-Answer its "no original visual identity" note instead by making the charge motif itself
-distinctive and consistent across all ten stops.
+3. **Body copy up in size and contrast** — *"currently treated as decorative texture rather
+   than information."*
 
-**Pace note, honestly:** screen 3 took far more passes than any other and oscillated
-(2,3,4,4,4,5,5,5,6,5,4,4,5) before jumping to 7.5. Every gain came from a concept change or
-a real asset. Every regression came from over-correcting one parameter per pass.
+4. **Gate the TRANSITION, not just the three endpoints.** Three stills cannot show a scroll.
+   `shot_scroll.mjs` takes any `p` value, so render p = 0, 0.5, 1, 1.5, 2, 2.3 and put the
+   mid-transition frames in the strip. Continuity is the thing being built; it has to be the
+   thing being judged.
+
+5. Screens 4–10 are still not built. Do not start them until the first three clear 9.
+
+**Do not** act on the judge's repeated request to delete the mountain hero — Yin specified
+it (rule 7).
+
+**Pace note, honestly:** screen 3 oscillated for many passes (2,3,4,4,4,5,5,5,6,5,4,4,5)
+before real assets moved it. Every gain came from a concept change or a real asset. Every
+regression came from over-correcting one parameter per pass.
 
 ## Where things are
 - Work dir: `C:\EPA\US\website_project\peak_to_particle\` (NOT a git repo — edit here)
 - Repo copy: `C:\EPA\US\website_project\_deploy\peak_to_particle\` — copy files across, then
   commit. The live preview serves from **main**; `peak-to-particle` is kept in step with it.
-- Live: https://aldrinor.github.io/nf-bigidea-preview/peak_to_particle/scene.html
+- Live: https://aldrinor.github.io/nf-bigidea-preview/peak_to_particle/index.html
+  (`scene.html` is the ABANDONED three.js terrain experiment — do not develop it)
+- Render the continuous page: `DPR=1.5 node shot_scroll.mjs 0 1 2` -> `sc_p<val>.png`.
+  Any p from 0 to 2.4 works, via the page's `?p=` hook.
 - Reference shots: `<scratchpad>/montfort/shot_hero.png`, `shot_s2.png`, `shot_s3.png`
 - Reference source (html/css/js) is saved in that same folder for measuring.
 - Copy to use: the existing approved site copy. No new claims, ever.

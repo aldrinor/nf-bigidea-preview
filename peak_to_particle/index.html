@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C-POLAR — peak to particle</title>
+<style>
+  :root{
+    --rail: clamp(50px, 13.7vw, 300px);
+    --bg:#edf0f2; --ink:#1f2327; --headline-ink:#1a1a1a; --muted:#5a646e; --accent:#1b7bff;
+    --display: clamp(28px, 3.45vw, 50px);
+    --stack:-apple-system, system-ui, 'Inter', 'Space Grotesk', sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--stack);
+    -webkit-font-smoothing:antialiased}
+  /* three stops, one document. The stops used to be three separate pages, which is exactly
+     why the sequence read as three slides — nothing could survive a seam. */
+  #scroller{height:340vh}
+
+  /* ---- the backdrop stack: one fixed layer, plates cross-fading as you descend ---- */
+  #stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
+  #stage img{position:absolute;object-fit:cover;will-change:opacity}
+  #pl_peak {left:0;top:0;width:100%;height:100%;filter:contrast(.94) saturate(.96) brightness(1.01)}
+  #pl_smoke{left:-12.65%;top:-6.86%;width:114%;height:114%;filter:contrast(1.03) brightness(1.01)}
+  #pl_fibre{left:0;top:0;width:100%;height:100%;filter:contrast(1.02) brightness(1.005)}
+
+  canvas.fx{position:fixed;inset:0;z-index:2;pointer-events:none;will-change:opacity}
+  #veil{position:fixed;inset:0;z-index:3;pointer-events:none;
+    background:linear-gradient(180deg, rgba(240,244,248,.46) 0%, rgba(240,244,248,0) 15%)}
+
+  /* ---- the one element that never dies: the charge mark ----
+     It is born in the cloud beside the peak, settles onto the pollutant, is then pulled
+     down the page and lands on the fibre. It is an annotation, not a fake photographed
+     object, so it can cross a seam without looking pasted. */
+  #charge{position:fixed;z-index:4;pointer-events:none;will-change:transform,opacity;
+    transform-origin:50% 50%}
+  #charge .ring{transition:stroke .35s linear}
+
+  /* ---- chrome ---- */
+  nav{position:fixed;z-index:6;left:var(--rail);top:clamp(46px,5.4vw,74px);
+    display:flex;align-items:center;gap:clamp(18px,2.4vw,40px);flex-wrap:wrap}
+  nav a{font-size:13.5px;letter-spacing:.05em;text-decoration:none;color:#47515b;
+    padding-bottom:6px;transition:color .2s}
+  nav a:hover{color:var(--ink)}
+  nav a.on{color:var(--ink);border-bottom:2px solid var(--accent)}
+
+  .stop{position:fixed;z-index:5;left:var(--rail);max-width:min(46ch,40vw);
+    will-change:opacity,transform}
+  #c1{top:52%;transform:translateY(-50%)}
+  #c2{bottom:clamp(112px,15vh,190px)}
+  #c3{top:50%;transform:translateY(-50%)}
+  .mark{margin:0 0 clamp(14px,2vh,26px)}
+  .mark img{height:clamp(24px,2.5vw,33px);width:auto;display:block;opacity:.95}
+  h1,h2{font-size:var(--display);font-weight:400;line-height:1.14;letter-spacing:-.015em;
+    color:var(--headline-ink);margin:0 0 clamp(18px,2.4vh,30px);max-width:19ch}
+  #c3 h2{max-width:13ch}
+  em{font-style:normal;color:var(--accent)}
+  p{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:var(--ink);margin:0;max-width:44ch}
+  .cue{position:fixed;z-index:6;left:var(--rail);bottom:clamp(40px,5vw,68px);
+    font-size:12px;letter-spacing:.09em;color:var(--muted);will-change:opacity}
+
+  @media (max-width:760px){
+    nav{gap:14px}
+    #pl_smoke{left:-30%;top:-4%;width:150%;height:150%}
+    #pl_fibre{left:-26%;top:-4%;width:152%;height:152%}
+    .stop{max-width:none;right:var(--rail)}
+    #c1{top:auto;bottom:22vh;transform:none}
+    #c2{bottom:20vh} #c3{top:auto;bottom:20vh;transform:none}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <img id="pl_peak"  src="./hero_img/peak_d.png"  alt="A snow-covered summit rising through cloud.">
+  <img id="pl_smoke" src="./hero_img/mote_in.png" alt="A single dark soot particle suspended in pale smoke.">
+  <img id="pl_fibre" src="./hero_img/mat_hot.png" alt="Charged nonwoven filter media holding one knot of captured particles.">
+</div>
+<canvas class="fx" id="mist"></canvas>
+<canvas class="fx" id="pull"></canvas>
+<div id="veil"></div>
+
+<svg id="charge" width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
+  <!-- solid marker, minus knocked out. An outlined ring with generous padding reads as a
+       zoom-out button; a filled charge marker sitting on the particle reads as physics. -->
+  <circle class="ring" cx="30" cy="30" r="24" fill="#2f3941" stroke="#eef1f4" stroke-width="4.5"/>
+  <rect class="bar" x="16" y="26.6" width="28" height="6.8" rx="3.4" fill="#edf0f2"/>
+</svg>
+
+<nav aria-label="Applications">
+  <a class="on" href="#">C-POLAR</a>
+  <a href="#">Air</a><a href="#">Water</a><a href="#">Protective Wear</a>
+  <a href="#">Food Packaging</a><a href="#">Medical Devices</a>
+</nav>
+
+<section class="stop" id="c1">
+  <div class="mark"><img src="./brand/cpolar_bluegrey.png" alt="C-POLAR"></div>
+  <h1>A permanent positive charge, engineered into the material.</h1>
+  <p>Proven first in air. The same physical mechanism carries across water,
+     protective wear, food packaging and medical devices.</p>
+</section>
+
+<section class="stop" id="c2">
+  <h2>Most pollutants carry <em>a negative charge</em>.</h2>
+  <p>The microbes and smoke in the air, the PFAS in water, the biofilm on a surface &mdash;
+     completely different problems that mostly share one trait: a negative charge.</p>
+</section>
+
+<section class="stop" id="c3">
+  <h2>A permanent positive charge <em>is what pulls them in</em>.</h2>
+  <p>NanoFlashing&trade; is a patented permanent positive polarity (3P) technology,
+     engineered into the material. It attracts and captures ultrafine particles, wildfire
+     smoke, PFAS, and pollen through a physical mechanism.</p>
+</section>
+
+<span class="cue" id="cue">SCROLL TO DESCEND</span>
+<div id="scroller"></div>
+
+<script>
+/* ================================================================
+   One document, one descent. p runs 0 .. 2.4 as you scroll:
+   0 the summit, 1 inside the cloud, 2 at the material, 2.4 captured.
+   ================================================================ */
+var clamp=function(v,a,b){return v<a?a:v>b?b:v;};
+var smooth=function(e0,e1,x){var t=clamp((x-e0)/(e1-e0),0,1); return t*t*(3-2*t);};
+var band=function(x,a,b,c,d){return smooth(a,b,x)*(1-smooth(c,d,x));};
+var mix=function(a,b,t){return a+(b-a)*t;};
+
+var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var P = 0;
+
+/* ---------- the charge mark's path down the page ----------
+   Keyframes are viewport fractions, so the path holds at any window size. */
+var KEY = [
+  { p:0.42, x:0.792, y:0.196, s:0.30, o:0.00 },   // appears in the cloud beside the peak
+  { p:0.80, x:0.786, y:0.286, s:0.40, o:0.85 },
+  { p:1.05, x:0.772, y:0.352, s:0.60, o:1.00 },   // ON the pollutant, not beside it
+  { p:1.60, x:0.764, y:0.372, s:0.58, o:1.00 },
+  { p:1.95, x:0.782, y:0.418, s:0.46, o:1.00 },   // the pull takes hold
+  { p:2.22, x:0.787, y:0.460, s:0.20, o:1.00 },   // lands on the junction
+  { p:2.40, x:0.787, y:0.460, s:0.11, o:0.00 }    // absorbed into the deposit
+];
+function chargeAt(p){
+  if(p <= KEY[0].p) return KEY[0];
+  for(var i=1;i<KEY.length;i++){
+    if(p <= KEY[i].p){
+      var a=KEY[i-1], b=KEY[i], t=smooth(a.p,b.p,p);
+      return { x:mix(a.x,b.x,t), y:mix(a.y,b.y,t), s:mix(a.s,b.s,t), o:mix(a.o,b.o,t) };
+    }
+  }
+  return KEY[KEY.length-1];
+}
+
+var el = {
+  peak:  document.getElementById('pl_peak'),
+  smoke: document.getElementById('pl_smoke'),
+  fibre: document.getElementById('pl_fibre'),
+  mist:  document.getElementById('mist'),
+  pull:  document.getElementById('pull'),
+  charge:document.getElementById('charge'),
+  ring:  document.querySelector('#charge .ring'),
+  bar:   document.querySelector('#charge .bar'),
+  c1:    document.getElementById('c1'),
+  c2:    document.getElementById('c2'),
+  c3:    document.getElementById('c3'),
+  cue:   document.getElementById('cue')
+};
+
+function copyState(node, v, centred){
+  node.style.opacity = v.o;
+  var t = 'translateY(' + v.dy.toFixed(1) + 'px)';
+  node.style.transform = centred ? 'translateY(-50%) ' + t : t;
+}
+
+function layout(){
+  var p = P;
+  // plates cross-fade; the descent never cuts
+  el.peak.style.opacity  = 1 - smooth(0.55, 1.02, p);
+  el.smoke.style.opacity = band(p, 0.55, 1.02, 1.62, 2.06);
+  el.fibre.style.opacity = smooth(1.62, 2.06, p);
+  el.mist.style.opacity  = 1 - smooth(0.45, 0.95, p);
+  el.pull.style.opacity  = smooth(1.75, 2.16, p);
+
+  // copy: each block rises in and lifts away, so the page reads as motion not as slides
+  copyState(el.c1, { o: 1 - smooth(0.30, 0.72, p), dy: -p * 46 }, true);
+  copyState(el.c2, { o: band(p, 0.68, 1.02, 1.62, 1.96), dy: (1 - p) * 46 }, false);
+  copyState(el.c3, { o: smooth(1.70, 2.06, p), dy: (2 - p) * 46 }, true);
+  el.cue.style.opacity = 1 - smooth(0.06, 0.30, p);
+
+  var c = chargeAt(p);
+  var side = Math.min(innerWidth, innerHeight);
+  var px = innerWidth * c.x, py = innerHeight * c.y;
+  el.charge.style.opacity = c.o;
+  el.charge.style.left = '0px'; el.charge.style.top = '0px';
+  el.charge.style.transform =
+    'translate(' + (px - 30).toFixed(1) + 'px,' + (py - 30).toFixed(1) + 'px) ' +
+    'scale(' + (c.s * side * 0.105 / 60).toFixed(3) + ')';
+  // it is neutralised as it is taken: the minus goes, the mark warms to the charge blue
+  var neutral = smooth(2.05, 2.30, p);
+  el.bar.style.opacity = 1 - neutral;
+  el.ring.setAttribute('fill', neutral > 0.5 ? '#1b7bff' : '#2f3941');
+}
+
+function onScroll(){
+  var max = document.getElementById('scroller').offsetHeight - innerHeight;
+  P = clamp(scrollY / Math.max(1, max), 0, 1) * 2.4;
+  layout();
+}
+addEventListener('scroll', onScroll, {passive:true});
+addEventListener('resize', function(){ onScroll(); sizeMist(); sizePull(); });
+
+/* ---------- section 1: cloud banks drifting across the peak ---------- */
+var NP = new Uint8Array(512);
+for (var i=0;i<256;i++) NP[i]=NP[i+256]=(Math.random()*256)|0;
+function nfade(t){return t*t*t*(t*(t*6-15)+10);}
+function nlerp(a,b,t){return a+t*(b-a);}
+function ngrad(h,x,y){return ((h&1)?x:-x)+((h&2)?y:-y);}
+function noise2(x,y){
+  var X=Math.floor(x)&255, Y=Math.floor(y)&255;
+  x-=Math.floor(x); y-=Math.floor(y);
+  var u=nfade(x), v=nfade(y), A=NP[X]+Y, B=NP[X+1]+Y;
+  return nlerp(nlerp(ngrad(NP[A],x,y), ngrad(NP[B],x-1,y), u),
+               nlerp(ngrad(NP[A+1],x,y-1), ngrad(NP[B+1],x-1,y-1), u), v);
+}
+function fbm(x,y,oct){ var s=0,a=0.5; for(var i=0;i<oct;i++){ s+=a*noise2(x,y); x*=2.03; y*=2.03; a*=0.5; } return s; }
+function bakeBank(size, nLobes, spread, cut, gain){
+  var c=document.createElement('canvas'); c.width=size; c.height=Math.round(size*0.5);
+  var W=c.width, H=c.height, g=c.getContext('2d');
+  var im=g.createImageData(W,H), d=im.data, dens=new Float32Array(W*H), lobes=[];
+  for(var k=0;k<nLobes;k++) lobes.push({ x:0.5+(Math.random()-0.5)*spread, y:0.5+(Math.random()-0.5)*0.52,
+                                         r:0.10+Math.random()*0.20, w:0.40+Math.random()*0.60 });
+  for(var y=0;y<H;y++) for(var x=0;x<W;x++){
+    var u=x/W, v=y/H, acc=0;
+    for(var q2=0;q2<lobes.length;q2++){
+      var L=lobes[q2], dx=(u-L.x)*1.9, dy=(v-L.y), qq=Math.sqrt(dx*dx+dy*dy)/L.r;
+      if(qq<1.35) acc += L.w*Math.pow(Math.max(0,1-qq*qq*0.55),3.4);
+    }
+    var n1=fbm(u*5.2+7.1, v*5.2+2.9, 4)*0.5+0.5, n2=fbm(u*13.0+19.4, v*13.0+8.3, 3)*0.5+0.5;
+    var a=(acc*(0.30+0.95*n1)*(0.55+0.72*n2)-cut)*gain;
+    var eu=Math.min(u,1-u), ev=Math.min(v,1-v), e=Math.min(1, Math.min(eu,ev)/0.14);
+    a*=e*e*(3-2*e);
+    dens[y*W+x]=a>0?Math.min(a,1):0;
+  }
+  for(var y2=0;y2<H;y2++) for(var x2=0;x2<W;x2++){
+    var i0=y2*W+x2, av=dens[i0];
+    if(av<=0.004){ d[i0*4+3]=0; continue; }
+    var xm=(x2-2+W)%W, ym=(y2-2+H)%H;
+    var rim=Math.max(0,av-dens[ym*W+xm]);
+    var broken=fbm(x2*0.09+31.7,y2*0.09+13.3,3)*0.5+0.5;
+    var lit=Math.min(1,rim*8.5)*(0.25+0.95*Math.pow(broken,1.6));
+    var ii=i0*4;
+    d[ii]=250+5*lit; d[ii+1]=252+3*lit; d[ii+2]=254;
+    d[ii+3]=(Math.min(1,Math.pow(av,0.9)*0.96)*255)|0;
+  }
+  g.putImageData(im,0,0); return c;
+}
+var mctx = el.mist.getContext('2d');
+function sizeMist(){
+  var dpr=Math.min(devicePixelRatio||1,1.5);
+  el.mist.width=Math.floor(innerWidth*dpr); el.mist.height=Math.floor(innerHeight*dpr);
+  el.mist.style.width=innerWidth+'px'; el.mist.style.height=innerHeight+'px';
+  mctx.setTransform(dpr,0,0,dpr,0,0);
+}
+sizeMist();
+var BANKS = [
+  { tile: bakeBank(512, 16, 0.86, 0.26, 2.7), y:0.30, h:0.30, w:1.90, v: 0.0115, a:0.34, blur:3.0 },
+  { tile: bakeBank(512, 13, 0.92, 0.24, 2.9), y:0.52, h:0.34, w:2.10, v:-0.0082, a:0.60, blur:1.4 },
+  { tile: bakeBank(576, 24, 1.10, 0.23, 2.5), y:0.68, h:0.42, w:2.40, v: 0.0062, a:0.56, blur:2.2 },
+  { tile: bakeBank(512, 14, 0.90, 0.30, 2.6), y:0.16, h:0.24, w:1.80, v:-0.0140, a:0.22, blur:4.4 }
+];
+
+/* ---------- section 3: motes arriving at the knot ---------- */
+var pctx = el.pull.getContext('2d'), PARTS=[], CX, CY;
+function sizePull(){
+  var dpr=Math.min(devicePixelRatio||1,2);
+  el.pull.width=Math.floor(innerWidth*dpr); el.pull.height=Math.floor(innerHeight*dpr);
+  el.pull.style.width=innerWidth+'px'; el.pull.style.height=innerHeight+'px';
+  pctx.setTransform(dpr,0,0,dpr,0,0);
+  var narrow=innerWidth<760;
+  CX=innerWidth*(narrow?0.58:0.787); CY=innerHeight*(narrow?0.34:0.46);
+  PARTS=[]; var n=narrow?9:15;
+  for(var i=0;i<n;i++){ var q=mkMote(); q.u=0.15+Math.random()*0.85; PARTS.push(q); }
+}
+function mkMote(){
+  var sx, sy;
+  if(Math.random()<0.58){ sx=innerWidth*(0.58+Math.random()*0.32); sy=innerHeight*(0.03+Math.random()*0.27); }
+  else                  { sx=innerWidth*(0.57+Math.random()*0.15); sy=innerHeight*(0.28+Math.random()*0.32); }
+  return { sx:sx, sy:sy, u:1.0, v:0.058+Math.random()*0.055, w:1.9+Math.random()*2.5, k:0.7+Math.random()*0.5 };
+}
+sizePull();
+
+var t0=performance.now(), lastT=t0, frames=0, winStart=t0;
+function frame(now){
+  var t=(now-t0)/1000, dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+
+  if(parseFloat(el.mist.style.opacity||'1') > 0.01){
+    mctx.clearRect(0,0,innerWidth,innerHeight);
+    for(var b=0;b<BANKS.length;b++){
+      var B=BANKS[b], w=innerWidth*B.w, h=innerHeight*B.h;
+      var x=(-t*B.v*w)%w; if(x>0) x-=w;
+      var y=innerHeight*B.y + Math.sin(t*0.06+B.y*9)*innerHeight*0.012;
+      mctx.globalAlpha=B.a; mctx.filter = B.blur>0.05 ? 'blur('+B.blur+'px)' : 'none';
+      for(var X=x-w; X<innerWidth+w; X+=w) mctx.drawImage(B.tile, X, y, w, h);
+      mctx.filter='none';
+    }
+    mctx.globalAlpha=1;
+  }
+
+  if(parseFloat(el.pull.style.opacity||'0') > 0.01){
+    pctx.clearRect(0,0,innerWidth,innerHeight); pctx.lineCap='round';
+    for(var i=0;i<PARTS.length;i++){
+      var p=PARTS[i];
+      p.u -= p.v*dt*(1.0 + 2.6*Math.pow(1-p.u,2.0));
+      if(p.u<=0.02){ PARTS[i]=mkMote(); continue; }
+      var dxp=p.sx-CX, dyp=p.sy-CY, cx=CX+dxp*p.u, cy=CY+dyp*p.u;
+      if(cx < innerWidth*0.545 && innerWidth>760) continue;
+      var fade=Math.min(1,(p.u-0.02)/0.11), len=0.115*p.k*p.u;
+      for(var q=0;q<8;q++){
+        var f1=q/8, f2=(q+1)/8, u1=p.u+len*f1, u2=p.u+len*f2;
+        pctx.strokeStyle='rgba(46,58,72,1)';
+        pctx.globalAlpha=0.27*Math.pow(1-f1,2.2)*(0.45+0.55*p.u)*fade;
+        pctx.lineWidth=Math.max(0.35,p.w*(0.30+1.30*(1-f1)));
+        pctx.beginPath(); pctx.moveTo(CX+dxp*u1,CY+dyp*u1); pctx.lineTo(CX+dxp*u2,CY+dyp*u2); pctx.stroke();
+      }
+      pctx.globalAlpha=(0.30+0.26*p.u)*fade; pctx.fillStyle='rgba(38,50,64,1)';
+      pctx.beginPath(); pctx.arc(cx,cy,p.w*(0.46+0.44*p.u),0,Math.PI*2); pctx.fill();
+    }
+    pctx.globalAlpha=1;
+  }
+
+  frames++;
+  if(now-winStart>=1000){ window.__fps=Math.round(frames*1000/(now-winStart)); frames=0; winStart=now; }
+  requestAnimationFrame(frame);
+}
+onScroll();
+if(!reduced) requestAnimationFrame(frame);
+
+/* the render harness parks the page at a stop: ?p=0 | 1 | 2 */
+(function(){
+  var q=new URLSearchParams(location.search);
+  if(q.has('p')){
+    var max=document.getElementById('scroller').offsetHeight - innerHeight;
+    scrollTo(0, max * (parseFloat(q.get('p'))/2.4));
+    setTimeout(onScroll, 30);
+  }
+})();
+window.__ready = true;
+</script>
+</body>
+</html>

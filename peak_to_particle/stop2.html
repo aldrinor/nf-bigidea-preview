@@ -16,24 +16,17 @@
     font-family:var(--stack);-webkit-font-smoothing:antialiased;color:var(--ink)}
   /* Real photographed smoke pushed into real cloud. The pollution in this frame is
      PHOTOGRAPHED, not painted. Pushed right so clean air sits between copy and mass. */
-  #plate{position:fixed;left:0;top:-20.9%;width:138%;height:138%;object-fit:cover;z-index:0;
-    filter:saturate(.36) contrast(1.02) brightness(1.06);}
+  #plate{position:fixed;left:-12.65%;top:-6.86%;width:114%;height:114%;object-fit:cover;z-index:0;
+    filter:contrast(1.03) brightness(1.01);}
   #veil{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(240,244,248,.52) 0%, rgba(240,244,248,0) 16%);}
 
-  /* ONE pollutant, large. Three small labelled specimens read as an infographic and the
-     gate scored it 4.9 — "tiny specimen bubbles float arbitrarily in dead space". The rule
-     that took screen 3 to its best applies here too: one subject owns the frame. */
-  .spec{position:fixed;left:65.5%;top:51%;z-index:2;transform:translate(-50%,-50%);
-    width:clamp(150px,22.5vw,324px);pointer-events:none;will-change:transform}
-  .spec img{display:block;width:100%;height:auto}
-  /* the charge mark is drawn at a size you can actually read, tied to the specimen by a
-     hairline leader — not a decorative glyph floating nearby */
-  .mark{position:fixed;left:78.5%;top:33.5%;z-index:3;transform:translate(-50%,-50%);
+  /* the charge mark is the only overlay on this screen, and it is an annotation on a real
+     photographed particle rather than a second pasted object */
+  .mark{position:fixed;left:77.2%;top:35.2%;z-index:3;transform:translate(-50%,-50%);
     pointer-events:none}
   @keyframes drift{ 0%,100%{transform:translate(-50%,-50%)}
-                    50%{transform:translate(-50%,calc(-50% - 11px))} }
-  .spec{animation:drift 21s ease-in-out infinite}
+                    50%{transform:translate(-50%,calc(-50% - 8px))} }
   .mark{animation:drift 21s ease-in-out infinite}
 
   .chrome{position:fixed;inset:0;z-index:4;padding:clamp(52px,6.4vw,92px) var(--rail)}
@@ -57,27 +50,21 @@
     nav{gap:14px}
     #plate{left:-24%;top:-8%;width:172%;height:172%}
     .lockup{max-width:none;right:var(--rail);bottom:14vh}
-    .spec{left:64%;top:27%;width:44vw} .mark{left:88%;top:14%}
+    .mark{left:76%;top:30%}
     #veil{background:linear-gradient(0deg, rgba(240,244,248,.95) 0%, rgba(240,244,248,.74) 32%,
       rgba(240,244,248,0) 58%)}
   }
-  @media (prefers-reduced-motion:reduce){ .spec,.mark{animation:none !important} }
+  @media (prefers-reduced-motion:reduce){ .mark{animation:none !important} }
 </style>
 </head>
 <body>
-<img id="plate" src="./hero_img/smoke_in.png"
-     alt="A dense plume of wildfire smoke pushing into clean white cloud.">
+<img id="plate" src="./hero_img/mote_in.png"
+     alt="A single dark soot particle suspended in pale smoke.">
 <div id="veil"></div>
 
-<figure class="spec">
-  <img src="./specimens/bacteria_cut.png"
-       alt="A single airborne microbe, lifted out of the smoke.">
-</figure>
-<svg class="mark" width="164" height="150" viewBox="0 0 164 150" aria-hidden="true">
-  <!-- leader runs from the charge mark down-left to the specimen's edge -->
-  <path d="M40 44 L150 132" fill="none" stroke="#4a545e" stroke-width="1.1" opacity=".55"/>
-  <circle cx="27" cy="27" r="24" fill="none" stroke="#2f3941" stroke-width="2.1"/>
-  <line x1="14.5" y1="27" x2="39.5" y2="27" stroke="#2f3941" stroke-width="2.1"/>
+<svg class="mark" width="70" height="70" viewBox="0 0 58 58" aria-hidden="true">
+  <circle cx="29" cy="29" r="23" fill="#2f3941" stroke="#eef1f4" stroke-width="4.2"/>
+  <rect x="15.5" y="25.7" width="27" height="6.6" rx="3.3" fill="#edf0f2"/>
 </svg>
 
 <div class="chrome">
