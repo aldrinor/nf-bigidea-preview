@@ -42,7 +42,7 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
 | 1 | Mountain — C-POLAR + 5 applications | **6.0** | iterating |
-| 2 | Down into cloud — charged particles | **6.0** | iterating |
+| 2 | Down into cloud — charged particles | **7.0** | iterating |
 | 3 | NanoFlashing pulls them in — cloud clears | **5.0** | iterating — climax 'partly', foreground competes |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
@@ -85,28 +85,23 @@ Techniques that carried:
 
 
 ## NEXT ACTION
-Sequence is 6 / 6 / 5.
+Sequence is 6 / 7 / 5. Screen 3 has now scored 5 twice and 4 three times before that. Every
+incremental fix — bounded band, single contact point, trajectories, contact bloom, arrest,
+quietened foreground — has failed to move it. Codex keeps returning the same verdict:
+*"another technical explainer... no decisive visual payoff."*
 
-Screen 3 moved 4 -> 5 once the painted deposit was replaced with a real macro plate of a
-filter loaded with black captured soot, and the streams were aimed at the summit of that
-ridge. Codex now says the climax reads **partly**.
+**Applying the rule at the bottom of this file, properly this time.** What is still painted
+on screen 3? The arriving particles and their trails. The deposit became real and the score
+moved 4 -> 5; the CONVERGENCE is still canvas dots over a photograph, and that is what keeps
+failing.
 
-Its remaining note: *"the chaotic foreground and scattered particles obscure the exact
-moment of impact... funnel the particles into a clearly defined charged surface where they
-visibly stop and accumulate; reduce the foreground debris competing with that moment."*
-So:
-1. Quieten the FOREGROUND of the loaded plate — the loose fibres in the bottom third compete
-   with the impact. Darken/blur/crop them so the summit is the only sharp thing.
-2. Make the particles visibly STOP at the summit — a brief held state before they fade,
-   not a continuous rain through it.
-3. Fewer, larger, higher-contrast arrivals. Volume is currently reading as noise again.
+In progress: generating the entire capture moment as ONE photograph — a high-speed macro of
+dark soot streaming down, converging on a single point of white charged fibre, motion-blurred
+on approach and stopped dead at contact. When it lands, screen 3 becomes that plate with at
+most a whisper of live motion over it, exactly as screen 2 became a real cloud photograph.
 
-Screens 1 and 2 both sit at 6 and need the same thing they have always needed: one element
+After screen 3 clears: screens 1 and 2 both sit at 6-7 and need the same thing — one element
 that decisively owns the frame.
-
-**Honest note on pace:** screen 3 has taken many passes (2 -> 3 -> 4 -> 4 -> 4 -> 5). The
-gains came only from replacing painted elements with real photography. When a screen stalls
-twice at the same number, stop tuning parameters and ask what is still painted.
 
 
 ## THE ONE LESSON THAT KEEPS REPEATING
