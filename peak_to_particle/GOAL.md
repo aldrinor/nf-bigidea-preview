@@ -307,6 +307,32 @@ decision — changing it is Yin's call, not mine.
 and to the gate. They appeared instantly when the two heroes were put one above the other at the
 same size. **Stack and look. It is the cheapest instrument in this project and the most honest.**
 
+## THE CHAPTERS GO DARK — the difference Yin kept pointing at
+*"Why is there a stupid particle and fibre, not the exact clone."* Stacking chapters 2, 3 and 4
+against theirs (`vs_c2/c3/c4.png`) made it obvious, and it was never about the subject:
+
+**Their chapters are full-bleed DARK atmospheric plates with almost no text.** A ship in a
+storm. The Earth from space. Deep blue-black, edge to edge.
+**Ours were white pages** with a grey specimen shoved to the right and a paragraph on the left.
+Same content, opposite register — which is why they never looked alike no matter how the grid
+and type were matched.
+
+**Fixed by inverting the micrographs.** A real SEM is normally shown as a *bright specimen on a
+dark field*; ours were the other way round. `soot_dark.webp`, `mat_dark.webp` and
+`mat_loaded_dark.webp` are the inversions, cooled toward blue-black. The ink inverts with them:
+`body.dark` swaps to one light ink across nav, headline, body, cue and chrome, so the chapters
+read the way the hero does, only reversed.
+
+**The page now has their rhythm:** pale hero → two dark chapters → light sky payoff. It had been
+uniformly pale from top to bottom, which is a large part of why it read as a product page rather
+than a world.
+
+**Also fixed:** the specimen was running underneath the paragraph on chapter 2 — a plain
+collision that no measurement had ever caught. Chapter 2 now takes a shorter measure.
+
+**The lesson, again:** stacking their screen above ours at the same size found in one minute
+what eleven passes of scoring never surfaced. It is the cheapest instrument here.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -832,14 +858,15 @@ layout or length was flat or negative. And the only fidelity lever left is the o
 pull ourselves.
 
 ## NEXT ACTION
-1. **Do the same stack-and-look for chapters 2, 3 and 4.** Only the hero has been compared this
-   way. `hero_vs.png` shows how: their screen on top, ours below, same width, then fix what is
-   obvious. Their `shot_s2/s3/s4.png` are in `<scratchpad>/montfort/`.
-2. **Their page is 19.6 viewports; ours is 4.4.** Still the largest remaining difference. Adding
-   stops measured worse twice, so length only helps if every chapter carries an event.
-3. **Yin's two decisions**, still the real blockers: what "done" means now the 9/10 bar is void
-   (it scores mont-fort itself at 4), and whether we may license real imagery.
-4. **Scroll FPS** is diagnosed but not fixable against this machine's meter — one look on real
+1. **Keep stacking.** `vs_c2/c3/c4.png` are in this folder; regenerate them after every change
+   and fix whatever is obvious. That loop is now the primary method — the /10 gate is void and
+   measurement missed the dark/light register entirely.
+2. **Their page is 19.6 viewports; ours is 4.4.** Still the largest structural difference, and
+   still gated on the fact that adding stops measured worse twice. Length only helps if every
+   chapter carries an event.
+3. **Yin's two decisions**, unchanged: what "done" means now the 9/10 bar is void, and whether
+   we may license real imagery.
+4. **Scroll FPS** diagnosed, not fixable against this machine's meter — one look on real
    hardware settles it.
 
 **Do not** retry: the WebGL specimen, more stops without events, seam or collision work, the

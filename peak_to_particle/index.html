@@ -41,9 +41,24 @@
 
   /* ---- the backdrop stack: one fixed layer, plates cross-fading as you descend ---- */
   #stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg)}
+  /* the substrate's own tone, sampled off the plate, so a pulled-back plate has no visible edge */
+  #stage.onSubstrate{background:#05070a}
+  /* Their chapters are full-bleed dark plates. Ours are too now, so the ink inverts with them:
+     one light ink on the dark beats, exactly as one dark ink on the light ones. */
+  body.dark{--ink:#c8d8e4; --headline-ink:#eaf1f6; --muted:#8ba4b8}
+  body.dark p{color:#b9cbd9}
+  body.dark nav a{color:#8ba4b8}
+  body.dark nav a.on{color:#eaf1f6}
+  body.dark .cue{color:#8ba4b8}
+  body.dark .chrome a{color:#8ba4b8}
+  body.dark .chrome .count{background:#eaf1f6;color:#0b1015}
+  body.dark header{background:linear-gradient(180deg, rgba(5,7,10,.72) 0%, rgba(5,7,10,0) 100%)}
+  body.dark #veil{background:linear-gradient(180deg, rgba(5,7,10,.46) 0%, rgba(5,7,10,0) 15%)}
+  body,body.dark{transition:none}
   #stage img,#stage video{position:absolute;object-fit:cover;will-change:opacity,transform}
   #pl_peak {left:-26%;top:-38%;width:152%;height:152%;filter:contrast(1.16) saturate(.38) brightness(0.99)}
-  #pl_smoke{left:-6%;top:-6%;width:112%;height:112%;filter:contrast(1.02) brightness(1.01)}
+  #pl_smoke{left:-6%;top:-6%;width:112%;height:112%;transform-origin:60% 50%;
+    filter:contrast(1.02) brightness(1.01)}
   #mote{left:0;top:0;transform-origin:50% 50%;z-index:1}
   #shadow{position:fixed;left:0;top:0;z-index:1;pointer-events:none;opacity:0;
     will-change:opacity,transform;
@@ -113,6 +128,8 @@
   .w > i{display:inline-block;font-style:inherit;color:inherit;will-change:transform,opacity}
   #c1{top:52%;transform:translateY(-50%)}
   #c2{top:0;bottom:auto}
+  /* the specimen runs into this column at full width, so this chapter takes a shorter measure */
+  #c2 .col{grid-column:4 / span 9}
   #c3{top:0;bottom:auto}
   #c4{top:52%;transform:translateY(-50%)}
   .mark{margin:0 0 clamp(14px,2vh,26px)}
@@ -148,7 +165,7 @@
        else in the frame is held. Its time is driven BY THE SCROLL, not by a clock: it is
        parked on frame 0 — the exact frame the travelling cutout was taken from — until the
        pull begins, so registration is perfect, and it then turns as we descend past it. -->
-  <video id="pl_smoke" poster="./hero_img/soot_real.webp" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
+  <video id="pl_smoke" poster="./hero_img/soot_dark.webp" muted playsinline preload="metadata" aria-label="An electron micrograph of a single airborne soot agglomerate.">
     <source src="./hero_img/soot_turn.mp4" type="video/mp4">
   </video>
   <!-- the SAME photographed contaminant, cut out of its own plate. It registers exactly
@@ -158,9 +175,9 @@
   <img id="mote" src="./hero_img/soot_cut.webp" alt="">
   <!-- the same junction later in its life. Cross-faded over the single-particle frame, so the
        event on this stop is the filter FILLING UP rather than a caption over a backdrop. -->
-  <img id="pl_load" src="./hero_img/mat_loaded.webp" alt="The same filter junction, heavily loaded with captured soot.">
+  <img id="pl_load" src="./hero_img/mat_loaded_dark.webp" alt="The same filter junction, heavily loaded with captured soot.">
   <img id="pl_sky" src="./hero_img/sky_clean.webp" alt="Clean cold blue sky above a flat sea of cloud.">
-  <img id="pl_fibre" src="./hero_img/mat_used_light.webp" alt="An electron micrograph of nonwoven filter media.">
+  <img id="pl_fibre" src="./hero_img/mat_dark.webp" alt="An electron micrograph of nonwoven filter media.">
 </div>
 <!-- A second copy of the filter plate, revealed only in a soft ellipse around the contact
      and sitting ABOVE the travelling contaminant, so one fibre crosses IN FRONT of part of
@@ -169,7 +186,7 @@
      The mat itself is now CLEAN. The deposit on the fibre is the very particle the viewer has
      been following since the summit — the gate three times running: "its scale, silhouette
      and structure change, so it looks swapped for different soot renders." -->
-<img id="pl_front" src="./hero_img/mat_used_light.webp" alt="">
+<img id="pl_front" src="./hero_img/mat_dark.webp" alt="">
 <div id="veil"></div>
 
 
@@ -303,6 +320,7 @@ function splitWords(node){
 var el = {
   peak:  document.getElementById('pl_peak'),
   smoke: document.getElementById('pl_smoke'),
+  stage: document.getElementById('stage'),
   fibre: document.getElementById('pl_fibre'),
   mote:  document.getElementById('mote'),
   shadow:document.getElementById('shadow'),
@@ -409,7 +427,14 @@ function layout(){
 
   setLayer(el.smoke, band(p, 0.50, 1.10, 1.16, 2.10));
   el.smoke.style.transform = 'translateY(' + ((0.055 - p*0.048)*vh).toFixed(1) + 'px) scale(' +
-                             smokeScale(p).toFixed(4) + ')';
+                             (smokeScale(p) * 0.80).toFixed(4) + ')';
+  // the stage takes the substrate's tone while the micrograph beats are on screen
+  var onSub = p > 0.62 && p < 2.60;
+  if(onSub !== el.stage.__sub){
+    el.stage.classList.toggle('onSubstrate', onSub);
+    document.body.classList.toggle('dark', onSub);
+    el.stage.__sub = onSub;
+  }
   // the specimen turns under the beam as the descent carries past it
   // seeked, not played: measured 21 fps seeking vs 14 fps playing on this page
   if(el.smoke.tagName === 'VIDEO' && el.smoke.readyState >= 1 && !PARKED && el.smoke.__off !== true){
