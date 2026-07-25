@@ -7,6 +7,18 @@ Set by Yin 2026-07-25. Survives context compression and session restarts.
 Build the **whole** front page in `PLAN.md` — all ten stops — and get **every screen to
 9/10 or better**, judged visually by **Codex** against mont-fort.com scored as the 10.
 
+## ⚠ GATE-METHOD FLAW — fixed 2026-07-25, do not repeat
+Screens 1 and 2 were scored 9.1 each. Yin looked at all three together and said all three
+were bad. He was right, and the earlier numbers were misleading.
+
+**Cause:** I gated each screen ALONE against a single reference frame, and asked whether the
+named defects had closed. That flatters the work. Shown the three as a SEQUENCE and asked
+bluntly, the same judge returned **5 / 3 / 2**.
+
+**The rule now:** gate every screen (a) in sequence with its neighbours, and (b) with a
+prompt that invites a verdict, never one that lists what I just fixed. Never report a score
+obtained from an isolated, leading comparison.
+
 ## The rules
 1. **Do not stop until every screen is >= 9/10.** Keep iterating, session after session.
 2. **Codex is the judge.** Its number is the number. Never my own opinion.
@@ -29,9 +41,9 @@ whether the named gaps closed, remaining gaps worst-first with concrete fixes.
 ## Scoreboard
 | # | Screen | Codex | State |
 |---|--------|-------|-------|
-| 1 | Mountain — C-POLAR + 5 applications | **9.1** | ✅ PASSED the gate |
-| 2 | Down into cloud — charged particles | **9.1** | ✅ PASSED the gate |
-| 3 | NanoFlashing pulls them in — cloud clears | — | not built |
+| 1 | Mountain — C-POLAR + 5 applications | **5.0** | ❌ REOPENED — see gate-method flaw |
+| 2 | Down into cloud — charged particles | **3.0** | ❌ REOPENED — painted noise, not cloud |
+| 3 | NanoFlashing pulls them in — cloud clears | **2.0** | ❌ capture is not visible |
 | 4 | Clean sky — Air | — | not built |
 | 5 | The lake — Water | — | not built |
 | 6 | Crop field — Food Packaging | — | not built |
