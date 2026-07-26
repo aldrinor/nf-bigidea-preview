@@ -894,17 +894,88 @@ Everything that moved the number was **asset fidelity**. Everything that was cho
 layout or length was flat or negative. And the only fidelity lever left is the one we cannot
 pull ourselves.
 
+## ⚠ STEP 1 DONE — THE REFERENCE IS CLONED AND RUNNING LOCALLY (2026-07-25)
+
+Yin, four times, escalating: *"clone the reference website first"* → *"do you know what the
+meaning of clone is"* → *"I want the exact clone, peak, cloud, ocean, land"* → *"you are now
+even failing on step 1, you are talking shit to me about step n?"*
+
+Every earlier "clone" in this file was a clone of *numbers* — a grid width, a font size, a
+library name. **The actual files had never been taken.** They have been now.
+
+### Where it is and how to run it
+- `C:\EPA\US\website_project\_ref_clone\` — 25 MB, complete, runs **offline**.
+- Serve it: `node serve.mjs` in that folder → **http://localhost:8099**
+- `index.orig.html` is the untouched original; `index.html` is the working copy.
+
+### Verified, not assumed
+| check | result |
+|---|---|
+| page height | **17636 px — exact match to the live site** |
+| failed requests | **none** |
+| page errors | **none** |
+| hero | 3D summit in cloud, wordmark, nav, cue — renders |
+| mid-page | cloud fly-through — renders |
+| Global connectivity | **3D Earth with plotted city markers — renders** |
+
+### ⚠ THE BUG THAT MADE IT LOOK BLANK — this cost the whole first attempt
+The page came up as **static header and nothing else**. Not a server problem, not Cookiebot.
+
+**Three.js fetches its texture decoder at RUNTIME: `/libs/basis/basis_transcoder.js` and
+`.wasm`.** Their KTX2-compressed textures cannot be read without it. **Nothing in the HTML or
+in any JS bundle links to those files by name**, so a crawler never sees them — the browser
+only asks once the 3D scene starts. Without them every texture fails, the scene throws
+`TypeError: Cannot set properties of null (setting 'wrapT')`, and the canvas stays empty.
+
+Fixed by downloading both from the reference site (57 KB + 527 KB, real).
+**The server must send `.wasm` as `application/wasm`** or streaming instantiation fails.
+
+**The general lesson: a static crawl cannot clone a WebGL site.** Load the page, watch the
+network panel for 404s, and fetch what the runtime asks for. Two other externals were removed
+from the local copy — the Cookiebot consent script and a Cloudflare email script. Both are
+tracking pointed at their accounts and neither draws anything.
+
+### ⛔ THIS MUST NEVER BE PUBLISHED
+`_ref_clone/` is mont-fort's copyrighted code, photographs and 3D models. It is a **local
+scaffold to cut into**, nothing else. It is gitignored in the project root AND in `_deploy/`,
+and it sits outside the deploy repo. Republishing a trading firm's site under C-POLAR while
+the EPA matter is live is real legal and reputational exposure. **Only once every one of their
+assets and words has been replaced does anything move into `_deploy/`.**
+
+### Their structure, which is what step 2 cuts into
+Eight sections, and they map onto our story almost one-to-one:
+
+| # | theirs | ours |
+|---|--------|------|
+| 1 | Hero — 3D summit in cloud | **the summit.** Yin's brief already asks for this. Keep the beat, swap the wordmark. |
+| 2 | Who we are | what C-POLAR is |
+| 3 | What we do | NanoFlashing — the mechanism |
+| 4 | Global connectivity — 3D Earth, 15 offices plotted | **441 facilities across 7 countries.** Their globe with our markers. |
+| 5 | Sustainability (numbered 1) | the science — 31 authors, 16 institutions |
+| 6 | Solutions (numbered 2) | **the five applications** — Air, Water, Protective wear, Food packaging, Medical devices |
+| 7 | Equality (numbered 3) | measured performance |
+| 8 | Social (numbered 4) | contact |
+
+Their whole site is set in capitals. **Yin's standing rule is no all-caps**, so the substituted
+copy is sentence case. That deviation is deliberate and is the same one recorded earlier.
+
 ## NEXT ACTION
-1. **Keep stacking.** Regenerate `vs_c2/c3/c4.png` against the current build and fix the next
-   obvious thing. That loop has now found, in order: misalignment, an empty sky, a missing
-   chrome cluster, the dark/light register, a specimen sitting on top of a paragraph, and three
-   thin chapters. None of those ever appeared in a score.
-2. **Density, not length.** Their 19.6 viewports against our 4.4 is still the largest structural
-   gap, but the last two passes closed part of it *without adding a stop*. Adding stops measured
-   worse twice; adding substance to existing chapters has worked twice. Continue that way.
-3. **Yin's two decisions**, unchanged: what "done" means now the 9/10 bar is void, and whether we
-   may license real imagery.
-4. **Scroll FPS** diagnosed, not fixable against this machine's meter.
+**Step 2: surgical substitution inside `_ref_clone/`.** Text first, then models, then
+photographs. In order:
+1. Wordmark and nav → C-POLAR and our five applications.
+2. Section copy → the approved site copy, section by section, using the map above.
+3. The globe's city markers → our 7 countries.
+4. Their photographs and GLB models → ours. This is the long pole and the only part that
+   needs new assets.
+5. Only when **every** one of their assets is gone does it move to `_deploy/` and go live.
+
+**Do not** run the old /10 gate — it is void (see the calibration section above). Judge step 2
+by stacking against the clone, which is the instrument that has actually found every real
+defect in this project.
+
+### Still Yin's to decide
+1. What "done" means now the 9/10 bar is void.
+2. Whether we may license real imagery.
 
 **Do not** retry: the WebGL specimen, more stops, seam or collision work, the hero plate or crop,
 charge symbols, the mat video, the hero-zoom-to-still swap.
