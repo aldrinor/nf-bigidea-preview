@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How small they really are — C-POLAR</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<link rel="stylesheet" href="./design_tokens.css">
+<style>
+/* Two tiers, because one is impossible. The span from a 40 nm smoke particle
+   to a 90 µm grain of sand is 2,250 to 1: draw the sand at 190px and the smoke
+   is 0.084px, which is nothing. So the familiar world is drawn at true scale
+   on top, the five are magnified underneath, and the magnification is stated.
+   Leader lines carry the labels out, as in the Visual Capitalist reference. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink);
+  font-family: var(--font); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 88px 48px 110px; }
+
+.mark { display: flex; align-items: center; gap: var(--gap-mark); margin: 0 0 26px;
+  font-size: var(--t-mark); font-weight: var(--w-bold);
+  letter-spacing: .9px; color: var(--ink-strong); }
+.diamond { width: var(--diamond); height: var(--diamond);
+  transform: rotate(45deg); border: 1.6px solid var(--ink-strong); }
+h1 { margin: 0 0 20px; max-width: 17ch; font-size: var(--t-title); line-height: 1.14;
+  font-weight: var(--w-normal); letter-spacing: -.3px; color: var(--ink-strong); }
+.standfirst { margin: 0 0 64px; max-width: 58ch;
+  font-size: var(--t-body); line-height: var(--lh-body); color: var(--ink-mid); }
+
+.tier-head { display: flex; align-items: baseline; gap: 14px;
+  margin: 0 0 6px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.tier-head h2 { margin: 0; font-size: 16px; font-weight: var(--w-semi);
+  color: var(--ink-strong); }
+.tier-head span { font-size: 13px; color: var(--ink-mid); opacity: .8; }
+
+/* ---- tier one: the familiar world, true scale ------------------------- */
+
+.familiar { position: relative; height: 322px; margin: 0 0 8px; }
+.fam { position: absolute; bottom: 74px; border-radius: 50%;
+  background: rgba(var(--ink-rgb), .13);
+  border: 1px solid rgba(var(--ink-rgb), .30); }
+.fam-tag { position: absolute; bottom: 34px; transform: translateX(-50%);
+  font-size: 12.5px; line-height: 1.35; text-align: center;
+  color: var(--ink-mid); white-space: nowrap; }
+.fam-tag b { display: block; font-weight: var(--w-semi); color: var(--ink-strong); }
+.fam-tag i { display: block; font-style: normal; opacity: .72; font-size: 12px; }
+.fam-stem { position: absolute; bottom: 74px; width: 1px;
+  background: rgba(var(--ink-rgb), .28); }
+
+/* the five, drawn at the SAME true scale as the familiar objects, to show
+   honestly that they are almost nothing at this magnification */
+.spec { position: absolute; bottom: 74px; border-radius: 50%; background: var(--ink); }
+.spec-brace { position: absolute; bottom: 84px; height: 9px;
+  border: 1px solid rgba(var(--ink-rgb), .45); border-bottom: 0; }
+.spec-note { position: absolute; bottom: 96px; transform: translateX(-50%);
+  font-size: 12.5px; line-height: 1.4; text-align: center; color: var(--ink-mid);
+  white-space: nowrap; }
+
+/* ---- tier two: magnified ---------------------------------------------- */
+
+.zoom { position: relative; margin: 40px 0 0; }
+.row { display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 18px; padding-bottom: 26px; border-bottom: 1px solid var(--rule); }
+.one { flex: 1 1 0; display: flex; flex-direction: column; align-items: center;
+  background: none; border: 0; padding: 0 4px; cursor: pointer;
+  font: inherit; color: inherit; text-align: center; }
+.disc-box { position: relative; height: 184px;
+  display: flex; align-items: flex-end; justify-content: center; }
+.disc { position: relative; border-radius: 50%; background: var(--ink);
+  transition: background .18s var(--ease), box-shadow .18s var(--ease); }
+.one:hover .disc, .one:focus-visible .disc, .one[aria-pressed="true"] .disc {
+  background: var(--ink-strong); box-shadow: 0 0 0 6px rgba(var(--ink-rgb), .14); }
+.one:focus-visible { outline: none; }
+.ring { position: absolute; bottom: 0; border-radius: 50%;
+  border: 1px solid rgba(var(--ink-rgb), .26); pointer-events: none; }
+.halo { position: absolute; bottom: -11px; width: 34px; height: 34px;
+  border-radius: 50%; border: 1px dashed rgba(var(--ink-rgb), .34); pointer-events: none; }
+.one b { display: block; margin-top: 18px; font-size: 15px;
+  font-weight: var(--w-semi); color: var(--ink-strong); }
+.one em { display: block; margin-top: 4px; font-style: normal;
+  font-size: 13.5px; color: var(--ink-mid); opacity: .86; }
+.one .times { display: block; margin-top: 8px; font-size: 12.5px;
+  line-height: 1.4; color: var(--ink); opacity: .6; }
+
+/* ---- what it does ------------------------------------------------------ */
+
+.panel { display: grid; grid-template-columns: 232px 1fr; gap: 0 44px;
+  margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--rule);
+  min-height: 300px; }
+.panel-key b { display: block; font-size: 22px; font-weight: var(--w-normal);
+  color: var(--ink-strong); line-height: 1.2; }
+.panel-key em { display: block; margin-top: 8px; font-style: normal;
+  font-size: 13.5px; color: var(--ink-mid); opacity: .86; }
+.panel-key span { display: block; margin-top: 14px; font-size: 13.5px;
+  line-height: 1.5; color: var(--ink-mid); }
+.panel-key .caveat { margin-top: 14px; font-size: 12.5px; line-height: 1.55;
+  color: var(--ink); opacity: .7; }
+.impacts { list-style: none; margin: 0; padding: 0; }
+.impacts li { margin: 0 0 14px; padding: 0 0 14px;
+  border-bottom: 1px solid var(--rule-faint);
+  font-size: 16.5px; line-height: 1.55; color: var(--ink-mid); max-width: 68ch; }
+.impacts li:last-child { border-bottom: 0; }
+.impacts a { color: var(--ink-strong); text-decoration: none; font-size: 13px;
+  border-bottom: 1px solid rgba(var(--ink-rgb), .32); }
+.impacts a:hover { border-bottom-color: var(--ink-strong); }
+.hint { font-size: 15px; color: var(--ink); opacity: .55; margin: 0; }
+
+.foot { margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--rule-faint);
+  font-size: 12.5px; line-height: 1.6; color: var(--ink); opacity: .64; max-width: 80ch; }
+
+@media (max-width: 900px) {
+  .wrap { padding: 56px 22px 74px; }
+  h1 { font-size: var(--t-title-sm); }
+  .standfirst { font-size: var(--t-body-sm); margin-bottom: 44px; }
+  .familiar { height: 230px; }
+  .row { flex-wrap: wrap; gap: 28px 6px; }
+  .one { flex: 0 0 30%; }
+  .disc-box { height: 120px; }
+  .panel { grid-template-columns: 1fr; gap: 16px; }
+  .impacts li { font-size: 15.5px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="mark"><span class="diamond"></span>The problem</p>
+  <h1>How small they really are.</h1>
+  <p class="standfirst" id="standfirst"></p>
+
+  <div class="tier-head">
+    <h2>Things you can picture</h2>
+    <span>drawn to true scale</span>
+  </div>
+  <div class="familiar" id="familiar"></div>
+
+  <div class="tier-head" id="zoomHead">
+    <h2>The five, magnified</h2>
+    <span id="zoomFactor"></span>
+  </div>
+  <div class="zoom"><div class="row" id="row"></div></div>
+
+  <div class="panel" id="panel"></div>
+  <p class="foot" id="foot"></p>
+
+</div>
+
+<script src="./chart_data.js"></script>
+<script>
+(function(){
+  var D = window.CHART_DATA;
+
+  /* ---- tier one --------------------------------------------------------
+     Everything at ONE true scale: the familiar objects and, beside them, the
+     five. The five come out as specks under a pixel wide. That is not a flaw
+     to be designed around, it is the finding, so it is drawn and then named. */
+  var famBox = document.getElementById('familiar');
+  var fam = D.familiar.slice().sort(function(a,b){ return b.nm - a.nm; });
+  var TRUE_BIG = 176;                       /* px for the largest familiar object */
+  var famMax = fam[0].nm;
+  var t1 = function(nm){ return nm / famMax * TRUE_BIG; };
+
+  var x = 0, GAP = 30, html = '', low = false;
+  fam.forEach(function(f, n){
+    var d = t1(f.nm);
+    var cx = x + d / 2;
+    /* the last three are small and their names are long, so they collided into
+       one another. Alternate them onto a second line and run the stem down. */
+    low = (d < 70) && !low;
+    var drop = low ? 30 : 0;
+    html += '<span class="fam" style="left:' + x.toFixed(1) + 'px;width:' + d.toFixed(1) +
+              'px;height:' + d.toFixed(1) + 'px"></span>' +
+            '<span class="fam-stem" style="left:' + cx.toFixed(1) + 'px;height:' +
+              (d + 12).toFixed(1) + 'px;bottom:' + (74 - drop) + 'px"></span>' +
+            '<span class="fam-tag" style="left:' + cx.toFixed(1) + 'px;bottom:' +
+              (34 - drop) + 'px"><b>' + f.name + '</b><i>' + f.size + '</i></span>';
+    x += d + GAP;
+  });
+
+  /* the five, same scale, immediately after */
+  var five = D.items.slice().sort(function(a,b){ return b.nm - a.nm; });
+  var startX = x + 92, w = 0;
+  five.forEach(function(it){
+    var d = Math.max(t1(it.nm), 0.6);
+    html += '<span class="spec" style="left:' + (startX + w).toFixed(2) + 'px;width:' +
+            d.toFixed(2) + 'px;height:' + d.toFixed(2) + 'px"></span>';
+    w += Math.max(d, 1.4) + 3;
+  });
+  html += '<span class="spec-brace" style="left:' + (startX - 6).toFixed(1) + 'px;width:' +
+            (w + 12).toFixed(1) + 'px"></span>' +
+          '<span class="spec-note" style="left:' + (startX + w / 2).toFixed(1) +
+            'px">all five of ours,<br>at this same scale</span>';
+  famBox.innerHTML = html;
+
+  /* ---- tier two --------------------------------------------------------- */
+  var row = document.getElementById('row');
+  var BIG = 168;
+  var maxNm = Math.max.apply(null, D.items.map(function(i){ return i.nm; }));
+  var px = function(nm){ return nm / maxNm * BIG; };
+  var smallest = D.items.reduce(function(a,b){ return a.nm < b.nm ? a : b; });
+
+  D.items.forEach(function(it, i){
+    var d = px(it.nm), ratio = Math.round(it.nm / smallest.nm);
+    row.insertAdjacentHTML('beforeend',
+      '<button class="one" data-i="' + i + '" aria-pressed="false" aria-label="' +
+        it.name + ', ' + it.size + '">' +
+        '<span class="disc-box">' +
+          (d < 26 ? '<span class="halo"></span>' : '') +
+          (it.hi && it.hi > it.nm ? '<span class="ring" style="width:' + px(it.hi).toFixed(1) +
+            'px;height:' + px(it.hi).toFixed(1) + 'px"></span>' : '') +
+          '<span class="disc" style="width:' + d.toFixed(1) + 'px;height:' + d.toFixed(1) + 'px"></span>' +
+        '</span><b>' + it.name + '</b><em>' + it.size + '</em>' +
+        '<span class="times">' + (ratio > 1 ? ratio + '× wider' : 'the smallest here') + '</span>' +
+      '</button>');
+  });
+
+  var factor = Math.round(px(maxNm) / t1(maxNm));
+  document.getElementById('zoomFactor').textContent =
+    'the same five, ' + factor.toLocaleString() + ' times larger than above, still true scale to each other';
+
+  document.getElementById('standfirst').innerHTML =
+    'A grain of sand you can see. A human hair you can see. Everything C-POLAR is built to ' +
+    'deal with is far below both — the largest of the five is about ' +
+    Math.round(famMax / maxNm) + ' times narrower than a grain of sand, and the smallest is ' +
+    'around ' + Math.round(D.hair.nm / smallest.nm).toLocaleString() +
+    ' times narrower than a hair. So they are drawn twice: once at true scale beside things ' +
+    'you can picture, and once magnified enough to see.';
+
+  /* ---- what it does ------------------------------------------------------ */
+  var panel = document.getElementById('panel');
+  function show(i){
+    var it = D.items[i];
+    panel.innerHTML =
+      '<div class="panel-key"><b>' + it.name + '</b><em>' + it.size + '</em>' +
+        '<span>' + it.reach + '</span>' +
+        (it.note ? '<span class="caveat">' + it.note + '</span>' : '') + '</div>' +
+      '<ul class="impacts">' + it.impacts.map(function(m){
+        return '<li>' + m.text + (m.url ? ' <a href="' + m.url +
+          '" target="_blank" rel="noopener">Source</a>' : '') + '</li>';
+      }).join('') + '</ul>';
+    [].forEach.call(row.querySelectorAll('.one'), function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-i') === String(i) ? 'true' : 'false');
+    });
+  }
+  panel.innerHTML = '<div class="panel-key"><b>What it does</b></div>' +
+    '<p class="hint">Point at any of the five to read what it does inside the body.</p>';
+
+  ['mouseover','focusin','click'].forEach(function(ev){
+    row.addEventListener(ev, function(e){
+      var b = e.target.closest ? e.target.closest('.one') : null;
+      if (b) show(+b.getAttribute('data-i'));
+    });
+  });
+
+  document.getElementById('foot').textContent =
+    'Within each tier the circles are drawn to true relative scale. The two tiers are not to '
+    + 'the same scale as one another, and the magnification is stated. Sizes for the familiar '
+    + 'objects are from Visual Capitalist, "Visualizing the Relative Size of Particles". Sizes '
+    + 'and health findings for the five are carried over unchanged from the C-POLAR pollutant '
+    + 'decks, which cite the World Health Organization, the US Environmental Protection Agency, '
+    + 'the Health Effects Institute and the studies linked on each line. Each of the five has a '
+    + 'range, drawn as a ring; the solid circle is the figure those decks work from. Airborne '
+    + 'viruses and bacteria usually travel inside a larger droplet, so the particle actually '
+    + 'breathed in is bigger than the organism drawn here.';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* ============================================================================
+   C-POLAR front page — design tokens
+   ----------------------------------------------------------------------------
+   Every value here was read out of the built page, not invented. It is the
+   single place to change a colour, a type size or a rhythm.
+
+   HOW TO USE IT
+   This file is loaded BEFORE cpolar.css. The rules in cpolar.css still carry
+   their literal values today, so changing a token here will not move the page
+   on its own yet — it is the reference and the starting point. When you touch
+   a rule, swap its literal for the token, e.g.
+
+       color: #12405f;            ->   color: var(--ink-strong);
+
+   Do that as you go rather than in one sweep: a mass find-and-replace across a
+   file with ~150 !important rules is how things break silently here.
+   ========================================================================== */
+
+:root {
+
+  /* --- ink ---------------------------------------------------------------
+     One blue family, four steps. There is no second accent colour on this
+     page and there should not be one. */
+
+  --ink:            #2d628c;   /* the base ink. Hero, nav, most body text.
+                                  Used 12x - this is the page's voice. */
+  --ink-strong:     #12405f;   /* headlines and the application titles.
+                                  Darkest step. Used 7x. */
+  --ink-mid:        #17456a;   /* application body copy and the small mark.
+                                  Chosen by measurement: #1d5580 failed the
+                                  4.5 contrast floor over photography. */
+  --ink-soft:       #1d5580;   /* the pollutant screen's answer text. Kept
+                                  because that screen is locked. */
+  --ink-line:       #1d6191;   /* the diamond outline and hover borders. */
+  --ink-bold:       #24567e;   /* the bolded runs inside the hero intro. */
+
+  /* rgba of --ink, for borders and washes. The page uses the raw numbers
+     45,98,140 because CSS cannot put a hex inside rgba() without a colour-mix. */
+  --ink-rgb:        45, 98, 140;
+  --rule:           rgba(var(--ink-rgb), .30);   /* a visible dividing line   */
+  --rule-faint:     rgba(var(--ink-rgb), .16);   /* a whisper of a line       */
+  --border-button:  rgba(var(--ink-rgb), .34);   /* the five hero buttons     */
+  --border-hover:   rgba(var(--ink-rgb), .60);
+  --fill-hover:     rgba(var(--ink-rgb), .08);
+
+  /* --- ground ------------------------------------------------------------- */
+
+  --bg:             #edf0f2;   /* the house background. Also the tint the
+                                  photography is pulled toward. */
+  --scrim:          #f3f6f8;   /* the wash used inside the image grade. */
+  --lift:           244, 247, 249;  /* the soft radial lift under the
+                                       application text block. */
+
+  /* --- type ---------------------------------------------------------------
+     Two stacks only. Century Gothic is the reference site's face and is what
+     the page actually renders in; the others are fallbacks. */
+
+  --font:      "Century Gothic", system-ui, sans-serif;
+  --font-alt:  "Century Gothic", "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Century Gothic", "Space Mono", monospace;
+
+  /* the sizes actually in use, smallest to largest */
+  --t-label:     12.5px;  /* small caps-style labels (never actual caps)     */
+  --t-mark:      14px;    /* the "Applications" mark above a title           */
+  --t-nav:       15px;    /* top bar: About, News, Menu, the counter         */
+  --t-button:    15px;    /* the five hero application buttons               */
+  --t-body:      18px;    /* application body copy                           */
+  --t-intro:     17px;    /* the hero intro paragraph                        */
+  --t-answer:    26px;    /* the pollutant screen's answer line              */
+  --t-line:      30px;    /* the two cloud-line sentences                    */
+  --t-title:     50px;    /* application titles                              */
+
+  /* mobile steps, applied below 1024px */
+  --t-body-sm:   15.5px;
+  --t-title-sm:  30px;
+
+  --lh-tight:    1.32;
+  --lh-body:     1.62;
+  --lh-intro:    1.66;
+
+  --w-normal:    400;
+  --w-semi:      600;   /* the top bar */
+  --w-bold:      700;   /* the mark, and bolded runs in the intro */
+
+  /* --- layout -------------------------------------------------------------
+     The application screens. 148px is the left margin the type sits on; it is
+     the same on all five so the block never appears to move between screens. */
+
+  --pad-left:      148px;  /* text inset on the application screens          */
+  --pad-bottom:    104px;  /* how far the block sits off the bottom edge     */
+  --pad-left-sm:   24px;   /* below 1024px                                   */
+  --measure:       760px;  /* max width of an application text block         */
+  --measure-copy:  46ch;   /* body copy line length                          */
+  --hero-width:    600px;  /* the hero text column                           */
+  --hero-apps:     760px;  /* the five buttons break out wider than the text */
+
+  --section:       150vh;  /* one application section: 100vh held + 50vh of
+                              travel for the hand-off                        */
+  --diamond:       12px;
+  --gap-mark:      12px;   /* diamond to word                                */
+
+  /* --- motion -------------------------------------------------------------
+     Nothing on this page bounces. Everything eases out. */
+
+  --ease:          ease;
+  --dur-hover:     .25s;
+  --dur-fade:      .85s;   /* the answer line fading in                      */
+
+  /* --- z-index ------------------------------------------------------------
+     Small and deliberate. Raising one of these without checking the others is
+     how the application photographs once covered the entire front page. */
+
+  --z-dust:        1;   /* the floating particle canvas                      */
+  --z-scenes:      2;   /* the five application photographs (FIXED, fullscreen)*/
+  --z-content:     3;   /* their chapter text                                */
+  --z-apps:        5;   /* the application sections that scroll over the top  */
+
+  /* --- breakpoints (for reference; CSS cannot use a var in a media query) --
+       1024px   desktop -> tablet: hero goes full width, buttons go 2-up
+        700px   the application photographs shift to 68% across, so the
+                person is in frame on a portrait screen
+        390px   the narrowest phone checked                                 */
+}
