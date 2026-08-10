@@ -490,13 +490,23 @@ void main(){
 // the panel covers, `y` is where the panel sits in the world. Between them the cloud
 // top has to land near the mountain's FOOT - the first pass put it near the middle of
 // the peak and drowned everything below it.
+// Two things this had wrong, both visible only when the three were stacked.
+//
+// The cloud never went BRIGHTER than the sky. Real cloud lit from above has white tops
+// that stand out against the background and shadowed undersides beneath them; mine was
+// uniformly a little darker than the page, which is haze, not cloud. The bright end is
+// now genuinely white and the layers are opaque enough to reach it.
+//
+// And the cloud only occupied the bottom third. In the reference it is everywhere, with
+// peaks coming through it. These now run from the foot of the mountain to well above it.
 const CLOUD_LAYERS = [
-  { w: 6000, band: 1.10, x:  120, y:  10, z: -980, top: .64, soft: .11, o: .54, spd: 1.6 },
-  { w: 5000, band: 1.02, x: -300, y:  -2, z: -820, top: .62, soft: .11, o: .58, spd: 2.0 },
-  { w: 4200, band: .96, x:  200, y: -12, z: -560, top: .58, soft: .11, o: .62, spd: 2.5 },
-  { w: 3600, band: .88, x: -260, y: -20, z: -300, top: .55, soft: .11, o: .52, spd: 3.0 },
-  { w: 1900, band: .66, x: -140, y: -52, z:  140, top: .50, soft: .11, o: .58, spd: 3.4 },
-  { w: 1500, band: .52, x:  160, y: -62, z:  270, top: .46, soft: .11, o: .44, spd: 4.2 },
+  { w: 6000, band: 1.20, x:  120, y:  74, z: -980, top: .70, soft: .11, o: .26, spd: 1.6 },
+  { w: 5000, band: 1.14, x: -300, y:  46, z: -820, top: .66, soft: .11, o: .28, spd: 2.0 },
+  { w: 4200, band: 1.06, x:  200, y:  18, z: -560, top: .62, soft: .11, o: .30, spd: 2.5 },
+  { w: 3600, band: .98, x: -260, y:  -6, z: -300, top: .58, soft: .11, o: .30, spd: 3.0 },
+  { w: 2600, band: .84, x:  140, y: -26, z:  -60, top: .54, soft: .11, o: .28, spd: 3.6 },
+  { w: 2000, band: .70, x: -140, y: -44, z:  140, top: .50, soft: .11, o: .24, spd: 4.2 },
+  { w: 1600, band: .56, x:  180, y: -58, z:  270, top: .46, soft: .11, o: .18, spd: 5.0 },
 ];
 
 const clouds = new THREE.Group();
@@ -516,8 +526,8 @@ CLOUD_LAYERS.forEach((L, i) => {
       // the bottom of the frame into a saturated blue band. Contrast comes from the
       // spread between these two, not from how strong the colour is - so the pale end
       // goes back toward grey while the gap stays wide.
-      uPale:  {value:new THREE.Color(0xbfd0e3)},
-        uBright:{value:new THREE.Color(0xfbfdff)},
+      uPale:  {value:new THREE.Color(0xb4c8de)},
+        uBright:{value:new THREE.Color(0xffffff)},
       },
     })
   );
