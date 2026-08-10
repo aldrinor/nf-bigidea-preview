@@ -141,6 +141,14 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
 </head>
 <body>
 
+<!-- The dust canvas and the five application photographs. V1 keeps these at the very
+     top of the body, before any section, so my first slice of its page dropped them -
+     the CSS and script that drive them came across but the elements did not, and the
+     five panels rendered as headings on empty backgrounds. Pasting the whole leading
+     block back was worse: it carried a duplicate header, footer links and decorative
+     rings, and doubled the page height. These are the two elements, and only these. -->
+<canvas id="cp-dust" aria-hidden="true"></canvas>
+<div id="cp-scenes" aria-hidden="true"><div class="cp-scene" data-k="air" style="background-image:url(./assets/scenes/h_air.webp)"></div><div class="cp-scene" data-k="water" style="background-image:url(./assets/scenes/h_water.webp)"></div><div class="cp-scene" data-k="food" style="background-image:url(./assets/scenes/h_food.webp)"></div><div class="cp-scene" data-k="textile" style="background-image:url(./assets/scenes/h_textile.webp)"></div><div class="cp-scene" data-k="medical" style="background-image:url(./assets/scenes/h_medical.webp)"></div></div>
 <canvas id="scene"></canvas>
 <div class="veil"></div>
 <div class="veil-x" id="vx"></div>
