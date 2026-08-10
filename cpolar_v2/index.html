@@ -40,7 +40,10 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    the page colour, so the mountain has no foot - it goes into weather and stops. */
 .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(180deg,rgba(238,242,245,.26) 0%,rgba(238,242,245,0) 30%,
-    rgba(238,242,245,.04) 66%,rgba(238,242,245,.10) 84%,rgba(238,242,245,.24) 100%)}
+    rgba(238,242,245,.04) 66%,rgba(238,242,245,.14) 84%,
+    rgba(238,242,245,.44) 96%,rgba(238,242,245,.70) 100%)}
+  /* the last two stops close a thin dark strip along the very bottom edge, where the
+     far flat ground catches light below the cloud sea */
 /* And the same across, holding the left of the frame clear. The mountain was running
    in behind the paragraph and the application row, so the copy sat on shifting tone
    instead of on the page - and the far shoulder over there was the one place the mesh
@@ -179,7 +182,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 // 1.0 with the lights below drove the whole mountain to white - snow and rock landed
 // on the same value and the shape disappeared. Rock has to sit in the mid greys or
 // there is nothing for the snow to be white AGAINST.
-renderer.toneMappingExposure = 0.70;
+renderer.toneMappingExposure = 0.86;
 
 const scene = new THREE.Scene();
 // Every visible surface of this mountain sits between 312 and 451 units away, so fog
@@ -209,8 +212,12 @@ camera.lookAt(AIM);
 // to come down with it: at 0.62 it was a second light aimed straight into the flank the
 // key is trying to darken, filling the new shadow back in as fast as it appeared. The
 // hemisphere ground colour was doing the same job from below.
-scene.add(new THREE.HemisphereLight(0xf0f6fc, 0xb9c6d4, 0.34));
-const key = new THREE.DirectionalLight(0xfffdf6, 1.90);
+// V1 gets its light from a BAKED LIGHTMAP, which is soft and ambient and has no hard
+// sun in it anywhere. A hard key with shadow maps is what a photoreal rubric rewards,
+// and it is not what V1 looks like. Ambient up, key down: the shape still reads, but it
+// reads the way V1's does - as light in air rather than as a spotlight on rock.
+scene.add(new THREE.HemisphereLight(0xf2f7fd, 0xc2cfdc, 0.72));
+const key = new THREE.DirectionalLight(0xfffdf6, 1.05);
 // Turning the mountain moved it relative to the light, so a key that modelled the old
 // face beautifully lights this one flat. Azimuth is measured from screen-left and has
 // to STAY on the left - shadows must fall away from the copy, not across it.
@@ -230,7 +237,7 @@ key.shadow.camera.near =    1; key.shadow.camera.far = 1600;
 key.shadow.bias = -0.0002;
 key.shadow.normalBias = 0.6;
 scene.add(key);
-const rim = new THREE.DirectionalLight(0xb6cee4, 0.28);
+const rim = new THREE.DirectionalLight(0xcfe0ef, 0.34);
 rim.position.set(330, 130, -320);
 scene.add(rim);
 
