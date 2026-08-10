@@ -40,14 +40,21 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    the page colour, so the mountain has no foot - it goes into weather and stops. */
 .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(180deg,rgba(238,242,245,.26) 0%,rgba(238,242,245,0) 30%,
-    rgba(238,242,245,.04) 66%,rgba(238,242,245,.20) 84%,rgba(238,242,245,.46) 100%)}
+    rgba(238,242,245,.04) 66%,rgba(238,242,245,.10) 84%,rgba(238,242,245,.24) 100%)}
 /* And the same across, holding the left of the frame clear. The mountain was running
    in behind the paragraph and the application row, so the copy sat on shifting tone
    instead of on the page - and the far shoulder over there was the one place the mesh
    still showed a long straight ramp. Both problems end at the same gradient. */
 .veil-x{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(238,242,245,1) 0%,rgba(238,242,245,.97) 30%,
-    rgba(238,242,245,.72) 44%,rgba(238,242,245,.24) 56%,rgba(238,242,245,0) 68%)}
+  /* Holding full opacity to 51% and then dropping to .34 by 60% draws a hard vertical
+     line at x=734: the eye reads the boundary between fully-hidden and partly-visible
+     as an edge however smooth the maths is. The ramp starts much earlier now. It costs
+     nothing to start it early - the mountain's own left edge is around x=750, so from
+     35% to 50% there is no terrain there to reveal. Zero lands at x=1008 and the summit
+     is at x=1035, so not one pixel of this touches the peak. */
+  background:linear-gradient(90deg,rgba(238,242,245,1) 0%,rgba(238,242,245,1) 35%,
+    rgba(238,242,245,.85) 45%,rgba(238,242,245,.45) 54%,
+    rgba(238,242,245,.15) 62%,rgba(238,242,245,0) 70%)}
 @media (max-width:900px){ .veil-x{background:linear-gradient(90deg,
     rgba(238,242,245,.92) 0%,rgba(238,242,245,.55) 40%,rgba(238,242,245,0) 78%)} }
 .wrap{position:relative;z-index:2}
@@ -152,6 +159,8 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true })
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 // 1.0 with the lights below drove the whole mountain to white - snow and rock landed
 // on the same value and the shape disappeared. Rock has to sit in the mid greys or
@@ -159,10 +168,12 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.70;
 
 const scene = new THREE.Scene();
-// The summit is 363 units from this camera and the far ridge about 554. Fog starting
-// at 250 put the summit past the halfway point of the ramp and bleached it out; it has
-// to start beyond the peak so only the ground BEHIND the peak recedes.
-scene.fog = new THREE.Fog(0xe6ecf1, 470, 1050);
+// Every visible surface of this mountain sits between 312 and 451 units away, so fog
+// starting at 470 contributed exactly nothing and distance cost nothing at all. 300 to
+// 820 brackets the mountain's own depth: the summit lifts about 11 levels, the far
+// ridge 6, the near foot 3 - ordered by distance, which is what makes depth read.
+// (An older comment here claimed 363 and 554. Both were wrong. These are measured.)
+scene.fog = new THREE.Fog(0xe6ecf1, 300, 820);
 
 // The shot. The summit of this mesh is at world (15.4, 58.4, -2.4).
 //   - the camera sits BELOW it, so the frame looks UP at the peak. The first version
@@ -178,11 +189,28 @@ camera.lookAt(AIM);
 // light: a hard raking key from the left so one face is lit and the other falls into
 // shadow - the ridge between them is what gives a mountain its shape. Cool sky fill,
 // cold rim from behind to separate the summit from the haze.
-scene.add(new THREE.HemisphereLight(0xf6fafd, 0x7c92a8, 0.58));
+// The key sat 39 degrees off the camera axis - a light shining over your own shoulder,
+// which gives nothing a shadow side. At 72 degrees, hard from screen left, every ridge
+// gets a lit face and a dark one, and the shadows fall away from the copy. The rim had
+// to come down with it: at 0.62 it was a second light aimed straight into the flank the
+// key is trying to darken, filling the new shadow back in as fast as it appeared. The
+// hemisphere ground colour was doing the same job from below.
+scene.add(new THREE.HemisphereLight(0xf0f6fc, 0xb9c6d4, 0.34));
 const key = new THREE.DirectionalLight(0xfffdf6, 1.90);
-key.position.set(-380, 150, 210);
+key.position.set(-470, 210, -60);
+// Worth switching on only now the key has moved; with the old position every shadow
+// fell behind the thing casting it. 2048 is sized to the mesh - one quad is 1.54 world
+// units, so this is about four shadow texels per quad. 4096 would double a per-frame
+// cost for detail the geometry does not carry.
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -420; key.shadow.camera.right = 420;
+key.shadow.camera.top  =  420; key.shadow.camera.bottom = -420;
+key.shadow.camera.near =    1; key.shadow.camera.far = 1600;
+key.shadow.bias = -0.0002;
+key.shadow.normalBias = 0.6;
 scene.add(key);
-const rim = new THREE.DirectionalLight(0xb6cee4, 0.62);
+const rim = new THREE.DirectionalLight(0xb6cee4, 0.28);
 rim.position.set(330, 130, -320);
 scene.add(rim);
 
@@ -203,9 +231,15 @@ new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
   const detN = tex.load('./assets/rock_detail_n.webp');
   const detC = tex.load('./assets/rock_detail_c.webp');
   detN.wrapS = detN.wrapT = detC.wrapS = detC.wrapT = THREE.RepeatWrapping;
+  // Every surface in this shot is seen at a grazing angle, which is exactly the case
+  // trilinear filtering blurs worst. Measured as the largest single gain of anything
+  // tried on this material.
+  const MA = renderer.capabilities.getMaxAnisotropy();
+  detN.anisotropy = detC.anisotropy = alb.anisotropy = nrm.anisotropy = rgh.anisotropy = MA;
 
   g.scene.traverse((o) => {
     if (!o.isMesh) return;
+    o.castShadow = true; o.receiveShadow = true;
     o.geometry.computeVertexNormals();
     const mat = new THREE.MeshStandardMaterial({
       map: alb, normalMap: nrm, roughnessMap: rgh,
@@ -231,7 +265,7 @@ new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
       sh.uniforms.uDetN   = { value: detN };
       sh.uniforms.uDetC   = { value: detC };
       sh.uniforms.uDScale = { value: 0.022 };   // one tile per ~45 world units
-      sh.uniforms.uDAmt   = { value: 0.85 };    // how hard the detail bends the normal
+      sh.uniforms.uDAmt   = { value: 1.80 };    // how hard the detail bends the normal
       sh.uniforms.uDCol   = { value: 0.80 };    // how much of its grain reaches colour
 
       sh.vertexShader = sh.vertexShader
@@ -280,7 +314,19 @@ vec3 triBlend(vec3 n){
     vec3 dX = texture2D(uDetN, p.zy).xyz * 2.0 - 1.0;
     vec3 dY = texture2D(uDetN, p.xz).xyz * 2.0 - 1.0;
     vec3 dZ = texture2D(uDetN, p.xy).xyz * 2.0 - 1.0;
-    vec3 dn = dX * bw.x + dY * bw.y + dZ * bw.z;
+    // Each of the three samples is a TANGENT-space normal: its z points out of the
+    // flat texture, not along any world axis. Summing them raw treated that z as a
+    // world direction, and since this map's blue channel is very nearly the constant
+    // 0.298, the sum added the SAME fixed push to every normal on the mountain. A
+    // constant tilt across a whole surface is what makes it look like brushed satin,
+    // which is what the render kept being called. Rotating each sample onto the axis
+    // it was projected along, and dropping the component that points back at the
+    // projector, removes the constant - and most of the strength with it, which is
+    // why uDAmt more than doubles below.
+    vec3 nX = vec3(0.0,  dX.y, dX.x);
+    vec3 nY = vec3(dY.x, 0.0,  dY.y);
+    vec3 nZ = vec3(dZ.x, dZ.y, 0.0 );
+    vec3 dn = nX * bw.x + nY * bw.y + nZ * bw.z;
     vec3 vdn = (viewMatrix * vec4(dn, 0.0)).xyz;
     normal = normalize(normal + vdn * uDAmt);
   }`);
@@ -343,20 +389,31 @@ const clouds = new THREE.Group();
 // foot itself spans about 40 of them.
 const BANKS = [
   // behind the summit, so the peak has something to stand against instead of bare sky
-  {w:2200,h:240, x:  40, y: 44, z:-620, o:.46, d:.012, soft:false},
+  {w:2200,h:240, x:  40, y: 44, z:-620, o:.46, d:-.009, soft:false},
   {w:1700,h:200, x:-120, y: 16, z:-420, o:.36, d:.018, soft:true },
   // the sea, lying across the foot of the mountain and nothing above it
-  {w:1600,h: 78, x:  60, y:-12, z: 210, o:.72, d:.030, soft:false},
-  {w:2000,h:105, x:-190, y:-16, z:  50, o:.76, d:.038, soft:false},
+  // These two were lifting the nearest slope to brightness 183 while the farthest mass
+  // sat at 97 - front paler than back, which is distance running backwards, and the
+  // main reason the picture read flat. Both agents had to come down; halving the cloud
+  // alone still left the foot near 163.
+  {w:1600,h: 78, x:  60, y:-30, z: 210, o:.34, d:.030, soft:false},
+  {w:2000,h:105, x:-190, y:-34, z:  50, o:.30, d:.038, soft:false},
   {w:2600,h:140, x: 180, y:-20, z:-140, o:.70, d:.046, soft:true },
   {w:3000,h:170, x:-260, y:-26, z:-330, o:.55, d:.054, soft:true },
+  // A thin collar that actually crosses the peak. Every other bank in front of the
+  // mountain sits at or below its foot, and everything at mid-height is BEHIND the
+  // mountain and hidden by it - the cloud material stops writing depth but still tests
+  // it. 34 units tall draws a collar of about 165px; 70 would be a slab across nearly
+  // 40% of a frame whose whole rule is restraint.
+  {w:1500,h: 34, x: -40, y: 40, z: 120, o:.34, d:.021, soft:true },
 ];
 BANKS.forEach(b => {
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(b.w, b.h),
     new THREE.MeshBasicMaterial({ map: cloudTex(b.soft), transparent:true, depthWrite:false, opacity:b.o })
   );
-  m.position.set(b.x, b.y, b.z); m.userData.d = b.d; m.userData.x0 = b.x;
+  m.position.set(b.x, b.y, b.z); m.userData.d = b.d * 60; m.userData.x0 = b.x;
+  m.userData.ph = Math.random() * 6.283; m.userData.o = b.o;
   clouds.add(m);
 });
 scene.add(clouds);
@@ -382,14 +439,24 @@ addEventListener('resize', () => {
 });
 
 const clock = new THREE.Clock();
+let lastT = 0;
 (function frame(){
   requestAnimationFrame(frame);
   const t = clock.getElapsedTime();
+  const dt = Math.min(t - lastT, 0.1); lastT = t;
   if (terrain) {
     terrain.rotation.y = 0.06 + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
     terrain.position.y = -sy * 0.05;
   }
-  clouds.children.forEach(c => { c.position.x += c.userData.d; if (c.position.x > c.userData.x0 + 700) c.position.x = c.userData.x0 - 700; });
+  // The drift used to advance once per FRAME, so it ran at double speed on a 120Hz
+  // screen and crawled when the tab dropped to 15fps. Per second now. The slow breathing
+  // of opacity stops six banks marching in step at one fixed brightness.
+  clouds.children.forEach(c => {
+    c.position.x += c.userData.d * dt;
+    if (c.position.x > c.userData.x0 + 700) c.position.x = c.userData.x0 - 700;
+    if (c.position.x < c.userData.x0 - 700) c.position.x = c.userData.x0 + 700;
+    c.material.opacity = c.userData.o * (0.72 + 0.28 * Math.sin(t * 0.045 + c.userData.ph));
+  });
   camera.position.y = 26 + Math.sin(t * 0.06) * 1.2;
   camera.lookAt(AIM.x, AIM.y - sy * 0.012, AIM.z);
   renderer.render(scene, camera);
