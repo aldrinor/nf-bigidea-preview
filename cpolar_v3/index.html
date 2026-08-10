@@ -35,6 +35,28 @@ body{opacity:1 !important}
    V1's header absent on every application frame and ours present on all of them. Doing
    what V1 does means no padding is needed and nothing has to be nudged. */
 header{transition:opacity .3s linear, transform .3s ease}
+
+/* THE TWO NARRATIVE SECTIONS - "This is where air and water are still clean" and
+   "Most harmful pollutants carry an electric charge" - took their whole layout from the
+   reference's 304 KB stylesheet, which is gone. Without it their copy sat flush against
+   the top-left corner of the window with no margin at all, and they overlapped each
+   other, because one of the rules they lost was a full screen of bottom padding.
+   Measured at 1850px: V1 puts those headings at left 183 and left 156; ours had them
+   both at left 0.
+   Rebuilt here on the same 148px rail the application panels already use, so the whole
+   page shares one left edge instead of three. */
+section[class*="astro-"]{
+  min-height:100vh;
+  padding:22vh 148px 100vh;
+  box-sizing:border-box;
+}
+section[class*="astro-"] > *{max-width:1100px}
+section[class*="astro-"] h2{margin:0 0 .6em; max-width:22ch}
+section[class*="astro-"] p{max-width:56ch}
+
+@media (max-width:900px){
+  section[class*="astro-"]{padding:16vh 22px 60vh}
+}
 </style>
 <meta name="robots" content="noindex, nofollow">
 
