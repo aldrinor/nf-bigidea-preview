@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C-POLAR</title>
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Public libraries, loaded from a CDN. three.js and its loaders are MIT;
+     GSAP 3.13 and ScrollTrigger are free at this version; Lenis is MIT. -->
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+@font-face{font-family:"Space Grotesk";src:url(./assets/SpaceGrotesk-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Space Grotesk";src:url(./assets/SpaceGrotesk-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
+
+:root{
+  --ink:#2d628c; --ink-strong:#12405f; --ink-soft:#4d7ea6;
+  --paper:#eef2f5; --rule:rgba(45,98,140,.28); --rule-soft:rgba(45,98,140,.14);
+  --gut:20px; --col:1376px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  background:var(--paper); color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
+.veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(238,242,245,.30) 0%,rgba(238,242,245,0) 30%,rgba(238,242,245,.18) 72%,rgba(238,242,245,.80) 100%)}
+.wrap{position:relative;z-index:2}
+
+header{position:fixed;top:0;left:0;right:0;height:82px;z-index:5;display:flex;align-items:center}
+.shell{width:100%;max-width:var(--col);margin:0 auto;padding:0 40px;
+  display:grid;grid-template-columns:repeat(24,1fr);gap:var(--gut);align-items:center}
+nav{grid-column:2 / span 12;display:flex;gap:30px}
+nav a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.01em;
+  padding-bottom:6px;border-bottom:1.5px solid transparent}
+nav a.on{border-bottom-color:var(--ink)}
+nav a:hover{color:var(--ink-strong)}
+.menu{grid-column:21 / span 4;justify-self:end;font-size:14px;font-weight:700;color:var(--ink)}
+
+section.stop{min-height:100vh;display:flex;align-items:center}
+.col{grid-column:2 / span 12}
+
+.mark{display:flex;align-items:center;gap:0;margin-bottom:26px}
+.mark img{height:56px;width:auto}
+h1{font-size:0;line-height:0;height:0;overflow:hidden}
+.lede{font-size:19px;line-height:1.62;max-width:600px;color:var(--ink);font-weight:400}
+.lede strong{font-weight:700;color:var(--ink-strong)}
+
+.apps{margin-top:44px}
+.apps-label{display:block;font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:14px}
+.apps ul{display:flex;flex-wrap:wrap;gap:10px;list-style:none}
+.apps a{display:block;padding:15px 26px;border:1px solid var(--rule);color:var(--ink);
+  text-decoration:none;font-size:14px;font-weight:700;transition:border-color .25s,background .25s}
+.apps a:hover{border-color:var(--ink);background:rgba(45,98,140,.06)}
+
+.cue{position:fixed;left:0;right:0;bottom:38px;z-index:5;font-size:13px;font-weight:700;color:var(--ink-soft)}
+.cue span{display:block;max-width:var(--col);margin:0 auto;padding:0 40px}
+.cue span i{display:inline-block;font-style:normal;margin-left:calc((100% - 80px) / 24 + var(--gut))}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:repeat(6,1fr);padding:0 22px}
+  nav{grid-column:1 / span 6;gap:18px;font-size:13px;overflow-x:auto}
+  .menu{display:none}
+  .col{grid-column:1 / span 6}
+  .mark img{height:42px}
+  .lede{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+<div class="veil"></div>
+
+<header>
+  <div class="shell">
+    <nav>
+      <a href="#about" class="on">About</a>
+      <a href="#tech">Technology</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#testimonial">Testimonial</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="menu">Menu</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="stop" id="about">
+    <div class="shell">
+      <div class="col">
+        <div class="mark"><img src="./assets/cpolar.png" alt="C-POLAR"></div>
+        <h1>C-POLAR</h1>
+        <p class="lede">
+          C-POLAR is a health science company. Our patented <strong>NanoFlashing</strong> is a
+          <strong>permanent positive polarity (3P)</strong> engineered into each of our five
+          verticals. It <strong>attracts and captures</strong> ultrafine particles, wildfire
+          smoke, PFAS and pollen &mdash; and <strong>destroys up to 99%</strong> of a
+          broad-spectrum of viruses, bacteria and fungal spores through a
+          <strong>physical mechanism</strong>.
+        </p>
+        <div class="apps">
+          <span class="apps-label">5 Applications</span>
+          <ul>
+            <li><a href="#air">Air</a></li>
+            <li><a href="#water">Water</a></li>
+            <li><a href="#textiles">Textiles</a></li>
+            <li><a href="#packaging">Food Packaging</a></li>
+            <li><a href="#medical">Medical Devices</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="cue"><span><i>Scroll down</i></span></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0xeef2f5, 0.0013);
+
+const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 1, 4000);
+camera.position.set(-40, 46, 322);
+camera.lookAt(46, 34, -40);
+
+// light: one raking key from the left, cool sky fill, warm bounce off the valley
+scene.add(new THREE.HemisphereLight(0xdfe9f2, 0x9fb2c4, 1.15));
+const key = new THREE.DirectionalLight(0xffffff, 1.5);
+key.position.set(-260, 300, 210);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xbcd2e6, 0.5);
+rim.position.set(300, 120, -260);
+scene.add(rim);
+
+const tex = new THREE.TextureLoader();
+const load = (p, srgb) => {
+  const t = tex.load(p);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(7, 7);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+};
+
+let terrain = null;
+new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
+  g.scene.traverse((o) => {
+    if (!o.isMesh) return;
+    o.material = new THREE.MeshStandardMaterial({
+      map: load('./assets/rock_diffuse.webp', true),
+      normalMap: load('./assets/rock_normal.webp', false),
+      normalScale: new THREE.Vector2(1.15, 1.15),
+      roughness: 0.88, metalness: 0.0,
+      color: 0xdfe7ef
+    });
+    o.geometry.computeVertexNormals();
+  });
+  terrain = g.scene;
+  scene.add(terrain);
+});
+
+// a few soft cloud bands drifting across, drawn as gradient planes
+const clouds = new THREE.Group();
+for (let i = 0; i < 5; i++) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d');
+  const gr = x.createRadialGradient(128,128,10,128,128,128);
+  gr.addColorStop(0,'rgba(255,255,255,.92)'); gr.addColorStop(.55,'rgba(246,250,253,.42)');
+  gr.addColorStop(1,'rgba(238,242,245,0)');
+  x.fillStyle = gr; x.fillRect(0,0,256,256);
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(560, 190),
+    new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(c), transparent:true, depthWrite:false, opacity:.85 })
+  );
+  m.position.set(-300 + i*160, -46 + i*9, 60 + i*52);
+  m.userData.drift = 0.05 + i*0.02;
+  clouds.add(m);
+}
+scene.add(clouds);
+
+// smooth scroll + the page rail
+const lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+gsap.registerPlugin(ScrollTrigger);
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((t) => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
+
+// the copy arrives staged, headline first then the paragraph
+gsap.from('.mark', { y: 26, opacity: 0, duration: .9, ease: 'power3.out', delay: .25 });
+gsap.from('.lede', { y: 22, opacity: 0, duration: .9, ease: 'power3.out', delay: .42 });
+gsap.from('.apps', { y: 18, opacity: 0, duration: .9, ease: 'power3.out', delay: .58 });
+
+let sy = 0;
+lenis.on('scroll', (e) => { sy = e.scroll; });
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+const clock = new THREE.Clock();
+(function frame(){
+  requestAnimationFrame(frame);
+  const t = clock.getElapsedTime();
+  if (terrain) {
+    terrain.rotation.y = 0.06 + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
+    terrain.position.y = -sy * 0.05;
+  }
+  clouds.children.forEach((c,i) => { c.position.x += c.userData.drift * 0.22; if (c.position.x > 420) c.position.x = -420; });
+  camera.position.y = 46 + Math.sin(t * 0.06) * 1.6;
+  camera.lookAt(46, 34 - sy * 0.012, -40);
+  renderer.render(scene, camera);
+})();
+
+// harness hook: ?p= pins the scroll for a screenshot
+const p = new URLSearchParams(location.search).get('p');
+if (p !== null) { lenis.destroy(); sy = parseFloat(p) * innerHeight; }
+</script>
+</body>
+</html>
