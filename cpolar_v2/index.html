@@ -46,17 +46,20 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    instead of on the page - and the far shoulder over there was the one place the mesh
    still showed a long straight ramp. Both problems end at the same gradient. */
 .veil-x{position:fixed;inset:0;z-index:1;pointer-events:none;
-  /* Holding full opacity to 51% and then dropping to .34 by 60% draws a hard vertical
-     line at x=734: the eye reads the boundary between fully-hidden and partly-visible
-     as an edge however smooth the maths is. The ramp starts much earlier now. It costs
-     nothing to start it early - the mountain's own left edge is around x=750, so from
-     35% to 50% there is no terrain there to reveal. Zero lands at x=1008 and the summit
-     is at x=1035, so not one pixel of this touches the peak. */
-  background:linear-gradient(90deg,rgba(238,242,245,1) 0%,rgba(238,242,245,1) 35%,
-    rgba(238,242,245,.85) 45%,rgba(238,242,245,.45) 54%,
-    rgba(238,242,245,.15) 62%,rgba(238,242,245,0) 70%)}
-@media (max-width:900px){ .veil-x{background:linear-gradient(90deg,
-    rgba(238,242,245,.92) 0%,rgba(238,242,245,.55) 40%,rgba(238,242,245,0) 78%)} }
+  /* Measured with the haze switched off: behind the paragraph the terrain sits 22
+     levels below the page, which is nothing; behind the button row 69; and behind the
+     scroll cue 154, which is far too dark to read over. So haze IS needed - but only
+     in the lower left, and the previous version applied it as a full-height vertical
+     band that was picked out three separate times as a fog band or an opacity mask.
+     Radial, centred on the lower left, so it has no straight edge and no band: it is
+     strongest exactly where the terrain is darkest and gone by the time it reaches
+     the peak. */
+  background:radial-gradient(125% 100% at 20% 80%,
+    rgba(238,242,245,1) 0%, rgba(238,242,245,.94) 30%,
+    rgba(238,242,245,.62) 50%, rgba(238,242,245,.24) 68%,
+    rgba(238,242,245,0) 86%)}
+@media (max-width:900px){ .veil-x{background:radial-gradient(150% 110% at 30% 78%,
+    rgba(238,242,245,1) 0%,rgba(238,242,245,.72) 45%,rgba(238,242,245,0) 85%)} }
 .wrap{position:relative;z-index:2}
 
 header{position:fixed;top:0;left:0;right:0;height:82px;z-index:5;display:flex;align-items:center}
@@ -80,10 +83,10 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
 
 .apps{margin-top:44px}
 .apps-label{display:block;font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:14px}
-.apps ul{display:flex;flex-wrap:wrap;gap:10px;list-style:none}
-.apps a{display:block;padding:15px 26px;border:1px solid var(--rule);color:var(--ink);
-  text-decoration:none;font-size:14px;font-weight:700;transition:border-color .25s,background .25s}
-.apps a:hover{border-color:var(--ink);background:rgba(45,98,140,.06)}
+.apps ul{display:flex;flex-wrap:wrap;gap:0;max-width:600px;list-style:none}
+.apps a{display:block;padding:0 0 8px;border-bottom:1px solid var(--rule);margin-right:34px;
+  color:var(--ink);text-decoration:none;font-size:14px;font-weight:400;transition:color .25s,border-color .25s}
+.apps a:hover{color:var(--ink-strong);border-bottom-color:var(--ink)}
 
 .cue{position:fixed;left:0;right:0;bottom:38px;z-index:5;font-size:13px;font-weight:700;color:var(--ink-soft)}
 .cue span{display:block;max-width:var(--col);margin:0 auto;padding:0 40px}
@@ -104,7 +107,7 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
 
 <canvas id="scene"></canvas>
 <div class="veil"></div>
-<div class="veil-x"></div>
+<div class="veil-x" id="vx"></div>
 
 <header>
   <div class="shell">
@@ -451,6 +454,15 @@ BANKS.forEach(b => {
 // ?clouds=0 hides them, so their real contribution can be MEASURED rather than argued
 // about. "I cannot see any cloud" is a testable claim and this is how it gets tested.
 clouds.visible = _q.get('clouds') !== '0';
+// ?veil=0 strips the CSS haze, so the mountain's TRUE silhouette can be measured
+// instead of argued about. The veil has been called a vertical fog band three times;
+// the honest fix is to place the mountain so it does not need one, and that starts
+// with knowing where its left edge actually falls.
+if (_q.get('veil') === '0') { document.querySelectorAll('.veil,.veil-x').forEach(e => e.style.display='none'); }
+// ?bare=1 also hides all the page furniture, so a measurement of the silhouette sees
+// the terrain and nothing else. Measuring it with the copy still on screen just finds
+// the copy - dark text on pale ground looks exactly like a mountain to a threshold.
+if (_q.get('bare') === '1') { document.querySelectorAll('header,.wrap,.cue').forEach(e => e.style.display='none'); }
 scene.add(clouds);
 
 // smooth scroll + the page rail
