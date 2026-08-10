@@ -491,9 +491,25 @@ void main(){
   a *= smoothstep(0.0, 0.16, uv.x) * smoothstep(1.0, 0.84, uv.x);
   a *= smoothstep(0.0, 0.10, uv.y) * smoothstep(1.0, 0.90, uv.y);
 
-  // pale underneath, bright on top, mixed by where we are inside the mass
-  float lift = smoothstep(uTop - 0.30, uTop, y);
+  // Measured against V1's cloud, cropped and magnified: its tonal range is 133 - pure
+  // white at 255 down to deep grey at 104. Mine was 33, sitting in a narrow band with no
+  // white and no shadow anywhere, which is why it read as a flat veil rather than as
+  // cloud. The range is what gives cloud its punch, not the amount of it.
+  //
+  // Two things were missing. The mix ran over too short a span, so nothing reached
+  // either end; and the alpha was gently semi-transparent EVERYWHERE, so no part of the
+  // frame was ever solid cloud or ever clear sky. Both are decisive now.
+  float lift = smoothstep(uTop - 0.62, uTop + 0.06, y);
+  lift = lift * lift * (3.0 - 2.0 * lift);
   vec3 col = mix(uPale, uBright, lift);
+
+  // push the alpha toward solid or toward clear, away from the everywhere-half-there
+  a = smoothstep(0.04, 0.55, a) * uOpacity;
+  // uOpacity is applied HERE, in the alpha, and the material itself is left fully
+  // opaque. It used to be the material's opacity, capped at 0.18 to 0.30 per layer -
+  // which meant no pixel anywhere could ever be more than a third cloud however solid
+  // the shader said it was. The white tops and the dark undersides were unreachable by
+  // construction, and that is why the tonal range would not move whatever I did to it.
 
   gl_FragColor = vec4(col, a * uOpacity);
   #include <colorspace_fragment>
@@ -515,14 +531,18 @@ void main(){
 //
 // And the cloud only occupied the bottom third. In the reference it is everywhere, with
 // peaks coming through it. These now run from the foot of the mountain to well above it.
+// Now that a layer can actually reach solid, the mass has to sit LOW. At the previous
+// heights the same density that finally produced white tops and dark undersides also
+// closed over the peak. The tops step down toward the camera so the near cloud is the
+// lowest, which is what makes a sea you are looking across rather than a lid.
 const CLOUD_LAYERS = [
-  { w: 6000, band: 1.20, x:  120, y:  74, z: -980, top: .70, soft: .11, o: .26, spd: 1.6 },
-  { w: 5000, band: 1.14, x: -300, y:  46, z: -820, top: .66, soft: .11, o: .28, spd: 2.0 },
-  { w: 4200, band: 1.06, x:  200, y:  18, z: -560, top: .62, soft: .11, o: .30, spd: 2.5 },
-  { w: 3600, band: .98, x: -260, y:  -6, z: -300, top: .58, soft: .11, o: .30, spd: 3.0 },
-  { w: 2600, band: .84, x:  140, y: -26, z:  -60, top: .54, soft: .11, o: .28, spd: 3.6 },
-  { w: 2000, band: .70, x: -140, y: -44, z:  140, top: .50, soft: .11, o: .24, spd: 4.2 },
-  { w: 1600, band: .56, x:  180, y: -58, z:  270, top: .46, soft: .11, o: .18, spd: 5.0 },
+  { w: 6000, band: 1.10, x:  120, y: -22, z: -980, top: .52, soft: .11, o: .16, spd: 1.6 },
+  { w: 5000, band: 1.00, x: -300, y: -34, z: -820, top: .48, soft: .11, o: .18, spd: 2.0 },
+  { w: 4200, band: .92, x:  200, y: -46, z: -560, top: .44, soft: .11, o: .21, spd: 2.5 },
+  { w: 3600, band: .84, x: -260, y: -58, z: -300, top: .40, soft: .11, o: .23, spd: 3.0 },
+  { w: 2600, band: .72, x:  140, y: -70, z:  -60, top: .36, soft: .11, o: .24, spd: 3.6 },
+  { w: 2000, band: .60, x: -140, y: -82, z:  140, top: .32, soft: .11, o: .22, spd: 4.2 },
+  { w: 1600, band: .48, x:  180, y: -94, z:  270, top: .28, soft: .11, o: .18, spd: 5.0 },
 ];
 
 const clouds = new THREE.Group();
@@ -534,18 +554,19 @@ CLOUD_LAYERS.forEach((L, i) => {
     new THREE.ShaderMaterial({
       vertexShader: CLOUD_VERT, fragmentShader: CLOUD_FRAG,
       transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+      opacity: 1.0,
       uniforms: {
         uTime:{value:0}, uSeed:{value:i * 17.3}, uTop:{value:L.top},
         uMouse:{value:new THREE.Vector2(0.5, 0.5)},
         uDepth:{value: 0.10 + 0.90 * (i / (CLOUD_LAYERS.length - 1))},
         uSoft:{value:L.soft * (0.55 + 0.85 * L.band)},
-        uOpacity:{value:L.o},
+        uOpacity:{value: Math.min(1, L.o * 2.9)},
         // 0x9db9dc gave the cloud enough internal contrast for its motion to read, and turned
       // the bottom of the frame into a saturated blue band. Contrast comes from the
       // spread between these two, not from how strong the colour is - so the pale end
       // goes back toward grey while the gap stays wide.
-      uPale:  {value:new THREE.Color(0xb4c8de)},
-        uBright:{value:new THREE.Color(0xffffff)},
+      uPale:  {value:new THREE.Color(0x71839a)},   // deep shaded underside, ~125
+        uBright:{value:new THREE.Color(0xffffff)},   // and a top that reaches 255
       },
     })
   );
