@@ -18,7 +18,7 @@
 
 .cp-hero .cp-intro {
   margin: 0;
-  font-family: "Century Gothic", "Space Grotesk", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.62;
   font-weight: 400;
@@ -37,7 +37,7 @@
   gap: 9px 20px;
 }
 .cp-hero .cp-apps li {
-  font-family: "Century Gothic", "Space Mono", monospace;
+  font-family: "Space Mono", "Space Grotesk", monospace;
   font-size: 12px;
   letter-spacing: 0.9px;
   color: #2d628c;
@@ -71,7 +71,7 @@
 .cp-room-sub {
   margin: 22px 0 0;
   max-width: 30ch;
-  font-family: "Century Gothic", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 17px;
   line-height: 1.6;
   color: #2d628c;
@@ -94,7 +94,7 @@
 .cp-hero .cp-apps { margin: 34px 0 0; padding: 0; border: 0; display: block; }
 .cp-apps-label {
   margin: 0 0 14px;
-  font-family: "Century Gothic", "Space Mono", monospace;
+  font-family: "Space Mono", "Space Grotesk", monospace;
   font-size: 11px;
   letter-spacing: 1.5px;
   color: #2d628c;
@@ -110,7 +110,7 @@
 .cp-apps-row li:last-child { border-right: 0; }
 .cp-apps-row a {
   display: block; padding: 13px 10px 0 0;
-  font-family: "Century Gothic", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 12.5px; line-height: 1.35; letter-spacing: .2px;
   color: #2d628c; text-decoration: none; text-transform: none;
   transition: opacity .25s ease;
@@ -157,7 +157,7 @@
   text-align: center;
   min-height: 62px; padding: 10px 9px;
   border: 1px solid rgba(45,98,140,.34);
-  font-family: "Century Gothic", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 14px; line-height: 1.32; letter-spacing: .2px;
   color: #2d628c; text-decoration: none; text-transform: none;
   transition: background .25s ease, border-color .25s ease;
@@ -363,7 +363,7 @@ header[data-astro-cid-4wsjtibl].top nav[data-astro-cid-4wsjtibl]::before {
 }
 .cp-scope-card {
   margin-top: 20px; text-align: center;
-  font-family: "Century Gothic", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
 }
 .cp-scope-card b {
   display: block; font-size: 17px; font-weight: 700; color: #12405f; letter-spacing: .2px;
@@ -530,7 +530,7 @@ header[data-astro-cid-4wsjtibl].top nav[data-astro-cid-4wsjtibl]::before {
   min-height: 50px; padding: 7px 6px;
   border: 1.5px solid rgba(45,98,140,.45);
   background: rgba(255,255,255,.50);
-  font-family: "Century Gothic", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 12.5px; font-weight: 700; line-height: 1.28; color: #12405f;
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Cpath d='M15 3v24M3 15h24' stroke='%232d628c' stroke-width='3.4' stroke-linecap='square'/%3E%3C/svg%3E") 15 15, crosshair;
   transition: none;
@@ -700,7 +700,7 @@ footer { display: none !important; }
 .cp-app-mark {
   display: flex; align-items: center; gap: 12px;
   margin: 0 0 22px;
-  font-family: "Century Gothic", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 14px; letter-spacing: .9px; font-weight: 700;
   color: #12405f; text-transform: none;
 }
@@ -710,7 +710,7 @@ footer { display: none !important; }
 }
 .cp-app-title {
   margin: 0 0 20px;
-  font-family: "Century Gothic", "Space Grotesk", system-ui, sans-serif;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   font-size: 50px; line-height: 1.14; font-weight: 400;
   letter-spacing: -.3px; color: #12405f; text-transform: none;
 }

@@ -52,12 +52,12 @@
                                        application text block. */
 
   /* --- type ---------------------------------------------------------------
-     Two stacks only. Century Gothic is the reference site's face and is what
+     Two stacks only. Space Grotesk (SIL Open Font Licence) is the face and is what
      the page actually renders in; the others are fallbacks. */
 
-  --font:      "Century Gothic", system-ui, sans-serif;
-  --font-alt:  "Century Gothic", "Space Grotesk", system-ui, sans-serif;
-  --font-mono: "Century Gothic", "Space Mono", monospace;
+  --font:      "Space Grotesk", system-ui, sans-serif;
+  --font-alt:  "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Space Mono", "Space Grotesk", monospace;
 
   /* the sizes actually in use, smallest to largest */
   --t-label:     12.5px;  /* small caps-style labels (never actual caps)     */
