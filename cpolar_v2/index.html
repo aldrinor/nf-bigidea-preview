@@ -364,39 +364,41 @@ vec3 triBlend(vec3 n){
   scene.add(terrain);
 
   // A RANGE, not one hill.
-  // Stacked side by side against the reference and against V1, the difference was not
-  // colour and it was not texture - both of those fill the frame with several peaks at
-  // several distances, seen through cloud, and this had a single object sitting in an
-  // empty field. One mountain alone reads as a prop; peaks behind peaks read as land.
+  // Stacked against the reference and against V1, the difference was never colour or
+  // texture: both of those fill the frame with several peaks at several distances seen
+  // through cloud, and this had one object in an empty field, which reads as a prop.
   //
-  // Same mesh, turned to a different face, scaled and pushed back so each one is a
-  // different mountain at a different distance. They cost nothing to load and the fog
-  // does most of the work of separating them.
-  // Placed by arithmetic, not by feel. The fog ends at 1400 and the camera sits at
-  // z=372, so anything past z=-1030 is fully fogged and invisible; and the frame is only
-  // about 640 world units wide at that depth, so x has to stay between roughly -450 and
-  // +250 or the peak is simply off the side. The first attempt broke both rules and
-  // added four mountains nobody could see.
+  // These load a LOW-RESOLUTION copy of the same mountain. Eight clones of the full one
+  // came to 1.4 million triangles and the page could no longer render a frame in time.
+  // A peak 700 units away behind fog does not need 90,000 vertices.
+  //
+  // Placed by arithmetic. At depth d the frame is 0.918*d wide and its centre in x is
+  // -244 + (d/430)*124, so each band has a known window: -338..168 at z=-180,
+  // -379..347 at z=-420, -427..557 at z=-700. Placing them by feel put four mountains
+  // outside the frame and beyond the fog, where not one of them could be seen.
   const RANGE = [
-    // near band, z=-180: the frame runs x -338..168 out here
     { rot: 1.30, sx: 1.45, sy: 0.72, x: -300, y: -28, z: -180 },
     { rot: 5.05, sx: 1.15, sy: 0.60, x:  -95, y: -34, z: -180 },
-    // middle band, z=-420: x -379..347
     { rot: 3.90, sx: 1.55, sy: 0.66, x: -340, y: -32, z: -420 },
     { rot: 0.55, sx: 1.30, sy: 0.54, x: -140, y: -38, z: -420 },
     { rot: 2.15, sx: 1.40, sy: 0.58, x:  145, y: -34, z: -420 },
-    // far band, z=-700: x -427..557, and the fog is doing most of the work here
     { rot: 4.80, sx: 1.85, sy: 0.62, x: -370, y: -34, z: -700 },
     { rot: 1.85, sx: 1.60, sy: 0.50, x:  -70, y: -40, z: -700 },
     { rot: 3.30, sx: 1.70, sy: 0.56, x:  270, y: -36, z: -700 },
   ];
-  RANGE.forEach((r) => {
-    const c = terrain.clone(true);
-    c.rotation.y = r.rot;
-    c.scale.set(r.sx, r.sy, r.sx);
-    c.position.set(r.x, r.y, r.z);
-    c.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
-    scene.add(c);
+  new GLTFLoader().load('./assets/banff_terrain_far.glb', (far) => {
+    const mat = new THREE.MeshStandardMaterial({
+      map: alb, normalMap: nrm, normalScale: new THREE.Vector2(0.6, 0.6),
+      roughness: 1.0, metalness: 0.0
+    });
+    far.scene.traverse(o => { if (o.isMesh) { o.material = mat; o.geometry.computeVertexNormals(); } });
+    RANGE.forEach((r) => {
+      const c = far.scene.clone(true);
+      c.rotation.y = r.rot;
+      c.scale.set(r.sx, r.sy, r.sx);
+      c.position.set(r.x, r.y, r.z);
+      scene.add(c);
+    });
   });
 });
 
