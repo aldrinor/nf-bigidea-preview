@@ -142,11 +142,11 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xdde5ee, 240, 1150);
+scene.fog = new THREE.Fog(0xdde6ef, 330, 720);
 
 const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 1, 4000);
-camera.position.set(-52, 52, 336);
-camera.lookAt(58, 30, -45);
+camera.position.set(-96, 44, 430);
+camera.lookAt(74, 20, -50);
 
 // light: one raking key from the left, cool sky fill, warm bounce off the valley
 scene.add(new THREE.HemisphereLight(0xf4f8fb, 0x8fa6ba, 1.05));
@@ -182,24 +182,35 @@ new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
 // drifting across in FRONT of it, so the mountain sits inside weather rather than
 // on top of a flat ground.
 function cloudTex(soft){
-  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+  const W = 512, H = 256;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d');
+  // blobs kept well inside the canvas, so nothing is cut off at the border
   for (let i = 0; i < 26; i++) {
-    const cxp = Math.random()*512, cyp = 128 + (Math.random()-0.5)*90;
-    const r = 40 + Math.random()*95;
+    const cxp = 80 + Math.random()*(W-160), cyp = H/2 + (Math.random()-0.5)*70;
+    const r = 40 + Math.random()*90;
     const gr = x.createRadialGradient(cxp,cyp,0,cxp,cyp,r);
     gr.addColorStop(0, 'rgba(255,255,255,'+(soft?0.11:0.20)+')');
     gr.addColorStop(1, 'rgba(255,255,255,0)');
     x.fillStyle = gr; x.beginPath(); x.arc(cxp,cyp,r,0,7); x.fill();
   }
+  // then punch the alpha to zero at every edge, so the plane has no visible rectangle
+  const img = x.getImageData(0,0,W,H), d = img.data;
+  for (let py=0; py<H; py++) for (let px=0; px<W; px++) {
+    const fx = Math.min(px, W-1-px) / (W*0.22), fy = Math.min(py, H-1-py) / (H*0.30);
+    const f = Math.min(1, fx) * Math.min(1, fy);
+    d[(py*W+px)*4+3] *= f*f*(3-2*f);
+  }
+  x.putImageData(img,0,0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 const clouds = new THREE.Group();
 const BANKS = [
   {w:1500,h:420, x:-40, y:-52, z:-330, o:.85, d:.020, soft:false},
   {w:1250,h:360, x: 90, y:-30, z:-140, o:.70, d:.030, soft:false},
-  {w:1150,h:250, x:-60, y:-74, z:  90, o:.42, d:.045, soft:true },
-  {w:1500,h:260, x: 60, y:-96, z: 250, o:.55, d:.062, soft:true },
+  {w:1800,h:280, x:-60, y:-92, z:  30, o:.50, d:.045, soft:true },
+  {w:2600,h:420, x: 60, y:-104, z: 210, o:.92, d:.052, soft:true },
+  {w:2200,h:300, x:-120, y:-84, z: 130, o:.68, d:.038, soft:true },
 ];
 BANKS.forEach(b => {
   const m = new THREE.Mesh(
@@ -240,8 +251,8 @@ const clock = new THREE.Clock();
     terrain.position.y = -sy * 0.05;
   }
   clouds.children.forEach(c => { c.position.x += c.userData.d; if (c.position.x > c.userData.x0 + 700) c.position.x = c.userData.x0 - 700; });
-  camera.position.y = 52 + Math.sin(t * 0.06) * 1.6;
-  camera.lookAt(58, 30 - sy * 0.012, -45);
+  camera.position.y = 44 + Math.sin(t * 0.06) * 1.4;
+  camera.lookAt(74, 20 - sy * 0.012, -50);
   renderer.render(scene, camera);
 })();
 
