@@ -368,128 +368,115 @@ vec3 triBlend(vec3 n){
 // The terrain now reaches 1400 units in every direction, past the far end of the fog,
 // so there is no edge to hide and the plane was only flattening the distance.
 
-// Cloud is what gives the frame depth: banks behind the peak, and one soft bank
-// drifting across in FRONT of it, so the mountain sits inside weather rather than
-// on top of a flat ground.
-function cloudTex(soft, seed){
-  // Big billowing masses, not a scatter of little puffs. The original's cloud has
-  // structure you can read - a bright shoulder on top, a heavier shaded underside,
-  // and lumps at more than one size. Twenty-six small blobs of the same radius gave a
-  // smooth even fog, which is the thing a flat CSS gradient also gives, and neither
-  // reads as weather.
-  const W = 1024, H = 512;
-  const c = document.createElement('canvas'); c.width = W; c.height = H;
-  const x = c.getContext('2d');
-  let r0 = seed * 9301 + 49297;
-  const rnd = () => { r0 = (r0 * 9301 + 49297) % 233280; return r0 / 233280; };
+// ?veil=0 strips the CSS haze and ?bare=1 hides all the page furniture, so the
+// mountain's TRUE silhouette can be measured rather than argued about.
+if (_q.get('veil') === '0') { document.querySelectorAll('.veil,.veil-x').forEach(e => e.style.display='none'); }
+if (_q.get('bare') === '1') { document.querySelectorAll('header,.wrap,.cue').forEach(e => e.style.display='none'); }
 
-  // three passes, coarse to fine, so the mass has lumps within lumps
-  const passes = [ {n: 7,  rmin: 190, rmax: 300, a: soft ? 0.20 : 0.30, spread: 0.42},
-                   {n: 14, rmin: 110, rmax: 190, a: soft ? 0.16 : 0.24, spread: 0.52},
-                   {n: 26, rmin:  46, rmax: 108, a: soft ? 0.11 : 0.17, spread: 0.60} ];
-  for (const p of passes) {
-    for (let i = 0; i < p.n; i++) {
-      const cxp = W * 0.5 + (rnd() - 0.5) * W * p.spread;
-      const cyp = H * 0.52 + (rnd() - 0.5) * H * p.spread * 0.72;
-      const r = p.rmin + rnd() * (p.rmax - p.rmin);
-      // lit from above: the top of a billow is pale, the underside carries the blue
-      const lift = 1 - Math.min(1, Math.max(0, (cyp - (H * 0.30)) / (H * 0.44)));
-      const cr = Math.round(196 + 46 * lift);
-      const cg = Math.round(209 + 40 * lift);
-      const cb = Math.round(223 + 30 * lift);
-      const gr = x.createRadialGradient(cxp, cyp - r * 0.18, r * 0.10, cxp, cyp, r);
-      gr.addColorStop(0,    'rgba(' + cr + ',' + cg + ',' + cb + ',' + p.a + ')');
-      gr.addColorStop(0.55, 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (p.a * 0.55) + ')');
-      gr.addColorStop(1,    'rgba(' + cr + ',' + cg + ',' + cb + ',0)');
-      x.fillStyle = gr; x.beginPath(); x.arc(cxp, cyp, r, 0, 7); x.fill();
-    }
-  }
-  // elliptical falloff, so the plane never shows a straight edge at any softness
-  const img = x.getImageData(0, 0, W, H), d = img.data;
-  for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) {
-    const ex = (px / (W - 1) - 0.5) * 2, ey = (py / (H - 1) - 0.5) * 2;
-    // A bank 3200 wide and a couple of hundred tall is a very flat ellipse, and the top
-    // of a very flat ellipse is a long almost-straight line - which duly appeared as a
-    // horizontal edge across the lower left. Wobbling the radius breaks it, and a much
-    // longer falloff stops it having a definite boundary at all.
-    const wob = 0.10 * Math.sin(ex * 5.1 + 1.7) + 0.07 * Math.sin(ex * 11.3 - 0.6)
-              + 0.05 * Math.sin(ex * 23.7 + 2.9);
-    const rr = Math.sqrt(ex * ex + ey * ey * 0.62) + wob * (0.5 + 0.5 * ey);
-    let f = 1 - Math.min(1, Math.max(0, (rr - 0.10) / 0.90));
-    f = f * f * (3 - 2 * f);
-    d[(py * W + px) * 4 + 3] *= f * f;
-  }
-  x.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+// ---------------------------------------------------------------------- the cloud
+// A cloud is a horizontal EDGE with weather pushing it about, not a pile of blobs.
+// Each panel draws one cloud top: a smoothstep across the panel whose height is shoved
+// up and down by three noise fields scrolling at different speeds. The slow one makes
+// the big billows, the fast one frays the rim.
+//
+// Depth testing is OFF. A cloud panel has to draw over the mountain rather than be
+// clipped by it - with depth testing on, everything at the height where cloud belongs
+// is behind the peak and simply never appears, which is why there seemed to be no
+// cloud at all no matter how much of it there was.
+const CLOUD_VERT = `
+varying vec2 vUv;
+void main(){
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
+const CLOUD_FRAG = `
+precision highp float;
+uniform float uTime, uSeed, uTop, uSoft, uOpacity;
+uniform vec3  uPale, uBright;
+varying vec2 vUv;
+
+// hashed value noise - no texture, so nothing to load and nothing to tile wrong
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+float vnoise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1,0)), u.x),
+             mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), u.x), u.y);
 }
-const clouds = new THREE.Group();
-// Every bank is a THIN horizontal band, not a tall sheet. The first attempt used
-// 430-tall planes 68 units from the camera; a plane that big that close simply fills
-// the screen and fogs the whole shot out. Nothing now sits closer than z=40, and the
-// alpha falloff in cloudTex eats the outer 30%, so h=160 draws a band about 100 tall.
-// Every bank is a THIN horizontal band. The terrain rim sits at y=-64, so the sea
-// bands straddle that line and there is nothing to see where the mesh stops.
-// A cloud plane is a billboard in world space, so how much of the SCREEN it covers
-// depends entirely on how far away it is. At z=240 a plane sits 230 units from this
-// camera, where the frame is only about 80 world units tall - so a 230-tall bank
-// covered the whole picture and buried the peak in fog. Sized against the distance:
-// the mountain's foot is roughly 285 away, where the frame is ~100 units tall and the
-// foot itself spans about 40 of them.
-// A SEA of cloud, which is what the original has: thick masses filling the lower third
-// and running up both sides, with the peak standing clear above them. The thin high
-// wisps that were here could never do that - they were sized to avoid washing out a
-// foreground that has now been given over to cloud on purpose.
-// `band` is how much of the FRAME HEIGHT this bank should cover, 0 to 1. The world
-// height is computed from that and its depth, below. `y` is still world height, because
-// where a bank sits vertically relative to the mountain is a real-world question.
-const BANKS = [
-  // far backdrop, giving the peak something to stand against
-  {w:3400, band:.62, x:  60, y: 26, z:-680, o:.40, d:-.010, soft:true },
-  {w:2800, band:.50, x:-180, y:  0, z:-430, o:.36, d: .014, soft:true },
+float fbm(vec2 p){
+  float v = 0.0, a = 0.5;
+  for (int k = 0; k < 5; k++){ v += a * vnoise(p); p *= 2.02; a *= 0.5; }
+  return v;
+}
 
-  // THE SEA. Layered from far to near so it has depth rather than being one sheet.
-  {w:3200, band:.34, x:  60, y:-58, z:-330, o:.62, d: .019, soft:false},
-  {w:2800, band:.30, x:-180, y:-50, z:-140, o:.70, d: .025, soft:false},
-  {w:2200, band:.26, x: 140, y:-42, z:  40, o:.72, d: .032, soft:false},
-  {w:1700, band:.22, x: -60, y:-34, z: 165, o:.60, d: .040, soft:false},
+void main(){
+  vec2 uv = vUv;
+  vec2 q  = uv * vec2(3.0, 1.0) + uSeed;
 
-  // masses climbing the flanks, which is what puts the peak ABOVE the weather
-  {w:1400, band:.20, x:-250, y:  4, z:  90, o:.46, d: .016, soft:true },
-  {w:1200, band:.16, x: 230, y: 18, z: 130, o:.40, d: .022, soft:true },
-  // one thin veil right in front, deliberately tiny because it is very close
-  {w: 900, band:.07, x: -20, y: 40, z: 305, o:.26, d: .048, soft:true },
+  // three scrolling fields shove the cloud top up and down: slow and broad, then
+  // quicker and finer, then a fast one that frays the rim
+  float y = uv.y;
+  y += 0.30 * (fbm(q * 0.55 + vec2(-0.020, -0.006) * uTime) - 0.5);
+  y -= 0.20 * (fbm(q * 1.30 + vec2( 0.034,  0.011) * uTime) - 0.5);
+  y += 0.09 * (fbm(q * 3.10 + vec2(-0.058,  0.004) * uTime) - 0.5);
+
+  // the cloud top itself, and a soft underside so the mass has a bottom
+  float top  = smoothstep(uTop + uSoft, uTop - uSoft, y);
+  float base = smoothstep(-0.05, 0.34, y);
+  float a = top * base;
+
+  // fade at every edge of the panel, so its rectangle can never show
+  a *= smoothstep(0.0, 0.16, uv.x) * smoothstep(1.0, 0.84, uv.x);
+  a *= smoothstep(0.0, 0.10, uv.y) * smoothstep(1.0, 0.90, uv.y);
+
+  // pale underneath, bright on top, mixed by where we are inside the mass
+  float lift = smoothstep(uTop - 0.30, uTop, y);
+  vec3 col = mix(uPale, uBright, lift);
+
+  gl_FragColor = vec4(col, a * uOpacity);
+  #include <colorspace_fragment>
+}`;
+
+// w and h are in WORLD units, but band is what actually matters: how much of the frame
+// this panel covers at its own depth. A panel near the camera is hugely magnified, and
+// sizing them by hand in world units buried the mountain three times running.
+// `top` is where inside the panel the cloud top sits, `band` is how much of the frame
+// the panel covers, `y` is where the panel sits in the world. Between them the cloud
+// top has to land near the mountain's FOOT - the first pass put it near the middle of
+// the peak and drowned everything below it.
+const CLOUD_LAYERS = [
+  { w: 3000, band: .80, x:  120, y: -34, z: -560, top: .58, soft: .15, o: .46, spd: .55 },
+  { w: 2600, band: .72, x: -180, y: -46, z: -300, top: .55, soft: .14, o: .54, spd: .75 },
+  { w: 2200, band: .62, x:   80, y: -56, z:  -60, top: .52, soft: .13, o: .64, spd: 1.00 },
+  { w: 1900, band: .52, x: -140, y: -62, z:  140, top: .48, soft: .12, o: .70, spd: 1.35 },
+  { w: 1500, band: .40, x:  160, y: -70, z:  270, top: .44, soft: .11, o: .56, spd: 1.80 },
 ];
-const FRAME_AT = (z) => {
-  // world height of the visible frame at depth z, for this camera and lens
-  const dist = Math.max(1, camera.position.z - z);
-  return 2 * dist * Math.tan(FOV * Math.PI / 360);
-};
-BANKS.forEach((b, i) => {
-  // The elliptical alpha falloff eats roughly the outer third, so the plane has to be
-  // built taller than the band it is meant to draw.
-  const h = FRAME_AT(b.z) * b.band / 0.66;
+
+const clouds = new THREE.Group();
+CLOUD_LAYERS.forEach((L, i) => {
+  const dist = Math.max(1, camera.position.z - L.z);
+  const frame = 2 * dist * Math.tan(FOV * Math.PI / 360);
   const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(b.w, h),
-    new THREE.MeshBasicMaterial({ map: cloudTex(b.soft, i + 1), transparent:true,
-                                  depthWrite:false, opacity:b.o })
+    new THREE.PlaneGeometry(L.w, frame * L.band),
+    new THREE.ShaderMaterial({
+      vertexShader: CLOUD_VERT, fragmentShader: CLOUD_FRAG,
+      transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+      uniforms: {
+        uTime:{value:0}, uSeed:{value:i * 17.3}, uTop:{value:L.top}, uSoft:{value:L.soft},
+        uOpacity:{value:L.o},
+        uPale:  {value:new THREE.Color(0xd2dae1)},
+        uBright:{value:new THREE.Color(0xf7fafc)},
+      },
+    })
   );
-  m.position.set(b.x, b.y, b.z); m.userData.d = b.d * 60 * 1.8; m.userData.x0 = b.x;
-  m.userData.ph = Math.random() * 6.283; m.userData.o = b.o;
+  m.position.set(L.x, L.y, L.z);
+  m.renderOrder = 10 + i;            // far layers first, so they stack correctly
+  m.userData.spd = L.spd;
   clouds.add(m);
 });
-// ?clouds=0 hides them, so their real contribution can be MEASURED rather than argued
-// about. "I cannot see any cloud" is a testable claim and this is how it gets tested.
-clouds.visible = _q.get('clouds') !== '0';
-// ?veil=0 strips the CSS haze, so the mountain's TRUE silhouette can be measured
-// instead of argued about. The veil has been called a vertical fog band three times;
-// the honest fix is to place the mountain so it does not need one, and that starts
-// with knowing where its left edge actually falls.
-if (_q.get('veil') === '0') { document.querySelectorAll('.veil,.veil-x').forEach(e => e.style.display='none'); }
-// ?bare=1 also hides all the page furniture, so a measurement of the silhouette sees
-// the terrain and nothing else. Measuring it with the copy still on screen just finds
-// the copy - dark text on pale ground looks exactly like a mountain to a threshold.
-if (_q.get('bare') === '1') { document.querySelectorAll('header,.wrap,.cue').forEach(e => e.style.display='none'); }
 scene.add(clouds);
+clouds.visible = _q.get('clouds') !== '0';
 
 // smooth scroll + the page rail
 const lenis = new Lenis({ duration: 1.15, smoothWheel: true });
@@ -524,15 +511,9 @@ let lastT = 0;
     terrain.rotation.y = ROT + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
     terrain.position.y = -sy * 0.05;
   }
-  // The drift used to advance once per FRAME, so it ran at double speed on a 120Hz
-  // screen and crawled when the tab dropped to 15fps. Per second now. The slow breathing
-  // of opacity stops six banks marching in step at one fixed brightness.
-  clouds.children.forEach(c => {
-    c.position.x += c.userData.d * dt;
-    if (c.position.x > c.userData.x0 + 700) c.position.x = c.userData.x0 - 700;
-    if (c.position.x < c.userData.x0 - 700) c.position.x = c.userData.x0 + 700;
-    c.material.opacity = c.userData.o * (0.72 + 0.28 * Math.sin(t * 0.045 + c.userData.ph));
-  });
+  // The cloud moves because its noise scrolls, not because a panel slides across, so
+  // there is nothing to wrap around and nothing to reset.
+  clouds.children.forEach(c => { c.material.uniforms.uTime.value = t * c.userData.spd; });
   camera.position.y = 26 + Math.sin(t * 0.06) * 1.2;
   camera.lookAt(AIM.x, AIM.y - sy * 0.012, AIM.z);
   renderer.render(scene, camera);
