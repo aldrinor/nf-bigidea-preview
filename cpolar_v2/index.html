@@ -158,19 +158,19 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const _q = new URLSearchParams(location.search);
-// 5.40 radians. Picked by rendering nine rotations and judging the OUTLINES only.
-// From here the mountain has a dominant peak, a real saddle and a distinct second
-// summit - the structure that was missing when it was one clean cone whose deepest
-// notch measured two pixels.
-const ROT = parseFloat(_q.get('rot') ?? '5.40');
+// 2.60 radians. Nine rotations were rendered and the judge picked 5.40 for having a
+// saddle and a second summit; Yin picked this one. His call stands - a clean single
+// spire with a long shoulder falling left is a quieter, more restrained shape, and
+// restraint is the whole brief.
+const ROT = parseFloat(_q.get('rot') ?? '2.60');
 // Placement picked the same way as the rotation: rendered as a sheet and judged, not
 // guessed. Aiming LEFT of the peak throws it right on screen, so -90 sets it decisively
 // on the right and leaves the whole left field clean for the copy.
-const AIMX = parseFloat(_q.get('aimx') ?? '-90');
+const AIMX = parseFloat(_q.get('aimx') ?? '-120');
 // A much shorter lens than the 20 it was on. The mass comes down, pale air opens up
 // around the silhouette - which is what an outline needs if it is to read as a shape -
 // and at 32 the right shoulder stops being clipped by the frame edge.
-const FOV = parseFloat(_q.get('fov') ?? '32');
+const FOV = parseFloat(_q.get('fov') ?? '30');
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
@@ -215,7 +215,13 @@ camera.lookAt(AIM);
 // hemisphere ground colour was doing the same job from below.
 scene.add(new THREE.HemisphereLight(0xf0f6fc, 0xb9c6d4, 0.34));
 const key = new THREE.DirectionalLight(0xfffdf6, 1.90);
-key.position.set(-470, 210, -60);
+// Turning the mountain moved it relative to the light, so a key that modelled the old
+// face beautifully lights this one flat. Azimuth is measured from screen-left and has
+// to STAY on the left - shadows must fall away from the copy, not across it.
+const KEYAZ = parseFloat(_q.get('keyaz') ?? '150');
+const KEYEL = parseFloat(_q.get('keyel') ?? '22');
+const kr = 520, ka = KEYAZ * Math.PI / 180, ke = KEYEL * Math.PI / 180;
+key.position.set(Math.cos(ka) * kr * Math.cos(ke), Math.sin(ke) * kr, Math.sin(ka) * kr * Math.cos(ke));
 // Worth switching on only now the key has moved; with the old position every shadow
 // fell behind the thing casting it. 2048 is sized to the mesh - one quad is 1.54 world
 // units, so this is about four shadow texels per quad. 4096 would double a per-frame
