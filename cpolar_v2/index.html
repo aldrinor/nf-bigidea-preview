@@ -430,7 +430,8 @@ void main(){
 
 const CLOUD_FRAG = `
 precision highp float;
-uniform float uTime, uSeed, uTop, uSoft, uOpacity;
+uniform float uTime, uSeed, uTop, uSoft, uOpacity, uDepth;
+uniform vec2 uMouse;
 uniform vec3  uPale, uBright;
 varying vec2 vUv;
 
@@ -454,6 +455,13 @@ void main(){
 
   // three scrolling fields shove the cloud top up and down: slow and broad, then
   // quicker and finer, then a fast one that frays the rim
+  // the pointer pushes the cloud away from itself, and nearer layers feel it more,
+  // which reads as air being disturbed rather than as a texture sliding
+  vec2 toM = uv - uMouse;
+  float grip = exp(-dot(toM, toM) * 7.0) * uDepth;
+  uv += normalize(toM + 1e-5) * grip * 0.10;
+  q  += normalize(toM + 1e-5) * grip * 0.30;
+
   float y = uv.y;
   // Measured on the live page: at a quarter of these rates the cloud sea moved 4.6
   // levels in fifteen seconds - real, and far too slow for anyone to notice. Cloud that
@@ -520,7 +528,9 @@ CLOUD_LAYERS.forEach((L, i) => {
       transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
       uniforms: {
         uTime:{value:0}, uSeed:{value:i * 17.3}, uTop:{value:L.top},
-      uSoft:{value:L.soft * (0.55 + 0.85 * L.band)},
+        uMouse:{value:new THREE.Vector2(0.5, 0.5)},
+        uDepth:{value: 0.10 + 0.90 * (i / (CLOUD_LAYERS.length - 1))},
+        uSoft:{value:L.soft * (0.55 + 0.85 * L.band)},
         uOpacity:{value:L.o},
         // 0x9db9dc gave the cloud enough internal contrast for its motion to read, and turned
       // the bottom of the frame into a saturated blue band. Contrast comes from the
@@ -561,6 +571,14 @@ addEventListener('resize', () => {
 
 const clock = new THREE.Clock();
 let lastT = 0;
+
+// Pointer, in 0..1 across the page, and a smoothed copy so nothing ever snaps. The
+// page ignored the pointer entirely, which measured as no response at all against V1.
+const mouse = { x: 0.5, y: 0.5, sx: 0.5, sy: 0.5 };
+addEventListener('pointermove', (e) => {
+  mouse.x = e.clientX / innerWidth;
+  mouse.y = 1 - e.clientY / innerHeight;
+}, { passive: true });
 (function frame(){
   requestAnimationFrame(frame);
   const t = clock.getElapsedTime();
@@ -570,13 +588,33 @@ let lastT = 0;
     // clean cone from the angle it was built at; other angles put a ridge and a col in
     // the outline. Swept rather than guessed at - see _sweep_angle.mjs.
     terrain.rotation.y = ROT + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
-    terrain.position.y = -sy * 0.05;
+    // (the terrain used to sink with the scroll to fake movement; the camera moves now)
   }
   // The cloud moves because its noise scrolls, not because a panel slides across, so
   // there is nothing to wrap around and nothing to reset.
   clouds.children.forEach(c => { c.material.uniforms.uTime.value = t * c.userData.spd; });
-  camera.position.y = 26 + Math.sin(t * 0.06) * 1.2;
-  camera.lookAt(AIM.x, AIM.y - sy * 0.012, AIM.z);
+  // How far through the first screen of scroll we are, eased.
+  const p = Math.min(1, sy / innerHeight);
+  const e = p * p * (3 - 2 * p);
+
+  mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt * 3.0);
+  mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt * 3.0);
+  const mx = (mouse.sx - 0.5), my = (mouse.sy - 0.5);
+  clouds.children.forEach(c => c.material.uniforms.uMouse.value.set(mouse.sx, mouse.sy));
+
+  // The camera TRAVELS. It used to sit still while the terrain sank by five per cent of
+  // the scroll, which is a picture shifting rather than a place being moved through.
+  // Forward, down and around: the mountain grows, swings past and is left above you.
+  camera.position.set(
+    -244 + e * 210 + mx * 26,
+     26  - e *  54 + Math.sin(t * 0.06) * 1.2 + my * 14,
+     372 - e * 300
+  );
+  camera.lookAt(
+    AIM.x + e * 96 + mx * 18,
+    AIM.y + e * 42 + my * 10,
+    AIM.z
+  );
   renderer.render(scene, camera);
 })();
 
