@@ -36,7 +36,7 @@ body{
 }
 canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
 .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(238,242,245,.30) 0%,rgba(238,242,245,0) 30%,rgba(238,242,245,.18) 72%,rgba(238,242,245,.80) 100%)}
+  background:linear-gradient(180deg,rgba(238,242,245,.30) 0%,rgba(238,242,245,0) 30%,rgba(238,242,245,.10) 74%,rgba(238,242,245,.55) 100%)}
 .wrap{position:relative;z-index:2}
 
 header{position:fixed;top:0;left:0;right:0;height:82px;z-index:5;display:flex;align-items:center}
@@ -138,66 +138,77 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true })
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0xeef2f5, 0.0013);
+scene.fog = new THREE.Fog(0xdde5ee, 240, 1150);
 
 const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 1, 4000);
-camera.position.set(-40, 46, 322);
-camera.lookAt(46, 34, -40);
+camera.position.set(-52, 52, 336);
+camera.lookAt(58, 30, -45);
 
 // light: one raking key from the left, cool sky fill, warm bounce off the valley
-scene.add(new THREE.HemisphereLight(0xdfe9f2, 0x9fb2c4, 1.15));
-const key = new THREE.DirectionalLight(0xffffff, 1.5);
-key.position.set(-260, 300, 210);
+scene.add(new THREE.HemisphereLight(0xf4f8fb, 0x8fa6ba, 1.05));
+const key = new THREE.DirectionalLight(0xfffdf8, 2.1);
+key.position.set(-330, 165, 240);
 scene.add(key);
-const rim = new THREE.DirectionalLight(0xbcd2e6, 0.5);
-rim.position.set(300, 120, -260);
+const rim = new THREE.DirectionalLight(0xa8c4dc, 0.75);
+rim.position.set(360, 90, -300);
 scene.add(rim);
 
 const tex = new THREE.TextureLoader();
-const load = (p, srgb) => {
-  const t = tex.load(p);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(7, 7);
-  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
-  return t;
-};
 
+// One colour map baked from this mountain: snow high and flat, rock on the steep
+// faces, ambient shading already in it. UV 0..1 across the mesh, so no tiling seam.
 let terrain = null;
 new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
+  const alb = tex.load('./assets/mountain_albedo.webp'); alb.colorSpace = THREE.SRGBColorSpace;
+  const nrm = tex.load('./assets/mountain_normal.webp');
   g.scene.traverse((o) => {
     if (!o.isMesh) return;
-    o.material = new THREE.MeshStandardMaterial({
-      map: load('./assets/rock_diffuse.webp', true),
-      normalMap: load('./assets/rock_normal.webp', false),
-      normalScale: new THREE.Vector2(1.15, 1.15),
-      roughness: 0.88, metalness: 0.0,
-      color: 0xdfe7ef
-    });
     o.geometry.computeVertexNormals();
+    o.material = new THREE.MeshStandardMaterial({
+      map: alb, normalMap: nrm,
+      normalScale: new THREE.Vector2(1.0, 1.0),
+      roughness: 0.93, metalness: 0.0
+    });
   });
   terrain = g.scene;
   scene.add(terrain);
 });
 
-// a few soft cloud bands drifting across, drawn as gradient planes
-const clouds = new THREE.Group();
-for (let i = 0; i < 5; i++) {
-  const c = document.createElement('canvas'); c.width = c.height = 256;
+// Cloud is what gives the frame depth: banks behind the peak, and one soft bank
+// drifting across in FRONT of it, so the mountain sits inside weather rather than
+// on top of a flat ground.
+function cloudTex(soft){
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
   const x = c.getContext('2d');
-  const gr = x.createRadialGradient(128,128,10,128,128,128);
-  gr.addColorStop(0,'rgba(255,255,255,.92)'); gr.addColorStop(.55,'rgba(246,250,253,.42)');
-  gr.addColorStop(1,'rgba(238,242,245,0)');
-  x.fillStyle = gr; x.fillRect(0,0,256,256);
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(560, 190),
-    new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(c), transparent:true, depthWrite:false, opacity:.85 })
-  );
-  m.position.set(-300 + i*160, -46 + i*9, 60 + i*52);
-  m.userData.drift = 0.05 + i*0.02;
-  clouds.add(m);
+  for (let i = 0; i < 26; i++) {
+    const cxp = Math.random()*512, cyp = 128 + (Math.random()-0.5)*90;
+    const r = 40 + Math.random()*95;
+    const gr = x.createRadialGradient(cxp,cyp,0,cxp,cyp,r);
+    gr.addColorStop(0, 'rgba(255,255,255,'+(soft?0.11:0.20)+')');
+    gr.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = gr; x.beginPath(); x.arc(cxp,cyp,r,0,7); x.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
+const clouds = new THREE.Group();
+const BANKS = [
+  {w:1500,h:420, x:-40, y:-52, z:-330, o:.85, d:.020, soft:false},
+  {w:1250,h:360, x: 90, y:-30, z:-140, o:.70, d:.030, soft:false},
+  {w:1150,h:250, x:-60, y:-74, z:  90, o:.42, d:.045, soft:true },
+  {w:1500,h:260, x: 60, y:-96, z: 250, o:.55, d:.062, soft:true },
+];
+BANKS.forEach(b => {
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(b.w, b.h),
+    new THREE.MeshBasicMaterial({ map: cloudTex(b.soft), transparent:true, depthWrite:false, opacity:b.o })
+  );
+  m.position.set(b.x, b.y, b.z); m.userData.d = b.d; m.userData.x0 = b.x;
+  clouds.add(m);
+});
 scene.add(clouds);
 
 // smooth scroll + the page rail
@@ -228,9 +239,9 @@ const clock = new THREE.Clock();
     terrain.rotation.y = 0.06 + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
     terrain.position.y = -sy * 0.05;
   }
-  clouds.children.forEach((c,i) => { c.position.x += c.userData.drift * 0.22; if (c.position.x > 420) c.position.x = -420; });
-  camera.position.y = 46 + Math.sin(t * 0.06) * 1.6;
-  camera.lookAt(46, 34 - sy * 0.012, -40);
+  clouds.children.forEach(c => { c.position.x += c.userData.d; if (c.position.x > c.userData.x0 + 700) c.position.x = c.userData.x0 - 700; });
+  camera.position.y = 52 + Math.sin(t * 0.06) * 1.6;
+  camera.lookAt(58, 30 - sy * 0.012, -45);
   renderer.render(scene, camera);
 })();
 
