@@ -46,20 +46,16 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    instead of on the page - and the far shoulder over there was the one place the mesh
    still showed a long straight ramp. Both problems end at the same gradient. */
 .veil-x{position:fixed;inset:0;z-index:1;pointer-events:none;
-  /* Measured with the haze switched off: behind the paragraph the terrain sits 22
-     levels below the page, which is nothing; behind the button row 69; and behind the
-     scroll cue 154, which is far too dark to read over. So haze IS needed - but only
-     in the lower left, and the previous version applied it as a full-height vertical
-     band that was picked out three separate times as a fog band or an opacity mask.
-     Radial, centred on the lower left, so it has no straight edge and no band: it is
-     strongest exactly where the terrain is darkest and gone by the time it reaches
-     the peak. */
-  background:radial-gradient(125% 100% at 20% 80%,
-    rgba(238,242,245,1) 0%, rgba(238,242,245,.94) 30%,
-    rgba(238,242,245,.62) 50%, rgba(238,242,245,.24) 68%,
-    rgba(238,242,245,0) 86%)}
-@media (max-width:900px){ .veil-x{background:radial-gradient(150% 110% at 30% 78%,
-    rgba(238,242,245,1) 0%,rgba(238,242,245,.72) 45%,rgba(238,242,245,0) 85%)} }
+  /* This was a large soft wash over the whole left of the frame, and it was spotted
+     for what it is: blur. A gradient has no structure and no edges, so at any size it
+     reads as a smudged photograph rather than as air. The cloud does this job now, and
+     what is left here is a small lift in the bottom corner where the ground is darkest
+     - about a third of the area it used to cover. */
+  background:radial-gradient(62% 46% at 14% 88%,
+    rgba(238,242,245,.92) 0%, rgba(238,242,245,.58) 38%,
+    rgba(238,242,245,.18) 66%, rgba(238,242,245,0) 88%)}
+@media (max-width:900px){ .veil-x{background:radial-gradient(80% 55% at 22% 86%,
+    rgba(238,242,245,.90) 0%,rgba(238,242,245,.42) 50%,rgba(238,242,245,0) 86%)} }
 .wrap{position:relative;z-index:2}
 
 header{position:fixed;top:0;left:0;right:0;height:82px;z-index:5;display:flex;align-items:center}
@@ -368,43 +364,55 @@ vec3 triBlend(vec3 n){
 // Cloud is what gives the frame depth: banks behind the peak, and one soft bank
 // drifting across in FRONT of it, so the mountain sits inside weather rather than
 // on top of a flat ground.
-function cloudTex(soft){
-  const W = 512, H = 256;
+function cloudTex(soft, seed){
+  // Big billowing masses, not a scatter of little puffs. The original's cloud has
+  // structure you can read - a bright shoulder on top, a heavier shaded underside,
+  // and lumps at more than one size. Twenty-six small blobs of the same radius gave a
+  // smooth even fog, which is the thing a flat CSS gradient also gives, and neither
+  // reads as weather.
+  const W = 1024, H = 512;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d');
-  // blobs kept well inside the canvas, so nothing is cut off at the border
-  for (let i = 0; i < 26; i++) {
-    const cxp = 80 + Math.random()*(W-160), cyp = H/2 + (Math.random()-0.5)*70;
-    const r = 40 + Math.random()*90;
-    const gr = x.createRadialGradient(cxp,cyp,0,cxp,cyp,r);
-    // Measured: with white blobs the cloud added +56 levels on the mid slopes and
-    // EXACTLY 0.00 against the sky. White on a near-white sky cannot be seen, so the
-    // cloud only ever showed as a pale wash on the rock and never as cloud. It has to
-    // be a little DARKER than the page to exist against the sky at all. Lit from above,
-    // so the top of each blob is paler and the underside carries the blue-grey.
-    const lift = 1 - Math.min(1, Math.max(0, (cyp - (H/2 - 60)) / 130));
-    const cr = Math.round(198 + 44 * lift);
-    const cg = Math.round(211 + 38 * lift);
-    const cb = Math.round(224 + 29 * lift);
-    gr.addColorStop(0, 'rgba('+cr+','+cg+','+cb+','+(soft?0.26:0.44)+')');
-    gr.addColorStop(1, 'rgba('+cr+','+cg+','+cb+',0)');
-    x.fillStyle = gr; x.beginPath(); x.arc(cxp,cyp,r,0,7); x.fill();
+  let r0 = seed * 9301 + 49297;
+  const rnd = () => { r0 = (r0 * 9301 + 49297) % 233280; return r0 / 233280; };
+
+  // three passes, coarse to fine, so the mass has lumps within lumps
+  const passes = [ {n: 7,  rmin: 190, rmax: 300, a: soft ? 0.20 : 0.30, spread: 0.42},
+                   {n: 14, rmin: 110, rmax: 190, a: soft ? 0.16 : 0.24, spread: 0.52},
+                   {n: 26, rmin:  46, rmax: 108, a: soft ? 0.11 : 0.17, spread: 0.60} ];
+  for (const p of passes) {
+    for (let i = 0; i < p.n; i++) {
+      const cxp = W * 0.5 + (rnd() - 0.5) * W * p.spread;
+      const cyp = H * 0.52 + (rnd() - 0.5) * H * p.spread * 0.72;
+      const r = p.rmin + rnd() * (p.rmax - p.rmin);
+      // lit from above: the top of a billow is pale, the underside carries the blue
+      const lift = 1 - Math.min(1, Math.max(0, (cyp - (H * 0.30)) / (H * 0.44)));
+      const cr = Math.round(196 + 46 * lift);
+      const cg = Math.round(209 + 40 * lift);
+      const cb = Math.round(223 + 30 * lift);
+      const gr = x.createRadialGradient(cxp, cyp - r * 0.18, r * 0.10, cxp, cyp, r);
+      gr.addColorStop(0,    'rgba(' + cr + ',' + cg + ',' + cb + ',' + p.a + ')');
+      gr.addColorStop(0.55, 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (p.a * 0.55) + ')');
+      gr.addColorStop(1,    'rgba(' + cr + ',' + cg + ',' + cb + ',0)');
+      x.fillStyle = gr; x.beginPath(); x.arc(cxp, cyp, r, 0, 7); x.fill();
+    }
   }
-  // Then fade the alpha out RADIALLY. It was done per-edge before - one falloff from
-  // the left and right borders, another from the top and bottom - which is still a
-  // rectangle, just a soft one, and on a bank this large and this close to the camera
-  // the four straight fade lines were plainly visible crossing the picture. Judged as
-  // "straight translucent polygon edges ... overlapping geometry planes". An ellipse
-  // has no straight edge to show at any softness.
-  const img = x.getImageData(0,0,W,H), d = img.data;
-  for (let py=0; py<H; py++) for (let px=0; px<W; px++) {
-    const ex = (px/(W-1) - 0.5) * 2.0, ey = (py/(H-1) - 0.5) * 2.0;
-    const r = Math.sqrt(ex*ex + ey*ey*0.72);
-    let f = 1.0 - Math.min(1, Math.max(0, (r - 0.30) / 0.70));
-    f = f*f*(3-2*f);
-    d[(py*W+px)*4+3] *= f*f;
+  // elliptical falloff, so the plane never shows a straight edge at any softness
+  const img = x.getImageData(0, 0, W, H), d = img.data;
+  for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) {
+    const ex = (px / (W - 1) - 0.5) * 2, ey = (py / (H - 1) - 0.5) * 2;
+    // A bank 3200 wide and a couple of hundred tall is a very flat ellipse, and the top
+    // of a very flat ellipse is a long almost-straight line - which duly appeared as a
+    // horizontal edge across the lower left. Wobbling the radius breaks it, and a much
+    // longer falloff stops it having a definite boundary at all.
+    const wob = 0.10 * Math.sin(ex * 5.1 + 1.7) + 0.07 * Math.sin(ex * 11.3 - 0.6)
+              + 0.05 * Math.sin(ex * 23.7 + 2.9);
+    const rr = Math.sqrt(ex * ex + ey * ey * 0.62) + wob * (0.5 + 0.5 * ey);
+    let f = 1 - Math.min(1, Math.max(0, (rr - 0.10) / 0.90));
+    f = f * f * (3 - 2 * f);
+    d[(py * W + px) * 4 + 3] *= f * f;
   }
-  x.putImageData(img,0,0);
+  x.putImageData(img, 0, 0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 const clouds = new THREE.Group();
@@ -420,40 +428,45 @@ const clouds = new THREE.Group();
 // covered the whole picture and buried the peak in fog. Sized against the distance:
 // the mountain's foot is roughly 285 away, where the frame is ~100 units tall and the
 // foot itself spans about 40 of them.
+// A SEA of cloud, which is what the original has: thick masses filling the lower third
+// and running up both sides, with the peak standing clear above them. The thin high
+// wisps that were here could never do that - they were sized to avoid washing out a
+// foreground that has now been given over to cloud on purpose.
+// `band` is how much of the FRAME HEIGHT this bank should cover, 0 to 1. The world
+// height is computed from that and its depth, below. `y` is still world height, because
+// where a bank sits vertically relative to the mountain is a real-world question.
 const BANKS = [
-  // Cloud only READS where there is something dark behind it. Lying it across the foot
-  // put it over pale ground, where it did nothing but wash the foreground out - and
-  // when that wash was cut back, the cloud went with it and the scene lost its weather
-  // entirely. So the weight moves UP, onto the mid slopes and around the peak, where
-  // there is dark rock for it to show against. The foot keeps only a thin veil.
-  //
-  // Depth matters as much as height: a bank must sit between the camera at z=372 and
-  // the mountain's foot at z=185 to cross anything. Anything further back is hidden by
-  // the mountain, because the cloud material stops writing depth but still tests it.
+  // far backdrop, giving the peak something to stand against
+  {w:3400, band:.62, x:  60, y: 26, z:-680, o:.40, d:-.010, soft:true },
+  {w:2800, band:.50, x:-180, y:  0, z:-430, o:.36, d: .014, soft:true },
 
-  // behind the summit, so the peak has something to stand against instead of bare sky
-  {w:2200,h:240, x:  40, y: 44, z:-620, o:.46, d:-.009, soft:false},
-  {w:1700,h:200, x:-120, y: 16, z:-420, o:.36, d:.018, soft:true },
+  // THE SEA. Layered from far to near so it has depth rather than being one sheet.
+  {w:3200, band:.34, x:  60, y:-58, z:-330, o:.62, d: .019, soft:false},
+  {w:2800, band:.30, x:-180, y:-50, z:-140, o:.70, d: .025, soft:false},
+  {w:2200, band:.26, x: 140, y:-42, z:  40, o:.72, d: .032, soft:false},
+  {w:1700, band:.22, x: -60, y:-34, z: 165, o:.60, d: .040, soft:false},
 
-  // the weather, crossing the mountain itself
-  {w:1500,h: 52, x: -40, y: 44, z: 120, o:.62, d:.021, soft:true },
-  {w:1800,h: 62, x: 180, y: 26, z: 175, o:.58, d:.028, soft:true },
-  {w:2000,h: 74, x:-120, y:  6, z: 225, o:.52, d:.034, soft:false},
-
-  // a thin veil at the foot only - this is the one that used to bleach the foreground
-  {w:1600,h: 78, x:  60, y:-30, z: 210, o:.26, d:.040, soft:false},
-  {w:2000,h:105, x:-190, y:-34, z:  50, o:.24, d:.046, soft:false},
-  {w:2600,h:140, x: 180, y:-20, z:-140, o:.42, d:.052, soft:true },
+  // masses climbing the flanks, which is what puts the peak ABOVE the weather
+  {w:1400, band:.20, x:-250, y:  4, z:  90, o:.46, d: .016, soft:true },
+  {w:1200, band:.16, x: 230, y: 18, z: 130, o:.40, d: .022, soft:true },
+  // one thin veil right in front, deliberately tiny because it is very close
+  {w: 900, band:.07, x: -20, y: 40, z: 305, o:.26, d: .048, soft:true },
 ];
-BANKS.forEach(b => {
+const FRAME_AT = (z) => {
+  // world height of the visible frame at depth z, for this camera and lens
+  const dist = Math.max(1, camera.position.z - z);
+  return 2 * dist * Math.tan(FOV * Math.PI / 360);
+};
+BANKS.forEach((b, i) => {
+  // The elliptical alpha falloff eats roughly the outer third, so the plane has to be
+  // built taller than the band it is meant to draw.
+  const h = FRAME_AT(b.z) * b.band / 0.66;
   const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(b.w, b.h),
-    new THREE.MeshBasicMaterial({ map: cloudTex(b.soft), transparent:true, depthWrite:false, opacity:b.o })
+    new THREE.PlaneGeometry(b.w, h),
+    new THREE.MeshBasicMaterial({ map: cloudTex(b.soft, i + 1), transparent:true,
+                                  depthWrite:false, opacity:b.o })
   );
-  m.position.set(b.x, b.y, b.z); // x1.8 on top of the per-second conversion. Measured: at the old rate the fastest bank
-  // crossed a quarter of the mountain in thirty seconds, which is true to life and far
-  // too slow to be noticed by someone who has just landed on the page.
-  m.userData.d = b.d * 60 * 1.8; m.userData.x0 = b.x;
+  m.position.set(b.x, b.y, b.z); m.userData.d = b.d * 60 * 1.8; m.userData.x0 = b.x;
   m.userData.ph = Math.random() * 6.283; m.userData.o = b.o;
   clouds.add(m);
 });
