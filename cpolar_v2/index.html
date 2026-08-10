@@ -182,7 +182,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 // 1.0 with the lights below drove the whole mountain to white - snow and rock landed
 // on the same value and the shape disappeared. Rock has to sit in the mid greys or
 // there is nothing for the snow to be white AGAINST.
-renderer.toneMappingExposure = 0.86;
+renderer.toneMappingExposure = 0.96;
 
 const scene = new THREE.Scene();
 // Every visible surface of this mountain sits between 312 and 451 units away, so fog
@@ -190,7 +190,7 @@ const scene = new THREE.Scene();
 // 820 brackets the mountain's own depth: the summit lifts about 11 levels, the far
 // ridge 6, the near foot 3 - ordered by distance, which is what makes depth read.
 // (An older comment here claimed 363 and 554. Both were wrong. These are measured.)
-scene.fog = new THREE.Fog(0xe6ecf1, 300, 820);
+scene.fog = new THREE.Fog(0xdfe9f4, 300, 820);
 
 // The shot. The summit of this mesh is at world (15.4, 58.4, -2.4).
 //   - the camera sits BELOW it, so the frame looks UP at the peak. The first version
@@ -449,11 +449,11 @@ void main(){
 // top has to land near the mountain's FOOT - the first pass put it near the middle of
 // the peak and drowned everything below it.
 const CLOUD_LAYERS = [
-  { w: 3000, band: .80, x:  120, y: -34, z: -560, top: .58, soft: .15, o: .46, spd: .55 },
-  { w: 2600, band: .72, x: -180, y: -46, z: -300, top: .55, soft: .14, o: .54, spd: .75 },
-  { w: 2200, band: .62, x:   80, y: -56, z:  -60, top: .52, soft: .13, o: .64, spd: 1.00 },
-  { w: 1900, band: .52, x: -140, y: -62, z:  140, top: .48, soft: .12, o: .70, spd: 1.35 },
-  { w: 1500, band: .40, x:  160, y: -70, z:  270, top: .44, soft: .11, o: .56, spd: 1.80 },
+  { w: 3000, band: .96, x:  120, y: -18, z: -560, top: .60, soft: .17, o: .52, spd: 1.6 },
+  { w: 2600, band: .88, x: -180, y: -30, z: -300, top: .57, soft: .16, o: .60, spd: 2.1 },
+  { w: 2200, band: .78, x:   80, y: -42, z:  -60, top: .54, soft: .15, o: .68, spd: 2.7 },
+  { w: 1900, band: .66, x: -140, y: -52, z:  140, top: .50, soft: .14, o: .72, spd: 3.4 },
+  { w: 1500, band: .52, x:  160, y: -62, z:  270, top: .46, soft: .13, o: .58, spd: 4.2 },
 ];
 
 const clouds = new THREE.Group();
@@ -468,8 +468,8 @@ CLOUD_LAYERS.forEach((L, i) => {
       uniforms: {
         uTime:{value:0}, uSeed:{value:i * 17.3}, uTop:{value:L.top}, uSoft:{value:L.soft},
         uOpacity:{value:L.o},
-        uPale:  {value:new THREE.Color(0xd2dae1)},
-        uBright:{value:new THREE.Color(0xf7fafc)},
+        uPale:  {value:new THREE.Color(0xc3d3e6)},
+        uBright:{value:new THREE.Color(0xf1f7fe)},
       },
     })
   );
