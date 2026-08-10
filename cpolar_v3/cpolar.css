@@ -1,0 +1,759 @@
+/* C-POLAR overrides. Their stylesheets are untouched; everything of ours lives here. */
+
+/* Yin's house rule: sentence case, never all-caps. */
+.menu-links-w a span,
+.scroll-to-cta-content-dk span,
+.scroll-to-cta-content-mb span,
+.menu-cta p span { text-transform: none !important; }
+
+/* --- hero: logo, intro, five applications ------------------------------- */
+.cp-hero {
+  position: absolute;
+  left: 164px;                 /* same left edge as their wordmark */
+  top: 408px;
+  width: 528px;
+  color: #2d628c;              /* their single ink */
+}
+.cp-hero .cp-logo { display: block; width: 368px; height: auto; margin: 0 0 30px; }
+
+.cp-hero .cp-intro {
+  margin: 0;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.62;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+  color: #2d628c;
+  text-transform: none;
+}
+
+.cp-hero .cp-apps {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 26px 0 0;
+  border-top: 1px solid rgba(45, 98, 140, .28);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 20px;
+}
+.cp-hero .cp-apps li {
+  font-family: "Space Mono", "Space Grotesk", monospace;
+  font-size: 12px;
+  letter-spacing: 0.9px;
+  color: #2d628c;
+  opacity: .82;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .cp-hero { left: 32px; top: 340px; width: calc(100% - 64px); }
+  .cp-hero .cp-logo { width: 260px; margin-bottom: 22px; }
+  .cp-hero .cp-intro { font-size: 14px; }
+}
+
+/* --- the room: our floating-particle scene, over their cloud beat -------- */
+.cp-room {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  will-change: opacity;
+}
+/* their copy must sit above it */
+[data-chapter="WhatWeDo"], [data-chapter="WhoWeAre"] { position: relative; z-index: 3; }
+
+/* the charge line, set over the room */
+.cp-room-sub {
+  margin: 22px 0 0;
+  max-width: 30ch;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: #2d628c;
+  text-transform: none;
+}
+/* sentence case on the big lines too */
+[data-chapter="WhoWeAre"] h2, [data-chapter="WhatWeDo"] h2 { text-transform: none !important; }
+
+/* chapter labels: sentence case too */
+[data-chapter] .fs-cta-s, [data-chapter] .uppercase,
+.chapter-link .text-container span, .anchor-label, .fs-s2 { text-transform: none !important; }
+
+/* --- header sits at the very top, like a normal site -------------------- */
+#header { top: 0 !important; }
+
+/* --- hero block vertically centred -------------------------------------- */
+.cp-hero { top: 50% !important; transform: translateY(-50%); }
+
+/* --- the five applications: a structured row, not a casual list --------- */
+.cp-hero .cp-apps { margin: 34px 0 0; padding: 0; border: 0; display: block; }
+.cp-apps-label {
+  margin: 0 0 14px;
+  font-family: "Space Mono", "Space Grotesk", monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: #2d628c;
+  opacity: .55;
+  text-transform: none;
+}
+.cp-apps-row {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid rgba(45,98,140,.30);
+}
+.cp-apps-row li { border-right: 1px solid rgba(45,98,140,.16); }
+.cp-apps-row li:last-child { border-right: 0; }
+.cp-apps-row a {
+  display: block; padding: 13px 10px 0 0;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 12.5px; line-height: 1.35; letter-spacing: .2px;
+  color: #2d628c; text-decoration: none; text-transform: none;
+  transition: opacity .25s ease;
+}
+.cp-apps-row a:hover { opacity: .6; }
+@media (max-width: 1024px) {
+  .cp-apps-row { grid-template-columns: repeat(2, 1fr); }
+  .cp-apps-row li { border-bottom: 1px solid rgba(45,98,140,.16); }
+}
+
+/* the applications row breaks out wider than the text column, so each
+   cell has room and the rules read as structure rather than crowding */
+.cp-hero .cp-apps { width: 712px; }
+.cp-apps-row a { padding: 14px 16px 2px 0; }
+.cp-apps-row li + li a { padding-left: 16px; }
+.cp-apps-row li { min-width: 0; }
+
+/* ======================= slide 1 revisions ============================== */
+
+/* 5. "News", not "NEWS" */
+.news-w p, .news-w, .menu-cta p, .menu-cta p span,
+.counter .number, .fs-cta-s { text-transform: none !important; }
+
+/* 6. everything up a step - it was too small to read */
+.menu-links-w a span { font-size: 15px !important; letter-spacing: .2px !important; }
+.news-w p, .menu-cta p span { font-size: 14px !important; letter-spacing: .2px !important; }
+.scroll-to-cta-content-dk span { font-size: 13.5px !important; letter-spacing: .4px !important; }
+
+.cp-hero { width: 600px; }
+.cp-hero .cp-intro { font-size: 17px; line-height: 1.66; }
+.cp-hero .cp-intro strong { font-weight: 700; color: #24567e; }
+
+.cp-apps-label { font-size: 12.5px !important; letter-spacing: 1.4px; opacity: .62; margin-bottom: 16px; }
+
+/* 1+2. the five as centred buttons */
+.cp-hero .cp-apps { width: 780px; margin-top: 38px; }
+.cp-apps-row {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 8px; border-top: 0;
+}
+.cp-apps-row li { border: 0; }
+.cp-apps-row a {
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  min-height: 62px; padding: 10px 9px;
+  border: 1px solid rgba(45,98,140,.34);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 14px; line-height: 1.32; letter-spacing: .2px;
+  color: #2d628c; text-decoration: none; text-transform: none;
+  transition: background .25s ease, border-color .25s ease;
+}
+.cp-apps-row li + li a { padding-left: 9px; }
+.cp-apps-row a:hover { background: rgba(45,98,140,.08); border-color: rgba(45,98,140,.6); opacity: 1; }
+
+@media (max-width: 1024px) {
+  .cp-hero { width: calc(100% - 64px); }
+  .cp-hero .cp-apps { width: 100%; }
+  .cp-apps-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* an earlier rule set white-space:nowrap on the old list - clear it so the
+   long name wraps inside its button instead of spilling across the next one */
+.cp-apps-row li, .cp-apps-row a { white-space: normal !important; }
+.cp-apps-row a { hyphens: none; word-break: normal; overflow-wrap: break-word; }
+
+/* all five buttons the same height, whatever the longest name needs */
+.cp-apps-row { align-items: stretch; }
+.cp-apps-row li { display: flex; }
+.cp-apps-row a { flex: 1 1 auto; min-height: 72px; }
+
+/* ======================= slide 1, pass 3 =============================== */
+
+/* the sound is off: assets/sounds/sound.mp3 is now silence, and the toggle
+   is hidden so nobody can turn a voice back on */
+button.sound { display: none !important; }
+
+/* top bar: every word the same strength as News and Menu. They were not
+   bolder - the other nav items were simply faded. */
+.menu-links-w a span {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #2d628c !important;
+  opacity: 1 !important;
+}
+.menu-links-w a { opacity: 1 !important; }
+.menu-links-w a:hover span { opacity: .62 !important; }
+
+/* News, Menu and the number all match About at 15px */
+.news-w p, .menu-cta p span {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #2d628c !important;
+}
+.counter .number { font-size: 15px !important; font-weight: 600 !important; }
+.counter { width: 32px !important; height: 32px !important; }
+
+/* 5 Applications: bold and bigger */
+.cp-apps-label {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: .6px !important;
+  opacity: 1 !important;
+  color: #2d628c;
+  margin-bottom: 18px;
+}
+
+/* the buttons: shorter names now, so one line each, bolder and bigger */
+.cp-hero .cp-apps { width: 760px; }
+.cp-apps-row a {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  min-height: 60px;
+  border-color: rgba(45,98,140,.45);
+}
+
+/* the count badge went square when it grew - keep it a circle */
+.counter { border-radius: 50% !important; display: flex !important;
+           align-items: center !important; justify-content: center !important; }
+/* the scroll cue was left behind by the size bump */
+.scroll-to-cta-content-dk span { font-weight: 600 !important; color: #2d628c !important; }
+
+/* the chapter/link labels were still forced to capitals */
+.link-block-label, .link-block-label span,
+[class*="link-block"] .fs-cta-s, .fs-cta-s span { text-transform: none !important; }
+
+/* --- cursor -------------------------------------------------------------
+   Their cursor is a DOM element (<div class="cursor">) drawn on top of the
+   native one - a circle with two dots. Hide it, then use a bold plus. */
+.cursor, div.cursor, [data-component="Cursor"] { display: none !important; }
+
+html, body, a, button, input, select, textarea, label,
+section, div, p, h1, h2, h3, span, li, ul, img, video, canvas, svg, header, nav, footer,
+[data-cursor], [data-chapter], .cp-apps-row a {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Cpath d='M15 3v24M3 15h24' stroke='%232d628c' stroke-width='3.4' stroke-linecap='square'/%3E%3C/svg%3E") 15 15, crosshair !important;
+}
+
+/* The page was flashing white for about a second before the 3D scene drew,
+   which read as a white bar behind the header. These are the scene's own sky
+   colours, sampled off the render, so the load looks like sky from the start. */
+html {
+  background: linear-gradient(180deg, #9fa9b2 0%, #b6c0c8 20%, #cfd7de 45%, #e2e8ec 75%, #eef2f5 100%) !important;
+  background-attachment: fixed !important;
+  background-size: 100% 100vh !important;
+  background-repeat: no-repeat !important;
+}
+body { background: transparent !important; }
+
+/* --- floating dust, drawn in JS over the cloud -------------------------- */
+#cp-dust {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 1;
+}
+
+/* "Down where we live, they are full of pollutants." matches the big lines */
+[data-chapter="WhoWeAre"] p {
+  font-size: 50px !important;
+  line-height: 70px !important;
+  font-weight: 400 !important;
+  max-width: 20ch;
+}
+
+/* --- the white bar, found at last ---------------------------------------
+   Their rule:  header.top nav::before { background:#fff }
+   The .top class is only added when you scroll back UP, which is why it
+   never showed in a downward test. Kill the panel, keep the header clear. */
+#header nav::before,
+header[data-astro-cid-4wsjtibl].top nav[data-astro-cid-4wsjtibl]::before {
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+/* 3. no "About" link on this beat */
+[data-chapter="WhoWeAre"] .link-block { display: none !important; }
+
+/* the second line breaks where you asked, so it needs room */
+[data-chapter="WhoWeAre"] p { max-width: 760px !important; }
+
+/* their text block sits on 8 grid columns (445px), too narrow for the line
+   to break where you want it. Widen it to 13 columns. */
+[data-chapter="WhoWeAre"] .text-block { grid-column: 5 / 18 !important; }
+[data-chapter="WhoWeAre"] p { max-width: none !important; }
+
+/* ================= slide 2: alignment, boxes, answer =================== */
+
+/* left, right, left down the slide */
+[data-chapter="WhoWeAre"] h2      { grid-column: 3 / 16 !important; text-align: left !important; }
+[data-chapter="WhoWeAre"] .text-block { grid-column: 12 / 24 !important; }
+[data-chapter="WhatWeDo"] h2      { grid-column: 3 / 16 !important; grid-row: 1 !important;
+                                    text-align: left !important; }
+
+/* the answer moves under the boxes and starts hidden - JS fades it in */
+#cp-answer {
+  grid-column: 3 / 16 !important;
+  grid-row: 3 !important;
+  margin-top: 34px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+#cp-answer.cp-in { opacity: 1; transform: none; }
+#cp-answer .read-more-button { display: none !important; }
+#cp-answer p { font-size: 26px !important; line-height: 1.42 !important; color: #1d5580 !important; }
+
+@media (max-width: 1024px) {
+
+}
+
+/* the answer fades in where it sits. It does not travel. */
+#cp-answer { transform: none !important; transition: opacity .85s ease !important; }
+#cp-answer.cp-in { transform: none !important; }
+/* the first line breaks where you asked, so it needs the full column */
+[data-chapter="WhoWeAre"] h2 { max-width: none !important; }
+
+/* ============ the pollutant screen, rebuilt ============================
+   Before: a circle drifting loose over the copy, overlapping a row of pale
+   boxes. Nothing was anchored and nothing had a job. Now it is one
+   instrument: the words on the left, a numbered index of what is in the
+   air, and the specimen under glass on the right. The index drives the
+   glass. */
+
+[data-chapter="WhatWeDo"] .grid { align-items: start; }
+[data-chapter="WhatWeDo"] h2 { grid-column: 3 / 14 !important; grid-row: 1 !important; }
+
+/* the instrument */
+.cp-scope-wrap {
+  grid-column: 14 / 24 !important; grid-row: 1 / span 3 !important;
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 6px;
+}
+.cp-scope {
+  position: relative; width: 372px; height: 372px; border-radius: 50%;
+  overflow: hidden; background: #f6f1ef;
+  box-shadow: 0 26px 60px -22px rgba(24,48,68,.45), 0 2px 10px rgba(24,48,68,.14);
+  will-change: transform;
+}
+.cp-scope-img {
+  position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px);
+  object-fit: cover; opacity: 0; transition: opacity .85s ease;
+}
+.cp-scope-img.is-on { opacity: 1; }
+.cp-scope-ring {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  box-shadow: inset 0 0 0 1.5px rgba(45,98,140,.42),
+              inset 0 0 0 5px rgba(255,255,255,.72),
+              inset 0 18px 34px -18px rgba(255,255,255,.9);
+}
+.cp-scope-card {
+  margin-top: 20px; text-align: center;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+.cp-scope-card b {
+  display: block; font-size: 17px; font-weight: 700; color: #12405f; letter-spacing: .2px;
+}
+.cp-scope-card span {
+  display: block; margin-top: 3px; font-size: 12.5px; letter-spacing: .9px;
+  color: rgba(45,98,140,.72);
+}
+
+/* the answer sits under the index, still a pure fade */
+#cp-answer { grid-column: 3 / 12 !important; grid-row: 3 !important; margin-top: 30px; }
+#cp-answer p { font-size: 22px !important; line-height: 1.5 !important; }
+
+@media (max-width: 1024px) {
+
+  .cp-scope { width: 240px; height: 240px; }
+  .cp-scope-wrap { margin-top: 30px; }
+}
+
+/* ====== the pollutant screen, execution pass ==========================
+   Everything now fits in ONE viewport, so the answer fades in while you
+   are looking at it - you do not scroll to reveal it. Its space is
+   reserved from the start, so nothing shifts when it appears. */
+
+[data-chapter="WhatWeDo"] h2 {
+  font-size: 42px !important; line-height: 56px !important;
+  grid-column: 3 / 13 !important; grid-row: 1 !important; margin: 0 !important;
+}
+
+/* space reserved, so the fade does not move the page */
+#cp-answer {
+  grid-column: 3 / 13 !important; grid-row: 3 !important;
+  margin-top: 26px !important; min-height: 74px;
+}
+#cp-answer p { font-size: 21px !important; line-height: 1.52 !important; }
+
+/* the instrument */
+.cp-scope-wrap {
+  grid-column: 14 / 24 !important; grid-row: 1 / span 3 !important;
+  justify-content: center; padding-top: 0;
+}
+.cp-scope { width: 330px; height: 330px; box-shadow: none; }
+.cp-scope-img { will-change: opacity; }
+.cp-scope-ring {
+  box-shadow: inset 0 0 0 9px #22475f,
+              inset 0 0 0 11px rgba(255,255,255,.85),
+              inset 0 0 44px -14px rgba(20,40,58,.55);
+}
+.cp-scope-card b { font-size: 16px; }
+.cp-scope-card span { font-size: 12px; }
+
+@media (max-width: 1024px){
+  [data-chapter="WhatWeDo"] h2 { font-size: 30px !important; line-height: 40px !important; }
+  .cp-scope { width: 230px; height: 230px; }
+}
+
+/* the housing sits in our blue family, not near-black */
+.cp-scope-ring { box-shadow: inset 0 0 0 9px #22475f,
+                             inset 0 0 0 11px rgba(255,255,255,.88),
+                             inset 0 0 40px -12px rgba(20,45,68,.42) !important; }
+
+/* while it is roaming the glass floats above the copy and the card hides */
+.cp-scope-wrap { position: relative; z-index: 6; }
+.cp-scope { transition: box-shadow .3s ease; }
+
+.cp-scope-card { transition: opacity .35s ease; }
+
+/* ===== the screen, as you described it ================================= */
+
+/* the second block dilutes in; opacity is set by scroll, in JS */
+#cp-answer {
+  grid-column: 3 / 14 !important; grid-row: 2 !important;
+  margin-top: 30px !important; min-height: 128px;
+  opacity: 0; transform: none !important; transition: none !important;
+}
+#cp-answer.cp-in { opacity: inherit; }
+.cp-a1 {
+  margin: 0 0 12px !important;
+  font-size: 30px !important; line-height: 1.28 !important;
+  font-weight: 400; color: #1d5580; text-transform: none;
+}
+.cp-a2 {
+  margin: 0 !important; max-width: 46ch;
+  font-size: 18px !important; line-height: 1.58 !important;
+  color: #2d628c; text-transform: none;
+}
+.cp-cap { font-style: normal; font-weight: 700; color: #12405f; }
+
+/* the instrument spans the whole right side now that the list has gone */
+.cp-scope-wrap { grid-column: 14 / 24 !important; grid-row: 1 / span 2 !important; }
+
+/* the screen holds while the sequence plays, so the first line is still
+   there when the second block arrives under it */
+[data-chapter="WhatWeDo"] > .grid:first-of-type {
+  position: sticky; top: 0;
+  min-height: 100vh; align-content: center;
+  padding-top: 40px;
+}
+
+/* ===== phone: stack it. These come last so they win. ================== */
+@media (max-width: 1024px){
+  [data-chapter="WhatWeDo"] > .grid:first-of-type {
+    position: static !important; min-height: 0 !important; padding-top: 24px;
+    display: block !important;
+  }
+  [data-chapter="WhatWeDo"] h2 {
+    grid-column: auto !important; grid-row: auto !important;
+    font-size: 28px !important; line-height: 38px !important;
+    max-width: none !important; margin: 0 24px !important;
+  }
+  .cp-scope-wrap {
+    grid-column: auto !important; grid-row: auto !important;
+    margin: 28px auto 0 !important; padding: 0 !important;
+  }
+  .cp-scope { width: 232px !important; height: 232px !important; }
+  #cp-answer {
+    grid-column: auto !important; grid-row: auto !important;
+    margin: 26px 24px 0 !important; min-height: 0 !important;
+    /* their component carries width:100%, which with a 24px left margin put
+       its right edge 24px past the screen and gave the whole document a
+       horizontal scrollbar on every phone. Let the margins set the width. */
+    width: auto !important; max-width: calc(100% - 48px) !important;
+    box-sizing: border-box !important;
+  }
+  .cp-a1 { font-size: 21px !important; }
+  .cp-a2 { font-size: 15.5px !important; max-width: none !important; }
+  [data-chapter="WhoWeAre"] h2, [data-chapter="WhoWeAre"] .text-block {
+    grid-column: auto !important; margin: 0 24px !important;
+  }
+}
+
+/* the tag stays with the lens, always. I had hidden it whenever the lens
+   moved, which is exactly when you need it. */
+.cp-scope-wrap.is-roaming .cp-scope-card { opacity: 1 !important; }
+.cp-scope-card { opacity: 1 !important; will-change: transform; }
+
+/* those two lines are no longer rebuilt per character, so give them their
+   own quiet entrance instead of their splitter's */
+[data-cp-noanim] { opacity: 1 !important; }
+
+/* ===== the air actually clears ========================================
+   The scene behind is their dark cloud. As the dust is drawn in, a pale
+   wash comes up so the air reads CLEAN at the end instead of smoky. */
+#cp-clear {
+  position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 1;
+  background:
+    radial-gradient(120% 90% at 50% 40%, rgba(255,255,255,.55) 0%, rgba(244,248,251,.30) 55%, rgba(238,244,249,0) 100%),
+    linear-gradient(180deg, rgba(240,246,250,.30) 0%, rgba(246,250,252,.62) 55%, rgba(250,252,254,.78) 100%);
+  will-change: opacity;
+}
+
+/* ===== the five we tackle ============================================= */
+.cp-tackle { grid-column: 3 / 13 !important; grid-row: 3 !important; margin-top: 30px; }
+.cp-tackle-label {
+  margin: 0 0 12px; font-size: 12.5px; letter-spacing: 1.4px;
+  font-weight: 700; color: #1d5580; text-transform: none;
+}
+.cp-tackle-row {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px;
+}
+.cp-tackle-row li {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 50px; padding: 7px 6px;
+  border: 1.5px solid rgba(45,98,140,.45);
+  background: rgba(255,255,255,.50);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 12.5px; font-weight: 700; line-height: 1.28; color: #12405f;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Cpath d='M15 3v24M3 15h24' stroke='%232d628c' stroke-width='3.4' stroke-linecap='square'/%3E%3C/svg%3E") 15 15, crosshair;
+  transition: none;
+}
+.cp-tackle-row li:hover, .cp-tackle-row li.is-on {
+  background: #1d6191; border-color: #1d6191; color: #fff;
+}
+
+@media (max-width: 1024px){
+  .cp-tackle { grid-column: auto !important; grid-row: auto !important; margin: 24px 24px 0 !important; }
+  .cp-tackle-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* the background transition on these boxes was leaving the wrong one lit -
+   the interpolation was starting and not advancing. No transition: the
+   class applies instantly. */
+.cp-tackle-row li { transition: none !important; }
+
+/* The wash was a radial plus a gradient, which left a milky fog at the top
+   and a grey band across the bottom - it read as haze, not clean air.
+   A near-uniform pale blue-white field instead, strong enough to beat
+   their cloud. */
+#cp-clear {
+  background: linear-gradient(180deg,
+      rgba(247,251,253,.97) 0%,
+      rgba(244,249,252,.99) 38%,
+      rgba(246,250,253,.99) 72%,
+      rgba(249,252,254,.97) 100%) !important;
+}
+
+/* The lens follows the pointer, so it lands on whatever you are pointing at
+   and steals the hover. It is a picture, not a control - it must never
+   intercept the mouse. */
+.cp-scope-wrap, .cp-scope, .cp-scope-img, .cp-scope-ring, .cp-scope-card {
+  pointer-events: none !important;
+}
+
+/* The wash and the dust were both z-index 1, and the wash came later in the
+   document, so it painted OVER the dust - the motes were being dimmed
+   instead of flying away behind clearing air. Dust in front. */
+#cp-clear { z-index: 1 !important; }
+#cp-dust  { z-index: 2 !important; }
+
+/* the wash goes fully opaque so none of their grey cloud shows through */
+#cp-clear {
+  background: linear-gradient(180deg,
+      rgba(247,251,253,1) 0%,
+      rgba(244,249,252,1) 38%,
+      rgba(246,250,253,1) 72%,
+      rgba(249,252,254,1) 100%) !important;
+}
+
+/* the staggered entrance is driven in JS; start them hidden */
+[data-chapter="WhatWeDo"] h2, .cp-scope-wrap, .cp-tackle { opacity: 0; }
+
+/* Their WebGL scene is z-index 2. The wash was at 1, i.e. BEHIND their
+   cloud, so it could never clean the air. Explicit stack, back to front:
+   their scene 2, our wash 3, our dust 4, the copy 5, the lens 6. */
+#cp-clear { z-index: 3 !important; }
+#cp-dust  { z-index: 4 !important; }
+[data-chapter="WhatWeDo"], [data-chapter="WhoWeAre"] { z-index: 5 !important; }
+.cp-scope-wrap { z-index: 6 !important; }
+
+/* the square under the boxes was their "divisions" row - a diamond marker
+   with a number in it - scrolling up behind our pinned screen. It is their
+   content and it is going anyway. */
+[data-chapter="WhatWeDo"] .divisions-container { display: none !important; }
+
+/* the five, in the same design as the hero page's five */
+.cp-tackle-row { gap: 8px; }
+.cp-tackle-row li {
+  min-height: 54px !important;
+  padding: 10px 9px !important;
+  border: 1.5px solid #1d6191 !important;
+  background: rgba(255,255,255,.62) !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.32 !important;
+  letter-spacing: .2px !important;
+  color: #12405f !important;
+}
+.cp-tackle-row li:hover, .cp-tackle-row li.is-on {
+  background: #1d6191 !important; border-color: #1d6191 !important; color: #fff !important;
+}
+
+/* Their divisions row was most of this section's height. With it hidden the
+   section collapsed to one screen, so the pinned block had nothing to stick
+   through and the headline scrolled away. Give the section its own runway. */
+[data-chapter="WhatWeDo"] { min-height: 230vh !important; }
+
+/* the pinned block was sitting top-aligned, clipping the headline */
+[data-chapter="WhatWeDo"] > .grid:first-of-type {
+  align-content: center !important;
+  align-items: center !important;
+  padding-top: 0 !important;
+  min-height: 100vh !important;
+}
+
+/* position:sticky does not hold inside their scroll engine - the block only
+   partly resisted and kept sliding, which is why the headline clipped. We
+   hold it ourselves with a transform, driven from the same loop. */
+[data-chapter="WhatWeDo"] > .grid:first-of-type {
+  /* position and top are driven from JS; !important here would beat the
+     inline style and stop the block being held */
+  will-change: transform;
+  z-index: 5;
+}
+
+
+/* ===== everything below our screens is still theirs ====================
+   Their globe with fifteen offices, their ethics framework, their charity
+   photographs, their addresses, their logo and copyright - and a 3D scene
+   that brings in ships, an Earth and a lake on its own as you scroll.
+   None of it can be on a C-POLAR page. Hidden until those screens are ours. */
+[data-chapter="GlobalConnectivity"],
+[data-chapter="Sustainability"],
+[data-chapter="Equality"],
+.section-sustainability,
+.section-solutions,
+.section-social,
+.divisions-container,
+footer { display: none !important; }
+
+/* with those gone the page ends on our clean screen, so let it settle there */
+[data-chapter="WhatWeDo"] { min-height: 230vh !important; }
+
+/* their page-transition splash still carries their division names; we have
+   no page navigation, so it serves nothing */
+.hero-transition .title p { visibility: hidden !important; }
+
+/* the boxes sit still; only the one you point at changes */
+.cp-tackle-row li { transition: background .18s ease, border-color .18s ease, color .18s ease !important; }
+
+
+/* ===== the five applications ==========================================
+   Their method, not ours: ONE background layer that never cuts, with the
+   scenes cross-fading inside it, and a small label naming the section.
+   All five images share one atmosphere so a cross-fade reads as an object
+   changing rather than a scene changing. */
+
+#cp-scenes { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.cp-scene {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0; will-change: opacity;
+}
+
+#cp-apps { position: relative; z-index: 5; }
+.cp-app { min-height: 150vh; position: relative; }
+.cp-app-inner {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding-left: 148px; padding-bottom: 104px; max-width: 760px;
+}
+.cp-app-inner::before {
+  /* was a flat 960px, which on a 390px phone stuck 570px off the side and
+     gave the whole page a horizontal scrollbar */
+  content: ""; position: absolute; left: 0; bottom: 0;
+  width: 100%; max-width: 960px; height: 540px; pointer-events: none;
+  background: radial-gradient(120% 100% at 0% 100%,
+              rgba(244,247,249,.80) 0%,
+              rgba(244,247,249,.54) 42%,
+              rgba(244,247,249,0)   78%);
+}
+.cp-app-inner > * { position: relative; }
+
+.cp-app-mark {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 0 22px;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 14px; letter-spacing: .9px; font-weight: 700;
+  color: #12405f; text-transform: none;
+}
+.cp-diamond {
+  width: 12px; height: 12px; transform: rotate(45deg);
+  border: 1.6px solid #12405f; display: inline-block;
+}
+.cp-app-title {
+  margin: 0 0 20px;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 50px; line-height: 1.14; font-weight: 400;
+  letter-spacing: -.3px; color: #12405f; text-transform: none;
+}
+.cp-app-copy {
+  margin: 0; max-width: 46ch;
+  font-size: 18px; line-height: 1.62; color: #17456a; text-transform: none;
+}
+.cp-app-copy:empty::before {
+  content: "copy to come";
+  color: rgba(23,69,106,.62); font-style: italic;
+}
+
+@media (max-width: 1024px){
+  .cp-app-inner { padding-left: 24px; padding-right: 24px; }
+  .cp-app-title { font-size: 30px; }
+  .cp-app-copy { font-size: 15.5px; }
+}
+
+
+/* Their page-transition overlay. It is for a multi-page site and never runs
+   here - it sits at opacity 0 from first paint to last. But its row of title
+   blocks is 1511px wide, so on a 390px phone it gave the whole document a
+   horizontal scrollbar. Clip it. The element stays so their script can still
+   find it. */
+.hero-transition { overflow: hidden !important; max-width: 100vw !important; }
+
+
+/* The applications row on the hero deliberately breaks out wider than the
+   600px text column - that is the approved desktop look and it stays. But the
+   760px width was declared AFTER the mobile override, so it won at every
+   width and gave a 390px phone a 792px document. Same specificity, later
+   rule wins, media query or not. Re-assert the mobile width last.
+   Desktop is untouched: this only applies below 1024px. */
+@media (max-width: 1024px){
+  .cp-hero .cp-apps { width: 100% !important; }
+  .cp-apps-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* On a phone the viewport is taller than it is wide, so a 16:9 photograph is
+   cropped to about a quarter of its width. Centred, that quarter is the empty
+   wall and the person is off the side - her head was cut off. She stands at
+   about 68% across in every frame, so favour that side on narrow screens.
+   Desktop is untouched. */
+@media (max-width: 700px){
+  .cp-scene { background-position: 68% center; }
+}
