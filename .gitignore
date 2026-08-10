@@ -13,3 +13,12 @@ _verify_widths.mjs
 
 # local-only replica of the reference site — never deploy: their code and images
 _ref_clone/
+
+# internal build notes and comparison renders - keep local, never publish
+peak_to_particle/GOAL.md
+peak_to_particle/PLAN.md
+peak_to_particle/hero_vs.png
+peak_to_particle/vs_c*.png
+peak_to_particle/ab_ref_*.png
+peak_to_particle/gate_*.png
+cpolar/
