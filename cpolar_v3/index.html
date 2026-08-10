@@ -29,11 +29,12 @@ body{opacity:1 !important}
    and fixed, and the application headings were running straight under it. cp-app is
    what those five sections are called; the plain rule lost to their own specificity. */
 /* The application panels are position:sticky with top:0, so they pin to the very top of
-   the viewport - under our 82px fixed header, which is why the headings were sitting on
-   the navigation. Padding on the section cannot move a sticky child; the padding has to
-   go inside it. */
-.cp-app-inner{padding-top:96px !important}
-section[class*="astro-"]{padding-top:96px}
+   the viewport - under our fixed header, which is why the headings sat on the
+   navigation. Padded them at first, which is a hack: V1 does not pad them, it takes the
+   HEADER away once you are past the hero. Stepping the two pages side by side showed
+   V1's header absent on every application frame and ours present on all of them. Doing
+   what V1 does means no padding is needed and nothing has to be nudged. */
+header{transition:opacity .3s linear, transform .3s ease}
 </style>
 <meta name="robots" content="noindex, nofollow">
 
@@ -1161,6 +1162,10 @@ addEventListener('pointermove', (e) => {
     canvas.style.opacity = o;
     document.querySelectorAll('.veil, .veil-x').forEach(e => e.style.opacity = o);
     document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = o);
+    // the header goes with the hero, the way V1's does
+    const hd = document.querySelector('header');
+    if (hd) { hd.style.opacity = o; hd.style.transform = done ? 'translateY(-100%)' : 'none';
+              hd.style.pointerEvents = done ? 'none' : ''; }
   }
   if (heroHidden) return;
   // How far through the first screen of scroll we are, eased.
