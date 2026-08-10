@@ -35,8 +35,13 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
+/* The terrain mesh has to end somewhere and from this camera the corner where it ends
+   crosses the lower part of the frame. This haze drowns the bottom of the picture in
+   the page colour, so the mountain has no foot - it goes into weather and stops. */
 .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(238,242,245,.30) 0%,rgba(238,242,245,0) 30%,rgba(238,242,245,.10) 74%,rgba(238,242,245,.55) 100%)}
+  background:linear-gradient(180deg,rgba(238,242,245,.30) 0%,rgba(238,242,245,0) 26%,
+    rgba(238,242,245,.06) 52%,rgba(238,242,245,.34) 70%,rgba(238,242,245,.78) 87%,
+    rgba(238,242,245,1) 100%)}
 .wrap{position:relative;z-index:2}
 
 header{position:fixed;top:0;left:0;right:0;height:82px;z-index:5;display:flex;align-items:center}
@@ -139,22 +144,37 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+// 1.0 with the lights below drove the whole mountain to white - snow and rock landed
+// on the same value and the shape disappeared. Rock has to sit in the mid greys or
+// there is nothing for the snow to be white AGAINST.
+renderer.toneMappingExposure = 0.70;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xdde6ef, 330, 720);
+// The summit is 363 units from this camera and the far ridge about 554. Fog starting
+// at 250 put the summit past the halfway point of the ramp and bleached it out; it has
+// to start beyond the peak so only the ground BEHIND the peak recedes.
+scene.fog = new THREE.Fog(0xe6ecf1, 620, 1300);
 
-const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 1, 4000);
-camera.position.set(-96, 44, 430);
-camera.lookAt(74, 20, -50);
+// The shot. The summit of this mesh is at world (15.4, 58.4, -2.4).
+//   - the camera sits BELOW it, so the frame looks UP at the peak. The first version
+//     sat at y=44 aiming at y=20, nearly level and 430 out, and read like a map.
+//   - closer, on a longer lens, so the base runs off both edges of the screen.
+//   - aimed to the LEFT of the summit line, which throws the peak to the RIGHT of
+//     frame and leaves the left half clear for the copy.
+const camera = new THREE.PerspectiveCamera(20, innerWidth/innerHeight, 1, 5000);
+camera.position.set(-290, 22, 470);
+const AIM = new THREE.Vector3(-38, 32, -37);
+camera.lookAt(AIM);
 
-// light: one raking key from the left, cool sky fill, warm bounce off the valley
-scene.add(new THREE.HemisphereLight(0xf4f8fb, 0x8fa6ba, 1.05));
-const key = new THREE.DirectionalLight(0xfffdf8, 2.1);
-key.position.set(-330, 165, 240);
+// light: a hard raking key from the left so one face is lit and the other falls into
+// shadow - the ridge between them is what gives a mountain its shape. Cool sky fill,
+// cold rim from behind to separate the summit from the haze.
+scene.add(new THREE.HemisphereLight(0xf6fafd, 0x7c92a8, 0.58));
+const key = new THREE.DirectionalLight(0xfffdf6, 1.90);
+key.position.set(-380, 150, 210);
 scene.add(key);
-const rim = new THREE.DirectionalLight(0xa8c4dc, 0.75);
-rim.position.set(360, 90, -300);
+const rim = new THREE.DirectionalLight(0xb6cee4, 0.62);
+rim.position.set(330, 130, -320);
 scene.add(rim);
 
 const tex = new THREE.TextureLoader();
@@ -178,6 +198,22 @@ new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
   scene.add(terrain);
 });
 
+// The mesh has to stop somewhere, and from a low camera the place it stops shows as a
+// hard straight line across the picture - it was clearly there on the lower left.
+// This is ground that carries on past it. It is fog-coloured and fog-affected, so it
+// never reads as a plane and never draws a horizon: it simply dissolves. Its top sits
+// at -24, which cuts the mountain on its OWN slopes: the outline where rock meets haze is
+// then a real terrain contour. Sitting it at the mesh rim instead put the waterline in
+// the artificial plunge zone, where the ground falls so steeply it crossed the plane
+// within a cell or two and the contour came out as a staircase of straight segments.
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(9000, 9000),
+  new THREE.MeshBasicMaterial({ color: 0xe6ecf1, fog: true })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -24.0;
+scene.add(ground);
+
 // Cloud is what gives the frame depth: banks behind the peak, and one soft bank
 // drifting across in FRONT of it, so the mountain sits inside weather rather than
 // on top of a flat ground.
@@ -190,7 +226,7 @@ function cloudTex(soft){
     const cxp = 80 + Math.random()*(W-160), cyp = H/2 + (Math.random()-0.5)*70;
     const r = 40 + Math.random()*90;
     const gr = x.createRadialGradient(cxp,cyp,0,cxp,cyp,r);
-    gr.addColorStop(0, 'rgba(255,255,255,'+(soft?0.11:0.20)+')');
+    gr.addColorStop(0, 'rgba(255,255,255,'+(soft?0.22:0.38)+')');
     gr.addColorStop(1, 'rgba(255,255,255,0)');
     x.fillStyle = gr; x.beginPath(); x.arc(cxp,cyp,r,0,7); x.fill();
   }
@@ -205,12 +241,23 @@ function cloudTex(soft){
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 const clouds = new THREE.Group();
+// Every bank is a THIN horizontal band, not a tall sheet. The first attempt used
+// 430-tall planes 68 units from the camera; a plane that big that close simply fills
+// the screen and fogs the whole shot out. Nothing now sits closer than z=40, and the
+// alpha falloff in cloudTex eats the outer 30%, so h=160 draws a band about 100 tall.
+// Every bank is a THIN horizontal band. The terrain rim sits at y=-64, so the sea
+// bands straddle that line and there is nothing to see where the mesh stops.
 const BANKS = [
-  {w:1500,h:420, x:-40, y:-52, z:-330, o:.85, d:.020, soft:false},
-  {w:1250,h:360, x: 90, y:-30, z:-140, o:.70, d:.030, soft:false},
-  {w:1800,h:280, x:-60, y:-92, z:  30, o:.50, d:.045, soft:true },
-  {w:2600,h:420, x: 60, y:-104, z: 210, o:.92, d:.052, soft:true },
-  {w:2200,h:300, x:-120, y:-84, z: 130, o:.68, d:.038, soft:true },
+  // behind the summit, so the peak has something to stand against instead of bare sky
+  {w:1900,h:230, x:  40, y: 40, z:-460, o:.55, d:.014, soft:false},
+  {w:1500,h:190, x:-120, y: 14, z:-340, o:.42, d:.020, soft:true },
+  // the cloud sea the peak rises out of, sitting ON the rim line
+  {w:2400,h:190, x:   0, y:-14, z: -80, o:.72, d:.026, soft:false},
+  {w:2600,h:170, x:  90, y:-22, z: 150, o:.78, d:.034, soft:false},
+  {w:2800,h:160, x:-160, y:-30, z: 330, o:.70, d:.044, soft:false},
+  {w:2600,h:150, x: 140, y:-38, z: 440, o:.58, d:.050, soft:true },
+  // one thin wisp drifting across the mid slopes IN FRONT of the rock, for depth
+  {w:1800,h: 95, x: -40, y: -2, z: 250, o:.34, d:.055, soft:true },
 ];
 BANKS.forEach(b => {
   const m = new THREE.Mesh(
@@ -251,8 +298,8 @@ const clock = new THREE.Clock();
     terrain.position.y = -sy * 0.05;
   }
   clouds.children.forEach(c => { c.position.x += c.userData.d; if (c.position.x > c.userData.x0 + 700) c.position.x = c.userData.x0 - 700; });
-  camera.position.y = 44 + Math.sin(t * 0.06) * 1.4;
-  camera.lookAt(74, 20 - sy * 0.012, -50);
+  camera.position.y = 22 + Math.sin(t * 0.06) * 1.2;
+  camera.lookAt(AIM.x, AIM.y - sy * 0.012, AIM.z);
   renderer.render(scene, camera);
 })();
 
