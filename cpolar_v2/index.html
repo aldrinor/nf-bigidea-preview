@@ -378,10 +378,17 @@ vec3 triBlend(vec3 n){
   // +250 or the peak is simply off the side. The first attempt broke both rules and
   // added four mountains nobody could see.
   const RANGE = [
-    { rot: 1.30, sx: 1.30, sy: 0.60, x: -330, y: -30, z: -180 },
-    { rot: 3.90, sx: 1.05, sy: 0.50, x:  180, y: -36, z: -300 },
-    { rot: 0.55, sx: 1.60, sy: 0.40, x: -110, y: -42, z: -520 },
-    { rot: 4.80, sx: 1.15, sy: 0.46, x:  260, y: -34, z: -700 },
+    // near band, z=-180: the frame runs x -338..168 out here
+    { rot: 1.30, sx: 1.45, sy: 0.72, x: -300, y: -28, z: -180 },
+    { rot: 5.05, sx: 1.15, sy: 0.60, x:  -95, y: -34, z: -180 },
+    // middle band, z=-420: x -379..347
+    { rot: 3.90, sx: 1.55, sy: 0.66, x: -340, y: -32, z: -420 },
+    { rot: 0.55, sx: 1.30, sy: 0.54, x: -140, y: -38, z: -420 },
+    { rot: 2.15, sx: 1.40, sy: 0.58, x:  145, y: -34, z: -420 },
+    // far band, z=-700: x -427..557, and the fog is doing most of the work here
+    { rot: 4.80, sx: 1.85, sy: 0.62, x: -370, y: -34, z: -700 },
+    { rot: 1.85, sx: 1.60, sy: 0.50, x:  -70, y: -40, z: -700 },
+    { rot: 3.30, sx: 1.70, sy: 0.56, x:  270, y: -36, z: -700 },
   ];
   RANGE.forEach((r) => {
     const c = terrain.clone(true);
@@ -482,11 +489,12 @@ void main(){
 // top has to land near the mountain's FOOT - the first pass put it near the middle of
 // the peak and drowned everything below it.
 const CLOUD_LAYERS = [
-  { w: 5200, band: 1.10, x:  120, y:  16, z: -900, top: .64, soft: .11, o: .58, spd: 1.6 },
-  { w: 4200, band: 1.00, x: -380, y:  -4, z: -620, top: .60, soft: .11, o: .62, spd: 2.1 },
-  { w: 3400, band: .92, x:  260, y: -18, z: -320, top: .56, soft: .11, o: .66, spd: 2.7 },
-  { w: 1900, band: .66, x: -140, y: -52, z:  140, top: .50, soft: .11, o: .72, spd: 3.4 },
-  { w: 1500, band: .52, x:  160, y: -62, z:  270, top: .46, soft: .11, o: .58, spd: 4.2 },
+  { w: 6000, band: 1.10, x:  120, y:  10, z: -980, top: .64, soft: .11, o: .54, spd: 1.6 },
+  { w: 5000, band: 1.02, x: -300, y:  -2, z: -820, top: .62, soft: .11, o: .58, spd: 2.0 },
+  { w: 4200, band: .96, x:  200, y: -12, z: -560, top: .58, soft: .11, o: .62, spd: 2.5 },
+  { w: 3600, band: .88, x: -260, y: -20, z: -300, top: .55, soft: .11, o: .52, spd: 3.0 },
+  { w: 1900, band: .66, x: -140, y: -52, z:  140, top: .50, soft: .11, o: .58, spd: 3.4 },
+  { w: 1500, band: .52, x:  160, y: -62, z:  270, top: .46, soft: .11, o: .44, spd: 4.2 },
 ];
 
 const clouds = new THREE.Group();
@@ -502,8 +510,12 @@ CLOUD_LAYERS.forEach((L, i) => {
         uTime:{value:0}, uSeed:{value:i * 17.3}, uTop:{value:L.top},
       uSoft:{value:L.soft * (0.55 + 0.85 * L.band)},
         uOpacity:{value:L.o},
-        uPale:  {value:new THREE.Color(0xadc6e2)},
-        uBright:{value:new THREE.Color(0xeef6ff)},
+        // 0x9db9dc gave the cloud enough internal contrast for its motion to read, and turned
+      // the bottom of the frame into a saturated blue band. Contrast comes from the
+      // spread between these two, not from how strong the colour is - so the pale end
+      // goes back toward grey while the gap stays wide.
+      uPale:  {value:new THREE.Color(0xbfd0e3)},
+        uBright:{value:new THREE.Color(0xfbfdff)},
       },
     })
   );
