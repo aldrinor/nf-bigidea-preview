@@ -190,7 +190,7 @@ const scene = new THREE.Scene();
 // 820 brackets the mountain's own depth: the summit lifts about 11 levels, the far
 // ridge 6, the near foot 3 - ordered by distance, which is what makes depth read.
 // (An older comment here claimed 363 and 554. Both were wrong. These are measured.)
-scene.fog = new THREE.Fog(0xd6e4f5, 300, 820);
+scene.fog = new THREE.Fog(0xd6e4f5, 300, 1400);
 
 // The shot. The summit of this mesh is at world (15.4, 58.4, -2.4).
 //   - the camera sits BELOW it, so the frame looks UP at the peak. The first version
@@ -362,6 +362,35 @@ vec3 triBlend(vec3 n){
   });
   terrain = g.scene;
   scene.add(terrain);
+
+  // A RANGE, not one hill.
+  // Stacked side by side against the reference and against V1, the difference was not
+  // colour and it was not texture - both of those fill the frame with several peaks at
+  // several distances, seen through cloud, and this had a single object sitting in an
+  // empty field. One mountain alone reads as a prop; peaks behind peaks read as land.
+  //
+  // Same mesh, turned to a different face, scaled and pushed back so each one is a
+  // different mountain at a different distance. They cost nothing to load and the fog
+  // does most of the work of separating them.
+  // Placed by arithmetic, not by feel. The fog ends at 1400 and the camera sits at
+  // z=372, so anything past z=-1030 is fully fogged and invisible; and the frame is only
+  // about 640 world units wide at that depth, so x has to stay between roughly -450 and
+  // +250 or the peak is simply off the side. The first attempt broke both rules and
+  // added four mountains nobody could see.
+  const RANGE = [
+    { rot: 1.30, sx: 1.30, sy: 0.60, x: -330, y: -30, z: -180 },
+    { rot: 3.90, sx: 1.05, sy: 0.50, x:  180, y: -36, z: -300 },
+    { rot: 0.55, sx: 1.60, sy: 0.40, x: -110, y: -42, z: -520 },
+    { rot: 4.80, sx: 1.15, sy: 0.46, x:  260, y: -34, z: -700 },
+  ];
+  RANGE.forEach((r) => {
+    const c = terrain.clone(true);
+    c.rotation.y = r.rot;
+    c.scale.set(r.sx, r.sy, r.sx);
+    c.position.set(r.x, r.y, r.z);
+    c.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
+    scene.add(c);
+  });
 });
 
 // There was a fog-coloured ground plane here whose only job was to hide the mesh edge.
@@ -453,9 +482,9 @@ void main(){
 // top has to land near the mountain's FOOT - the first pass put it near the middle of
 // the peak and drowned everything below it.
 const CLOUD_LAYERS = [
-  { w: 3000, band: .96, x:  120, y: -18, z: -560, top: .60, soft: .11, o: .52, spd: 1.6 },
-  { w: 2600, band: .88, x: -180, y: -30, z: -300, top: .57, soft: .11, o: .60, spd: 2.1 },
-  { w: 2200, band: .78, x:   80, y: -42, z:  -60, top: .54, soft: .11, o: .68, spd: 2.7 },
+  { w: 5200, band: 1.10, x:  120, y:  16, z: -900, top: .64, soft: .11, o: .58, spd: 1.6 },
+  { w: 4200, band: 1.00, x: -380, y:  -4, z: -620, top: .60, soft: .11, o: .62, spd: 2.1 },
+  { w: 3400, band: .92, x:  260, y: -18, z: -320, top: .56, soft: .11, o: .66, spd: 2.7 },
   { w: 1900, band: .66, x: -140, y: -52, z:  140, top: .50, soft: .11, o: .72, spd: 3.4 },
   { w: 1500, band: .52, x:  160, y: -62, z:  270, top: .46, soft: .11, o: .58, spd: 4.2 },
 ];
