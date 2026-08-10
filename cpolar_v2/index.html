@@ -154,6 +154,21 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+const _q = new URLSearchParams(location.search);
+// 5.40 radians. Picked by rendering nine rotations and judging the OUTLINES only.
+// From here the mountain has a dominant peak, a real saddle and a distinct second
+// summit - the structure that was missing when it was one clean cone whose deepest
+// notch measured two pixels.
+const ROT = parseFloat(_q.get('rot') ?? '5.40');
+// Placement picked the same way as the rotation: rendered as a sheet and judged, not
+// guessed. Aiming LEFT of the peak throws it right on screen, so -90 sets it decisively
+// on the right and leaves the whole left field clean for the copy.
+const AIMX = parseFloat(_q.get('aimx') ?? '-90');
+// A much shorter lens than the 20 it was on. The mass comes down, pale air opens up
+// around the silhouette - which is what an outline needs if it is to read as a shape -
+// and at 32 the right shoulder stops being clipped by the frame edge.
+const FOV = parseFloat(_q.get('fov') ?? '32');
+
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
@@ -181,9 +196,9 @@ scene.fog = new THREE.Fog(0xe6ecf1, 300, 820);
 //   - closer, on a longer lens, so the base runs off both edges of the screen.
 //   - aimed to the LEFT of the summit line, which throws the peak to the RIGHT of
 //     frame and leaves the left half clear for the copy.
-const camera = new THREE.PerspectiveCamera(20, innerWidth/innerHeight, 1, 5000);
+const camera = new THREE.PerspectiveCamera(FOV, innerWidth/innerHeight, 1, 5000);
 camera.position.set(-244, 26, 372);
-const AIM = new THREE.Vector3(-30, 34, -40);
+const AIM = new THREE.Vector3(AIMX, 34, -40);
 camera.lookAt(AIM);
 
 // light: a hard raking key from the left so one face is lit and the other falls into
@@ -353,8 +368,17 @@ function cloudTex(soft){
     const cxp = 80 + Math.random()*(W-160), cyp = H/2 + (Math.random()-0.5)*70;
     const r = 40 + Math.random()*90;
     const gr = x.createRadialGradient(cxp,cyp,0,cxp,cyp,r);
-    gr.addColorStop(0, 'rgba(255,255,255,'+(soft?0.22:0.38)+')');
-    gr.addColorStop(1, 'rgba(255,255,255,0)');
+    // Measured: with white blobs the cloud added +56 levels on the mid slopes and
+    // EXACTLY 0.00 against the sky. White on a near-white sky cannot be seen, so the
+    // cloud only ever showed as a pale wash on the rock and never as cloud. It has to
+    // be a little DARKER than the page to exist against the sky at all. Lit from above,
+    // so the top of each blob is paler and the underside carries the blue-grey.
+    const lift = 1 - Math.min(1, Math.max(0, (cyp - (H/2 - 60)) / 130));
+    const cr = Math.round(198 + 44 * lift);
+    const cg = Math.round(211 + 38 * lift);
+    const cb = Math.round(224 + 29 * lift);
+    gr.addColorStop(0, 'rgba('+cr+','+cg+','+cb+','+(soft?0.26:0.44)+')');
+    gr.addColorStop(1, 'rgba('+cr+','+cg+','+cb+',0)');
     x.fillStyle = gr; x.beginPath(); x.arc(cxp,cyp,r,0,7); x.fill();
   }
   // Then fade the alpha out RADIALLY. It was done per-edge before - one falloff from
@@ -388,34 +412,45 @@ const clouds = new THREE.Group();
 // the mountain's foot is roughly 285 away, where the frame is ~100 units tall and the
 // foot itself spans about 40 of them.
 const BANKS = [
+  // Cloud only READS where there is something dark behind it. Lying it across the foot
+  // put it over pale ground, where it did nothing but wash the foreground out - and
+  // when that wash was cut back, the cloud went with it and the scene lost its weather
+  // entirely. So the weight moves UP, onto the mid slopes and around the peak, where
+  // there is dark rock for it to show against. The foot keeps only a thin veil.
+  //
+  // Depth matters as much as height: a bank must sit between the camera at z=372 and
+  // the mountain's foot at z=185 to cross anything. Anything further back is hidden by
+  // the mountain, because the cloud material stops writing depth but still tests it.
+
   // behind the summit, so the peak has something to stand against instead of bare sky
   {w:2200,h:240, x:  40, y: 44, z:-620, o:.46, d:-.009, soft:false},
   {w:1700,h:200, x:-120, y: 16, z:-420, o:.36, d:.018, soft:true },
-  // the sea, lying across the foot of the mountain and nothing above it
-  // These two were lifting the nearest slope to brightness 183 while the farthest mass
-  // sat at 97 - front paler than back, which is distance running backwards, and the
-  // main reason the picture read flat. Both agents had to come down; halving the cloud
-  // alone still left the foot near 163.
-  {w:1600,h: 78, x:  60, y:-30, z: 210, o:.34, d:.030, soft:false},
-  {w:2000,h:105, x:-190, y:-34, z:  50, o:.30, d:.038, soft:false},
-  {w:2600,h:140, x: 180, y:-20, z:-140, o:.70, d:.046, soft:true },
-  {w:3000,h:170, x:-260, y:-26, z:-330, o:.55, d:.054, soft:true },
-  // A thin collar that actually crosses the peak. Every other bank in front of the
-  // mountain sits at or below its foot, and everything at mid-height is BEHIND the
-  // mountain and hidden by it - the cloud material stops writing depth but still tests
-  // it. 34 units tall draws a collar of about 165px; 70 would be a slab across nearly
-  // 40% of a frame whose whole rule is restraint.
-  {w:1500,h: 34, x: -40, y: 40, z: 120, o:.34, d:.021, soft:true },
+
+  // the weather, crossing the mountain itself
+  {w:1500,h: 52, x: -40, y: 44, z: 120, o:.62, d:.021, soft:true },
+  {w:1800,h: 62, x: 180, y: 26, z: 175, o:.58, d:.028, soft:true },
+  {w:2000,h: 74, x:-120, y:  6, z: 225, o:.52, d:.034, soft:false},
+
+  // a thin veil at the foot only - this is the one that used to bleach the foreground
+  {w:1600,h: 78, x:  60, y:-30, z: 210, o:.26, d:.040, soft:false},
+  {w:2000,h:105, x:-190, y:-34, z:  50, o:.24, d:.046, soft:false},
+  {w:2600,h:140, x: 180, y:-20, z:-140, o:.42, d:.052, soft:true },
 ];
 BANKS.forEach(b => {
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(b.w, b.h),
     new THREE.MeshBasicMaterial({ map: cloudTex(b.soft), transparent:true, depthWrite:false, opacity:b.o })
   );
-  m.position.set(b.x, b.y, b.z); m.userData.d = b.d * 60; m.userData.x0 = b.x;
+  m.position.set(b.x, b.y, b.z); // x1.8 on top of the per-second conversion. Measured: at the old rate the fastest bank
+  // crossed a quarter of the mountain in thirty seconds, which is true to life and far
+  // too slow to be noticed by someone who has just landed on the page.
+  m.userData.d = b.d * 60 * 1.8; m.userData.x0 = b.x;
   m.userData.ph = Math.random() * 6.283; m.userData.o = b.o;
   clouds.add(m);
 });
+// ?clouds=0 hides them, so their real contribution can be MEASURED rather than argued
+// about. "I cannot see any cloud" is a testable claim and this is how it gets tested.
+clouds.visible = _q.get('clouds') !== '0';
 scene.add(clouds);
 
 // smooth scroll + the page rail
@@ -445,7 +480,10 @@ let lastT = 0;
   const t = clock.getElapsedTime();
   const dt = Math.min(t - lastT, 0.1); lastT = t;
   if (terrain) {
-    terrain.rotation.y = 0.06 + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
+    // ?rot= turns the mountain so a different face is presented. The skyline is one
+    // clean cone from the angle it was built at; other angles put a ridge and a col in
+    // the outline. Swept rather than guessed at - see _sweep_angle.mjs.
+    terrain.rotation.y = ROT + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
     terrain.position.y = -sy * 0.05;
   }
   // The drift used to advance once per FRAME, so it ran at double speed on a 120Hz
@@ -463,7 +501,8 @@ let lastT = 0;
 })();
 
 // harness hook: ?p= pins the scroll for a screenshot
-const p = new URLSearchParams(location.search).get('p');
+const q = new URLSearchParams(location.search);
+const p = q.get('p');
 if (p !== null) { lenis.destroy(); sy = parseFloat(p) * innerHeight; }
 </script>
 </body>
