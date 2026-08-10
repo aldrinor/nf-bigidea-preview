@@ -417,9 +417,12 @@ void main(){
   // three scrolling fields shove the cloud top up and down: slow and broad, then
   // quicker and finer, then a fast one that frays the rim
   float y = uv.y;
-  y += 0.30 * (fbm(q * 0.55 + vec2(-0.020, -0.006) * uTime) - 0.5);
-  y -= 0.20 * (fbm(q * 1.30 + vec2( 0.034,  0.011) * uTime) - 0.5);
-  y += 0.09 * (fbm(q * 3.10 + vec2(-0.058,  0.004) * uTime) - 0.5);
+  // Measured on the live page: at a quarter of these rates the cloud sea moved 4.6
+  // levels in fifteen seconds - real, and far too slow for anyone to notice. Cloud that
+  // is true to life is not cloud you can see moving on a web page.
+  y += 0.30 * (fbm(q * 0.55 + vec2(-0.075, -0.022) * uTime) - 0.5);
+  y -= 0.20 * (fbm(q * 1.30 + vec2( 0.128,  0.041) * uTime) - 0.5);
+  y += 0.09 * (fbm(q * 3.10 + vec2(-0.210,  0.015) * uTime) - 0.5);
 
   // the cloud top itself, and a soft underside so the mass has a bottom
   float top  = smoothstep(uTop + uSoft, uTop - uSoft, y);
