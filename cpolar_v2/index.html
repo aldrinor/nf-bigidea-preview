@@ -39,9 +39,17 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    crosses the lower part of the frame. This haze drowns the bottom of the picture in
    the page colour, so the mountain has no foot - it goes into weather and stops. */
 .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(238,242,245,.30) 0%,rgba(238,242,245,0) 26%,
-    rgba(238,242,245,.06) 52%,rgba(238,242,245,.34) 70%,rgba(238,242,245,.78) 87%,
-    rgba(238,242,245,1) 100%)}
+  background:linear-gradient(180deg,rgba(238,242,245,.26) 0%,rgba(238,242,245,0) 30%,
+    rgba(238,242,245,.04) 66%,rgba(238,242,245,.20) 84%,rgba(238,242,245,.46) 100%)}
+/* And the same across, holding the left of the frame clear. The mountain was running
+   in behind the paragraph and the application row, so the copy sat on shifting tone
+   instead of on the page - and the far shoulder over there was the one place the mesh
+   still showed a long straight ramp. Both problems end at the same gradient. */
+.veil-x{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,rgba(238,242,245,1) 0%,rgba(238,242,245,.97) 30%,
+    rgba(238,242,245,.72) 44%,rgba(238,242,245,.24) 56%,rgba(238,242,245,0) 68%)}
+@media (max-width:900px){ .veil-x{background:linear-gradient(90deg,
+    rgba(238,242,245,.92) 0%,rgba(238,242,245,.55) 40%,rgba(238,242,245,0) 78%)} }
 .wrap{position:relative;z-index:2}
 
 header{position:fixed;top:0;left:0;right:0;height:82px;z-index:5;display:flex;align-items:center}
@@ -57,8 +65,8 @@ nav a:hover{color:var(--ink-strong)}
 section.stop{min-height:100vh;display:flex;align-items:center}
 .col{grid-column:2 / span 12}
 
-.mark{display:flex;align-items:center;gap:0;margin-bottom:26px}
-.mark img{height:56px;width:auto}
+.mark{display:flex;align-items:center;gap:0;margin-bottom:30px;opacity:.92}
+.mark img{height:40px;width:auto}
 h1{font-size:0;line-height:0;height:0;overflow:hidden}
 .lede{font-size:19px;line-height:1.62;max-width:600px;color:var(--ink);font-weight:400}
 .lede strong{font-weight:700;color:var(--ink-strong)}
@@ -89,6 +97,7 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
 
 <canvas id="scene"></canvas>
 <div class="veil"></div>
+<div class="veil-x"></div>
 
 <header>
   <div class="shell">
@@ -185,34 +194,72 @@ let terrain = null;
 new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
   const alb = tex.load('./assets/mountain_albedo.webp'); alb.colorSpace = THREE.SRGBColorSpace;
   const nrm = tex.load('./assets/mountain_normal.webp');
+  const rgh = tex.load('./assets/mountain_rough.webp');
+  const det = tex.load('./assets/rock_detail_n.webp');
+  det.wrapS = det.wrapT = THREE.RepeatWrapping;
+
   g.scene.traverse((o) => {
     if (!o.isMesh) return;
     o.geometry.computeVertexNormals();
-    o.material = new THREE.MeshStandardMaterial({
-      map: alb, normalMap: nrm,
-      normalScale: new THREE.Vector2(1.0, 1.0),
-      roughness: 0.93, metalness: 0.0
+    const mat = new THREE.MeshStandardMaterial({
+      map: alb, normalMap: nrm, roughnessMap: rgh,
+      normalScale: new THREE.Vector2(1.35, 1.35),
+      roughness: 1.0, metalness: 0.0
     });
+
+    // TRIPLANAR DETAIL.
+    // The baked maps above are projected straight down, because that is the only way
+    // to bake where snow and scree go. On the flat and gently sloping ground that is
+    // fine. On a cliff it is not: a near-vertical face occupies almost no area in a
+    // top-down UV, so every texel there is smeared into a long vertical streak. Three
+    // separate judgements named it - "vertical smearing", "texture-stretched",
+    // "a stretched height map" - and adding more detail to the baked map only ever
+    // made the streaks louder, because the streaking IS the projection.
+    //
+    // So fine detail is not projected from above at all. A small tiling rock map is
+    // sampled three times, once down each world axis, and blended by which way the
+    // surface faces. A vertical face takes its detail from a sideways projection, so
+    // nothing stretches in any orientation, and because the map tiles it can run at a
+    // far finer scale than one baked texture over a whole mountain could ever hold.
+    mat.onBeforeCompile = (sh) => {
+      sh.uniforms.uDetail = { value: det };
+      sh.uniforms.uDScale = { value: 0.075 };   // world units to texture repeats
+      sh.uniforms.uDAmt   = { value: 0.72 };
+
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>',
+                 '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNrm;')
+        .replace('#include <worldpos_vertex>',
+                 '#include <worldpos_vertex>\n' +
+                 '  vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;\n' +
+                 '  vWNrm = normalize(mat3(modelMatrix) * objectNormal);');
+
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>',
+                 '#include <common>\nuniform sampler2D uDetail;\nuniform float uDScale;\n' +
+                 'uniform float uDAmt;\nvarying vec3 vWPos;\nvarying vec3 vWNrm;')
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+  {
+    vec3 bw = pow(abs(normalize(vWNrm)), vec3(4.0));
+    bw /= (bw.x + bw.y + bw.z + 1e-5);
+    vec3 p = vWPos * uDScale;
+    vec3 dX = texture2D(uDetail, p.zy).xyz * 2.0 - 1.0;
+    vec3 dY = texture2D(uDetail, p.xz).xyz * 2.0 - 1.0;
+    vec3 dZ = texture2D(uDetail, p.xy).xyz * 2.0 - 1.0;
+    vec3 dn = dX * bw.x + dY * bw.y + dZ * bw.z;
+    vec3 vdn = (viewMatrix * vec4(dn, 0.0)).xyz;
+    normal = normalize(normal + vdn * uDAmt);
+  }`);
+    };
+    o.material = mat;
   });
   terrain = g.scene;
   scene.add(terrain);
 });
 
-// The mesh has to stop somewhere, and from a low camera the place it stops shows as a
-// hard straight line across the picture - it was clearly there on the lower left.
-// This is ground that carries on past it. It is fog-coloured and fog-affected, so it
-// never reads as a plane and never draws a horizon: it simply dissolves. Its top sits
-// at -24, which cuts the mountain on its OWN slopes: the outline where rock meets haze is
-// then a real terrain contour. Sitting it at the mesh rim instead put the waterline in
-// the artificial plunge zone, where the ground falls so steeply it crossed the plane
-// within a cell or two and the contour came out as a staircase of straight segments.
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(9000, 9000),
-  new THREE.MeshBasicMaterial({ color: 0xe6ecf1, fog: true })
-);
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -24.0;
-scene.add(ground);
+// There was a fog-coloured ground plane here whose only job was to hide the mesh edge.
+// The terrain now reaches 1400 units in every direction, past the far end of the fog,
+// so there is no edge to hide and the plane was only flattening the distance.
 
 // Cloud is what gives the frame depth: banks behind the peak, and one soft bank
 // drifting across in FRONT of it, so the mountain sits inside weather rather than
@@ -247,17 +294,21 @@ const clouds = new THREE.Group();
 // alpha falloff in cloudTex eats the outer 30%, so h=160 draws a band about 100 tall.
 // Every bank is a THIN horizontal band. The terrain rim sits at y=-64, so the sea
 // bands straddle that line and there is nothing to see where the mesh stops.
+// A cloud plane is a billboard in world space, so how much of the SCREEN it covers
+// depends entirely on how far away it is. At z=240 a plane sits 230 units from this
+// camera, where the frame is only about 80 world units tall - so a 230-tall bank
+// covered the whole picture and buried the peak in fog. Sized against the distance:
+// the mountain's foot is roughly 285 away, where the frame is ~100 units tall and the
+// foot itself spans about 40 of them.
 const BANKS = [
   // behind the summit, so the peak has something to stand against instead of bare sky
-  {w:1900,h:230, x:  40, y: 40, z:-460, o:.55, d:.014, soft:false},
-  {w:1500,h:190, x:-120, y: 14, z:-340, o:.42, d:.020, soft:true },
-  // the cloud sea the peak rises out of, sitting ON the rim line
-  {w:2400,h:190, x:   0, y:-14, z: -80, o:.72, d:.026, soft:false},
-  {w:2600,h:170, x:  90, y:-22, z: 150, o:.78, d:.034, soft:false},
-  {w:2800,h:160, x:-160, y:-30, z: 330, o:.70, d:.044, soft:false},
-  {w:2600,h:150, x: 140, y:-38, z: 440, o:.58, d:.050, soft:true },
-  // one thin wisp drifting across the mid slopes IN FRONT of the rock, for depth
-  {w:1800,h: 95, x: -40, y: -2, z: 250, o:.34, d:.055, soft:true },
+  {w:2200,h:240, x:  40, y: 44, z:-620, o:.46, d:.012, soft:false},
+  {w:1700,h:200, x:-120, y: 16, z:-420, o:.36, d:.018, soft:true },
+  // the sea, lying across the foot of the mountain and nothing above it
+  {w:1600,h: 78, x:  60, y:-12, z: 210, o:.72, d:.030, soft:false},
+  {w:2000,h:105, x:-190, y:-16, z:  50, o:.76, d:.038, soft:false},
+  {w:2600,h:140, x: 180, y:-20, z:-140, o:.70, d:.046, soft:true },
+  {w:3000,h:170, x:-260, y:-26, z:-330, o:.55, d:.054, soft:true },
 ];
 BANKS.forEach(b => {
   const m = new THREE.Mesh(
