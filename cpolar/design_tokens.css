@@ -22,7 +22,7 @@
      One blue family, four steps. There is no second accent colour on this
      page and there should not be one. */
 
-  --ink:            #2d628c;   /* the base ink. Hero, nav, most body text.
+  --ink:            #1f2327;   /* the base ink. Hero, nav, most body text.
                                   Used 12x - this is the page's voice. */
   --ink-strong:     #12405f;   /* headlines and the application titles.
                                   Darkest step. Used 7x. */
