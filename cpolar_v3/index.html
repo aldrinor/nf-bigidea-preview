@@ -12,6 +12,28 @@
    whole page renders as a blank gradient with every element present, visible, correctly
    sized - and completely invisible. Our own fade-in is handled per element by GSAP. */
 body{opacity:1 !important}
+/* The hero canvas is position:fixed, because in v2 the hero WAS the whole page. Put
+   V1's seven sections underneath it and it never leaves - the mountain sits behind Air,
+   Water, Food Packaging and Textiles all the way to the bottom of the page. The hero
+   gets the runway and then hands over. */
+#scene, .veil, .veil-x{transition:opacity .35s linear}
+.wrap > *:not(.runway){position:relative; z-index:3; background:var(--paper,#eef2f5)}
+.runway{position:relative; z-index:2}
+/* The hero copy is pinned for the whole runway, so it was still at full strength while
+   the next section rose over it - two pieces of copy on screen at once. It fades out
+   with the mountain. */
+.col{transition:opacity .3s linear}
+/* V1's sections were authored under THEIR header. Ours is 82px and fixed, and the
+   Textiles heading was running underneath it. */
+/* V1's sections were authored under THEIR header, which sat differently. Ours is 82px
+   and fixed, and the application headings were running straight under it. cp-app is
+   what those five sections are called; the plain rule lost to their own specificity. */
+/* The application panels are position:sticky with top:0, so they pin to the very top of
+   the viewport - under our 82px fixed header, which is why the headings were sitting on
+   the navigation. Padding on the section cannot move a sticky child; the padding has to
+   go inside it. */
+.cp-app-inner{padding-top:96px !important}
+section[class*="astro-"]{padding-top:96px}
 </style>
 <meta name="robots" content="noindex, nofollow">
 
@@ -1092,6 +1114,7 @@ addEventListener('resize', () => {
 
 const clock = new THREE.Clock();
 let lastT = 0;
+let heroHidden = false;
 
 // Pointer, in 0..1 across the page, and a smoothed copy so nothing ever snaps. The
 // page ignored the pointer entirely, which measured as no response at all against V1.
@@ -1114,6 +1137,24 @@ addEventListener('pointermove', (e) => {
   // The cloud moves because its noise scrolls, not because a panel slides across, so
   // there is nothing to wrap around and nothing to reset.
   clouds.children.forEach(c => { c.material.uniforms.uTime.value = t * c.userData.spd; });
+
+  // Hand over. Once the runway is spent the hero fades and stops drawing, so the
+  // sections below scroll over the page rather than over a permanently visible
+  // mountain. Rendering stops too - there is no reason to keep a WebGL scene running
+  // for something nobody can see.
+  const fade = 1 - Math.min(1, Math.max(0, (sy - innerHeight * 1.25) / (innerHeight * 0.7)));
+  if (!heroHidden) {
+    document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = fade);
+  }
+  const done = sy > innerHeight * 2.05;
+  if (done !== heroHidden) {
+    heroHidden = done;
+    const o = done ? '0' : '1';
+    canvas.style.opacity = o;
+    document.querySelectorAll('.veil, .veil-x').forEach(e => e.style.opacity = o);
+    document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = o);
+  }
+  if (heroHidden) return;
   // How far through the first screen of scroll we are, eased.
   const p = Math.min(1, sy / innerHeight);
   // Ease OUT, not smoothstep. V1 moves more in the first third of a screen (19 levels)
