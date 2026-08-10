@@ -603,7 +603,12 @@ addEventListener('pointermove', (e) => {
   clouds.children.forEach(c => { c.material.uniforms.uTime.value = t * c.userData.spd; });
   // How far through the first screen of scroll we are, eased.
   const p = Math.min(1, sy / innerHeight);
-  const e = p * p * (3 - 2 * p);
+  // Ease OUT, not smoothstep. V1 moves more in the first third of a screen (19 levels)
+  // than across the whole one (14) - it is front-loaded, so the scene answers the moment
+  // you touch the wheel. Smoothstep is slow at the start, which made this back-loaded:
+  // 8.9 for the first third and then 40 for the screen, both wrong and the second one
+  // nearly three times more movement than V1 has.
+  const e = 1 - (1 - p) * (1 - p);
 
   mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt * 3.0);
   mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt * 3.0);
@@ -614,13 +619,13 @@ addEventListener('pointermove', (e) => {
   // the scroll, which is a picture shifting rather than a place being moved through.
   // Forward, down and around: the mountain grows, swings past and is left above you.
   camera.position.set(
-    -244 + e * 210 + mx * 26,
-     26  - e *  54 + Math.sin(t * 0.06) * 1.2 + my * 14,
-     372 - e * 300
+    -244 + e * 118 + mx * 26,
+     26  - e *  31 + Math.sin(t * 0.06) * 1.2 + my * 14,
+     372 - e * 170
   );
   camera.lookAt(
-    AIM.x + e * 96 + mx * 18,
-    AIM.y + e * 42 + my * 10,
+    AIM.x + e * 54 + mx * 18,
+    AIM.y + e * 24 + my * 10,
     AIM.z
   );
   renderer.render(scene, camera);
