@@ -71,7 +71,13 @@ nav a.on{border-bottom-color:var(--ink)}
 nav a:hover{color:var(--ink-strong)}
 .menu{grid-column:21 / span 4;justify-self:end;font-size:14px;font-weight:700;color:var(--ink)}
 
-section.stop{min-height:100vh;display:flex;align-items:center}
+/* The page was exactly one screen tall, so there was nothing to scroll: the scroll
+   position never left zero and the camera path that reads from it could never run. All
+   that measuring of "scroll response" was measuring a thing that was never able to
+   happen. The hero is pinned for two and a half screens now, which is the room the
+   camera flight needs. */
+section.stop{height:100vh;position:sticky;top:0;display:flex;align-items:center}
+.runway{height:250vh}
 .col{grid-column:2 / span 12}
 
 .mark{display:flex;align-items:center;gap:0;margin-bottom:30px;opacity:.92}
@@ -122,6 +128,7 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
 </header>
 
 <div class="wrap">
+  <div class="runway">
   <section class="stop" id="about">
     <div class="shell">
       <div class="col">
@@ -148,6 +155,7 @@ h1{font-size:0;line-height:0;height:0;overflow:hidden}
       </div>
     </div>
   </section>
+  </div>
 </div>
 
 <div class="cue"><span><i>Scroll down</i></span></div>
