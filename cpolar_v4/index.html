@@ -32,6 +32,11 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    below instead - without it every element renders correctly and invisibly. */
 body{opacity:1 !important}
 header, #header{transition:opacity .3s linear, transform .3s ease}
+/* The hero canvas is fixed, because on the standalone hero page the hero WAS the page.
+   Here V1's sections scroll over it and it never left - the narrative copy ended up
+   sitting on the peak. It hands over once the hero is behind us, and stops rendering,
+   since there is no reason to run a 3D scene nobody can see. */
+canvas#scene{transition:opacity .45s linear}
 html, body{overflow-x:hidden}
 </style>
 <script type="importmap">
@@ -1070,6 +1075,15 @@ if (p !== null) { lenis.destroy(); sy = parseFloat(p) * innerHeight; }
 </script>
 <script>
 document.body.classList.add("loaded");
+(function(){
+  // the mountain leaves with the hero
+  var cv = document.querySelector('canvas#scene'), gone = null;
+  (function fade(){
+    var past = (window.scrollY||0) > innerHeight * 0.85;
+    if (cv && past !== gone) { gone = past; cv.style.opacity = past ? '0' : '1'; }
+    requestAnimationFrame(fade);
+  })();
+})();
 (function(){ var hd=document.querySelector('header, #header'); if(!hd) return; var hidden=null;
   (function tick(){ var past=(window.scrollY||0) > innerHeight*0.75;
     if(past!==hidden){ hidden=past; hd.style.opacity=past?'0':'1';
