@@ -1,0 +1,8 @@
+The Basis Universal transcoder (basis_transcoder.js / basis_transcoder.wasm) is
+distributed by the three.js project and is licensed under the Apache License 2.0.
+
+  Copyright 2019 Binomial LLC
+  https://github.com/BinomialLLC/basis_universal
+  Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+Included unmodified.
