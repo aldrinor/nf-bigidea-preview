@@ -1004,7 +1004,6 @@ const CLOUD_LAYERS = [
   { w: 1600, band: .48, x:  180, y: -94, z:  270, top: .28, soft: .11, o: .18, spd: 5.0 },
 ];
 
-let lastCq = -1;   // the cloud rise only rewrites uniforms when it actually moves
 const clouds = new THREE.Group();
 CLOUD_LAYERS.forEach((L, i) => {
   const dist = Math.max(1, camera.position.z - L.z);
@@ -1153,29 +1152,6 @@ addEventListener('pointermove', (e) => {
   // 8.9 for the first third and then 40 for the screen, both wrong and the second one
   // nearly three times more movement than V1 has.
   const e = 1 - (1 - p) * (1 - p);
-
-  // THE CLOUD RISES as the hero hands over. Measured against V1: where the copy sits, V1's
-  // backdrop reads 0.948 in luminance and ours read 0.801, so the same ink - it is the same
-  // ink, rgb(129,160,187) on both - carried 2.22:1 of contrast against V1's 2.60:1. The
-  // words looked sunk because they were being read off a darker, busier ground, not because
-  // anything was in front of them. V1 answers this with a bank of white cloud through the
-  // whole transition. These seven layers already exist here; at the hero they are the mist
-  // at the mountain's foot, and this walks them up and thickens them so the frame whitens
-  // exactly where the reading happens. The peak stays clear and sharp on the first screen,
-  // which is the point of it.
-  // Raising the cloud TOP further than this is counter-productive: the shader gives the
-  // bank a shaded underside near 0x71839a and a top that reaches white, so pushing the
-  // edge too high fills the frame with the dark side instead of the bright one. Tried it
-  // at 124/4.3/0.62 and the backdrop went the wrong way, 0.865 down to 0.623.
-  const cq = Math.min(1, Math.max(0, (sy - innerHeight * 0.55) / (innerHeight * 0.80)));
-  if (cq !== lastCq) {
-    lastCq = cq;
-    clouds.position.y = cq * 96;
-    clouds.children.forEach(c => {
-      c.material.uniforms.uOpacity.value = Math.min(1, c.userData.o0 * (1 + 3.9 * cq));
-      c.material.uniforms.uTop.value = c.userData.top0 + 0.46 * cq;
-    });
-  }
 
   mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt * 3.0);
   mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt * 3.0);

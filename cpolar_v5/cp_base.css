@@ -1104,7 +1104,7 @@ h2[data-cp-divisions]{margin-bottom:8.75rem;color:#2d628c}
 
 @media (min-width:64em){
   h2[data-cp-section],
-  h2[data-cp-divisions]{margin-bottom:12.5rem;color:#81a0bb}
+  h2[data-cp-divisions]{margin-bottom:12.5rem}
 }
 @media (min-width:105em){
   h2[data-cp-section],
