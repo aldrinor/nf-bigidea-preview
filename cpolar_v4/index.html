@@ -43,7 +43,12 @@ body{opacity:1 !important}
    whose state came from the engine that has been removed, so those are links that no
    longer go anywhere and a progress rail that never fills. Dead UI. */
 .chapter-link, [data-astro-cid-gpzihxjt], .link-block-label,
-.chapters-navigation, [data-component="ChaptersNavigation"]{display:none !important}
+.chapters-navigation, [data-component="ChaptersNavigation"],
+/* and the link-block: a link with an arrow that their engine animated in. The engine is
+   gone, so it sits frozen in its start state - a thin rule and the word "About" adrift in
+   the middle of the frame. Its class list also literally contains the word "undefined",
+   which is a fault in their own template. */
+.link-block, [data-astro-cid-chamlvsj]{display:none !important}
 
 header nav a{color:#2d628c !important}
 header nav a.on{border-bottom-color:#2d628c !important}
