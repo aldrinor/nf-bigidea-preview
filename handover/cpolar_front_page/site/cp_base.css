@@ -1,0 +1,1139 @@
+/* ===========================================================================
+   C-POLAR front page - base stylesheet
+
+   This replaces a 305 KB stylesheet that came in with a site scaffold and was
+   never ours. Of that file the page used a small fraction; the rest was other
+   pages, plus 810 @font-face declarations for seventeen font files of which
+   four are actually on disk.
+
+   Written to render the page exactly as it already renders. Every change was
+   checked by peak_to_particle/_pixel_guard.mjs, which photographs the page at
+   1850, 1440, 1280 and 390 across twenty scroll positions and compares both
+   the pixels and the measured box, font and colour of every element against a
+   frozen reference. The rule for this file is that the guard reports no
+   movement. If a rule here looks odd, it is because the design depends on it.
+
+   Layout is a 24-column grid on desktop and 4 columns below 1024px. Elements
+   are placed with column classes carried in the markup - dk:col-start-10 and
+   the like - which resolve at the bottom of section 4.
+
+   Breakpoints, in the em units the media queries use:
+       48em   =  768px    tablet and up
+       64em   = 1024px    desktop; the grid changes from 4 columns to 24
+       80em   = 1280px
+      105em   = 1680px    wide desktop
+
+   Component rules are scoped by a data attribute - [data-cp-hero],
+   [data-cp-menu] and so on - which is carried in the markup and keeps a
+   generic name like .inner or .title or .content from leaking across
+   components. The scoping is load-bearing: canvas[data-cp-floatbtn] is a 24px
+   icon inside a button, and as a bare `canvas` rule it would shrink the hero
+   mountain to a postage stamp.
+   =========================================================================== */
+
+
+/* --- 1. Typefaces ---------------------------------------------------------
+   Space Grotesk for everything except the hero title slider, which is Josefin
+   Sans Light. Both are SIL Open Font Licence.
+
+   The italic face deliberately points at the UPRIGHT Regular file. That is how
+   the page has always rendered: text marked italic comes out upright. Remove
+   this rule and the browser synthesises a slant instead - it tilted the words
+   "copy to come" on the Medical Devices panel, which is how it was caught. */
+
+@font-face{font-family:"Space Grotesk";font-weight:400;font-style:normal;font-display:swap;
+  src:url(./assets/fonts/SpaceGrotesk-Regular.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-weight:400;font-style:italic;font-display:swap;
+  src:url(./assets/fonts/SpaceGrotesk-Regular.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-weight:700;font-style:normal;font-display:swap;
+  src:url(./assets/fonts/SpaceGrotesk-Bold.woff2) format("woff2")}
+@font-face{font-family:"Josefin Sans";font-weight:300;font-style:normal;font-display:swap;
+  src:url(./assets/fonts/JosefinSans-Light.woff2) format("woff2")}
+
+
+/* --- 2. Reset ------------------------------------------------------------- */
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:16px;
+  color:#000;
+  text-size-adjust:100%;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Headings carry no weight of their own - the type scale in section 6 sets it. */
+h1,h2,h3,h4,h5{margin:0;padding:0;font-weight:unset;text-wrap:balance}
+p{margin:0;padding:0}
+blockquote{quotes:none}
+address{font-style:normal}
+
+ul,ol{list-style-type:none}
+a{color:currentColor;text-decoration:none;cursor:pointer}
+
+input{background:none;border:none;outline:none}
+button{font-family:inherit;color:inherit;background-color:transparent;border:none;cursor:pointer}
+a:hover,a:active,input,textarea,select,button{outline:0}
+
+table{border-collapse:collapse;border-spacing:0}
+th{font-weight:400}
+hr{appearance:none;border:0}
+
+
+/* --- 3. Tokens ------------------------------------------------------------
+   --svh and --lvh are the small and large viewport heights. They start as 1vh
+   and the page script replaces them with a measured pixel value, so a mobile
+   browser growing or shrinking its address bar does not resize the hero. */
+
+:root{
+  --vw:1vw;
+  --dvh:1vh;
+  --svh:1vh;
+  --lvh:1vh;
+  --container-padding-x:18px;
+  --header-padding:1rem;
+}
+
+@media (min-width:64em){
+  :root{--container-padding-x:150px; --header-padding:2rem}
+}
+@media (min-width:80em){
+  :root{--header-padding:3rem}
+}
+
+
+/* --- 4. Grid --------------------------------------------------------------
+   Four columns with a 10px gutter on small screens; twenty-four columns with a
+   20px gutter from 1024px, capped at 1920px wide and centred. Anything dropped
+   in spans the full width until a column class says otherwise. */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  column-gap:10px;
+  width:max(200px,100% - 64px);
+  margin:0 auto;
+}
+
+@media (min-width:64em){
+  .grid{
+    grid-template-columns:repeat(24,minmax(0,1fr));
+    column-gap:20px;
+    max-width:1920px;
+    margin:auto;
+  }
+}
+
+.grid>*{grid-column:1/-1}
+
+/* Column placement. The prefix is the width it starts at: none = all widths,
+   tb = 768px, dk = 1024px, ml = 1280px, lg = 1680px. The colon is escaped
+   because a colon is not otherwise legal in a class name. */
+
+.grid .col-start-1{grid-column-start:1}
+.grid .col-start-3{grid-column-start:3}
+.grid .col-end-5{grid-column-end:5}
+
+@media (min-width:48em){
+  .grid .tb\:col-start-1{grid-column-start:1}
+  .grid .tb\:col-start-2{grid-column-start:2}
+  .grid .tb\:col-end-4{grid-column-end:4}
+  .grid .tb\:col-end-5{grid-column-end:5}
+}
+
+@media (min-width:64em){
+  .grid .dk\:col-start-2{grid-column-start:2}
+  .grid .dk\:col-start-3{grid-column-start:3}
+  .grid .dk\:col-start-5{grid-column-start:5}
+  .grid .dk\:col-start-10{grid-column-start:10}
+  .grid .dk\:col-start-12{grid-column-start:12}
+  .grid .dk\:col-start-14{grid-column-start:14}
+  .grid .dk\:col-end-13{grid-column-end:13}
+  .grid .dk\:col-end-14{grid-column-end:14}
+  .grid .dk\:col-end-18{grid-column-end:18}
+  .grid .dk\:col-end-19{grid-column-end:19}
+  .grid .dk\:col-end-20{grid-column-end:20}
+  .grid .dk\:col-end-22{grid-column-end:22}
+  .grid .dk\:col-end-23{grid-column-end:23}
+  .grid .dk\:col-end-24{grid-column-end:24}
+}
+
+@media (min-width:80em){
+  .grid .ml\:col-start-3{grid-column-start:3}
+  .grid .ml\:col-end-23{grid-column-end:23}
+}
+
+@media (min-width:105em){
+  .grid .lg\:col-start-3{grid-column-start:3}
+  .grid .lg\:col-start-4{grid-column-start:4}
+  .grid .lg\:col-start-6{grid-column-start:6}
+  .grid .lg\:col-start-7{grid-column-start:7}
+  .grid .lg\:col-start-14{grid-column-start:14}
+  .grid .lg\:col-start-15{grid-column-start:15}
+  .grid .lg\:col-start-16{grid-column-start:16}
+  .grid .lg\:col-end-14{grid-column-end:14}
+  .grid .lg\:col-end-17{grid-column-end:17}
+  .grid .lg\:col-end-20{grid-column-end:20}
+  .grid .lg\:col-end-21{grid-column-end:21}
+  .grid .lg\:col-end-23{grid-column-end:23}
+}
+
+
+/* --- 5. Colour helpers ---------------------------------------------------- */
+
+.white{color:#fff}
+.cp-ink{color:#2d628c}
+.uppercase{text-transform:uppercase}
+
+
+/* --- 6. Type scale --------------------------------------------------------
+   Sizes step up once, at 1024px. Letter-spacing is wide throughout - it is
+   most of the page's character, so the values are not decoration. */
+
+.fs-h2{font-size:2.25rem;line-height:1.4;letter-spacing:.09rem}
+.fs-h3{font-size:1.75rem;line-height:1.4;letter-spacing:.14rem}
+.fs-h4{font-size:.75rem;line-height:1.4;letter-spacing:.03rem}
+.fs-s1{font-size:1.25rem;line-height:1.6}
+.fs-body{font-size:1rem;line-height:1.6;letter-spacing:.08rem}
+.fs-cta{font-size:.75rem;line-height:1.2;letter-spacing:.025rem}
+.fs-cta-s{font-size:.75rem;line-height:1.2;letter-spacing:.03rem}
+.fs-label{font-size:.75rem;font-weight:700;line-height:1.4;letter-spacing:.0375rem}
+
+@media (min-width:64em){
+  .fs-h2{font-size:3.125rem;letter-spacing:.14rem}
+  .fs-h3{font-size:2.5rem;letter-spacing:.1rem}
+  .fs-h4{font-size:1.25rem;letter-spacing:.05rem}
+  .fs-s1{font-size:1.5rem;letter-spacing:.03rem}
+}
+
+
+/* --- 7. Page rhythm -------------------------------------------------------
+   Sections are tall on purpose: the scroll drives the 3D hero and the chapter
+   animations, so the vertical space is what gives them room to play out.
+
+   [data-chapter] carries three lengths the page script writes as it measures a
+   chapter, and the :after pseudo-element turns them into height. That is what
+   holds a chapter open while its animation runs. */
+
+section:not([data-chapter-first]){padding:7.5rem 0}
+
+@media (min-width:64em){
+  section:not([data-chapter-first]){padding:10rem 0}
+}
+@media (min-width:105em){
+  section:not([data-chapter-first]){padding:12.5rem 0}
+}
+
+[data-chapter]{--overflow:0px; --expanding:0px; --minimum:0px}
+[data-chapter]:after{
+  content:"";
+  display:block;
+  height:calc(max(var(--minimum),var(--overflow)) - var(--expanding));
+  will-change:height;
+}
+
+
+/* --- 8. Hero --------------------------------------------------------------
+   One and a half viewports tall, so the mountain has somewhere to travel. It
+   takes no pointer events - the canvas behind it does. */
+
+.hero[data-cp-hero]{width:100%;height:calc(150 * var(--lvh));pointer-events:none}
+
+.hero-inner[data-cp-hero]{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:calc(100 * var(--svh));
+}
+
+@media (min-width:64em){
+  .hero-inner[data-cp-hero]{
+    display:grid;
+    grid-template-columns:repeat(24,minmax(0,1fr));
+    column-gap:20px;
+    width:max(200px,100% - 64px);
+    max-width:1920px;
+    margin:auto;
+  }
+}
+
+/* the scroll cue, bottom left */
+.hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero]{
+  position:absolute;
+  bottom:1.75rem;
+  padding-top:1rem;
+  padding-bottom:1rem;
+}
+
+@media (max-width:64em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero]{left:calc(1rem + var(--header-padding))}
+}
+@media (min-width:48em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero]{bottom:2.75rem}
+}
+@media (min-width:64em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero]{
+    grid-column:2/-1;
+    padding-left:var(--header-padding);
+  }
+}
+@media (min-width:80em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero]{grid-column:3/-1}
+}
+@media (min-width:105em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero]{bottom:6.5rem}
+}
+
+/* two versions of the cue - the short one below 1024px, the long one above */
+.hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .scroll-to-cta-content-mb[data-cp-hero]{
+  display:flex;
+  gap:1.5625rem;
+  align-items:center;
+  height:24px;
+}
+.hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .scroll-to-cta-content-dk[data-cp-hero]{height:24px}
+
+@media (min-width:64em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .scroll-to-cta-content-mb[data-cp-hero]{display:none}
+}
+@media (max-width:64em){
+  .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .scroll-to-cta-content-dk[data-cp-hero]{display:none}
+}
+
+/* The underline sweeps in from the right on hover; it sits at zero width until
+   something scales it. */
+.hero[data-cp-hero] .fs-cta-s[data-cp-hero]{position:relative;text-transform:uppercase}
+.hero[data-cp-hero] .fs-cta-s[data-cp-hero]:before{
+  content:"";
+  position:absolute;
+  bottom:-5px;
+  left:0;
+  width:100%;
+  height:1px;
+  transform:scale3d(0,1,1);
+  transform-origin:right center;
+  transition:transform .4s cubic-bezier(.4,0,.1,1);
+}
+
+/* The cue flips between ink and white depending on what is behind it: blue over
+   the pale sky, white once the mountain fills the frame. */
+.hero[data-cp-hero][data-theme=dark] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .fs-cta-s[data-cp-hero],
+.hero[data-cp-hero][data-theme=dark] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] svg[data-cp-hero]{color:#2d628c}
+.hero[data-cp-hero][data-theme=dark] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .fs-cta-s[data-cp-hero]:before,
+.hero[data-cp-hero][data-theme=dark] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] svg[data-cp-hero]:before{background-color:#2d628c}
+
+.hero[data-cp-hero][data-theme=light] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .fs-cta-s[data-cp-hero],
+.hero[data-cp-hero][data-theme=light] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] svg[data-cp-hero]{color:#fff}
+.hero[data-cp-hero][data-theme=light] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] .fs-cta-s[data-cp-hero]:before,
+.hero[data-cp-hero][data-theme=light] .hero-inner[data-cp-hero] .scroll-to-cta[data-cp-hero] svg[data-cp-hero]:before{background-color:#fff}
+
+
+/* --- 9. Title slider ------------------------------------------------------
+   The row of words that slides sideways under the hero. --slide-progress is
+   written by the page script and moves the strip by whole title widths, so the
+   drag lands on a word rather than between two. */
+
+.hero-transition[data-cp-titles]{
+  --slide-progress:0;
+  --title-width:75vw;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:calc(100 * var(--svh));
+  overflow:hidden;
+  opacity:0;
+  cursor:grab;
+  touch-action:pan-x pan-y;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+@media (min-width:64em){
+  .hero-transition[data-cp-titles]{--title-width:50vw}
+}
+
+.hero-transition[data-cp-titles]:active{cursor:grabbing}
+
+/* the hairline the words sit on */
+.hero-transition[data-cp-titles]:after{
+  content:"";
+  position:absolute;
+  inset:50% 0 0;
+  width:100%;
+  height:1px;
+  background-color:#2d628c1a;
+}
+
+.hero-transition[data-cp-titles] .inner[data-cp-titles]{
+  position:relative;
+  display:flex;
+  flex-wrap:nowrap;
+  width:100%;
+  height:100%;
+  padding-left:12.5vw;
+  pointer-events:none;
+  transform:translate(calc(var(--slide-progress) * var(--title-width) * -1));
+}
+
+@media (min-width:64em){
+  .hero-transition[data-cp-titles] .inner[data-cp-titles]{padding-left:25vw}
+}
+
+.hero-transition[data-cp-titles] .title[data-cp-titles]{
+  position:relative;
+  display:flex;
+  flex:0 0 var(--title-width);
+  align-items:center;
+  justify-content:center;
+  height:100%;
+}
+
+.hero-transition[data-cp-titles] .title[data-cp-titles] p[data-cp-titles]{
+  font-family:"Josefin Sans",sans-serif;
+  font-weight:300;
+  font-style:normal;
+  font-size:1.125rem;
+  color:#2d628c;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:.32em;
+}
+
+@media (min-width:64em){
+  .hero-transition[data-cp-titles] .title[data-cp-titles] p[data-cp-titles]{font-size:3.875rem}
+}
+
+/* a small diamond between one word and the next, but not before the first */
+.hero-transition[data-cp-titles] .title[data-cp-titles]:not(:first-child):before{
+  content:"";
+  position:absolute;
+  left:-2px;
+  width:4px;
+  height:4px;
+  background-color:#2d628c;
+  transform:rotate(45deg);
+}
+
+
+/* --- 10. Spinner ---------------------------------------------------------- */
+
+.spinner-defs[data-cp-titles]{position:absolute}
+
+.spinner[data-cp-titles]{
+  position:absolute;
+  top:57%;
+  display:flex;
+  justify-content:center;
+  pointer-events:none;
+  opacity:0;
+  transform:translate3d(0,-50%,0);
+  transition:opacity .3s linear 0s;
+}
+
+.spinner-inner[data-cp-titles]{width:30px;height:30px;animation:rotate-spinner infinite 1s linear}
+
+@media (min-width:48em){
+  .spinner-inner[data-cp-titles]{width:40px;height:40px}
+}
+
+@keyframes rotate-spinner{to{transform:rotate(360deg)}}
+
+
+/* --- 11. Arrow link -------------------------------------------------------
+   Label with a round arrow button. At rest the arrow sits off to the left at
+   zero scale; on hover the button grows in and the label slides right to make
+   room. Both halves share one long easing so they read as one movement. */
+
+.link-block[data-cp-arrowlink]{
+  position:relative;
+  display:flex;
+  gap:1.0625rem;
+  align-items:center;
+  width:fit-content;
+  padding-bottom:1.25rem;
+  font-family:"Space Grotesk",sans-serif;
+  font-weight:700;
+  font-style:normal;
+  font-size:.875rem;
+  line-height:1.2;
+  letter-spacing:.21rem;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:color .4s linear;
+  transform-origin:right center;
+}
+
+@media (min-width:64em){
+  .link-block[data-cp-arrowlink]{padding-bottom:1.75rem}
+}
+
+/* two stacked rules: the pale track, and the ink bar that wipes across it */
+.link-block[data-cp-arrowlink]:before{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:#d1dde8;
+  border-radius:2px;
+}
+.link-block[data-cp-arrowlink]:after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:#2d628c;
+  border-radius:2px;
+  transform:scale3d(0,1,1);
+  transform-origin:right center;
+  transition:transform .4s cubic-bezier(.4,0,.1,1);
+}
+
+.link-block[data-cp-arrowlink] .link-block-label[data-cp-arrowlink],
+.link-block[data-cp-arrowlink] .arrow-wrapper[data-cp-arrowlink]{
+  transition:transform .7s cubic-bezier(.4,0,.1,1);
+}
+
+.link-block[data-cp-arrowlink] .arrow-wrapper[data-cp-arrowlink].left{
+  position:absolute;
+  top:0;
+  left:0;
+  transform:translate3d(-2.5rem,0,0);
+}
+
+.link-block[data-cp-arrowlink] .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink]{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:2.5rem;
+  height:2.5rem;
+  color:#2d628c;
+  background:#fff;
+  border-radius:50%;
+  transition:background .4s linear,color .4s linear,transform .7s cubic-bezier(.4,0,.1,1);
+}
+.link-block[data-cp-arrowlink] .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink] svg[data-cp-arrowlink]{
+  transition:transform .3s cubic-bezier(.4,0,.1,1);
+}
+.link-block[data-cp-arrowlink] .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink].left{
+  position:absolute;
+  left:0;
+  transform:scale3d(0,0,1);
+}
+.link-block[data-cp-arrowlink] .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink].left svg[data-cp-arrowlink]{
+  transform:translate3d(-50%,0,0);
+}
+
+/* Hover only where there is a real pointer - on a touch screen there is no
+   hover to leave, and the arrow would stick open. */
+@media (hover:hover) and (pointer:fine){
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink]{transform:scaleZ(1)}
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink].left{transform:translateZ(0)}
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink].right{transform:translate3d(2.5rem,0,0)}
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink] svg[data-cp-arrowlink]{
+    transition:transform .6s cubic-bezier(.4,0,.1,1) .1s;
+  }
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink].left{transform:scaleZ(1)}
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink].left svg[data-cp-arrowlink]{transform:translateZ(0)}
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink].right{transform:scale3d(0,0,1)}
+  .link-block[data-cp-arrowlink]:hover .arrow-wrapper[data-cp-arrowlink] .arrow-container[data-cp-arrowlink].right svg[data-cp-arrowlink]{transform:translate3d(50%,0,0)}
+  .link-block[data-cp-arrowlink]:hover .link-block-label[data-cp-arrowlink]{transform:translate3d(3.5625rem,0,0)}
+}
+
+
+/* --- 12. Round more-button ------------------------------------------------
+   A ring with a chevron built from two borders of a rotated square. Comes in a
+   blue variant and a white one for use over imagery. */
+
+.read-more-button[data-cp-morebtn]{position:relative;width:2.5rem;height:2.5rem}
+
+.read-more-button[data-cp-morebtn]:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  border:2px solid;
+  border-radius:50%;
+  transition:background .4s,border-color .4s;
+}
+
+.read-more-button[data-cp-morebtn] .arrow[data-cp-morebtn]{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:.375rem;
+  height:.375rem;
+  border-right:.09375rem solid;
+  border-bottom:.09375rem solid;
+  transform:translate3d(-12.5%,-25%,0) rotate(45deg);
+  transition:transform .4s cubic-bezier(.4,0,.1,1),border-color .4s;
+}
+
+.read-more-button[data-cp-morebtn].secondary:before{border-color:#2d628c4d}
+.read-more-button[data-cp-morebtn].secondary .arrow[data-cp-morebtn]{border-color:#2d628c}
+
+.read-more-button[data-cp-morebtn].white:before{border-color:#2d628c}
+.read-more-button[data-cp-morebtn].white .arrow[data-cp-morebtn]{border-color:#fff}
+
+@media (hover:hover) and (pointer:fine){
+  .read-more-button[data-cp-morebtn].secondary:hover:before{background:#2d628c;border-color:#2d628c}
+  .read-more-button[data-cp-morebtn].secondary:hover .arrow[data-cp-morebtn]{border-color:#fff}
+  .read-more-button[data-cp-morebtn].white:hover:before{background:#fff;border-color:#fff}
+  .read-more-button[data-cp-morebtn].white:hover .arrow[data-cp-morebtn]{border-color:#2d628c}
+}
+
+
+/* --- 13. Copy block -------------------------------------------------------
+   Body copy that can be clamped to a set number of lines, with the round
+   button from section 12 appearing only when there is more to show.
+   --line-count is written per block by the page script. */
+
+.fs-s1[data-cp-copy]{padding-bottom:1rem;color:#fff}
+
+@media (min-width:64em){
+  .fs-s1[data-cp-copy]{padding-bottom:2rem}
+}
+
+.content-wrapper[data-cp-copy]{width:100%}
+
+.content[data-cp-copy]{
+  height:fit-content;
+  margin-bottom:2.5rem;
+  overflow:hidden;
+  pointer-events:none;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.content[data-cp-copy]::-webkit-scrollbar{width:0}
+
+@media (min-width:64em){
+  .content[data-cp-copy]{margin-bottom:3.25rem}
+}
+
+.inner[data-cp-copy].clamp{
+  display:-webkit-box;
+  -webkit-line-clamp:var(--line-count);
+  -webkit-box-orient:vertical;
+  text-overflow:-o-ellipsis-lastline;
+}
+
+.read-more[data-cp-copy]{position:relative;width:100%}
+.read-more[data-cp-copy] .read-more-button{display:none}
+.read-more[data-cp-copy].expandable .read-more-button{display:block}
+
+
+/* --- 14. Text block ------------------------------------------------------- */
+
+.text-block[data-cp-textblock]{position:relative}
+.text-block[data-cp-textblock] ul{padding-left:1em;list-style-type:disc}
+.text-block[data-cp-textblock] .title{margin-bottom:1rem}
+.text-block[data-cp-textblock] .link-block{margin-top:2.75rem}
+
+@media (min-width:64em){
+  .text-block[data-cp-textblock] .title{margin-bottom:2rem}
+  .text-block[data-cp-textblock] .link-block{margin-top:5.75rem}
+}
+
+
+/* --- 15. Chapter rail -----------------------------------------------------
+   The progress rail down the left edge: a diamond per chapter, a white track
+   and a blue bar that fills behind it. Hidden below 1680px, where there is no
+   room for it beside the content. */
+
+.chapters-navigation[data-cp-chapters]{position:fixed;bottom:6.875rem;left:0;width:100%}
+
+@media (max-width:105em){
+  .chapters-navigation[data-cp-chapters]{display:none}
+}
+
+.chapters-container[data-cp-chapters]{position:relative;height:calc(100% + 2.5rem)}
+
+.chapters-list[data-cp-chapters]{
+  display:flex;
+  flex-direction:column;
+  width:fit-content;
+  padding-left:var(--header-padding);
+}
+
+.chapter-wrapper[data-cp-chapters]{position:relative;height:2.5rem}
+
+.chapter-wrapper[data-cp-chapters] .dot[data-cp-chapters]{
+  display:flex;
+  padding:8px;
+  transform:translate3d(0,-8px,0) scale3d(0,0,1);
+}
+.chapter-wrapper[data-cp-chapters] .dot[data-cp-chapters] span[data-cp-chapters]{
+  display:inline-block;
+  width:4px;
+  height:4px;
+  background:#2d628c;
+  transform:rotate(45deg);
+  transition:transform .4s cubic-bezier(.4,0,.1,1),background .4s linear;
+}
+
+.chapter-wrapper[data-cp-chapters] .progress-wrapper[data-cp-chapters]{
+  position:absolute;
+  top:0;
+  left:50%;
+  width:2px;
+  height:100%;
+  transform:translate3d(-50%,0,0);
+  transform-origin:top center;
+}
+.chapter-wrapper[data-cp-chapters] .progress-wrapper[data-cp-chapters] .progress-bar[data-cp-chapters]{
+  width:100%;
+  height:100%;
+  transform:scale3d(1,0,1);
+  transform-origin:top center;
+}
+.chapter-wrapper[data-cp-chapters] .progress-wrapper[data-cp-chapters] .progress-bar[data-cp-chapters].white-part{background:#fff}
+.chapter-wrapper[data-cp-chapters] .progress-wrapper[data-cp-chapters] .progress-bar[data-cp-chapters].blue-part{
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:-1;
+  background:#2d628c;
+}
+
+/* the chapter name, which slides up from below as its chapter arrives */
+.text-container[data-cp-chapters]{
+  position:absolute;
+  top:.9375rem;
+  left:3.125rem;
+  height:.9375rem;
+  overflow:hidden;
+  text-wrap:nowrap;
+  transition:color .4s linear;
+}
+.text-container[data-cp-chapters] span[data-cp-chapters]{display:inline-block;transform:translate3d(0,200%,0)}
+
+/* white over the mountain, ink over the pale sections */
+.chapters-navigation[data-cp-chapters][data-theme=dark] .text-container[data-cp-chapters]{color:#fff}
+.chapters-navigation[data-cp-chapters][data-theme=dark] .chapter-wrapper[data-cp-chapters] .dot[data-cp-chapters] span[data-cp-chapters]{background:#fff}
+.chapters-navigation[data-cp-chapters][data-theme=light] .text-container[data-cp-chapters]{color:#2d628c}
+.chapters-navigation[data-cp-chapters][data-theme=light] .chapter-wrapper[data-cp-chapters] .dot[data-cp-chapters] span[data-cp-chapters]{background:#2d628c}
+
+
+/* --- 16. Floating controls ------------------------------------------------
+   The round buttons pinned to the bottom right. The container spans the page
+   and takes no pointer events, so only the buttons themselves are clickable. */
+
+.buttons-container[data-cp-floatbtn]{
+  position:fixed;
+  bottom:2rem;
+  z-index:5;
+  width:100%;
+  pointer-events:none;
+}
+
+@media (min-width:48em){
+  .buttons-container[data-cp-floatbtn]{bottom:2.75rem}
+}
+@media (min-width:64em){
+  .buttons-container[data-cp-floatbtn]{z-index:50}
+}
+@media (min-width:105em){
+  .buttons-container[data-cp-floatbtn]{bottom:6.5rem}
+}
+
+.buttons-wrapper[data-cp-floatbtn]{width:max(200px,100% - 32px)}
+
+@media (min-width:48em){
+  .buttons-wrapper[data-cp-floatbtn]{width:max(200px,100% - 64px)}
+}
+
+.buttons-inner[data-cp-floatbtn]{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding-right:var(--header-padding);
+  margin-left:auto;
+}
+
+button[data-cp-floatbtn]{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:52px;
+  height:52px;
+  pointer-events:all;
+  cursor:pointer;
+  border:1.5px solid rgba(255,255,255,.15);
+  border-radius:50%;
+}
+
+/* the icon inside a button, NOT the hero canvas - hence the scoping */
+canvas[data-cp-floatbtn]{width:24px;height:24px}
+
+.scroll-top[data-cp-floatbtn]{opacity:0}
+.scroll-top[data-cp-floatbtn] svg[data-cp-floatbtn]{height:12px}
+
+
+/* --- 17. Menu -------------------------------------------------------------
+   Full-screen overlay, display:none until opened. Each link's underline wipes
+   in from the left; on desktop it starts collapsed and the round icon scales
+   up as the label slides right. Below 768px the icons are dropped and the
+   labels stay put - there is no hover on a phone to trigger any of it. */
+
+.cp-menu[data-cp-menu]{
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:9;
+  display:none;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.cp-menu[data-cp-menu].active{pointer-events:all}
+
+.cp-menu[data-cp-menu] .overlay[data-cp-menu]{
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:-1;
+  width:100%;
+  height:100%;
+  background:linear-gradient(120deg,#d8d8d8 -45%,#f6f6f6 25%);
+}
+
+.cp-menu[data-cp-menu] .grid-nav[data-cp-menu]{align-items:center;height:100%}
+
+.cp-menu[data-cp-menu] .grid-terms[data-cp-menu]{
+  position:absolute;
+  bottom:1.5rem;
+  left:50%;
+  padding-top:1rem;
+  padding-bottom:1rem;
+  transform:translate3d(-50%,0,0);
+}
+
+@media (min-width:48em){
+  .cp-menu[data-cp-menu] .grid-terms[data-cp-menu]{bottom:2.75rem}
+}
+@media (min-width:105em){
+  .cp-menu[data-cp-menu] .grid-terms[data-cp-menu]{bottom:6.5rem}
+}
+
+.cp-menu[data-cp-menu] nav[data-cp-menu] ul[data-cp-menu]{display:flex;flex-direction:column;width:100%}
+.cp-menu[data-cp-menu] nav[data-cp-menu] li[data-cp-menu]{width:fit-content}
+
+@media (min-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] ul[data-cp-menu]{gap:.75rem}
+}
+@media (max-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] li[data-cp-menu]{width:100%}
+  .cp-menu[data-cp-menu] nav[data-cp-menu] li[data-cp-menu]:last-of-type .nav-link[data-cp-menu] .text-content[data-cp-menu]:before{display:none}
+}
+
+.cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]{
+  display:flex;
+  gap:2rem;
+  align-items:center;
+  color:#a9bfd2;
+  font-size:1.25rem;
+  line-height:1.6;
+  transition:color .4s linear;
+}
+.cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu] span[data-cp-menu]{text-wrap:nowrap}
+
+@media (max-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]{width:100%}
+}
+@media (min-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]{
+    font-size:1.75rem;
+    line-height:1.4;
+    letter-spacing:.14rem;
+    text-transform:uppercase;
+  }
+}
+@media (min-width:64em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]{font-size:2.5rem;letter-spacing:.1rem}
+}
+
+.cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu] .text-content[data-cp-menu]{
+  position:relative;
+  padding:1.5rem 0;
+  transform:translate3d(-4.5rem,0,0);
+  transition:transform .6s cubic-bezier(.4,0,.1,1);
+}
+.cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu] .text-content[data-cp-menu]:before{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:1px;
+  background:#d1dde8;
+  transform-origin:left center;
+  transition:transform .6s cubic-bezier(.4,0,.1,1);
+}
+
+@media (min-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu] .text-content[data-cp-menu]:before{transform:scale3d(0,1,1)}
+}
+@media (max-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu] .text-content[data-cp-menu]{width:100%;transform:none}
+}
+
+.cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu].active{color:#2d628c}
+.cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu].active .text-content[data-cp-menu]:before{transform:scaleZ(1)}
+
+.cp-menu[data-cp-menu] nav[data-cp-menu] .svg-container[data-cp-menu]{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:2.5rem;
+  height:2.5rem;
+  color:#2d628c;
+  background:#fff;
+  border-radius:50%;
+  transform:scale3d(0,0,1);
+  transition:background .4s linear,color .4s linear,transform .4s cubic-bezier(.4,0,.1,1);
+}
+.cp-menu[data-cp-menu] nav[data-cp-menu] .svg-container[data-cp-menu] svg[data-cp-menu]{
+  transform:translate3d(-75%,0,0);
+  transition:transform .2s cubic-bezier(.4,0,.1,1);
+}
+
+@media (max-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .svg-container[data-cp-menu]{display:none}
+}
+
+@media (hover:hover) and (pointer:fine){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]:hover{color:#2d628c}
+}
+@media (hover:hover) and (pointer:fine) and (min-width:48em){
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]:hover:not(.active) .svg-container[data-cp-menu]{
+    transform:scaleZ(1);
+    transition:transform .6s cubic-bezier(.4,0,.1,1);
+  }
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]:hover:not(.active) .svg-container[data-cp-menu] svg[data-cp-menu]{
+    transform:translateZ(0);
+    transition:transform .7s cubic-bezier(.4,0,.1,1) .1s;
+  }
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]:hover:not(.active) .text-content[data-cp-menu]{transform:translateZ(0)}
+  .cp-menu[data-cp-menu] nav[data-cp-menu] .nav-link[data-cp-menu]:hover:not(.active) .text-content[data-cp-menu]:before{
+    transform:scaleZ(1);
+    transform-origin:right center;
+  }
+}
+
+/* the small print at the foot of the menu; each item holds a second copy of its
+   own label below the fold, and hover rolls one up as the other leaves */
+.cp-menu[data-cp-menu] .terms-w[data-cp-menu] ul[data-cp-menu]{
+  display:flex;
+  flex-direction:column-reverse;
+  gap:1.75rem;
+  align-items:flex-end;
+}
+.cp-menu[data-cp-menu] .terms-w[data-cp-menu] li[data-cp-menu]{
+  position:relative;
+  overflow:hidden;
+  color:#2d628c;
+  font-size:.75rem;
+  line-height:1.2;
+  letter-spacing:.025rem;
+  text-transform:uppercase;
+}
+.cp-menu[data-cp-menu] .terms-w[data-cp-menu] li[data-cp-menu] span[data-cp-menu]{
+  display:inline-block;
+  transition:transform .4s cubic-bezier(.4,0,.1,1);
+}
+.cp-menu[data-cp-menu] .terms-w[data-cp-menu] li[data-cp-menu] span[data-cp-menu]:last-of-type{
+  position:absolute;
+  bottom:-100%;
+  left:0;
+}
+
+/* on a short screen the stack has to tighten or it runs off the bottom */
+@media (max-height:43.75em){
+  .cp-menu[data-cp-menu] .terms-w[data-cp-menu] ul[data-cp-menu]{gap:.875rem}
+}
+@media (min-width:48em){
+  .cp-menu[data-cp-menu] .terms-w[data-cp-menu] ul[data-cp-menu]{
+    flex-direction:row;
+    align-items:flex-start;
+    justify-content:flex-end;
+  }
+}
+@media (min-width:64em){
+  .cp-menu[data-cp-menu] .terms-w[data-cp-menu]{height:24px;margin-left:auto}
+  .cp-menu[data-cp-menu] .terms-w[data-cp-menu] ul[data-cp-menu]{justify-content:flex-start}
+}
+
+@media (hover:hover) and (pointer:fine){
+  .cp-menu[data-cp-menu] .terms-w[data-cp-menu] li[data-cp-menu]:hover span[data-cp-menu]{transform:translate3d(0,-100%,0)}
+}
+
+
+/* --- 18. Cursor -----------------------------------------------------------
+   A ring that follows the pointer, with dots inside it. Removed entirely where
+   there is no hover, because there is no pointer to follow. */
+
+.cursor[data-cp-cursor]{
+  --color:#2d628c;
+  --scale:1;
+  position:fixed;
+  top:-26px;
+  left:-26px;
+  z-index:20;
+  width:52px;
+  height:52px;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .5s linear;
+  will-change:transform;
+}
+
+@media (hover:none){
+  .cursor[data-cp-cursor]{display:none}
+}
+
+.cursor[data-cp-cursor][data-theme=light]{--color:#2d628c}
+.cursor[data-cp-cursor][data-theme=dark]{--color:#fff}
+
+.cursor[data-cp-cursor] .inner[data-cp-cursor]{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  height:100%;
+  padding:12px;
+  transform:scale(var(--scale));
+  transition:transform .2s cubic-bezier(.9,0,.4,1);
+}
+
+.cursor[data-cp-cursor] .circle[data-cp-cursor]{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:1.5px solid var(--color);
+  border-radius:50%;
+  transform-origin:center;
+  transition:opacity 1s linear,border 1s linear,transform 1s cubic-bezier(.9,0,.4,1);
+}
+
+.cursor[data-cp-cursor] .dots[data-cp-cursor],
+.cursor[data-cp-cursor] .middle-dot[data-cp-cursor]{
+  width:3px;
+  height:3px;
+  background-color:var(--color);
+  border-radius:50%;
+  opacity:0;
+  transition:opacity 1s linear,background-color 1s linear,transform 1s cubic-bezier(.9,0,.4,1);
+}
+.cursor[data-cp-cursor] .middle-dot[data-cp-cursor]{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate3d(-50%,-50%,0);
+}
+
+
+/* --- 19. Application cards ------------------------------------------------
+   The five panels down the lower half of the page. The index sits in a rotated
+   square hanging off the left edge, with the number counter-rotated so it
+   reads straight. Dropped below 1024px, where there is no margin to hang in. */
+
+.divisions-container[data-cp-division]{row-gap:8.75rem;margin-top:8.75rem}
+
+@media (min-width:64em){
+  .divisions-container[data-cp-division]{row-gap:15.625rem;margin-top:15.625rem}
+}
+@media (min-width:105em){
+  .divisions-container[data-cp-division]{row-gap:21.25rem;margin-top:23.125rem}
+}
+
+.division-link-ship[data-cp-division]{position:relative;width:fit-content}
+
+.division-link-ship[data-cp-division] .division-index[data-cp-division]{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:3.5rem;
+  height:3.5rem;
+  border:2px solid #a9bfd2;
+  transform:translate3d(-5.4375rem,0,0) rotate3d(0,0,1,45deg);
+}
+.division-link-ship[data-cp-division] .division-index[data-cp-division] span[data-cp-division]{
+  transform:rotate3d(0,0,1,-45deg);
+}
+
+@media (max-width:63.99em){
+  .division-link-ship[data-cp-division] .division-index[data-cp-division]{display:none}
+}
+
+.division-link-ship[data-cp-division] .division-content[data-cp-division]{margin-top:1.75rem}
+.division-link-ship[data-cp-division] .division-content[data-cp-division] h3{margin-bottom:2rem}
+.division-link-ship[data-cp-division] .division-content[data-cp-division] h4{text-transform:uppercase;text-wrap:wrap}
+.division-link-ship[data-cp-division] .division-content[data-cp-division] .link-block{margin-top:1.875rem}
+.division-link-ship[data-cp-division] .division-content[data-cp-division] div{max-width:29.0625rem;margin-top:1rem}
+
+@media (min-width:64em){
+  .division-link-ship[data-cp-division] .division-content[data-cp-division] h3{margin-bottom:2.5rem}
+  .division-link-ship[data-cp-division] .division-content[data-cp-division] .link-block{margin-top:4rem}
+  .division-link-ship[data-cp-division] .division-content[data-cp-division] div{margin-top:2.5rem}
+}
+
+
+/* --- 20. Section headings -------------------------------------------------
+   A section heading is followed by a very large gap - that gap is the pause
+   before the content arrives, and it grows with the screen. The colour lifts
+   from ink to a pale blue on desktop, where the heading is large enough that
+   full-strength ink would shout.
+
+   The padding-bottom below overrides the shorthand in section 7 for these
+   sections only, holding a full viewport of empty space under them for the
+   scroll animation to run in. It has to come after section 7 to win. */
+
+h2[data-cp-section],
+h2[data-cp-divisions]{margin-bottom:8.75rem;color:#2d628c}
+
+@media (min-width:64em){
+  h2[data-cp-section],
+  h2[data-cp-divisions]{margin-bottom:12.5rem}
+}
+@media (min-width:105em){
+  h2[data-cp-section],
+  h2[data-cp-divisions]{margin-bottom:15rem}
+}
+
+section[data-cp-divisions]{padding-bottom:calc(100 * var(--lvh))}
+
+
+/* --- 21. Scene canvas -----------------------------------------------------
+   The wrapper the 3D scene draws into. Behind everything, and it does take
+   pointer events - the scene reads the pointer. */
+
+#canvas-wrapper{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  width:100%;
+  height:calc(100 * var(--lvh));
+  pointer-events:auto;
+  touch-action:none;
+}
+#canvas-wrapper canvas{width:100%;height:100%}
+
+
+/* --- 22. Reduced motion --------------------------------------------------- */
+
+@media (prefers-reduced-motion){
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){animation:none!important}
+}
