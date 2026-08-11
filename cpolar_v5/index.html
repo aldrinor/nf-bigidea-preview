@@ -1171,8 +1171,12 @@ addEventListener('pointermove', (e) => {
   const de = d * d * (3 - 2 * d);
 
   // The world rises; the camera holds its distance. See the note above the phases.
-  terrain.position.y = -de * 150;
-  clouds.position.y  = -de * 178;
+  // `terrain` is null until the GLB has loaded, and on a cold visit that is a second or
+  // two after the first frame. Writing to it unguarded threw on every frame of that window
+  // - not visible on a warm local server where the file is there almost immediately, which
+  // is exactly why it reached the live site before it was caught.
+  if (terrain) terrain.position.y = -de * 150;
+  clouds.position.y = -de * 178;
 
   camera.position.set(
     -244 + e * 118 + mx * 26,
