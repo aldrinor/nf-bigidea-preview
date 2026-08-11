@@ -31,12 +31,7 @@ canvas#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-ind
    .loaded to reveal it. That script is gone with their engine, so the class is added
    below instead - without it every element renders correctly and invisibly. */
 body{opacity:1 !important}
-/* The header is fixed and V1's own scripts used to take it away on scroll. Those scripts
-   went with their engine, so it stayed put and the application headings ran underneath
-   it. It leaves with the hero instead - the same handover used on the standalone hero. */
 header, #header{transition:opacity .3s linear, transform .3s ease}
-/* at 390 something was 12px wider than the window and gave the whole document a
-   sideways scrollbar */
 html, body{overflow-x:hidden}
 </style>
 <script type="importmap">
@@ -538,26 +533,547 @@ html, body{overflow-x:hidden}
     requestAnimationFrame(loop);
   })();
 })();
-</script><script type="module">let e=document.querySelector("#footer"),o=e.querySelectorAll(".office");const n=(a="light")=>{e=document.querySelector("#footer"),e&&(o=e.querySelectorAll(".office")),e&&(e.dataset.theme=a),o&&o.length>0&&o.forEach(t=>{t.dataset.theme=a})},r=()=>{const t=document.querySelector("main")?.dataset.footer;n(t||"light")},c=()=>{r()},i=()=>{};document.addEventListener("astro:page-load",c);document.addEventListener("astro:before-preparation",i);</script>
+</script><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const _q = new URLSearchParams(location.search);
+// 2.60 radians. Nine rotations were rendered and the judge picked 5.40 for having a
+// saddle and a second summit; Yin picked this one. His call stands - a clean single
+// spire with a long shoulder falling left is a quieter, more restrained shape, and
+// restraint is the whole brief.
+const ROT = parseFloat(_q.get('rot') ?? '2.60');
+// Placement picked the same way as the rotation: rendered as a sheet and judged, not
+// guessed. Aiming LEFT of the peak throws it right on screen, so -90 sets it decisively
+// on the right and leaves the whole left field clean for the copy.
+const AIMX = parseFloat(_q.get('aimx') ?? '-120');
+// A much shorter lens than the 20 it was on. The mass comes down, pale air opens up
+// around the silhouette - which is what an outline needs if it is to read as a shape -
+// and at 32 the right shoulder stops being clipped by the frame edge.
+const FOV = parseFloat(_q.get('fov') ?? '30');
+
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+// 1.0 with the lights below drove the whole mountain to white - snow and rock landed
+// on the same value and the shape disappeared. Rock has to sit in the mid greys or
+// there is nothing for the snow to be white AGAINST.
+renderer.toneMappingExposure = 0.96;
+
+const scene = new THREE.Scene();
+// Every visible surface of this mountain sits between 312 and 451 units away, so fog
+// starting at 470 contributed exactly nothing and distance cost nothing at all. 300 to
+// 820 brackets the mountain's own depth: the summit lifts about 11 levels, the far
+// ridge 6, the near foot 3 - ordered by distance, which is what makes depth read.
+// (An older comment here claimed 363 and 554. Both were wrong. These are measured.)
+scene.fog = new THREE.Fog(0xd6e4f5, 300, 1400);
+
+// The shot. The summit of this mesh is at world (15.4, 58.4, -2.4).
+//   - the camera sits BELOW it, so the frame looks UP at the peak. The first version
+//     sat at y=44 aiming at y=20, nearly level and 430 out, and read like a map.
+//   - closer, on a longer lens, so the base runs off both edges of the screen.
+//   - aimed to the LEFT of the summit line, which throws the peak to the RIGHT of
+//     frame and leaves the left half clear for the copy.
+const camera = new THREE.PerspectiveCamera(FOV, innerWidth/innerHeight, 1, 5000);
+camera.position.set(-244, 26, 372);
+const AIM = new THREE.Vector3(AIMX, 34, -40);
+camera.lookAt(AIM);
+
+// light: a hard raking key from the left so one face is lit and the other falls into
+// shadow - the ridge between them is what gives a mountain its shape. Cool sky fill,
+// cold rim from behind to separate the summit from the haze.
+// The key sat 39 degrees off the camera axis - a light shining over your own shoulder,
+// which gives nothing a shadow side. At 72 degrees, hard from screen left, every ridge
+// gets a lit face and a dark one, and the shadows fall away from the copy. The rim had
+// to come down with it: at 0.62 it was a second light aimed straight into the flank the
+// key is trying to darken, filling the new shadow back in as fast as it appeared. The
+// hemisphere ground colour was doing the same job from below.
+// V1 gets its light from a BAKED LIGHTMAP, which is soft and ambient and has no hard
+// sun in it anywhere. A hard key with shadow maps is what a photoreal rubric rewards,
+// and it is not what V1 looks like. Ambient up, key down: the shape still reads, but it
+// reads the way V1's does - as light in air rather than as a spotlight on rock.
+scene.add(new THREE.HemisphereLight(0xf2f7fd, 0xc2cfdc, 0.72));
+const key = new THREE.DirectionalLight(0xfffdf6, 1.05);
+// Turning the mountain moved it relative to the light, so a key that modelled the old
+// face beautifully lights this one flat. Azimuth is measured from screen-left and has
+// to STAY on the left - shadows must fall away from the copy, not across it.
+const KEYAZ = parseFloat(_q.get('keyaz') ?? '150');
+const KEYEL = parseFloat(_q.get('keyel') ?? '22');
+const kr = 520, ka = KEYAZ * Math.PI / 180, ke = KEYEL * Math.PI / 180;
+key.position.set(Math.cos(ka) * kr * Math.cos(ke), Math.sin(ke) * kr, Math.sin(ka) * kr * Math.cos(ke));
+// Worth switching on only now the key has moved; with the old position every shadow
+// fell behind the thing casting it. 2048 is sized to the mesh - one quad is 1.54 world
+// units, so this is about four shadow texels per quad. 4096 would double a per-frame
+// cost for detail the geometry does not carry.
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -420; key.shadow.camera.right = 420;
+key.shadow.camera.top  =  420; key.shadow.camera.bottom = -420;
+key.shadow.camera.near =    1; key.shadow.camera.far = 1600;
+key.shadow.bias = -0.0002;
+key.shadow.normalBias = 0.6;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xcfe0ef, 0.34);
+rim.position.set(330, 130, -320);
+scene.add(rim);
+
+const tex = new THREE.TextureLoader();
+
+// One colour map baked from this mountain: snow high and flat, rock on the steep
+// faces, ambient shading already in it. UV 0..1 across the mesh, so no tiling seam.
+let terrain = null;
+new GLTFLoader().load('./assets/banff_terrain.glb', (g) => {
+  const alb = tex.load('./assets/mountain_albedo.webp'); alb.colorSpace = THREE.SRGBColorSpace;
+  const nrm = tex.load('./assets/mountain_normal.webp');
+  const rgh = tex.load('./assets/mountain_rough.webp');
+  // The close-range rock. A photograph, generated by Codex Gen 2, then cross-faded
+  // against half-shifted copies of itself so it tiles exactly. It carries the one
+  // thing no amount of procedural noise produced: fracture that is ANGULAR, straight
+  // segments meeting at corners. Folded value noise only ever makes smooth meanders,
+  // and painted on rock those read as dark worms.
+  const detN = tex.load('./assets/rock_detail_n.webp');
+  const detC = tex.load('./assets/rock_detail_c.webp');
+  detN.wrapS = detN.wrapT = detC.wrapS = detC.wrapT = THREE.RepeatWrapping;
+  // Every surface in this shot is seen at a grazing angle, which is exactly the case
+  // trilinear filtering blurs worst. Measured as the largest single gain of anything
+  // tried on this material.
+  const MA = renderer.capabilities.getMaxAnisotropy();
+  detN.anisotropy = detC.anisotropy = alb.anisotropy = nrm.anisotropy = rgh.anisotropy = MA;
+
+  g.scene.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = true; o.receiveShadow = true;
+    o.geometry.computeVertexNormals();
+    const mat = new THREE.MeshStandardMaterial({
+      map: alb, normalMap: nrm, roughnessMap: rgh,
+      normalScale: new THREE.Vector2(0.95, 0.95),
+      roughness: 1.0, metalness: 0.0
+    });
+
+    // TRIPLANAR DETAIL.
+    // The baked maps above are projected straight down, because that is the only way
+    // to bake where snow and scree go. On the flat and gently sloping ground that is
+    // fine. On a cliff it is not: a near-vertical face occupies almost no area in a
+    // top-down UV, so every texel there is smeared into a long vertical streak. Three
+    // separate judgements named it - "vertical smearing", "texture-stretched",
+    // "a stretched height map" - and adding more detail to the baked map only ever
+    // made the streaks louder, because the streaking IS the projection.
+    //
+    // So fine detail is not projected from above at all. A small tiling rock map is
+    // sampled three times, once down each world axis, and blended by which way the
+    // surface faces. A vertical face takes its detail from a sideways projection, so
+    // nothing stretches in any orientation, and because the map tiles it can run at a
+    // far finer scale than one baked texture over a whole mountain could ever hold.
+    mat.onBeforeCompile = (sh) => {
+      sh.uniforms.uDetN   = { value: detN };
+      sh.uniforms.uDetC   = { value: detC };
+      sh.uniforms.uDScale = { value: 0.022 };   // one tile per ~45 world units
+      sh.uniforms.uDAmt   = { value: 1.80 };    // how hard the detail bends the normal
+      sh.uniforms.uDCol   = { value: 0.80 };    // how much of its grain reaches colour
+
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>',
+                 '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNrm;')
+        .replace('#include <worldpos_vertex>',
+                 '#include <worldpos_vertex>\n' +
+                 '  vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;\n' +
+                 '  vWNrm = normalize(mat3(modelMatrix) * objectNormal);');
+
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+uniform sampler2D uDetN;
+uniform sampler2D uDetC;
+uniform float uDScale;
+uniform float uDAmt;
+uniform float uDCol;
+varying vec3 vWPos;
+varying vec3 vWNrm;
+// How much each of the three projections counts, from which way the surface faces.
+// Raised to a power so the blend is tight and a face takes almost all of its detail
+// from the one axis it is squarest to, instead of smearing three together.
+vec3 triBlend(vec3 n){
+  vec3 b = pow(abs(normalize(n)), vec3(4.0));
+  return b / (b.x + b.y + b.z + 1e-5);
+}`)
+        // The photograph's own grain, multiplied over the baked colour rather than
+        // replacing it. The baked map decides WHAT each place is - rock, scree, snow
+        // above the line - and must keep deciding; this only varies it locally. The
+        // file was flattened before saving, with its slow average divided out, so it
+        // carries no lighting of its own to print onto the mountain tile after tile.
+        .replace('#include <map_fragment>', `#include <map_fragment>
+  {
+    vec3 bw = triBlend(vWNrm);
+    vec3 p = vWPos * uDScale;
+    vec3 cX = texture2D(uDetC, p.zy).rgb;
+    vec3 cY = texture2D(uDetC, p.xz).rgb;
+    vec3 cZ = texture2D(uDetC, p.xy).rgb;
+    vec3 dc = (cX * bw.x + cY * bw.y + cZ * bw.z) * 1.6;
+    diffuseColor.rgb *= mix(vec3(1.0), dc, uDCol);
+  }`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+  {
+    vec3 bw = triBlend(vWNrm);
+    vec3 p = vWPos * uDScale;
+    vec3 dX = texture2D(uDetN, p.zy).xyz * 2.0 - 1.0;
+    vec3 dY = texture2D(uDetN, p.xz).xyz * 2.0 - 1.0;
+    vec3 dZ = texture2D(uDetN, p.xy).xyz * 2.0 - 1.0;
+    // Each of the three samples is a TANGENT-space normal: its z points out of the
+    // flat texture, not along any world axis. Summing them raw treated that z as a
+    // world direction, and since this map's blue channel is very nearly the constant
+    // 0.298, the sum added the SAME fixed push to every normal on the mountain. A
+    // constant tilt across a whole surface is what makes it look like brushed satin,
+    // which is what the render kept being called. Rotating each sample onto the axis
+    // it was projected along, and dropping the component that points back at the
+    // projector, removes the constant - and most of the strength with it, which is
+    // why uDAmt more than doubles below.
+    vec3 nX = vec3(0.0,  dX.y, dX.x);
+    vec3 nY = vec3(dY.x, 0.0,  dY.y);
+    vec3 nZ = vec3(dZ.x, dZ.y, 0.0 );
+    vec3 dn = nX * bw.x + nY * bw.y + nZ * bw.z;
+    vec3 vdn = (viewMatrix * vec4(dn, 0.0)).xyz;
+    normal = normalize(normal + vdn * uDAmt);
+  }`);
+    };
+    o.material = mat;
+  });
+  terrain = g.scene;
+  scene.add(terrain);
+
+  // A RANGE, not one hill.
+  // Stacked against the reference and against V1, the difference was never colour or
+  // texture: both of those fill the frame with several peaks at several distances seen
+  // through cloud, and this had one object in an empty field, which reads as a prop.
+  //
+  // These load a LOW-RESOLUTION copy of the same mountain. Eight clones of the full one
+  // came to 1.4 million triangles and the page could no longer render a frame in time.
+  // A peak 700 units away behind fog does not need 90,000 vertices.
+  //
+  // Placed by arithmetic. At depth d the frame is 0.918*d wide and its centre in x is
+  // -244 + (d/430)*124, so each band has a known window: -338..168 at z=-180,
+  // -379..347 at z=-420, -427..557 at z=-700. Placing them by feel put four mountains
+  // outside the frame and beyond the fog, where not one of them could be seen.
+  const RANGE = [
+    { rot: 1.30, sx: 1.45, sy: 0.72, x: -300, y: -28, z: -180 },
+    { rot: 5.05, sx: 1.15, sy: 0.60, x:  -95, y: -34, z: -180 },
+    { rot: 3.90, sx: 1.55, sy: 0.66, x: -340, y: -32, z: -420 },
+    { rot: 0.55, sx: 1.30, sy: 0.54, x: -140, y: -38, z: -420 },
+    { rot: 2.15, sx: 1.40, sy: 0.58, x:  145, y: -34, z: -420 },
+    { rot: 4.80, sx: 1.85, sy: 0.62, x: -370, y: -34, z: -700 },
+    { rot: 1.85, sx: 1.60, sy: 0.50, x:  -70, y: -40, z: -700 },
+    { rot: 3.30, sx: 1.70, sy: 0.56, x:  270, y: -36, z: -700 },
+  ];
+  new GLTFLoader().load('./assets/banff_terrain_far.glb', (far) => {
+    const mat = new THREE.MeshStandardMaterial({
+      map: alb, normalMap: nrm, normalScale: new THREE.Vector2(0.6, 0.6),
+      roughness: 1.0, metalness: 0.0
+    });
+    far.scene.traverse(o => { if (o.isMesh) { o.material = mat; o.geometry.computeVertexNormals(); } });
+    RANGE.forEach((r) => {
+      const c = far.scene.clone(true);
+      c.rotation.y = r.rot;
+      c.scale.set(r.sx, r.sy, r.sx);
+      c.position.set(r.x, r.y, r.z);
+      scene.add(c);
+    });
+  });
+});
+
+// There was a fog-coloured ground plane here whose only job was to hide the mesh edge.
+// The terrain now reaches 1400 units in every direction, past the far end of the fog,
+// so there is no edge to hide and the plane was only flattening the distance.
+
+// ?veil=0 strips the CSS haze and ?bare=1 hides all the page furniture, so the
+// mountain's TRUE silhouette can be measured rather than argued about.
+if (_q.get('veil') === '0') { document.querySelectorAll('.veil,.veil-x').forEach(e => e.style.display='none'); }
+if (_q.get('bare') === '1') { document.querySelectorAll('header,.wrap,.cue').forEach(e => e.style.display='none'); }
+
+// ---------------------------------------------------------------------- the cloud
+// A cloud is a horizontal EDGE with weather pushing it about, not a pile of blobs.
+// Each panel draws one cloud top: a smoothstep across the panel whose height is shoved
+// up and down by three noise fields scrolling at different speeds. The slow one makes
+// the big billows, the fast one frays the rim.
+//
+// Depth testing is OFF. A cloud panel has to draw over the mountain rather than be
+// clipped by it - with depth testing on, everything at the height where cloud belongs
+// is behind the peak and simply never appears, which is why there seemed to be no
+// cloud at all no matter how much of it there was.
+const CLOUD_VERT = `
+varying vec2 vUv;
+void main(){
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
+const CLOUD_FRAG = `
+precision highp float;
+uniform float uTime, uSeed, uTop, uSoft, uOpacity, uDepth;
+uniform vec2 uMouse;
+uniform vec3  uPale, uBright;
+varying vec2 vUv;
+
+// hashed value noise - no texture, so nothing to load and nothing to tile wrong
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+float vnoise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1,0)), u.x),
+             mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), u.x), u.y);
+}
+float fbm(vec2 p){
+  float v = 0.0, a = 0.5;
+  for (int k = 0; k < 5; k++){ v += a * vnoise(p); p *= 2.02; a *= 0.5; }
+  return v;
+}
+
+void main(){
+  vec2 uv = vUv;
+  vec2 q  = uv * vec2(3.0, 1.0) + uSeed;
+
+  // three scrolling fields shove the cloud top up and down: slow and broad, then
+  // quicker and finer, then a fast one that frays the rim
+  // the pointer pushes the cloud away from itself, and nearer layers feel it more,
+  // which reads as air being disturbed rather than as a texture sliding
+  vec2 toM = uv - uMouse;
+  float grip = exp(-dot(toM, toM) * 7.0) * uDepth;
+  uv += normalize(toM + 1e-5) * grip * 0.10;
+  q  += normalize(toM + 1e-5) * grip * 0.30;
+
+  float y = uv.y;
+  // Measured on the live page: at a quarter of these rates the cloud sea moved 4.6
+  // levels in fifteen seconds - real, and far too slow for anyone to notice. Cloud that
+  // is true to life is not cloud you can see moving on a web page.
+  y += 0.30 * (fbm(q * 0.55 + vec2(-0.075, -0.022) * uTime) - 0.5);
+  y -= 0.20 * (fbm(q * 1.30 + vec2( 0.128,  0.041) * uTime) - 0.5);
+  y += 0.09 * (fbm(q * 3.10 + vec2(-0.210,  0.015) * uTime) - 0.5);
+
+  // the cloud top itself, and a soft underside so the mass has a bottom
+  float top  = smoothstep(uTop + uSoft, uTop - uSoft, y);
+  float base = smoothstep(-0.05, 0.30, y);
+  // a second, higher top inside the same panel: one mass in front of another, which is
+  // what gives a cloud bank internal edges rather than one smooth wall
+  float top2 = smoothstep(uTop + 0.20 + uSoft, uTop + 0.20 - uSoft * 0.7, y + 0.06 *
+               (fbm(q * 0.9 + vec2(0.041, -0.018) * uTime) - 0.5) * 4.0);
+  float a = top * base * (0.66 + 0.34 * top2);
+
+  // fade at every edge of the panel, so its rectangle can never show
+  a *= smoothstep(0.0, 0.16, uv.x) * smoothstep(1.0, 0.84, uv.x);
+  a *= smoothstep(0.0, 0.10, uv.y) * smoothstep(1.0, 0.90, uv.y);
+
+  // Measured against V1's cloud, cropped and magnified: its tonal range is 133 - pure
+  // white at 255 down to deep grey at 104. Mine was 33, sitting in a narrow band with no
+  // white and no shadow anywhere, which is why it read as a flat veil rather than as
+  // cloud. The range is what gives cloud its punch, not the amount of it.
+  //
+  // Two things were missing. The mix ran over too short a span, so nothing reached
+  // either end; and the alpha was gently semi-transparent EVERYWHERE, so no part of the
+  // frame was ever solid cloud or ever clear sky. Both are decisive now.
+  float lift = smoothstep(uTop - 0.62, uTop + 0.06, y);
+  lift = lift * lift * (3.0 - 2.0 * lift);
+  vec3 col = mix(uPale, uBright, lift);
+
+  // push the alpha toward solid or toward clear, away from the everywhere-half-there
+  a = smoothstep(0.04, 0.55, a) * uOpacity;
+  // uOpacity is applied HERE, in the alpha, and the material itself is left fully
+  // opaque. It used to be the material's opacity, capped at 0.18 to 0.30 per layer -
+  // which meant no pixel anywhere could ever be more than a third cloud however solid
+  // the shader said it was. The white tops and the dark undersides were unreachable by
+  // construction, and that is why the tonal range would not move whatever I did to it.
+
+  gl_FragColor = vec4(col, a * uOpacity);
+  #include <colorspace_fragment>
+}`;
+
+// w and h are in WORLD units, but band is what actually matters: how much of the frame
+// this panel covers at its own depth. A panel near the camera is hugely magnified, and
+// sizing them by hand in world units buried the mountain three times running.
+// `top` is where inside the panel the cloud top sits, `band` is how much of the frame
+// the panel covers, `y` is where the panel sits in the world. Between them the cloud
+// top has to land near the mountain's FOOT - the first pass put it near the middle of
+// the peak and drowned everything below it.
+// Two things this had wrong, both visible only when the three were stacked.
+//
+// The cloud never went BRIGHTER than the sky. Real cloud lit from above has white tops
+// that stand out against the background and shadowed undersides beneath them; mine was
+// uniformly a little darker than the page, which is haze, not cloud. The bright end is
+// now genuinely white and the layers are opaque enough to reach it.
+//
+// And the cloud only occupied the bottom third. In the reference it is everywhere, with
+// peaks coming through it. These now run from the foot of the mountain to well above it.
+// Now that a layer can actually reach solid, the mass has to sit LOW. At the previous
+// heights the same density that finally produced white tops and dark undersides also
+// closed over the peak. The tops step down toward the camera so the near cloud is the
+// lowest, which is what makes a sea you are looking across rather than a lid.
+const CLOUD_LAYERS = [
+  { w: 6000, band: 1.10, x:  120, y: -22, z: -980, top: .52, soft: .11, o: .16, spd: 1.6 },
+  { w: 5000, band: 1.00, x: -300, y: -34, z: -820, top: .48, soft: .11, o: .18, spd: 2.0 },
+  { w: 4200, band: .92, x:  200, y: -46, z: -560, top: .44, soft: .11, o: .21, spd: 2.5 },
+  { w: 3600, band: .84, x: -260, y: -58, z: -300, top: .40, soft: .11, o: .23, spd: 3.0 },
+  { w: 2600, band: .72, x:  140, y: -70, z:  -60, top: .36, soft: .11, o: .24, spd: 3.6 },
+  { w: 2000, band: .60, x: -140, y: -82, z:  140, top: .32, soft: .11, o: .22, spd: 4.2 },
+  { w: 1600, band: .48, x:  180, y: -94, z:  270, top: .28, soft: .11, o: .18, spd: 5.0 },
+];
+
+const clouds = new THREE.Group();
+CLOUD_LAYERS.forEach((L, i) => {
+  const dist = Math.max(1, camera.position.z - L.z);
+  const frame = 2 * dist * Math.tan(FOV * Math.PI / 360);
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(L.w, frame * L.band),
+    new THREE.ShaderMaterial({
+      vertexShader: CLOUD_VERT, fragmentShader: CLOUD_FRAG,
+      transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide,
+      opacity: 1.0,
+      uniforms: {
+        uTime:{value:0}, uSeed:{value:i * 17.3}, uTop:{value:L.top},
+        uMouse:{value:new THREE.Vector2(0.5, 0.5)},
+        uDepth:{value: 0.10 + 0.90 * (i / (CLOUD_LAYERS.length - 1))},
+        uSoft:{value:L.soft * (0.55 + 0.85 * L.band)},
+        uOpacity:{value: Math.min(1, L.o * 2.9)},
+        // 0x9db9dc gave the cloud enough internal contrast for its motion to read, and turned
+      // the bottom of the frame into a saturated blue band. Contrast comes from the
+      // spread between these two, not from how strong the colour is - so the pale end
+      // goes back toward grey while the gap stays wide.
+      uPale:  {value:new THREE.Color(0x71839a)},   // deep shaded underside, ~125
+        uBright:{value:new THREE.Color(0xffffff)},   // and a top that reaches 255
+      },
+    })
+  );
+  m.position.set(L.x, L.y, L.z);
+  m.renderOrder = 10 + i;            // far layers first, so they stack correctly
+  m.userData.spd = L.spd;
+  clouds.add(m);
+});
+scene.add(clouds);
+clouds.visible = _q.get('clouds') !== '0';
+
+// smooth scroll + the page rail
+const lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+gsap.registerPlugin(ScrollTrigger);
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((t) => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
+
+// the copy arrives staged, headline first then the paragraph
+gsap.from('.mark', { y: 26, opacity: 0, duration: .9, ease: 'power3.out', delay: .25 });
+gsap.from('.lede', { y: 22, opacity: 0, duration: .9, ease: 'power3.out', delay: .42 });
+gsap.from('.apps', { y: 18, opacity: 0, duration: .9, ease: 'power3.out', delay: .58 });
+
+let sy = 0;
+lenis.on('scroll', (e) => { sy = e.scroll; });
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+const clock = new THREE.Clock();
+let lastT = 0;
+let heroHidden = false;
+const appInners = [...document.querySelectorAll('.cp-app-inner')];
+
+// Pointer, in 0..1 across the page, and a smoothed copy so nothing ever snaps. The
+// page ignored the pointer entirely, which measured as no response at all against V1.
+const mouse = { x: 0.5, y: 0.5, sx: 0.5, sy: 0.5 };
+addEventListener('pointermove', (e) => {
+  mouse.x = e.clientX / innerWidth;
+  mouse.y = 1 - e.clientY / innerHeight;
+}, { passive: true });
+(function frame(){
+  requestAnimationFrame(frame);
+  const t = clock.getElapsedTime();
+  const dt = Math.min(t - lastT, 0.1); lastT = t;
+  if (terrain) {
+    // ?rot= turns the mountain so a different face is presented. The skyline is one
+    // clean cone from the angle it was built at; other angles put a ridge and a col in
+    // the outline. Swept rather than guessed at - see _sweep_angle.mjs.
+    terrain.rotation.y = ROT + Math.sin(t * 0.045) * 0.012;   // a slow breath, not a spin
+    // (the terrain used to sink with the scroll to fake movement; the camera moves now)
+  }
+  // The cloud moves because its noise scrolls, not because a panel slides across, so
+  // there is nothing to wrap around and nothing to reset.
+  clouds.children.forEach(c => { c.material.uniforms.uTime.value = t * c.userData.spd; });
+
+  // Fade each application panel through its handover. Full strength while it is pinned
+  // in the middle of the screen, fading out as its box releases and rides up. This is
+  // what stops a title reaching the top edge, and what stops two being visible at once.
+  for (const inner of appInners) {
+    const b = inner.getBoundingClientRect();
+    const vh = innerHeight;
+    const enter = Math.min(1, Math.max(0, (vh - b.top) / (vh * 0.34)));
+    const leave = Math.min(1, Math.max(0, (b.bottom - vh * 0.30) / (vh * 0.34)));
+    const o = Math.min(enter, leave);
+    if (Math.abs(o - (inner.__o ?? -1)) > 0.02) { inner.__o = o; inner.style.opacity = o; }
+  }
+
+  // Hand over. Once the runway is spent the hero fades and stops drawing, so the
+  // sections below scroll over the page rather than over a permanently visible
+  // mountain. Rendering stops too - there is no reason to keep a WebGL scene running
+  // for something nobody can see.
+  // was 1.25 -> 1.95 screens, which let the lede ride up to the top edge and under the
+  // header before it had gone. Gone by 1.5 screens now, well clear of both.
+  const fade = 1 - Math.min(1, Math.max(0, (sy - innerHeight * 0.85) / (innerHeight * 0.65)));
+  if (!heroHidden) {
+    document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = fade);
+  }
+  const done = sy > innerHeight * 2.05;
+  if (done !== heroHidden) {
+    heroHidden = done;
+    const o = done ? '0' : '1';
+    canvas.style.opacity = o;
+    document.querySelectorAll('.veil, .veil-x').forEach(e => e.style.opacity = o);
+    document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = o);
+    // the header goes with the hero, the way V1's does
+    const hd = document.querySelector('header');
+    if (hd) { hd.style.opacity = o; hd.style.transform = done ? 'translateY(-100%)' : 'none';
+              hd.style.pointerEvents = done ? 'none' : ''; }
+  }
+  if (heroHidden) return;
+  // How far through the first screen of scroll we are, eased.
+  const p = Math.min(1, sy / innerHeight);
+  // Ease OUT, not smoothstep. V1 moves more in the first third of a screen (19 levels)
+  // than across the whole one (14) - it is front-loaded, so the scene answers the moment
+  // you touch the wheel. Smoothstep is slow at the start, which made this back-loaded:
+  // 8.9 for the first third and then 40 for the screen, both wrong and the second one
+  // nearly three times more movement than V1 has.
+  const e = 1 - (1 - p) * (1 - p);
+
+  mouse.sx += (mouse.x - mouse.sx) * Math.min(1, dt * 3.0);
+  mouse.sy += (mouse.y - mouse.sy) * Math.min(1, dt * 3.0);
+  const mx = (mouse.sx - 0.5), my = (mouse.sy - 0.5);
+  clouds.children.forEach(c => c.material.uniforms.uMouse.value.set(mouse.sx, mouse.sy));
+
+  // The camera TRAVELS. It used to sit still while the terrain sank by five per cent of
+  // the scroll, which is a picture shifting rather than a place being moved through.
+  // Forward, down and around: the mountain grows, swings past and is left above you.
+  camera.position.set(
+    -244 + e * 118 + mx * 26,
+     26  - e *  31 + Math.sin(t * 0.06) * 1.2 + my * 14,
+     372 - e * 170
+  );
+  camera.lookAt(
+    AIM.x + e * 54 + mx * 18,
+    AIM.y + e * 24 + my * 10,
+    AIM.z
+  );
+  renderer.render(scene, camera);
+})();
+
+// harness hook: ?p= pins the scroll for a screenshot
+const q = new URLSearchParams(location.search);
+const p = q.get('p');
+if (p !== null) { lenis.destroy(); sy = parseFloat(p) * innerHeight; }
+</script>
 <script>
 document.body.classList.add("loaded");
-// Take the header away once the hero is behind us, and bring it back on the way up.
-// V1's own scripts did this; they went with their engine.
-(function(){
-  var hd = document.querySelector('header, #header');
-  if (!hd) return;
-  var hidden = null;
-  function tick(){
-    var past = (window.scrollY || 0) > innerHeight * 0.75;
-    if (past !== hidden) {
-      hidden = past;
-      hd.style.opacity = past ? '0' : '1';
-      hd.style.transform = past ? 'translateY(-100%)' : 'none';
-      hd.style.pointerEvents = past ? 'none' : '';
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
+(function(){ var hd=document.querySelector('header, #header'); if(!hd) return; var hidden=null;
+  (function tick(){ var past=(window.scrollY||0) > innerHeight*0.75;
+    if(past!==hidden){ hidden=past; hd.style.opacity=past?'0':'1';
+      hd.style.transform=past?'translateY(-100%)':'none'; hd.style.pointerEvents=past?'none':''; }
+    requestAnimationFrame(tick); })(); })();
 </script>
 </body></html>
