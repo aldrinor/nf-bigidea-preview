@@ -50,12 +50,40 @@ section[class*="astro-"]{
   padding:22vh 148px 100vh;
   box-sizing:border-box;
 }
+/* The section carries the padding, and its child .grid is position:FIXED - so it is out
+   of flow and ignores that padding entirely, which is why the charge copy sat at left 0
+   however the section was padded. This is the third time in this page that padding a
+   parent failed to move a fixed or sticky child. The padding has to go ON the thing
+   that is positioned. */
+section[class*="astro-"] .grid,
+section[class*="astro-"] > div[class*="grid"]{
+  padding-left:148px !important;
+  padding-right:56px;
+  box-sizing:border-box;
+}
 section[class*="astro-"] > *{max-width:1100px}
 section[class*="astro-"] h2{margin:0 0 .6em; max-width:22ch}
 section[class*="astro-"] p{max-width:56ch}
 
+/* NOTHING here about the application panels. They are already correct: a full-height
+   sticky box with justify-content:flex-end and padding-bottom:104px, so the label sits
+   near the BOTTOM of the screen by design. I added padding-top to "fix" it, which made
+   the box 116vh tall and pushed its contents past the bottom of the window - a fix for
+   a fault that was mine to begin with, on top of a design that was already right.
+   Read the rule before overriding it. */
+
+/* V1's chapter navigation. It is driven by their ChaptersNavigation script, which v3
+   does not carry, so these are links that no longer do anything - and without their
+   stylesheet they were rendering unstyled at left 0 partway down the page. Dead UI. */
+.chapter-link, [data-astro-cid-gpzihxjt], .link-block-label{display:none !important}
+
 @media (max-width:900px){
   section[class*="astro-"]{padding:16vh 22px 60vh}
+  section[class*="astro-"] .grid,
+  section[class*="astro-"] > div[class*="grid"]{padding-left:22px !important; padding-right:22px}
+  footer, .cp-footer, nav[class*="secondary"]{padding-left:22px}
+  /* the header nav overflowed the viewport at 390 */
+  nav{padding-right:22px}
 }
 </style>
 <meta name="robots" content="noindex, nofollow">
