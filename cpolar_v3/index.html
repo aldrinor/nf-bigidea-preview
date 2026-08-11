@@ -59,11 +59,37 @@ section[class*="astro-"] .grid,
 section[class*="astro-"] > div[class*="grid"]{
   padding-left:148px !important;
   padding-right:56px;
+  /* !important on BOTH. Without it the padding-top lost to their rule and stayed at
+     0px, and because this .grid is position:FIXED it never scrolls away - so the
+     headline sat hard on the top edge for the whole section rather than for a moment. */
+  padding-top:max(10vh, 96px);
+  padding-bottom:max(8vh, 64px);
   box-sizing:border-box;
 }
 section[class*="astro-"] > *{max-width:1100px}
 section[class*="astro-"] h2{margin:0 0 .6em; max-width:22ch}
 section[class*="astro-"] p{max-width:56ch}
+
+/* At 1280 and below the charge block is simply TALLER than the window - headline,
+   specimen circle, its label, and the capture copy. Our own cpolar.css centres it in a
+   100vh box with padding-top:0 !important, which is right when it fits and pushes the
+   headline onto the top edge when it does not. Padding was never the answer here and I
+   spent three passes trying to force it: the fix is to stop centring over-tall content
+   and to take a little off the circle so it fits. */
+@media (max-width:1420px){
+  [data-chapter="WhatWeDo"] > .grid:first-of-type{
+    align-content:start !important;
+    padding-top:7vh !important;
+  }
+  .cp-scope{width:210px !important; height:210px !important}
+}
+
+/* Panels fade as they arrive and leave. Two things came out of the dense audit: a
+   title occasionally rode up to the very top edge as its pinned box released, and for
+   two frames out of sixty-five two titles were on screen together. Both are the same
+   moment - the handover - and fading through it fixes both at once, rather than nudging
+   positions until the symptom moves somewhere else. */
+.cp-app-inner{transition:opacity .18s linear}
 
 /* NOTHING here about the application panels. They are already correct: a full-height
    sticky box with justify-content:flex-end and padding-bottom:104px, so the label sits
@@ -79,6 +105,16 @@ section[class*="astro-"] p{max-width:56ch}
 
 @media (max-width:900px){
   section[class*="astro-"]{padding:16vh 22px 60vh}
+  /* at 390 the headings were reaching the top edge; the labels inside the specimen
+     circles too */
+  section[class*="astro-"] .grid,
+  section[class*="astro-"] > div[class*="grid"]{padding-top:18vh !important; padding-bottom:12vh !important}
+  .cp-app-inner{padding-bottom:14vh}
+  /* the last nav item ran off the right edge at 390. Five links at 13px with 18px gaps
+     do not fit in 346px; at 11px with 11px gaps they do, with room to spare. */
+  header nav{gap:11px; overflow:visible}
+  header nav a{font-size:11px; letter-spacing:0; padding-bottom:4px}
+  header .shell{padding:0 16px}
   section[class*="astro-"] .grid,
   section[class*="astro-"] > div[class*="grid"]{padding-left:22px !important; padding-right:22px}
   footer, .cp-footer, nav[class*="secondary"]{padding-left:22px}
@@ -1174,6 +1210,7 @@ addEventListener('resize', () => {
 const clock = new THREE.Clock();
 let lastT = 0;
 let heroHidden = false;
+const appInners = [...document.querySelectorAll('.cp-app-inner')];
 
 // Pointer, in 0..1 across the page, and a smoothed copy so nothing ever snaps. The
 // page ignored the pointer entirely, which measured as no response at all against V1.
@@ -1197,11 +1234,25 @@ addEventListener('pointermove', (e) => {
   // there is nothing to wrap around and nothing to reset.
   clouds.children.forEach(c => { c.material.uniforms.uTime.value = t * c.userData.spd; });
 
+  // Fade each application panel through its handover. Full strength while it is pinned
+  // in the middle of the screen, fading out as its box releases and rides up. This is
+  // what stops a title reaching the top edge, and what stops two being visible at once.
+  for (const inner of appInners) {
+    const b = inner.getBoundingClientRect();
+    const vh = innerHeight;
+    const enter = Math.min(1, Math.max(0, (vh - b.top) / (vh * 0.34)));
+    const leave = Math.min(1, Math.max(0, (b.bottom - vh * 0.30) / (vh * 0.34)));
+    const o = Math.min(enter, leave);
+    if (Math.abs(o - (inner.__o ?? -1)) > 0.02) { inner.__o = o; inner.style.opacity = o; }
+  }
+
   // Hand over. Once the runway is spent the hero fades and stops drawing, so the
   // sections below scroll over the page rather than over a permanently visible
   // mountain. Rendering stops too - there is no reason to keep a WebGL scene running
   // for something nobody can see.
-  const fade = 1 - Math.min(1, Math.max(0, (sy - innerHeight * 1.25) / (innerHeight * 0.7)));
+  // was 1.25 -> 1.95 screens, which let the lede ride up to the top edge and under the
+  // header before it had gone. Gone by 1.5 screens now, well clear of both.
+  const fade = 1 - Math.min(1, Math.max(0, (sy - innerHeight * 0.85) / (innerHeight * 0.65)));
   if (!heroHidden) {
     document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = fade);
   }
