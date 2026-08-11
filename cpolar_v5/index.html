@@ -828,7 +828,7 @@ vec3 triBlend(vec3 n){
     o.material = mat;
   });
   terrain = g.scene;
-  scene.add(terrain);
+  scene.add(terrain); window.__cpTerrain = terrain; window.__cpCam = camera;
 
   // A RANGE, not one hill.
   // Stacked against the reference and against V1, the difference was never colour or
@@ -1175,17 +1175,27 @@ addEventListener('pointermove', (e) => {
   // two after the first frame. Writing to it unguarded threw on every frame of that window
   // - not visible on a warm local server where the file is there almost immediately, which
   // is exactly why it reached the live site before it was caught.
-  if (terrain) terrain.position.y = -de * 150;
-  clouds.position.y = -de * 178;
+  // SIGN MATTERS, and I had it backwards. Descending past a mountain makes the mountain
+  // RISE in your view. Moving the terrain down sinks it out of frame, which reads as
+  // flying up and over the summit - the opposite of the beat this section is for.
+  //
+  // `terrain` is null until the GLB has loaded, and that model is 7.7 MB, so on a cold
+  // visit that is a second or two after the first frame. Writing to it unguarded threw on
+  // every frame of that window - invisible on a warm local server, which is exactly how it
+  // reached the live site.
+  // The cloud bank settles a little as the view comes down, so it reads as being below
+  // you rather than around you. The terrain itself does NOT move - there is no room for
+  // it to, and translating it was what shattered the mesh twice.
+  clouds.position.y = -de * 26;
 
   camera.position.set(
-    -244 + e * 118 + mx * 26,
-     26  - e *  31 + Math.sin(t * 0.06) * 1.2 + my * 14,
-     372 - e * 170
+    -244 + e * 118 - de * 46 + mx * 26,
+     26  - e *  31 - de * 14 + Math.sin(t * 0.06) * 1.2 + my * 14,
+     372 - e * 170 - de * 52
   );
   camera.lookAt(
     AIM.x + e * 54 + mx * 18,
-    AIM.y + e * 24 - de * 34 + my * 10,
+    AIM.y + e * 24 - de * 12 + my * 10,
     AIM.z
   );
   renderer.render(scene, camera);
