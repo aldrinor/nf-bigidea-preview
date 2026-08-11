@@ -1105,12 +1105,29 @@ addEventListener('pointermove', (e) => {
   const fade = 1 - Math.min(1, Math.max(0, (sy - innerHeight * 0.85) / (innerHeight * 0.65)));
   if (!heroHidden) {
     document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = fade);
+    // The scene dissolves on the SAME ramp as the hero copy. It used to be switched off
+    // instead - opacity 1 to 0 in one frame at 0.85 screens - which snapped, and left the
+    // screen behind the "air and water" line completely empty until that section's own
+    // content arrived. Leaving the scene up instead is no better: the mountain is dark and
+    // "Down where we live, they are full of pollutants" then sits on bare rock and cannot
+    // be read. A dissolve is what serves both - the mountain is still there as the first
+    // line arrives, and is gone by the time the second one does.
+    canvas.style.opacity = fade;
+    const fld = document.querySelector('.cp-hero-field');
+    if (fld) fld.style.opacity = fade;
   }
   const done = sy > innerHeight * 2.05;
   if (done !== heroHidden) {
     heroHidden = done;
     const o = done ? '0' : '1';
     canvas.style.opacity = o;
+    // The pale field behind the hero leaves with it. This used to be done by a separate
+    // script bolted on after the engine, which ALSO switched the canvas off - at 0.85
+    // screens, hard, with no transition. That overrode this handover and killed the scene
+    // 1,200px early, so from there until the "air and water" line arrived the screen
+    // behind the copy was empty. Same job, done once, in the place that owns it.
+    const fld = document.querySelector('.cp-hero-field');
+    if (fld) fld.style.opacity = o;
     document.querySelectorAll('.veil, .veil-x').forEach(e => e.style.opacity = o);
     document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = o);
     // the header goes with the hero, the way V1's does
@@ -1156,18 +1173,10 @@ if (p !== null) { lenis.destroy(); sy = parseFloat(p) * innerHeight; }
 </script>
 <script>
 document.body.classList.add("loaded");
-(function(){
-  // the mountain leaves with the hero
-  var cv = document.querySelector('canvas#scene'), gone = null;
-  (function fade(){
-    var past = (window.scrollY||0) > innerHeight * 0.85;
-    if (cv && past !== gone) { gone = past;
-      cv.style.opacity = past ? '0' : '1';
-      var fd = document.querySelector('.cp-hero-field');
-      if (fd) fd.style.opacity = past ? '0' : '1'; }
-    requestAnimationFrame(fade);
-  })();
-})();
+// The hero's handover lives in the engine above, which fades the copy from 0.85 screens
+// and lets the scene go at 2.05. A second copy of that job used to sit here and switch the
+// canvas off at 0.85 - hard, no transition - which beat the engine to it and left the
+// screen blank behind the "air and water" line. Removed.
 (function(){ var hd=document.querySelector('header, #header'); if(!hd) return; var hidden=null;
   (function tick(){ var past=(window.scrollY||0) > innerHeight*0.30;
     if(past!==hidden){ hidden=past; hd.style.opacity=past?'0':'1';
