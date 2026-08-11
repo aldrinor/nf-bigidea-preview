@@ -1143,10 +1143,9 @@ addEventListener('pointermove', (e) => {
     if (fld) fld.style.opacity = o;
     document.querySelectorAll('.veil, .veil-x').forEach(e => e.style.opacity = o);
     document.querySelectorAll('.col, .cue').forEach(e => e.style.opacity = o);
-    // the header goes with the hero, the way V1's does
-    const hd = document.querySelector('header');
-    if (hd) { hd.style.opacity = o; hd.style.transform = done ? 'translateY(-100%)' : 'none';
-              hd.style.pointerEvents = done ? 'none' : ''; }
+    // The header is NOT touched here. It has its own owner further down, on a 0.30-screen
+    // threshold. Writing to it from both places meant that coming back up across 2.10
+    // screens re-showed it at scroll 1880, over the copy - which is what Yin caught.
   }
   if (heroHidden) return;
   // How far through the first screen of scroll we are, eased.
@@ -1189,13 +1188,13 @@ addEventListener('pointermove', (e) => {
   clouds.position.y = -de * 26;
 
   camera.position.set(
-    -244 + e * 118 - de * 46 + mx * 26,
-     26  - e *  31 - de * 14 + Math.sin(t * 0.06) * 1.2 + my * 14,
-     372 - e * 170 - de * 52
+    -244 + e * 118 + de * 26 + mx * 26,
+     26  - e *  31 - de * 21 + Math.sin(t * 0.06) * 1.2 + my * 14,
+     372 - e * 170 - de * 8
   );
   camera.lookAt(
     AIM.x + e * 54 + mx * 18,
-    AIM.y + e * 24 - de * 12 + my * 10,
+    AIM.y + e * 24 - de * 6 + my * 10,
     AIM.z
   );
   renderer.render(scene, camera);
