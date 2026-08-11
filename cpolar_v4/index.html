@@ -38,10 +38,31 @@ body{opacity:1 !important}
    And the copy and the application buttons were sitting on the mountain: the peak is on
    the right but its lower mass runs the width of the frame. A soft field behind the
    left half puts the copy back on paper without touching the peak. */
+/* SLIDE 2. A stray "About" with a rule and three dots was sitting in the middle of the
+   frame - V1's chapter navigation. It is driven by their ChaptersNavigation component,
+   whose state came from the engine that has been removed, so those are links that no
+   longer go anywhere and a progress rail that never fills. Dead UI. */
+.chapter-link, [data-astro-cid-gpzihxjt], .link-block-label,
+.chapters-navigation, [data-component="ChaptersNavigation"]{display:none !important}
+
 header nav a{color:#2d628c !important}
 header nav a.on{border-bottom-color:#2d628c !important}
 header nav a:hover{color:#12405f !important}
 header .menu{color:#2d628c !important}
+
+/* The hero copy passes under the fixed bar about half a screen in. V1 does the same,
+   but the bar is ours now so there is no reason to inherit the fault - it leaves before
+   the copy reaches it rather than after. */
+
+/* At 390 the last two links ran off the right edge, and the applications label went
+   under the bar. Five links at 13px with 18px gaps need more than the 346px available;
+   at 11px with 10px gaps they fit with room to spare. */
+@media (max-width:900px){
+  header .shell{padding:0 16px}
+  header nav{gap:10px}
+  header nav a{font-size:11px; letter-spacing:0}
+  header .menu{display:none}
+}
 
 .cp-hero-field{
   position:fixed; inset:0; z-index:-1; pointer-events:none;
@@ -1143,7 +1164,7 @@ document.body.classList.add("loaded");
   })();
 })();
 (function(){ var hd=document.querySelector('header, #header'); if(!hd) return; var hidden=null;
-  (function tick(){ var past=(window.scrollY||0) > innerHeight*0.75;
+  (function tick(){ var past=(window.scrollY||0) > innerHeight*0.30;
     if(past!==hidden){ hidden=past; hd.style.opacity=past?'0':'1';
       hd.style.transform=past?'translateY(-100%)':'none'; hd.style.pointerEvents=past?'none':''; }
     requestAnimationFrame(tick); })(); })();
