@@ -280,7 +280,7 @@ body { background: transparent !important; }
    The .top class is only added when you scroll back UP, which is why it
    never showed in a downward test. Kill the panel, keep the header clear. */
 #header nav::before,
-header[data-astro-cid-4wsjtibl].top nav[data-astro-cid-4wsjtibl]::before {
+#header.top nav::before {
   background: transparent !important;
   background-color: transparent !important;
   opacity: 0 !important;
