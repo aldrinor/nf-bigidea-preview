@@ -1040,6 +1040,9 @@ clouds.visible = _q.get('clouds') !== '0';
 // smooth scroll + the page rail
 const lenis = new Lenis({ duration: 1.15, smoothWheel: true });
 gsap.registerPlugin(ScrollTrigger);
+// handed out so the reveal layer can use the same instances - a second copy of gsap
+// would keep its own ScrollTrigger registry and never see Lenis driving the scroll
+window.gsap = gsap; window.ScrollTrigger = ScrollTrigger;;
 lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
@@ -1183,4 +1186,5 @@ document.body.classList.add("loaded");
       hd.style.transform=past?'translateY(-100%)':'none'; hd.style.pointerEvents=past?'none':''; }
     requestAnimationFrame(tick); })(); })();
 </script>
+<script src="./cp_reveal.js"></script>
 </body></html>
