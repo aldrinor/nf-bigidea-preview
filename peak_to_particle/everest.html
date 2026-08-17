@@ -43,6 +43,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const q = new URLSearchParams(location.search);
 const canvas = document.getElementById('c');
@@ -115,13 +116,111 @@ new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./terrain/out/everest_h
   window.__ready = true;
 }, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
 
-/* a slow drift, so it is alive without being a ride */
-let t0 = performance.now();
+/* --- cloud sea: at 8 848 m the summit is above the deck --------------------
+   Two drifting fbm layers on wide planes. The lower one is the deck the peak
+   rises out of; the upper one is thin banner cloud crossing the face.        */
+const CLOUD = `
+  varying vec2 vUv;
+  uniform float uTime, uScale, uCover, uSoft, uOpacity, uSeed, uSlab;
+  uniform vec3  uColor;
+  vec2 h2(vec2 p){ p = vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)));
+    return fract(sin(p)*43758.5453)*2.0-1.0; }
+  float noise(vec2 p){
+    vec2 i = floor(p), f = fract(p);
+    vec2 u = f*f*(3.0-2.0*f);
+    return mix(mix(dot(h2(i+vec2(0,0)), f-vec2(0,0)),
+                   dot(h2(i+vec2(1,0)), f-vec2(1,0)), u.x),
+               mix(dot(h2(i+vec2(0,1)), f-vec2(0,1)),
+                   dot(h2(i+vec2(1,1)), f-vec2(1,1)), u.x), u.y);
+  }
+  float fbm(vec2 p){
+    float v = 0.0, a = 0.5;
+    for(int i=0;i<4;i++){ v += a*noise(p); p = p*2.03 + 17.3; a *= 0.5; }
+    return v;
+  }
+  void main(){
+    vec2 p = (vUv-0.5)*uScale + vec2(uSeed*3.7, uSeed*-2.1);
+    vec2 dr = vec2(uTime*0.010, uTime*0.004);
+    float n = fbm(p + dr) * 0.6 + fbm(p*2.7 - dr*1.7) * 0.4;
+    float d = smoothstep(uCover, uCover + uSoft, n*0.5+0.5);
+    // fade the plane out at its own edges so it never shows a rim
+    float edge = smoothstep(0.5, 0.30, length(vUv-0.5));
+    float a = d * edge * uOpacity * uSlab;
+    if (a < 0.004) discard;
+    // lit from the same side as the sun, so the tops catch light
+    float lit = smoothstep(uCover, uCover+0.30, n*0.5+0.5);
+    gl_FragColor = vec4(mix(uColor*0.80, vec3(1.0), lit), a);
+  }`;
+const CLOUD_V = `varying vec2 vUv; void main(){ vUv = uv;
+  gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+
+function cloudSlice({y, size, scale, cover, soft, opacity, color, seed, slab}) {
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(size, size, 1, 1),
+    new THREE.ShaderMaterial({
+      vertexShader: CLOUD_V, fragmentShader: CLOUD,
+      transparent: true, depthWrite: false, side: THREE.DoubleSide,
+      uniforms: {
+        uTime:{value:0}, uScale:{value:scale}, uCover:{value:cover},
+        uSoft:{value:soft}, uOpacity:{value:opacity}, uSeed:{value:seed},
+        uSlab:{value:slab}, uColor:{value:new THREE.Color(color)}
+      }
+    })
+  );
+  m.rotation.x = -Math.PI/2;
+  m.position.y = y;
+  m.renderOrder = 3;
+  scene.add(m);
+  return m;
+}
+
+/* A single plane always shows its own edge cutting the mountain. A stack of
+   slices, each sampling the noise field at a different offset and fading at the
+   top and bottom of the slab, reads as depth instead. */
+function cloudStack({base, top, n, size, scale, cover, soft, opacity, color, drift}) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const f = i / (n - 1);                       // 0 at base, 1 at top
+    const slab = Math.sin(Math.PI * f) ** 0.7;   // soft at both faces
+    out.push(cloudSlice({
+      y: base + (top - base) * f, size, scale,
+      cover: cover + f * 0.10,                   // thins toward the top
+      soft, opacity, color, seed: i * 1.31, slab: slab * (drift ?? 1)
+    }));
+  }
+  return out;
+}
+
+// the deck the summit stands out of
+const deck = cloudStack({base:6900, top:7950, n:11, size:120000, scale:7.0,
+                         cover:0.26, soft:0.42, opacity:0.42, color:0xdae7f3});
+// thin banner cloud streaming off the ridge
+const banner = cloudStack({base:8150, top:8600, n:4, size:90000, scale:15.0,
+                           cover:0.74, soft:0.22, opacity:0.16, color:0xeaf1f8});
+const clouds = deck.concat(banner);
+
+/* --- controls: drag to orbit, wheel to zoom -------------------------------- */
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.copy(SUMMIT);
+controls.enableDamping = true;
+controls.dampingFactor = 0.055;
+controls.rotateSpeed = 0.42;
+controls.zoomSpeed = 0.75;
+controls.minDistance = 3200;
+controls.maxDistance = 26000;
+controls.minPolarAngle = 0.30;          // never fly under the terrain
+controls.maxPolarAngle = Math.PI/2 - 0.06;
+controls.autoRotate = true;             // drifts until the visitor takes hold
+controls.autoRotateSpeed = 0.16;
+controls.addEventListener('start', () => { controls.autoRotate = false; });
+controls.update();
+
+const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
-  const t = (performance.now() - t0) * 0.00004;
-  camera.position.x = view[0] + Math.sin(t) * 260;
-  camera.position.y = view[1] + Math.sin(t * 0.7) * 60;
-  camera.lookAt(SUMMIT);
+  const t = clock.getElapsedTime();
+  for (let i = 0; i < clouds.length; i++)
+    clouds[i].material.uniforms.uTime.value = t * (i < 14 ? 1.0 : 1.7);
+  controls.update();
   renderer.render(scene, camera);
 });
 
