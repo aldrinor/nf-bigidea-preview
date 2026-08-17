@@ -8,3 +8,15 @@ terrain/out/dem_small.npy
 shot_*.png
 cmp_*.png
 _*.mjs
+
+# Everest raw source data — refetchable with terrain/fetch_everest.py, never committed
+terrain/out/everest_dem.npy
+terrain/out/everest_albedo.png
+terrain/out/everest_albedo_4k.webp
+terrain/out/everest_terrain.glb
+terrain/out/everest_opt.glb
+terrain/out/everest_hero.glb
+terrain/out/_t_*.glb
+terrain/out/_albedo_preview.png
+terrain/out/_everest_hillshade.png
+terrain/out/_shot_*.png
