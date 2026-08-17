@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Everest</title>
+<style>
+  :root{ --ink:#1f2327; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#c9d8e6;overflow:hidden;
+    font-family:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  #c{display:block;position:fixed;inset:0}
+  .plate{position:fixed;left:6vw;top:16vh;z-index:2;color:var(--ink)}
+  .plate h1{font-size:clamp(28px,4.6vw,64px);font-weight:600;line-height:1.06;
+    letter-spacing:-.015em}
+  .plate p{margin-top:14px;font-size:clamp(15px,1.35vw,19px);font-weight:440;
+    line-height:1.5;max-width:34ch;opacity:.82}
+  .meta{position:fixed;left:6vw;bottom:9vh;z-index:2;text-align:left;
+    font-family:"Space Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.06em;
+    color:#fff;opacity:.9;line-height:1.9;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+  #load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;
+    background:#c9d8e6;font-family:"Space Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.12em;color:#5a6570;transition:opacity .8s}
+  #load.gone{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="plate">
+  <h1>It starts eight kilometres up.</h1>
+  <p>Air moves. What it carries does not stop at the summit.</p>
+</div>
+<div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8 848 m<br>elevation and imagery, measured</div>
+<div id="load">LOADING TERRAIN</div>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+const q = new URLSearchParams(location.search);
+const canvas = document.getElementById('c');
+
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+
+/* --- sky: a real gradient, deep at altitude, pale at the horizon --------- */
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(90000, 32, 16),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite:false,
+    uniforms:{ top:{value:new THREE.Color(0x5f8fc4)}, bot:{value:new THREE.Color(0xdfe8f0)} },
+    vertexShader:`varying float h; void main(){ h = normalize(position).y;
+      gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader:`varying float h; uniform vec3 top; uniform vec3 bot;
+      void main(){ float t = pow(clamp(h*1.05+0.05,0.0,1.0), 0.82);
+        gl_FragColor = vec4(mix(bot, top, t), 1.0); }`
+  })
+);
+scene.add(sky);
+scene.fog = new THREE.FogExp2(0xcfdeea, 0.000062);
+
+const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 20, 200000);
+
+/* --- sun: low from the east, the light Everest is actually photographed in */
+const sun = new THREE.DirectionalLight(0xfff0dc, 3.6);
+sun.position.set(7400, 5200, 6200);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+const S = 9000;
+Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:1000, far:40000});
+sun.shadow.bias = -0.0006;
+sun.shadow.normalBias = 12;
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0x9dc0e4, 0x5c6672, 0.85));
+
+const SUMMIT = new THREE.Vector3(152, 8750, 580);
+const VIEWS = {
+  hero:  [-4300, 9700, 7600],
+  wide:  [-7000, 10200, 10400],
+  low:   [-3100, 8600, 6100],
+  north: [ 3800, 10000, 8200],
+};
+const view = VIEWS[q.get('v')] || VIEWS.hero;
+camera.position.set(...view);
+camera.lookAt(SUMMIT);
+
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./terrain/out/everest_hero_opt.glb', gltf => {
+  gltf.scene.traverse(o => {
+    if (o.isMesh) {
+      o.castShadow = true;
+      o.receiveShadow = true;
+      const m = o.material;
+      m.roughness = 0.97; m.metalness = 0.0;
+      if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+      m.needsUpdate = true;
+    }
+  });
+  scene.add(gltf.scene);
+  document.getElementById('load').classList.add('gone');
+  window.__ready = true;
+}, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
+
+/* a slow drift, so it is alive without being a ride */
+let t0 = performance.now();
+renderer.setAnimationLoop(() => {
+  const t = (performance.now() - t0) * 0.00004;
+  camera.position.x = view[0] + Math.sin(t) * 260;
+  camera.position.y = view[1] + Math.sin(t * 0.7) * 60;
+  camera.lookAt(SUMMIT);
+  renderer.render(scene, camera);
+});
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

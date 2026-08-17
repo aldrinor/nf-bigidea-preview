@@ -1,0 +1,72 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Everest — terrain check</title>
+<style>
+  html,body{margin:0;height:100%;background:#dfe6ee;overflow:hidden}
+  canvas{display:block}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const q = new URLSearchParams(location.search);
+const VIEW = q.get('v') || 'sw';
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdfe6ee);
+// thin high-altitude haze, so distance reads
+scene.fog = new THREE.FogExp2(0xdfe6ee, 0.000035);
+
+const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 10, 120000);
+
+// sun low from the east-south-east, the way Everest is usually photographed at dawn
+const sun = new THREE.DirectionalLight(0xfff3e2, 3.2);
+sun.position.set(-9000, 6000, 7000);
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xcfe2f5, 0x6b7480, 1.1));
+
+const SUMMIT = new THREE.Vector3(152, 8750, 24);
+const VIEWS = {
+  sw:   {pos:[-7200, 10600, 9800]},
+  s:    {pos:[  400,  9900, 12000]},
+  low:  {pos:[-5200,  8400, 9000]},
+  close:{pos:[-3400,  9400, 5200]},
+};
+const v = VIEWS[VIEW] || VIEWS.sw;
+camera.position.set(...v.pos);
+camera.lookAt(SUMMIT);
+
+new GLTFLoader().load('./out/everest_terrain.glb', g => {
+  const m = g.scene;
+  m.traverse(o => {
+    if (o.isMesh) {
+      o.material.roughness = 0.95;
+      o.material.metalness = 0.0;
+      if (o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
+      o.material.needsUpdate = true;
+    }
+  });
+  scene.add(m);
+  window.__ready = true;
+}, undefined, e => { window.__err = String(e); });
+
+renderer.setAnimationLoop(() => renderer.render(scene, camera));
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
