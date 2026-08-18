@@ -134,6 +134,11 @@ lum = A @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
 A += (A - lum[..., None]) * 0.30                        # saturation, gently
 shadow = (1.0 - lum)[..., None]
 A += shadow * np.array([-0.009, 0.000, 0.022], np.float32) * 0.9   # cool the shade, lightly
+# The south-west face is genuinely dark rock and it measured at median 0.32 in
+# frame against 0.65-0.70 for every other bearing. A screen-style lift raises
+# the dark end without touching the highlights, which a gamma curve cannot do.
+A = A.clip(0, 1)
+A = A * 0.62 + (1.0 - (1.0 - A) ** 2) * 0.38
 # headroom at both ends: nothing in a photograph of a mountain is 0 or 255, and
 # a texture that touches the ceiling has no detail left for the light to find
 A = 0.045 + A.clip(0, 1) * 0.915

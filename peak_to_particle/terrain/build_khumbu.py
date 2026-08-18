@@ -24,7 +24,7 @@ WW, WE, WS, WN = 86.35, 87.55, 27.45, 28.50
 # hero frame -- the origin of the whole scene is the centre of THIS
 HW, HE, HS, HN = 86.865, 86.985, 27.955, 28.035
 
-GX = GY = 330      # distant relief; the hero tile carries the detail
+GX = GY = 470      # distant relief; the hero tile carries the detail
 TEX = 2048
 SINK = 130.0        # drop the low-res sheet so the sharp tile always wins
 
