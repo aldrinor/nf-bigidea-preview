@@ -171,79 +171,67 @@ CLOUD_TEX.anisotropy = 8;
 // no camera angle can ever see it. Measured, not guessed.
 // The terrain is a 11.8 x 8.9 km tile whose boundary tops out at 7527 m, so the
 // cloud base sits just above that and the rectangular cut edge can never be seen.
-const CLOUD_Y = 7560;
-const CLOUD_RELIEF = 520;      // metres of billow above the base
+/* --- cloud sea ------------------------------------------------------------
+   Back to the version that actually looked like cloud: one plane, one baked
+   texture, with the lighting -- lit tops, cool shadowed bases -- baked into the
+   RGB rather than applied at runtime. That is what makes it a body and not a
+   filter.
 
-/* A flat plane cannot look like cloud from a shallow angle -- the texture
-   stretches to nothing and it reads as a milky sheet. Give the surface real
-   relief and it catches light on the tops and goes dark in the troughs, which is
-   what a cloud sea actually is. */
-const CG = 400;                                        // grid resolution
-const cloudGeo = new THREE.PlaneGeometry(190000, 190000, CG, CG);
-{
-  // displace from the same field the texture was baked from
-  const pos = cloudGeo.attributes.position;
-  const h = (x, y) => {
-    const s1 = Math.sin(x * 0.00021 + 1.3) * Math.cos(y * 0.00019 - 0.7);
-    const s2 = Math.sin(x * 0.00057 - 2.1) * Math.cos(y * 0.00061 + 1.9);
-    const s3 = Math.sin(x * 0.00134 + 0.4) * Math.cos(y * 0.00127 - 2.6);
-    return (s1 * 0.55 + s2 * 0.31 + s3 * 0.14) * 0.5 + 0.5;
-  };
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), y = pos.getY(i);
-    pos.setZ(i, Math.pow(h(x, y), 1.7) * CLOUD_RELIEF);
-  }
-  pos.needsUpdate = true;
-  cloudGeo.computeVertexNormals();
-}
+   It was ruined by being asked to hide the tile edge as well. Raising it to
+   submerge the cut drowned the mountain; turning it into a displaced mesh made
+   it a band on the horizon. Real terrain hides the edge now, so the cloud only
+   has to be beautiful. */
+const CLOUD_Y = 7150;
+const cloudSea = new THREE.Mesh(
+  new THREE.PlaneGeometry(300000, 300000, 1, 1),
+  new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    uniforms: {
+      uTex:{value:CLOUD_TEX}, uHeight:{value:HEIGHT_TEX},
+      uTime:{value:0}, uY:{value:CLOUD_Y},
+      uHmin:{value:HEIGHT_META.hmin}, uHmax:{value:HEIGHT_META.hmax},
+      uSpanX:{value:HEIGHT_META.spanX}, uSpanZ:{value:HEIGHT_META.spanZ},
+      uHorizon:{value:new THREE.Color(0xdbe6f0)},
+    },
+    vertexShader:`
+      varying vec3 vW;
+      void main(){
+        vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader:`
+      varying vec3 vW;
+      uniform sampler2D uTex, uHeight;
+      uniform float uTime, uY, uHmin, uHmax, uSpanX, uSpanZ;
+      uniform vec3 uHorizon;
+      void main(){
+        vec2 uv = vW.xz / 21000.0 + vec2(uTime * 0.0011, uTime * 0.0004);
+        vec4 c  = texture2D(uTex, uv);
+        // a second, larger, slower tap so the tiling never shows
+        vec4 c2 = texture2D(uTex, vW.xz / 53000.0 - vec2(uTime * 0.0005, 0.0));
+        c = mix(c, c2, 0.44);
 
-const cloudMat = new THREE.MeshStandardMaterial({
-  map: CLOUD_TEX,
-  transparent: true,
-  depthWrite: false,
-  side: THREE.DoubleSide,
-  roughness: 1.0,
-  metalness: 0.0,
-  color: 0xffffff,
-});
-cloudMat.onBeforeCompile = (sh) => {
-  sh.uniforms.uHeight = {value: HEIGHT_TEX};
-  sh.uniforms.uHmin = {value: HEIGHT_META.hmin};
-  sh.uniforms.uHmax = {value: HEIGHT_META.hmax};
-  sh.uniforms.uSpanX = {value: HEIGHT_META.spanX};
-  sh.uniforms.uSpanZ = {value: HEIGHT_META.spanZ};
-  sh.vertexShader = sh.vertexShader
-    .replace('#include <common>', `#include <common>
-varying vec3 vWpos;`)
-    .replace('#include <worldpos_vertex>', `#include <worldpos_vertex>
-  vWpos = (modelMatrix * vec4(transformed,1.0)).xyz;`);
-  sh.fragmentShader = sh.fragmentShader
-    .replace('#include <common>', `#include <common>
-varying vec3 vWpos;
-uniform sampler2D uHeight;
-uniform float uHmin,uHmax,uSpanX,uSpanZ;`)
-    .replace('#include <dithering_fragment>', `#include <dithering_fragment>
-      vec2 tuv = vec2(vWpos.x/uSpanX + 0.5, 0.5 - vWpos.z/uSpanZ);
-      float terr = uHmin;
-      if (tuv.x>0.0&&tuv.x<1.0&&tuv.y>0.0&&tuv.y<1.0)
-        terr = uHmin + texture2D(uHeight, tuv).r * (uHmax-uHmin);
-      float clear = smoothstep(0.0, 130.0, vWpos.y - terr);
-      float dist  = length(vWpos.xz - cameraPosition.xz);
-      float near  = smoothstep(900.0, 4200.0, dist);
-      float haze  = smoothstep(28000.0, 120000.0, dist);
-      gl_FragColor.a *= clear * near;
-      gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.862,0.902,0.941), haze*0.9);
-      if (gl_FragColor.a < 0.006) discard;`);
-  cloudMat.userData.shader = sh;
-};
+        // thin out against rock so the peaks rise out of it, no hard waterline
+        vec2 tuv = vec2(vW.x / uSpanX + 0.5, 0.5 - vW.z / uSpanZ);
+        float terrain = uHmin;
+        if (tuv.x > 0.0 && tuv.x < 1.0 && tuv.y > 0.0 && tuv.y < 1.0)
+          terrain = uHmin + texture2D(uHeight, tuv).r * (uHmax - uHmin);
+        float clear = smoothstep(0.0, 380.0, uY - terrain);
 
-const cloudSea = new THREE.Mesh(cloudGeo, cloudMat);
+        float dist = length(vW.xz - cameraPosition.xz);
+        float near = smoothstep(700.0, 3400.0, dist);
+        float haze = smoothstep(26000.0, 120000.0, dist);
+        float a = c.a * clear * near * (1.0 - haze * 0.20);
+        if (a < 0.006) discard;
+        gl_FragColor = vec4(mix(c.rgb, uHorizon, haze * 0.88), a);
+      }`,
+  })
+);
 cloudSea.rotation.x = -Math.PI / 2;
 cloudSea.position.y = CLOUD_Y;
 cloudSea.renderOrder = 2;
-cloudSea.receiveShadow = true;
 scene.add(cloudSea);
-CLOUD_TEX.repeat.set(7, 7);
+CLOUD_TEX.repeat.set(1, 1);
 
 /* --- controls: drag to orbit, wheel to zoom -------------------------------- */
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -261,11 +249,10 @@ controls.autoRotateSpeed = 0.16;
 controls.addEventListener('start', () => { controls.autoRotate = false; });
 controls.update();
 
-const clock = new THREE.Clock();
 /* The camera orbits, so a fixed sun leaves half the rotation looking at an
-   unlit black mass. Keep the sun off the camera's shoulder: the face we are
-   looking at is always modelled, and the shadow still falls to one side. */
-const SUN_R = 14000, SUN_H = 8200, SUN_OFF = 0.85;   // radians off the view axis
+   unlit black mass. Keep the sun off the camera's shoulder. */
+const SUN_R = 14000, SUN_H = 8200, SUN_OFF = 0.85;
+scene.add(sun.target);
 function trackSun() {
   const dx = camera.position.x - SUMMIT.x, dz = camera.position.z - SUMMIT.z;
   const az = Math.atan2(dz, dx) + SUN_OFF;
@@ -274,12 +261,12 @@ function trackSun() {
   sun.target.position.copy(SUMMIT);
   sun.target.updateMatrixWorld();
 }
-scene.add(sun.target);
 
+const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
+  cloudSea.material.uniforms.uTime.value = t;
   trackSun();
-  CLOUD_TEX.offset.set(t * 0.0016, t * 0.0007);   // the deck drifts
   controls.update();
   renderer.render(scene, camera);
 });
