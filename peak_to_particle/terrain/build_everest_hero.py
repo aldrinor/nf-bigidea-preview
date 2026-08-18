@@ -12,6 +12,8 @@ import trimesh
 from PIL import Image
 from scipy import ndimage
 
+from repair_dem import repair
+
 Image.MAX_IMAGE_PIXELS = None
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
@@ -22,8 +24,8 @@ W0, E0, S0, N0 = 86.85, 87.00, 27.93, 28.05
 # summer strip along the south edge, both Esri acquisition seams
 W1, E1, S1, N1 = 86.865, 86.985, 27.955, 28.035
 
-GX, GY = 641, 449          # web weight; the normal map carries the fine detail
-TEX = 2048
+GX, GY = 961, 673          # 12 m/vertex; the normal map carries the rest
+TEX = 3072                 # source is z16 at 2.4 m/px = 4935 px, so this is real detail
 
 # ---------------------------------------------------------------- crop helper
 def crop_box(w, h, lon0, lon1, lat0, lat1):
@@ -37,11 +39,7 @@ def crop_box(w, h, lon0, lon1, lat0, lat1):
 
 # ---------------------------------------------------------------- 1. DEM
 dem = np.load(os.path.join(OUT, "everest_dem.npy")).astype(np.float32)
-void = dem < -100
-if void.any():
-    fill = ndimage.median_filter(dem, size=9)
-    dem[void] = fill[void]
-    dem[dem < -100] = np.median(dem[dem >= -100])
+dem, _ = repair(dem)
 
 h, w = dem.shape
 cl, rt, cr, rb = crop_box(w, h, W0, E0, S0, N0)
@@ -114,16 +112,34 @@ cl2, rt2, cr2, rb2 = crop_box(aw, ah, W0, E0, S0, N0)
 alb = alb.crop((cl2, rt2, cr2, rb2)).resize((TEX, TEX), Image.LANCZOS)
 A = np.asarray(alb, dtype=np.float32) / 255.0
 
-# Esri delivers this scene flat and clipped. Pull the whites back off the ceiling,
-# open the midtones so the rock bands read, and let the snow shadows go cool.
-lo, hi = np.percentile(A, 1.0), np.percentile(A, 99.5)
+# Esri delivers this scene flat and clipped, and the first curve here made it
+# worse: 11.5% of the plate came out at pure white and 45% above 0.90, which is
+# why the sunlit side rendered as a blank white mass with no snow detail at all.
+# The whole point of this asset is that Everest is REAL, and clipped snow throws
+# that away. So: normalise off the true extremes, never reach pure white, and
+# recover the crevasse and sastrugi detail with local contrast instead of gain.
+lo, hi = np.percentile(A, 0.5), np.percentile(A, 99.9)
 A = ((A - lo) / max(hi - lo, 1e-6)).clip(0, 1)
-A = np.power(A, 1.18)                                   # deepen midtones
+
+# local contrast -- snow detail is real but low-amplitude, and a global curve
+# cannot lift it without clipping. Two scales: form, then texture.
 lum = A @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
-A += (A - lum[..., None]) * 0.35                        # saturation, gently
-shadow = (1.0 - lum)[..., None]
-A += shadow * np.array([-0.020, 0.000, 0.055], np.float32) * 0.9   # cool the shade
+for sigma, amount in ((14.0, 0.42), (3.0, 0.36)):
+    hp = lum - ndimage.gaussian_filter(lum, sigma)
+    A += hp[..., None] * amount
 A = A.clip(0, 1)
+
+A = np.power(A, 1.06)                                   # midtones, gently
+lum = A @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+A += (A - lum[..., None]) * 0.30                        # saturation, gently
+shadow = (1.0 - lum)[..., None]
+A += shadow * np.array([-0.009, 0.000, 0.022], np.float32) * 0.9   # cool the shade, lightly
+# headroom at both ends: nothing in a photograph of a mountain is 0 or 255, and
+# a texture that touches the ceiling has no detail left for the light to find
+A = 0.045 + A.clip(0, 1) * 0.915
+l2 = A @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+print("albedo tone: mean %.3f  clipped-white %.2f%%  >0.90 %.1f%%  std %.3f"
+      % (l2.mean(), 100 * (l2 > 0.97).mean(), 100 * (l2 > 0.90).mean(), l2.std()))
 alb = Image.fromarray((A * 255).astype(np.uint8))
 p_alb = os.path.join(OUT, "everest_hero_albedo.webp")
 alb.save(p_alb, quality=88, method=6)
