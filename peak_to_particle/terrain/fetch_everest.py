@@ -21,7 +21,12 @@ from PIL import Image
 
 # Everest 27.9881 86.9250 | Lhotse 27.9617 86.9330 | Nuptse 27.9678 86.8969
 # Changtse 28.0189 86.9111 | Khumbu icefall runs SW off the Western Cwm
-W, E, S, N = 86.85, 87.00, 27.93, 28.05
+# The sharp tile was 11.8 x 8.9 km, and from the pivot the camera leaves it at
+# 3.9 km on the worst bearing -- so ANY distant framing puts the 73 m/vertex
+# surround in the foreground, which rendered as a blank white cone. Isolating
+# the meshes proved it, twice: the cheap terrain keeps ending up in front.
+# 21 x 16 km covers every camera position the orbit can reach.
+W, E, S, N = 86.815, 87.025, 27.920, 28.065
 
 Z_DEM = 15          # ~4.2 m/px at this latitude
 Z_IMG = 16          # ~2.1 m/px

@@ -22,9 +22,9 @@ OUT = os.path.join(HERE, "out")
 # wide frame
 WW, WE, WS, WN = 86.35, 87.55, 27.45, 28.50
 # hero frame -- the origin of the whole scene is the centre of THIS
-HW, HE, HS, HN = 86.865, 86.985, 27.955, 28.035
+HW, HE, HS, HN = 86.826, 87.014, 27.929, 28.056
 
-GX = GY = 470      # distant relief; the hero tile carries the detail
+GX = GY = 360      # distant relief; the hero tile carries the detail
 TEX = 2048
 SINK = 130.0        # drop the low-res sheet so the sharp tile always wins
 
@@ -90,7 +90,7 @@ A += (A - lum[..., None]) * 0.30
 A += (1.0 - lum)[..., None] * np.array([-0.018, 0.0, 0.05], np.float32)
 alb = Image.fromarray((np.clip(A, 0, 1) * 255).astype(np.uint8))
 p_alb = os.path.join(OUT, "khumbu_albedo.webp")
-alb.save(p_alb, quality=86, method=6)
+alb.save(p_alb, quality=80, method=6)
 
 mat = trimesh.visual.material.PBRMaterial(
     baseColorTexture=alb, metallicFactor=0.0, roughnessFactor=0.97,

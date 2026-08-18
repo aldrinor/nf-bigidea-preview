@@ -29,13 +29,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
 
 # hero frame -- scene origin is the centre of this
-HW, HE, HS, HN = 86.865, 86.985, 27.955, 28.035
+HW, HE, HS, HN = 86.826, 87.014, 27.929, 28.056
 HERO_LAT, HERO_LON = (HS + HN) / 2, (HW + HE) / 2
 MPD_LON = 111320.0 * math.cos(math.radians(HERO_LAT))
 
 RINGS = {
     #        W       E       S       N     zoom grid  tex  sink
-    "mid": (86.70, 87.16, 27.79, 28.19, 13, 620, 2048, 55.0),
+    "mid": (86.70, 87.16, 27.79, 28.19, 13, 400, 2048, 55.0),
     "far": (86.35, 87.55, 27.45, 28.50, 11, 330, 2048, 130.0),
 }
 
@@ -138,7 +138,7 @@ def build(name):
     A += (A - lum[..., None]) * 0.30
     A += (1.0 - lum)[..., None] * np.array([-0.018, 0.0, 0.05], np.float32)
     alb = Image.fromarray((np.clip(A, 0, 1) * 255).astype(np.uint8))
-    alb.save(os.path.join(OUT, "ring_%s_albedo.webp" % name), quality=86, method=6)
+    alb.save(os.path.join(OUT, "ring_%s_albedo.webp" % name), quality=80, method=6)
 
     mat = trimesh.visual.material.PBRMaterial(
         baseColorTexture=alb, metallicFactor=0.0, roughnessFactor=0.97,

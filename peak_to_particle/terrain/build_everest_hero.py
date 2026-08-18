@@ -19,13 +19,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
 
 # full fetched frame
-W0, E0, S0, N0 = 86.85, 87.00, 27.93, 28.05
-# hero crop: drops the bright band along the north edge and the snow-free
-# summer strip along the south edge, both Esri acquisition seams
-W1, E1, S1, N1 = 86.865, 86.985, 27.955, 28.035
+W0, E0, S0, N0 = 86.815, 87.025, 27.920, 28.065
+# hero crop: a small inset off the fetched frame, enough to drop the Esri
+# acquisition seams that run along its edges
+W1, E1, S1, N1 = 86.826, 87.014, 27.929, 28.056
 
-GX, GY = 961, 673          # 12 m/vertex; the normal map carries the rest
-TEX = 3072                 # source is z16 at 2.4 m/px = 4935 px, so this is real detail
+# 18.5 x 14.1 km. The old 11.8 x 8.9 km tile was smaller than the camera orbit,
+# so from most bearings the foreground was 73 m/vertex surround terrain and it
+# rendered as a blank white cone. This covers every position the orbit reaches.
+GX, GY = 905, 690          # 20 m/vertex; the normal map carries the rest
+TEX = 4096                 # source is z16 at 2.4 m/px = 7700 px, so this is real detail
 
 # ---------------------------------------------------------------- crop helper
 def crop_box(w, h, lon0, lon1, lat0, lat1):
@@ -147,7 +150,7 @@ print("albedo tone: mean %.3f  clipped-white %.2f%%  >0.90 %.1f%%  std %.3f"
       % (l2.mean(), 100 * (l2 > 0.97).mean(), 100 * (l2 > 0.90).mean(), l2.std()))
 alb = Image.fromarray((A * 255).astype(np.uint8))
 p_alb = os.path.join(OUT, "everest_hero_albedo.webp")
-alb.save(p_alb, quality=88, method=6)
+alb.save(p_alb, quality=80, method=6)
 print("albedo -> %s  %.2f MB" % (os.path.basename(p_alb),
                                  os.path.getsize(p_alb) / 1048576))
 
@@ -173,7 +176,7 @@ ln = np.sqrt(nx * nx + ny * ny + nz * nz)
 nmap = np.stack([nx / ln, nz / ln, ny / ln], -1)
 nmap = ((nmap * 0.5 + 0.5) * 255).clip(0, 255).astype(np.uint8)
 p_nrm = os.path.join(OUT, "everest_hero_normal.webp")
-Image.fromarray(nmap).resize((TEX, TEX), Image.LANCZOS).save(p_nrm, quality=88, method=6)
+Image.fromarray(nmap).resize((3072, 3072), Image.LANCZOS).save(p_nrm, quality=82, method=6)
 print("normal -> %s  %.2f MB" % (os.path.basename(p_nrm),
                                  os.path.getsize(p_nrm) / 1048576))
 

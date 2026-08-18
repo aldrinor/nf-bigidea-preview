@@ -12,8 +12,8 @@ from scipy import ndimage
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
 
-W0, E0, S0, N0 = 86.85, 87.00, 27.93, 28.05
-W1, E1, S1, N1 = 86.865, 86.985, 27.955, 28.035
+W0, E0, S0, N0 = 86.815, 87.025, 27.920, 28.065
+W1, E1, S1, N1 = 86.826, 87.014, 27.929, 28.056
 TEX = 1024
 
 dem = np.load(os.path.join(OUT, "everest_dem.npy")).astype(np.float32)

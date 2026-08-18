@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # which it did, on the first attempt.
     for f in sys.argv[1:]:
         d = f.replace(".glb", "_webp.glb")
-        r = convert(f, d, "webp", quality=88)
+        r = convert(f, d, "webp", quality=80)
         if r:
             print("%-26s %6.2f -> %5.2f MB   %s" % (os.path.basename(f),
                   r[0] / 1048576, r[1] / 1048576, os.path.basename(d)))
