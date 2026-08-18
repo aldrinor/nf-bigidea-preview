@@ -116,11 +116,19 @@ new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./terrain/out/everest_h
   window.__ready = true;
 }, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
 
+const HEIGHT_META = {hmin:5332.8, hmax:8750.2, spanX:11795.3, spanZ:8905.6};
+const HEIGHT_TEX = new THREE.TextureLoader().load('./terrain/out/everest_hero_height.webp');
+HEIGHT_TEX.wrapS = HEIGHT_TEX.wrapT = THREE.ClampToEdgeWrapping;
+HEIGHT_TEX.minFilter = HEIGHT_TEX.magFilter = THREE.LinearFilter;
+HEIGHT_TEX.colorSpace = THREE.NoColorSpace;
+
 /* --- cloud sea: at 8 848 m the summit is above the deck --------------------
    Two drifting fbm layers on wide planes. The lower one is the deck the peak
    rises out of; the upper one is thin banner cloud crossing the face.        */
 const CLOUD = `
-  varying vec2 vUv;
+  varying vec2 vUv; varying vec3 vW;
+  uniform sampler2D uHeight;
+  uniform float uHmin, uHmax, uSpanX, uSpanZ, uY;
   uniform float uTime, uScale, uCover, uSoft, uOpacity, uSeed, uSlab;
   uniform vec3  uColor;
   vec2 h2(vec2 p){ p = vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)));
@@ -145,14 +153,25 @@ const CLOUD = `
     float d = smoothstep(uCover, uCover + uSoft, n*0.5+0.5);
     // fade the plane out at its own edges so it never shows a rim
     float edge = smoothstep(0.5, 0.30, length(vUv-0.5));
-    float a = d * edge * uOpacity * uSlab;
+    // Where the slice passes through the mountain it would otherwise paint a
+    // hard band across the rock. Sample the terrain and thin the cloud out as it
+    // approaches the surface, the way real cloud does against a slope.
+    vec2 tuv = vec2(vW.x / uSpanX + 0.5, 0.5 - vW.z / uSpanZ);
+    float terrain = uHmin;
+    if (tuv.x > 0.0 && tuv.x < 1.0 && tuv.y > 0.0 && tuv.y < 1.0)
+      terrain = uHmin + texture2D(uHeight, tuv).r * (uHmax - uHmin);
+    float clear = smoothstep(0.0, 620.0, uY - terrain);
+
+    float a = d * edge * uOpacity * uSlab * clear;
     if (a < 0.004) discard;
     // lit from the same side as the sun, so the tops catch light
     float lit = smoothstep(uCover, uCover+0.30, n*0.5+0.5);
     gl_FragColor = vec4(mix(uColor*0.80, vec3(1.0), lit), a);
   }`;
-const CLOUD_V = `varying vec2 vUv; void main(){ vUv = uv;
-  gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const CLOUD_V = `varying vec2 vUv; varying vec3 vW;
+  void main(){ vUv = uv;
+    vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp; }`;
 
 function cloudSlice({y, size, scale, cover, soft, opacity, color, seed, slab}) {
   const m = new THREE.Mesh(
@@ -163,7 +182,10 @@ function cloudSlice({y, size, scale, cover, soft, opacity, color, seed, slab}) {
       uniforms: {
         uTime:{value:0}, uScale:{value:scale}, uCover:{value:cover},
         uSoft:{value:soft}, uOpacity:{value:opacity}, uSeed:{value:seed},
-        uSlab:{value:slab}, uColor:{value:new THREE.Color(color)}
+        uSlab:{value:slab}, uColor:{value:new THREE.Color(color)},
+        uHeight:{value:HEIGHT_TEX}, uHmin:{value:HEIGHT_META.hmin},
+        uHmax:{value:HEIGHT_META.hmax}, uSpanX:{value:HEIGHT_META.spanX},
+        uSpanZ:{value:HEIGHT_META.spanZ}, uY:{value:y}
       }
     })
   );
