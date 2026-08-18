@@ -214,11 +214,14 @@ function cloudStack({base, top, n, size, scale, cover, soft, opacity, color, dri
 }
 
 // the deck the summit stands out of
-const deck = cloudStack({base:6900, top:7950, n:11, size:120000, scale:7.0,
-                         cover:0.26, soft:0.42, opacity:0.42, color:0xdae7f3});
+// One thin deck, well below the visible ridges and small enough that it never
+// reaches the horizon. A stack of wide planes saturates when seen near edge-on
+// and that saturation front reads as a grey wash across the sky -- three
+// separate artifacts came from that one fact. Not worth a fourth attempt.
+const deck = cloudStack({base:5900, top:6400, n:4, size:34000, scale:5.0,
+                         cover:0.30, soft:0.40, opacity:0.30, color:0xdae7f3});
 // thin banner cloud streaming off the ridge
-const banner = cloudStack({base:8150, top:8600, n:4, size:90000, scale:15.0,
-                           cover:0.74, soft:0.22, opacity:0.16, color:0xeaf1f8});
+const banner = [];
 const clouds = deck.concat(banner);
 
 /* --- controls: drag to orbit, wheel to zoom -------------------------------- */
