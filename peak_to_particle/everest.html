@@ -75,7 +75,7 @@ const sky = new THREE.Mesh(
 scene.add(sky);
 scene.fog = new THREE.FogExp2(0xcfdeea, 0.0000185);   // real Himalayan haze over tens of km
 
-const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 30, 400000);
+const camera = new THREE.PerspectiveCamera(26, innerWidth/innerHeight, 30, 400000);
 
 /* --- sun: low from the east, the light Everest is actually photographed in */
 const sun = new THREE.DirectionalLight(0xfff0dc, 3.6);
@@ -87,14 +87,14 @@ Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:1000,
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 12;
 scene.add(sun);
-scene.add(new THREE.HemisphereLight(0x9dc0e4, 0x5c6672, 0.85));
+scene.add(new THREE.HemisphereLight(0xa8c8e8, 0x6b7684, 1.25));   // lift the shadow side off black
 
 const SUMMIT = new THREE.Vector3(152, 8750, 580);
 const VIEWS = {
-  hero:  [-5600, 9050, 9400],
-  wide:  [-8200, 9300, 12000],
-  low:   [-4200, 8800, 7400],
-  north: [ 3800, 10000, 8200],
+  hero:  [-3900, 7950, 4150],
+  wide:  [-4900, 8150, 5000],
+  low:   [-3200, 7700, 3500],
+  north: [ 3600, 7950, 3900],
   far:   [-12000, 11500, 19000],
   seat:  [-8000, 8200, 14000],
 };
@@ -113,6 +113,19 @@ loader.load('./terrain/out/khumbu_wide_opt.glb', g => {
     if (o.isMesh) {
       o.receiveShadow = true;
       o.material.roughness = 0.98; o.material.metalness = 0.0;
+      if (o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
+      o.material.needsUpdate = true;
+      o.renderOrder = -1;
+    }
+  });
+  scene.add(g.scene);
+});
+
+loader.load('./terrain/out/ring_mid_opt.glb', g => {
+  g.scene.traverse(o => {
+    if (o.isMesh) {
+      o.receiveShadow = true;
+      o.material.roughness = 0.97; o.material.metalness = 0.0;
       if (o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
       o.material.needsUpdate = true;
       o.renderOrder = -1;
@@ -214,7 +227,7 @@ uniform float uHmin,uHmax,uSpanX,uSpanZ;`)
       float terr = uHmin;
       if (tuv.x>0.0&&tuv.x<1.0&&tuv.y>0.0&&tuv.y<1.0)
         terr = uHmin + texture2D(uHeight, tuv).r * (uHmax-uHmin);
-      float clear = smoothstep(0.0, 620.0, vWpos.y - terr);
+      float clear = smoothstep(0.0, 130.0, vWpos.y - terr);
       float dist  = length(vWpos.xz - cameraPosition.xz);
       float near  = smoothstep(900.0, 4200.0, dist);
       float haze  = smoothstep(28000.0, 120000.0, dist);
@@ -239,18 +252,33 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.055;
 controls.rotateSpeed = 0.42;
 controls.zoomSpeed = 0.75;
-controls.minDistance = 3200;
-controls.maxDistance = 34000;
-controls.minPolarAngle = 0.42;          // never straight down onto the tile
-controls.maxPolarAngle = Math.PI/2 - 0.20;   // never so low the deck goes edge-on
+controls.minDistance = 4200;
+controls.maxDistance = 9000;
+controls.minPolarAngle = 1.16;
+controls.maxPolarAngle = Math.PI/2 + 0.06;   // slightly below the summit, looking up at it
 controls.autoRotate = true;             // drifts until the visitor takes hold
 controls.autoRotateSpeed = 0.16;
 controls.addEventListener('start', () => { controls.autoRotate = false; });
 controls.update();
 
 const clock = new THREE.Clock();
+/* The camera orbits, so a fixed sun leaves half the rotation looking at an
+   unlit black mass. Keep the sun off the camera's shoulder: the face we are
+   looking at is always modelled, and the shadow still falls to one side. */
+const SUN_R = 14000, SUN_H = 8200, SUN_OFF = 0.85;   // radians off the view axis
+function trackSun() {
+  const dx = camera.position.x - SUMMIT.x, dz = camera.position.z - SUMMIT.z;
+  const az = Math.atan2(dz, dx) + SUN_OFF;
+  sun.position.set(SUMMIT.x + Math.cos(az) * SUN_R, SUMMIT.y + SUN_H,
+                   SUMMIT.z + Math.sin(az) * SUN_R);
+  sun.target.position.copy(SUMMIT);
+  sun.target.updateMatrixWorld();
+}
+scene.add(sun.target);
+
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
+  trackSun();
   CLOUD_TEX.offset.set(t * 0.0016, t * 0.0007);   // the deck drifts
   controls.update();
   renderer.render(scene, camera);
