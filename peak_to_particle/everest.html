@@ -73,9 +73,9 @@ const sky = new THREE.Mesh(
   })
 );
 scene.add(sky);
-scene.fog = new THREE.FogExp2(0xcfdeea, 0.000062);
+scene.fog = new THREE.FogExp2(0xcfdeea, 0.0000185);   // real Himalayan haze over tens of km
 
-const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 20, 200000);
+const camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 30, 400000);
 
 /* --- sun: low from the east, the light Everest is actually photographed in */
 const sun = new THREE.DirectionalLight(0xfff0dc, 3.6);
@@ -102,7 +102,26 @@ const view = VIEWS[q.get('v')] || VIEWS.hero;
 camera.position.set(...view);
 camera.lookAt(SUMMIT);
 
-new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./terrain/out/everest_hero_opt.glb', gltf => {
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+
+/* The hero tile is 11.8 x 8.9 km and its cut sides show from any angle that
+   looks past them. Hiding them under cloud failed -- the cloud has gaps. So this
+   is 118 km of the real Khumbu around it, at a resolution matched to how far
+   away it is. Georeferenced to the same origin, so the two line up. */
+loader.load('./terrain/out/khumbu_wide_opt.glb', g => {
+  g.scene.traverse(o => {
+    if (o.isMesh) {
+      o.receiveShadow = true;
+      o.material.roughness = 0.98; o.material.metalness = 0.0;
+      if (o.material.map) o.material.map.colorSpace = THREE.SRGBColorSpace;
+      o.material.needsUpdate = true;
+      o.renderOrder = -1;
+    }
+  });
+  scene.add(g.scene);
+});
+
+loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
   gltf.scene.traverse(o => {
     if (o.isMesh) {
       o.castShadow = true;
@@ -221,7 +240,7 @@ controls.dampingFactor = 0.055;
 controls.rotateSpeed = 0.42;
 controls.zoomSpeed = 0.75;
 controls.minDistance = 3200;
-controls.maxDistance = 26000;
+controls.maxDistance = 34000;
 controls.minPolarAngle = 0.42;          // never straight down onto the tile
 controls.maxPolarAngle = Math.PI/2 - 0.20;   // never so low the deck goes edge-on
 controls.autoRotate = true;             // drifts until the visitor takes hold

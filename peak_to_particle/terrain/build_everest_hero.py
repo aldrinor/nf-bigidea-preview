@@ -49,6 +49,36 @@ dem = dem[rt:rb, cl:cr]
 H, Wpx = dem.shape
 print("DEM cropped to %dx%d   %.0f .. %.0f m" % (Wpx, H, dem.min(), dem.max()))
 
+# ---- feather the tile edge onto the wide Khumbu sheet ----------------------
+# Without this the tile is a slab floating above the low-res terrain and its cut
+# side reads as a cliff from any angle that looks past it.
+KH = os.path.join(OUT, "khumbu_dem.npy")
+if os.path.exists(KH):
+    WW, WE, WS, WN = 86.35, 87.55, 27.45, 28.50
+    SINK = 130.0
+    wide = np.load(KH).astype(np.float32)
+    wh, ww = wide.shape
+    # sample the wide sheet across exactly the hero footprint
+    cy = np.linspace((WN - N1) / (WN - WS) * (wh - 1),
+                     (WN - S1) / (WN - WS) * (wh - 1), dem.shape[0])
+    cx = np.linspace((W1 - WW) / (WE - WW) * (ww - 1),
+                     (E1 - WW) / (WE - WW) * (ww - 1), dem.shape[1])
+    base = ndimage.map_coordinates(
+        wide, np.meshgrid(cy, cx, indexing="ij"), order=1).astype(np.float32) - SINK
+
+    # weight: 1 in the middle, 0 at the rim, over the outer 9%
+    m = 0.09
+    ry = np.clip(np.minimum(np.linspace(0, 1, dem.shape[0]),
+                            1 - np.linspace(0, 1, dem.shape[0])) / m, 0, 1)
+    rx = np.clip(np.minimum(np.linspace(0, 1, dem.shape[1]),
+                            1 - np.linspace(0, 1, dem.shape[1])) / m, 0, 1)
+    w2 = np.minimum(ry[:, None], rx[None, :])
+    w2 = w2 * w2 * (3 - 2 * w2)                      # smoothstep
+    dem = dem * w2 + base * (1 - w2)
+    print("edge feathered onto the wide sheet over the outer %.0f%%" % (m * 100))
+else:
+    print("khumbu_dem.npy not found -- tile edge NOT feathered")
+
 lat_mid = (S1 + N1) / 2
 span_x = (E1 - W1) * 111320.0 * math.cos(math.radians(lat_mid))
 span_y = (N1 - S1) * 111320.0
