@@ -504,10 +504,33 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera);
 });
 
+/* three.js fixes the VERTICAL field, so a phone held upright gets a very narrow
+   horizontal one: the massif ran off both edges and not a single cloud was in
+   frame. A wide subject cannot be made to fit a tall window by lens alone, so
+   the portrait framing opens up and steps back together -- enough air around the
+   peak for the sky and the cloud to be part of the picture. */
+const BASE_FOV = 21.5, WIDE_ASPECT = 1.45;
+function fitCamera() {
+  const a = innerWidth / innerHeight;
+  const t = Math.min(1, Math.max(0, (WIDE_ASPECT - a) / (WIDE_ASPECT - 0.5)));
+  camera.fov = BASE_FOV + t * 10.5;             // 21.5 landscape -> 32 portrait
+  camera.aspect = a;
+  camera.updateProjectionMatrix();
+  const pull = 1 + t * 0.34;
+  controls.minDistance = 6600 * pull;
+  controls.maxDistance = 11000 * pull;
+  const v = camera.position.clone().sub(PIVOT);
+  const d = v.length();
+  const want = Math.min(controls.maxDistance, Math.max(controls.minDistance, d));
+  if (Math.abs(want - d) > 1) camera.position.copy(PIVOT).add(v.multiplyScalar(want / d));
+  controls.update();
+}
+
 addEventListener('resize', () => {
-  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  fitCamera();
 });
+fitCamera();
 </script>
 </body>
 </html>
