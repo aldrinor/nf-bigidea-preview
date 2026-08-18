@@ -95,6 +95,8 @@ const VIEWS = {
   wide:  [-7000, 10200, 10400],
   low:   [-3100, 8600, 6100],
   north: [ 3800, 10000, 8200],
+  far:   [-12000, 11500, 19000],
+  seat:  [-8000, 8200, 14000],
 };
 const view = VIEWS[q.get('v')] || VIEWS.hero;
 camera.position.set(...view);
@@ -122,107 +124,66 @@ HEIGHT_TEX.wrapS = HEIGHT_TEX.wrapT = THREE.ClampToEdgeWrapping;
 HEIGHT_TEX.minFilter = HEIGHT_TEX.magFilter = THREE.LinearFilter;
 HEIGHT_TEX.colorSpace = THREE.NoColorSpace;
 
-/* --- cloud sea: at 8 848 m the summit is above the deck --------------------
-   Two drifting fbm layers on wide planes. The lower one is the deck the peak
-   rises out of; the upper one is thin banner cloud crossing the face.        */
-const CLOUD = `
-  varying vec2 vUv; varying vec3 vW;
-  uniform sampler2D uHeight;
-  uniform float uHmin, uHmax, uSpanX, uSpanZ, uY;
-  uniform float uTime, uScale, uCover, uSoft, uOpacity, uSeed, uSlab;
-  uniform vec3  uColor;
-  vec2 h2(vec2 p){ p = vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)));
-    return fract(sin(p)*43758.5453)*2.0-1.0; }
-  float noise(vec2 p){
-    vec2 i = floor(p), f = fract(p);
-    vec2 u = f*f*(3.0-2.0*f);
-    return mix(mix(dot(h2(i+vec2(0,0)), f-vec2(0,0)),
-                   dot(h2(i+vec2(1,0)), f-vec2(1,0)), u.x),
-               mix(dot(h2(i+vec2(0,1)), f-vec2(0,1)),
-                   dot(h2(i+vec2(1,1)), f-vec2(1,1)), u.x), u.y);
-  }
-  float fbm(vec2 p){
-    float v = 0.0, a = 0.5;
-    for(int i=0;i<4;i++){ v += a*noise(p); p = p*2.03 + 17.3; a *= 0.5; }
-    return v;
-  }
-  void main(){
-    vec2 p = (vUv-0.5)*uScale + vec2(uSeed*3.7, uSeed*-2.1);
-    vec2 dr = vec2(uTime*0.010, uTime*0.004);
-    float n = fbm(p + dr) * 0.6 + fbm(p*2.7 - dr*1.7) * 0.4;
-    float d = smoothstep(uCover, uCover + uSoft, n*0.5+0.5);
-    // fade the plane out at its own edges so it never shows a rim
-    float edge = smoothstep(0.5, 0.30, length(vUv-0.5));
-    // Where the slice passes through the mountain it would otherwise paint a
-    // hard band across the rock. Sample the terrain and thin the cloud out as it
-    // approaches the surface, the way real cloud does against a slope.
-    vec2 tuv = vec2(vW.x / uSpanX + 0.5, 0.5 - vW.z / uSpanZ);
-    float terrain = uHmin;
-    if (tuv.x > 0.0 && tuv.x < 1.0 && tuv.y > 0.0 && tuv.y < 1.0)
-      terrain = uHmin + texture2D(uHeight, tuv).r * (uHmax - uHmin);
-    float clear = smoothstep(0.0, 620.0, uY - terrain);
+/* --- cloud sea ------------------------------------------------------------
+   One plane, one baked texture. The lighting -- lit tops, shadowed bases -- is
+   baked into the RGB, which is what makes it read as a body instead of a filter.
+   The terrain height texture fades it out against rock, which is what killed the
+   hard edge the first plane showed. */
+const CLOUD_TEX = new THREE.TextureLoader().load('./terrain/out/cloudsea.webp');
+CLOUD_TEX.wrapS = CLOUD_TEX.wrapT = THREE.RepeatWrapping;
+CLOUD_TEX.colorSpace = THREE.SRGBColorSpace;
+CLOUD_TEX.anisotropy = 8;
 
-    float a = d * edge * uOpacity * uSlab * clear;
-    if (a < 0.004) discard;
-    // lit from the same side as the sun, so the tops catch light
-    float lit = smoothstep(uCover, uCover+0.30, n*0.5+0.5);
-    gl_FragColor = vec4(mix(uColor*0.80, vec3(1.0), lit), a);
-  }`;
-const CLOUD_V = `varying vec2 vUv; varying vec3 vW;
-  void main(){ vUv = uv;
-    vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz;
-    gl_Position = projectionMatrix * viewMatrix * wp; }`;
+const CLOUD_Y = 7250;
+const cloudSea = new THREE.Mesh(
+  new THREE.PlaneGeometry(300000, 300000, 1, 1),
+  new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    uniforms: {
+      uTex:{value:CLOUD_TEX}, uHeight:{value:HEIGHT_TEX},
+      uTime:{value:0}, uY:{value:CLOUD_Y},
+      uHmin:{value:HEIGHT_META.hmin}, uHmax:{value:HEIGHT_META.hmax},
+      uSpanX:{value:HEIGHT_META.spanX}, uSpanZ:{value:HEIGHT_META.spanZ},
+      uHorizon:{value:new THREE.Color(0xdbe6f0)},
+    },
+    vertexShader:`
+      varying vec3 vW;
+      void main(){
+        vec4 wp = modelMatrix * vec4(position,1.0); vW = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader:`
+      varying vec3 vW;
+      uniform sampler2D uTex, uHeight;
+      uniform float uTime, uY, uHmin, uHmax, uSpanX, uSpanZ;
+      uniform vec3 uHorizon;
+      void main(){
+        vec2 uv = vW.xz / 26000.0 + vec2(uTime * 0.0012, uTime * 0.0005);
+        vec4 c = texture2D(uTex, uv);
+        // second, slower tap breaks the tiling up
+        vec4 c2 = texture2D(uTex, vW.xz / 61000.0 - vec2(uTime * 0.0006, 0.0));
+        c = mix(c, c2, 0.42);
 
-function cloudSlice({y, size, scale, cover, soft, opacity, color, seed, slab}) {
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(size, size, 1, 1),
-    new THREE.ShaderMaterial({
-      vertexShader: CLOUD_V, fragmentShader: CLOUD,
-      transparent: true, depthWrite: false, side: THREE.DoubleSide,
-      uniforms: {
-        uTime:{value:0}, uScale:{value:scale}, uCover:{value:cover},
-        uSoft:{value:soft}, uOpacity:{value:opacity}, uSeed:{value:seed},
-        uSlab:{value:slab}, uColor:{value:new THREE.Color(color)},
-        uHeight:{value:HEIGHT_TEX}, uHmin:{value:HEIGHT_META.hmin},
-        uHmax:{value:HEIGHT_META.hmax}, uSpanX:{value:HEIGHT_META.spanX},
-        uSpanZ:{value:HEIGHT_META.spanZ}, uY:{value:y}
-      }
-    })
-  );
-  m.rotation.x = -Math.PI/2;
-  m.position.y = y;
-  m.renderOrder = 3;
-  scene.add(m);
-  return m;
-}
+        // die against rock -- no hard edge across the mountain
+        vec2 tuv = vec2(vW.x / uSpanX + 0.5, 0.5 - vW.z / uSpanZ);
+        float terrain = uHmin;
+        if (tuv.x > 0.0 && tuv.x < 1.0 && tuv.y > 0.0 && tuv.y < 1.0)
+          terrain = uHmin + texture2D(uHeight, tuv).r * (uHmax - uHmin);
+        float clear = smoothstep(0.0, 700.0, uY - terrain);
 
-/* A single plane always shows its own edge cutting the mountain. A stack of
-   slices, each sampling the noise field at a different offset and fading at the
-   top and bottom of the slab, reads as depth instead. */
-function cloudStack({base, top, n, size, scale, cover, soft, opacity, color, drift}) {
-  const out = [];
-  for (let i = 0; i < n; i++) {
-    const f = i / (n - 1);                       // 0 at base, 1 at top
-    const slab = Math.sin(Math.PI * f) ** 0.7;   // soft at both faces
-    out.push(cloudSlice({
-      y: base + (top - base) * f, size, scale,
-      cover: cover + f * 0.10,                   // thins toward the top
-      soft, opacity, color, seed: i * 1.31, slab: slab * (drift ?? 1)
-    }));
-  }
-  return out;
-}
-
-// the deck the summit stands out of
-// One thin deck, well below the visible ridges and small enough that it never
-// reaches the horizon. A stack of wide planes saturates when seen near edge-on
-// and that saturation front reads as a grey wash across the sky -- three
-// separate artifacts came from that one fact. Not worth a fourth attempt.
-const deck = cloudStack({base:5900, top:6400, n:4, size:34000, scale:5.0,
-                         cover:0.30, soft:0.40, opacity:0.30, color:0xdae7f3});
-// thin banner cloud streaming off the ridge
-const banner = [];
-const clouds = deck.concat(banner);
+        float dist = length(vW.xz - cameraPosition.xz);
+        float near = smoothstep(1200.0, 5000.0, dist);       // no plane edge underfoot
+        float haze = smoothstep(30000.0, 150000.0, dist);    // melt into the horizon
+        float a = c.a * clear * near * (1.0 - haze * 0.25);
+        if (a < 0.006) discard;
+        gl_FragColor = vec4(mix(c.rgb, uHorizon, haze * 0.85), a);
+      }`,
+  })
+);
+cloudSea.rotation.x = -Math.PI / 2;
+cloudSea.position.y = CLOUD_Y;
+cloudSea.renderOrder = 2;
+scene.add(cloudSea);
 
 /* --- controls: drag to orbit, wheel to zoom -------------------------------- */
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -242,9 +203,7 @@ controls.update();
 
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
-  const t = clock.getElapsedTime();
-  for (let i = 0; i < clouds.length; i++)
-    clouds[i].material.uniforms.uTime.value = t * (i < 14 ? 1.0 : 1.7);
+  cloudSea.material.uniforms.uTime.value = clock.getElapsedTime();
   controls.update();
   renderer.render(scene, camera);
 });
