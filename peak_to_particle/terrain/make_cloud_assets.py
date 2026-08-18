@@ -30,19 +30,12 @@ src = np.asarray(Image.open(os.path.join(SRC, "gen_puffs.png")).convert("RGB"),
                  np.float32) / 255.0
 lum = src @ np.array([0.2126, 0.7152, 0.0722], np.float32)
 alpha = np.clip((lum - 0.020) / 0.42, 0, 1)          # small toe kills the fringe
-# The judge: "a crisp, paper-thin photographic silhouette ... pale edge halo".
-# A photographic cutout has a hard rim because the plate is a finished picture,
-# not a slab of atmosphere. Erode the rim and give it a long soft ramp, so the
-# outline dissolves rather than ending, and so overlapping copies build density
-# instead of stacking one hard outline on another.
-alpha = np.clip((alpha - 0.16) / 0.84, 0, 1)         # erode
-alpha = ndimage.gaussian_filter(alpha, 3.0)          # feather
-alpha = np.clip(alpha, 0, 1) ** 1.28                 # long ramp into nothing
-rgb = src / np.maximum(alpha, 0.14)[..., None]       # unpremultiply
-# where alpha is thin the unpremultiply is noisy; drift toward the cloud's own
-# colour, not toward white, or the rim lights up as a halo
-thin = 1.0 - np.clip(alpha / 0.55, 0, 1)
-rgb = rgb + (np.array([0.80, 0.845, 0.905], np.float32) - rgb) * thin[..., None] * 0.75
+alpha = np.clip(alpha ** 0.88, 0, 1)
+rgb = src / np.maximum(alpha, 0.10)[..., None]       # unpremultiply
+# where alpha is thin the unpremultiply is noisy and leaves a dark fringe, so
+# fade those pixels toward the cloud's own white instead of toward black
+thin = 1.0 - np.clip(alpha / 0.45, 0, 1)
+rgb = rgb + (np.array([0.93, 0.95, 0.98], np.float32) - rgb) * thin[..., None] * 0.85
 rgb = np.clip(rgb, 0, 1)
 
 lab, n = ndimage.label(alpha > 0.30)
