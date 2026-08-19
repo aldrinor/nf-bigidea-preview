@@ -213,9 +213,17 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
         float d2 = texture2D(uDet, vWP.zy / 470.0).r * bw.x
                  + texture2D(uDet, vWP.xz / 470.0).r * bw.y
                  + texture2D(uDet, vWP.xy / 470.0).r * bw.z;
+        // a third, much finer octave. The mesh is 20 m per vertex and the drape
+        // 4.5 m per pixel, so at the summit a screen pixel covers several metres
+        // of ground with nothing in it -- which is most of what reads as
+        // "synthetic". Fades out fast so it never shimmers at distance.
+        float d3 = texture2D(uDet, vWP.zy / 17.0).r * bw.x
+                 + texture2D(uDet, vWP.xz / 17.0).r * bw.y
+                 + texture2D(uDet, vWP.xy / 17.0).r * bw.z;
         float dist = length(vWP - cameraPosition);
         float k = 1.0 - smoothstep(uFade.x, uFade.y, dist);
-        float det = (d1 - 0.5) * 1.0 + (d2 - 0.5) * 0.85;
+        float det = (d1 - 0.5) * 1.0 + (d2 - 0.5) * 0.85
+                  + (d3 - 0.5) * 0.55 * (1.0 - smoothstep(1800.0, 6500.0, dist));
         diffuseColor.rgb *= 1.0 + det * uAmt * k;
 
         // On a near-vertical face the nadir orthophoto has no data at all --
@@ -331,7 +339,7 @@ loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
       m.roughness = 0.97; m.metalness = 0.0;
       if (m.map) { m.map.colorSpace = THREE.SRGBColorSpace; m.map.anisotropy = 8; }
       m.normalMap = NRM;
-      m.normalScale = new THREE.Vector2(0.72, NS * 0.72);
+      m.normalScale = new THREE.Vector2(1.05, NS * 1.05);
       dressTerrain(m, 1.55, 7000, 17000);
       m.needsUpdate = true;
     }
