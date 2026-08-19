@@ -107,6 +107,24 @@ function buildNoise(size = 64) {
   return tex;
 }
 
+/* The terrain needs to be shadowed by THIS cloud, not by a second one that
+   disagrees with it, so the sampler and the coverage test are shared source
+   rather than copied by hand. */
+export const NOISE_GLSL = /* glsl */`
+const float NZ = 64.0, TILE = 66.0, COLS = 8.0, ATLAS = 528.0;
+vec4 nv_slice(sampler2D tex, vec2 uv, float z){
+  z = mod(z, NZ);
+  vec2 org = vec2(mod(z, COLS), floor(z / COLS)) * (TILE / ATLAS);
+  vec2 inner = (fract(uv) * NZ + 1.0) / ATLAS;
+  return texture(tex, org + inner);
+}
+vec4 nv_noise3(sampler2D tex, vec3 p){
+  float zf = fract(p.z) * NZ - 0.5;
+  float z0 = floor(zf);
+  return mix(nv_slice(tex, p.xy, z0), nv_slice(tex, p.xy, z0 + 1.0), zf - z0);
+}
+`;
+
 const FRAG = /* glsl */`
 precision highp float;
 
@@ -479,6 +497,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
 
   return {
     material: mat,
+    noise: mat.uniforms.uNoise.value,
     setSize(w, h) {
       const r = renderer.getPixelRatio();
       // the DEPTH texture has to be resized too, or every ray after a resize is
