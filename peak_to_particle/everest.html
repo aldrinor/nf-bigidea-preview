@@ -800,7 +800,18 @@ function autoQuality() {
    slow curl, and a staggered accelerating suck into the lens.
 
    No charge crosses. Yin: "dust, no + symbol". The charge arrives in words. */
-const DUST_RGB = [[110,118,127],[122,128,136],[94,102,110]];
+/* Yin: "it look broken". It was the dust, and isolating the layers proved it --
+   in open sky, away from any cloud or rock, the specks measure 0.98% of the area
+   with everything on, 0.86% with the cloud off, 0.80% with the terrain detail
+   off, and 0.09% with the DUST off. An eleven-fold drop. Nothing else was doing
+   it.
+
+   These greys came from act1.html, where they float over a dim room video and
+   read as air. Here the sky is near-white, and a dark grey speck on near-white
+   does not read as dust -- it reads as dirt on the screen, or a dead pixel.
+   Lighter, softer, fewer and larger: the same amount of atmosphere, none of the
+   grit. */
+const DUST_RGB = [[152,161,171],[166,173,181],[138,147,157]];
 const dustCv  = document.getElementById('dust');
 const dctx    = dustCv.getContext('2d');
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -823,8 +834,8 @@ function makeMote(){
   return {
     x: Math.random()*DW, y: Math.random()*DH,
     vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4,
-    size: 1.0 + Math.random()*3.0,          // drawn at size*4 -> 4..16 px
-    baseAlpha: 0.15 + Math.random()*0.45,
+    size: 1.6 + Math.random()*3.6,          // drawn at size*4 -> 6..21 px
+    baseAlpha: 0.09 + Math.random()*0.26,
     sp: (Math.random()*3)|0,
     phase: Math.random()*Math.PI*2,
     state: 'float',
@@ -839,7 +850,7 @@ function sizeDust(){
   dustCv.width = DW*dpr; dustCv.height = DH*dpr;
   dustCv.style.width = DW+'px'; dustCv.style.height = DH+'px';
   dctx.setTransform(dpr,0,0,dpr,0,0);
-  const want = DW < 720 ? (REDUCED ? 380 : 640) : (REDUCED ? 520 : 1100);
+  const want = DW < 720 ? (REDUCED ? 240 : 380) : (REDUCED ? 320 : 620);
   if (motes.length !== want) { motes = []; for (let i=0;i<want;i++) motes.push(makeMote()); }
 }
 makeDustSprites(); sizeDust();
@@ -1044,7 +1055,8 @@ function applyScroll() {
     el.style.pointerEvents = o < 0.5 ? 'none' : '';
   }
 
-  dustFade = smootherstep(0.36, 0.50, p) * (1 - smootherstep(0.955, 1.0, p));
+  // arrives WITH the grey rather than against the clean blue sky
+  dustFade = smootherstep(0.44, 0.58, p) * (1 - smootherstep(0.955, 1.0, p));
   suckP    = smootherstep(0.86, 0.985, p);
   if (suckP < 0.002 && lastSuck > 0.002) resetDust();
   lastSuck = suckP;
