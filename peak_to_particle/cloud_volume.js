@@ -127,6 +127,8 @@ uniform float uNear, uFar, uTime;
 uniform float uBase, uTop;        // cloud slab, metres
 uniform float uCover, uDensity, uScale;
 uniform float uHmin, uHmax, uSpanX, uSpanZ;
+uniform vec3  uSummit;
+uniform float uClearR, uClearAmt;
 uniform float uDebug;
 
 const int   STEPS      = 128;
@@ -208,6 +210,14 @@ float density(vec3 p){
   vec4 n = noise3(q);
   float shape = clamp((n.r - 0.34) / 0.32, 0.0, 1.0);
   shape *= smoothstep(0.26, 0.60, big) * 0.80 + 0.20;
+
+  /* The sea DRIFTS, so at high coverage the summit was sometimes clear and
+     sometimes buried -- a hero cannot let its subject come and go. This holds a
+     permanent clearing around the peak, which is also what a real peak does to
+     the cloud that meets it. Everything outside the clearing fills in, so the
+     frame is still mostly cloud. */
+  float dSum = length(p.xz - uSummit.xz);
+  shape *= mix(uClearAmt, 1.0, smoothstep(uClearR * 0.35, uClearR, dSum));
   // Subtracting a constant gives a soft ramp in every direction -- that is fog.
   // A cloud is either there or it is not, so snap: clear air below the
   // threshold, near-full density just above it. This is what draws the edge.
@@ -418,6 +428,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
     sunDir = new THREE.Vector3(0.72, 0.51, 0.60).normalize(),
     sunCol = new THREE.Color(0xfff0dc), skyCol = new THREE.Color(0xa8c4e0),
     groundCol = new THREE.Color(0x7f8f9f), ambient = 0.62, lift = 0.075, sat = 0.86,
+    summit = new THREE.Vector3(0, 8750, 0), clearR = 7000, clearAmt = 0.18,
     terrain = null, hmin = 0, hmax = 1, spanX = 1, spanZ = 1,
   } = opts;
 
@@ -452,6 +463,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
       uTime:{value:0}, uBase:{value:base}, uTop:{value:top},
       uCover:{value:cover}, uDensity:{value:density}, uScale:{value:scale},
       uHmin:{value:hmin}, uHmax:{value:hmax}, uDebug:{value:0},
+      uSummit:{value:summit}, uClearR:{value:clearR}, uClearAmt:{value:clearAmt},
       uSpanX:{value:spanX}, uSpanZ:{value:spanZ},
     },
   });

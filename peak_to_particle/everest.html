@@ -388,12 +388,18 @@ const cloud = createVolumetricCloud(renderer, {
   // want a total optical depth of 4-6 through the thick part over ~30 steps, so
   // it lands near 0.0035 -- the 0.075 it shipped with was twenty times over and
   // saturated on the first sample.
+  // Six settings on a contact sheet from "cloud is scenery" to "mountain is
+  // gone". This is one stop short of the point where the summit stops reading:
+  // the lower massif veils, the peak stays legible, and the frame becomes mostly
+  // cloud -- which is the proportion the reference actually has, and which also
+  // moves the median luminance up to where the reference sits, because in the
+  // reference the pale IS the cloud and not the mountain.
   base: 7000, top: 10400,
   // Widening the density edge from 0.09 to 0.30 to kill the dither also cut the
   // mean density by about two thirds, so this is the same cloud, not more of it.
   // ?cover= and ?dens= to tune without a rebuild.
-  cover: parseFloat(q.get('cover') || '0.88'),
-  density: parseFloat(q.get('dens') || '0.018'),
+  cover: parseFloat(q.get('cover') || '0.89'),
+  density: parseFloat(q.get('dens') || '0.020'),
   scale: 6800,
   sunCol: new THREE.Color(0xfff6ea),
   skyCol: new THREE.Color(0xeaf1f7),
@@ -401,6 +407,9 @@ const cloud = createVolumetricCloud(renderer, {
   ambient: parseFloat(q.get('amb') || '0.95'),
   lift: parseFloat(q.get('lift') || '0.13'),
   sat: parseFloat(q.get('sat') || '0.82'),
+  summit: SUMMIT,
+  clearR: parseFloat(q.get('clr') || '6200'),
+  clearAmt: parseFloat(q.get('clra') || '0.30'),
   terrain: HEIGHT_TEX,
   hmin: HEIGHT_META.hmin, hmax: HEIGHT_META.hmax,
   spanX: HEIGHT_META.spanX, spanZ: HEIGHT_META.spanZ,
