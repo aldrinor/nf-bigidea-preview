@@ -224,11 +224,11 @@
      original, which is why changing it means regenerating the images. -->
 <div class="scope-wrap" id="scopeWrap">
   <div class="scope">
-    <img class="scope-img is-on" data-k="ultrafine" src="./assets/specimens/ultrafine.jpg" alt="">
-    <img class="scope-img" data-k="smoke"    src="./assets/specimens/smoke.jpg" alt="">
-    <img class="scope-img" data-k="virus"    src="./assets/specimens/virus.jpg" alt="">
-    <img class="scope-img" data-k="bacteria" src="./assets/specimens/bacteria.jpg" alt="">
-    <img class="scope-img" data-k="spore"    src="./assets/specimens/spore.jpg" alt="">
+    <img class="scope-img is-on" data-k="ultrafine" data-src="./assets/specimens/ultrafine.jpg" alt="">
+    <img class="scope-img" data-k="smoke"    data-src="./assets/specimens/smoke.jpg" alt="">
+    <img class="scope-img" data-k="virus"    data-src="./assets/specimens/virus.jpg" alt="">
+    <img class="scope-img" data-k="bacteria" data-src="./assets/specimens/bacteria.jpg" alt="">
+    <img class="scope-img" data-k="spore"    data-src="./assets/specimens/spore.jpg" alt="">
     <span class="scope-ring"></span>
   </div>
   <div class="scope-card"><b id="scopeName">Ultrafine Particle</b><span>Electrically charged</span></div>
@@ -392,7 +392,7 @@ window.__grade = (winx, winy, sh, li) => {
   if (sh) SHADE_COL.setRGB(sh[0], sh[1], sh[2]);
   if (li) LIGHT_COL.setRGB(li[0], li[1], li[2]);
 };
-const DET = new THREE.TextureLoader().load('./terrain/out/terrain_detail.webp');
+const DET = new THREE.Texture();
 DET.wrapS = DET.wrapT = THREE.RepeatWrapping;
 DET.colorSpace = THREE.NoColorSpace;
 DET.anisotropy = 8;
@@ -536,6 +536,7 @@ const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
    looks past them. Hiding them under cloud failed -- the cloud has gaps. So this
    is 118 km of the real Khumbu around it, at a resolution matched to how far
    away it is. Georeferenced to the same origin, so the two line up. */
+function loadSurround() {
 loader.load('./terrain/out/khumbu_wide_opt.glb', g => {
   g.scene.traverse(o => {
     if (o.isMesh) {
@@ -563,12 +564,13 @@ loader.load('./terrain/out/ring_mid_opt.glb', g => {
   });
   scene.add(g.scene);
 });
+}   // loadSurround
 
 /* The mesh is 641 x 449 over 11.8 km -- one vertex every 18 m, which is why
    ridges show facets. This normal map was baked from the FULL-resolution DEM,
    so it carries the relief the mesh threw away. It was built and never loaded.
    ?ns= flips the green channel for the tangent-handedness check. */
-const NRM = new THREE.TextureLoader().load('./terrain/out/everest_hero_normal.webp');
+const NRM = new THREE.Texture();
 NRM.colorSpace = THREE.NoColorSpace;
 NRM.anisotropy = 8;
 const NS = parseFloat(q.get('ns') || '-1');
@@ -590,6 +592,24 @@ loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
   scene.add(gltf.scene);
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
+
+  /* Everything the first frame does NOT need, fetched after it is on screen.
+     Two frames of grace so the browser has actually painted before the next
+     megabyte starts competing for bandwidth. */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const tl = new THREE.TextureLoader();
+    tl.load('./terrain/out/everest_hero_normal.webp', t => {
+      NRM.image = t.image; NRM.needsUpdate = true;
+    });
+    tl.load('./terrain/out/terrain_detail.webp', t => {
+      DET.image = t.image;
+      DET.wrapS = DET.wrapT = THREE.RepeatWrapping;
+      DET.colorSpace = THREE.NoColorSpace;
+      DET.anisotropy = 8;
+      DET.needsUpdate = true;
+    });
+    loadSurround();
+  }));
 }, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
 
 const HEIGHT_META = {hmin:4930.6, hmax:8750.2, spanX:18479.8, spanZ:14137.6};
@@ -941,7 +961,7 @@ function resetDust(){
 const SPEC = ['Ultrafine Particle','Wildfire Smoke','Viruses','Bacteria','Fungal Spores'];
 const specImgs = Array.prototype.slice.call(document.querySelectorAll('.scope-img'));
 const specName = document.getElementById('scopeName');
-let specIdx = 0, lastSpec = 0;
+let specIdx = 0, lastSpec = 0, specLoaded = false;
 const chipEls = Array.prototype.slice.call(document.querySelectorAll('.tackle-row li'));
 function cycleSpecimen(now){
   if (now - lastSpec < 4200) return;
@@ -1067,6 +1087,10 @@ function applyScroll() {
   if (suckP < 0.002 && lastSuck > 0.002) resetDust();
   lastSuck = suckP;
 
+  if (p > 0.55 && !specLoaded) {
+    specLoaded = true;
+    for (const im of specImgs) if (im.dataset.src) im.src = im.dataset.src;
+  }
   const lensIn = smootherstep(0.78, 0.86, p);
   scopeWrap.style.opacity = lensIn.toFixed(3);
   tackle.style.opacity    = smootherstep(0.795, 0.845, p).toFixed(3);
@@ -1080,6 +1104,7 @@ function smootherstep(a, b, x){
 /* The slow orbit of the opening. Only while the page is at the top -- once the
    fall starts, the scroll owns the camera. */
 let lastSpinT = 0;
+const spinBaseY = 8400;
 function spin(t) {
   // clamped so a stall cannot jump the camera, but not so tight that a slow
   // machine orbits slower than a fast one -- 0.1 meant anything under 10 fps
@@ -1087,11 +1112,23 @@ function spin(t) {
   const dt = Math.min(0.25, t - lastSpinT);
   lastSpinT = t;
   if (!autoSpin || scrollP > 0.02) return;
-  const a = (Math.PI * 2 / SPIN_SECONDS) * dt;
+
+  /* Yin: "so robotic". A constant yaw around a fixed point is a turntable, not a
+     camera. Three slow drifts on periods that do not divide into one another, so
+     they never line up and it never repeats a pose: the rate itself breathes,
+     the distance opens and closes a little, and the eye rises and falls. All far
+     slower than the orbit, so it reads as a hand on the tripod, not a wobble. */
+  const rateMod = 1.0 + 0.26 * Math.sin(t * 0.170 + 1.3);
+  const a = (Math.PI * 2 / SPIN_SECONDS) * dt * rateMod;
   const ox = camera.position.x - PIVOT.x, oz = camera.position.z - PIVOT.z;
   const cs = Math.cos(a), sn = Math.sin(a);
-  camera.position.x = PIVOT.x + ox * cs - oz * sn;
-  camera.position.z = PIVOT.z + ox * sn + oz * cs;
+  let nx = PIVOT.x + ox * cs - oz * sn;
+  let nz = PIVOT.z + ox * sn + oz * cs;
+
+  const breathe = 1.0 + 0.030 * Math.sin(t * 0.094 + 0.7);
+  camera.position.x = PIVOT.x + (nx - PIVOT.x) * breathe;
+  camera.position.z = PIVOT.z + (nz - PIVOT.z) * breathe;
+  camera.position.y += (spinBaseY + 105 * Math.sin(t * 0.061) - camera.position.y) * 0.06;
 }
 
 const clock = new THREE.Clock();

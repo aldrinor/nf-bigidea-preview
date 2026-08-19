@@ -799,6 +799,8 @@ export function createVolumetricCloud(renderer, opts = {}) {
   compQuad.frustumCulled = false;
   const compScene = new THREE.Scene(); compScene.add(compQuad);
   const postCam = new THREE.Camera();
+  const lastCloudPos = new THREE.Vector3(1e9, 1e9, 1e9);
+  let lastCloudFov = -1, cloudAge = 0, cloudPrimed = false;
 
   function sizeTargets(w, h) {
     const r = renderer.getPixelRatio();
@@ -835,6 +837,14 @@ export function createVolumetricCloud(renderer, opts = {}) {
     },
     render(scene, camera, time) {
       const u = mat.uniforms;
+      /* Re-march only when the view has actually changed. At the opening orbit's
+         four degrees a second a one-frame-old cloud is 0.07 degrees stale, well
+         under a pixel, so this cuts the cost of the most expensive pass on the
+         page for nothing visible. A scroll moves far more than the threshold and
+         gets a fresh march every frame. */
+      const moved = camera.position.distanceToSquared(lastCloudPos) > 9.0 ||
+                    Math.abs(camera.fov - lastCloudFov) > 0.01;
+      const marchNow = moved || (++cloudAge >= 3) || !cloudPrimed;
       u.uTime.value = time;
       u.uNear.value = camera.near;
       u.uFar.value = camera.far;
@@ -847,9 +857,14 @@ export function createVolumetricCloud(renderer, opts = {}) {
       renderer.clear();
       renderer.render(scene, camera);
 
-      renderer.setRenderTarget(cloudRT);
-      renderer.clear();
-      renderer.render(post, postCam);
+      if (marchNow) {
+        cloudAge = 0; cloudPrimed = true;
+        lastCloudPos.copy(camera.position);
+        lastCloudFov = camera.fov;
+        renderer.setRenderTarget(cloudRT);
+        renderer.clear();
+        renderer.render(post, postCam);
+      }
 
       comp.uniforms.uNear.value = camera.near;
       comp.uniforms.uFar.value = camera.far;
