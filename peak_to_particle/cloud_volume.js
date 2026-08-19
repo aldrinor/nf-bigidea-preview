@@ -164,7 +164,7 @@ uniform mat4  uInvProj, uInvView;
 uniform vec3  uCamPos, uSunDir, uSunCol, uSkyCol, uGroundCol;
 uniform float uAmbient;
 uniform float uLift, uSat;
-uniform float uSteps, uJit;
+uniform float uSteps, uJit, uResLod;
 uniform vec2  uRes;
 uniform float uNear, uFar, uTime;
 uniform float uBase, uTop;        // cloud slab, metres
@@ -470,7 +470,13 @@ void main(){
     // near-horizontal ray t0 is tiny while the samples are tens of kilometres
     // out, so the entry-based fade never fired and the far sea -- where the
     // steps are kilometres apart -- aliased into blocky stipple.
-    float lod = smoothstep(180.0, 1500.0, base);
+    /* How coarse this sample is -- from the step length AND from the buffer it
+       is drawn into. Marching at a fifth of screen resolution while still asking
+       for hundred-metre wisps is asking for detail the buffer cannot hold, and
+       it comes back as a dot screen. My machine is slow, so the adaptive ladder
+       had pinned it to the LOWEST rung the whole time I was auditing the top
+       one: I was testing a different configuration from the one Yin sees. */
+    float lod = max(smoothstep(180.0, 1500.0, base), uResLod);
     float d = density(p, lod) * (1.0 - smoothstep(30000.0, 72000.0, t));
     dbgMaxD = max(dbgMaxD, d); dbgSteps += 1.0;
 
@@ -557,9 +563,46 @@ const COMPOSITE_FRAG = /* glsl */`
 precision highp float;
 in vec2 vUv;
 out vec4 outColor;
-uniform sampler2D uScene, uCloud;
+uniform sampler2D uScene, uCloud, uDepth;
 uniform vec2  uTexel, uCloudSize;
-uniform float uLift, uSat, uUp;
+uniform float uLift, uSat, uUp, uNear, uFar;
+
+float linDepth(vec2 uv){
+  float d = texture(uDepth, uv).x;
+  if (d >= 1.0 || d <= 0.0) return 1e9;
+  float ndc = d * 2.0 - 1.0;
+  return (2.0 * uNear * uFar) / (uFar + uNear - ndc * (uFar - uNear));
+}
+
+/* Depth-aware upsample. The cloud is marched at half resolution against a
+   FULL resolution depth buffer, so at a mountain silhouette two neighbouring
+   half-res rays stop at wildly different distances -- one against rock a
+   kilometre away, one against sky. Blending those two with any fixed filter,
+   bicubic included, mixes cloud that belongs in front of the ridge with cloud
+   that belongs behind it, and the result is the dotted screen along every edge
+   in Yin's screenshot. This weights each tap by how well its depth agrees with
+   this pixel's, so a tap from the wrong side of an edge is simply not used.
+   Standard for half-resolution volumetrics, and the reason they do not fringe. */
+vec4 bilateralCloud(vec2 uv){
+  vec2 px = uv * uCloudSize - 0.5;
+  vec2 f  = fract(px);
+  vec2 b  = floor(px);
+  float dz = linDepth(uv);
+  vec4  acc = vec4(0.0);
+  float wsum = 0.0;
+  for (int j = 0; j < 2; j++)
+    for (int i = 0; i < 2; i++) {
+      vec2 t  = (b + vec2(float(i), float(j)) + 0.5) / uCloudSize;
+      float wb = (i == 0 ? 1.0 - f.x : f.x) * (j == 0 ? 1.0 - f.y : f.y);
+      float zt = linDepth(t);
+      // agreement in inverse depth, so it is scale-free across the whole range
+      float dd = abs(1.0 / max(dz, 1.0) - 1.0 / max(zt, 1.0)) * 4000.0;
+      float w  = wb * exp(-dd * dd);
+      acc += texture(uCloud, t) * w;
+      wsum += w;
+    }
+  return wsum > 1e-5 ? acc / wsum : texture(uCloud, uv);
+}
 
 /* Catmull-Rom, four taps. A tent filter is a box in disguise: blowing a
    half-resolution buffer up with one is what leaves the soft squares, because a
@@ -586,16 +629,8 @@ vec4 bicubic(sampler2D tex, vec2 uv, vec2 texSize){
 
 void main(){
   vec3 scene = texture(uScene, vUv).rgb;
-  vec4 c;
-  if (uUp < 0.5) {
-    c = texture(uCloud, vUv) * 0.36
-      + texture(uCloud, vUv + vec2( uTexel.x, 0.0)) * 0.16
-      + texture(uCloud, vUv + vec2(-uTexel.x, 0.0)) * 0.16
-      + texture(uCloud, vUv + vec2(0.0,  uTexel.y)) * 0.16
-      + texture(uCloud, vUv + vec2(0.0, -uTexel.y)) * 0.16;
-  } else {
-    c = max(bicubic(uCloud, vUv, uCloudSize), vec4(0.0));
-  }
+  vec4 c = max(uUp < 0.5 ? bicubic(uCloud, vUv, uCloudSize)
+                         : bilateralCloud(vUv), vec4(0.0));
 
   vec3 outRgb = scene * (1.0 - c.a) + c.rgb;
 
@@ -668,7 +703,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
       uCamPos:{value:new THREE.Vector3()}, uSunDir:{value:sunDir},
       uSunCol:{value:sunCol}, uSkyCol:{value:skyCol},
       uGroundCol:{value:groundCol}, uAmbient:{value:ambient},
-      uLift:{value:lift}, uSat:{value:sat}, uSteps:{value:160}, uJit:{value:1},
+      uLift:{value:lift}, uSat:{value:sat}, uSteps:{value:160}, uJit:{value:1}, uResLod:{value:0},
       uRes:{value:new THREE.Vector2()}, uNear:{value:1}, uFar:{value:1},
       uTime:{value:0}, uBase:{value:base}, uTop:{value:top},
       uCover:{value:cover}, uDensity:{value:density}, uScale:{value:scale},
@@ -699,8 +734,10 @@ export function createVolumetricCloud(renderer, opts = {}) {
     fragmentShader: COMPOSITE_FRAG,
     uniforms: {
       uScene:{value:sceneRT.texture}, uCloud:{value:cloudRT.texture},
+      uDepth:{value:depth},
       uTexel:{value:new THREE.Vector2()}, uCloudSize:{value:new THREE.Vector2()},
       uLift:{value:lift}, uSat:{value:sat}, uUp:{value:1},
+      uNear:{value:1}, uFar:{value:1},
     },
   });
 
@@ -739,6 +776,8 @@ export function createVolumetricCloud(renderer, opts = {}) {
     setQuality(scale, steps) {
       CLOUD_SCALE = scale;
       mat.uniforms.uSteps.value = steps;
+      // half resolution is the reference; anything coarser gets a smoother cloud
+      mat.uniforms.uResLod.value = Math.min(1.15, Math.max(0, 0.5 / scale - 1.0));
       renderer.getSize(size);
       sizeTargets(size.x, size.y);
     },
@@ -760,6 +799,8 @@ export function createVolumetricCloud(renderer, opts = {}) {
       renderer.clear();
       renderer.render(post, postCam);
 
+      comp.uniforms.uNear.value = camera.near;
+      comp.uniforms.uFar.value = camera.far;
       renderer.setRenderTarget(null);
       renderer.render(compScene, postCam);
     },

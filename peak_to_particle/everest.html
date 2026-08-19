@@ -592,7 +592,10 @@ function trackSun() {
    the blocks and the dither in the first place.
 
    ?cq= pins the resolution scale and disables the ladder. */
-const QUALITY = [ [0.50, 160], [0.38, 120], [0.28, 90], [0.20, 64] ];
+/* Less extreme at the bottom. Resolution is the cheapest thing to give up, but
+   a fifth of screen shows its own texture no matter how the cloud is filtered,
+   so the floor comes up and the step count carries more of the saving. */
+const QUALITY = [ [0.50, 160], [0.42, 116], [0.34, 84], [0.28, 60] ];
 let qLevel = 0, frameTimes = [], lastT = performance.now(), settle = 0;
 const QUALITY_PINNED = q.has('cq');
 function autoQuality() {
@@ -766,11 +769,19 @@ function applyScroll() {
     }
   }
   dustMat.uniforms.uFade.value = smootherstep(0.68, 0.95, p);
-  // swapped inside the whiteout, where the change cannot be seen happening
-  const swap = smootherstep(0.40, 0.56, p);
-  plate1.style.opacity = String(1 - swap);
-  plate2.style.opacity = String(swap);
-  plate1.style.pointerEvents = swap > 0.5 ? 'none' : '';
+  /* Two DISJOINT windows, not one cross-fade. Fading one out while the other
+     fades in means that anywhere in the middle both are half visible and sitting
+     on top of each other -- which is exactly what Yin's screenshot shows, and a
+     visitor scrolling slowly parks there. The first is gone before the second
+     starts, and the gap is inside the whiteout where there is nothing to look
+     at anyway. */
+  const out1 = smootherstep(0.34, 0.44, p);
+  const in2  = smootherstep(0.52, 0.62, p);
+  plate1.style.opacity = String(1 - out1);
+  plate2.style.opacity = String(in2);
+  plate1.style.visibility = out1 > 0.995 ? 'hidden' : 'visible';
+  plate2.style.visibility = in2 < 0.005 ? 'hidden' : 'visible';
+  plate1.style.pointerEvents = out1 > 0.5 ? 'none' : '';
   if (cue) cue.style.opacity = String(0.62 * (1 - smootherstep(0.02, 0.16, p)));
 }
 function smootherstep(a, b, x){
