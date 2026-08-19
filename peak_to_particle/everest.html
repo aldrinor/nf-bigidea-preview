@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background:#b7ceed">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14,7 +14,11 @@
     font-weight:100 900;font-display:swap}
   :root{ --ink:#1f2327; }
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{background:#c9d8e6;color:#000;
+  /* Sampled off the rendered frame: #b7ceed at the top through #c8ddf5 at a third
+     down to the pale band at the horizon. The canvas paints the same sky, so when
+     it arrives there is nothing to see change. */
+  html,body{background:linear-gradient(180deg,#b7ceed 0%,#bcd2f0 12%,#c1d7f2 26%,#cfe1f3 36%,#e3ebf2 46%,#eef3f7 62%,#edf0f2 100%);
+    background-attachment:fixed;color:#000;
     font-family:Montserrat,Arial,sans-serif}
   #c{display:block;position:fixed;inset:0}
   /* The plan of record says the camera FALLS and never cuts, so the descent is
@@ -166,10 +170,17 @@
     .tackle-row{grid-template-columns:repeat(2,1fr)}
   }
 
-  #load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;
-    background:#c9d8e6;font-family:"Space Mono",ui-monospace,monospace;
-    font-size:11px;letter-spacing:.12em;color:#5a6570;transition:opacity .8s}
-  #load.gone{opacity:0;pointer-events:none}
+  /* Yin: "different layer show up, that is weird". This was an OPAQUE full-screen
+     panel at z-index 5 -- it covered the headline as well as the canvas, so the
+     entire load was a flat blue wall with a tiny label, and then the finished page
+     appeared in one step. There is no loading screen now. The sky is painted in CSS
+     straight away, the words are readable from the first frame, and the mountain
+     fades up into a page that is already there. This element survives only to
+     report a real failure. */
+  #load{display:none;position:fixed;inset:0;place-items:center;z-index:5;
+    background:#c9d8e6;font-family:Montserrat,Arial,sans-serif;
+    font-size:12px;font-weight:650;letter-spacing:.10em;color:#5a6570}
+  #load.show{display:grid}
 </style>
 </head>
 <body>
@@ -247,7 +258,7 @@
 <div id="scroller"></div>
 <div class="cue">Scroll<span>&darr;</span></div>
 <div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8,848 m<br>elevation and imagery, measured</div>
-<div id="load">LOADING TERRAIN</div>
+<div id="load"></div>
 
 <script type="importmap">
 {"imports":{
@@ -708,7 +719,8 @@ loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
 
   // the distant ranges last, and they fade too
   requestAnimationFrame(() => requestAnimationFrame(loadSurround));
-}, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
+}, undefined, e => { window.__err = String(e); const L = document.getElementById('load');
+  L.textContent = 'TERRAIN FAILED'; L.classList.add('show'); });
 }   // loadHeroFull
 
 const HEIGHT_META = {hmin:4930.6, hmax:8750.2, spanX:18479.8, spanZ:14137.6};
