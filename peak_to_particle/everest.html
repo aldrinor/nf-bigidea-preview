@@ -735,9 +735,16 @@ controls.minDistance = 6600;
 controls.maxDistance = 11000;
 controls.minPolarAngle = 1.32;
 controls.maxPolarAngle = Math.PI/2 + 0.06;   // slightly below the summit, looking up at it
-controls.autoRotate = true;             // drifts until the visitor takes hold
-controls.autoRotateSpeed = 0.16;
-controls.addEventListener('start', () => { controls.autoRotate = false; });
+/* OrbitControls' own autoRotate advances a fixed amount PER FRAME, not per
+   second, so its speed is whatever the machine's frame rate happens to be. At
+   0.16 it measured 14 796 seconds for one orbit here and would still be four
+   minutes on a fast machine -- invisible either way, and different on every
+   device. Driven off the clock instead: one turn in 90 seconds, the same on
+   every machine. ?spin= to change it, ?spin=0 to stop it. */
+controls.autoRotate = false;
+const SPIN_SECONDS = parseFloat(q.get('spin') || '90');
+let autoSpin = SPIN_SECONDS > 0;
+controls.addEventListener('start', () => { autoSpin = false; });   // the visitor takes over for good
 controls.update();
 
 /* The camera orbits, so a fixed sun leaves half the rotation looking at an
@@ -1001,7 +1008,6 @@ function applyScroll() {
      move further, position hold, but the grey cloud and dust start getting full
      covering the whole screen." Everything past 0.55 is weather and words. */
   const fall = smootherstep(0.20, 0.55, p);
-  if (p > 0.004) controls.autoRotate = false;
 
   if (fall > 0.0005) {
     const eye = new THREE.Vector3();
@@ -1071,11 +1077,29 @@ function smootherstep(a, b, x){
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
+/* The slow orbit of the opening. Only while the page is at the top -- once the
+   fall starts, the scroll owns the camera. */
+let lastSpinT = 0;
+function spin(t) {
+  // clamped so a stall cannot jump the camera, but not so tight that a slow
+  // machine orbits slower than a fast one -- 0.1 meant anything under 10 fps
+  // drifted behind, and this box runs at two
+  const dt = Math.min(0.25, t - lastSpinT);
+  lastSpinT = t;
+  if (!autoSpin || scrollP > 0.02) return;
+  const a = (Math.PI * 2 / SPIN_SECONDS) * dt;
+  const ox = camera.position.x - PIVOT.x, oz = camera.position.z - PIVOT.z;
+  const cs = Math.cos(a), sn = Math.sin(a);
+  camera.position.x = PIVOT.x + ox * cs - oz * sn;
+  camera.position.z = PIVOT.z + ox * sn + oz * cs;
+}
+
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
   if (!QUALITY_PINNED) autoQuality();
   applyScroll();
+  spin(t);
   keepAboveGround();
   trackSun();
   if ((shadowTick++ % 8) === 0) sun.shadow.needsUpdate = true;
