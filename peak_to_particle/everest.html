@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Everest</title>
-<link rel="preload" as="image" href="./assets/brand/cpolar-full-color.svg">
 <style>
   /* Read off cpolar.tech, not guessed: Anton for display, Montserrat variable
      for everything else, both served from here rather than hotlinked. TTF was
@@ -182,6 +181,16 @@
      straight away, the words are readable from the first frame, and the mountain
      fades up into a page that is already there. This element survives only to
      report a real failure. */
+  /* A 661-byte blurred still of the opening pose, embedded in the page so it
+     needs no request and cannot arrive late. It gives the first paint a mountain
+     instead of empty sky, and the real terrain cross-fades over it. Scale is a
+     touch over 1 so the blur has no soft edge at the frame. */
+  #plate0{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAwICQsJCAwLCgsODQwOEh4UEhEREiUbHBYeLCcuLisnKyoxN0Y7MTRCNCorPVM+QkhKTk9OLztWXFVMW0ZNTkv/2wBDAQ0ODhIQEiQUFCRLMisyS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0v/wAARCAAgADgDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAUBAgYEA//EAC4QAAIBAwMDAQUJAAAAAAAAAAECAwAEEQUSIRMxQWEGMlFxoRUiI0JSgZHB8P/EABgBAAMBAQAAAAAAAAAAAAAAAAABAgME/8QAGxEBAAIDAQEAAAAAAAAAAAAAAAETAhESIVH/2gAMAwEAAhEDEQA/ANZsqdlP1sYAANgIHk+arLp8L8gFTjAx2rpuhhXJFso2U2k0zHKyAD1pRcXcMcZliljnjBI/DbJyO/y7VVuKeJTsqNldOltbatB1bS4DbeHRhhlPwIrsOmP+padmP0cSVbKKZ/ZrD32CjHf1oosgcy8YtdVQVMTBzySeKl9fRPeUDPYckn+Kyll1JZXXc/TVSxOSSMf4CrM2xT0wEJGCR3Y+p/qsPGnp9qN/LdIAzbIiH3IDjsOMn5msRNHtSQKfvFs4P1H1pil5dNC1mDujJ7N4/fxXTBfhIZ7e4SKWQrtSRo+cDv35qdGXWV1cQzxTW22OSBcDYcFl+GPNaK09p7mYSyPCBFFGGabJwT4UD4k1mmjCytJ0g4Uh1TOAfSrR6mbVWVE3JNwxbxjniqI71D2hu54SpAiLL+TznwDRSc3AuLqM3A6SZwMnj0Boo3EFqX//2Q==') center/cover no-repeat;
+    filter:blur(26px) saturate(1.05);transform:scale(1.06);
+    transition:opacity 1.1s ease}
+  #plate0.gone{opacity:0}
+
   #load{display:none;position:fixed;inset:0;place-items:center;z-index:5;
     background:#c9d8e6;font-family:Montserrat,Arial,sans-serif;
     font-size:12px;font-weight:650;letter-spacing:.10em;color:#5a6570}
@@ -192,7 +201,7 @@
 <canvas id="c"></canvas>
 <div class="scrim"></div>
 <header class="bar">
-  <img src="./assets/brand/cpolar-full-color.svg" alt="C-POLAR" fetchpriority="high" decoding="sync">
+  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR" decoding="sync">
   <nav>
     <a href="#applications">Applications</a>
     <a href="#evidence">Science &amp; Evidence</a>
@@ -263,6 +272,7 @@
 <div id="scroller"></div>
 <div class="cue">Scroll<span>&darr;</span></div>
 <div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8,848 m<br>elevation and imagery, measured</div>
+<div id="plate0"></div>
 <div id="load"></div>
 
 <script type="importmap">
@@ -622,6 +632,10 @@ const NS = parseFloat(q.get('ns') || '-1');
    textures are made to land underneath the mountain cross-fade so their change
    is hidden by it. */
 const fades = [];
+function dropPlate() {
+  const p0 = document.getElementById('plate0');
+  if (p0) p0.classList.add('gone');
+}
 function fadeIn(root, seconds, done) {
   root.traverse(o => {
     if (!o.isMesh) return;
@@ -666,7 +680,7 @@ loader.load('./terrain/out/everest_hero_lo_opt.glb', g => {
   if (window.__heroFull) return;              // the real one beat it here
   g.scene.traverse(o => { if (o.isMesh) { o.receiveShadow = true; dressHero(o.material); } });
   heroLo = g.scene;
-  fadeIn(heroLo, 0.75);
+  fadeIn(heroLo, 0.75, dropPlate);     // blurred plate off once this is fully up
   scene.add(heroLo);
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
@@ -709,6 +723,7 @@ loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
      the sharp one is fully opaque. The two are the same mountain from the same
      elevation data, so the handover cannot be seen. */
   fadeIn(gltf.scene, 0.65, () => {
+    dropPlate();                       // in case the sharp one won the race
     if (heroLo) {
       scene.remove(heroLo);
       heroLo.traverse(o => {
