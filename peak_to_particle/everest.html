@@ -7,9 +7,13 @@
 <style>
   :root{ --ink:#1f2327; }
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;background:#c9d8e6;overflow:hidden;
+  html,body{background:#c9d8e6;
     font-family:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   #c{display:block;position:fixed;inset:0}
+  /* The plan of record says the camera FALLS and never cuts, so the descent is
+     scroll on this same scene rather than a second page. The canvas is fixed and
+     this is the only thing that actually scrolls. */
+  #scroller{height:300vh;pointer-events:none}
   /* The camera orbits, so what sits behind the type changes: at some bearings
      it is pale sky, at others it is the mountain, and 18 px at 66% opacity on a
      sunlit snowfield cannot be read. The reference never has this problem
@@ -29,6 +33,8 @@
       rgba(234,240,245,0)   58%)}
   }
 
+  .plate{opacity:1}
+  #plate2{opacity:0}
   .plate{position:fixed;left:7vw;top:50%;transform:translateY(-54%);z-index:2;
     color:var(--ink);max-width:min(28ch,40vw)}
   .plate h1{font-size:clamp(28px,3.5vw,52px);font-weight:500;line-height:1.10;
@@ -79,11 +85,17 @@
   <img src="./brand/nanoflashing_black.svg" alt="NanoFlashing">
   <span>Peak to particle</span>
 </div>
-<div class="plate">
+<div class="plate" id="plate1">
   <div class="rule"></div>
   <h1>It starts eight kilometres up.</h1>
   <p>Air moves. What it carries does not stop at the summit.</p>
 </div>
+<div class="plate" id="plate2">
+  <div class="rule"></div>
+  <h1>Down here, the air is full of it.</h1>
+  <p>Most pollutants carry a negative charge.</p>
+</div>
+<div id="scroller"></div>
 <div class="cue">Scroll<span>&darr;</span></div>
 <div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8 848 m<br>elevation and imagery, measured</div>
 <div id="load">LOADING TERRAIN</div>
@@ -170,6 +182,12 @@ const SUMMIT = new THREE.Vector3(149, 8750, 528);
 // BELOW it lifts the peak into the upper third and lets the massif fill the
 // frame, which is how the reference is composed.
 const PIVOT = new THREE.Vector3(149, 8260, 528);
+/* Where the fall ends: on the glacier under the south-west face, looking back up
+   at it. The summit stays in frame the whole way down, so the descent reads as
+   one move rather than as two pictures. keepAboveGround does the rest -- it holds
+   the camera clear of whatever it lands over. */
+const GROUND_EYE = new THREE.Vector3(-2450, 5950, 4250);
+const GROUND_AIM = new THREE.Vector3(149, 7450, 528);
 const VIEWS = {
   hero:  [-6156, 8400, 6084],
   wide:  [-6980, 8490, 6890],
@@ -421,7 +439,10 @@ function groundAt(x, z) {
   return HGRID.g[py * HGRID.w + px];
 }
 
-const CLEARANCE = 620;
+/* The clearance relaxes as the page descends. Held at 620 m all the way down,
+   the fall ended a kilometre above the valley floor and "ground level" was a
+   figure of speech. */
+let CLEARANCE = 620;
 function keepAboveGround() {
   // sample a small neighbourhood: a single point misses the ridge the camera is
   // about to graze
@@ -523,7 +544,7 @@ controls.target.copy(PIVOT);
 controls.enableDamping = true;
 controls.dampingFactor = 0.055;
 controls.rotateSpeed = 0.42;
-controls.zoomSpeed = 0.75;
+controls.enableZoom = false;      // the wheel belongs to the page now
 controls.minDistance = 6600;
 controls.maxDistance = 11000;
 controls.minPolarAngle = 1.32;
@@ -582,14 +603,175 @@ function autoQuality() {
   }
 }
 
+
+/* --- dust ------------------------------------------------------------------
+   Stop 2 of the plan: the camera falls to the ground and the air turns out to be
+   full of what it carries. The mark is the one from the earlier hero -- a small
+   charge cross in the brand blue -- so the two pages read as the same world
+   rather than as two different projects.
+
+   Drawn as points with the cross cut in the fragment shader instead of a sprite
+   texture: one draw call, no asset, and the mark stays crisp at every size. */
+const DUST_N = 9000;
+const DUST_BOX = 900;      // metres; the mote field follows the camera
+const dustGeo = new THREE.BufferGeometry();
+{
+  const pos = new Float32Array(DUST_N * 3);
+  const seed = new Float32Array(DUST_N * 3);   // phase, speed, size
+  let ds = 991;
+  const r = () => (ds = (ds * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  /* LOCAL coordinates, in a box that FOLLOWS the camera. Scattered over five
+     kilometres of world the motes worked out at less than one pixel each and
+     nothing appeared at all -- dust is only dust when it is near you. */
+  for (let i = 0; i < DUST_N; i++) {
+    pos[i*3  ] = (r() - 0.5) * DUST_BOX;
+    // weighted low: the air thickens toward the ground, it does not fill a box
+    pos[i*3+1] = (Math.pow(r(), 1.7) - 0.35) * DUST_BOX * 0.70;
+    pos[i*3+2] = (r() - 0.5) * DUST_BOX;
+    seed[i*3  ] = r() * 6.283;
+    seed[i*3+1] = 0.45 + r() * 0.9;
+    seed[i*3+2] = 0.55 + Math.pow(r(), 2.2) * 1.5;   // most small, a few larger
+  }
+  dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  dustGeo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 3));
+}
+const dustMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, depthTest: true,
+  blending: THREE.NormalBlending,
+  uniforms: {
+    uTime:{value:0}, uFade:{value:0}, uPR:{value:Math.min(devicePixelRatio,2)},
+    uInk:{value:new THREE.Color(0x1b7bff)}, uGrey:{value:new THREE.Color(0x5a646e)},
+  },
+  vertexShader:`
+    attribute vec3 aSeed;
+    uniform float uTime, uPR, uFade;
+    varying float vMix, vA;
+    void main(){
+      vec3 p = position;
+      // slow float: rising, with a lateral wander. Nothing orbits or pulses.
+      float t = uTime * aSeed.y;
+      p.x += sin(t * 0.21 + aSeed.x) * 9.0;
+      p.z += cos(t * 0.17 + aSeed.x * 1.7) * 9.0;
+      p.y = mod(p.y + t * 3.4 + 900.0, 900.0) - 450.0;   // rise and wrap, no pop
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      float d = -mv.z;
+      gl_Position = projectionMatrix * mv;
+      // sized to read, not to scale: real dust is invisible, and this is a
+      // picture of what the air carries rather than a measurement of it
+      gl_PointSize = clamp(aSeed.z * 5200.0 * uPR / max(d, 1.0), 1.5 * uPR, 22.0 * uPR);
+      vMix = step(0.62, fract(aSeed.x * 3.77));      // a minority are plain motes
+      // near ones fade out so nothing sits on the lens, far ones fade into haze
+      vA = uFade * smoothstep(22.0, 130.0, d) * (1.0 - smoothstep(430.0, 760.0, d));
+    }`,
+  fragmentShader:`
+    uniform vec3 uInk, uGrey;
+    varying float vMix, vA;
+    void main(){
+      vec2 q = gl_PointCoord - 0.5;
+      float a;
+      if (vMix > 0.5) {
+        // the charge cross, cut with a soft edge so it never aliases
+        float bar = 0.13, arm = 0.42;
+        float cross = max(
+          (1.0 - smoothstep(bar, bar + 0.06, abs(q.y))) * (1.0 - smoothstep(arm, arm + 0.07, abs(q.x))),
+          (1.0 - smoothstep(bar, bar + 0.06, abs(q.x))) * (1.0 - smoothstep(arm, arm + 0.07, abs(q.y))));
+        a = cross;
+      } else {
+        a = 1.0 - smoothstep(0.18, 0.46, length(q));   // a plain mote
+      }
+      if (a * vA < 0.004) discard;
+      vec3 col = mix(uGrey, uInk, vMix);
+      gl_FragColor = vec4(col, a * vA * (vMix > 0.5 ? 0.62 : 0.34));
+    }`,
+});
+const dust = new THREE.Points(dustGeo, dustMat);
+dust.frustumCulled = false;
+dust.renderOrder = 4;
+scene.add(dust);
+
+/* --- the fall ---------------------------------------------------------------
+   One damped value drives everything: the camera, the two text plates and the
+   dust. Damped rather than raw so a trackpad flick does not snap the camera. */
+let scrollP = 0, scrollTarget = 0;
+const plate1 = document.getElementById('plate1');
+const plate2 = document.getElementById('plate2');
+const cue = document.querySelector('.cue');
+const heroEye = new THREE.Vector3(), heroAim = new THREE.Vector3();
+heroEye.copy(camera.position); heroAim.copy(PIVOT);
+
+function readScroll() {
+  const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  scrollTarget = Math.min(1, Math.max(0, scrollY / max));
+}
+addEventListener('scroll', readScroll, { passive: true });
+readScroll();
+
+function applyScroll() {
+  scrollP += (scrollTarget - scrollP) * 0.075;
+  const p = scrollP;
+  // the peak holds for the first sixth, then the camera falls
+  const fall = smootherstep(0.14, 0.90, p);
+  if (p > 0.004) controls.autoRotate = false;
+
+  if (fall > 0.0005) {
+    // the orbit still owns the bearing, so a visitor who dragged keeps their view
+    const off = camera.position.clone().sub(controls.target);
+    const bearing = Math.atan2(off.z, off.x);
+    const gOff = GROUND_EYE.clone().sub(GROUND_AIM);
+    const gR = Math.hypot(gOff.x, gOff.z);
+    const gEye = new THREE.Vector3(
+      GROUND_AIM.x + Math.cos(bearing) * gR, GROUND_EYE.y,
+      GROUND_AIM.z + Math.sin(bearing) * gR);
+    controls.target.lerpVectors(PIVOT, GROUND_AIM, fall);
+    // set the height ALONG the fall rather than easing toward it -- an eased
+    // lerp never arrives, and the descent stopped half way down the mountain
+    const eye = heroEye.clone().lerp(gEye, fall);
+    camera.position.x += (eye.x - camera.position.x) * 0.22;
+    camera.position.z += (eye.z - camera.position.z) * 0.22;
+    camera.position.y = eye.y;
+    camera.fov = 21.5 + fall * 12.0;
+    camera.updateProjectionMatrix();
+    CLEARANCE = 620 - fall * 470;
+    /* OrbitControls enforces its own min/max distance from the target every
+       frame, and at 6 600 m that was pushing the camera straight back out of the
+       descent -- the fall stopped a kilometre up and no amount of scroll moved
+       it. The leash has to lengthen as we come down. */
+    controls.minDistance = 6600 * fitPull * (1.0 - fall) + 620 * fall;
+    controls.maxDistance = 11000 * fitPull * (1.0 - fall) + 4200 * fall;
+  }
+  dustMat.uniforms.uFade.value = smootherstep(0.33, 0.78, p);
+  const swap = smootherstep(0.30, 0.44, p);   // short, so the two never sit on each other
+  plate1.style.opacity = String(1 - swap);
+  plate2.style.opacity = String(swap);
+  plate1.style.pointerEvents = swap > 0.5 ? 'none' : '';
+  if (cue) cue.style.opacity = String(0.62 * (1 - smootherstep(0.02, 0.16, p)));
+}
+function smootherstep(a, b, x){
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
   if (!QUALITY_PINNED) autoQuality();
+  applyScroll();
+  dustMat.uniforms.uTime.value = t;
   keepAboveGround();
   trackSun();
   if ((shadowTick++ % 8) === 0) sun.shadow.needsUpdate = true;
   controls.update();
+  /* The field follows the camera only once everything else has finished moving
+     it -- applyScroll, the ground clamp AND controls.update all move the camera,
+     and placing the dust before the last of them left the whole box outside the
+     distance fade, so every mote was discarded. Forcing the material to opaque
+     red still drew nothing, which is what finally pointed at ordering. */
+  {
+    const g = DUST_BOX * 0.25;
+    dust.position.set(Math.round(camera.position.x / g) * g,
+                      Math.round(camera.position.y / g) * g,
+                      Math.round(camera.position.z / g) * g);
+  }
   cloud.material.uniforms.uSunDir.value
     .copy(sun.position).sub(SUMMIT).normalize();
   cloud.material.uniforms.uDebug.value = parseFloat(q.get('dbg') || '0');
@@ -615,19 +797,20 @@ renderer.setAnimationLoop(() => {
    the portrait framing opens up and steps back together -- enough air around the
    peak for the sky and the cloud to be part of the picture. */
 const BASE_FOV = 21.5, WIDE_ASPECT = 1.45;
+let fitPull = 1;
 function fitCamera() {
   const a = innerWidth / innerHeight;
   const t = Math.min(1, Math.max(0, (WIDE_ASPECT - a) / (WIDE_ASPECT - 0.5)));
   camera.fov = BASE_FOV + t * 10.5;             // 21.5 landscape -> 32 portrait
   camera.aspect = a;
   camera.updateProjectionMatrix();
-  const pull = 1 + t * 0.34;
-  controls.minDistance = 6600 * pull;
-  controls.maxDistance = 11000 * pull;
-  const v = camera.position.clone().sub(PIVOT);
+  fitPull = 1 + t * 0.34;
+  controls.minDistance = 6600 * fitPull;
+  controls.maxDistance = 11000 * fitPull;
+  const v = camera.position.clone().sub(controls.target);
   const d = v.length();
   const want = Math.min(controls.maxDistance, Math.max(controls.minDistance, d));
-  if (Math.abs(want - d) > 1) camera.position.copy(PIVOT).add(v.multiplyScalar(want / d));
+  if (Math.abs(want - d) > 1) camera.position.copy(controls.target).add(v.multiplyScalar(want / d));
   controls.update();
 }
 
