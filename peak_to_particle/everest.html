@@ -40,7 +40,10 @@
     color:var(--ink);opacity:.44;line-height:2.0}
   @media (max-aspect-ratio:1/1){
     .plate{top:13vh;transform:none;max-width:min(30ch,86vw)}
-    .meta{right:auto;left:7vw;text-align:left;top:auto;bottom:16vh}
+    /* on a phone the frame is tall, so the sky band at the top is where small
+       mono can be read; the bottom is all snow */
+    .meta{right:auto;left:7vw;text-align:left;top:auto;bottom:16vh;
+      text-shadow:0 0 12px rgba(255,255,255,.9), 0 0 4px rgba(255,255,255,.95);opacity:.62}
   }
   #load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;
     background:#c9d8e6;font-family:"Space Mono",ui-monospace,monospace;
