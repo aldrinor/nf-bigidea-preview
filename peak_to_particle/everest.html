@@ -72,6 +72,68 @@
        a halo holding them up. Put them under the copy, inside the scrim. */
     .meta{right:auto;left:7vw;text-align:left;top:36vh;bottom:auto;opacity:.50}
   }
+  /* ---- the acts -------------------------------------------------------
+     Type taken off the built site rather than re-designed: 50/70 at weight 400
+     for the two big lines, 42/56 for the charge line, 21/31.92 for the answer,
+     and the one emphasised run in the whole sequence is "Positive polarity". */
+  .act{opacity:0;visibility:hidden}
+  /* the plate's 28ch was set for a three-word headline; these lines are longer
+     and the answer paragraph runs to 46ch, so the acts carry their own width */
+  #actA{max-width:min(38ch,40vw)}
+  #actB,#actC{max-width:none;width:min(46vw,700px)}
+  #actD{max-width:none;width:min(40vw,560px)}
+  #actE{max-width:min(46ch,44vw)}
+  .plate h1.big{font-size:clamp(26px,2.85vw,44px);font-weight:400;line-height:1.40;
+    letter-spacing:.045em;color:#2d628c;max-width:none}
+  .plate h1.big.med{font-size:clamp(26px,3.0vw,42px);line-height:1.333}
+  .plate .lede{font-size:clamp(16px,1.35vw,20px);font-weight:400;line-height:1.62;
+    color:#2d628c;max-width:34ch}
+  .plate .lede b{font-weight:700;color:#12405f}
+  .plate .lede2{margin-top:22px;font-size:14px;letter-spacing:.02em;color:#5a7893}
+  .plate .verticals{list-style:none;margin:10px 0 0;padding:0;max-width:34ch}
+  .plate .verticals li{font-size:clamp(15px,1.2vw,18px);color:#1d5580;padding:9px 0;
+    border-bottom:1px solid rgba(29,97,145,.16)}
+  .plate .ans{font-size:21px;line-height:1.52;letter-spacing:.08rem;color:#1d5580;font-weight:400}
+  .plate .ans.a1{margin:26px 0 12px}
+  .plate .ans.a2{margin:0;max-width:46ch}
+  #actE h1.big.med{max-width:20ch}
+  .plate .ans .cap{font-style:normal;font-weight:700;color:#12405f}
+
+  .scope-wrap{position:fixed;right:11vw;top:50%;transform:translateY(-50%);z-index:3;
+    opacity:0;pointer-events:none;transition:opacity .5s ease}
+  .scope{position:relative;width:330px;height:330px;border-radius:50%;overflow:hidden;
+    background:#f6f1ef}
+  .scope-ring{position:absolute;inset:0;border-radius:50%;pointer-events:none;
+    box-shadow:inset 0 0 0 9px #22475f,
+               inset 0 0 0 11px rgba(255,255,255,.88),
+               inset 0 0 40px -12px rgba(20,45,68,.42)}
+  .scope-img{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);
+    object-fit:cover;opacity:0;transition:opacity .85s ease}
+  .scope-img.is-on{opacity:1}
+  .scope-card{margin-top:20px;text-align:center}
+  .scope-card b{display:block;font-size:16px;font-weight:700;color:#12405f;letter-spacing:.2px}
+  .scope-card span{display:block;margin-top:3px;font-size:12px;letter-spacing:.9px;
+    color:rgba(45,98,140,.72)}
+
+  .tackle{position:fixed;left:7vw;bottom:8vh;z-index:3;opacity:0;
+    transition:opacity .5s ease;max-width:min(620px,52vw)}
+  .tackle-row{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:repeat(5,1fr);gap:8px}
+  .tackle-row li{display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:14.5px;font-weight:700;line-height:1.32;letter-spacing:.2px;color:#12405f;
+    border:1.5px solid #1d6191;background:rgba(255,255,255,.62);
+    padding:10px 9px;min-height:54px}
+
+  /* the dust is a flat canvas over everything, exactly as in the original */
+  #dust{position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;opacity:0}
+
+  @media (max-aspect-ratio:1/1){
+    .scope-wrap{right:auto;left:50%;top:auto;bottom:19vh;transform:translateX(-50%)}
+    .scope{width:232px;height:232px}
+    .tackle{left:5vw;right:5vw;bottom:5vh;max-width:none}
+    .tackle-row{grid-template-columns:repeat(2,1fr)}
+  }
+
   #load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;
     background:#c9d8e6;font-family:"Space Mono",ui-monospace,monospace;
     font-size:11px;letter-spacing:.12em;color:#5a6570;transition:opacity .8s}
@@ -85,16 +147,66 @@
   <img src="./brand/nanoflashing_black.svg" alt="NanoFlashing">
   <span>Peak to particle</span>
 </div>
-<div class="plate" id="plate1">
+<!-- The original hero page copy, verbatim. Beat A. -->
+<div class="plate act" id="actA">
   <div class="rule"></div>
-  <h1>It starts eight kilometres up.</h1>
-  <p>Air moves. What it carries does not stop at the summit.</p>
+  <p class="lede">C-POLAR Technologies, Inc. is a <b>Health Science Platform Company</b>
+     built around its patented NanoFlashing&trade; technology.</p>
+  <p class="lede2">The platform has five primary application verticals:</p>
+  <ul class="verticals">
+    <li>Air</li><li>Water</li><li>Personal Protective Wear (PPW&trade;)</li>
+    <li>Food Packaging</li><li>Medical Devices</li>
+  </ul>
 </div>
-<div class="plate" id="plate2">
+
+<div class="plate act" id="actB">
   <div class="rule"></div>
-  <h1>Down here, the air is full of it.</h1>
-  <p>Most pollutants carry a negative charge.</p>
+  <h1 class="big">This is where air and water<br>are still clean.</h1>
 </div>
+
+<div class="plate act" id="actC">
+  <div class="rule"></div>
+  <h1 class="big">Down where we live,<br>they are full of pollutants.</h1>
+</div>
+
+<div class="plate act" id="actD">
+  <div class="rule"></div>
+  <h1 class="big med">Most harmful pollutants carry an electric charge.</h1>
+</div>
+
+<div class="plate act" id="actE">
+  <div class="rule"></div>
+  <h1 class="big med">Most harmful pollutants carry an electric charge.</h1>
+  <p class="ans a1">What they carry, we capture.</p>
+  <p class="ans a2"><em class="cap">Positive polarity</em> captures particles, destroys up to
+     99% of pathogens through a physical mechanism.</p>
+</div>
+
+<!-- The lens: a 9 px band, a white lip, an inner vignette. The coral glow is
+     painted INTO the photographs -- there is no glow rule anywhere in the
+     original, which is why changing it means regenerating the images. -->
+<div class="scope-wrap" id="scopeWrap">
+  <div class="scope">
+    <img class="scope-img is-on" data-k="ultrafine" src="./assets/specimens/ultrafine.jpg" alt="">
+    <img class="scope-img" data-k="smoke"    src="./assets/specimens/smoke.jpg" alt="">
+    <img class="scope-img" data-k="virus"    src="./assets/specimens/virus.jpg" alt="">
+    <img class="scope-img" data-k="bacteria" src="./assets/specimens/bacteria.jpg" alt="">
+    <img class="scope-img" data-k="spore"    src="./assets/specimens/spore.jpg" alt="">
+    <span class="scope-ring"></span>
+  </div>
+  <div class="scope-card"><b id="scopeName">Ultrafine Particle</b><span>Electrically charged</span></div>
+</div>
+
+<div class="tackle" id="tackle"><ul class="tackle-row">
+  <li data-k="ultrafine"><span>Ultrafine Particle</span></li>
+  <li data-k="smoke"><span>Wildfire Smoke</span></li>
+  <li data-k="virus"><span>Viruses</span></li>
+  <li data-k="bacteria"><span>Bacteria</span></li>
+  <li data-k="spore"><span>Fungal Spores</span></li>
+</ul></div>
+
+<canvas id="dust" aria-hidden="true"></canvas>
+
 <div id="scroller"></div>
 <div class="cue">Scroll<span>&darr;</span></div>
 <div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8 848 m<br>elevation and imagery, measured</div>
@@ -622,96 +734,152 @@ function autoQuality() {
 
 
 /* --- dust ------------------------------------------------------------------
-   Stop 2 of the plan: the camera falls to the ground and the air turns out to be
-   full of what it carries. The mark is the one from the earlier hero -- a small
-   charge cross in the brand blue -- so the two pages read as the same world
-   rather than as two different projects.
+   A flat 2D canvas over the scene, which is what the original is. Ported from
+   act1.html rather than re-invented, so both pages carry the same motes: three
+   grey radial sprites, drawn plain-alpha not additive, Brownian drift with a
+   slow curl, and a staggered accelerating suck into the lens.
 
-   Drawn as points with the cross cut in the fragment shader instead of a sprite
-   texture: one draw call, no asset, and the mark stays crisp at every size. */
-const DUST_N = 9000;
-const DUST_BOX = 900;      // metres; the mote field follows the camera
-const dustGeo = new THREE.BufferGeometry();
-{
-  const pos = new Float32Array(DUST_N * 3);
-  const seed = new Float32Array(DUST_N * 3);   // phase, speed, size
-  let ds = 991;
-  const r = () => (ds = (ds * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-  /* LOCAL coordinates, in a box that FOLLOWS the camera. Scattered over five
-     kilometres of world the motes worked out at less than one pixel each and
-     nothing appeared at all -- dust is only dust when it is near you. */
-  for (let i = 0; i < DUST_N; i++) {
-    pos[i*3  ] = (r() - 0.5) * DUST_BOX;
-    // weighted low: the air thickens toward the ground, it does not fill a box
-    pos[i*3+1] = (Math.pow(r(), 1.7) - 0.35) * DUST_BOX * 0.70;
-    pos[i*3+2] = (r() - 0.5) * DUST_BOX;
-    seed[i*3  ] = r() * 6.283;
-    seed[i*3+1] = 0.45 + r() * 0.9;
-    seed[i*3+2] = 0.55 + Math.pow(r(), 2.2) * 1.5;   // most small, a few larger
-  }
-  dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  dustGeo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 3));
+   No charge crosses. Yin: "dust, no + symbol". The charge arrives in words. */
+const DUST_RGB = [[110,118,127],[122,128,136],[94,102,110]];
+const dustCv  = document.getElementById('dust');
+const dctx    = dustCv.getContext('2d');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let   DW = 0, DH = 0, dustSprites = [], motes = [];
+
+function makeDustSprites(){
+  dustSprites = DUST_RGB.map(function(c){
+    const r = c[0], g = c[1], b = c[2];
+    const cv = document.createElement('canvas'); cv.width = cv.height = 24;
+    const x = cv.getContext('2d');
+    const grd = x.createRadialGradient(12,12,0, 12,12,12);
+    grd.addColorStop(0,    'rgba('+r+','+g+','+b+',1)');
+    grd.addColorStop(0.35, 'rgba('+r+','+g+','+b+',0.5)');
+    grd.addColorStop(1,    'rgba('+r+','+g+','+b+',0)');
+    x.fillStyle = grd; x.fillRect(0,0,24,24);
+    return cv;
+  });
 }
-const dustMat = new THREE.ShaderMaterial({
-  transparent: true, depthWrite: false, depthTest: true,
-  blending: THREE.NormalBlending,
-  uniforms: {
-    uTime:{value:0}, uFade:{value:0}, uPR:{value:Math.min(devicePixelRatio,2)},
-    uInk:{value:new THREE.Color(0x1b7bff)}, uGrey:{value:new THREE.Color(0x5a646e)},
-  },
-  vertexShader:`
-    attribute vec3 aSeed;
-    uniform float uTime, uPR, uFade;
-    varying float vMix, vA;
-    void main(){
-      vec3 p = position;
-      // slow float: rising, with a lateral wander. Nothing orbits or pulses.
-      float t = uTime * aSeed.y;
-      p.x += sin(t * 0.21 + aSeed.x) * 9.0;
-      p.z += cos(t * 0.17 + aSeed.x * 1.7) * 9.0;
-      p.y = mod(p.y + t * 3.4 + 900.0, 900.0) - 450.0;   // rise and wrap, no pop
-      vec4 mv = modelViewMatrix * vec4(p, 1.0);
-      float d = -mv.z;
-      gl_Position = projectionMatrix * mv;
-      // sized to read, not to scale: real dust is invisible, and this is a
-      // picture of what the air carries rather than a measurement of it
-      gl_PointSize = clamp(aSeed.z * 5200.0 * uPR / max(d, 1.0), 1.5 * uPR, 22.0 * uPR);
-      vMix = step(0.62, fract(aSeed.x * 3.77));      // a minority are plain motes
-      // near ones fade out so nothing sits on the lens, far ones fade into haze
-      vA = uFade * smoothstep(22.0, 130.0, d) * (1.0 - smoothstep(430.0, 760.0, d));
-    }`,
-  fragmentShader:`
-    uniform vec3 uInk, uGrey;
-    varying float vMix, vA;
-    void main(){
-      vec2 q = gl_PointCoord - 0.5;
-      float a;
-      if (vMix > 0.5) {
-        // the charge cross, cut with a soft edge so it never aliases
-        float bar = 0.13, arm = 0.42;
-        float cross = max(
-          (1.0 - smoothstep(bar, bar + 0.06, abs(q.y))) * (1.0 - smoothstep(arm, arm + 0.07, abs(q.x))),
-          (1.0 - smoothstep(bar, bar + 0.06, abs(q.x))) * (1.0 - smoothstep(arm, arm + 0.07, abs(q.y))));
-        a = cross;
-      } else {
-        a = 1.0 - smoothstep(0.18, 0.46, length(q));   // a plain mote
-      }
-      if (a * vA < 0.004) discard;
-      vec3 col = mix(uGrey, uInk, vMix);
-      gl_FragColor = vec4(col, a * vA * (vMix > 0.5 ? 0.62 : 0.34));
-    }`,
-});
-const dust = new THREE.Points(dustGeo, dustMat);
-dust.frustumCulled = false;
-dust.renderOrder = 4;
-scene.add(dust);
+function makeMote(){
+  return {
+    x: Math.random()*DW, y: Math.random()*DH,
+    vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4,
+    size: 1.0 + Math.random()*3.0,          // drawn at size*4 -> 4..16 px
+    baseAlpha: 0.15 + Math.random()*0.45,
+    sp: (Math.random()*3)|0,
+    phase: Math.random()*Math.PI*2,
+    state: 'float',
+    suckAt:  Math.random()*0.62,            // staggered across the suck window
+    suckDur: 0.16 + Math.random()*0.22,
+    tx:0, ty:0, startX:0, startY:0, curveAmt:0, gone:false
+  };
+}
+function sizeDust(){
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  DW = innerWidth; DH = innerHeight;
+  dustCv.width = DW*dpr; dustCv.height = DH*dpr;
+  dustCv.style.width = DW+'px'; dustCv.style.height = DH+'px';
+  dctx.setTransform(dpr,0,0,dpr,0,0);
+  const want = DW < 720 ? (REDUCED ? 380 : 640) : (REDUCED ? 520 : 1100);
+  if (motes.length !== want) { motes = []; for (let i=0;i<want;i++) motes.push(makeMote()); }
+}
+makeDustSprites(); sizeDust();
+addEventListener('resize', sizeDust);
 
-/* --- the fall ---------------------------------------------------------------
-   One damped value drives everything: the camera, the two text plates and the
-   dust. Damped rather than raw so a trackpad flick does not snap the camera. */
+/* Where the motes go: the lens itself, as on the built site. Read from the DOM
+   so it follows the layout rather than being a second set of numbers that can
+   drift out of step with the CSS. */
+function lensRect(){
+  const el = document.querySelector('.scope');
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  if (r.width < 2) return null;
+  return { x:r.left, y:r.top, w:r.width, h:r.height };
+}
+
+let dustFade = 0, suckP = 0, lastSuck = 0;
+function drawDust(t){
+  if (dustFade <= 0.002) { if (dustCv.style.opacity !== '0') dustCv.style.opacity = '0'; return; }
+  dustCv.style.opacity = dustFade.toFixed(3);
+  dctx.clearRect(0,0,DW,DH);
+  const rect = suckP > 0 ? lensRect() : null;
+  for (let i=0;i<motes.length;i++){
+    const m = motes[i];
+    if (m.gone) continue;
+
+    if (m.state === 'float'){
+      if (rect && suckP >= m.suckAt){
+        m.state='suck'; m.startX=m.x; m.startY=m.y;
+        m.tx = rect.x + Math.random()*rect.w;
+        m.ty = rect.y + Math.random()*rect.h;
+        const dist = Math.hypot(m.tx-m.startX, m.ty-m.startY);
+        m.curveAmt = (Math.random()-0.5) * Math.min(80, dist*0.25);
+      } else {
+        m.vx += (Math.random()-0.5)*0.06;
+        m.vy += (Math.random()-0.5)*0.06;
+        m.vx += Math.sin(m.y*0.005 + t*0.00015)*0.012;
+        m.vy += Math.cos(m.x*0.005 + t*0.00015)*0.012;
+        m.vx *= 0.95; m.vy *= 0.95;
+        m.x += m.vx;  m.y += m.vy;
+        if (m.x < -15) m.x = DW+15; else if (m.x > DW+15) m.x = -15;
+        if (m.y < -15) m.y = DH+15; else if (m.y > DH+15) m.y = -15;
+      }
+    }
+
+    let a = m.baseAlpha;
+    if (m.state === 'suck'){
+      const prog = Math.min(1, Math.max(0, (suckP - m.suckAt) / m.suckDur));
+      if (prog >= 1) { m.gone = true; continue; }
+      const ep = prog*prog;                                  // easeInQuad, accelerating
+      m.x = m.startX + (m.tx-m.startX)*ep;
+      m.y = m.startY + (m.ty-m.startY)*ep;
+      const dx = m.tx-m.startX, dy = m.ty-m.startY;
+      const len = Math.hypot(dx,dy) || 1;
+      const curve = Math.sin(prog*Math.PI) * m.curveAmt;     // zero at both ends
+      m.x += (-dy/len)*curve;
+      m.y += ( dx/len)*curve;
+      a *= (1 - ep);
+    }
+    a *= 0.75 + 0.25*Math.sin(t*0.001 + m.phase);
+    if (a < 0.003) continue;
+    const d = m.size*4;
+    dctx.globalAlpha = a;
+    dctx.drawImage(dustSprites[m.sp], m.x-d/2, m.y-d/2, d, d);
+  }
+  dctx.globalAlpha = 1;
+}
+function resetDust(){
+  for (let i=0;i<motes.length;i++){
+    const m = motes[i];
+    m.state='float'; m.gone=false; m.curveAmt=0;
+    m.x=Math.random()*DW; m.y=Math.random()*DH;
+    m.vx=(Math.random()-0.5)*0.4; m.vy=(Math.random()-0.5)*0.4;
+    m.suckAt=Math.random()*0.62; m.suckDur=0.16+Math.random()*0.22;
+  }
+}
+
+/* The lens cycles the five specimens. On the built site the pick comes from
+   whichever mote is nearest the pointer; there is no pointer during a scroll,
+   so this uses the other trigger the original has -- its 4.2 s idle step. */
+const SPEC = ['Ultrafine Particle','Wildfire Smoke','Viruses','Bacteria','Fungal Spores'];
+const specImgs = Array.prototype.slice.call(document.querySelectorAll('.scope-img'));
+const specName = document.getElementById('scopeName');
+let specIdx = 0, lastSpec = 0;
+function cycleSpecimen(now){
+  if (now - lastSpec < 4200) return;
+  lastSpec = now;
+  specIdx = (specIdx + 1) % specImgs.length;
+  for (let n=0;n<specImgs.length;n++) specImgs[n].classList.toggle('is-on', n === specIdx);
+  specName.textContent = SPEC[specIdx];
+}
+
+/* --- the six beats -----------------------------------------------------------
+   One damped value drives all of it: the camera, the cloud's colour and
+   density, the five text plates, the lens and the dust. Damped rather than raw
+   so a trackpad flick does not snap the camera. */
 let scrollP = 0, scrollTarget = 0;
-const plate1 = document.getElementById('plate1');
-const plate2 = document.getElementById('plate2');
+const ACTS = ['actA','actB','actC','actD','actE'].map(function(id){ return document.getElementById(id); });
+const scopeWrap = document.getElementById('scopeWrap');
+const tackle    = document.getElementById('tackle');
 const cue = document.querySelector('.cue');
 const heroEye = new THREE.Vector3(), heroAim = new THREE.Vector3();
 heroEye.copy(camera.position); heroAim.copy(PIVOT);
@@ -723,15 +891,34 @@ function readScroll() {
 addEventListener('scroll', readScroll, { passive: true });
 readScroll();
 
+/* One window per act, and they do NOT overlap. Cross-fading two blocks in the
+   same place leaves both half visible in the middle, and a visitor scrolling
+   slowly parks exactly there -- which is what Yin's screenshot caught. */
+const ACT_WINDOWS = [
+  [0.000, 0.000, 0.090, 0.130],   // A  the platform copy
+  [0.130, 0.175, 0.250, 0.295],   // B  still clean
+  [0.375, 0.420, 0.520, 0.560],   // C  full of pollutants
+  [0.600, 0.640, 0.735, 0.775],   // D  they carry a charge
+  [0.795, 0.835, 1.001, 1.001]    // E  what we capture
+];
+function actOpacity(w, p){
+  if (p < w[0] || p > w[3]) return 0;
+  if (p < w[1]) return smootherstep(w[0], w[1], p);
+  if (p <= w[2]) return 1;
+  return 1 - smootherstep(w[2], w[3], p);
+}
+
 function applyScroll() {
   scrollP += (scrollTarget - scrollP) * 0.075;
   const p = scrollP;
-  // the peak holds for the first sixth, then the camera falls
-  const fall = smootherstep(0.14, 0.90, p);
+
+  /* The camera falls over the first half and then HOLDS. Yin: "mountain won't
+     move further, position hold, but the grey cloud and dust start getting full
+     covering the whole screen." Everything past 0.55 is weather and words. */
+  const fall = smootherstep(0.20, 0.55, p);
   if (p > 0.004) controls.autoRotate = false;
 
   if (fall > 0.0005) {
-    // a three-key path: the hero, a point INSIDE the deck, then the valley floor
     const eye = new THREE.Vector3();
     if (fall < 0.5) eye.lerpVectors(heroEye, MID_EYE, fall / 0.5);
     else            eye.lerpVectors(MID_EYE, GROUND_EYE, (fall - 0.5) / 0.5);
@@ -742,46 +929,51 @@ function applyScroll() {
     camera.fov = 21.5 + fall * 7.5;
     camera.updateProjectionMatrix();
     CLEARANCE = 620 - fall * 500;
-    /* OrbitControls enforces its own min/max distance from the target every
-       frame, and at 6 600 m it was pushing the camera straight back out of the
-       descent. The leash lengthens as we come down. */
     controls.minDistance = 6600 * fitPull * (1.0 - fall) + 700 * fall;
     controls.maxDistance = 11000 * fitPull * (1.0 - fall) + 14000 * fall;
-
-    /* The whiteout. The clearing that keeps the summit visible closes, coverage
-       and density go up, and by the time the camera is level with the deck the
-       frame is formless white. Then it opens again BELOW the deck, broken, so
-       Everest comes back out of a ceiling of cloud instead of standing beside it. */
-    const cu = cloud.material.uniforms;
-    // held blind for a real stretch. On their site you are inside the cloud for
-    // several screens; a brief flash of white reads as a glitch, not as weather.
-    const blind = smootherstep(0.03, 0.30, fall);      // closing in
-    const clear = smootherstep(0.66, 0.97, fall);      // opening out, underneath
-    cu.uClearAmt.value = 0.20 + 0.80 * blind - 0.62 * clear;
-    // coverage does the blinding, density only makes it opaque. Pushing
-    // density alone to 0.064 whited the frame out but saturated every step and
-    // stippled the dark parts; coverage at 0.995 gets there with less.
-    cu.uCover.value    = 0.78 + 0.215 * blind - 0.40 * clear;
-    cu.uDensity.value  = 0.014 + 0.040 * blind - 0.038 * clear;
-    for (const sh of TERRAIN_SHADERS) {
-      sh.uniforms.uCCover.value = cu.uCover.value;
-      sh.uniforms.uCClear.value.y = cu.uClearAmt.value;
-    }
   }
-  dustMat.uniforms.uFade.value = smootherstep(0.68, 0.95, p);
-  /* Two DISJOINT windows, not one cross-fade. Fading one out while the other
-     fades in means that anywhere in the middle both are half visible and sitting
-     on top of each other -- which is exactly what Yin's screenshot shows, and a
-     visitor scrolling slowly parks there. The first is gone before the second
-     starts, and the gap is inside the whiteout where there is nothing to look
-     at anyway. */
-  const out1 = smootherstep(0.34, 0.44, p);
-  const in2  = smootherstep(0.52, 0.62, p);
-  plate1.style.opacity = String(1 - out1);
-  plate2.style.opacity = String(in2);
-  plate1.style.visibility = out1 > 0.995 ? 'hidden' : 'visible';
-  plate2.style.visibility = in2 < 0.005 ? 'hidden' : 'visible';
-  plate1.style.pointerEvents = out1 > 0.5 ? 'none' : '';
+
+  const cu = cloud.material.uniforms;
+  const blind   = smootherstep(0.22, 0.38, p);   // into the deck
+  const under   = smootherstep(0.46, 0.60, p);   // out underneath it
+  const closeIn = smootherstep(0.60, 0.80, p);   // then it closes over everything
+  const lift    = smootherstep(0.82, 0.92, p);   // and lifts for the charge
+
+  cu.uClearAmt.value = 0.20 + 0.80*blind - 0.62*under + 0.62*closeIn - 0.72*lift;
+  cu.uCover.value    = 0.78 + 0.215*blind - 0.40*under + 0.39*closeIn - 0.46*lift;
+  cu.uDensity.value  = 0.014 + 0.040*blind - 0.038*under + 0.036*closeIn - 0.044*lift;
+  for (let i=0;i<TERRAIN_SHADERS.length;i++){
+    TERRAIN_SHADERS[i].uniforms.uCCover.value = cu.uCover.value;
+    TERRAIN_SHADERS[i].uniforms.uCClear.value.y = cu.uClearAmt.value;
+  }
+
+  /* The cloud greys on the way down, stays grey while it closes over, then
+     clears for the charge. Yin: "the cloud start turning grey". It is the light
+     on it, not a filter laid over the top. */
+  const grey = Math.max(0, Math.min(1, smootherstep(0.30, 0.58, p) - lift*0.96));
+  cu.uSunCol.value.setRGB(1.000 - 0.330*grey, 0.965 - 0.315*grey, 0.918 - 0.270*grey);
+  cu.uSkyCol.value.setRGB(0.918 - 0.360*grey, 0.945 - 0.365*grey, 0.969 - 0.345*grey);
+  cu.uGroundCol.value.setRGB(0.706 - 0.330*grey, 0.765 - 0.345*grey, 0.816 - 0.335*grey);
+  cu.uAmbient.value = 0.95 - 0.34*grey;
+  cloud.composite.uniforms.uSat.value  = 0.82 - 0.50*grey;
+  cloud.composite.uniforms.uLift.value = 0.13 - 0.20*grey;   // take the whites down too
+
+  for (let i=0;i<ACTS.length;i++){
+    const o = actOpacity(ACT_WINDOWS[i], p);
+    const el = ACTS[i];
+    el.style.opacity = o.toFixed(3);
+    el.style.visibility = o < 0.004 ? 'hidden' : 'visible';
+    el.style.pointerEvents = o < 0.5 ? 'none' : '';
+  }
+
+  dustFade = smootherstep(0.36, 0.50, p) * (1 - smootherstep(0.955, 1.0, p));
+  suckP    = smootherstep(0.86, 0.985, p);
+  if (suckP < 0.002 && lastSuck > 0.002) resetDust();
+  lastSuck = suckP;
+
+  const lensIn = smootherstep(0.78, 0.86, p);
+  scopeWrap.style.opacity = lensIn.toFixed(3);
+  tackle.style.opacity    = smootherstep(0.84, 0.92, p).toFixed(3);
   if (cue) cue.style.opacity = String(0.62 * (1 - smootherstep(0.02, 0.16, p)));
 }
 function smootherstep(a, b, x){
@@ -794,25 +986,15 @@ renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
   if (!QUALITY_PINNED) autoQuality();
   applyScroll();
-  dustMat.uniforms.uTime.value = t;
   keepAboveGround();
   trackSun();
   if ((shadowTick++ % 8) === 0) sun.shadow.needsUpdate = true;
   controls.update();
-  /* The field follows the camera only once everything else has finished moving
-     it -- applyScroll, the ground clamp AND controls.update all move the camera,
-     and placing the dust before the last of them left the whole box outside the
-     distance fade, so every mote was discarded. Forcing the material to opaque
-     red still drew nothing, which is what finally pointed at ordering. */
-  {
-    const g = DUST_BOX * 0.25;
-    dust.position.set(Math.round(camera.position.x / g) * g,
-                      Math.round(camera.position.y / g) * g,
-                      Math.round(camera.position.z / g) * g);
-  }
   cloud.material.uniforms.uSunDir.value
     .copy(sun.position).sub(SUMMIT).normalize();
   cloud.material.uniforms.uDebug.value = parseFloat(q.get('dbg') || '0');
+  drawDust(t * 1000);
+  cycleSpecimen(t * 1000);
   for (const sh of TERRAIN_SHADERS) {
     if (!sh.uniforms.uCN.value) {
       sh.uniforms.uCN.value = cloud.noise;
