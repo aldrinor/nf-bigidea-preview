@@ -357,12 +357,12 @@ const cloud = createVolumetricCloud(renderer, {
   // want a total optical depth of 4-6 through the thick part over ~30 steps, so
   // it lands near 0.0035 -- the 0.075 it shipped with was twenty times over and
   // saturated on the first sample.
-  base: 6050, top: 9450,
+  base: 7000, top: 10400,
   // Widening the density edge from 0.09 to 0.30 to kill the dither also cut the
   // mean density by about two thirds, so this is the same cloud, not more of it.
   // ?cover= and ?dens= to tune without a rebuild.
-  cover: parseFloat(q.get('cover') || '0.60'),
-  density: parseFloat(q.get('dens') || '0.0045'),
+  cover: parseFloat(q.get('cover') || '0.88'),
+  density: parseFloat(q.get('dens') || '0.018'),
   scale: 6800,
   sunCol: new THREE.Color(0xfff6ea),
   skyCol: new THREE.Color(0xeaf1f7),
