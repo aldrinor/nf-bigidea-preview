@@ -564,6 +564,7 @@ loader.load('./terrain/out/khumbu_wide_opt.glb', g => {
       o.renderOrder = -1;
     }
   });
+  fadeIn(g.scene, 1.10);
   scene.add(g.scene);
 });
 
@@ -578,6 +579,7 @@ loader.load('./terrain/out/ring_mid_opt.glb', g => {
       o.renderOrder = -1;
     }
   });
+  fadeIn(g.scene, 1.10);
   scene.add(g.scene);
 });
 }   // loadSurround
@@ -597,6 +599,44 @@ const NS = parseFloat(q.get('ns') || '-1');
    1536 texture instead of 4096 -- lands in under two, and the real one swaps in
    behind it when it arrives. The visitor sees Everest almost immediately and
    it sharpens; they never see a blank screen. */
+/* Yin: "different layer show up, that is weird". Four things arrived at four
+   different moments and every one of them appeared instantly: the stand-in
+   mountain, the full mountain replacing it, the surface textures, and the
+   distant ranges. Nothing is allowed to pop now -- each one fades, and the
+   textures are made to land underneath the mountain cross-fade so their change
+   is hidden by it. */
+const fades = [];
+function fadeIn(root, seconds, done) {
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) { m.transparent = true; m.opacity = 0; m.depthWrite = true; }
+  });
+  fades.push({ root, seconds, t0: -1, done: done || null });
+}
+function stepFades(t) {
+  for (let i = fades.length - 1; i >= 0; i--) {
+    const f = fades[i];
+    if (f.t0 < 0) f.t0 = t;                     // start on the first frame it is drawn
+    const k = Math.min(1, (t - f.t0) / f.seconds);
+    const e = k * k * (3 - 2 * k);              // smoothstep, no linear ramp edge
+    f.root.traverse(o => {
+      if (!o.isMesh) return;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      for (const m of mats) m.opacity = e;
+    });
+    if (k >= 1) {
+      f.root.traverse(o => {
+        if (!o.isMesh) return;
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (const m of mats) { m.transparent = false; m.opacity = 1; m.needsUpdate = true; }
+      });
+      fades.splice(i, 1);
+      if (f.done) f.done();
+    }
+  }
+}
+
 function dressHero(m) {
   m.roughness = 0.97; m.metalness = 0.0;
   if (m.map) { m.map.colorSpace = THREE.SRGBColorSpace; m.map.anisotropy = 8; }
@@ -610,6 +650,7 @@ loader.load('./terrain/out/everest_hero_lo_opt.glb', g => {
   if (window.__heroFull) return;              // the real one beat it here
   g.scene.traverse(o => { if (o.isMesh) { o.receiveShadow = true; dressHero(o.material); } });
   heroLo = g.scene;
+  fadeIn(heroLo, 0.75);
   scene.add(heroLo);
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
@@ -617,6 +658,28 @@ loader.load('./terrain/out/everest_hero_lo_opt.glb', g => {
 });
 
 function loadHeroFull() {
+  /* The surface textures are fetched BEFORE the full mountain is added, not
+     after. They change the shading of whatever is on screen, so on their own
+     they are a visible pop; landing them while the two mountains are mid
+     cross-fade makes them invisible. A 2 s cap so a slow connection cannot
+     hold the sharp mountain hostage to a texture. */
+  const tl = new THREE.TextureLoader();
+  let waiting = 2, capped = false;
+  const goOn = () => { if (--waiting <= 0 && !capped) { capped = true; addHeroFull(); } };
+  setTimeout(() => { if (!capped) { capped = true; addHeroFull(); } }, 2000);
+  tl.load('./terrain/out/everest_hero_normal.webp', t => {
+    NRM.image = t.image; NRM.needsUpdate = true; goOn();
+  }, undefined, goOn);
+  tl.load('./terrain/out/terrain_detail.webp', t => {
+    DET.image = t.image;
+    DET.wrapS = DET.wrapT = THREE.RepeatWrapping;
+    DET.colorSpace = THREE.NoColorSpace;
+    DET.anisotropy = 8;
+    DET.needsUpdate = true; goOn();
+  }, undefined, goOn);
+}
+
+function addHeroFull() {
 loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
   gltf.scene.traverse(o => {
     if (o.isMesh) {
@@ -625,31 +688,26 @@ loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
       dressHero(o.material);
     }
   });
+  /* A true cross-fade. The stand-in is NOT removed first -- it stays lit
+     underneath while the sharp one comes up over it, and is only disposed once
+     the sharp one is fully opaque. The two are the same mountain from the same
+     elevation data, so the handover cannot be seen. */
+  fadeIn(gltf.scene, 0.65, () => {
+    if (heroLo) {
+      scene.remove(heroLo);
+      heroLo.traverse(o => {
+        if (o.isMesh) { o.geometry.dispose(); if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
+      });
+      heroLo = null;
+    }
+  });
   scene.add(gltf.scene);
   window.__heroFull = true;
-  if (heroLo) { scene.remove(heroLo); heroLo.traverse(o => {
-    if (o.isMesh) { o.geometry.dispose(); if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
-  }); heroLo = null; }
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
 
-  /* Everything the first frame does NOT need, fetched after it is on screen.
-     Two frames of grace so the browser has actually painted before the next
-     megabyte starts competing for bandwidth. */
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    const tl = new THREE.TextureLoader();
-    tl.load('./terrain/out/everest_hero_normal.webp', t => {
-      NRM.image = t.image; NRM.needsUpdate = true;
-    });
-    tl.load('./terrain/out/terrain_detail.webp', t => {
-      DET.image = t.image;
-      DET.wrapS = DET.wrapT = THREE.RepeatWrapping;
-      DET.colorSpace = THREE.NoColorSpace;
-      DET.anisotropy = 8;
-      DET.needsUpdate = true;
-    });
-    loadSurround();
-  }));
+  // the distant ranges last, and they fade too
+  requestAnimationFrame(() => requestAnimationFrame(loadSurround));
 }, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
 }   // loadHeroFull
 
@@ -1177,6 +1235,7 @@ function spin(t) {
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
+  if (fades.length) stepFades(t);
   if (!QUALITY_PINNED) autoQuality();
   applyScroll();
   spin(t);
