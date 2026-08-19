@@ -487,7 +487,7 @@ controls.update();
 
 /* The camera orbits, so a fixed sun leaves half the rotation looking at an
    unlit black mass. Keep the sun off the camera's shoulder. */
-const SUN_R = 14000, SUN_H = 7100, SUN_OFF = 1.42;
+const SUN_R = 14000, SUN_H = 6200, SUN_OFF = 1.78;
 scene.add(sun.target);
 function trackSun() {
   const dx = camera.position.x - SUMMIT.x, dz = camera.position.z - SUMMIT.z;
