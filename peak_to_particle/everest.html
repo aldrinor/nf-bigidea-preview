@@ -61,8 +61,10 @@
     .plate{top:13vh;transform:none;max-width:min(30ch,86vw)}
     /* on a phone the frame is tall, so the sky band at the top is where small
        mono can be read; the bottom is all snow */
-    .meta{right:auto;left:7vw;text-align:left;top:auto;bottom:16vh;
-      text-shadow:0 0 12px rgba(255,255,255,.9), 0 0 4px rgba(255,255,255,.95);opacity:.62}
+    /* On a phone the scrim comes from the TOP, so the bottom of the frame has
+       no ground under it -- the coordinates were sitting on bare snow with only
+       a halo holding them up. Put them under the copy, inside the scrim. */
+    .meta{right:auto;left:7vw;text-align:left;top:36vh;bottom:auto;opacity:.50}
   }
   #load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;
     background:#c9d8e6;font-family:"Space Mono",ui-monospace,monospace;
