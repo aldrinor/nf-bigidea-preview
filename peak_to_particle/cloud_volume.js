@@ -440,7 +440,7 @@ void main(){
   float jitter = uJit < 0.5
     ? fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))))
     : texture(uBlue, gl_FragCoord.xy / 64.0).r;
-  float t = t0 + base * jitter * 0.35;
+  float t = t0 + base * jitter * 0.55;
   /* The growth rate has to follow the step budget, or lowering quality lowers
      the REACH instead of the sharpness. Total distance is base*(g^N-1)/(g-1),
      so at 160 steps and 2.6% growth the ray covers 215 km -- and at 64 steps it
@@ -564,7 +564,7 @@ precision highp float;
 in vec2 vUv;
 out vec4 outColor;
 uniform sampler2D uScene, uCloud, uDepth;
-uniform vec2  uTexel, uCloudSize;
+uniform vec2  uTexel, uCloudSize, uSceneTexel;
 uniform float uLift, uSat, uUp, uNear, uFar;
 
 float linDepth(vec2 uv){
@@ -627,8 +627,34 @@ vec4 bicubic(sampler2D tex, vec2 uv, vec2 texSize){
        + texture(tex, vec2(t1.x, t1.y)) * (s1.x * s1.y);
 }
 
+/* FXAA, on the scene before the cloud is composited over it -- the hard edge
+   is terrain against sky, and that lives in the scene texture. Cheap, and it is
+   the only route left once MSAA is off the table. */
+float fxLuma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
+vec3 fxaa(sampler2D tex, vec2 uv, vec2 rcp){
+  vec3 rgbM = texture(tex, uv).rgb;
+  float lM  = fxLuma(rgbM);
+  float lNW = fxLuma(texture(tex, uv + vec2(-1.0,-1.0)*rcp).rgb);
+  float lNE = fxLuma(texture(tex, uv + vec2( 1.0,-1.0)*rcp).rgb);
+  float lSW = fxLuma(texture(tex, uv + vec2(-1.0, 1.0)*rcp).rgb);
+  float lSE = fxLuma(texture(tex, uv + vec2( 1.0, 1.0)*rcp).rgb);
+  float lMin = min(lM, min(min(lNW,lNE), min(lSW,lSE)));
+  float lMax = max(lM, max(max(lNW,lNE), max(lSW,lSE)));
+  if (lMax - lMin < max(0.0312, lMax * 0.125)) return rgbM;   // flat, leave it
+  vec2 dir = vec2(-((lNW + lNE) - (lSW + lSE)), ((lNW + lSW) - (lNE + lSE)));
+  float red = max((lNW + lNE + lSW + lSE) * 0.25 * 0.25, 1.0/128.0);
+  float rcpDir = 1.0 / (min(abs(dir.x), abs(dir.y)) + red);
+  dir = clamp(dir * rcpDir, -8.0, 8.0) * rcp;
+  vec3 a = 0.5 * (texture(tex, uv + dir * (1.0/3.0 - 0.5)).rgb +
+                  texture(tex, uv + dir * (2.0/3.0 - 0.5)).rgb);
+  vec3 b = a * 0.5 + 0.25 * (texture(tex, uv + dir * -0.5).rgb +
+                             texture(tex, uv + dir *  0.5).rgb);
+  float lB = fxLuma(b);
+  return (lB < lMin || lB > lMax) ? a : b;
+}
+
 void main(){
-  vec3 scene = texture(uScene, vUv).rgb;
+  vec3 scene = fxaa(uScene, vUv, uSceneTexel);
   vec4 c = max(uUp < 0.5 ? bicubic(uCloud, vUv, uCloudSize)
                          : bilateralCloud(vUv), vec4(0.0));
 
@@ -687,6 +713,13 @@ export function createVolumetricCloud(renderer, opts = {}) {
     depthTexture: depth, depthBuffer: true,
     minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
     type: THREE.HalfFloatType,
+    /* No `samples` here. `antialias: true` on the renderer only ever applied to
+       the DEFAULT framebuffer, and once the scene rendered into a target for the
+       cloud pass it silently lost multisampling -- the audit measured the terrain
+       silhouette stepping in flat 3-13 px runs. But asking THIS target for MSAA
+       does nothing either, because it carries a depth texture and a depth texture
+       cannot be multisampled; measured 5.39% -> 5.45%, i.e. ignored. The cloud
+       needs that depth, so the antialiasing has to happen in the shader. */
   });
 
   const mat = new THREE.ShaderMaterial({
@@ -736,6 +769,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
       uScene:{value:sceneRT.texture}, uCloud:{value:cloudRT.texture},
       uDepth:{value:depth},
       uTexel:{value:new THREE.Vector2()}, uCloudSize:{value:new THREE.Vector2()},
+      uSceneTexel:{value:new THREE.Vector2()},
       uLift:{value:lift}, uSat:{value:sat}, uUp:{value:1},
       uNear:{value:1}, uFar:{value:1},
     },
@@ -760,6 +794,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
     cloudRT.setSize(cw, ch);
     comp.uniforms.uTexel.value.set(1 / cw, 1 / ch);
     comp.uniforms.uCloudSize.value.set(cw, ch);
+    comp.uniforms.uSceneTexel.value.set(1 / (w * r), 1 / (h * r));
   }
   sizeTargets(size.x, size.y);
 

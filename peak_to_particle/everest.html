@@ -42,7 +42,7 @@
 
   .plate{opacity:1}
   #plate2{opacity:0}
-  .plate{position:fixed;left:72px;top:50%;transform:translateY(-54%);z-index:2;
+  .plate{position:fixed;left:72px;top:50%;transform:translateY(calc(-54% + var(--dy,0px)));z-index:2;
     color:var(--ink);max-width:min(28ch,40vw)}
   .plate h1{font-size:clamp(28px,3.5vw,52px);font-weight:500;line-height:1.10;
     letter-spacing:-.022em}
@@ -77,12 +77,17 @@
 
   /* over the sky, not over the mountain -- 10 px mono on a snowfield is
      unreadable however it is coloured */
-  /* pushed clear of the bar, which now owns the top of the frame */
+  /* The audit measured this at 1.5:1 to 2.2:1 -- dark grey type laid straight
+     on ridge texture whose own variation is larger than the letterforms. A
+     provenance line that cannot be read is not doing its job, so it gets its own
+     ground rather than depending on whatever the mountain is doing behind it. */
   .meta{position:fixed;right:80px;bottom:7vh;z-index:2;text-align:right;
-    font-family:Montserrat,Arial,sans-serif;font-size:11px;font-weight:500;
-    letter-spacing:.06em;color:#000;opacity:.42;line-height:1.9}
+    font-family:Montserrat,Arial,sans-serif;font-size:11px;font-weight:600;
+    letter-spacing:.06em;color:#000;opacity:.86;line-height:1.85;
+    padding:10px 14px;border-radius:7px;background:rgba(255,255,255,.62);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
   @media (max-aspect-ratio:1/1){
-    .plate{top:13vh;transform:none;max-width:min(30ch,86vw)}
+    .plate{top:13vh;transform:translateY(var(--dy,0px));max-width:min(30ch,86vw)}
     /* on a phone the frame is tall, so the sky band at the top is where small
        mono can be read; the bottom is all snow */
     /* On a phone the scrim comes from the TOP, so the bottom of the frame has
@@ -98,9 +103,9 @@
   /* the plate's 28ch was set for a three-word headline; these lines are longer
      and the answer paragraph runs to 46ch, so the acts carry their own width */
   #actA{max-width:min(38ch,40vw)}
-  #actB,#actC{max-width:none;width:min(46vw,700px)}
-  #actD{max-width:none;width:min(40vw,560px)}
-  #actE{max-width:min(46ch,44vw)}
+  #actB,#actC{max-width:none;width:min(58vw,1000px)}
+  #actD{max-width:none;width:min(46vw,800px)}
+  #actE{max-width:min(44ch,40vw)}
   /* cpolar.tech sets these at Anton 74/74 in solid black. Same face, same
      ratio, clamped so it does not swamp a laptop. */
   .plate h1.big{font-family:Anton,Impact,sans-serif;
@@ -139,9 +144,16 @@
     transition:opacity .5s ease;max-width:min(620px,52vw)}
   .tackle-row{list-style:none;margin:0;padding:0;display:grid;
     grid-template-columns:repeat(5,1fr);gap:8px}
+  /* Opaque, not translucent: over a backdrop that drops from 213 to 142 the
+     five fills measured 233 / 229 / 215 / 211 / 200 and the last two had
+     mountain texture showing through them, so the row did not read as one
+     object. And there was no selected state at all -- the lens changed and the
+     chips did not. */
+  .tackle-row li.on{background:#000;border-color:#000;color:#fff}
   .tackle-row li{display:flex;align-items:center;justify-content:center;text-align:center;
     font-family:Montserrat,Arial,sans-serif;font-size:14.4px;font-weight:650;line-height:1.32;
-    color:#000;border:1px solid #000;border-radius:7px;background:rgba(255,255,255,.55);
+    color:#000;border:1px solid #000;border-radius:7px;background:#fff;
+    transition:background .35s ease,color .35s ease,border-color .35s ease;
     padding:10px 9px;min-height:54px}
 
   /* the dust is a flat canvas over everything, exactly as in the original */
@@ -234,7 +246,7 @@
 
 <div id="scroller"></div>
 <div class="cue">Scroll<span>&darr;</span></div>
-<div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8 848 m<br>elevation and imagery, measured</div>
+<div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8,848 m<br>elevation and imagery, measured</div>
 <div id="load">LOADING TERRAIN</div>
 
 <script type="importmap">
@@ -430,14 +442,21 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
         // lookups out there -- most of the screen is out there
         float dist = length(vWP - cameraPosition);
         float k3 = 1.0 - smoothstep(1800.0, 6500.0, dist);
+        /* The audit found a regular ~9 px lattice of dots printed over the snow.
+           That is THIS octave: a 1024 px texture repeating every 17 m means one
+           whole tile spans about eight screen pixels at close range, so what
+           reads as detail is really the tile grid. The fix is not less detail,
+           it is a tile large enough that its repeat is not the artifact --
+           60 m puts it around thirty pixels, well above the scale the eye picks
+           out as a pattern. */
         float d3 = 0.5;
         if (k3 > 0.01) {
-          d3 = texture2D(uDet, vWP.zy / 17.0).r * bw.x
-             + texture2D(uDet, vWP.xz / 17.0).r * bw.y
-             + texture2D(uDet, vWP.xy / 17.0).r * bw.z;
+          d3 = texture2D(uDet, vWP.zy / 60.0).r * bw.x
+             + texture2D(uDet, vWP.xz / 60.0).r * bw.y
+             + texture2D(uDet, vWP.xy / 60.0).r * bw.z;
         }
         float k = 1.0 - smoothstep(uFade.x, uFade.y, dist);
-        float det = (d1 - 0.5) * 1.0 + (d2 - 0.5) * 0.85 + (d3 - 0.5) * 0.55 * k3;
+        float det = (d1 - 0.5) * 1.0 + (d2 - 0.5) * 0.85 + (d3 - 0.5) * 0.42 * k3;
         diffuseColor.rgb *= 1.0 + det * uAmt * k;
 
         // On a near-vertical face the nadir orthophoto has no data at all --
@@ -466,7 +485,17 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
            and the Tibetan brown and the glacier green go with it. Detail is not
            lost -- it is carried by the local contrast and the rock plate above,
            which is where it should have been coming from anyway. */
+        /* The satellite plate carries a green cast on some rock -- the audit
+           measured hue 70-80 on the summit block against hue 202 on every other
+           face, which reads as vegetation at 8 848 m. The vibrance boost was
+           amplifying it. Pull anything green-dominant toward neutral BEFORE the
+           ramp, in proportion to how green it is, so real rock and snow are
+           untouched. */
         float g = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+        float greenExcess = diffuseColor.g - max(diffuseColor.r, diffuseColor.b);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(g),
+                               clamp(greenExcess * 9.0, 0.0, 0.80));
+        g = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
         // The judge, on the gap to the reference: "the washed-out mountain
         // treatment feels flat". It was: after the shadow lift the input sits
         // between 0.6 and 0.9, so a 0.14-0.88 window put the whole mountain in
@@ -895,11 +924,15 @@ const SPEC = ['Ultrafine Particle','Wildfire Smoke','Viruses','Bacteria','Fungal
 const specImgs = Array.prototype.slice.call(document.querySelectorAll('.scope-img'));
 const specName = document.getElementById('scopeName');
 let specIdx = 0, lastSpec = 0;
+const chipEls = Array.prototype.slice.call(document.querySelectorAll('.tackle-row li'));
 function cycleSpecimen(now){
   if (now - lastSpec < 4200) return;
   lastSpec = now;
   specIdx = (specIdx + 1) % specImgs.length;
   for (let n=0;n<specImgs.length;n++) specImgs[n].classList.toggle('is-on', n === specIdx);
+  // the chips are driven by the SAME index as the lens, so the row always says
+  // which of the five you are looking at
+  for (let n=0;n<chipEls.length;n++) chipEls[n].classList.toggle('on', n === specIdx);
   specName.textContent = SPEC[specIdx];
 }
 
@@ -925,12 +958,22 @@ readScroll();
 /* One window per act, and they do NOT overlap. Cross-fading two blocks in the
    same place leaves both half visible in the middle, and a visitor scrolling
    slowly parks exactly there -- which is what Yin's screenshot caught. */
+/* Handoffs are SHORT. With a long fade the previous act reaches zero at the same
+   instant the next one starts from zero, and a 0.06-wide transition is a third of
+   a screen of scrolling with nothing to read on it -- which is exactly what 30%,
+   60% and 80% were. Each act now holds, then hands over in about 13vh. */
+/* The windows OVERLAP by about two per cent, and each act is offset vertically
+   while it is not at full strength -- an outgoing one rises as it goes, an
+   incoming one arrives from below. Butt-joining them left the screen wordless at
+   exactly the handoff; overlapping them without the offset is what Yin caught
+   earlier, two blocks sitting on top of each other. Offset plus overlap is
+   neither. */
 const ACT_WINDOWS = [
-  [0.000, 0.000, 0.090, 0.130],   // A  the platform copy
-  [0.130, 0.175, 0.250, 0.295],   // B  still clean
-  [0.375, 0.420, 0.520, 0.560],   // C  full of pollutants
-  [0.600, 0.640, 0.735, 0.775],   // D  they carry a charge
-  [0.795, 0.835, 1.001, 1.001]    // E  what we capture
+  [0.000, 0.000, 0.115, 0.170],   // A  the platform copy
+  [0.115, 0.170, 0.305, 0.350],   // B  still clean -- carries INTO the whiteout
+  [0.370, 0.410, 0.565, 0.610],   // C  full of pollutants
+  [0.565, 0.610, 0.775, 0.820],   // D  they carry a charge
+  [0.775, 0.820, 1.001, 1.001]    // E  what we capture
 ];
 function actOpacity(w, p){
   if (p < w[0] || p > w[3]) return 0;
@@ -990,8 +1033,12 @@ function applyScroll() {
   cloud.composite.uniforms.uLift.value = 0.055 - 0.13*grey;   // take the whites down too
 
   for (let i=0;i<ACTS.length;i++){
-    const o = actOpacity(ACT_WINDOWS[i], p);
+    const w = ACT_WINDOWS[i];
+    const o = actOpacity(w, p);
     const el = ACTS[i];
+    // past its own middle it leaves upward, before it arrives from below
+    const up = p > (w[1] + w[2]) * 0.5;
+    el.style.setProperty('--dy', ((1 - o) * (up ? -28 : 28)).toFixed(1) + 'px');
     el.style.opacity = o.toFixed(3);
     el.style.visibility = o < 0.004 ? 'hidden' : 'visible';
     el.style.pointerEvents = o < 0.5 ? 'none' : '';
@@ -1004,7 +1051,7 @@ function applyScroll() {
 
   const lensIn = smootherstep(0.78, 0.86, p);
   scopeWrap.style.opacity = lensIn.toFixed(3);
-  tackle.style.opacity    = smootherstep(0.84, 0.92, p).toFixed(3);
+  tackle.style.opacity    = smootherstep(0.795, 0.845, p).toFixed(3);
   if (cue) cue.style.opacity = String(0.62 * (1 - smootherstep(0.02, 0.16, p)));
 }
 function smootherstep(a, b, x){
