@@ -287,10 +287,14 @@ void main(){
   }
 
   // intersect the cloud slab
+  /* Returning early for a near-horizontal ray drew a hard dark line straight
+     across every frame at the height where dir.y crosses zero -- one row of
+     pixels with no cloud on them at all. Nudge the divisor instead; the slab is
+     then entered at a very large t and the distance fade takes care of it. */
   float t0, t1;
-  if (abs(dir.y) < 1e-4) { outColor = vec4(scene, 1.0); return; }
-  float ta = (uBase - uCamPos.y) / dir.y;
-  float tb = (uTop  - uCamPos.y) / dir.y;
+  float dy = abs(dir.y) < 1.5e-3 ? (dir.y >= 0.0 ? 1.5e-3 : -1.5e-3) : dir.y;
+  float ta = (uBase - uCamPos.y) / dy;
+  float tb = (uTop  - uCamPos.y) / dy;
   t0 = min(ta, tb); t1 = max(ta, tb);
   t0 = max(t0, 0.0);
   t1 = min(t1, min(sceneDist, 78000.0));  // a cloud SEA lives in near-horizontal rays, tens of km out

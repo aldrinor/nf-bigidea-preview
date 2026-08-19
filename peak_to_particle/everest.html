@@ -398,8 +398,8 @@ const cloud = createVolumetricCloud(renderer, {
   // Widening the density edge from 0.09 to 0.30 to kill the dither also cut the
   // mean density by about two thirds, so this is the same cloud, not more of it.
   // ?cover= and ?dens= to tune without a rebuild.
-  cover: parseFloat(q.get('cover') || '0.89'),
-  density: parseFloat(q.get('dens') || '0.020'),
+  cover: parseFloat(q.get('cover') || '0.78'),
+  density: parseFloat(q.get('dens') || '0.014'),
   scale: 6800,
   sunCol: new THREE.Color(0xfff6ea),
   skyCol: new THREE.Color(0xeaf1f7),
@@ -408,8 +408,8 @@ const cloud = createVolumetricCloud(renderer, {
   lift: parseFloat(q.get('lift') || '0.13'),
   sat: parseFloat(q.get('sat') || '0.82'),
   summit: SUMMIT,
-  clearR: parseFloat(q.get('clr') || '6200'),
-  clearAmt: parseFloat(q.get('clra') || '0.30'),
+  clearR: parseFloat(q.get('clr') || '11000'),
+  clearAmt: parseFloat(q.get('clra') || '0.20'),
   terrain: HEIGHT_TEX,
   hmin: HEIGHT_META.hmin, hmax: HEIGHT_META.hmax,
   spanX: HEIGHT_META.spanX, spanZ: HEIGHT_META.spanZ,
