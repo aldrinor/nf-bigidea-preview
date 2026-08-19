@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Everest</title>
+<link rel="preload" as="image" href="./assets/brand/cpolar-full-color.svg">
 <style>
   /* Read off cpolar.tech, not guessed: Anton for display, Montserrat variable
      for everything else, both served from here rather than hotlinked. TTF was
@@ -104,6 +105,10 @@
      for the two big lines, 42/56 for the charge line, 21/31.92 for the answer,
      and the one emphasised run in the whole sequence is "Positive polarity". */
   .act{opacity:0;visibility:hidden}
+  /* Act A is the opening copy. It was waiting on JavaScript and arriving with the
+     terrain, which is why the page read as one late step instead of a page that
+     was already there. It starts visible; the scroll engine takes it from here. */
+  #actA{opacity:1;visibility:visible}
   /* the plate's 28ch was set for a three-word headline; these lines are longer
      and the answer paragraph runs to 46ch, so the acts carry their own width */
   #actA{max-width:min(38ch,40vw)}
@@ -183,11 +188,11 @@
   #load.show{display:grid}
 </style>
 </head>
-<body>
+<body style="background:#b7ceed">
 <canvas id="c"></canvas>
 <div class="scrim"></div>
 <header class="bar">
-  <img src="./assets/brand/cpolar-full-color.svg" alt="C-POLAR">
+  <img src="./assets/brand/cpolar-full-color.svg" alt="C-POLAR" fetchpriority="high" decoding="sync">
   <nav>
     <a href="#applications">Applications</a>
     <a href="#evidence">Science &amp; Evidence</a>
