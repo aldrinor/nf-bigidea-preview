@@ -186,8 +186,22 @@ const PIVOT = new THREE.Vector3(149, 8260, 528);
    at it. The summit stays in frame the whole way down, so the descent reads as
    one move rather than as two pictures. keepAboveGround does the rest -- it holds
    the camera clear of whatever it lands over. */
-const GROUND_EYE = new THREE.Vector3(-2450, 5950, 4250);
-const GROUND_AIM = new THREE.Vector3(149, 7450, 528);
+/* Studied mont-fort's own mountain-to-ocean move frame by frame from the local
+   clone. It is not a camera move at all: peaks above a white cloud sea, then the
+   camera goes INTO the cloud, total formless whiteout, the tone shifts while you
+   are blind, and you emerge already at sea level. The mountain and the ocean are
+   never in one frame. THE CLOUD IS THE WIPE.
+
+   Mine kept the mountain in view the whole way down, which is why it read as a
+   camera move rather than a journey -- Yin: "the effect is weird".
+
+   So: 8 400 m, down through the deck at 7 000, out at 5 200 on the valley floor
+   nine and a half kilometres away, which is real ground -- the lowest point in
+   the tile is 4 931 m and 87% of it is under the cloud base. Everest rises
+   3 500 m above that, out of a broken deck. */
+const MID_EYE    = new THREE.Vector3(-7300, 7750, 4300);   // inside the cloud
+const GROUND_EYE = new THREE.Vector3(-8680, 5205, -2895);  // measured valley floor
+const GROUND_AIM = new THREE.Vector3(149, 7250, 528);
 const VIEWS = {
   hero:  [-6156, 8400, 6084],
   wide:  [-6980, 8490, 6890],
@@ -714,33 +728,43 @@ function applyScroll() {
   if (p > 0.004) controls.autoRotate = false;
 
   if (fall > 0.0005) {
-    // the orbit still owns the bearing, so a visitor who dragged keeps their view
-    const off = camera.position.clone().sub(controls.target);
-    const bearing = Math.atan2(off.z, off.x);
-    const gOff = GROUND_EYE.clone().sub(GROUND_AIM);
-    const gR = Math.hypot(gOff.x, gOff.z);
-    const gEye = new THREE.Vector3(
-      GROUND_AIM.x + Math.cos(bearing) * gR, GROUND_EYE.y,
-      GROUND_AIM.z + Math.sin(bearing) * gR);
+    // a three-key path: the hero, a point INSIDE the deck, then the valley floor
+    const eye = new THREE.Vector3();
+    if (fall < 0.5) eye.lerpVectors(heroEye, MID_EYE, fall / 0.5);
+    else            eye.lerpVectors(MID_EYE, GROUND_EYE, (fall - 0.5) / 0.5);
     controls.target.lerpVectors(PIVOT, GROUND_AIM, fall);
-    // set the height ALONG the fall rather than easing toward it -- an eased
-    // lerp never arrives, and the descent stopped half way down the mountain
-    const eye = heroEye.clone().lerp(gEye, fall);
-    camera.position.x += (eye.x - camera.position.x) * 0.22;
-    camera.position.z += (eye.z - camera.position.z) * 0.22;
+    camera.position.x += (eye.x - camera.position.x) * 0.25;
+    camera.position.z += (eye.z - camera.position.z) * 0.25;
     camera.position.y = eye.y;
-    camera.fov = 21.5 + fall * 12.0;
+    camera.fov = 21.5 + fall * 7.5;
     camera.updateProjectionMatrix();
-    CLEARANCE = 620 - fall * 470;
+    CLEARANCE = 620 - fall * 430;
     /* OrbitControls enforces its own min/max distance from the target every
-       frame, and at 6 600 m that was pushing the camera straight back out of the
-       descent -- the fall stopped a kilometre up and no amount of scroll moved
-       it. The leash has to lengthen as we come down. */
-    controls.minDistance = 6600 * fitPull * (1.0 - fall) + 620 * fall;
-    controls.maxDistance = 11000 * fitPull * (1.0 - fall) + 4200 * fall;
+       frame, and at 6 600 m it was pushing the camera straight back out of the
+       descent. The leash lengthens as we come down. */
+    controls.minDistance = 6600 * fitPull * (1.0 - fall) + 700 * fall;
+    controls.maxDistance = 11000 * fitPull * (1.0 - fall) + 14000 * fall;
+
+    /* The whiteout. The clearing that keeps the summit visible closes, coverage
+       and density go up, and by the time the camera is level with the deck the
+       frame is formless white. Then it opens again BELOW the deck, broken, so
+       Everest comes back out of a ceiling of cloud instead of standing beside it. */
+    const cu = cloud.material.uniforms;
+    // held blind for a real stretch. On their site you are inside the cloud for
+    // several screens; a brief flash of white reads as a glitch, not as weather.
+    const blind = smootherstep(0.04, 0.34, fall);      // closing in
+    const clear = smootherstep(0.66, 0.97, fall);      // opening out, underneath
+    cu.uClearAmt.value = 0.20 + 0.80 * blind - 0.62 * clear;
+    cu.uCover.value    = 0.78 + 0.21 * blind - 0.40 * clear;
+    cu.uDensity.value  = 0.014 + 0.050 * blind - 0.048 * clear;
+    for (const sh of TERRAIN_SHADERS) {
+      sh.uniforms.uCCover.value = cu.uCover.value;
+      sh.uniforms.uCClear.value.y = cu.uClearAmt.value;
+    }
   }
-  dustMat.uniforms.uFade.value = smootherstep(0.33, 0.78, p);
-  const swap = smootherstep(0.30, 0.44, p);   // short, so the two never sit on each other
+  dustMat.uniforms.uFade.value = smootherstep(0.68, 0.95, p);
+  // swapped inside the whiteout, where the change cannot be seen happening
+  const swap = smootherstep(0.40, 0.56, p);
   plate1.style.opacity = String(1 - swap);
   plate2.style.opacity = String(swap);
   plate1.style.pointerEvents = swap > 0.5 ? 'none' : '';
