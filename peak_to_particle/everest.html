@@ -5,10 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Everest</title>
 <style>
+  /* Read off cpolar.tech, not guessed: Anton for display, Montserrat variable
+     for everything else, both served from here rather than hotlinked. TTF was
+     875 kB; woff2 is 263 kB for the same two faces. */
+  @font-face{font-family:Anton;src:url('./assets/fonts/Anton-Regular.woff2') format('woff2');
+    font-weight:400;font-display:swap}
+  @font-face{font-family:Montserrat;src:url('./assets/fonts/Montserrat-Variable.woff2') format('woff2');
+    font-weight:100 900;font-display:swap}
   :root{ --ink:#1f2327; }
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{background:#c9d8e6;
-    font-family:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  html,body{background:#c9d8e6;color:#000;
+    font-family:Montserrat,Arial,sans-serif}
   #c{display:block;position:fixed;inset:0}
   /* The plan of record says the camera FALLS and never cuts, so the descent is
      scroll on this same scene rather than a second page. The canvas is fixed and
@@ -35,15 +42,15 @@
 
   .plate{opacity:1}
   #plate2{opacity:0}
-  .plate{position:fixed;left:7vw;top:50%;transform:translateY(-54%);z-index:2;
+  .plate{position:fixed;left:72px;top:50%;transform:translateY(-54%);z-index:2;
     color:var(--ink);max-width:min(28ch,40vw)}
   .plate h1{font-size:clamp(28px,3.5vw,52px);font-weight:500;line-height:1.10;
     letter-spacing:-.022em}
-  .plate p{margin-top:20px;font-size:clamp(15px,1.2vw,18px);font-weight:400;
-    line-height:1.62;max-width:27ch;opacity:.74}
+  .plate p{margin-top:20px;font-size:17px;font-weight:470;line-height:1.55;
+    max-width:38ch;color:#000;opacity:.78}
   .rule{width:44px;height:1px;background:currentColor;opacity:.28;margin-bottom:26px}
-  .cue{position:fixed;left:7vw;bottom:7vh;z-index:2;color:var(--ink);opacity:.62;
-    font-family:"Space Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.14em;
+  .cue{position:fixed;left:72px;bottom:7vh;z-index:2;color:#000;opacity:.62;
+    font-family:Montserrat,Arial,sans-serif;font-size:12px;font-weight:650;letter-spacing:.10em;
     text-shadow:0 0 14px rgba(255,255,255,.85), 0 0 4px rgba(255,255,255,.9)}
   .cue span{display:inline-block;animation:nudge 2.6s ease-in-out infinite;margin-left:8px}
   @keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
@@ -51,18 +58,29 @@
      what makes the reference a nine, and this page carried no mark at all --
      which is simply an unfinished hero, not a matter of taste. Top left, small,
      one weight, nothing else. */
-  .brand{position:fixed;left:7vw;top:7vh;z-index:3;display:flex;align-items:center;gap:14px}
-  .brand img{height:26px;width:auto;opacity:.92}
-  .brand span{font-family:"Space Mono",ui-monospace,monospace;font-size:10.5px;
-    letter-spacing:.16em;color:var(--ink);opacity:.42;padding-left:14px;
-    border-left:1px solid rgba(31,35,39,.18)}
-  @media (max-width:720px){ .brand img{height:21px} .brand span{display:none} }
+  /* The bar, measured off cpolar.tech: fixed, transparent, logo 218x34 at
+     x=72 y=49, links Montserrat 14.4px weight 650 in black 26px apart, and the
+     contact pill 1px solid black at 7px radius with 10px 13px padding. */
+  .bar{position:fixed;left:0;right:0;top:0;z-index:6;display:flex;align-items:center;
+    justify-content:space-between;padding:46px 80px 0 72px;pointer-events:none}
+  .bar img{height:34px;width:auto;pointer-events:auto}
+  .bar nav{display:flex;align-items:center;gap:26px;pointer-events:auto}
+  .bar nav a{font-family:Montserrat,Arial,sans-serif;font-size:14.4px;font-weight:650;
+    line-height:18.72px;color:#000;text-decoration:none;padding:9px 0}
+  .bar nav a.pill{border:1px solid #000;border-radius:7px;padding:10px 13px}
+  @media (max-width:900px){
+    .bar{padding:20px 20px 0}
+    .bar img{height:26px}
+    .bar nav a{display:none}
+    .bar nav a.pill{display:block;font-size:12.5px;padding:8px 11px}
+  }
 
   /* over the sky, not over the mountain -- 10 px mono on a snowfield is
      unreadable however it is coloured */
-  .meta{position:fixed;right:7vw;top:7vh;z-index:2;text-align:right;
-    font-family:"Space Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
-    color:var(--ink);opacity:.44;line-height:2.0}
+  /* pushed clear of the bar, which now owns the top of the frame */
+  .meta{position:fixed;right:80px;bottom:7vh;z-index:2;text-align:right;
+    font-family:Montserrat,Arial,sans-serif;font-size:11px;font-weight:500;
+    letter-spacing:.06em;color:#000;opacity:.42;line-height:1.9}
   @media (max-aspect-ratio:1/1){
     .plate{top:13vh;transform:none;max-width:min(30ch,86vw)}
     /* on a phone the frame is tall, so the sky band at the top is where small
@@ -83,21 +101,23 @@
   #actB,#actC{max-width:none;width:min(46vw,700px)}
   #actD{max-width:none;width:min(40vw,560px)}
   #actE{max-width:min(46ch,44vw)}
-  .plate h1.big{font-size:clamp(26px,2.85vw,44px);font-weight:400;line-height:1.40;
-    letter-spacing:.045em;color:#2d628c;max-width:none}
-  .plate h1.big.med{font-size:clamp(26px,3.0vw,42px);line-height:1.333}
-  .plate .lede{font-size:clamp(16px,1.35vw,20px);font-weight:400;line-height:1.62;
-    color:#2d628c;max-width:34ch}
-  .plate .lede b{font-weight:700;color:#12405f}
-  .plate .lede2{margin-top:22px;font-size:14px;letter-spacing:.02em;color:#5a7893}
+  /* cpolar.tech sets these at Anton 74/74 in solid black. Same face, same
+     ratio, clamped so it does not swamp a laptop. */
+  .plate h1.big{font-family:Anton,Impact,sans-serif;
+    font-size:clamp(36px,4.0vw,74px);font-weight:400;line-height:1.0;
+    letter-spacing:0;color:#000;max-width:none;text-transform:none}
+  .plate h1.big.med{font-size:clamp(32px,3.6vw,66px)}
+  .plate .lede{font-size:17px;font-weight:470;line-height:1.55;color:#000;max-width:38ch}
+  .plate .lede b{font-weight:700}
+  .plate .lede2{margin-top:22px;font-size:14px;font-weight:600;color:#000;opacity:.62}
   .plate .verticals{list-style:none;margin:10px 0 0;padding:0;max-width:34ch}
-  .plate .verticals li{font-size:clamp(15px,1.2vw,18px);color:#1d5580;padding:9px 0;
-    border-bottom:1px solid rgba(29,97,145,.16)}
-  .plate .ans{font-size:21px;line-height:1.52;letter-spacing:.08rem;color:#1d5580;font-weight:400}
+  .plate .verticals li{font-size:17px;font-weight:470;color:#000;padding:9px 0;
+    border-bottom:1px solid rgba(0,0,0,.14)}
+  .plate .ans{font-size:17px;line-height:1.55;color:#000;font-weight:470}
   .plate .ans.a1{margin:26px 0 12px}
   .plate .ans.a2{margin:0;max-width:46ch}
   #actE h1.big.med{max-width:20ch}
-  .plate .ans .cap{font-style:normal;font-weight:700;color:#12405f}
+  .plate .ans .cap{font-style:normal;font-weight:700;color:#000}
 
   .scope-wrap{position:fixed;right:11vw;top:50%;transform:translateY(-50%);z-index:3;
     opacity:0;pointer-events:none;transition:opacity .5s ease}
@@ -111,17 +131,17 @@
     object-fit:cover;opacity:0;transition:opacity .85s ease}
   .scope-img.is-on{opacity:1}
   .scope-card{margin-top:20px;text-align:center}
-  .scope-card b{display:block;font-size:16px;font-weight:700;color:#12405f;letter-spacing:.2px}
-  .scope-card span{display:block;margin-top:3px;font-size:12px;letter-spacing:.9px;
-    color:rgba(45,98,140,.72)}
+  .scope-card b{display:block;font-size:16px;font-weight:700;color:#000;letter-spacing:.2px}
+  .scope-card span{display:block;margin-top:3px;font-size:12px;font-weight:500;
+    letter-spacing:.9px;color:rgba(0,0,0,.62)}
 
-  .tackle{position:fixed;left:7vw;bottom:8vh;z-index:3;opacity:0;
+  .tackle{position:fixed;left:72px;bottom:8vh;z-index:3;opacity:0;
     transition:opacity .5s ease;max-width:min(620px,52vw)}
   .tackle-row{list-style:none;margin:0;padding:0;display:grid;
     grid-template-columns:repeat(5,1fr);gap:8px}
   .tackle-row li{display:flex;align-items:center;justify-content:center;text-align:center;
-    font-size:14.5px;font-weight:700;line-height:1.32;letter-spacing:.2px;color:#12405f;
-    border:1.5px solid #1d6191;background:rgba(255,255,255,.62);
+    font-family:Montserrat,Arial,sans-serif;font-size:14.4px;font-weight:650;line-height:1.32;
+    color:#000;border:1px solid #000;border-radius:7px;background:rgba(255,255,255,.55);
     padding:10px 9px;min-height:54px}
 
   /* the dust is a flat canvas over everything, exactly as in the original */
@@ -143,10 +163,15 @@
 <body>
 <canvas id="c"></canvas>
 <div class="scrim"></div>
-<div class="brand">
-  <img src="./brand/nanoflashing_black.svg" alt="NanoFlashing">
-  <span>Peak to particle</span>
-</div>
+<header class="bar">
+  <img src="./assets/brand/cpolar-full-color.svg" alt="C-POLAR">
+  <nav>
+    <a href="#applications">Applications</a>
+    <a href="#evidence">Science &amp; Evidence</a>
+    <a href="#company">Company</a>
+    <a class="pill" href="#contact">Contact C-POLAR</a>
+  </nav>
+</header>
 <!-- The original hero page copy, verbatim. Beat A. -->
 <div class="plate act" id="actA">
   <div class="rule"></div>
@@ -244,8 +269,8 @@ const sky = new THREE.Mesh(
   new THREE.SphereGeometry(90000, 32, 16),
   new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite:false,
-    uniforms:{ top:{value:new THREE.Color(0x8fb0cd)}, bot:{value:new THREE.Color(0xf1f5f7)},
-               band:{value:new THREE.Color(0xfafcfd)}, sunDir:{value:new THREE.Vector3(1,0.3,0)} },
+    uniforms:{ top:{value:new THREE.Color(0x3f7cc4)}, bot:{value:new THREE.Color(0xd9e8f4)},
+               band:{value:new THREE.Color(0xf4f8fb)}, sunDir:{value:new THREE.Vector3(1,0.3,0)} },
     vertexShader:`varying vec3 vD; void main(){ vD = normalize(position);
       gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
     fragmentShader:`varying vec3 vD; uniform vec3 top, bot, band, sunDir;
@@ -262,7 +287,7 @@ const sky = new THREE.Mesh(
   })
 );
 scene.add(sky);
-scene.fog = new THREE.FogExp2(0xe6edf2, 0.0000420);   // pale, and heavy enough to eat the horizon   // real Himalayan haze over tens of km
+scene.fog = new THREE.FogExp2(0xcfe1f0, 0.0000290);   // pale, and heavy enough to eat the horizon   // real Himalayan haze over tens of km
 
 const camera = new THREE.PerspectiveCamera(21.5, innerWidth/innerHeight, 30, 400000);
 
@@ -338,10 +363,16 @@ camera.lookAt(PIVOT);
    steep faces get their detail from the SIDE projections rather than from the
    stretched top-down one. It modulates luminance only, by a few per cent, and
    fades out with distance so nothing shimmers on the horizon. */
-const GRADE = parseFloat(q.get('grade') || '0.88');   // 0 = raw satellite, 1 = full mono
-const SHADE_COL = new THREE.Color(0.200, 0.275, 0.400);
+/* Yin: "your original mountain when following the real map, is quite colorful,
+   and blue sky behind, why now everything very grey scale". Mine, and a
+   deliberate choice -- I pushed this to 0.88 to chase mont-fort's monochrome and
+   took the real satellite colour out with it. Back to a light touch: the grade
+   now only cools and unifies, it no longer replaces the photograph. The grey
+   still arrives, but as the POLLUTION beats rather than as the whole page. */
+const GRADE = parseFloat(q.get('grade') || '0.26');   // 0 = raw satellite, 1 = full mono
+const SHADE_COL = new THREE.Color(0.235, 0.300, 0.410);
 const LIGHT_COL = new THREE.Color(0.980, 0.990, 1.000);
-const GRADE_WIN = new THREE.Vector2(0.55, 0.88);
+const GRADE_WIN = new THREE.Vector2(0.42, 0.90);
 const TERRAIN_SHADERS = [];
 const SHADOW_STRENGTH = parseFloat(q.get('shadow') || '0.34');
 window.__grade = (winx, winy, sh, li) => {
@@ -642,11 +673,11 @@ const cloud = createVolumetricCloud(renderer, {
   density: parseFloat(q.get('dens') || '0.014'),
   scale: 6800,
   sunCol: new THREE.Color(0xfff6ea),
-  skyCol: new THREE.Color(0xeaf1f7),
+  skyCol: new THREE.Color(0xdfeaf5),
   groundCol: new THREE.Color(0xb4c3d0),
   ambient: parseFloat(q.get('amb') || '0.95'),
-  lift: parseFloat(q.get('lift') || '0.13'),
-  sat: parseFloat(q.get('sat') || '0.82'),
+  lift: parseFloat(q.get('lift') || '0.055'),
+  sat: parseFloat(q.get('sat') || '1.38'),
   summit: SUMMIT,
   clearR: parseFloat(q.get('clr') || '11000'),
   clearAmt: parseFloat(q.get('clra') || '0.20'),
@@ -955,8 +986,8 @@ function applyScroll() {
   cu.uSkyCol.value.setRGB(0.918 - 0.360*grey, 0.945 - 0.365*grey, 0.969 - 0.345*grey);
   cu.uGroundCol.value.setRGB(0.706 - 0.330*grey, 0.765 - 0.345*grey, 0.816 - 0.335*grey);
   cu.uAmbient.value = 0.95 - 0.34*grey;
-  cloud.composite.uniforms.uSat.value  = 0.82 - 0.50*grey;
-  cloud.composite.uniforms.uLift.value = 0.13 - 0.20*grey;   // take the whites down too
+  cloud.composite.uniforms.uSat.value  = 1.38 - 1.06*grey;
+  cloud.composite.uniforms.uLift.value = 0.055 - 0.13*grey;   // take the whites down too
 
   for (let i=0;i<ACTS.length;i++){
     const o = actOpacity(ACT_WINDOWS[i], p);
