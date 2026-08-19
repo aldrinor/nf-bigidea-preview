@@ -10,14 +10,27 @@
   html,body{height:100%;background:#c9d8e6;overflow:hidden;
     font-family:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   #c{display:block;position:fixed;inset:0}
-  .plate{position:fixed;left:6vw;top:16vh;z-index:2;color:var(--ink)}
-  .plate h1{font-size:clamp(28px,4.6vw,64px);font-weight:600;line-height:1.06;
-    letter-spacing:-.015em}
-  .plate p{margin-top:14px;font-size:clamp(15px,1.35vw,19px);font-weight:440;
-    line-height:1.5;max-width:34ch;opacity:.82}
-  .meta{position:fixed;left:6vw;bottom:9vh;z-index:2;text-align:left;
-    font-family:"Space Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.06em;
-    color:#fff;opacity:.9;line-height:1.9;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+  .plate{position:fixed;left:7vw;top:50%;transform:translateY(-54%);z-index:2;
+    color:var(--ink);max-width:min(28ch,40vw)}
+  .plate h1{font-size:clamp(28px,3.5vw,52px);font-weight:500;line-height:1.10;
+    letter-spacing:-.022em}
+  .plate p{margin-top:20px;font-size:clamp(15px,1.2vw,18px);font-weight:400;
+    line-height:1.62;max-width:27ch;opacity:.66}
+  .rule{width:44px;height:1px;background:currentColor;opacity:.28;margin-bottom:26px}
+  .cue{position:fixed;left:7vw;bottom:7vh;z-index:2;color:var(--ink);opacity:.62;
+    font-family:"Space Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.14em;
+    text-shadow:0 0 14px rgba(255,255,255,.85), 0 0 4px rgba(255,255,255,.9)}
+  .cue span{display:inline-block;animation:nudge 2.6s ease-in-out infinite;margin-left:8px}
+  @keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+  /* over the sky, not over the mountain -- 10 px mono on a snowfield is
+     unreadable however it is coloured */
+  .meta{position:fixed;right:6vw;top:8vh;z-index:2;text-align:right;
+    font-family:"Space Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+    color:var(--ink);opacity:.44;line-height:2.0}
+  @media (max-aspect-ratio:1/1){
+    .plate{top:13vh;transform:none;max-width:min(30ch,86vw)}
+    .meta{right:auto;left:7vw;text-align:left;top:auto;bottom:16vh}
+  }
   #load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;
     background:#c9d8e6;font-family:"Space Mono",ui-monospace,monospace;
     font-size:11px;letter-spacing:.12em;color:#5a6570;transition:opacity .8s}
@@ -27,9 +40,11 @@
 <body>
 <canvas id="c"></canvas>
 <div class="plate">
+  <div class="rule"></div>
   <h1>It starts eight kilometres up.</h1>
   <p>Air moves. What it carries does not stop at the summit.</p>
 </div>
+<div class="cue">Scroll<span>&darr;</span></div>
 <div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8 848 m<br>elevation and imagery, measured</div>
 <div id="load">LOADING TERRAIN</div>
 
@@ -384,6 +399,8 @@ const cloud = createVolumetricCloud(renderer, {
   skyCol: new THREE.Color(0xeaf1f7),
   groundCol: new THREE.Color(0xb4c3d0),
   ambient: parseFloat(q.get('amb') || '0.95'),
+  lift: parseFloat(q.get('lift') || '0.13'),
+  sat: parseFloat(q.get('sat') || '0.82'),
   terrain: HEIGHT_TEX,
   hmin: HEIGHT_META.hmin, hmax: HEIGHT_META.hmax,
   spanX: HEIGHT_META.spanX, spanZ: HEIGHT_META.spanZ,
