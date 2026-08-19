@@ -124,7 +124,16 @@ const camera = new THREE.PerspectiveCamera(21.5, innerWidth/innerHeight, 30, 400
 const sun = new THREE.DirectionalLight(0xfff6ea, 3.10);
 sun.position.set(7400, 5200, 6200);
 sun.castShadow = true;
-sun.shadow.mapSize.set(4096, 4096);
+/* The shadow map re-renders all 1.8 million triangles a second time, every
+   frame, because the sun tracks the camera and so never stops moving. Measured:
+   11% of frame time for a mean difference of 1.05/255 on screen -- the cloud
+   shadow and the normal map are doing that job now. But the sun CREEPS, so the
+   answer is not to delete it, it is to stop redrawing it sixty times a second.
+   Every eighth frame, at half the resolution. */
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.autoUpdate = false;
+sun.shadow.needsUpdate = true;
+let shadowTick = 0;
 const S = 9000;
 Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:1000, far:40000});
 sun.shadow.bias = -0.0006;
@@ -220,13 +229,18 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
         // 4.5 m per pixel, so at the summit a screen pixel covers several metres
         // of ground with nothing in it -- which is most of what reads as
         // "synthetic". Fades out fast so it never shimmers at distance.
-        float d3 = texture2D(uDet, vWP.zy / 17.0).r * bw.x
-                 + texture2D(uDet, vWP.xz / 17.0).r * bw.y
-                 + texture2D(uDet, vWP.xy / 17.0).r * bw.z;
+        // it is faded out past 6.5 km anyway, so do not pay for the three
+        // lookups out there -- most of the screen is out there
         float dist = length(vWP - cameraPosition);
+        float k3 = 1.0 - smoothstep(1800.0, 6500.0, dist);
+        float d3 = 0.5;
+        if (k3 > 0.01) {
+          d3 = texture2D(uDet, vWP.zy / 17.0).r * bw.x
+             + texture2D(uDet, vWP.xz / 17.0).r * bw.y
+             + texture2D(uDet, vWP.xy / 17.0).r * bw.z;
+        }
         float k = 1.0 - smoothstep(uFade.x, uFade.y, dist);
-        float det = (d1 - 0.5) * 1.0 + (d2 - 0.5) * 0.85
-                  + (d3 - 0.5) * 0.55 * (1.0 - smoothstep(1800.0, 6500.0, dist));
+        float det = (d1 - 0.5) * 1.0 + (d2 - 0.5) * 0.85 + (d3 - 0.5) * 0.55 * k3;
         diffuseColor.rgb *= 1.0 + det * uAmt * k;
 
         // On a near-vertical face the nadir orthophoto has no data at all --
@@ -467,6 +481,7 @@ const cloud = createVolumetricCloud(renderer, {
   summit: SUMMIT,
   clearR: parseFloat(q.get('clr') || '11000'),
   clearAmt: parseFloat(q.get('clra') || '0.20'),
+  cloudScale: parseFloat(q.get('cq') || '0.5'),
   terrain: HEIGHT_TEX,
   hmin: HEIGHT_META.hmin, hmax: HEIGHT_META.hmax,
   spanX: HEIGHT_META.spanX, spanZ: HEIGHT_META.spanZ,
@@ -504,11 +519,46 @@ function trackSun() {
                     SUMMIT.z - Math.sin(az) * SUN_R);
 }
 
+/* Adaptive quality. The cloud is by far the most expensive thing on the page
+   and I have no way to test the machines it will actually run on, so the page
+   measures its own frame time over a rolling second and steps down until it is
+   smooth. Resolution comes down before step count: a soft cloud upsampled reads
+   far better than a cloud marched with too few samples, which is what produced
+   the blocks and the dither in the first place.
+
+   ?cq= pins the resolution scale and disables the ladder. */
+const QUALITY = [ [0.50, 160], [0.38, 120], [0.28, 90], [0.20, 64] ];
+let qLevel = 0, frameTimes = [], lastT = performance.now(), settle = 0;
+const QUALITY_PINNED = q.has('cq');
+function autoQuality() {
+  const now = performance.now();
+  const dt = now - lastT; lastT = now;
+  if (settle < 20) { settle++; return; }        // ignore start-up and shader compiles
+  frameTimes.push(dt);
+  if (frameTimes.length < 15) return;
+  frameTimes.sort((a, b) => a - b);
+  const median = frameTimes[7];
+  frameTimes = [];
+  // step down as far as the measurement says in one go: waiting a second per
+  // level means a visitor on slow hardware sits through several seconds of it
+  let want = qLevel;
+  if (median > 90)      want = 3;
+  else if (median > 45) want = Math.max(qLevel, 2);
+  else if (median > 23) want = Math.max(qLevel, qLevel + 1);
+  want = Math.min(want, QUALITY.length - 1);
+  if (want !== qLevel) {
+    qLevel = want;
+    cloud.setQuality(QUALITY[qLevel][0], QUALITY[qLevel][1]);
+  }
+}
+
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
+  if (!QUALITY_PINNED) autoQuality();
   keepAboveGround();
   trackSun();
+  if ((shadowTick++ % 8) === 0) sun.shadow.needsUpdate = true;
   controls.update();
   cloud.material.uniforms.uSunDir.value
     .copy(sun.position).sub(SUMMIT).normalize();

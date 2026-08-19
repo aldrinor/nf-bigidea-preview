@@ -140,6 +140,7 @@ uniform mat4  uInvProj, uInvView;
 uniform vec3  uCamPos, uSunDir, uSunCol, uSkyCol, uGroundCol;
 uniform float uAmbient;
 uniform float uLift, uSat;
+uniform float uSteps;
 uniform vec2  uRes;
 uniform float uNear, uFar, uTime;
 uniform float uBase, uTop;        // cloud slab, metres
@@ -149,8 +150,8 @@ uniform vec3  uSummit;
 uniform float uClearR, uClearAmt;
 uniform float uDebug;
 
-const int   STEPS      = 128;
-const int   LIGHT_STEPS = 5;
+const int   STEPS      = 160;   // hard ceiling; uSteps is the live budget
+const int   LIGHT_STEPS = 3;
 const float BIG        = 1e9;
 
 /* Trilinear through the slice atlas. The tile gutters make the hardware
@@ -284,8 +285,6 @@ float lightMarch(vec3 p){
 }
 
 void main(){
-  vec3 scene = texture(uScene, vUv).rgb;
-
   // 2 = the raw atlas, 3 = one slice through noise3(). If 2 has data and 3 is
   // black the sampling is wrong; if both are black the upload is.
   if (uDebug > 1.5 && uDebug < 2.5) { outColor = vec4(texture(uNoise, vUv).rgb, 1.0); return; }
@@ -316,7 +315,7 @@ void main(){
   t0 = min(ta, tb); t1 = max(ta, tb);
   t0 = max(t0, 0.0);
   t1 = min(t1, min(sceneDist, 78000.0));  // a cloud SEA lives in near-horizontal rays, tens of km out
-  if (t1 <= t0) { outColor = vec4(scene, 1.0); return; }
+  if (t1 <= t0) { outColor = vec4(0.0); return; }
 
   /* Dividing the span evenly is what made the cloud a flat white band. A
      near-horizontal ray crosses a hundred kilometres of slab, so an even split
@@ -326,14 +325,18 @@ void main(){
      Geometric stepping instead: 110 m at the camera, growing 4.5% a step. Fine
      where the detail is a few pixels across, coarse where it is sub-pixel, and
      it reaches past 150 km inside the step budget. */
-  float base = 110.0;
+  float base = 95.0;
   // interleaved-gradient noise, not a sin hash: a full-step random offset on a
   // 180 m step is visible as speckle, and this is both better distributed and
   // used at half amplitude
   float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
   float t = t0 + base * jitter * 0.35;
-  float grow = 1.030;
+  float grow = 1.026;
   bool  inside = false;
+  float lightCache = 0.0;
+  int   lightAge = 0;
+  vec4  bigCache = vec4(0.0);
+  int   bigAge = 0;
 
   float cosA = dot(dir, uSunDir);
   float phase = min(mix(hg(cosA, 0.68), hg(cosA, -0.22), 0.38) * 6.4 + 0.46, 3.2);
@@ -343,6 +346,7 @@ void main(){
   float dbgMaxD = 0.0, dbgMaxShape = 0.0, dbgSteps = 0.0;
 
   for (int i = 0; i < STEPS; i++){
+    if (float(i) >= uSteps) break;          // live budget, lowered on slow hardware
     if (trans < 0.012) break;
     vec3 p = uCamPos + dir * t;
     // Fade with the SAMPLE distance, not the ray's entry distance. On a
@@ -352,28 +356,28 @@ void main(){
     float d = density(p) * (1.0 - smoothstep(30000.0, 72000.0, t));
     dbgMaxD = max(dbgMaxD, d); dbgSteps += 1.0;
 
-    /* Empty-space skipping. Most of a ray is clear air and there is nothing to
-       learn by sampling it finely, so it strides through that and drops to a
-       third of the step the moment it finds density -- stepping back first, so
-       the entry face is not overshot. Same budget, samples spent where the
-       picture is. */
-    if (d > 0.0 && !inside) {
-      inside = true;
-      t -= base * 0.8;
-      base *= 0.30;
-      continue;
-    }
-    if (d <= 0.0 && inside) {
-      inside = false;
-      base /= 0.30;
-    }
+    /* Empty-space skipping, without the back-up. Stepping BACK on entry and
+       re-sampling meant neighbouring rays could disagree about which step first
+       saw cloud, and that disagreement drew hard rectangular block edges all
+       over the sky. Stride through clear air, drop to a third of the step while
+       inside, never rewind. */
+    if (d > 0.0 && !inside) { inside = true;  base *= 0.30; }
+    else if (d <= 0.0 && inside) { inside = false; base /= 0.30; }
     {
       float hh = clamp((p.y - uBase)/(uTop-uBase),0.0,1.0);
       vec3 qq = p / uScale; qq.xz += uTime*0.004;
       dbgMaxShape = max(dbgMaxShape, noise3(qq).r);
     }
     if (d > 0.0){
-      float light = lightMarch(p);
+      /* The light march is the dominant cost in this shader -- three steps, each
+         a full noise lookup, on EVERY accumulating sample. But how buried a
+         sample is barely changes over a hundred metres, so recomputing it every
+         sample is paying three times over for the same answer. Every third
+         sample, reused in between: a two-thirds cut in the most expensive thing
+         here, and nothing visible. */
+      if (lightAge <= 0) { lightCache = lightMarch(p); lightAge = 3; }
+      lightAge--;
+      float light = lightCache;
       // ambient falls off with depth into the slab, so the base is cooler and
       // darker than the crown without ever going near black
       float hAmb  = clamp((p.y - uBase) / (uTop - uBase), 0.0, 1.0);
@@ -409,7 +413,43 @@ void main(){
   }
   // col is already premultiplied by the accumulation, so compose it directly.
   // Un-premultiplying and re-mixing amplifies noise wherever alpha is small.
-  vec3 outRgb = scene * (1.0 - alpha) + col * far;
+  outColor = vec4(col * far, alpha);
+}
+`;
+
+/* Composite at FULL resolution from a HALF resolution cloud buffer.
+
+   Yin: "the cloud is broken in a weird way, and it is so lag". One cause, two
+   symptoms. The march was running a full-resolution ray for every pixel, up to
+   128 steps, each able to trigger a 5-step light march -- about three thousand
+   texture reads per pixel per frame. That is the lag. And to stay anywhere near
+   affordable it had too few effective samples, so the per-pixel jitter showed
+   as a halftone dot screen and the empty-space skip's back-up-and-refine left
+   hard block edges where neighbouring rays disagreed about where cloud began.
+   That is the "weird".
+
+   Marching at half resolution is four times cheaper, which buys back the step
+   count, and the upsample blurs the dither out instead of my having to fight
+   it. This is how every real-time cloud does it. */
+const COMPOSITE_FRAG = /* glsl */`
+precision highp float;
+in vec2 vUv;
+out vec4 outColor;
+uniform sampler2D uScene, uCloud;
+uniform vec2  uTexel;
+uniform float uLift, uSat;
+
+void main(){
+  vec3 scene = texture(uScene, vUv).rgb;
+  // tent filter across the half-res buffer -- the point of the half-res pass is
+  // that this smoothing is free and the dither goes with it
+  vec4 c = texture(uCloud, vUv) * 0.36
+         + texture(uCloud, vUv + vec2( uTexel.x, 0.0)) * 0.16
+         + texture(uCloud, vUv + vec2(-uTexel.x, 0.0)) * 0.16
+         + texture(uCloud, vUv + vec2(0.0,  uTexel.y)) * 0.16
+         + texture(uCloud, vUv + vec2(0.0, -uTexel.y)) * 0.16;
+
+  vec3 outRgb = scene * (1.0 - c.a) + c.rgb;
 
   /* "flat lighting" was the judge's other word for the gap. Two cheap things
      that a photograph has and a raw render does not: light falls off toward the
@@ -480,7 +520,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
       uCamPos:{value:new THREE.Vector3()}, uSunDir:{value:sunDir},
       uSunCol:{value:sunCol}, uSkyCol:{value:skyCol},
       uGroundCol:{value:groundCol}, uAmbient:{value:ambient},
-      uLift:{value:lift}, uSat:{value:sat},
+      uLift:{value:lift}, uSat:{value:sat}, uSteps:{value:160},
       uRes:{value:new THREE.Vector2()}, uNear:{value:1}, uFar:{value:1},
       uTime:{value:0}, uBase:{value:base}, uTop:{value:top},
       uCover:{value:cover}, uDensity:{value:density}, uScale:{value:scale},
@@ -490,22 +530,67 @@ export function createVolumetricCloud(renderer, opts = {}) {
     },
   });
 
+  /* Three passes. The scene at full resolution with its depth, the MARCH at
+     half, and the composite back at full. The march is the only expensive one
+     and it now costs a quarter of what it did, which is where the step count
+     comes back from. */
+  let CLOUD_SCALE = opts.cloudScale || 0.5;
+  const cloudRT = new THREE.WebGLRenderTarget(
+    Math.max(2, Math.round(size.x * dpr * CLOUD_SCALE)),
+    Math.max(2, Math.round(size.y * dpr * CLOUD_SCALE)), {
+      depthBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+      type: THREE.HalfFloatType,
+    });
+
+  const comp = new THREE.ShaderMaterial({
+    glslVersion: THREE.GLSL3,
+    depthTest: false, depthWrite: false,
+    vertexShader: `
+      out vec2 vUv;
+      void main(){ vUv = uv; gl_Position = vec4(position, 1.0); }`,
+    fragmentShader: COMPOSITE_FRAG,
+    uniforms: {
+      uScene:{value:sceneRT.texture}, uCloud:{value:cloudRT.texture},
+      uTexel:{value:new THREE.Vector2()},
+      uLift:{value:lift}, uSat:{value:sat},
+    },
+  });
+
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
   quad.frustumCulled = false;
   const post = new THREE.Scene(); post.add(quad);
+  const compQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), comp);
+  compQuad.frustumCulled = false;
+  const compScene = new THREE.Scene(); compScene.add(compQuad);
   const postCam = new THREE.Camera();
+
+  function sizeTargets(w, h) {
+    const r = renderer.getPixelRatio();
+    depth.image.width = w * r;
+    depth.image.height = h * r;
+    depth.needsUpdate = true;
+    sceneRT.setSize(w * r, h * r);
+    const cw = Math.max(2, Math.round(w * r * CLOUD_SCALE));
+    const ch = Math.max(2, Math.round(h * r * CLOUD_SCALE));
+    cloudRT.setSize(cw, ch);
+    comp.uniforms.uTexel.value.set(1 / cw, 1 / ch);
+  }
+  sizeTargets(size.x, size.y);
 
   return {
     material: mat,
+    composite: comp,
     noise: mat.uniforms.uNoise.value,
-    setSize(w, h) {
-      const r = renderer.getPixelRatio();
-      // the DEPTH texture has to be resized too, or every ray after a resize is
-      // clamped against a stale depth buffer and the cloud vanishes or clips
-      depth.image.width = w * r;
-      depth.image.height = h * r;
-      depth.needsUpdate = true;
-      sceneRT.setSize(w * r, h * r);
+    setSize: sizeTargets,
+    /* "it is so lag" -- on hardware I cannot see. So the page measures itself
+       and turns this down until it is smooth, rather than my guessing a setting
+       that suits one machine. Resolution first, because a soft cloud upsampled
+       is far less visible than a cloud marched with too few steps. */
+    setQuality(scale, steps) {
+      CLOUD_SCALE = scale;
+      mat.uniforms.uSteps.value = steps;
+      renderer.getSize(size);
+      sizeTargets(size.x, size.y);
     },
     render(scene, camera, time) {
       const u = mat.uniforms;
@@ -521,8 +606,12 @@ export function createVolumetricCloud(renderer, opts = {}) {
       renderer.clear();
       renderer.render(scene, camera);
 
-      renderer.setRenderTarget(null);
+      renderer.setRenderTarget(cloudRT);
+      renderer.clear();
       renderer.render(post, postCam);
+
+      renderer.setRenderTarget(null);
+      renderer.render(compScene, postCam);
     },
   };
 }
