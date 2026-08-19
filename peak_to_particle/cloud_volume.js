@@ -331,7 +331,14 @@ void main(){
   // used at half amplitude
   float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
   float t = t0 + base * jitter * 0.35;
-  float grow = 1.026;
+  /* The growth rate has to follow the step budget, or lowering quality lowers
+     the REACH instead of the sharpness. Total distance is base*(g^N-1)/(g-1),
+     so at 160 steps and 2.6% growth the ray covers 215 km -- and at 64 steps it
+     covered fifteen. Watching the page run showed exactly that: the cloud faded
+     away as the adaptive ladder stepped down, which is trading the lag for the
+     thing the lag was buying. Holding g^N constant keeps the reach identical at
+     every level; only the sampling gets coarser. */
+  float grow = pow(60.0, 1.0 / max(uSteps, 8.0));
   bool  inside = false;
   float lightCache = 0.0;
   int   lightAge = 0;
