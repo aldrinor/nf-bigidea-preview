@@ -10,12 +10,31 @@
   html,body{height:100%;background:#c9d8e6;overflow:hidden;
     font-family:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   #c{display:block;position:fixed;inset:0}
+  /* The camera orbits, so what sits behind the type changes: at some bearings
+     it is pale sky, at others it is the mountain, and 18 px at 66% opacity on a
+     sunlit snowfield cannot be read. The reference never has this problem
+     because its left side is always cloud. A soft scrim gives the type ground
+     at every bearing without ever reading as a panel. */
+  .scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(100deg,
+      rgba(234,240,245,.90) 0%,
+      rgba(234,240,245,.72) 18%,
+      rgba(234,240,245,.34) 36%,
+      rgba(234,240,245,0)   54%)}
+  @media (max-aspect-ratio:1/1){
+    .scrim{background:linear-gradient(184deg,
+      rgba(234,240,245,.92) 0%,
+      rgba(234,240,245,.74) 22%,
+      rgba(234,240,245,.30) 42%,
+      rgba(234,240,245,0)   58%)}
+  }
+
   .plate{position:fixed;left:7vw;top:50%;transform:translateY(-54%);z-index:2;
     color:var(--ink);max-width:min(28ch,40vw)}
   .plate h1{font-size:clamp(28px,3.5vw,52px);font-weight:500;line-height:1.10;
     letter-spacing:-.022em}
   .plate p{margin-top:20px;font-size:clamp(15px,1.2vw,18px);font-weight:400;
-    line-height:1.62;max-width:27ch;opacity:.66}
+    line-height:1.62;max-width:27ch;opacity:.74}
   .rule{width:44px;height:1px;background:currentColor;opacity:.28;margin-bottom:26px}
   .cue{position:fixed;left:7vw;bottom:7vh;z-index:2;color:var(--ink);opacity:.62;
     font-family:"Space Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.14em;
@@ -53,6 +72,7 @@
 </head>
 <body>
 <canvas id="c"></canvas>
+<div class="scrim"></div>
 <div class="brand">
   <img src="./brand/nanoflashing_black.svg" alt="NanoFlashing">
   <span>Peak to particle</span>
