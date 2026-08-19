@@ -13,7 +13,7 @@
   /* The plan of record says the camera FALLS and never cuts, so the descent is
      scroll on this same scene rather than a second page. The canvas is fixed and
      this is the only thing that actually scrolls. */
-  #scroller{height:300vh;pointer-events:none}
+  #scroller{height:520vh;pointer-events:none}   /* a longer fall: Yin asked to pull further down */
   /* The camera orbits, so what sits behind the type changes: at some bearings
      it is pale sky, at others it is the mountain, and 18 px at 66% opacity on a
      sunlit snowfield cannot be read. The reference never has this problem
@@ -200,7 +200,7 @@ const PIVOT = new THREE.Vector3(149, 8260, 528);
    the tile is 4 931 m and 87% of it is under the cloud base. Everest rises
    3 500 m above that, out of a broken deck. */
 const MID_EYE    = new THREE.Vector3(-7300, 7750, 4300);   // inside the cloud
-const GROUND_EYE = new THREE.Vector3(-8680, 5205, -2895);  // measured valley floor
+const GROUND_EYE = new THREE.Vector3(-8680, 5125, -2895);  // measured valley floor
 const GROUND_AIM = new THREE.Vector3(149, 7250, 528);
 const VIEWS = {
   hero:  [-6156, 8400, 6084],
@@ -738,7 +738,7 @@ function applyScroll() {
     camera.position.y = eye.y;
     camera.fov = 21.5 + fall * 7.5;
     camera.updateProjectionMatrix();
-    CLEARANCE = 620 - fall * 430;
+    CLEARANCE = 620 - fall * 500;
     /* OrbitControls enforces its own min/max distance from the target every
        frame, and at 6 600 m it was pushing the camera straight back out of the
        descent. The leash lengthens as we come down. */
@@ -752,11 +752,14 @@ function applyScroll() {
     const cu = cloud.material.uniforms;
     // held blind for a real stretch. On their site you are inside the cloud for
     // several screens; a brief flash of white reads as a glitch, not as weather.
-    const blind = smootherstep(0.04, 0.34, fall);      // closing in
+    const blind = smootherstep(0.03, 0.30, fall);      // closing in
     const clear = smootherstep(0.66, 0.97, fall);      // opening out, underneath
     cu.uClearAmt.value = 0.20 + 0.80 * blind - 0.62 * clear;
-    cu.uCover.value    = 0.78 + 0.21 * blind - 0.40 * clear;
-    cu.uDensity.value  = 0.014 + 0.050 * blind - 0.048 * clear;
+    // coverage does the blinding, density only makes it opaque. Pushing
+    // density alone to 0.064 whited the frame out but saturated every step and
+    // stippled the dark parts; coverage at 0.995 gets there with less.
+    cu.uCover.value    = 0.78 + 0.215 * blind - 0.40 * clear;
+    cu.uDensity.value  = 0.014 + 0.040 * blind - 0.038 * clear;
     for (const sh of TERRAIN_SHADERS) {
       sh.uniforms.uCCover.value = cu.uCover.value;
       sh.uniforms.uCClear.value.y = cu.uClearAmt.value;

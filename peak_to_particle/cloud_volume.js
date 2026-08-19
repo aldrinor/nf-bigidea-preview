@@ -250,8 +250,10 @@ float densityCheap(vec3 p){
      Real cloud lighting varies smoothly. How buried you are is a property of the
      mass, not of the wisp at your nose. */
   float h = clamp((p.y - uBase) / (uTop - uBase), 0.0, 1.0);
-  float profile = smoothstep(0.0, 0.22, h) * smoothstep(1.0, 0.58, h);
   vec3 warp = noise3(p / (uScale * 2.6) + vec3(0.11, 0.53, 0.29)).gba - 0.5;
+  float bigB = noise3(p / (uScale * 4.1) + warp * 0.34 + vec3(0.0, 0.61, 0.43)).b;
+  float capBase = 0.015 + 0.26 * smoothstep(0.22, 0.80, bigB);
+  float profile = smoothstep(capBase, capBase + 0.20, h) * smoothstep(1.0, 0.58, h);
   vec3 q = p / uScale + warp * 0.46;
   q.xz += uTime * 0.004;
   float shape = clamp((noise3(q).r - 0.34) / 0.32, 0.0, 1.0);
@@ -302,7 +304,17 @@ float density(vec3 p, float lod){
      it is high it towers past the camera, and those towers are what break the
      horizon line into something with a shape. */
   float capTop = 0.30 + 0.66 * smoothstep(0.24, 0.78, big);
-  float profile = smoothstep(0.0, 0.14, h) * smoothstep(capTop, capTop * 0.55, h);
+
+  /* The BASE has to be per-column as well. I made the top ragged and left the
+     bottom a flat plane at uBase, and flying DOWN through it put a hard
+     horizontal edge straight across the frame -- the same fault as the
+     ruler-straight top, one surface down, and it only shows when you pass
+     through the deck rather than look at it from above. A real cloud base is
+     as uneven as its top, more so when the deck is broken. */
+  float bigB = noise3(rot * p / (uScale * 4.1) + warp * 0.34 + vec3(0.0, 0.61, 0.43)).b;
+  float capBase = 0.015 + 0.26 * smoothstep(0.22, 0.80, bigB);
+  float profile = smoothstep(capBase, capBase + 0.13, h)
+                * smoothstep(capTop, capTop * 0.55, h);
 
   vec3 q = p / uScale + warp * 0.46;
   q.xz += uTime * 0.004;                           // the whole deck drifts
