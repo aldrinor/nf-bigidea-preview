@@ -505,6 +505,14 @@ const cloud = createVolumetricCloud(renderer, {
   clearAmt: parseFloat(q.get('clra') || '0.20'),
   cloudScale: parseFloat(q.get('cq') || '0.5'),
   terrain: HEIGHT_TEX,
+  blueNoise: (() => {
+    const t = new THREE.TextureLoader().load('./terrain/out/bluenoise.webp');
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.minFilter = t.magFilter = THREE.NearestFilter;   // a blue-noise tile must
+    t.colorSpace = THREE.NoColorSpace;                 // never be interpolated
+    t.generateMipmaps = false;
+    return t;
+  })(),
   hmin: HEIGHT_META.hmin, hmax: HEIGHT_META.hmax,
   spanX: HEIGHT_META.spanX, spanZ: HEIGHT_META.spanZ,
 });

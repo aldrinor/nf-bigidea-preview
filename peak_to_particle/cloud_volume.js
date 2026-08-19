@@ -118,10 +118,33 @@ vec4 nv_slice(sampler2D tex, vec2 uv, float z){
   vec2 inner = (fract(uv) * NZ + 1.0) / ATLAS;
   return texture(tex, org + inner);
 }
+
+/* Yin: "why is the cloud effect still weirdly square". Because a graphics card
+   blends texture samples in STRAIGHT LINES, and straight-line blending between
+   random grid values is not smooth -- it has a crease at every grid line, and
+   those creases show as squares and diamonds. Normally you never see it because
+   the texture is minified. Here the coverage lookup is 640 metres per sample and
+   gets magnified about 150x on screen, so every crease is a visible edge.
+
+   The fix is standard and costs nothing: bend the sampling coordinate through a
+   smoothstep inside each texel first. The hardware still blends in straight
+   lines, but along a curve that meets its neighbours with a matching slope, so
+   the creases vanish. (This is what makes Perlin noise smooth and value noise
+   blocky, applied at the sampling end.) */
+vec3 nv_smooth(vec3 p){
+  vec3 g = p * NZ;
+  vec3 i = floor(g);
+  vec3 f = fract(g);
+  return (i + f * f * (3.0 - 2.0 * f)) / NZ;
+}
+
 vec4 nv_noise3(sampler2D tex, vec3 p){
+  p = nv_smooth(p);
   float zf = fract(p.z) * NZ - 0.5;
   float z0 = floor(zf);
-  return mix(nv_slice(tex, p.xy, z0), nv_slice(tex, p.xy, z0 + 1.0), zf - z0);
+  float fz = zf - z0;
+  fz = fz * fz * (3.0 - 2.0 * fz);
+  return mix(nv_slice(tex, p.xy, z0), nv_slice(tex, p.xy, z0 + 1.0), fz);
 }
 `;
 
@@ -134,13 +157,14 @@ out vec4 outColor;
 uniform sampler2D  uScene;
 uniform sampler2D  uDepth;
 uniform sampler2D  uNoise;      // 8x8 atlas of 64 slices, 1-texel gutters
+uniform sampler2D  uBlue;       // 64x64 blue-noise tile
 uniform sampler2D  uTerrain;      // baked terrain height, to keep cloud off the rock
 
 uniform mat4  uInvProj, uInvView;
 uniform vec3  uCamPos, uSunDir, uSunCol, uSkyCol, uGroundCol;
 uniform float uAmbient;
 uniform float uLift, uSat;
-uniform float uSteps;
+uniform float uSteps, uJit;
 uniform vec2  uRes;
 uniform float uNear, uFar, uTime;
 uniform float uBase, uTop;        // cloud slab, metres
@@ -151,7 +175,7 @@ uniform float uClearR, uClearAmt;
 uniform float uDebug;
 
 const int   STEPS      = 160;   // hard ceiling; uSteps is the live budget
-const int   LIGHT_STEPS = 3;
+const int   LIGHT_STEPS = 5;
 const float BIG        = 1e9;
 
 /* Trilinear through the slice atlas. The tile gutters make the hardware
@@ -164,10 +188,33 @@ vec4 slice(vec2 uv, float z){
   vec2 inner = (fract(uv) * NZ + 1.0) / ATLAS;
   return texture(uNoise, org + inner);
 }
+
+/* Yin: "why is the cloud effect still weirdly square". Because a graphics card
+   blends texture samples in STRAIGHT LINES, and straight-line blending between
+   random grid values is not smooth -- it has a crease at every grid line, and
+   those creases show as squares and diamonds. Normally you never see it because
+   the texture is minified. Here the coverage lookup is 640 metres per sample and
+   gets magnified about 150x on screen, so every crease is a visible edge.
+
+   The fix is standard and costs nothing: bend the sampling coordinate through a
+   smoothstep inside each texel first. The hardware still blends in straight
+   lines, but along a curve that meets its neighbours with a matching slope, so
+   the creases vanish. (This is what makes Perlin noise smooth and value noise
+   blocky, applied at the sampling end.) */
+vec3 nvSmooth(vec3 p){
+  vec3 g = p * NZ;
+  vec3 i = floor(g);
+  vec3 f = fract(g);
+  return (i + f * f * (3.0 - 2.0 * f)) / NZ;
+}
+
 vec4 noise3(vec3 p){
+  p = nvSmooth(p);
   float zf = fract(p.z) * NZ - 0.5;
   float z0 = floor(zf);
-  return mix(slice(p.xy, z0), slice(p.xy, z0 + 1.0), zf - z0);
+  float fz = zf - z0;
+  fz = fz * fz * (3.0 - 2.0 * fz);          // and the same on the slice blend
+  return mix(slice(p.xy, z0), slice(p.xy, z0 + 1.0), fz);
 }
 
 float linearDepth(vec2 uv){
@@ -192,28 +239,61 @@ float terrainAt(vec3 p){
 // it is the difference between 64x8 full density evaluations per pixel and
 // something that ships.
 float densityCheap(vec3 p){
+  /* The light march reads the MASS only -- no erosion, no fine detail, a wider
+     threshold. Isolating the cloud from the terrain and amplifying it showed the
+     real fault: its contribution swings from near-black to near-white between
+     NEIGHBOURING pixels, and that is the lighting, not the density. Five coarse
+     samples through a field full of fine detail is a noisy estimate of how
+     buried a point is, and the phase function then multiplied that noise by up
+     to three.
+
+     Real cloud lighting varies smoothly. How buried you are is a property of the
+     mass, not of the wisp at your nose. */
   float h = clamp((p.y - uBase) / (uTop - uBase), 0.0, 1.0);
   float profile = smoothstep(0.0, 0.22, h) * smoothstep(1.0, 0.58, h);
-  vec3 q = p / uScale;
+  vec3 warp = noise3(p / (uScale * 2.6) + vec3(0.11, 0.53, 0.29)).gba - 0.5;
+  vec3 q = p / uScale + warp * 0.46;
   q.xz += uTime * 0.004;
-  vec4 n = noise3(q);
-  float shape = clamp((n.r - 0.34) / 0.32, 0.0, 1.0);
-  // A 0.09-wide transition is a knife edge next to a 400 m march step, and
-  // adjacent pixels landed on opposite sides of it -- that is the checkerboard
-  // dither along every cloud edge. Real cloud edges are not knife edges either.
-  float t = 1.0 - uCover;
-  float d = smoothstep(t, t + 0.30, shape);
-  d = clamp(d - (n.g * 0.62 + n.b * 0.38) * 0.42 * (1.0 - h * 0.6), 0.0, 1.0);
+  float shape = clamp((noise3(q).r - 0.34) / 0.32, 0.0, 1.0);
+  float d = smoothstep(1.0 - uCover, 1.0 - uCover + 0.42, shape);
   return d * profile * uDensity;
 }
 
-float density(vec3 p){
+/* The lod argument is how coarse the current march step is. The march grows its
+   step to kilometres, and optical depth per step is density x step -- so out
+   there ONE sample saturates a ray completely while its neighbour, missing the
+   same wisp, contributes nothing. Binary between neighbours IS speckle, and
+   marching at full resolution is what finally showed it: the cloud was never
+   blocky, it was grainy, and the half-resolution blur was turning the grain into
+   blobs. Blobs are what read as squares.
+
+   So detail a coarse step cannot resolve is faded out of the density and the
+   threshold widens with it. This is ordinary texture filtering: a kilometre-wide
+   sample has no business reading a hundred-metre wisp. */
+float density(vec3 p, float lod){
   float h = clamp((p.y - uBase) / (uTop - uBase), 0.0, 1.0);
 
   // A single lookup gives an even quilt. This much larger one opens bays in the
   // sea, lets ridges through, and -- the important part -- sets how high THIS
   // column reaches.
-  float big = noise3(p / (uScale * 6.0) + vec3(0.37, 0.0, 0.11)).r;
+  /* Domain warp. Smoothing the sampling coordinate fixed the creases BETWEEN
+     texels, but this is VALUE noise -- its random values sit on a fixed lattice,
+     so even perfectly smoothed the blobs still line up to that grid, and a grid
+     of blobs reads as squares. Measured: squareness rose with scale, 1.100 at
+     pixel level to 1.130 four pixels out, which is the signature of structure
+     rather than of noise.
+
+     Bending the lookup position with a coarser noise first destroys the
+     alignment -- the lattice is still there, it just no longer points at
+     anything. One extra lookup, and it is the standard cure. */
+  vec3 warp = noise3(p / (uScale * 2.6) + vec3(0.11, 0.53, 0.29)).gba - 0.5;
+
+  // the two lookups are rotated relative to each other as well, so the coverage
+  // grid and the shape grid cannot line up with each other either
+  mat3 rot = mat3(0.804, 0.0, -0.595,
+                  0.0,   1.0,  0.0,
+                  0.595, 0.0,  0.804);
+  float big = noise3(rot * p / (uScale * 6.0) + warp * 0.30 + vec3(0.37, 0.0, 0.11)).r;
 
   /* The flat white band with a ruler-straight top was the slab's own top plane
      seen edge-on from just above it. Geometrically correct and exactly why it
@@ -224,7 +304,7 @@ float density(vec3 p){
   float capTop = 0.30 + 0.66 * smoothstep(0.24, 0.78, big);
   float profile = smoothstep(0.0, 0.14, h) * smoothstep(capTop, capTop * 0.55, h);
 
-  vec3 q = p / uScale;
+  vec3 q = p / uScale + warp * 0.46;
   q.xz += uTime * 0.004;                           // the whole deck drifts
   vec4 n = noise3(q);
   float shape = clamp((n.r - 0.34) / 0.32, 0.0, 1.0);
@@ -241,9 +321,19 @@ float density(vec3 p){
   // A cloud is either there or it is not, so snap: clear air below the
   // threshold, near-full density just above it. This is what draws the edge.
   float t = 1.0 - uCover;
-  float d = smoothstep(t, t + 0.30, shape);
-  // worley erosion bites the billows out of that edge
-  float erode = n.g * 0.55 + n.b * 0.30 + n.a * 0.15;
+  float d = smoothstep(t, t + 0.30 + 0.55 * lod, shape);
+  /* The .a channel is Worley baked at 16 cells across a 64-voxel volume -- FOUR
+     voxels per cell, which is badly undersampled and aliases into per-pixel
+     speckle the moment it is magnified. That speckle is what the half-resolution
+     blur was smearing into blobs, and the blobs are what read as squares.
+     Marching at full resolution is what finally showed it: the cloud was not
+     blocky, it was grainy, and the blur turned grain into blocks.
+
+     So the fine octave comes from a SECOND lookup of a well-sampled channel at a
+     higher frequency instead -- 16 voxels per cell, evaluated four times denser.
+     Same detail, properly band-limited. */
+  float fine = noise3(q * 3.7 + vec3(0.61, 0.19, 0.83)).g;
+  float erode = (n.g * 0.52 + n.b * 0.31 + fine * 0.17) * (1.0 - lod * 0.85);
   d = clamp(d - erode * 0.42 * (1.0 - h * 0.6), 0.0, 1.0);
   d *= profile;
 
@@ -281,7 +371,9 @@ float lightMarch(vec3 p){
   // came out grey instead of white.
   float beer = exp(-sum);
   float powder = 1.0 - exp(-sum * 2.2);
-  return beer * mix(1.0, powder * 1.5, 0.40);
+  // a floor under it: a cloud is never lit from one direction only, and letting
+  // this reach zero is what produced the near-black fragments
+  return mix(0.30, 1.0, beer * mix(1.0, powder * 1.5, 0.40));
 }
 
 void main(){
@@ -326,10 +418,16 @@ void main(){
      where the detail is a few pixels across, coarse where it is sub-pixel, and
      it reaches past 150 km inside the step budget. */
   float base = 95.0;
-  // interleaved-gradient noise, not a sin hash: a full-step random offset on a
-  // 180 m step is visible as speckle, and this is both better distributed and
-  // used at half amplitude
-  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+  /* Blue noise, not a hash. Both are random; the difference is WHERE the error
+     sits in frequency. A hash spreads its error across all frequencies including
+     the low ones, and low-frequency error is what the eye reads as blotches and
+     what an upsample cannot remove. Blue noise puts almost all of its error high
+     -- measured 98x more energy above half-Nyquist than below -- exactly where
+     the half-resolution upscale throws it away. Every serious implementation of
+     this uses it here. */
+  float jitter = uJit < 0.5
+    ? fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))))
+    : texture(uBlue, gl_FragCoord.xy / 64.0).r;
   float t = t0 + base * jitter * 0.35;
   /* The growth rate has to follow the step budget, or lowering quality lowers
      the REACH instead of the sharpness. Total distance is base*(g^N-1)/(g-1),
@@ -339,14 +437,14 @@ void main(){
      thing the lag was buying. Holding g^N constant keeps the reach identical at
      every level; only the sampling gets coarser. */
   float grow = pow(60.0, 1.0 / max(uSteps, 8.0));
-  bool  inside = false;
   float lightCache = 0.0;
   int   lightAge = 0;
   vec4  bigCache = vec4(0.0);
   int   bigAge = 0;
 
   float cosA = dot(dir, uSunDir);
-  float phase = min(mix(hg(cosA, 0.68), hg(cosA, -0.22), 0.38) * 6.4 + 0.46, 3.2);
+  // and stop amplifying whatever variation is left
+  float phase = min(mix(hg(cosA, 0.68), hg(cosA, -0.22), 0.38) * 3.4 + 0.72, 1.85);
 
   vec3  col = vec3(0.0);
   float trans = 1.0;
@@ -360,16 +458,20 @@ void main(){
     // near-horizontal ray t0 is tiny while the samples are tens of kilometres
     // out, so the entry-based fade never fired and the far sea -- where the
     // steps are kilometres apart -- aliased into blocky stipple.
-    float d = density(p) * (1.0 - smoothstep(30000.0, 72000.0, t));
+    float lod = smoothstep(180.0, 1500.0, base);
+    float d = density(p, lod) * (1.0 - smoothstep(30000.0, 72000.0, t));
     dbgMaxD = max(dbgMaxD, d); dbgSteps += 1.0;
 
-    /* Empty-space skipping, without the back-up. Stepping BACK on entry and
-       re-sampling meant neighbouring rays could disagree about which step first
-       saw cloud, and that disagreement drew hard rectangular block edges all
-       over the sky. Stride through clear air, drop to a third of the step while
-       inside, never rewind. */
-    if (d > 0.0 && !inside) { inside = true;  base *= 0.30; }
-    else if (d <= 0.0 && inside) { inside = false; base /= 0.30; }
+    /* No adaptive stepping at all. Marching at FULL resolution showed what the
+       half-res blur had been hiding: the cloud was a mass of hard speckle, and
+       the blobs that speckle smeared into are what read as squares.
+
+       The cause was this: changing the step size according to whether a ray had
+       entered cloud makes the integration PATH-DEPENDENT. Two neighbouring rays
+       that meet the cloud one step apart then integrate along different step
+       sequences and disagree wildly -- per-pixel, which is speckle. Removing it
+       costs samples in clear air and buys an integral that varies smoothly from
+       one pixel to the next, which is the whole point. */
     {
       float hh = clamp((p.y - uBase)/(uTop-uBase),0.0,1.0);
       vec3 qq = p / uScale; qq.xz += uTime*0.004;
@@ -382,8 +484,9 @@ void main(){
          sample is paying three times over for the same answer. Every third
          sample, reused in between: a two-thirds cut in the most expensive thing
          here, and nothing visible. */
-      if (lightAge <= 0) { lightCache = lightMarch(p); lightAge = 3; }
-      lightAge--;
+      // and the light cache keys on the LOOP INDEX, not on accumulation state,
+      // for the same reason: every ray must refresh it at the same steps
+      if (i % 3 == 0 || lightAge == 0) { lightCache = lightMarch(p); lightAge = 1; }
       float light = lightCache;
       // ambient falls off with depth into the slab, so the base is cooler and
       // darker than the crown without ever going near black
@@ -443,18 +546,44 @@ precision highp float;
 in vec2 vUv;
 out vec4 outColor;
 uniform sampler2D uScene, uCloud;
-uniform vec2  uTexel;
-uniform float uLift, uSat;
+uniform vec2  uTexel, uCloudSize;
+uniform float uLift, uSat, uUp;
+
+/* Catmull-Rom, four taps. A tent filter is a box in disguise: blowing a
+   half-resolution buffer up with one is what leaves the soft squares, because a
+   tent's second derivative is discontinuous at every texel boundary and the eye
+   finds those edges. Catmull-Rom is smooth across the boundary and keeps the
+   detail a tent throws away. This is the standard upsample for exactly this job. */
+vec4 bicubic(sampler2D tex, vec2 uv, vec2 texSize){
+  vec2 pos = uv * texSize - 0.5;
+  vec2 f = fract(pos);
+  vec2 base = floor(pos);
+  vec2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+  vec2 w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+  vec2 w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+  vec2 w3 = f * f * (-0.5 + 0.5 * f);
+  vec2 s0 = w0 + w1, s1 = w2 + w3;
+  vec2 o0 = w1 / s0 - 1.0, o1 = w3 / s1 + 1.0;
+  vec2 t0 = (base + o0 + 0.5) / texSize;
+  vec2 t1 = (base + o1 + 0.5) / texSize;
+  return texture(tex, vec2(t0.x, t0.y)) * (s0.x * s0.y)
+       + texture(tex, vec2(t1.x, t0.y)) * (s1.x * s0.y)
+       + texture(tex, vec2(t0.x, t1.y)) * (s0.x * s1.y)
+       + texture(tex, vec2(t1.x, t1.y)) * (s1.x * s1.y);
+}
 
 void main(){
   vec3 scene = texture(uScene, vUv).rgb;
-  // tent filter across the half-res buffer -- the point of the half-res pass is
-  // that this smoothing is free and the dither goes with it
-  vec4 c = texture(uCloud, vUv) * 0.36
-         + texture(uCloud, vUv + vec2( uTexel.x, 0.0)) * 0.16
-         + texture(uCloud, vUv + vec2(-uTexel.x, 0.0)) * 0.16
-         + texture(uCloud, vUv + vec2(0.0,  uTexel.y)) * 0.16
-         + texture(uCloud, vUv + vec2(0.0, -uTexel.y)) * 0.16;
+  vec4 c;
+  if (uUp < 0.5) {
+    c = texture(uCloud, vUv) * 0.36
+      + texture(uCloud, vUv + vec2( uTexel.x, 0.0)) * 0.16
+      + texture(uCloud, vUv + vec2(-uTexel.x, 0.0)) * 0.16
+      + texture(uCloud, vUv + vec2(0.0,  uTexel.y)) * 0.16
+      + texture(uCloud, vUv + vec2(0.0, -uTexel.y)) * 0.16;
+  } else {
+    c = max(bicubic(uCloud, vUv, uCloudSize), vec4(0.0));
+  }
 
   vec3 outRgb = scene * (1.0 - c.a) + c.rgb;
 
@@ -498,7 +627,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
     sunCol = new THREE.Color(0xfff0dc), skyCol = new THREE.Color(0xa8c4e0),
     groundCol = new THREE.Color(0x7f8f9f), ambient = 0.62, lift = 0.075, sat = 0.86,
     summit = new THREE.Vector3(0, 8750, 0), clearR = 7000, clearAmt = 0.18,
-    terrain = null, hmin = 0, hmax = 1, spanX = 1, spanZ = 1,
+    terrain = null, blueNoise = null, hmin = 0, hmax = 1, spanX = 1, spanZ = 1,
   } = opts;
 
   const size = new THREE.Vector2();
@@ -522,12 +651,12 @@ export function createVolumetricCloud(renderer, opts = {}) {
     fragmentShader: FRAG,
     uniforms: {
       uScene:{value:sceneRT.texture}, uDepth:{value:depth},
-      uNoise:{value:buildNoise(64)}, uTerrain:{value:terrain},
+      uNoise:{value:buildNoise(64)}, uBlue:{value:blueNoise}, uTerrain:{value:terrain},
       uInvProj:{value:new THREE.Matrix4()}, uInvView:{value:new THREE.Matrix4()},
       uCamPos:{value:new THREE.Vector3()}, uSunDir:{value:sunDir},
       uSunCol:{value:sunCol}, uSkyCol:{value:skyCol},
       uGroundCol:{value:groundCol}, uAmbient:{value:ambient},
-      uLift:{value:lift}, uSat:{value:sat}, uSteps:{value:160},
+      uLift:{value:lift}, uSat:{value:sat}, uSteps:{value:160}, uJit:{value:1},
       uRes:{value:new THREE.Vector2()}, uNear:{value:1}, uFar:{value:1},
       uTime:{value:0}, uBase:{value:base}, uTop:{value:top},
       uCover:{value:cover}, uDensity:{value:density}, uScale:{value:scale},
@@ -558,8 +687,8 @@ export function createVolumetricCloud(renderer, opts = {}) {
     fragmentShader: COMPOSITE_FRAG,
     uniforms: {
       uScene:{value:sceneRT.texture}, uCloud:{value:cloudRT.texture},
-      uTexel:{value:new THREE.Vector2()},
-      uLift:{value:lift}, uSat:{value:sat},
+      uTexel:{value:new THREE.Vector2()}, uCloudSize:{value:new THREE.Vector2()},
+      uLift:{value:lift}, uSat:{value:sat}, uUp:{value:1},
     },
   });
 
@@ -581,12 +710,14 @@ export function createVolumetricCloud(renderer, opts = {}) {
     const ch = Math.max(2, Math.round(h * r * CLOUD_SCALE));
     cloudRT.setSize(cw, ch);
     comp.uniforms.uTexel.value.set(1 / cw, 1 / ch);
+    comp.uniforms.uCloudSize.value.set(cw, ch);
   }
   sizeTargets(size.x, size.y);
 
   return {
     material: mat,
     composite: comp,
+    setAB(jit, up) { mat.uniforms.uJit.value = jit; comp.uniforms.uUp.value = up; },
     noise: mat.uniforms.uNoise.value,
     setSize: sizeTargets,
     /* "it is so lag" -- on hardware I cannot see. So the page measures itself
