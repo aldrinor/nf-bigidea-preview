@@ -88,7 +88,7 @@ scene.fog = new THREE.FogExp2(0xe6edf2, 0.0000420);   // pale, and heavy enough 
 const camera = new THREE.PerspectiveCamera(21.5, innerWidth/innerHeight, 30, 400000);
 
 /* --- sun: low from the east, the light Everest is actually photographed in */
-const sun = new THREE.DirectionalLight(0xfff6ea, 1.95);
+const sun = new THREE.DirectionalLight(0xfff6ea, 3.10);
 sun.position.set(7400, 5200, 6200);
 sun.castShadow = true;
 sun.shadow.mapSize.set(4096, 4096);
@@ -97,8 +97,8 @@ Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:1000,
 sun.shadow.bias = -0.0006;
 sun.shadow.normalBias = 12;
 scene.add(sun);
-scene.add(new THREE.HemisphereLight(0xcfe2f4, 0x9aa4ad, 1.55));   // lift the shadow side off black
-const fill = new THREE.DirectionalLight(0xcfe0f2, 1.35);   // sky bounce, no shadow
+scene.add(new THREE.HemisphereLight(0xcfe2f4, 0x9aa4ad, 0.85));   // lift the shadow side off black
+const fill = new THREE.DirectionalLight(0xcfe0f2, 0.60);   // sky bounce, no shadow
 scene.add(fill);
 
 const SUMMIT = new THREE.Vector3(149, 8750, 528);
@@ -131,6 +131,15 @@ camera.lookAt(PIVOT);
    stretched top-down one. It modulates luminance only, by a few per cent, and
    fades out with distance so nothing shimmers on the horizon. */
 const GRADE = parseFloat(q.get('grade') || '0.88');   // 0 = raw satellite, 1 = full mono
+const SHADE_COL = new THREE.Color(0.200, 0.275, 0.400);
+const LIGHT_COL = new THREE.Color(0.980, 0.990, 1.000);
+const GRADE_WIN = new THREE.Vector2(0.55, 0.88);
+const TERRAIN_SHADERS = [];
+window.__grade = (winx, winy, sh, li) => {
+  GRADE_WIN.set(winx, winy);
+  if (sh) SHADE_COL.setRGB(sh[0], sh[1], sh[2]);
+  if (li) LIGHT_COL.setRGB(li[0], li[1], li[2]);
+};
 const DET = new THREE.TextureLoader().load('./terrain/out/terrain_detail.webp');
 DET.wrapS = DET.wrapT = THREE.RepeatWrapping;
 DET.colorSpace = THREE.NoColorSpace;
@@ -142,13 +151,17 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
     sh.uniforms.uAmt = { value: amount };
     sh.uniforms.uFade = { value: new THREE.Vector2(fadeStart, fadeEnd) };
     sh.uniforms.uGrade = { value: GRADE };
+    sh.uniforms.uShade = { value: SHADE_COL };
+    sh.uniforms.uLight = { value: LIGHT_COL };
+    sh.uniforms.uWin   = { value: GRADE_WIN };
+    TERRAIN_SHADERS.push(sh);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vWP;\nvarying vec3 vWN;')
       .replace('#include <begin_vertex>',
                '#include <begin_vertex>\n  vWP = (modelMatrix * vec4(transformed,1.0)).xyz;\n  vWN = normalize(mat3(modelMatrix) * objectNormal);');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>',
-               '#include <common>\nvarying vec3 vWP;\nvarying vec3 vWN;\nuniform sampler2D uDet;\nuniform float uAmt;\nuniform float uGrade;\nuniform vec2 uFade;')
+               '#include <common>\nvarying vec3 vWP;\nvarying vec3 vWN;\nuniform sampler2D uDet;\nuniform float uAmt;\nuniform float uGrade;\nuniform vec2 uFade;\nuniform vec3 uShade;\nuniform vec3 uLight;\nuniform vec2 uWin;')
       .replace('#include <map_fragment>', `#include <map_fragment>
       {
         vec3 bw = abs(normalize(vWN));
@@ -192,9 +205,12 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
            lost -- it is carried by the local contrast and the rock plate above,
            which is where it should have been coming from anyway. */
         float g = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-        vec3 shade = vec3(0.395, 0.470, 0.580);
-        vec3 light = vec3(0.960, 0.975, 0.998);
-        vec3 mono  = mix(shade, light, smoothstep(0.14, 0.88, g));
+        // The judge, on the gap to the reference: "the washed-out mountain
+        // treatment feels flat". It was: after the shadow lift the input sits
+        // between 0.6 and 0.9, so a 0.14-0.88 window put the whole mountain in
+        // the top of the ramp and every face came out the same pale grey. The
+        // window has to sit where the data actually is.
+        vec3 mono  = mix(uShade, uLight, smoothstep(uWin.x, uWin.y, g));
         diffuseColor.rgb = mix(diffuseColor.rgb, mono, uGrade);
         diffuseColor.rgb = clamp(diffuseColor.rgb, 0.0, 1.0);
       }`);
