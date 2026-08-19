@@ -44,6 +44,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createVolumetricCloud } from './cloud_volume.js';
 
 const q = new URLSearchParams(location.search);
 const canvas = document.getElementById('c');
@@ -338,117 +339,39 @@ const CLOUD_Y = 7250;
 
    Kept: CLOUD_Y as the altitude the sea is built around. */
 
-/* Cloud masses. Four photographed cumulus, one atlas, camera-facing quads.
-   These are what read as cloud from a camera that is level with them. */
-const PUFF_TEX = [0,1,2,3].map(i => {
-  const t = new THREE.TextureLoader().load('./terrain/out/cloudpuff.webp');
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.repeat.set(0.5, 0.5);
-  t.offset.set((i % 2) * 0.5, 1 - Math.floor(i / 2) * 0.5 - 0.5);
-  t.anisotropy = 8;
-  return t;
+/* --- cloud ---------------------------------------------------------------
+   Billboards are gone. Yin: "stop using 2D cloud, I want 3D effect cloud, like
+   the mont fort reference". He is right and the whole session was evidence for
+   it -- a camera-facing quad has no inside, so every fix bought softness at the
+   cost of the billows, and the moment the camera moved you could see the cards.
+
+   This marches the volume instead. The scene renders to a target that carries a
+   depth texture, and every cloud ray is clamped to the terrain distance read
+   from it, so a ray never accumulates density in front of rock it should be
+   behind. That clamp is the thing a sprite can never do: it is what lets cloud
+   pour past a ridge and sit in a valley rather than hang in front of it. */
+const cloud = createVolumetricCloud(renderer, {
+  // The slab must sit BELOW the camera. With base 6250 / top 8450 and the camera
+  // at 8400 the camera was inside the cloud and the frame was a white-out.
+  // Density is not a taste number either: the march step here is about 180 m, we
+  // want a total optical depth of 4-6 through the thick part over ~30 steps, so
+  // it lands near 0.0035 -- the 0.075 it shipped with was twenty times over and
+  // saturated on the first sample.
+  base: 6050, top: 9450,
+  // Widening the density edge from 0.09 to 0.30 to kill the dither also cut the
+  // mean density by about two thirds, so this is the same cloud, not more of it.
+  // ?cover= and ?dens= to tune without a rebuild.
+  cover: parseFloat(q.get('cover') || '0.60'),
+  density: parseFloat(q.get('dens') || '0.0045'),
+  scale: 6800,
+  sunCol: new THREE.Color(0xfff6ea),
+  skyCol: new THREE.Color(0xeaf1f7),
+  groundCol: new THREE.Color(0xb4c3d0),
+  ambient: parseFloat(q.get('amb') || '0.95'),
+  terrain: HEIGHT_TEX,
+  hmin: HEIGHT_META.hmin, hmax: HEIGHT_META.hmax,
+  spanX: HEIGHT_META.spanX, spanZ: HEIGHT_META.spanZ,
 });
-// Twelve materials, not four: three opacity levels per plate. Sprites share a
-// material, so per-sprite opacity is impossible without them, and without
-// varied opacity every mass has the same weight and the bank reads as one
-// painted object.
-const PUFF_MAT = [];
-for (const o of [1.0, 0.74, 0.5])
-  for (const t of PUFF_TEX)
-    PUFF_MAT.push(new THREE.SpriteMaterial({
-      map: t, transparent: true, depthWrite: false, fog: true, opacity: o,
-    }));
-
-// deterministic, so the frame a visitor lands on is the frame we judged
-let seed = 20260818;
-const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-
-const puffs = new THREE.Group();
-/* Yin, and the judge four times over: "a very fake 2D on the background".
-   Both right, and it was not the plates -- those are photographs. Every mass
-   sat between 6 400 and 7 800 m while the camera flies at 8 400 m, so the whole
-   bank compressed onto the horizon line and read as one painted strip. Exactly
-   the same fault that killed the flat sheet, one level up.
-
-   Himalayan cumulus tower to nine and ten kilometres. So these spread from
-   5 700 m in the valleys to 9 800 m overhead: some below the camera, some level
-   with the summit, some above it and off to the side. A visitor's eye reads
-   depth from things at different heights passing each other, and there is
-   nothing to read when they are all in one band. */
-/* mont-fort does not show ground. The peaks come out of a cloud SEA that fills
-   the lower half of the frame, and that is what makes it read as altitude rather
-   than as a map. It also permanently retires the complaint about the distant
-   terrain looking plasticky: the distant terrain is under the cloud.
-
-   So the near band is no longer a scattering of cumulus, it is a packed deck --
-   more clusters, bigger, overlapping, with their tops around 7 400 m so the top
-   1 350 m of Everest stands clear of it. The towers stay: something has to be
-   taller than the sea or there is no depth in it. */
-/* Three bands, and the near one is the whole trick. Putting cloud out at 5-30 km
-   only ever put it BEHIND the ridges in front of the camera, which is why the
-   ground kept running to the bottom of the frame. In the reference there is no
-   near ground at all: the cloud is between the viewer and the mountain and laps
-   its shoulders, and the peak is what comes out of the top.
-
-   APRON  6-15 km, 7 000-7 900 m -- drapes the near ridges and the lower massif
-   SEA    5-31 km, 6 500-7 600 m -- fills behind it
-   FAR    30-96 km               -- the horizon
-   plus a fifth of the clusters towering past the summit, or the sea has no
-   depth in it. */
-const APRON = 20, NEAR = 44 + APRON, CLUSTERS = 62 + APRON;
-for (let c = 0; c < CLUSTERS; c++) {
-  const apron = c < APRON;
-  const far = c >= NEAR;
-  const band = apron ? c : (far ? c - NEAR : c - APRON);
-  const bandN = apron ? APRON : (far ? CLUSTERS - NEAR : NEAR - APRON);
-  const ang = (band + 0.18 + rnd() * 0.64) / bandN * Math.PI * 2
-            + (far ? 0.4 : 0.0) + (apron ? 0.21 : 0.0);
-  const rad = apron ? 6000 + Math.pow(rnd(), 0.8) * 9000
-            : far   ? 30000 + rnd() * 66000
-                    : 5200 + Math.pow(rnd(), 0.55) * 26000;
-  const cx = SUMMIT.x + Math.cos(ang) * rad;
-  const cz = SUMMIT.z + Math.sin(ang) * rad;
-
-  const tower = !apron && rnd() > 0.80;
-  const cy = tower  ? 7700 + Math.pow(rnd(), 0.7) * 2000     // 7 700 .. 9 700
-           : apron  ? 7000 + Math.pow(rnd(), 0.9) * 900      // 7 000 .. 7 900
-                    : 6500 + Math.pow(rnd(), 1.25) * 1100;   // 6 500 .. 7 600
-  const spread = far ? 12000 : (apron ? 4200 : 5200);
-  const members = (apron ? 5 : 4) + Math.floor(rnd() * 4);
-  for (let k = 0; k < members; k++) {
-    const mi = Math.floor(rnd() * 4) + (k === 0 ? 0 : (rnd() < 0.45 ? 4 : 8));
-    const s = new THREE.Sprite(PUFF_MAT[mi]);
-    const w = (far   ? 8000 + rnd() * 13000
-             : apron ? 3800 + Math.pow(rnd(), 0.7) * 5200
-             : tower ? 3200 + rnd() * 4200
-                     : 4200 + Math.pow(rnd(), 0.7) * 7000)
-              * (k === 0 ? 1.0 : 0.5 + rnd() * 0.6);
-    // a towering mass is as tall as it is wide; a fair-weather one is a slab
-    const aspect = tower ? 0.62 + rnd() * 0.42 : 0.36 + rnd() * 0.22;
-    s.position.set(cx + (rnd() - 0.5) * spread,
-                   cy + (rnd() - 0.5) * (tower ? 1700 : 700),
-                   cz + (rnd() - 0.5) * spread);
-    // flip half of them: four plates over a hundred sprites shows as repetition,
-    // and a mirrored cumulus is still a cumulus
-    s.scale.set(rnd() < 0.5 ? -w : w, w * aspect, 1);
-    s.renderOrder = 3;
-    s.userData = { baseY: s.position.y, ph: rnd() * 6.283, w };
-    puffs.add(s);
-  }
-}
-scene.add(puffs);
-
-function driftClouds(t) {
-  puffs.rotation.y = t * 0.0016;                 // the whole bank moves with the wind
-  for (const s of puffs.children) {
-    s.position.y = s.userData.baseY + Math.sin(t * 0.05 + s.userData.ph) * 26;
-    // a quad that fills the screen stops being a cloud and becomes a smear, so
-    // fade anything the orbit brings too close
-    const d = s.position.distanceTo(camera.position);
-    s.material.opacity = 1.0;
-    s.visible = d > s.userData.w * 0.62;
-  }
-}
 
 /* --- controls: drag to orbit, wheel to zoom -------------------------------- */
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -485,11 +408,13 @@ function trackSun() {
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const t = clock.getElapsedTime();
-  driftClouds(t);
   keepAboveGround();
   trackSun();
   controls.update();
-  renderer.render(scene, camera);
+  cloud.material.uniforms.uSunDir.value
+    .copy(sun.position).sub(SUMMIT).normalize();
+  cloud.material.uniforms.uDebug.value = parseFloat(q.get('dbg') || '0');
+  cloud.render(scene, camera, t);
 });
 
 /* three.js fixes the VERTICAL field, so a phone held upright gets a very narrow
@@ -516,6 +441,7 @@ function fitCamera() {
 
 addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
+  cloud.setSize(innerWidth, innerHeight);
   fitCamera();
 });
 fitCamera();
