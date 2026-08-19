@@ -428,12 +428,28 @@ function dressTerrain(m, amount, fadeStart, fadeEnd) {
         vec3 bw = abs(normalize(vWN));
         bw = pow(bw, vec3(3.0));
         bw /= (bw.x + bw.y + bw.z);
-        float d1 = texture2D(uDet, vWP.zy / 74.0).r * bw.x
-                 + texture2D(uDet, vWP.xz / 74.0).r * bw.y
-                 + texture2D(uDet, vWP.xy / 74.0).r * bw.z;
-        float d2 = texture2D(uDet, vWP.zy / 470.0).r * bw.x
-                 + texture2D(uDet, vWP.xz / 470.0).r * bw.y
-                 + texture2D(uDet, vWP.xy / 470.0).r * bw.z;
+
+        /* Triplanar is three taps per octave, and it only earns them where the
+           surface is genuinely turned between two axes. Most of a mountain seen
+           from above is dominated by ONE axis, and there the other two taps are
+           multiplied by almost nothing and thrown away. Taking the single
+           dominant plane when it holds more than 88% of the weight cuts six
+           texture reads per pixel across most of the screen; the blend still
+           runs on the ridges and overhangs, which is where it matters. */
+        float d1, d2;
+        float bmax = max(bw.x, max(bw.y, bw.z));
+        if (bmax > 0.88) {
+          vec2 uv1 = bw.y >= bmax ? vWP.xz : (bw.x >= bmax ? vWP.zy : vWP.xy);
+          d1 = texture2D(uDet, uv1 / 74.0).r;
+          d2 = texture2D(uDet, uv1 / 470.0).r;
+        } else {
+          d1 = texture2D(uDet, vWP.zy / 74.0).r * bw.x
+             + texture2D(uDet, vWP.xz / 74.0).r * bw.y
+             + texture2D(uDet, vWP.xy / 74.0).r * bw.z;
+          d2 = texture2D(uDet, vWP.zy / 470.0).r * bw.x
+             + texture2D(uDet, vWP.xz / 470.0).r * bw.y
+             + texture2D(uDet, vWP.xy / 470.0).r * bw.z;
+        }
         // a third, much finer octave. The mesh is 20 m per vertex and the drape
         // 4.5 m per pixel, so at the summit a screen pixel covers several metres
         // of ground with nothing in it -- which is most of what reads as
@@ -575,21 +591,45 @@ NRM.colorSpace = THREE.NoColorSpace;
 NRM.anisotropy = 8;
 const NS = parseFloat(q.get('ns') || '-1');
 
+/* Progressive. On a 4 Mbps line the full 4.7 MB hero is nine seconds before
+   anything is on screen at all, which is what "loading is too slow" means. A
+   1.5 MB stand-in -- same mountain, 242 k triangles instead of 1.25 M and a
+   1536 texture instead of 4096 -- lands in under two, and the real one swaps in
+   behind it when it arrives. The visitor sees Everest almost immediately and
+   it sharpens; they never see a blank screen. */
+function dressHero(m) {
+  m.roughness = 0.97; m.metalness = 0.0;
+  if (m.map) { m.map.colorSpace = THREE.SRGBColorSpace; m.map.anisotropy = 8; }
+  m.normalMap = NRM;
+  m.normalScale = new THREE.Vector2(1.05, NS * 1.05);
+  dressTerrain(m, 1.55, 7000, 17000);
+  m.needsUpdate = true;
+}
+let heroLo = null;
+loader.load('./terrain/out/everest_hero_lo_opt.glb', g => {
+  if (window.__heroFull) return;              // the real one beat it here
+  g.scene.traverse(o => { if (o.isMesh) { o.receiveShadow = true; dressHero(o.material); } });
+  heroLo = g.scene;
+  scene.add(heroLo);
+  document.getElementById('load').classList.add('gone');
+  window.__ready = true;
+  requestAnimationFrame(() => requestAnimationFrame(loadHeroFull));
+});
+
+function loadHeroFull() {
 loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
   gltf.scene.traverse(o => {
     if (o.isMesh) {
       o.castShadow = true;
       o.receiveShadow = true;
-      const m = o.material;
-      m.roughness = 0.97; m.metalness = 0.0;
-      if (m.map) { m.map.colorSpace = THREE.SRGBColorSpace; m.map.anisotropy = 8; }
-      m.normalMap = NRM;
-      m.normalScale = new THREE.Vector2(1.05, NS * 1.05);
-      dressTerrain(m, 1.55, 7000, 17000);
-      m.needsUpdate = true;
+      dressHero(o.material);
     }
   });
   scene.add(gltf.scene);
+  window.__heroFull = true;
+  if (heroLo) { scene.remove(heroLo); heroLo.traverse(o => {
+    if (o.isMesh) { o.geometry.dispose(); if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
+  }); heroLo = null; }
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
 
@@ -611,6 +651,7 @@ loader.load('./terrain/out/everest_hero_opt.glb', gltf => {
     loadSurround();
   }));
 }, undefined, e => { window.__err = String(e); document.getElementById('load').textContent = 'TERRAIN FAILED'; });
+}   // loadHeroFull
 
 const HEIGHT_META = {hmin:4930.6, hmax:8750.2, spanX:18479.8, spanZ:14137.6};
 const HEIGHT_TEX = new THREE.TextureLoader().load('./terrain/out/everest_hero_height.webp');

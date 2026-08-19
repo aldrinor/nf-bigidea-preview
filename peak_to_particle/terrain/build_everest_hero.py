@@ -27,8 +27,14 @@ W1, E1, S1, N1 = 86.826, 87.014, 27.929, 28.056
 # 18.5 x 14.1 km. The old 11.8 x 8.9 km tile was smaller than the camera orbit,
 # so from most bearings the foreground was 73 m/vertex surround terrain and it
 # rendered as a blank white cone. This covers every position the orbit reaches.
-GX, GY = 905, 690          # 20 m/vertex; the normal map carries the rest
-TEX = 4096                 # source is z16 at 2.4 m/px = 7700 px, so this is real detail
+# A light first-load version exists alongside the full one. On a 4 Mbps line the
+# full 4.7 MB hero is nine seconds before anything is on screen; this is under
+# two, and the full one swaps in behind it once it arrives.
+#     python build_everest_hero.py lo
+import sys
+LO = len(sys.argv) > 1 and sys.argv[1] == 'lo'
+GX, GY = (400, 305) if LO else (905, 690)   # 20 m/vertex full; 46 m for the stand-in
+TEX = 1536 if LO else 4096   # source is z16 at 2.4 m/px = 7700 px, so full is real detail
 
 # ---------------------------------------------------------------- crop helper
 def crop_box(w, h, lon0, lon1, lat0, lat1):
@@ -149,8 +155,8 @@ l2 = A @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
 print("albedo tone: mean %.3f  clipped-white %.2f%%  >0.90 %.1f%%  std %.3f"
       % (l2.mean(), 100 * (l2 > 0.97).mean(), 100 * (l2 > 0.90).mean(), l2.std()))
 alb = Image.fromarray((A * 255).astype(np.uint8))
-p_alb = os.path.join(OUT, "everest_hero_albedo.webp")
-alb.save(p_alb, quality=80, method=6)
+p_alb = os.path.join(OUT, "everest_hero_albedo%s.webp" % ("_lo" if LO else ""))
+alb.save(p_alb, quality=58 if LO else 72, method=6)
 print("albedo -> %s  %.2f MB" % (os.path.basename(p_alb),
                                  os.path.getsize(p_alb) / 1048576))
 
@@ -163,7 +169,7 @@ mesh = trimesh.Trimesh(vertices=verts, faces=faces, process=False)
 mesh.vertex_normals  # force computation
 print("vertex normals:", mesh.vertex_normals.shape)
 mesh.visual = trimesh.visual.TextureVisuals(uv=uv, material=mat)
-p_glb = os.path.join(OUT, "everest_hero.glb")
+p_glb = os.path.join(OUT, "everest_hero%s.glb" % ("_lo" if LO else ""))
 mesh.export(p_glb)
 print("mesh   -> %s  %.2f MB" % (os.path.basename(p_glb),
                                  os.path.getsize(p_glb) / 1048576))
@@ -176,7 +182,8 @@ ln = np.sqrt(nx * nx + ny * ny + nz * nz)
 nmap = np.stack([nx / ln, nz / ln, ny / ln], -1)
 nmap = ((nmap * 0.5 + 0.5) * 255).clip(0, 255).astype(np.uint8)
 p_nrm = os.path.join(OUT, "everest_hero_normal.webp")
-Image.fromarray(nmap).resize((3072, 3072), Image.LANCZOS).save(p_nrm, quality=82, method=6)
+if not LO:
+    Image.fromarray(nmap).resize((3072, 3072), Image.LANCZOS).save(p_nrm, quality=82, method=6)
 print("normal -> %s  %.2f MB" % (os.path.basename(p_nrm),
                                  os.path.getsize(p_nrm) / 1048576))
 
