@@ -207,7 +207,8 @@
      lost anywhere is the outer 2% of the fungal spore's stalk, which a
      circle already cuts at scale 1.00 -- that stalk reaches 1.137 of the
      half-width, past the circle itself. */
-  .scope-wrap{position:fixed;right:76px;top:50%;transform:translateY(-50%);z-index:3;
+  .scope-wrap{position:fixed;left:calc(75% - 38px);top:50%;
+    transform:translate(-50%,-50%);z-index:3;
     opacity:0;pointer-events:none;transition:opacity .5s ease;--d:330px}
   .scope{position:relative;width:var(--d);height:var(--d);border-radius:50%;overflow:hidden;
     background:#edf0f2}
@@ -239,7 +240,8 @@
      10px the cells keep between themselves, because the disc curves away
      from the label: 6px is the clearance at the tangent, and the average
      clearance across the label's width is about 32px. */
-  .scope-card{margin:22px auto 0;width:calc(var(--d) * .80);min-width:168px;
+  .scope-card{position:fixed;margin:0;z-index:3;opacity:0;pointer-events:none;
+    transition:opacity .5s ease;width:calc(var(--d) * .80);min-width:168px;
     min-height:60px;box-sizing:border-box;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:9px 12px;
@@ -378,8 +380,8 @@
     <img class="scope-img" data-k="spore"    data-src="./assets/specimens/spore.jpg" alt="">
     <span class="scope-ring"></span>
   </div>
-  <div class="scope-card"><b id="scopeName">Ultrafine Particle</b><span>Electrically charged</span></div>
 </div>
+<div class="scope-card" id="scopeCard"><b id="scopeName">Ultrafine Particle</b><span>Electrically charged</span></div>
 
 <div class="tackle" id="tackle"><ul class="tackle-row">
   <li data-k="ultrafine"><span>Ultrafine Particle</span></li>
@@ -1273,6 +1275,19 @@ function mirrorAppsRow(){
   if (!appsRowEl || !tackle) return;
   const r = appsRowEl.getBoundingClientRect();
   if (r.width < 10) return;
+
+  /* the lens's name cell sits on the SAME line as the five pollutant cells --
+     same top, same height -- and is centred under the disc */
+  const card = document.querySelector('.scope-card');
+  const disc = document.querySelector('.scope');
+  if (card && disc) {
+    const dr = disc.getBoundingClientRect();
+    const cw = Math.max(168, Math.round(dr.width * 0.80));
+    card.style.width  = cw + 'px';
+    card.style.left   = Math.round(dr.left + dr.width / 2 - cw / 2) + 'px';
+    card.style.top    = Math.round(r.top) + 'px';
+    card.style.height = Math.round(r.height) + 'px';
+  }
   tackle.style.left   = Math.round(r.left) + 'px';
   tackle.style.top    = Math.round(r.top) + 'px';
   tackle.style.right  = 'auto';
@@ -1310,6 +1325,7 @@ const ansEls = Array.prototype.slice.call(document.querySelectorAll('#actE .ans'
 const chargeHead = document.querySelector('#actE h1.big.med');
 const barEl = document.querySelector('.bar');
 const scopeWrap = document.getElementById('scopeWrap');
+const scopeCard = document.getElementById('scopeCard');
 const tackle    = document.getElementById('tackle');
 mirrorAppsRow();                       // declared above; runs once tackle exists
 addEventListener('resize', mirrorAppsRow);
@@ -1466,6 +1482,7 @@ function applyScroll() {
   }
   const lensIn = smootherstep(0.660, 0.740, p);
   scopeWrap.style.opacity = lensIn.toFixed(3);
+  if (scopeCard) scopeCard.style.opacity = lensIn.toFixed(3);
   tackle.style.opacity    = smootherstep(0.675, 0.755, p).toFixed(3);
   if (cue) cue.style.opacity = String(0.62 * (1 - smootherstep(0.02, 0.16, p)));
   // the bar's small mark only exists once the hero's big one has gone
