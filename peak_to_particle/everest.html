@@ -24,7 +24,7 @@
   /* The plan of record says the camera FALLS and never cuts, so the descent is
      scroll on this same scene rather than a second page. The canvas is fixed and
      this is the only thing that actually scrolls. */
-  #scroller{height:520vh;pointer-events:none}   /* a longer fall: Yin asked to pull further down */
+  #scroller{height:760vh;pointer-events:none}   /* a longer fall, and a long clean-up at the end */
   /* The camera orbits, so what sits behind the type changes: at some bearings
      it is pale sky, at others it is the mountain, and 18 px at 66% opacity on a
      sunlit snowfield cannot be read. The reference never has this problem
@@ -130,12 +130,12 @@
   .statement{margin:0;font-family:Anton,Impact,sans-serif;font-weight:400;
     font-size:clamp(40px,4.75vw,72px);line-height:.99;letter-spacing:.004em;color:#000}
   .apps{width:min(720px,50vw);margin:38px 0 0}
-  .apps-label{margin:0 0 18px;font-family:Montserrat,Arial,sans-serif;font-size:15px;
-    font-weight:700;letter-spacing:.6px;color:#000;opacity:1}
+  .apps .apps-label{margin:0 0 18px;font-family:Montserrat,Arial,sans-serif;font-size:15px;
+    font-weight:700;letter-spacing:.6px;color:#000;opacity:1;line-height:1.3}
   .apps-row{list-style:none;margin:0;padding:0;display:grid;
     grid-template-columns:repeat(5,1fr);gap:10px}
   .apps-row li{display:flex;align-items:center;justify-content:center;text-align:center;
-    min-height:60px;padding:10px 9px;box-sizing:border-box;
+    min-width:0;min-height:60px;padding:10px 9px;box-sizing:border-box;
     border:1px solid rgba(0,0,0,.45);border-radius:0;
     font-family:Montserrat,Arial,sans-serif;font-size:15px;font-weight:600;
     line-height:1.32;letter-spacing:.2px;color:#000;
@@ -156,12 +156,12 @@
   /* a1 is the statement: same face and size as the charge line it replaces. */
   .plate .ans.a1{font-family:Anton,Impact,sans-serif;font-weight:400;
     font-size:clamp(32px,3.6vw,66px);line-height:1.02;letter-spacing:.004em;
-    color:#000;margin:0 0 24px;max-width:15ch}
+    color:#000;margin:0 0 2px;max-width:15ch}
   /* a2 is the mechanism, and it is a sentence, not a headline. Same relationship the
      top of the page already uses, one step larger than the hero's paragraph. */
   .plate .ans.a2{font-family:Montserrat,Arial,sans-serif;font-weight:450;
-    font-size:23px;line-height:1.52;letter-spacing:0;color:#000;
-    margin:0;max-width:26ch}
+    font-size:23px;line-height:1.42;letter-spacing:0;color:#000;
+    margin:0;max-width:34ch}
   /* no rule under it -- the box-shadow landed under the following line and read as a
      strikethrough. Weight is the emphasis. */
   .plate .ans .cap{font-style:normal;font-weight:750;color:#000}
@@ -171,24 +171,28 @@
      headline, so anchoring the much taller answers at top:0 pushed them off the
      bottom of the screen. Centring means the answers occupy the same middle the
      headline did, whatever their height. */
-  #actE .ans-wrap{position:absolute;top:50%;left:0;width:100%;transform:translateY(calc(-50% - 118px))}
+  #actE .ans-wrap{position:absolute;top:0;left:0;width:100%}
   .plate .ans .cap{font-style:normal;font-weight:700;color:#000}
 
-  .scope-wrap{position:fixed;right:11vw;top:50%;transform:translateY(-50%);z-index:3;
+  .scope-wrap{position:fixed;right:76px;top:50%;transform:translateY(-50%);z-index:3;
     opacity:0;pointer-events:none;transition:opacity .5s ease}
   .scope{position:relative;width:330px;height:330px;border-radius:50%;overflow:hidden;
     background:#f6f1ef}
+  /* Same hairline as the five cells: 1px of black at 45%, no blue, no heavy band.
+     The inner shade stays so the specimen reads as being under glass. */
   .scope-ring{position:absolute;inset:0;border-radius:50%;pointer-events:none;
-    box-shadow:inset 0 0 0 9px #22475f,
-               inset 0 0 0 11px rgba(255,255,255,.88),
-               inset 0 0 40px -12px rgba(20,45,68,.42)}
+    box-shadow:inset 0 0 0 5px rgba(0,0,0,.82),
+               inset 0 0 0 7px rgba(255,255,255,.85),
+               inset 0 0 34px -12px rgba(0,0,0,.34)}
   .scope-img{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);
     object-fit:cover;opacity:0;transition:opacity .85s ease}
   .scope-img.is-on{opacity:1}
   .scope-card{margin-top:20px;text-align:center}
-  .scope-card b{display:block;font-size:16px;font-weight:700;color:#000;letter-spacing:.2px}
-  .scope-card span{display:block;margin-top:3px;font-size:12px;font-weight:500;
-    letter-spacing:.9px;color:rgba(0,0,0,.62)}
+  /* the same voice as the cells it names */
+  .scope-card b{display:block;font-family:Montserrat,Arial,sans-serif;font-size:15px;
+    font-weight:700;color:#000;letter-spacing:.6px}
+  .scope-card span{display:block;margin-top:5px;font-family:Montserrat,Arial,sans-serif;
+    font-size:13px;font-weight:500;letter-spacing:.2px;color:rgba(0,0,0,.62)}
 
   .tackle{position:fixed;left:72px;bottom:8vh;z-index:3;opacity:0;
     transition:opacity .5s ease;max-width:min(620px,52vw)}
@@ -201,7 +205,7 @@
      chips did not. */
   .tackle-row li.on{background:#000;border-color:#000;color:#fff}   /* the one in the lens */
   .tackle-row li{display:flex;align-items:center;justify-content:center;text-align:center;
-    min-height:60px;padding:10px 9px;box-sizing:border-box;
+    min-width:0;min-height:60px;padding:10px 9px;box-sizing:border-box;
     border:1px solid rgba(0,0,0,.45);border-radius:0;
     font-family:Montserrat,Arial,sans-serif;font-size:15px;font-weight:600;
     line-height:1.32;letter-spacing:.2px;color:#000;
@@ -439,7 +443,7 @@ const GROUND_EYE = new THREE.Vector3(-8680, 5125, -2895);  // measured valley fl
    the answer block sits, and the answers came back at 2.11:1. Aiming higher tilts
    the camera up, drops the massif in the frame and opens the clean sky the last beat
    is about. The type moves into the clear rather than being rescued by a wash. */
-const GROUND_AIM = new THREE.Vector3(149, 7980, 528);
+const GROUND_AIM = new THREE.Vector3(149, 8460, 528);
 /* Yin: "why mountain lean on right... mountain shall be in the center". The lean
    was Codex's instruction and it is overruled -- the peak is centred on the massif
    again. The only thing kept from that pass is the 360 m of downward aim, which
@@ -1086,8 +1090,8 @@ function makeMote(){
     sp: (Math.random()*3)|0,
     phase: Math.random()*Math.PI*2,
     state: 'float',
-    suckAt:  Math.random()*0.62,            // staggered across the suck window
-    suckDur: 0.16 + Math.random()*0.22,
+    suckAt:  Math.random()*0.70,            // staggered across the suck window
+    suckDur: 0.22 + Math.random()*0.30,     // each mote's own unhurried trip
     tx:0, ty:0, startX:0, startY:0, curveAmt:0, gone:false
   };
 }
@@ -1183,6 +1187,36 @@ const specImgs = Array.prototype.slice.call(document.querySelectorAll('.scope-im
 const specName = document.getElementById('scopeName');
 let specIdx = 0, lastSpec = 0, specLoaded = false;
 const chipEls = Array.prototype.slice.call(document.querySelectorAll('.tackle-row li'));
+const appsRowEl = document.querySelector('.apps-row');
+function mirrorAppsRow(){
+  /* the answers start on the charge line's own first line, not on the act's rule */
+  const head = document.querySelector('#actE h1.big.med');
+  const wrap = document.querySelector('#actE .ans-wrap');
+  if (head && wrap) wrap.style.top = head.offsetTop + 'px';
+
+  /* and the lens hangs from that same line rather than from the middle of the window */
+  if (head && scopeWrap) {
+    /* Not from getBoundingClientRect: the act carries a --dy travel offset that is
+       28px at rest, so reading its live rect put the lens 28px high. This is where
+       the headline's first line sits with that travel at zero -- .plate is fixed at
+       top:50% and translated by -54% of its own height. */
+    const plate = head.closest('.plate');
+    const stable = innerHeight * 0.5 - plate.offsetHeight * 0.54 + head.offsetTop;
+    scopeWrap.style.top = Math.round(stable) + 'px';
+    scopeWrap.style.transform = 'none';
+  }
+
+  if (!appsRowEl || !tackle) return;
+  const r = appsRowEl.getBoundingClientRect();
+  if (r.width < 10) return;
+  tackle.style.left   = Math.round(r.left) + 'px';
+  tackle.style.top    = Math.round(r.top) + 'px';
+  tackle.style.right  = 'auto';
+  tackle.style.bottom = 'auto';
+  tackle.style.width  = Math.round(r.width) + 'px';
+  tackle.style.maxWidth = 'none';
+}
+
 function cycleSpecimen(now){
   if (now - lastSpec < 4200) return;
   lastSpec = now;
@@ -1205,6 +1239,8 @@ const chargeHead = document.querySelector('#actE h1.big.med');
 const barEl = document.querySelector('.bar');
 const scopeWrap = document.getElementById('scopeWrap');
 const tackle    = document.getElementById('tackle');
+mirrorAppsRow();                       // declared above; runs once tackle exists
+addEventListener('resize', mirrorAppsRow);
 const cue = document.querySelector('.cue');
 const greyField = document.getElementById('greyField');
 let cloudSolid = 0, greyNow = 0;
@@ -1348,7 +1384,7 @@ function applyScroll() {
 
   // arrives WITH the grey rather than against the clean blue sky
   dustFade = smootherstep(0.355, 0.445, p) * (1 - smootherstep(0.955, 1.0, p));
-  suckP    = smootherstep(0.885, 0.985, p);   // begins on the polarity line
+  suckP    = smootherstep(0.845, 1.000, p);   // begins on the polarity line, and takes its time
   if (suckP < 0.002 && lastSuck > 0.002) resetDust();
   lastSuck = suckP;
 
