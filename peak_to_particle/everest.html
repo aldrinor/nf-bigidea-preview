@@ -174,25 +174,78 @@
   #actE .ans-wrap{position:absolute;top:0;left:0;width:100%}
   .plate .ans .cap{font-style:normal;font-weight:700;color:#000}
 
+/* ---- the specimen lens ------------------------------------------------
+     The circle stays. What goes is the bezel. The old frame was 5px of black
+     at 82% plus a 2px white lip -- seven times the weight of the 1px line
+     this page draws round its own cells -- and that is what made the disc
+     read as a coin lying on the mountain rather than a window cut into it.
+
+     The disc is now drawn with the page's own hairline and nothing else:
+     1px rgba(0,0,0,.45), the exact line on the five pollutant cells and the
+     five application cells. A soft shade inside the rim gives it depth. It
+     is measured, not eyeballed: it takes the rim from 241 to 229 grey over
+     the last 22px, and stops at .86 of the radius -- outside the widest
+     glow of the five photographs, which reaches .763. It never touches a
+     specimen.
+
+     The fill is #edf0f2, the page's own paper, not the old warm #f6f1ef.
+     Two reasons, both measured. The five photographs are shot on a studio
+     ground of #eaebed to #f1f2f4, mean #edeef0 -- the page background to
+     within two levels, where #f6f1ef was nine levels warm. And the fill has
+     to be opaque: the two images cross-fade through it, so at the midpoint
+     of every 340ms change the pair is only 75% opaque and 25% of whatever
+     sits behind the disc would show straight through the specimen, four
+     times a minute.
+
+     The scale is per specimen, and measured. Each source is 760x760 but the
+     subject is a different size in each: the radius holding 95% of the
+     subject mass runs 220px on the virus to 290px on the ultrafine
+     particle. These five numbers bring all five to that same 290px, so the
+     series reads as one instrument at one magnification instead of five
+     photographs at five distances. Each is checked against its own
+     content: not one of the five loses a pixel of glow, and the only content
+     lost anywhere is the outer 2% of the fungal spore's stalk, which a
+     circle already cuts at scale 1.00 -- that stalk reaches 1.137 of the
+     half-width, past the circle itself. */
   .scope-wrap{position:fixed;right:76px;top:50%;transform:translateY(-50%);z-index:3;
-    opacity:0;pointer-events:none;transition:opacity .5s ease}
-  .scope{position:relative;width:330px;height:330px;border-radius:50%;overflow:hidden;
-    background:#f6f1ef}
-  /* Same hairline as the five cells: 1px of black at 45%, no blue, no heavy band.
-     The inner shade stays so the specimen reads as being under glass. */
+    opacity:0;pointer-events:none;transition:opacity .5s ease;--d:330px}
+  .scope{position:relative;width:var(--d);height:var(--d);border-radius:50%;overflow:hidden;
+    background:#edf0f2}
   .scope-ring{position:absolute;inset:0;border-radius:50%;pointer-events:none;
-    box-shadow:inset 0 0 0 5px rgba(0,0,0,.82),
-               inset 0 0 0 7px rgba(255,255,255,.85),
-               inset 0 0 34px -12px rgba(0,0,0,.34)}
-  .scope-img{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);
-    object-fit:cover;opacity:0;transition:opacity .34s ease}
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.45),
+               inset 0 0 30px -14px rgba(0,0,0,.34)}
+  .scope-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    transform-origin:50% 50%;opacity:0;transition:opacity .34s ease}
+  .scope-img[data-k="ultrafine"]{transform:scale(1.00)}
+  .scope-img[data-k="spore"]    {transform:scale(1.12)}
+  .scope-img[data-k="smoke"]    {transform:scale(1.22)}
+  .scope-img[data-k="bacteria"] {transform:scale(1.20)}
+  .scope-img[data-k="virus"]    {transform:scale(1.32)}
   .scope-img.is-on{opacity:1}
-  .scope-card{margin-top:20px;text-align:center}
-  /* the same voice as the cells it names */
+  /* The label is the sixth cell, and it is the INVERTED one. The cell naming
+     this specimen in the row bottom-left is solid black with white type at
+     the same instant, so the label wears the same state: solid #000, 1px
+     #000, square, 60px minimum, 15px/600/.2px -- the cells' own values, read
+     off the live page, not approximated.
+
+     80% of the diameter and centred, because a bar as wide as the disc sits
+     under the widest chord of a circle and reads as a pedestal. 6px, not the
+     10px the cells keep between themselves, because the disc curves away
+     from the label: 6px is the clearance at the tangent, and the average
+     clearance across the label's width is about 32px. */
+  .scope-card{margin:6px auto 0;width:calc(var(--d) * .80);min-width:168px;
+    min-height:60px;box-sizing:border-box;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:9px 12px;
+    border:1px solid #000;border-radius:0;background:#000;color:#fff}
   .scope-card b{display:block;font-family:Montserrat,Arial,sans-serif;font-size:15px;
-    font-weight:700;color:#000;letter-spacing:.6px}
-  .scope-card span{display:block;margin-top:5px;font-family:Montserrat,Arial,sans-serif;
-    font-size:13px;font-weight:500;letter-spacing:.2px;color:rgba(0,0,0,.62)}
+    font-weight:600;line-height:1.32;letter-spacing:.2px;color:#fff}
+  .scope-card span{display:block;margin-top:3px;font-family:Montserrat,Arial,sans-serif;
+    font-size:13px;font-weight:500;letter-spacing:.2px;color:rgba(255,255,255,.74)}
+  /* the 76px page edge is held at every desktop width -- only the diameter
+     gives way, so the disc and the contact pill stay on one line */
+  @media (max-width:1200px){ .scope-wrap{--d:274px} }
+  @media (max-width:1024px){ .scope-wrap{--d:238px} }
 
   .tackle{position:fixed;left:72px;bottom:8vh;z-index:3;opacity:0;
     transition:opacity .5s ease;max-width:min(620px,52vw)}
@@ -217,8 +270,8 @@
   #dust{position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;opacity:0}
 
   @media (max-aspect-ratio:1/1){
-    .scope-wrap{right:auto;left:50%;top:auto;bottom:19vh;transform:translateX(-50%)}
-    .scope{width:232px;height:232px}
+    .scope-wrap{right:auto;left:50%;bottom:6vh;top:auto;
+      transform:translateX(-50%);--d:clamp(168px,52vw,232px)}
     .tackle{left:5vw;right:5vw;bottom:5vh;max-width:none}
     .tackle-row{grid-template-columns:repeat(2,1fr)}
   }
@@ -1201,7 +1254,8 @@ function mirrorAppsRow(){
   if (head && wrap) wrap.style.top = head.offsetTop + 'px';
 
   /* and the lens hangs from that same line rather than from the middle of the window */
-  if (head && scopeWrap) {
+  /* portrait centres the lens in CSS, so the desktop pinning must not run there */
+  if (head && scopeWrap && innerWidth / innerHeight > 1) {
     /* Not from getBoundingClientRect: the act carries a --dy travel offset that is
        28px at rest, so reading its live rect put the lens 28px high. This is where
        the headline's first line sits with that travel at zero -- .plate is fixed at
