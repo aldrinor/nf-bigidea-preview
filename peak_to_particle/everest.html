@@ -129,20 +129,24 @@
     font-weight:560;letter-spacing:.01em;color:#000;opacity:.72}
   .statement{margin:0;font-family:Anton,Impact,sans-serif;font-weight:400;
     font-size:clamp(40px,4.75vw,72px);line-height:.99;letter-spacing:.004em;color:#000}
-  .apps{width:min(620px,44vw);margin:38px 0 0}
-  .apps-label{margin:0 0 16px;font-family:Montserrat,Arial,sans-serif;font-size:13px;
-    font-weight:700;letter-spacing:.16em;color:#000;opacity:.9}
-  .apps-row{list-style:none;margin:0;padding:20px 0 0;display:flex;flex-wrap:wrap;
-    align-items:center;gap:10px 10px;border-top:1.5px solid rgba(0,0,0,.34)}
-  .apps-row li{font-family:Montserrat,Arial,sans-serif;font-size:14.5px;font-weight:650;
-    line-height:1.2;letter-spacing:.006em;color:#000;white-space:nowrap;
-    padding:11px 16px;border:1.5px solid #000;border-radius:8px;
-    background:rgba(255,255,255,.82);
-    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-    transition:background .28s ease,color .28s ease}
-  .apps-row li:hover{background:#000;color:#fff}
+  .apps{width:min(720px,50vw);margin:38px 0 0}
+  .apps-label{margin:0 0 18px;font-family:Montserrat,Arial,sans-serif;font-size:15px;
+    font-weight:700;letter-spacing:.6px;color:#000;opacity:1}
+  .apps-row{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:repeat(5,1fr);gap:10px}
+  .apps-row li{display:flex;align-items:center;justify-content:center;text-align:center;
+    min-height:60px;padding:10px 9px;box-sizing:border-box;
+    border:1px solid rgba(0,0,0,.45);border-radius:0;
+    font-family:Montserrat,Arial,sans-serif;font-size:15px;font-weight:600;
+    line-height:1.32;letter-spacing:.2px;color:#000;
+    white-space:normal;overflow-wrap:break-word;hyphens:none;
+    background:rgba(255,255,255,.66);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    transition:background .25s ease,border-color .25s ease}
+  .apps-row li:hover{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.75)}
   @media (max-width:1024px){
     .apps{width:min(560px,90vw)}
+    .apps-row{grid-template-columns:repeat(2,1fr)}
   }
   .plate .verticals{list-style:none;margin:10px 0 0;padding:0;max-width:34ch}
   .plate .verticals li{font-size:17px;font-weight:470;color:#000;padding:9px 0;
