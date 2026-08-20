@@ -208,7 +208,7 @@
      circle already cuts at scale 1.00 -- that stalk reaches 1.137 of the
      half-width, past the circle itself. */
   .scope-wrap{position:fixed;left:calc(75% - 38px);top:50%;
-    transform:translate(-50%,-50%);z-index:3;
+    transform:translate(-50%,-50%);z-index:5;
     opacity:0;pointer-events:none;transition:opacity .5s ease;--d:330px}
   .scope{position:relative;width:var(--d);height:var(--d);border-radius:50%;overflow:hidden;
     background:#edf0f2}
@@ -240,7 +240,7 @@
      10px the cells keep between themselves, because the disc curves away
      from the label: 6px is the clearance at the tangent, and the average
      clearance across the label's width is about 32px. */
-  .scope-card{position:fixed;margin:0;z-index:3;opacity:0;pointer-events:none;
+  .scope-card{position:fixed;margin:0;z-index:5;opacity:0;pointer-events:none;
     transition:opacity .5s ease;width:calc(var(--d) * .80);min-width:168px;
     min-height:60px;box-sizing:border-box;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -1287,6 +1287,14 @@ function mirrorAppsRow(){
     card.style.left   = Math.round(dr.left + dr.width / 2 - cw / 2) + 'px';
     card.style.top    = Math.round(r.top) + 'px';
     card.style.height = Math.round(r.height) + 'px';
+
+    /* and the disc sits a fixed 46px clear above that cell, rather than wherever the
+       viewport's centre happens to put it. Landscape only -- portrait centres the
+       whole module in CSS. */
+    if (scopeWrap && innerWidth / innerHeight > 1) {
+      scopeWrap.style.top = Math.round(r.top - 46 - dr.height) + 'px';
+      scopeWrap.style.transform = 'translateX(-50%)';
+    }
   }
   tackle.style.left   = Math.round(r.left) + 'px';
   tackle.style.top    = Math.round(r.top) + 'px';
