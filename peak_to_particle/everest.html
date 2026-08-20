@@ -34,19 +34,16 @@
      nothing needs its own panel. */
   /* Feathered fields that appear only when the measurement says the type needs
      them. No border, no radius, no card -- just a soft lift in the right place. */
-  .field-copy,.field-meta{position:fixed;z-index:1;pointer-events:none;opacity:0;
+  .field-copy{position:fixed;z-index:1;pointer-events:none;opacity:0;
     transition:opacity .55s linear}
-  .field-copy{left:0;top:0;width:min(900px,62vw);height:100vh;
+  .field-copy{left:0;top:0;width:min(1010px,70vw);height:100vh;
     background:linear-gradient(100deg,
-      rgba(236,241,246,.97) 0%,  rgba(236,241,246,.94) 34%,
-      rgba(236,241,246,.84) 52%, rgba(236,241,246,.56) 68%,
-      rgba(236,241,246,.34) 82%, rgba(236,241,246,0)   97%);
+      rgba(236,241,246,.98) 0%,  rgba(236,241,246,.97) 54%,
+      rgba(236,241,246,.93) 70%, rgba(236,241,246,.76) 80%,
+      rgba(236,241,246,.48) 87%, rgba(236,241,246,.24) 92%,
+      rgba(236,241,246,.09) 96%, rgba(236,241,246,0)   100%);
     -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 13%,#000 94%,transparent 100%);
     mask-image:linear-gradient(180deg,transparent 0,#000 13%,#000 94%,transparent 100%)}
-  .field-meta{right:0;bottom:0;width:min(470px,36vw);height:30vh;
-    background:radial-gradient(110% 98% at 84% 78%,
-      rgba(236,241,246,.98) 0%, rgba(236,241,246,.86) 38%,
-      rgba(236,241,246,.44) 66%, rgba(236,241,246,0) 100%)}
   .scrim2{position:fixed;left:0;right:0;bottom:0;height:17vh;z-index:1;pointer-events:none;
     background:linear-gradient(0deg,rgba(240,245,249,.40) 0%,rgba(240,245,249,.15) 48%,rgba(240,245,249,0) 100%)}
   .scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -102,12 +99,6 @@
 
   /* over the sky, not over the mountain -- 10 px mono on a snowfield is
      unreadable however it is coloured */
-  /* One grid with the scroll cue: same face, size, weight, margin and baseline.
-     The box is gone -- a full-width bottom scrim carries the contrast for both, so
-     neither reads as a utility sticker pasted on the picture. */
-  .meta{position:fixed;right:72px;bottom:7vh;z-index:2;text-align:right;
-    font-family:Montserrat,Arial,sans-serif;font-size:12px;font-weight:650;
-    letter-spacing:.09em;color:#000;opacity:.86;line-height:1.8;font-size:12px}
   @media (max-aspect-ratio:1/1){
     .plate{top:13vh;transform:translateY(var(--dy,0px));max-width:min(30ch,86vw)}
     /* on a phone the frame is tall, so the sky band at the top is where small
@@ -115,7 +106,6 @@
     /* On a phone the scrim comes from the TOP, so the bottom of the frame has
        no ground under it -- the coordinates were sitting on bare snow with only
        a halo holding them up. Put them under the copy, inside the scrim. */
-    .meta{right:auto;left:7vw;text-align:left;top:36vh;bottom:auto;opacity:.50}
   }
   /* ---- the acts -------------------------------------------------------
      Type taken off the built site rather than re-designed: 50/70 at weight 400
@@ -151,8 +141,8 @@
   .statement{margin:0;font-family:Anton,Impact,sans-serif;font-weight:400;
     font-size:clamp(34px,3.85vw,58px);line-height:1.02;letter-spacing:.002em;color:#000}
   .apps{width:min(600px,42vw);margin:32px 0 0}
-  .apps-label{margin:0 0 14px;font-family:Montserrat,Arial,sans-serif;font-size:11px;
-    font-weight:650;letter-spacing:.15em;color:#000;opacity:.55}
+  .apps-label{margin:0 0 14px;font-family:Montserrat,Arial,sans-serif;font-size:14px;
+    font-weight:560;letter-spacing:0;color:#000;opacity:.78}
   .apps-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);
     gap:0 6px;border-top:1px solid rgba(0,0,0,.26)}
   .apps-row li{min-width:0;padding:15px 14px 0 0;font-family:Montserrat,Arial,sans-serif;
@@ -249,7 +239,6 @@
 <div class="scrim"></div>
 <div class="scrim2"></div>
 <div class="field-copy"></div>
-<div class="field-meta"></div>
 <header class="bar">
   <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR" decoding="sync">
   <nav>
@@ -266,7 +255,7 @@
   <p class="lede">built around its patented NanoFlashing&trade; technology.</p>
   <img class="hero-mark" hidden src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR">
   <div class="apps">
-    <p class="apps-label">5 Applications</p>
+    <p class="apps-label">The platform has five primary application verticals:</p>
     <ul class="apps-row">
       <li>Air</li><li>Water</li><li>Personal Protective<br>Wear (PPW&trade;)</li>
       <li>Food Packaging</li><li>Medical Devices</li>
@@ -324,7 +313,6 @@
 
 <div id="scroller"></div>
 <div class="cue">Scroll<span>&darr;</span></div>
-<div class="meta">27&deg;59&prime;17&Prime;N&nbsp; 86&deg;55&prime;31&Prime;E<br>8,848 m<br>elevation and imagery, measured</div>
 <div id="plate0"></div>
 <div id="load"></div>
 
@@ -430,10 +418,11 @@ const PIVOT = new THREE.Vector3(149, 8260, 528);
 const MID_EYE    = new THREE.Vector3(-7300, 7750, 4300);   // inside the cloud
 const GROUND_EYE = new THREE.Vector3(-8680, 5125, -2895);  // measured valley floor
 const GROUND_AIM = new THREE.Vector3(149, 7250, 528);
-/* Screen-right at the opening pose is (0.66, 0, 0.75). This is PIVOT less 1 000 m
-   along it, which slides the peak off the copy column, and 360 m down, which tilts
-   the camera and closes the empty sky at the top. */
-const HERO_AIM   = new THREE.Vector3(-874, 7900, -635);
+/* Yin: "why mountain lean on right... mountain shall be in the center". The lean
+   was Codex's instruction and it is overruled -- the peak is centred on the massif
+   again. The only thing kept from that pass is the 360 m of downward aim, which
+   closes the empty sky at the top without moving the peak sideways. */
+const HERO_AIM   = new THREE.Vector3(149, 7900, 528);
 const VIEWS = {
   hero:  [-5399, 8383, 5417],
   wide:  [-6980, 8490, 6890],
@@ -1359,6 +1348,18 @@ renderer.setAnimationLoop(() => {
   measureBackdrop();
 });
 
+/* Test hook: park the opening orbit on an exact azimuth, in degrees, so the
+   contrast sweep samples the same poses every run. Not used by the page itself. */
+window.__setAz = function (deg) {
+  const r = Math.hypot(heroEye.x - PIVOT.x, heroEye.z - PIVOT.z);
+  const a0 = Math.atan2(heroEye.z - PIVOT.z, heroEye.x - PIVOT.x);
+  const a = a0 + deg * Math.PI / 180;
+  camera.position.set(PIVOT.x + r * Math.cos(a), heroEye.y, PIVOT.z + r * Math.sin(a));
+  controls.target.copy(HERO_AIM);
+  controls.update();
+  autoSpin = false;
+};
+
 /* --- adaptive text protection ---------------------------------------------
    Measured, not guessed. With a fixed wash the worst case around the orbit was
    2.05:1 on the applications index and 2.07:1 on the coordinates -- black type on
@@ -1369,21 +1370,29 @@ renderer.setAnimationLoop(() => {
    block, only when it is needed. Over open sky it is invisible. */
 const scrimEl = document.querySelector('.scrim');
 const fieldC  = document.querySelector('.field-copy');
-const fieldM  = document.querySelector('.field-meta');
-let backTick = 0, bufC = null, bufC2 = null, bufM = null, lastC = -1, lastM = -1;
+let backTick = 0, bufC = null, bufC2 = null, bufC3 = null, bufC4 = null, lastC = -1;
 
+function srgbToLinear(c) {
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
 function darkEnd(buf) {
   const ls = [];
   for (let i = 0; i < buf.length; i += 4) {
-    ls.push(0.2126 * buf[i]/255 + 0.7152 * buf[i+1]/255 + 0.0722 * buf[i+2]/255);
+    ls.push(0.2126 * srgbToLinear(buf[i]) +
+            0.7152 * srgbToLinear(buf[i+1]) +
+            0.0722 * srgbToLinear(buf[i+2]));
   }
   ls.sort((a, b) => a - b);
-  return ls[Math.floor(ls.length * 0.15)];   // one dark ridge is what breaks type
+  return ls[Math.floor(ls.length * 0.05)];   // one dark ridge is what breaks type
 }
+const FIELD_LUM = 0.873;     // luminance of rgba(236,241,246)
+const FIELD_K   = 0.97;      // the gradient is flat across the copy now, so this holds
+const TARGET    = 0.47;      // the bar is 4.5:1; this keeps a margin over it
 function needFor(dark) {
-  // 0.62 and brighter needs nothing; 0.18 and darker needs the full field
-  const k = Math.min(1, Math.max(0, (0.62 - dark) / (0.62 - 0.18)));
-  return k * k;
+  if (dark >= TARGET) return 0;                       // already light enough
+  const a = (TARGET - dark) / ((FIELD_LUM - dark) * FIELD_K);
+  return Math.min(1, Math.max(0, a));
 }
 function readBlock(gl, buf, xCss, yBottomCss, wCss, hCss, dpr) {
   const w = Math.max(1, Math.round(wCss * dpr)), h = Math.max(1, Math.round(hCss * dpr));
@@ -1404,11 +1413,16 @@ function measureBackdrop() {
   // the copy column: a wide, short strip at the applications index, which is the
   // lowest and worst-lit part of the block. GL counts y from the bottom.
   const cy = VH - 575;
+  const hy = VH - 352;                      // CSS y 272-352: the headline band itself
   bufC  = readBlock(gl, bufC,  72, cy, 150, 26, dpr) || bufC;
   bufC2 = readBlock(gl, bufC2, 450, cy, 170, 26, dpr) || bufC2;
+  bufC3 = readBlock(gl, bufC3, 80, hy, 350, 80, dpr) || bufC3;
+  bufC4 = readBlock(gl, bufC4, 80, VH - 502, 350, 62, dpr) || bufC4;   // the label lines
   if (bufC && fieldC) {
     const a = Math.max(needFor(darkEnd(bufC)),
-                       bufC2 ? needFor(darkEnd(bufC2)) : 0);
+                       bufC2 ? needFor(darkEnd(bufC2)) : 0,
+                       bufC3 ? needFor(darkEnd(bufC3)) : 0,
+                       bufC4 ? needFor(darkEnd(bufC4)) : 0);
     if (Math.abs(a - lastC) > 0.02) {
       lastC = a;
       fieldC.style.opacity = a.toFixed(3);
@@ -1416,13 +1430,6 @@ function measureBackdrop() {
     }
   }
 
-  // the coordinates, bottom right
-  const my = VH - 760;
-  bufM = readBlock(gl, bufM, window.innerWidth - 300, my, 70, 18, dpr) || bufM;
-  if (bufM && fieldM) {
-    const a = needFor(darkEnd(bufM));
-    if (Math.abs(a - lastM) > 0.02) { lastM = a; fieldM.style.opacity = a.toFixed(3); }
-  }
 }
 
 /* three.js fixes the VERTICAL field, so a phone held upright gets a very narrow
