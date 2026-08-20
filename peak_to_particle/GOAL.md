@@ -106,6 +106,33 @@ About 24% faster, and the spread is +-0.25, so the gap is real. Note what this a
 says: rotation was NOT the main cost. The cloud raymarch is. It now re-marches every
 twelfth frame when the camera is still instead of every third.
 
+### The placeholder must match the live camera, or the load jumps
+
+Yin: "it load at one angle, then after finish loading, it jump to another angle."
+
+The blurred still is embedded in the HTML so the first paint has a mountain. It was
+shot from the OLD right-leaning pose and never re-shot when the camera was centred,
+so the placeholder and the live scene were two different photographs.
+
+**If the camera framing changes, RE-SHOOT THE PLATE.** Harness: `plate.mjs`.
+
+Two more things had to be right, and neither was obvious:
+
+- **Match by HEIGHT, not `cover`.** The camera holds a fixed VERTICAL field of 21.5
+  degrees for every window wider than 1.45 and only the horizontal extent grows with
+  the window. So `background-size: auto 100%` centred is the correct mapping;
+  `cover` crops the height on a wide window and jumps again. The plate is shot at
+  2.96:1 so an ultrawide screen has width in hand. Below aspect 1.45 the lens opens
+  to 32 degrees and steps back, so no single still can match -- there the plate is
+  not shown at all and the CSS sky carries it.
+- **A cloud that jumps is still a jump.** Getting the terrain to line up was not
+  enough. `?ct=<seconds>` pins the cloud clock; the handover was measured at 2.05 s,
+  so the plate is shot with `?ct=1.8`.
+
+Measured, live scene against the plate, per-pixel difference on 0-255:
+**median 2, mean 7.3, 95th percentile 33.** Skyline offset across 180 columns:
+median 4 px. Before the fix the cloud band disagreed completely.
+
 ### Contrast, still framing, ink only, 4.5:1 required
 
 | element | worst |
