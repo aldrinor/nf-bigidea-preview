@@ -214,6 +214,12 @@
   .scope-ring{position:absolute;inset:0;border-radius:50%;pointer-events:none;
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.45),
                inset 0 0 30px -14px rgba(0,0,0,.34)}
+  /* the alternative, for a side-by-side judgement: no line at all, the disc held by
+     a feathered edge instead. Reached with ?edge=soft */
+  .edge-soft .scope{
+    -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 0,#000 90%,rgba(0,0,0,0) 100%);
+            mask-image:radial-gradient(circle at 50% 50%,#000 0,#000 90%,rgba(0,0,0,0) 100%)}
+  .edge-soft .scope-ring{box-shadow:inset 0 0 46px -16px rgba(0,0,0,.30)}
   .scope-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
     transform-origin:50% 50%;opacity:0;transition:opacity .34s ease}
   .scope-img[data-k="ultrafine"]{transform:scale(1.00)}
@@ -233,7 +239,7 @@
      10px the cells keep between themselves, because the disc curves away
      from the label: 6px is the clearance at the tangent, and the average
      clearance across the label's width is about 32px. */
-  .scope-card{margin:6px auto 0;width:calc(var(--d) * .80);min-width:168px;
+  .scope-card{margin:22px auto 0;width:calc(var(--d) * .80);min-width:168px;
     min-height:60px;box-sizing:border-box;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:9px 12px;
@@ -1022,6 +1028,7 @@ controls.maxPolarAngle = Math.PI/2 + 0.06;   // slightly below the summit, looki
 controls.autoRotate = false;
 const SPIN_SECONDS = parseFloat(q.get('spin') || '0');
 const CLOUD_T = q.has('ct') ? parseFloat(q.get('ct')) : -1;
+if (q.get('edge') === 'soft') document.documentElement.classList.add('edge-soft');
 let autoSpin = SPIN_SECONDS > 0;
 controls.addEventListener('start', () => { autoSpin = false; });   // the visitor takes over for good
 controls.update();
@@ -1154,7 +1161,7 @@ function sizeDust(){
   dustCv.width = DW*dpr; dustCv.height = DH*dpr;
   dustCv.style.width = DW+'px'; dustCv.style.height = DH+'px';
   dctx.setTransform(dpr,0,0,dpr,0,0);
-  const want = DW < 720 ? (REDUCED ? 300 : 500) : (REDUCED ? 400 : 700);   // the original hero's
+  const want = DW < 720 ? (REDUCED ? 900 : 2500) : (REDUCED ? 1400 : 3500);  // 5x, at Yin's ask
   if (motes.length !== want) { motes = []; for (let i=0;i<want;i++) motes.push(makeMote()); }
 }
 makeDustSprites(); sizeDust();
@@ -1223,6 +1230,12 @@ function drawDust(t){
     a *= 0.75 + 0.25*Math.sin(t*0.001 + m.phase);
     if (a < 0.003) continue;
     const d = m.size*4;
+    /* At five times the count, a good share of the field is faint enough to make no
+       visible difference. Below 2% alpha the mote cannot be told from the backdrop,
+       so it is not worth a draw call. Also skip anything off-screen: with 3 500 motes
+       the wrap-around margin holds a lot of them at any moment. */
+    if (a < 0.02) continue;
+    if (m.x < -d || m.x > DW + d || m.y < -d || m.y > DH + d) continue;
     dctx.globalAlpha = a;
     dctx.drawImage(dustSprites[m.sp], m.x-d/2, m.y-d/2, d, d);
   }
@@ -1254,17 +1267,8 @@ function mirrorAppsRow(){
   if (head && wrap) wrap.style.top = head.offsetTop + 'px';
 
   /* and the lens hangs from that same line rather than from the middle of the window */
-  /* portrait centres the lens in CSS, so the desktop pinning must not run there */
-  if (head && scopeWrap && innerWidth / innerHeight > 1) {
-    /* Not from getBoundingClientRect: the act carries a --dy travel offset that is
-       28px at rest, so reading its live rect put the lens 28px high. This is where
-       the headline's first line sits with that travel at zero -- .plate is fixed at
-       top:50% and translated by -54% of its own height. */
-    const plate = head.closest('.plate');
-    const stable = innerHeight * 0.5 - plate.offsetHeight * 0.54 + head.offsetTop;
-    scopeWrap.style.top = Math.round(stable) + 'px';
-    scopeWrap.style.transform = 'none';
-  }
+  /* The lens is centred on the right half by CSS and nothing pins it any more.
+     It used to hang off the charge headline's first line, which sat it high. */
 
   if (!appsRowEl || !tackle) return;
   const r = appsRowEl.getBoundingClientRect();
