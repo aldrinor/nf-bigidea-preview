@@ -151,10 +151,21 @@
   .plate .verticals{list-style:none;margin:10px 0 0;padding:0;max-width:34ch}
   .plate .verticals li{font-size:17px;font-weight:470;color:#000;padding:9px 0;
     border-bottom:1px solid rgba(0,0,0,.14)}
-  .plate .ans{font-size:17px;line-height:1.55;color:#000;font-weight:470}
-  .plate .ans.a1{margin:26px 0 12px}
-  .plate .ans.a2{margin:0;max-width:46ch}
+  /* Same face and same size as the charge line they replace -- Yin asked for the
+     answers to carry the same weight on screen, not to shrink to a caption. */
+  .plate .ans{font-family:Anton,Impact,sans-serif;font-weight:400;
+    font-size:clamp(32px,3.6vw,66px);line-height:1.04;letter-spacing:.004em;color:#000}
+  .plate .ans.a1{margin:0 0 30px}
+  .plate .ans.a2{margin:0;max-width:none}
+  .plate .ans .cap{font-style:normal;font-weight:400;color:#000;
+    box-shadow:inset 0 -0.10em 0 rgba(0,0,0,.85)}
   #actE h1.big.med{max-width:20ch}
+  /* the answers sit where the headline was, so one replaces the other in place */
+  /* Centred on the act, not hung from its top. The act's height is set by the SHORT
+     headline, so anchoring the much taller answers at top:0 pushed them off the
+     bottom of the screen. Centring means the answers occupy the same middle the
+     headline did, whatever their height. */
+  #actE .ans-wrap{position:absolute;top:50%;left:0;width:100%;transform:translateY(-50%)}
   .plate .ans .cap{font-style:normal;font-weight:700;color:#000}
 
   .scope-wrap{position:fixed;right:11vw;top:50%;transform:translateY(-50%);z-index:3;
@@ -176,18 +187,21 @@
   .tackle{position:fixed;left:72px;bottom:8vh;z-index:3;opacity:0;
     transition:opacity .5s ease;max-width:min(620px,52vw)}
   .tackle-row{list-style:none;margin:0;padding:0;display:grid;
-    grid-template-columns:repeat(5,1fr);gap:8px}
+    grid-template-columns:repeat(5,1fr);gap:10px}   /* same gap as the applications */
   /* Opaque, not translucent: over a backdrop that drops from 213 to 142 the
      five fills measured 233 / 229 / 215 / 211 / 200 and the last two had
      mountain texture showing through them, so the row did not read as one
      object. And there was no selected state at all -- the lens changed and the
      chips did not. */
-  .tackle-row li.on{background:#000;border-color:#000;color:#fff}
+  .tackle-row li.on{background:#000;border-color:#000;color:#fff}   /* the one in the lens */
   .tackle-row li{display:flex;align-items:center;justify-content:center;text-align:center;
-    font-family:Montserrat,Arial,sans-serif;font-size:14.4px;font-weight:650;line-height:1.32;
-    color:#000;border:1px solid #000;border-radius:7px;background:#fff;
-    transition:background .35s ease,color .35s ease,border-color .35s ease;
-    padding:10px 9px;min-height:54px}
+    min-height:60px;padding:10px 9px;box-sizing:border-box;
+    border:1px solid rgba(0,0,0,.45);border-radius:0;
+    font-family:Montserrat,Arial,sans-serif;font-size:15px;font-weight:600;
+    line-height:1.32;letter-spacing:.2px;color:#000;
+    background:rgba(255,255,255,.66);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    transition:background .3s ease,color .3s ease,border-color .3s ease}
 
   /* the dust is a flat canvas over everything, exactly as in the original */
   #dust{position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;opacity:0}
@@ -237,7 +251,6 @@
 </head>
 <body style="background:#b7ceed">
 <canvas id="c"></canvas>
-<div id="greyField"></div>
 <div class="scrim2"></div>
 <header class="bar">
   <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR" decoding="sync">
@@ -277,9 +290,11 @@
 <div class="plate act" id="actE">
   <div class="rule"></div>
   <h1 class="big med">Most harmful pollutants carry an electric charge.</h1>
-  <p class="ans a1">What they carry, we capture.</p>
-  <p class="ans a2"><em class="cap">Positive polarity</em> captures particles, destroys up to
-     99% of pathogens through a physical mechanism.</p>
+  <div class="ans-wrap">
+    <p class="ans a1">What they carry, we capture.</p>
+    <p class="ans a2"><em class="cap">Positive polarity</em> captures particles, destroys up to
+       99% of pathogens through a physical mechanism.</p>
+  </div>
 </div>
 
 <!-- The lens: a 9 px band, a white lip, an inner vignette. The coral glow is
@@ -1055,7 +1070,7 @@ function makeMote(){
   return {
     x: Math.random()*DW, y: Math.random()*DH,
     vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4,
-    size: 1.6 + Math.random()*3.6,          // drawn at size*4 -> 6..21 px
+    size: 1.05 + Math.random()*2.35,        // drawn at size*4 -> 4..14 px
     baseAlpha: 0.15 + Math.random()*0.45,      // the original hero's
     sp: (Math.random()*3)|0,
     phase: Math.random()*Math.PI*2,
@@ -1117,7 +1132,7 @@ function drawDust(t){
       }
     }
 
-    let a = m.baseAlpha * (0.40 + 0.60 * greyNow + 0.45 * cloudSolid);
+    let a = m.baseAlpha * (0.34 + 0.40 * greyNow + 0.20 * cloudSolid);
     if (m.state === 'suck'){
       const prog = Math.min(1, Math.max(0, (suckP - m.suckAt) / m.suckDur));
       if (prog >= 1) { m.gone = true; continue; }
@@ -1175,6 +1190,7 @@ function cycleSpecimen(now){
 let scrollP = 0, scrollTarget = 0;
 const ACTS = ['actA','actB','actC','actE'].map(function(id){ return document.getElementById(id); });
 const ansEls = Array.prototype.slice.call(document.querySelectorAll('#actE .ans'));
+const chargeHead = document.querySelector('#actE h1.big.med');
 const barEl = document.querySelector('.bar');
 const scopeWrap = document.getElementById('scopeWrap');
 const tackle    = document.getElementById('tackle');
@@ -1255,8 +1271,8 @@ function applyScroll() {
   const cu = cloud.material.uniforms;
   const blind   = smootherstep(0.22, 0.38, p);   // into the deck
   const under   = smootherstep(0.46, 0.60, p);   // out underneath it
-  const closeIn = smootherstep(0.60, 0.80, p);   // then it closes over everything
-  const lift    = smootherstep(0.82, 0.92, p);   // and lifts for the charge
+  const closeIn = smootherstep(0.60, 0.80, p);   // thickens, but never closes over
+  const lift    = smootherstep(0.900, 1.000, p);  // and the sky comes back clean
 
   /* Yin, both at once: "when it get more grey cloud, it start lagging, why we are
      not using the floating dust effect that we originally have" and "the grey cloud
@@ -1275,13 +1291,13 @@ function applyScroll() {
 
      How completely the deck has closed over: 0 = structure still visible and the
      volume is worth marching, 1 = formless and it is not. */
-  const solid = smootherstep(0.655, 0.755, p) * (1 - smootherstep(0.845, 0.905, p));
-  cloudSolid = solid;
-  if (greyField) greyField.style.opacity = (solid * 0.93).toFixed(3);
+  /* Kept only to drive how strongly the dust is lit -- it no longer paints
+     anything over the mountain. */
+  cloudSolid = smootherstep(0.60, 0.76, p) * (1 - smootherstep(0.90, 0.98, p));
 
-  cu.uClearAmt.value = 0.20 + 0.80*blind - 0.62*under + 0.62*closeIn - 0.72*lift;
-  cu.uCover.value    = 0.78 + 0.215*blind - 0.40*under + 0.39*closeIn - 0.46*lift;
-  cu.uDensity.value  = 0.014 + 0.040*blind - 0.038*under + 0.036*closeIn - 0.044*lift;
+  cu.uClearAmt.value = 0.20 + 0.80*blind - 0.62*under + 0.20*closeIn - 0.30*lift;
+  cu.uCover.value    = 0.78 + 0.215*blind - 0.40*under + 0.11*closeIn - 0.20*lift;
+  cu.uDensity.value  = 0.014 + 0.040*blind - 0.038*under + 0.009*closeIn - 0.020*lift;
   for (let i=0;i<TERRAIN_SHADERS.length;i++){
     TERRAIN_SHADERS[i].uniforms.uCCover.value = cu.uCover.value;
     TERRAIN_SHADERS[i].uniforms.uCClear.value.y = cu.uClearAmt.value;
@@ -1312,22 +1328,26 @@ function applyScroll() {
   }
 
   // the two answer lines, inside the act that already holds the headline
-  const ansIn = smootherstep(0.790, 0.855, p).toFixed(3);
+  /* The headline leaves before the answers arrive, rather than sharing the screen
+     with them. Both live inside one act, so the sentence is never drawn twice. */
+  const headOut = 1 - smootherstep(0.800, 0.855, p);
+  if (chargeHead) chargeHead.style.opacity = headOut.toFixed(3);
+  const ansIn = smootherstep(0.845, 0.900, p).toFixed(3);
   for (let i = 0; i < ansEls.length; i++) ansEls[i].style.opacity = ansIn;
 
   // arrives WITH the grey rather than against the clean blue sky
   dustFade = smootherstep(0.355, 0.445, p) * (1 - smootherstep(0.955, 1.0, p));
-  suckP    = smootherstep(0.86, 0.985, p);
+  suckP    = smootherstep(0.885, 0.985, p);   // begins on the polarity line
   if (suckP < 0.002 && lastSuck > 0.002) resetDust();
   lastSuck = suckP;
 
-  if (p > 0.55 && !specLoaded) {
+  if (p > 0.42 && !specLoaded) {
     specLoaded = true;
     for (const im of specImgs) if (im.dataset.src) im.src = im.dataset.src;
   }
-  const lensIn = smootherstep(0.78, 0.86, p);
+  const lensIn = smootherstep(0.660, 0.740, p);
   scopeWrap.style.opacity = lensIn.toFixed(3);
-  tackle.style.opacity    = smootherstep(0.795, 0.845, p).toFixed(3);
+  tackle.style.opacity    = smootherstep(0.675, 0.755, p).toFixed(3);
   if (cue) cue.style.opacity = String(0.62 * (1 - smootherstep(0.02, 0.16, p)));
   // the bar's small mark only exists once the hero's big one has gone
   if (barEl) barEl.classList.toggle('solid', p > 0.055);
@@ -1401,7 +1421,7 @@ renderer.setAnimationLoop(() => {
      jump either -- the terrain aligning is not enough on its own. */
   /* Skip the whole three-pass cloud while the flat field is opaque over it. It is
      the most expensive thing on the page and none of it is visible here. */
-  if (cloudSolid < 0.94) cloud.render(scene, camera, CLOUD_T >= 0 ? CLOUD_T : t);
+  cloud.render(scene, camera, CLOUD_T >= 0 ? CLOUD_T : t);
 });
 
 /* Test hook: park the opening orbit on an exact azimuth, in degrees, so the
