@@ -800,7 +800,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
   const compScene = new THREE.Scene(); compScene.add(compQuad);
   const postCam = new THREE.Camera();
   const lastCloudPos = new THREE.Vector3(1e9, 1e9, 1e9);
-  let lastCloudFov = -1, cloudAge = 0, cloudPrimed = false;
+  let lastCloudFov = -1, cloudAge = 0, cloudPrimed = false, movedRecently = 0;
 
   function sizeTargets(w, h) {
     const r = renderer.getPixelRatio();
@@ -844,7 +844,13 @@ export function createVolumetricCloud(renderer, opts = {}) {
          gets a fresh march every frame. */
       const moved = camera.position.distanceToSquared(lastCloudPos) > 9.0 ||
                     Math.abs(camera.fov - lastCloudFov) > 0.01;
-      const marchNow = moved || (++cloudAge >= 3) || !cloudPrimed;
+      /* Every third frame was set when the camera was always orbiting, so a stale
+         cloud was always about to be replaced anyway. With the opening camera held
+         still nothing in the view changes but the cloud's own slow drift, and that
+         does not need twenty updates a second. Still: every twelfth frame. Moving:
+         every frame. The march is the most expensive pass on the page. */
+      const marchNow = moved || (++cloudAge >= (movedRecently > 0 ? 3 : 12)) || !cloudPrimed;
+      if (moved) movedRecently = 30; else if (movedRecently > 0) movedRecently--;
       u.uTime.value = time;
       u.uNear.value = camera.near;
       u.uFar.value = camera.far;

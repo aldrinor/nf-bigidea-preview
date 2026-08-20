@@ -32,35 +32,11 @@
      at every bearing without ever reading as a panel. */
   /* Carries the contrast for the copy column AND the bottom line of metadata, so
      nothing needs its own panel. */
-  /* Feathered fields that appear only when the measurement says the type needs
-     them. No border, no radius, no card -- just a soft lift in the right place. */
-  .field-copy{position:fixed;z-index:1;pointer-events:none;opacity:0;
-    transition:opacity .55s linear}
-  .field-copy{left:0;top:0;width:min(1010px,70vw);height:100vh;
-    background:linear-gradient(100deg,
-      rgba(236,241,246,.98) 0%,  rgba(236,241,246,.97) 54%,
-      rgba(236,241,246,.93) 70%, rgba(236,241,246,.76) 80%,
-      rgba(236,241,246,.48) 87%, rgba(236,241,246,.24) 92%,
-      rgba(236,241,246,.09) 96%, rgba(236,241,246,0)   100%);
-    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 13%,#000 94%,transparent 100%);
-    mask-image:linear-gradient(180deg,transparent 0,#000 13%,#000 94%,transparent 100%)}
-  .scrim2{position:fixed;left:0;right:0;bottom:0;height:17vh;z-index:1;pointer-events:none;
-    background:linear-gradient(0deg,rgba(240,245,249,.40) 0%,rgba(240,245,249,.15) 48%,rgba(240,245,249,0) 100%)}
-  .scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(100deg,
-      rgba(234,240,245,calc(var(--sa,.34)))          0%,
-      rgba(234,240,245,calc(var(--sa,.34) * 0.62))   16%,
-      rgba(234,240,245,calc(var(--sa,.34) * 0.30))   30%,
-      rgba(234,240,245,calc(var(--sa,.34) * 0.09))   44%,
-      rgba(234,240,245,0)                            53%);
-    transition:background .5s linear}
-  @media (max-aspect-ratio:1/1){
-    .scrim{background:linear-gradient(184deg,
-      rgba(234,240,245,.92) 0%,
-      rgba(234,240,245,.74) 22%,
-      rgba(234,240,245,.30) 42%,
-      rgba(234,240,245,0)   58%)}
-  }
+  .scrim2{position:fixed;left:0;right:0;bottom:0;height:34vh;z-index:1;pointer-events:none;
+    background:linear-gradient(0deg,
+      rgba(238,243,248,.90) 0%,  rgba(238,243,248,.72) 20%,
+      rgba(238,243,248,.44) 40%, rgba(238,243,248,.20) 60%,
+      rgba(238,243,248,.06) 80%, rgba(238,243,248,0)   100%)}
 
   .plate{opacity:1}
   #plate2{opacity:0}
@@ -115,7 +91,8 @@
   /* Act A is the opening copy. It was waiting on JavaScript and arriving with the
      terrain, which is why the page read as one late step instead of a page that
      was already there. It starts visible; the scroll engine takes it from here. */
-  #actA{opacity:1;visibility:visible;max-width:none;width:min(660px,46vw)}
+  #actA{opacity:1;visibility:visible;max-width:none;width:min(660px,46vw);
+    transform:translateY(calc(-54% + var(--dy,0px) - 92px))}
   @media (max-width:1024px){ #actA{width:auto;left:5vw;right:5vw} }
   /* the plate's 28ch was set for a three-word headline; these lines are longer
      and the answer paragraph runs to 46ch, so the acts carry their own width */
@@ -236,9 +213,7 @@
 </head>
 <body style="background:#b7ceed">
 <canvas id="c"></canvas>
-<div class="scrim"></div>
 <div class="scrim2"></div>
-<div class="field-copy"></div>
 <header class="bar">
   <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR" decoding="sync">
   <nav>
@@ -941,7 +916,7 @@ controls.maxPolarAngle = Math.PI/2 + 0.06;   // slightly below the summit, looki
    device. Driven off the clock instead: one turn in 90 seconds, the same on
    every machine. ?spin= to change it, ?spin=0 to stop it. */
 controls.autoRotate = false;
-const SPIN_SECONDS = parseFloat(q.get('spin') || '90');
+const SPIN_SECONDS = parseFloat(q.get('spin') || '0');
 let autoSpin = SPIN_SECONDS > 0;
 controls.addEventListener('start', () => { autoSpin = false; });   // the visitor takes over for good
 controls.update();
@@ -1345,7 +1320,6 @@ renderer.setAnimationLoop(() => {
     sh.uniforms.uCSun.value.copy(cloud.material.uniforms.uSunDir.value);
   }
   cloud.render(scene, camera, t);
-  measureBackdrop();
 });
 
 /* Test hook: park the opening orbit on an exact azimuth, in degrees, so the
@@ -1360,77 +1334,11 @@ window.__setAz = function (deg) {
   autoSpin = false;
 };
 
-/* --- adaptive text protection ---------------------------------------------
-   Measured, not guessed. With a fixed wash the worst case around the orbit was
-   2.05:1 on the applications index and 2.07:1 on the coordinates -- black type on
-   dark rock as the massif swings behind them. A heavier fixed wash was judged
-   "extreme white haze... looks like a low-resolution background image", so the
-   wash cannot be fixed in either direction. Every twelfth frame the page reads the
-   pixels actually behind each text block and raises a soft field only for that
-   block, only when it is needed. Over open sky it is invisible. */
-const scrimEl = document.querySelector('.scrim');
-const fieldC  = document.querySelector('.field-copy');
-let backTick = 0, bufC = null, bufC2 = null, bufC3 = null, bufC4 = null, lastC = -1;
+/* The adaptive text protection is gone with the rotation that made it necessary.
+   It read the framebuffer four times a frame, and every readPixels is a stall --
+   part of what Yin felt as lag. With a still camera the backdrop behind the type is
+   fixed, so it is checked once, at build time, and the framing carries the type. */
 
-function srgbToLinear(c) {
-  c /= 255;
-  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-}
-function darkEnd(buf) {
-  const ls = [];
-  for (let i = 0; i < buf.length; i += 4) {
-    ls.push(0.2126 * srgbToLinear(buf[i]) +
-            0.7152 * srgbToLinear(buf[i+1]) +
-            0.0722 * srgbToLinear(buf[i+2]));
-  }
-  ls.sort((a, b) => a - b);
-  return ls[Math.floor(ls.length * 0.05)];   // one dark ridge is what breaks type
-}
-const FIELD_LUM = 0.873;     // luminance of rgba(236,241,246)
-const FIELD_K   = 0.97;      // the gradient is flat across the copy now, so this holds
-const TARGET    = 0.47;      // the bar is 4.5:1; this keeps a margin over it
-function needFor(dark) {
-  if (dark >= TARGET) return 0;                       // already light enough
-  const a = (TARGET - dark) / ((FIELD_LUM - dark) * FIELD_K);
-  return Math.min(1, Math.max(0, a));
-}
-function readBlock(gl, buf, xCss, yBottomCss, wCss, hCss, dpr) {
-  const w = Math.max(1, Math.round(wCss * dpr)), h = Math.max(1, Math.round(hCss * dpr));
-  if (!buf || buf.length !== w * h * 4) buf = new Uint8Array(w * h * 4);
-  try {
-    gl.readPixels(Math.round(xCss * dpr), Math.round(yBottomCss * dpr),
-                  w, h, gl.RGBA, gl.UNSIGNED_BYTE, buf);
-  } catch (e) { return null; }
-  return buf;
-}
-
-function measureBackdrop() {
-  if ((backTick++ % 12) !== 0) return;
-  const gl = renderer.getContext();
-  const dpr = renderer.getPixelRatio();
-  const VH = window.innerHeight;
-
-  // the copy column: a wide, short strip at the applications index, which is the
-  // lowest and worst-lit part of the block. GL counts y from the bottom.
-  const cy = VH - 575;
-  const hy = VH - 352;                      // CSS y 272-352: the headline band itself
-  bufC  = readBlock(gl, bufC,  72, cy, 150, 26, dpr) || bufC;
-  bufC2 = readBlock(gl, bufC2, 450, cy, 170, 26, dpr) || bufC2;
-  bufC3 = readBlock(gl, bufC3, 80, hy, 350, 80, dpr) || bufC3;
-  bufC4 = readBlock(gl, bufC4, 80, VH - 502, 350, 62, dpr) || bufC4;   // the label lines
-  if (bufC && fieldC) {
-    const a = Math.max(needFor(darkEnd(bufC)),
-                       bufC2 ? needFor(darkEnd(bufC2)) : 0,
-                       bufC3 ? needFor(darkEnd(bufC3)) : 0,
-                       bufC4 ? needFor(darkEnd(bufC4)) : 0);
-    if (Math.abs(a - lastC) > 0.02) {
-      lastC = a;
-      fieldC.style.opacity = a.toFixed(3);
-      if (scrimEl) scrimEl.style.setProperty('--sa', (0.10 + 0.34 * a).toFixed(3));
-    }
-  }
-
-}
 
 /* three.js fixes the VERTICAL field, so a phone held upright gets a very narrow
    horizontal one: the massif ran off both edges and not a single cloud was in
