@@ -64,41 +64,64 @@ times -- position bias, i.e. void, twice.
 So: use Codex to FIND defects, never to score progress. Fix the defects that
 repeat across rounds, and verify them with a measurement.
 
-### What was fixed this round, with numbers
+### Yin's corrections, 2026-08-19 (these overrule Codex)
 
-- **Hierarchy.** The one defect Codex named in every single round: no headline,
-  the wordmark doing the work of a proposition. Act A is now eyebrow / Anton
-  statement / lede / applications index. The approved sentence is unchanged --
-  broken typographically, not rewritten. The wordmark left the hero; the bar keeps it.
-- **The terrain was over-lit, not under-lit.** Hemisphere 0.85 and fill 0.60 filled
-  every shadow so a 3.10 key had nothing to cut against. Now key 3.62, hemisphere
-  0.44, fill 0.26, haze 2.9e-5 -> 1.86e-5, exposure 1.05.
-- **Camera reframed off the geometry**, not by eye: aim 1 550 m along the
-  screen-right axis (0.66, 0, 0.75) and 360 m down, eye 12% closer. The peak
-  anchors the right, the copy has a clear corridor.
-- **Text contrast is now measured and adaptive.** Worst case around the orbit was
-  2.05:1 on the applications index and 2.07:1 on the coordinates -- black type on
-  dark rock as the massif swings behind them. A fixed wash cannot solve this: heavy
-  enough for the rock was judged "extreme white haze, looks like a low-resolution
-  background image". So two feathered fields now read the actual pixels behind the
-  type every twelfth frame and raise only when needed.
+- **The mountain is CENTRED.** Codex asked for a right-lean; Yin rejected it --
+  "when it rotate, it doesn't look good at all". Overruled. Aim is back on the
+  massif's centre line. The only thing kept from that pass is 360 m of downward
+  aim, which closes the empty sky without moving the peak sideways.
+- **Do not cut his writing.** I had replaced "The platform has five primary
+  application verticals:" with a two-word label. That was wrong. Every word of the
+  original is back. The Anton headline breaks his sentence typographically; it
+  does not shorten it. **Rule: his copy is not a design variable.**
+- **The coordinate block is deleted.** "27 59 17 N / 8,848 m / elevation and
+  imagery, measured" -- Yin: "It is meaningless." Gone, with the field that
+  existed only to keep it legible.
 
-Worst-case contrast, 10 points around the orbit, black type, 4.5:1 required:
+### Text contrast is measured, not judged
 
-| element | before | after |
+Worst case around the orbit started at 2.05:1 on the applications index and 2.07:1
+on the coordinates -- black type on dark rock as the massif swings behind it. A
+fixed wash cannot solve this in either direction: heavy enough for the rock was
+judged "extreme white haze... looks like a low-resolution background image".
+
+So the page reads the pixels behind the type every twelfth frame, at four bands
+(headline, label, index left, index right), and solves for the LEAST field alpha
+that reaches the target. That cut the veil from 0.75-1.00 down to about 0.43.
+
+Worst case at 12 exact azimuths, measuring the INK only, 4.5:1 required:
+
+| element | worst | at |
 |---|---|---|
-| eyebrow | -- | 18.82 |
-| statement | -- | 11.15 |
-| lede | -- | 8.83 |
-| apps-label | -- | 7.41 |
-| **apps-row** | **2.05** | **4.94** |
-| cue | 4.87 | 7.30 |
-| **meta** | **2.07** | **4.66** |
+| eyebrow | 16.72:1 | 60 deg |
+| statement | 8.75:1 | 270 deg |
+| lede | 7.80:1 | 120 deg |
+| label | 7.67:1 | 150 deg |
+| index | 6.97:1 | 150 deg |
+| scroll cue | 9.45:1 | 30 deg |
 
-Harness: `probe2.mjs` in the session scratchpad. It hides ONLY the text, with
-`!important` so the render loop cannot override it, and leaves the fields live.
+**ALL PASS.** Harness: `probe3.mjs` + `window.__setAz(deg)`.
+
+### Three real bugs found while building that check
+
+1. **Gamma vs linear.** The page weighted raw framebuffer BYTES, which are
+   gamma-encoded. Rock whose true luminance is 0.09 reads as 0.35, so the solve
+   concluded no field was needed and the sweep came back at 1.7:1.
+2. **The maths was right, the surface under it was not.** The solve assumed the
+   field was at full strength where the type is; the gradient had already fallen to
+   .34 by the right end of the index. It is flat across the copy now, then feathers.
+3. **Measuring block boxes, not ink.** `.statement` is a 732 px box whose letters
+   end at 430. Measuring the empty half reported failures no reader would ever see.
+   The probe walks text nodes with a Range and measures the ink.
+
+### Sampling must be deterministic
+
+Waiting N seconds between shots lands on different orbit angles every run, so two
+runs cannot be compared and a fix can look like a regression. `window.__setAz(deg)`
+parks the camera on an exact azimuth. Use it.
 
 ## Load, measured cold-cache
+
 
  on a throttled connection
 
@@ -163,10 +186,11 @@ disposed. Verified on the live page: both meshes render, swap confirmed, no cons
 
 ## NEXT ACTION
 
-1. The remaining Codex defects are art direction, not code: one coherent type scale,
-   the applications index treatment, and a single system for the corner telemetry.
-   Per the standing rule these are design DECISIONS -- route them to GLM 5.2 + GLM 5V,
-   do not decide them by taste.
-2. Apply the same measured contrast check to scroll beats B, C, D and E. Only the
-   hero has been checked so far.
+1. Run the same measured contrast sweep on scroll beats B, C, D and E. Only the hero
+   is verified. Beats B-E are large Anton type over the same rotating terrain, so
+   they will have the same failure and nobody has looked.
+2. The remaining Codex defects are art direction: one type scale, the index
+   treatment. These are design DECISIONS -- route them to GLM 5.2 + GLM 5V. And
+   check anything Codex proposes against Yin's taste first; it asked for the
+   right-lean he rejected.
 3. Get a real frame-rate number from Yin's machine, or say clearly it is unmeasured.
