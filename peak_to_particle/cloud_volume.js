@@ -801,6 +801,7 @@ export function createVolumetricCloud(renderer, opts = {}) {
   const postCam = new THREE.Camera();
   const lastCloudPos = new THREE.Vector3(1e9, 1e9, 1e9);
   let lastCloudFov = -1, cloudAge = 0, cloudPrimed = false, movedRecently = 0;
+  let lastCover = -1, lastDensity = -1, lastClear = -1;
 
   function sizeTargets(w, h) {
     const r = renderer.getPixelRatio();
@@ -842,7 +843,11 @@ export function createVolumetricCloud(renderer, opts = {}) {
          under a pixel, so this cuts the cost of the most expensive pass on the
          page for nothing visible. A scroll moves far more than the threshold and
          gets a fresh march every frame. */
-      const moved = camera.position.distanceToSquared(lastCloudPos) > 9.0 ||
+      const shifted = Math.abs(u.uCover.value   - lastCover)   > 0.0015 ||
+                      Math.abs(u.uDensity.value - lastDensity) > 0.00012 ||
+                      Math.abs(u.uClearAmt.value - lastClear)  > 0.0025;
+      const moved = shifted ||
+                    camera.position.distanceToSquared(lastCloudPos) > 9.0 ||
                     Math.abs(camera.fov - lastCloudFov) > 0.01;
       /* Every third frame was set when the camera was always orbiting, so a stale
          cloud was always about to be replaced anyway. With the opening camera held
@@ -867,6 +872,8 @@ export function createVolumetricCloud(renderer, opts = {}) {
         cloudAge = 0; cloudPrimed = true;
         lastCloudPos.copy(camera.position);
         lastCloudFov = camera.fov;
+        lastCover = u.uCover.value; lastDensity = u.uDensity.value;
+        lastClear = u.uClearAmt.value;
         renderer.setRenderTarget(cloudRT);
         renderer.clear();
         renderer.render(post, postCam);

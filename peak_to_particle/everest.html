@@ -32,6 +32,11 @@
      at every bearing without ever reading as a panel. */
   /* Carries the contrast for the copy column AND the bottom line of metadata, so
      nothing needs its own panel. */
+  /* Stands in for the volume once the deck has closed over. A flat tint costs
+     nothing; the movement comes from the dust drawn on top of it. */
+  #greyField{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;
+    background:radial-gradient(128% 100% at 50% 42%,
+      #b9c0c6 0%, #aeb6bd 44%, #9fa8b0 78%, #97a0a9 100%)}
   .scrim2{position:fixed;left:0;right:0;bottom:0;height:34vh;z-index:1;pointer-events:none;
     background:linear-gradient(0deg,
       rgba(238,243,248,.90) 0%,  rgba(238,243,248,.72) 20%,
@@ -105,8 +110,8 @@
      and the answer paragraph runs to 46ch, so the acts carry their own width */
   /* superseded: the panel above owns act A's width now that it carries the
      five-column applications band as well as the paragraph */
-  #actB,#actC{max-width:none;width:min(58vw,1000px)}
-  #actD{max-width:none;width:min(46vw,800px)}
+  #actB,#actC,#actE{max-width:none;width:min(58vw,1000px)}
+  /* actD was merged into actE; the width rule moves with it */
   #actE{max-width:min(44ch,40vw)}
   /* cpolar.tech sets these at Anton 74/74 in solid black. Same face, same
      ratio, clamped so it does not swamp a laptop. */
@@ -225,6 +230,7 @@
 </head>
 <body style="background:#b7ceed">
 <canvas id="c"></canvas>
+<div id="greyField"></div>
 <div class="scrim2"></div>
 <header class="bar">
   <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR" decoding="sync">
@@ -259,11 +265,6 @@
 <div class="plate act" id="actC">
   <div class="rule"></div>
   <h1 class="big">Down where we live,<br>they are full of pollutants.</h1>
-</div>
-
-<div class="plate act" id="actD">
-  <div class="rule"></div>
-  <h1 class="big med">Most harmful pollutants carry an electric charge.</h1>
 </div>
 
 <div class="plate act" id="actE">
@@ -1091,7 +1092,7 @@ function drawDust(t){
       }
     }
 
-    let a = m.baseAlpha;
+    let a = m.baseAlpha * (1 + 1.4 * cloudSolid);
     if (m.state === 'suck'){
       const prog = Math.min(1, Math.max(0, (suckP - m.suckAt) / m.suckDur));
       if (prog >= 1) { m.gone = true; continue; }
@@ -1147,11 +1148,14 @@ function cycleSpecimen(now){
    density, the five text plates, the lens and the dust. Damped rather than raw
    so a trackpad flick does not snap the camera. */
 let scrollP = 0, scrollTarget = 0;
-const ACTS = ['actA','actB','actC','actD','actE'].map(function(id){ return document.getElementById(id); });
+const ACTS = ['actA','actB','actC','actE'].map(function(id){ return document.getElementById(id); });
+const ansEls = Array.prototype.slice.call(document.querySelectorAll('#actE .ans'));
 const barEl = document.querySelector('.bar');
 const scopeWrap = document.getElementById('scopeWrap');
 const tackle    = document.getElementById('tackle');
 const cue = document.querySelector('.cue');
+const greyField = document.getElementById('greyField');
+let cloudSolid = 0;
 const heroEye = new THREE.Vector3(), heroAim = new THREE.Vector3();
 heroEye.copy(camera.position); heroAim.copy(HERO_AIM);
 
@@ -1179,8 +1183,10 @@ const ACT_WINDOWS = [
   [0.000, 0.000, 0.115, 0.170],   // A  the platform copy
   [0.115, 0.170, 0.305, 0.350],   // B  still clean -- carries INTO the whiteout
   [0.370, 0.410, 0.565, 0.610],   // C  full of pollutants
-  [0.565, 0.610, 0.775, 0.820],   // D  they carry a charge
-  [0.775, 0.820, 1.001, 1.001]    // E  what we capture
+  /* One act, not two. The charge line arrives at 0.565 and STAYS; the answer lines
+     fade in underneath it at 0.79 on their own timing. Previously D and E each held
+     the same headline and the crossfade drew it twice, offset. */
+  [0.565, 0.610, 1.001, 1.001]    // D+E  the charge, then what we capture
 ];
 function actOpacity(w, p){
   if (p < w[0] || p > w[3]) return 0;
@@ -1189,8 +1195,14 @@ function actOpacity(w, p){
   return 1 - smootherstep(w[2], w[3], p);
 }
 
+let lastScrollT = 0;
 function applyScroll() {
-  scrollP += (scrollTarget - scrollP) * 0.075;
+  const now = performance.now() / 1000;
+  let dt = lastScrollT ? now - lastScrollT : 1 / 60;
+  lastScrollT = now;
+  if (dt > 0.25) dt = 0.25;                       // a tab coming back, not a frame
+  const k = 1 - Math.pow(1 - 0.075, dt * 60);     // 0.075 per frame at 60fps, exactly
+  scrollP += (scrollTarget - scrollP) * k;
   const p = scrollP;
 
   /* The camera falls over the first half and then HOLDS. Yin: "mountain won't
@@ -1220,6 +1232,27 @@ function applyScroll() {
   const under   = smootherstep(0.46, 0.60, p);   // out underneath it
   const closeIn = smootherstep(0.60, 0.80, p);   // then it closes over everything
   const lift    = smootherstep(0.82, 0.92, p);   // and lifts for the charge
+
+  /* Yin, both at once: "when it get more grey cloud, it start lagging, why we are
+     not using the floating dust effect that we originally have" and "the grey cloud
+     you made, they are not moving, so fake". Right twice.
+
+     Measured on the grey screen: dropping the cloud's resolution to 30% lifted it
+     from 1.00 to 1.33 fps, so the raymarch is what costs. And past the close-over
+     the march buys nothing -- the screen is a formless grey field with no structure
+     left to see. It also looked frozen, and that was my own doing: the march is
+     gated to every twelfth frame when the camera has not moved, and the camera
+     HOLDS from 0.55, so the one thing still animating updated at a twelfth rate.
+
+     Past the close-over the volume is switched off and the field becomes a flat
+     tint with the original 2D dust moving over it -- a canvas draw instead of a
+     raymarch, and it actually moves.
+
+     How completely the deck has closed over: 0 = structure still visible and the
+     volume is worth marching, 1 = formless and it is not. */
+  const solid = smootherstep(0.655, 0.755, p) * (1 - smootherstep(0.845, 0.905, p));
+  cloudSolid = solid;
+  if (greyField) greyField.style.opacity = (solid * 0.93).toFixed(3);
 
   cu.uClearAmt.value = 0.20 + 0.80*blind - 0.62*under + 0.62*closeIn - 0.72*lift;
   cu.uCover.value    = 0.78 + 0.215*blind - 0.40*under + 0.39*closeIn - 0.46*lift;
@@ -1251,6 +1284,10 @@ function applyScroll() {
     el.style.visibility = o < 0.004 ? 'hidden' : 'visible';
     el.style.pointerEvents = o < 0.5 ? 'none' : '';
   }
+
+  // the two answer lines, inside the act that already holds the headline
+  const ansIn = smootherstep(0.790, 0.855, p).toFixed(3);
+  for (let i = 0; i < ansEls.length; i++) ansEls[i].style.opacity = ansIn;
 
   // arrives WITH the grey rather than against the clean blue sky
   dustFade = smootherstep(0.44, 0.58, p) * (1 - smootherstep(0.955, 1.0, p));
@@ -1336,7 +1373,9 @@ renderer.setAnimationLoop(() => {
   /* `?ct=<seconds>` pins the cloud's clock. The still plate is shot with it pinned
      to the time the page is at when the plate hands over, so the cloud does not
      jump either -- the terrain aligning is not enough on its own. */
-  cloud.render(scene, camera, CLOUD_T >= 0 ? CLOUD_T : t);
+  /* Skip the whole three-pass cloud while the flat field is opaque over it. It is
+     the most expensive thing on the page and none of it is visible here. */
+  if (cloudSolid < 0.94) cloud.render(scene, camera, CLOUD_T >= 0 ? CLOUD_T : t);
 });
 
 /* Test hook: park the opening orbit on an exact azimuth, in degrees, so the
