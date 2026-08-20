@@ -44,31 +44,62 @@ pill 1 px solid black at 7 px radius.
 
 ## Scoreboard
 
-Judged by Codex on real captures, 2026-08-19.
-
-| | score | bar |
+| | Codex | measured |
 |---|---|---|
-| Load, first seconds | 5/10 | 9 |
-| Hero, finished | 6/10 | 9 |
+| Load, first seconds | 5/10 | complete, sharp page at 500 ms |
+| Hero, finished | 5.5/10 | all 7 text elements pass 4.5:1 at every orbit angle |
 
-**Not frontier. Do not present it as finished.**
+**Not 10/10. Do not present it as finished.**
 
-The load went 2 -> 5 in this session. The hero has not moved off 6 across three
-rounds, and the defects Codex names are composition, not code.
+### Read this before trusting another Codex number
 
-### The hero's four standing defects, in Codex's words
+Codex's absolute /10 on this hero has sat between 5 and 6 across SIX rounds while
+the page changed enormously -- headline added, terrain relit, card added, card
+removed, contrast fixed. It also **contradicted itself**: round 3 said "place the
+five applications in a deliberate translucent panel", round 4 said the panel
+"makes the hero feel like a generic SaaS card, remove it". And a forced A/B in
+both column orders picked the FIRST image both times, then the SECOND image both
+times -- position bias, i.e. void, twice.
 
-1. No dominant focal hierarchy -- copy, peak, logo, nav and coordinates all carry
-   the same visual weight.
-2. The mountain crosses the application list and hurts legibility, worst on
-   "Personal Protective Wear (PPW)".
-3. The lower half is packed with snow detail and the upper half is empty. Crop
-   higher, enlarge the peak slightly, tighten the space above the copy.
-4. The coordinates, elevation and "Scroll" read as detached fragments.
+So: use Codex to FIND defects, never to score progress. Fix the defects that
+repeat across rounds, and verify them with a measurement.
 
-Fixing 1 and 3 changes a composition Yin approved. Raise it with him before doing it.
+### What was fixed this round, with numbers
+
+- **Hierarchy.** The one defect Codex named in every single round: no headline,
+  the wordmark doing the work of a proposition. Act A is now eyebrow / Anton
+  statement / lede / applications index. The approved sentence is unchanged --
+  broken typographically, not rewritten. The wordmark left the hero; the bar keeps it.
+- **The terrain was over-lit, not under-lit.** Hemisphere 0.85 and fill 0.60 filled
+  every shadow so a 3.10 key had nothing to cut against. Now key 3.62, hemisphere
+  0.44, fill 0.26, haze 2.9e-5 -> 1.86e-5, exposure 1.05.
+- **Camera reframed off the geometry**, not by eye: aim 1 550 m along the
+  screen-right axis (0.66, 0, 0.75) and 360 m down, eye 12% closer. The peak
+  anchors the right, the copy has a clear corridor.
+- **Text contrast is now measured and adaptive.** Worst case around the orbit was
+  2.05:1 on the applications index and 2.07:1 on the coordinates -- black type on
+  dark rock as the massif swings behind them. A fixed wash cannot solve this: heavy
+  enough for the rock was judged "extreme white haze, looks like a low-resolution
+  background image". So two feathered fields now read the actual pixels behind the
+  type every twelfth frame and raise only when needed.
+
+Worst-case contrast, 10 points around the orbit, black type, 4.5:1 required:
+
+| element | before | after |
+|---|---|---|
+| eyebrow | -- | 18.82 |
+| statement | -- | 11.15 |
+| lede | -- | 8.83 |
+| apps-label | -- | 7.41 |
+| **apps-row** | **2.05** | **4.94** |
+| cue | 4.87 | 7.30 |
+| **meta** | **2.07** | **4.66** |
+
+Harness: `probe2.mjs` in the session scratchpad. It hides ONLY the text, with
+`!important` so the render loop cannot override it, and leaves the fields live.
 
 ## Load, measured cold-cache
+
  on a throttled connection
 
 Time until there is a mountain on screen:
@@ -99,6 +130,12 @@ disposed. Verified on the live page: both meshes render, swap confirmed, no cons
   on a near-white sky they read as dirt. Yin: "it look broken". Retuned lighter and fewer.
 - **Reasoning about a white blob instead of isolating meshes.** Three separate times the
   cause was a cheap terrain sheet drawing in front. Isolate meshes first, always.
+- **Chasing Codex's absolute score.** Six rounds, score never left 5-6, advice
+  reversed itself. Find defects with it; measure the fix yourself.
+- **Measuring contrast without hiding the type first.** Done twice now. The render
+  loop rewrites act opacity every frame, so `element.style.visibility` is overwritten
+  and the probe ends up measuring its own black letters -- luminance 0.000, which is
+  not a mountain. Inject a stylesheet with `!important`.
 - **A choreographed entrance animation.** Tried, measured, reverted. Fading and
   rising the bar, copy and plate over 0.5-0.6 s left the page an almost empty field
   with a ghost mountain at 500 ms and 750 ms, and it did not compose until 1250 ms.
@@ -126,7 +163,10 @@ disposed. Verified on the live page: both meshes render, swap confirmed, no cons
 
 ## NEXT ACTION
 
-1. Ask Yin whether the hero composition may change -- bigger headline, higher crop,
-   copy clear of the peak. Codex will not go past 6 without it.
-2. Get a real frame-rate number from Yin's machine, or say clearly it is unmeasured.
-3. Close the torn bands under the cloud deck.
+1. The remaining Codex defects are art direction, not code: one coherent type scale,
+   the applications index treatment, and a single system for the corner telemetry.
+   Per the standing rule these are design DECISIONS -- route them to GLM 5.2 + GLM 5V,
+   do not decide them by taste.
+2. Apply the same measured contrast check to scroll beats B, C, D and E. Only the
+   hero has been checked so far.
+3. Get a real frame-rate number from Yin's machine, or say clearly it is unmeasured.
