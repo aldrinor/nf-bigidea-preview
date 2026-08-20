@@ -1025,9 +1025,27 @@ function makeDustSprites(){
     const r = c[0], g = c[1], b = c[2];
     const cv = document.createElement('canvas'); cv.width = cv.height = 24;
     const x = cv.getContext('2d');
-    const grd = x.createRadialGradient(12,12,0, 12,12,12);
+    /* the lit rim first, wide and soft */
+    /* The rim is an ANNULUS that begins outside the core. The first attempt let it
+       start at 0.42 of the radius, so it sat on top of the core and lightened it --
+       visibility over rock doubled but dropped by a third over the sky. Separated,
+       each does its own job: the core reads against the pale sky, the rim against
+       the dark rock, and neither cancels the other. */
+    const rim = x.createRadialGradient(12,12,0, 12,12,12);
+    /* A halo, not an outline. Pushed too far out and made too bright, the rim stops
+       being a lit edge and becomes a ring -- the motes read as little bubbles. It
+       sits just outside a strong core and is half the brightness, so the pair reads
+       as one lit speck. */
+    rim.addColorStop(0,    'rgba(248,251,254,0)');
+    rim.addColorStop(0.50, 'rgba(248,251,254,0.06)');
+    rim.addColorStop(0.70, 'rgba(248,251,254,0.30)');
+    rim.addColorStop(1,    'rgba(248,251,254,0)');
+    x.fillStyle = rim; x.fillRect(0,0,24,24);
+    /* the dark core: solid through the middle, so it is a speck and not a ring */
+    const grd = x.createRadialGradient(12,12,0, 12,12,8.6);
     grd.addColorStop(0,    'rgba('+r+','+g+','+b+',1)');
-    grd.addColorStop(0.35, 'rgba('+r+','+g+','+b+',0.5)');
+    grd.addColorStop(0.50, 'rgba('+r+','+g+','+b+',0.92)');
+    grd.addColorStop(0.78, 'rgba('+r+','+g+','+b+',0.40)');
     grd.addColorStop(1,    'rgba('+r+','+g+','+b+',0)');
     x.fillStyle = grd; x.fillRect(0,0,24,24);
     return cv;
