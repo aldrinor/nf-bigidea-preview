@@ -78,49 +78,63 @@ repeat across rounds, and verify them with a measurement.
   imagery, measured" -- Yin: "It is meaningless." Gone, with the field that
   existed only to keep it legible.
 
-### Text contrast is measured, not judged
+### The camera is STILL, and that removed a whole class of problem
 
-Worst case around the orbit started at 2.05:1 on the applications index and 2.07:1
-on the coordinates -- black type on dark rock as the massif swings behind it. A
-fixed wash cannot solve this in either direction: heavy enough for the rock was
-judged "extreme white haze... looks like a low-resolution background image".
+Yin, 2026-08-20: "why left side got filter background, right side don't have?" and
+"the rotation make the effect so lag, maybe stop rotation".
 
-So the page reads the pixels behind the type every twelfth frame, at four bands
-(headline, label, index left, index right), and solves for the LEAST field alpha
-that reaches the target. That cut the veil from 0.75-1.00 down to about 0.43.
+Both were the same root cause. The left-side wash existed ONLY to defend the copy
+from dark rock swinging behind it as the camera turned. Camera still -> nothing to
+defend -> the panel, the left gradient and the whole per-frame framebuffer read are
+deleted. That was four readPixels calls per frame, and every readPixels is a stall.
 
-Worst case at 12 exact azimuths, measuring the INK only, 4.5:1 required:
+What is left is symmetric: haze along the base of the massif, full width, which is
+what the bottom of a mountain actually looks like. The copy also lifts 92 px clear
+of the dark lower rock rather than being rescued from it.
 
-| element | worst | at |
+`?spin=90` still turns the orbit on for testing.
+
+**Frame rate**, software renderer, 4 runs each. RELATIVE signal only -- this machine
+has no GPU, so these are not Yin's numbers:
+
+| | runs | mean |
 |---|---|---|
-| eyebrow | 16.72:1 | 60 deg |
-| statement | 8.75:1 | 270 deg |
-| lede | 7.80:1 | 120 deg |
-| label | 7.67:1 | 150 deg |
-| index | 6.97:1 | 150 deg |
-| scroll cue | 9.45:1 | 30 deg |
+| rotation off | 3.20 2.80 3.30 3.00 | **3.08** |
+| rotation on | 2.80 2.30 2.50 2.30 | **2.48** |
 
-**ALL PASS.** Harness: `probe3.mjs` + `window.__setAz(deg)`.
+About 24% faster, and the spread is +-0.25, so the gap is real. Note what this also
+says: rotation was NOT the main cost. The cloud raymarch is. It now re-marches every
+twelfth frame when the camera is still instead of every third.
 
-### Three real bugs found while building that check
+### Contrast, still framing, ink only, 4.5:1 required
+
+| element | worst |
+|---|---|
+| eyebrow | 13.54:1 |
+| statement | 19.34:1 |
+| lede | 19.25:1 |
+| label | 17.26:1 |
+| index | 6.47:1 |
+| scroll cue | 10.59:1 |
+
+**ALL PASS with no left-side wash anywhere.** Harness: `still.mjs`.
+
+### Bugs found while building the contrast check (kept for the record)
 
 1. **Gamma vs linear.** The page weighted raw framebuffer BYTES, which are
    gamma-encoded. Rock whose true luminance is 0.09 reads as 0.35, so the solve
-   concluded no field was needed and the sweep came back at 1.7:1.
+   concluded no protection was needed and the sweep came back at 1.7:1.
 2. **The maths was right, the surface under it was not.** The solve assumed the
    field was at full strength where the type is; the gradient had already fallen to
-   .34 by the right end of the index. It is flat across the copy now, then feathers.
+   .34 by the right end of the index.
 3. **Measuring block boxes, not ink.** `.statement` is a 732 px box whose letters
    end at 430. Measuring the empty half reported failures no reader would ever see.
-   The probe walks text nodes with a Range and measures the ink.
-
-### Sampling must be deterministic
-
-Waiting N seconds between shots lands on different orbit angles every run, so two
-runs cannot be compared and a fix can look like a regression. `window.__setAz(deg)`
-parks the camera on an exact azimuth. Use it.
+   Walk the text nodes with a Range and measure the ink.
+4. **Non-deterministic sampling.** Waiting N seconds between shots lands on
+   different orbit angles every run, so a fix can look like a regression.
 
 ## Load, measured cold-cache
+
 
 
  on a throttled connection
@@ -186,9 +200,9 @@ disposed. Verified on the live page: both meshes render, swap confirmed, no cons
 
 ## NEXT ACTION
 
-1. Run the same measured contrast sweep on scroll beats B, C, D and E. Only the hero
-   is verified. Beats B-E are large Anton type over the same rotating terrain, so
-   they will have the same failure and nobody has looked.
+1. Run the contrast check on scroll beats B, C, D and E. Only the hero is verified.
+   The camera MOVES during the descent, so those beats still have the moving-backdrop
+   problem the hero no longer has. Use `still.mjs` with a scroll position set.
 2. The remaining Codex defects are art direction: one type scale, the index
    treatment. These are design DECISIONS -- route them to GLM 5.2 + GLM 5V. And
    check anything Codex proposes against Yin's taste first; it asked for the
