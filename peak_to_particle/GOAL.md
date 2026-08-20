@@ -44,11 +44,32 @@ pill 1 px solid black at 7 px radius.
 
 ## Scoreboard
 
-Not yet re-scored since the performance pass. The last Codex A/B was run before the
-progressive loader, the colour restore, and the dust retune landed. **Re-score is the
-first job of the next session.**
+Judged by Codex on real captures, 2026-08-19.
 
-## Load, measured cold-cache on a throttled connection
+| | score | bar |
+|---|---|---|
+| Load, first seconds | 5/10 | 9 |
+| Hero, finished | 6/10 | 9 |
+
+**Not frontier. Do not present it as finished.**
+
+The load went 2 -> 5 in this session. The hero has not moved off 6 across three
+rounds, and the defects Codex names are composition, not code.
+
+### The hero's four standing defects, in Codex's words
+
+1. No dominant focal hierarchy -- copy, peak, logo, nav and coordinates all carry
+   the same visual weight.
+2. The mountain crosses the application list and hurts legibility, worst on
+   "Personal Protective Wear (PPW)".
+3. The lower half is packed with snow detail and the upper half is empty. Crop
+   higher, enlarge the peak slightly, tighten the space above the copy.
+4. The coordinates, elevation and "Scroll" read as detached fragments.
+
+Fixing 1 and 3 changes a composition Yin approved. Raise it with him before doing it.
+
+## Load, measured cold-cache
+ on a throttled connection
 
 Time until there is a mountain on screen:
 
@@ -78,6 +99,17 @@ disposed. Verified on the live page: both meshes render, swap confirmed, no cons
   on a near-white sky they read as dirt. Yin: "it look broken". Retuned lighter and fewer.
 - **Reasoning about a white blob instead of isolating meshes.** Three separate times the
   cause was a cheap terrain sheet drawing in front. Isolate meshes first, always.
+- **A choreographed entrance animation.** Tried, measured, reverted. Fading and
+  rising the bar, copy and plate over 0.5-0.6 s left the page an almost empty field
+  with a ghost mountain at 500 ms and 750 ms, and it did not compose until 1250 ms.
+  Without it the page is complete and sharp at 500 ms. Choreography only helps when
+  the content is ready before the choreography; here it delayed the one fast thing.
+- **A heavy-blur placeholder.** 56 px wide under 26 px of blur read as dirt, not as
+  soft focus. Codex: "reads as broken rather than loading". The working version is
+  640 px of WebP at 14 kB inline, under 2 px of blur.
+- **Trusting a forced A/B without checking for position bias.** Codex picked
+  "IMAGE 1" in BOTH column orders on the load sheets, which is a void result, not a
+  verdict. Always check that the winner flips with the order.
 - **17 m detail tile.** About 8 screen pixels at close range — a visible dot lattice on
   snow. It is 60 m.
 
@@ -94,6 +126,7 @@ disposed. Verified on the live page: both meshes render, swap confirmed, no cons
 
 ## NEXT ACTION
 
-1. Get a real frame-rate number from Yin's machine, or say clearly that it is unmeasured.
-2. Re-score all six beats with Codex, forced A/B in both column orders, against mont-fort.
+1. Ask Yin whether the hero composition may change -- bigger headline, higher crop,
+   copy clear of the peak. Codex will not go past 6 without it.
+2. Get a real frame-rate number from Yin's machine, or say clearly it is unmeasured.
 3. Close the torn bands under the cloud deck.
