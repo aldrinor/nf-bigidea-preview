@@ -92,7 +92,7 @@
      terrain, which is why the page read as one late step instead of a page that
      was already there. It starts visible; the scroll engine takes it from here. */
   #actA{opacity:1;visibility:visible;max-width:none;width:min(660px,46vw);
-    transform:translateY(calc(-54% + var(--dy,0px) - 92px))}
+    transform:translateY(calc(-54% + var(--dy,0px) - 96px))}
   @media (max-width:1024px){ #actA{width:auto;left:5vw;right:5vw} }
   /* the plate's 28ch was set for a three-word headline; these lines are longer
      and the answer paragraph runs to 46ch, so the acts carry their own width */
@@ -107,7 +107,7 @@
     font-size:clamp(36px,4.0vw,74px);font-weight:400;line-height:1.0;
     letter-spacing:0;color:#000;max-width:none;text-transform:none}
   .plate h1.big.med{font-size:clamp(32px,3.6vw,66px)}
-  .plate .lede{font-size:17px;font-weight:470;line-height:1.55;color:#000;max-width:44ch}
+  .plate .lede{font-size:16px;font-weight:470;line-height:1.62;color:#000;max-width:52ch;margin-top:20px}
   .plate .lede b{font-weight:700}
   .plate .lede2{margin-top:22px;font-size:14px;font-weight:600;color:#000;opacity:.62}
   /* The wordmark is retired from the hero -- the bar carries the brand, the
@@ -117,18 +117,17 @@
     font-weight:560;letter-spacing:.01em;color:#000;opacity:.72}
   .statement{margin:0;font-family:Anton,Impact,sans-serif;font-weight:400;
     font-size:clamp(34px,3.85vw,58px);line-height:1.02;letter-spacing:.002em;color:#000}
-  .apps{width:min(600px,42vw);margin:32px 0 0}
-  .apps-label{margin:0 0 14px;font-family:Montserrat,Arial,sans-serif;font-size:14px;
-    font-weight:560;letter-spacing:0;color:#000;opacity:.78}
-  .apps-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);
-    gap:0 6px;border-top:1px solid rgba(0,0,0,.26)}
-  .apps-row li{min-width:0;padding:15px 14px 0 0;font-family:Montserrat,Arial,sans-serif;
-    font-size:12px;font-weight:620;line-height:1.4;letter-spacing:.005em;color:#000}
+  .apps{width:min(470px,34vw);margin:28px 0 0}
+  .apps-label{margin:0 0 13px;font-family:Montserrat,Arial,sans-serif;font-size:11px;
+    font-weight:650;letter-spacing:.15em;color:#000;opacity:.62}
+  .apps-row{list-style:none;margin:0;padding:13px 0 0;display:flex;flex-wrap:wrap;
+    align-items:baseline;gap:0;border-top:1px solid rgba(0,0,0,.26)}
+  .apps-row li{font-family:Montserrat,Arial,sans-serif;font-size:12px;font-weight:620;
+    line-height:1.5;letter-spacing:.005em;color:#000;white-space:nowrap}
+  .apps-row li + li::before{content:"";display:inline-block;width:3px;height:3px;
+    border-radius:50%;background:rgba(0,0,0,.42);margin:0 10px 3px}
   @media (max-width:1024px){
-    .hero-mark{width:min(300px,54vw)}
     .apps{width:min(560px,90vw)}
-    .apps-row{grid-template-columns:repeat(2,1fr)}
-    .apps-row li{border-bottom:1px solid rgba(0,0,0,.16)}
   }
   .plate .verticals{list-style:none;margin:10px 0 0;padding:0;max-width:34ch}
   .plate .verticals li{font-size:17px;font-weight:470;color:#000;padding:9px 0;
@@ -231,14 +230,15 @@
 </header>
 <!-- The original hero page copy, verbatim. Beat A. -->
 <div class="plate act" id="actA">
-  <p class="eyebrow">C-POLAR Technologies, Inc. is a</p>
-  <h1 class="statement">Health Science<br>Platform Company</h1>
-  <p class="lede">built around its patented NanoFlashing&trade; technology.</p>
-  <img class="hero-mark" hidden src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR">
+  <h1 class="statement">C-POLAR is a<br>health science company.</h1>
+  <p class="lede">Our patented <b>NanoFlashing</b> is a <b>permanent positive polarity (3P)</b>
+     engineered into each of our five verticals. It <b>attracts and captures</b> ultrafine
+     particles, wildfire smoke, PFAS and pollen &mdash; and <b>destroys up to 99.9%</b> of a
+     broad-spectrum of viruses, bacteria and fungal spores through a <b>physical mechanism</b>.</p>
   <div class="apps">
-    <p class="apps-label">The platform has five primary application verticals:</p>
+    <p class="apps-label">5 Applications</p>
     <ul class="apps-row">
-      <li>Air</li><li>Water</li><li>Personal Protective<br>Wear (PPW&trade;)</li>
+      <li>Air</li><li>Water</li><li>Textiles</li>
       <li>Food Packaging</li><li>Medical Devices</li>
     </ul>
   </div>
