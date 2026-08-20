@@ -153,19 +153,25 @@
     border-bottom:1px solid rgba(0,0,0,.14)}
   /* Same face and same size as the charge line they replace -- Yin asked for the
      answers to carry the same weight on screen, not to shrink to a caption. */
-  .plate .ans{font-family:Anton,Impact,sans-serif;font-weight:400;
-    font-size:clamp(32px,3.6vw,66px);line-height:1.04;letter-spacing:.004em;color:#000}
-  .plate .ans.a1{margin:0 0 30px}
-  .plate .ans.a2{margin:0;max-width:none}
-  .plate .ans .cap{font-style:normal;font-weight:400;color:#000;
-    box-shadow:inset 0 -0.10em 0 rgba(0,0,0,.85)}
+  /* a1 is the statement: same face and size as the charge line it replaces. */
+  .plate .ans.a1{font-family:Anton,Impact,sans-serif;font-weight:400;
+    font-size:clamp(32px,3.6vw,66px);line-height:1.02;letter-spacing:.004em;
+    color:#000;margin:0 0 24px;max-width:15ch}
+  /* a2 is the mechanism, and it is a sentence, not a headline. Same relationship the
+     top of the page already uses, one step larger than the hero's paragraph. */
+  .plate .ans.a2{font-family:Montserrat,Arial,sans-serif;font-weight:450;
+    font-size:23px;line-height:1.52;letter-spacing:0;color:#000;
+    margin:0;max-width:26ch}
+  /* no rule under it -- the box-shadow landed under the following line and read as a
+     strikethrough. Weight is the emphasis. */
+  .plate .ans .cap{font-style:normal;font-weight:750;color:#000}
   #actE h1.big.med{max-width:20ch}
   /* the answers sit where the headline was, so one replaces the other in place */
   /* Centred on the act, not hung from its top. The act's height is set by the SHORT
      headline, so anchoring the much taller answers at top:0 pushed them off the
      bottom of the screen. Centring means the answers occupy the same middle the
      headline did, whatever their height. */
-  #actE .ans-wrap{position:absolute;top:50%;left:0;width:100%;transform:translateY(-50%)}
+  #actE .ans-wrap{position:absolute;top:50%;left:0;width:100%;transform:translateY(calc(-50% - 118px))}
   .plate .ans .cap{font-style:normal;font-weight:700;color:#000}
 
   .scope-wrap{position:fixed;right:11vw;top:50%;transform:translateY(-50%);z-index:3;
@@ -428,7 +434,12 @@ const PIVOT = new THREE.Vector3(149, 8260, 528);
    3 500 m above that, out of a broken deck. */
 const MID_EYE    = new THREE.Vector3(-7300, 7750, 4300);   // inside the cloud
 const GROUND_EYE = new THREE.Vector3(-8680, 5125, -2895);  // measured valley floor
-const GROUND_AIM = new THREE.Vector3(149, 7250, 528);
+/* Raised from 7250. Measured on the final frame, the left column stayed light only
+   to y=442 at x=80 and to y=302 by x=400 -- a diagonal ridge straight through where
+   the answer block sits, and the answers came back at 2.11:1. Aiming higher tilts
+   the camera up, drops the massif in the frame and opens the clean sky the last beat
+   is about. The type moves into the clear rather than being rescued by a wash. */
+const GROUND_AIM = new THREE.Vector3(149, 7980, 528);
 /* Yin: "why mountain lean on right... mountain shall be in the center". The lean
    was Codex's instruction and it is overruled -- the peak is centred on the massif
    again. The only thing kept from that pass is the 360 m of downward aim, which
@@ -1330,9 +1341,9 @@ function applyScroll() {
   // the two answer lines, inside the act that already holds the headline
   /* The headline leaves before the answers arrive, rather than sharing the screen
      with them. Both live inside one act, so the sentence is never drawn twice. */
-  const headOut = 1 - smootherstep(0.800, 0.855, p);
+  const headOut = 1 - smootherstep(0.795, 0.840, p);
   if (chargeHead) chargeHead.style.opacity = headOut.toFixed(3);
-  const ansIn = smootherstep(0.845, 0.900, p).toFixed(3);
+  const ansIn = smootherstep(0.840, 0.878, p).toFixed(3);
   for (let i = 0; i < ansEls.length; i++) ansEls[i].style.opacity = ansIn;
 
   // arrives WITH the grey rather than against the clean blue sky
