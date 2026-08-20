@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en" style="background:#b7ceed">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Manhattan</title>
+<style>
+  html,body{margin:0;height:100%;background:#b7ceed;overflow:hidden;
+    font-family:Montserrat,-apple-system,"Segoe UI",Arial,sans-serif;color:#000}
+  canvas{display:block}
+  .hud{position:fixed;left:24px;bottom:22px;z-index:3;font-size:12px;font-weight:600;
+    letter-spacing:.08em;opacity:.72;line-height:1.9;pointer-events:none}
+  .hud b{display:block;font-size:13px;letter-spacing:.10em;opacity:1;margin-bottom:4px}
+  .load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;background:#b7ceed;
+    font-size:12px;font-weight:650;letter-spacing:.12em;color:#4b5560;transition:opacity .7s}
+  .load.gone{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+  <b>Manhattan — real data</b>
+  23,728 buildings · OpenStreetMap heights · aerial imagery<br>
+  drag to orbit · scroll to zoom
+</div>
+<div class="load" id="load">LOADING CITY</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('c');
+const r = new THREE.WebGLRenderer({canvas, antialias:true});
+r.setSize(innerWidth, innerHeight);
+r.setPixelRatio(Math.min(devicePixelRatio, 2));
+r.toneMapping = THREE.ACESFilmicToneMapping;
+r.toneMappingExposure = 1.05;
+r.shadowMap.enabled = true;
+r.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const sc = new THREE.Scene();
+sc.background = new THREE.Color(0xb7ceed);
+sc.fog = new THREE.FogExp2(0xc2d6ea, 0.000085);
+
+const cam = new THREE.PerspectiveCamera(24, innerWidth/innerHeight, 10, 60000);
+
+/* the mountain's own light rig, unchanged, so the two scenes match */
+const sun = new THREE.DirectionalLight(0xfff6ea, 3.62);
+sun.position.set(-3800, 2100, 4600);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+const S = 4500;
+Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:100, far:20000});
+sun.shadow.bias = -0.0006; sun.shadow.normalBias = 1.2;
+sc.add(sun);
+sc.add(new THREE.HemisphereLight(0xcfe2f4, 0x8d99a6, 0.44));
+const fill = new THREE.DirectionalLight(0xcfe0f2, 0.26);
+fill.position.set(3000, 1500, -2000);
+sc.add(fill);
+
+const GW = 5380, GH = 7425;   // the plate covers the OSM bounding box exactly
+const tex = new THREE.TextureLoader().load('./nyc_ground.webp', t => {
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true;
+});
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(GW, GH),
+  new THREE.MeshStandardMaterial({map:tex, roughness:0.95})
+);
+ground.rotation.x = -Math.PI/2; ground.position.y = -0.5;
+ground.receiveShadow = true; sc.add(ground);
+
+const skirt = new THREE.Mesh(
+  new THREE.PlaneGeometry(60000, 60000),
+  new THREE.MeshStandardMaterial({color:0x101a24, roughness:0.42, metalness:0.15})
+);
+skirt.rotation.x = -Math.PI/2; skirt.position.y = -1.5; sc.add(skirt);
+
+/* Roofs take the real aerial, projected straight down. Walls get a window grid at
+   3.5 m floors and 4.2 m bays, because a building reads as a building from its
+   window rhythm, not from its silhouette. */
+function cityMaterial(){
+  const m = new THREE.MeshStandardMaterial({color:0xc4ccd4, roughness:0.72, metalness:0.10});
+  m.onBeforeCompile = sh => {
+    sh.uniforms.uAerial = {value: tex};
+    sh.uniforms.uGW = {value: GW};
+    sh.uniforms.uGH = {value: GH};
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNrm;')
+      .replace('#include <worldpos_vertex>',
+        '#include <worldpos_vertex>\n vWPos=(modelMatrix*vec4(transformed,1.0)).xyz;\n vWNrm=normalize(mat3(modelMatrix)*objectNormal);');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>',
+        '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNrm;\nuniform sampler2D uAerial;\nuniform float uGW;\nuniform float uGH;')
+      .replace('#include <map_fragment>', `
+        float up = abs(vWNrm.y);
+        vec2 auv = vec2(vWPos.x/uGW + 0.5, 0.5 - vWPos.z/uGH);
+        vec3 roof = texture2D(uAerial, auv).rgb * 0.62 + 0.02;
+
+        float bay = (abs(vWNrm.x) > abs(vWNrm.z)) ? vWPos.z : vWPos.x;
+        float fx = fract(bay / 4.2);
+        float fy = fract((vWPos.y - 1.2) / 3.5);
+        float win = smoothstep(0.16,0.30,fx) * (1.0 - smoothstep(0.70,0.84,fx))
+                  * smoothstep(0.20,0.34,fy) * (1.0 - smoothstep(0.66,0.80,fy));
+
+        float seed = fract(sin(floor(vWPos.x/7.0)*12.9898 + floor(vWPos.z/7.0)*78.233)*43758.5453);
+        vec3 wall  = mix(vec3(0.46,0.47,0.50), vec3(0.24,0.26,0.30), seed);
+        vec3 glass = mix(vec3(0.17,0.21,0.28), vec3(0.09,0.12,0.18), seed);
+        vec3 face  = mix(wall, glass, win);
+        face *= 0.80 + 0.20*smoothstep(0.03,0.10,fx)*smoothstep(0.03,0.10,fy);
+        face *= 0.90 + 0.16*clamp(vWPos.y/190.0, 0.0, 1.0);
+
+        diffuseColor.rgb = mix(face, roof, smoothstep(0.5, 0.75, up));
+      `);
+  };
+  return m;
+}
+
+const controls = new OrbitControls(cam, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 300;
+controls.maxDistance = 22000;
+controls.maxPolarAngle = Math.PI * 0.495;
+
+new GLTFLoader().load('./nyc_city_opt.glb', gl => {
+  const m = gl.scene;
+  m.traverse(o => { if (o.isMesh) {
+    o.castShadow = true; o.receiveShadow = true;
+    o.geometry.rotateX(-Math.PI/2);
+    o.geometry.computeVertexNormals();
+    o.material = cityMaterial();
+  }});
+  sc.add(m);
+  const c = new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3());
+  cam.position.set(c.x - 3200, 1650, c.z + 5200);
+  controls.target.set(c.x, 120, c.z);
+  controls.update();
+  document.getElementById('load').classList.add('gone');
+  window.__ready = true;
+});
+
+addEventListener('resize', () => {
+  cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix();
+  r.setSize(innerWidth, innerHeight);
+});
+
+r.setAnimationLoop(() => { controls.update(); r.render(sc, cam); });
+</script>
+</body>
+</html>
