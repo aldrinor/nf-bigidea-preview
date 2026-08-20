@@ -1,164 +1,67 @@
-# Peak to particle — front page
+# Peak to particle — the C-POLAR front page
 
-## The goal
+**STATUS: Yin signed it off on 2026-08-20 — "Now this is perfect."**
+Packed and pushed to the private team repo. See "Where it lives" below.
+This objective is complete unless Yin reopens it.
 
-One scrolling front page. It starts on the summit of Mount Everest and travels down
-to the material at nanoscale. Real elevation, real satellite imagery, real volumetric
-cloud. The quality bar is mont-fort.com scored as a 10. Every screen must reach 9 or
-better, judged by Codex, before it is called finished.
+---
 
-## Rules that do not bend
+## The goal (met)
 
-- Codex is the visual judge. Its number is the number. Never substitute my own opinion.
-- An absolute /10 from Codex is noise. Use a forced A/B, run in BOTH column orders.
-- Never present a screen as finished below 9. Always state the real score.
-- Update this file's scoreboard and NEXT ACTION every pass, then commit and push.
-  **This file IS the handover between sessions.**
-- The live site and the five existing decks are not touched.
+One scrolling front page. It opens on a real Mount Everest — measured elevation and
+satellite imagery, rendered live in 3D — and travels down through grey polluted air to
+the five pollutants and the mechanism that captures them.
 
 ## Where it lives
 
-- Page: `_deploy/peak_to_particle/everest.html`
-- Cloud: `_deploy/peak_to_particle/cloud_volume.js`
-- Terrain build scripts: `_deploy/peak_to_particle/terrain/`
-- Live: https://aldrinor.github.io/nf-bigidea-preview/peak_to_particle/everest.html
+- **Working copy:** `_deploy/peak_to_particle/` on the `main` branch of
+  `github.com/aldrinor/nf-bigidea-preview`
+- **Live preview:** https://aldrinor.github.io/nf-bigidea-preview/peak_to_particle/everest.html
+- **Handover package:** `peak_to_particle/` on the **`peak-to-particle`** branch of
+  the private `github.com/aldrinor/nanoflashing-website`, commit `849adbc`.
+  14.6 MB, only what the page loads plus the terrain build scripts. Verified to run
+  standalone with zero failed requests. **`HANDOVER.md` there is the entry point.**
 
-## The six beats (Yin's script, locked)
+## The scroll, beat by beat
 
-1. Original hero content — the platform copy.
-2. "This is where air and water are still clean."
-3. Cloud turns grey, dust starts floating.
-4. "Down where we live, they are full of pollutants."
-5. Camera holds. Grey fills the screen. "Most harmful pollutants carry an electric charge."
-6. "What they carry, we capture." Polarity line fades in, dust is sucked into the lens.
-
-Act windows are in `ACT_WINDOWS`. Each act's fade-OUT range is exactly the next act's
-fade-IN range, so the two always sum to 1 and the screen is never wordless.
-
-## Type and chrome
-
-Matched to cpolar.tech from measured computed styles. Anton for display, Montserrat
-variable for everything else, both self-hosted and subset to Latin. Bar is fixed and
-transparent: logo 34 px at x=72, links 14.4 px weight 650 in black 26 px apart, contact
-pill 1 px solid black at 7 px radius.
-
-## Scoreboard
-
-| | Codex | measured |
-|---|---|---|
-| Load, first seconds | 5/10 | complete, sharp page at 500 ms |
-| Hero, finished | 5.5/10 | all 7 text elements pass 4.5:1 at every orbit angle |
-
-**Not 10/10. Do not present it as finished.**
-
-### Read this before trusting another Codex number
-
-Codex's absolute /10 on this hero has sat between 5 and 6 across SIX rounds while
-the page changed enormously -- headline added, terrain relit, card added, card
-removed, contrast fixed. It also **contradicted itself**: round 3 said "place the
-five applications in a deliberate translucent panel", round 4 said the panel
-"makes the hero feel like a generic SaaS card, remove it". And a forced A/B in
-both column orders picked the FIRST image both times, then the SECOND image both
-times -- position bias, i.e. void, twice.
-
-So: use Codex to FIND defects, never to score progress. Fix the defects that
-repeat across rounds, and verify them with a measurement.
-
-### Yin's corrections, 2026-08-19 (these overrule Codex)
-
-- **The mountain is CENTRED.** Codex asked for a right-lean; Yin rejected it --
-  "when it rotate, it doesn't look good at all". Overruled. Aim is back on the
-  massif's centre line. The only thing kept from that pass is 360 m of downward
-  aim, which closes the empty sky without moving the peak sideways.
-- **Do not cut his writing.** I had replaced "The platform has five primary
-  application verticals:" with a two-word label. That was wrong. Every word of the
-  original is back. The Anton headline breaks his sentence typographically; it
-  does not shorten it. **Rule: his copy is not a design variable.**
-- **The coordinate block is deleted.** "27 59 17 N / 8,848 m / elevation and
-  imagery, measured" -- Yin: "It is meaningless." Gone, with the field that
-  existed only to keep it legible.
-
-### The camera is STILL, and that removed a whole class of problem
-
-Yin, 2026-08-20: "why left side got filter background, right side don't have?" and
-"the rotation make the effect so lag, maybe stop rotation".
-
-Both were the same root cause. The left-side wash existed ONLY to defend the copy
-from dark rock swinging behind it as the camera turned. Camera still -> nothing to
-defend -> the panel, the left gradient and the whole per-frame framebuffer read are
-deleted. That was four readPixels calls per frame, and every readPixels is a stall.
-
-What is left is symmetric: haze along the base of the massif, full width, which is
-what the bottom of a mountain actually looks like. The copy also lifts 92 px clear
-of the dark lower rock rather than being rescued from it.
-
-`?spin=90` still turns the orbit on for testing.
-
-**Frame rate**, software renderer, 4 runs each. RELATIVE signal only -- this machine
-has no GPU, so these are not Yin's numbers:
-
-| | runs | mean |
-|---|---|---|
-| rotation off | 3.20 2.80 3.30 3.00 | **3.08** |
-| rotation on | 2.80 2.30 2.50 2.30 | **2.48** |
-
-About 24% faster, and the spread is +-0.25, so the gap is real. Note what this also
-says: rotation was NOT the main cost. The cloud raymarch is. It now re-marches every
-twelfth frame when the camera is still instead of every third.
-
-### The placeholder must match the live camera, or the load jumps
-
-Yin: "it load at one angle, then after finish loading, it jump to another angle."
-
-The blurred still is embedded in the HTML so the first paint has a mountain. It was
-shot from the OLD right-leaning pose and never re-shot when the camera was centred,
-so the placeholder and the live scene were two different photographs.
-
-**If the camera framing changes, RE-SHOOT THE PLATE.** Harness: `plate.mjs`.
-
-Two more things had to be right, and neither was obvious:
-
-- **Match by HEIGHT, not `cover`.** The camera holds a fixed VERTICAL field of 21.5
-  degrees for every window wider than 1.45 and only the horizontal extent grows with
-  the window. So `background-size: auto 100%` centred is the correct mapping;
-  `cover` crops the height on a wide window and jumps again. The plate is shot at
-  2.96:1 so an ultrawide screen has width in hand. Below aspect 1.45 the lens opens
-  to 32 degrees and steps back, so no single still can match -- there the plate is
-  not shown at all and the CSS sky carries it.
-- **A cloud that jumps is still a jump.** Getting the terrain to line up was not
-  enough. `?ct=<seconds>` pins the cloud clock; the handover was measured at 2.05 s,
-  so the plate is shot with `?ct=1.8`.
-
-Measured, live scene against the plate, per-pixel difference on 0-255:
-**median 2, mean 7.3, 95th percentile 33.** Skyline offset across 180 columns:
-median 4 px. Before the fix the cloud band disagreed completely.
-
-### Contrast, still framing, ink only, 4.5:1 required
-
-| element | worst |
+| scroll | what happens |
 |---|---|
-| eyebrow | 13.54:1 |
-| statement | 19.34:1 |
-| lede | 19.25:1 |
-| label | 17.26:1 |
-| index | 6.47:1 |
-| scroll cue | 10.59:1 |
+| 0.00 | The hero. Camera still. C-POLAR statement, paragraph, five applications. |
+| 0.20–0.55 | The camera falls. It never cuts. Ends at 4,980 m, near the valley floor. |
+| 0.30–0.58 | The air greys, by draining colour from the light, not by a curtain. |
+| 0.36–0.45 | Dust starts drifting, arriving BEFORE the pollutants line. |
+| 0.41 | "Down where we live, they are full of pollutants." |
+| 0.55 | The camera holds. Everything after is weather and words. |
+| 0.565 | "Most harmful pollutants carry an electric charge." |
+| 0.66–0.755 | The lens and the five pollutants arrive. |
+| 0.80–0.84 | The charge line leaves. |
+| 0.84–0.878 | "What they carry, we capture." and the mechanism sentence arrive. |
+| 0.80–1.00 | The dust is drawn into the words "Positive polarity". |
+| 0.90–1.00 | The grey lifts. Blue sky, clean. |
 
-**ALL PASS with no left-side wash anywhere.** Harness: `still.mjs`.
+Page is 1040vh so the clean-up has room to breathe.
 
-### Bugs found while building the contrast check (kept for the record)
+## Final measured state
 
-1. **Gamma vs linear.** The page weighted raw framebuffer BYTES, which are
-   gamma-encoded. Rock whose true luminance is 0.09 reads as 0.35, so the solve
-   concluded no protection was needed and the sweep came back at 1.7:1.
-2. **The maths was right, the surface under it was not.** The solve assumed the
-   field was at full strength where the type is; the gradient had already fallen to
-   .34 by the right end of the index.
-3. **Measuring block boxes, not ink.** `.statement` is a 732 px box whose letters
-   end at 430. Measuring the empty half reported failures no reader would ever see.
-   Walk the text nodes with a Range and measure the ink.
-4. **Non-deterministic sampling.** Waiting N seconds between shots lands on
-   different orbit angles every run, so a fix can look like a regression.
+**Load, cold cache:** a complete readable page at 500 ms — sky, logo, nav, headline,
+the five applications — from a blurred mountain plate embedded in the HTML. The 1.41 MB
+stand-in mountain follows, then the 7.58 MB sharp one cross-fades in behind it.
+Critical path 1,306 kB, down from 9,172 kB.
+
+**Contrast, black type, 4.5:1 required.** Hero: statement 12.26, paragraph 16.92,
+label 17.77, applications 7.47, scroll cue 11.77. Final screen: statement 12.59,
+mechanism 4.70, pollutant cells 12.36–12.90. All pass.
+
+**Alignment.** Lens centred in the right section: 1042 / 1222 / 987 against
+right-section centres of 1042 / 1222 / 987 at 1440, 1680, 1366. Its name cell sits on
+the pollutant row's exact line at all three. Disc hangs a fixed 46 px clear of it.
+
+**Dust:** 3,500 motes on desktop, entirely behind the lens — 0.25% specks inside the
+disc against 39.44% just outside, measured in a single frame.
+
+**Frame rate:** relative only. This machine has no GPU. Rotation off was ~24% faster
+than on; skipping the cloud where it is invisible was 0.89 → 9.89 fps. Never quoted as
+Yin's numbers.
 
 ## Load, measured cold-cache
 
