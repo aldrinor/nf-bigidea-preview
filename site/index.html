@@ -109,6 +109,7 @@ canvas#scene{transition:opacity .45s linear}
   /* one layer behind the hero, so the mountain dissolves to reveal it */
   #cp-city{position:fixed;inset:0;width:100vw;height:100vh;border:0;display:block;
     z-index:-3;opacity:0;pointer-events:none;transition:opacity .45s linear}
+  html.cp-city-on #cp-clear{opacity:0 !important;transition:opacity .5s linear}
 html, body{overflow-x:clip}
 </style>
 <script type="importmap">
@@ -1107,6 +1108,7 @@ function cityBackdrop(sy, sceneFade){
     cityShown = on;
     cityFrame.style.opacity = on.toFixed(3);
     window.__cpCityOn = on;   /* the pale wash reads this and steps aside */
+    document.documentElement.classList.toggle('cp-city-on', on > 0.45);
   }
   /* Choked when it arrives, clear by the time the capture copy has had its say. The
      span is set from the pollutant section's own height rather than a guessed number of
