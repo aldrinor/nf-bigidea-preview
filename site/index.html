@@ -525,7 +525,11 @@ html, body{overflow-x:clip}
        buffer and comes back black. Their renderer does not redraw on its
        own, so the background stayed black after scrolling back up. */
     var washNow = got > sceneOut ? got : sceneOut;
-    put(clear, 'opacity', (washNow * (1 - washOut)).toFixed(3));
+    /* The pale wash was standing in for a background once the vendor's scene was
+       taken out. The city is that background now, so the wash steps aside for it --
+       otherwise it sits on top at z-index 1 and the city is never seen. */
+    var cityUp = (window.__cpCityOn || 0);
+    put(clear, 'opacity', (washNow * (1 - washOut) * (1 - cityUp)).toFixed(3));
     window.__cpClean = capture;
     target.x = capOffX; target.y = gridTop + capOffY;
 
@@ -1102,6 +1106,7 @@ function cityBackdrop(sy, sceneFade){
   if (Math.abs(on - cityShown) > 0.004){
     cityShown = on;
     cityFrame.style.opacity = on.toFixed(3);
+    window.__cpCityOn = on;   /* the pale wash reads this and steps aside */
   }
   /* Choked when it arrives, clear by the time the capture copy has had its say. The
      span is set from the pollutant section's own height rather than a guessed number of
