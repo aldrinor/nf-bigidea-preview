@@ -109,7 +109,12 @@ canvas#scene{transition:opacity .45s linear}
   /* one layer behind the hero, so the mountain dissolves to reveal it */
   #cp-city{position:fixed;inset:0;width:100vw;height:100vh;border:0;display:block;
     z-index:-3;opacity:0;pointer-events:none;transition:opacity .45s linear}
-  html.cp-city-on #cp-clear{opacity:0 !important;transition:opacity .5s linear}
+  /* Measured on the deployed page: the class was applied, the inline opacity was 0,
+     and the COMPUTED opacity was still 0.967 -- something else on the page keeps
+     writing it, and it sits at z-index 3, above the city. Rather than fight over
+     opacity, take its background away: that is the thing doing the covering, and
+     nothing else animates it. */
+  html.cp-city-on #cp-clear{background:none !important;opacity:0 !important}
 html, body{overflow-x:clip}
 </style>
 <script type="importmap">
