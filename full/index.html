@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en" style="background:#b7ceed">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Peak to city</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#b7ceed;overflow-x:hidden}
+  #stage{position:fixed;inset:0;z-index:0}
+  #stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  /* The mountain sits on top and is dissolved away inside its own whiteout. The city
+     is underneath the whole time, already running, so nothing has to start at the
+     handover -- a scene that begins mid-transition always shows the join. */
+  #city{opacity:0}
+  #mtn{opacity:1}
+  #scroller{pointer-events:none}
+  .bar{position:fixed;left:0;right:0;top:0;z-index:6;display:flex;align-items:center;
+    justify-content:space-between;padding:52px 76px 0 76px;pointer-events:none}
+  .bar img{height:44px;width:auto;pointer-events:auto}
+  .bar nav{display:flex;align-items:center;gap:34px;pointer-events:auto}
+  .bar nav a{font-family:Montserrat,Arial,sans-serif;font-size:16.5px;font-weight:620;
+    line-height:1.3;color:#000;text-decoration:none;padding:10px 0;
+    transition:opacity .25s ease}
+  .bar nav a:hover{opacity:.58}
+  .bar nav a.pill{border:1.5px solid #000;border-radius:8px;padding:13px 18px;font-weight:650}
+  .bar nav a.pill:hover{opacity:1;background:#000;color:#fff}
+  @media (max-width:900px){
+    .bar{padding:20px 20px 0}
+    .bar img{height:26px}
+    .bar nav a{display:none}
+    .bar nav a.pill{display:block;font-size:12.5px;padding:8px 11px}
+  }
+  #load{position:fixed;inset:0;display:grid;place-items:center;z-index:9;background:#b7ceed;
+    font:650 12px/1.2 Montserrat,Arial,sans-serif;letter-spacing:.12em;color:#3f5a7a;
+    transition:opacity .7s}
+  #load.gone{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<header class="bar">
+  <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iX+WcluWxpF8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI5MS43IDQ1LjciPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4zLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMyBCdWlsZCAxODIpIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNTcuOCwyNmw1LjUsOC44aDEwLjdsLTYuNi0xMC40YzMuMi0xLjksNS40LTUuNCw1LjQtOS4zLDAtNi01LjEtMTAuOS0xMS40LTEwLjloLTE5Ljl2MzAuNmg5LjN2LTguOGg2LjlaTTI2MCwxMi4xYzIsMCwzLjcsMS4zLDMuNywyLjlzLTEuNiwyLjktMy43LDIuOWgtOS4xdi01LjhoOS4xWiIvPgogIDxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTc1LjggNC4xIDE4NS4xIDQuMSAxODUuMSAxNy45IDE4NS4xIDI1LjMgMTg1LjEgMjYuNyAyMDIuNSAyNi43IDIwMi41IDM0LjcgMTg1LjEgMzQuNyAxNzUuOCAzNC43IDE3NS44IDI1LjMgMTc1LjggNC4xIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTE1Ni4zLDQuMWM5LjgsMCwxNy44LDYuOCwxNy44LDE1LjNzLTgsMTUuMy0xNy44LDE1LjMtMTcuOC02LjktMTcuOC0xNS4zLDgtMTUuMywxNy44LTE1LjNoMFpNMTU2LjMsMTIuMWMtNC43LDAtOC41LDMuMy04LjUsNy4zczMuOCw3LjMsOC41LDcuMyw4LjUtMy4zLDguNS03LjMtMy44LTcuMy04LjUtNy4zWiIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OS40LDQuMWM4LjIsMCwxNS4xLDQuNywxNy4yLDExLjFoLTEwLjJjLTEuNS0xLjktNC4xLTMuMS02LjktMy4xLTQuNywwLTguNSwzLjMtOC41LDcuM3MzLjgsNy4zLDguNSw3LjMsNS41LTEuMiw3LTMuMWgxMC4yYy0yLjEsNi40LTksMTEuMi0xNy4yLDExLjJzLTE3LjgtNi45LTE3LjgtMTUuMyw4LTE1LjMsMTcuOC0xNS4zaDBaIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsMzQuN2w3LjgsNC4yLDkuNC0yNi41aDYuOGw5LjQsMjYuNSw3LjgtNC4yVjQuMWMwLDAtLjEtLjEtLjQtLjItMi41LTEtNS0xLjgtNy43LTIuNEMyOS45LjcsMjYuNC4yLDIzLDBjLTEuNywwLTMuNSwwLTUuMiwwLTEuOCwwLTMuNi4zLTUuMy42LTMuNS42LTYuOSwxLjQtMTAuMywyLjYtLjYuMi0xLjMuNS0xLjkuN0MuMSw0LDAsNC4xLDAsNC4xdjMwLjZoMFpNMjguMiw0MS43bC03LjYsNC03LjYtNCw3LjYtMjEuOCw3LjYsMjEuOFpNMjUuNSwxMi40aDBzNC4yLDAsNC4yLDB2LTQuMmg1LjN2NC4yaDQuMnY1LjNoLTQuMnY0LjJoLTUuM3YtNC4yaC0yLjNsLTEuOS01LjJoMFoiLz4KICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjIwMi41IDM0LjcgMjEyLjIgMzQuNyAyMjIgMTMuNiAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHJlY3QgeD0iODkuNiIgeT0iMTUuMiIgd2lkdGg9IjEzLjEiIGhlaWdodD0iOC4zIi8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyNS40LDQuMWM2LjMsMCwxMS40LDQuOSwxMS40LDEwLjlzLTUuMSwxMC45LTExLjQsMTAuOWgtMTAuNnY4LjhoLTkuM1Y0LjFoMTkuOFpNMTIzLjksMTIuMWgtOS4xdjUuOGg5LjFjMiwwLDMuNy0xLjMsMy43LTIuOXMtMS43LTIuOS0zLjctMi45aDBaIi8+CiAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIyMDIuNSAzNC43IDIxMi4yIDM0LjcgMjIyIDEzLjYgMjMxLjkgMzQuNyAyNDEuNiAzNC43IDIyNy4zIDQuMSAyMjIgNC4xIDIxNi44IDQuMSAyMDIuNSAzNC43Ii8+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTI3Ni42LDEyLjF2LTYuNWgtMi42di0xLjVoN3YxLjVoLTIuNnY2LjVoLTEuOVpNMjgyLjYsMTIuMVY0LjFoMS41bDMuNCw1LjctLjQtLjcsMi45LTVoMS41djhzLTEuNywwLTEuNywwdi01LjMuNXMtMi40LDQtMi40LDRoLS44bC0yLjctNC41LjQuNnY0LjdoLTEuNywwWiIvPgo8L3N2Zz4K" alt="C-POLAR" decoding="sync">
+  <nav>
+    <a href="#applications">Applications</a>
+    <a href="#evidence">Science &amp; Evidence</a>
+    <a href="#company">Company</a>
+    <a class="pill" href="#contact">Contact C-POLAR</a>
+  </nav>
+</header>
+<div id="stage">
+  <iframe id="city" src="../city_preview/index.html" title="City" scrolling="no"></iframe>
+  <iframe id="mtn"  src="../peak_to_particle/everest.html" title="Mount Everest" scrolling="no"></iframe>
+</div>
+<div id="scroller"></div>
+<div id="load">LOADING</div>
+
+<script>
+/* ---------------------------------------------------------------------------
+   One scrollbar, two scenes.
+
+   The wrapper owns the page scroll and drives each scene by setting its own
+   scrollTop. Both frames are same-origin, so this is a direct call rather than a
+   postMessage handshake -- fewer moving parts, and no risk of the two drifting apart
+   by a frame, which is what would show at the join.
+
+   The handover happens INSIDE the mountain's whiteout. That is the whole trick: at
+   that point the mountain page is formless grey from edge to edge, so there is nothing
+   whose shape could fail to line up with the city behind it. The two scenes never have
+   to match geometrically, only in tone -- and both are the same grey there.
+   --------------------------------------------------------------------------- */
+
+const MTN_END   = 0.42;    // how far into the mountain's own scroll we go before leaving
+const FADE_IN   = 0.345;   // the whiteout is total from about here...
+const FADE_OUT  = 0.415;   // ...to about here
+
+/* The wrapper's height is the two scenes' scroll lengths, in their own proportions, so
+   neither one is sped up or slowed down relative to how it was built and judged. */
+const MTN_VH  = 1040 * MTN_END;   // the mountain page is 1040vh
+const CITY_VH = 660;              // the city page is 660vh
+const TOTAL_VH = Math.round(MTN_VH + CITY_VH);
+
+const scroller = document.getElementById('scroller');
+scroller.style.height = TOTAL_VH + 'vh';
+
+const mtn = document.getElementById('mtn');
+const city = document.getElementById('city');
+const split = MTN_VH / TOTAL_VH;   // fraction of the wrapper scroll that is mountain
+
+let ready = 0;
+function whenReady(frame, fn){
+  const check = () => {
+    try {
+      const w = frame.contentWindow;
+      if (w && w.document && w.document.readyState === 'complete') { fn(); return; }
+    } catch (e) { /* still loading */ }
+    setTimeout(check, 120);
+  };
+  check();
+}
+function armed(){
+  if (++ready < 2) return;
+  document.getElementById('load').classList.add('gone');
+  try { mtn.contentDocument.querySelector('.bar').style.display = 'none'; } catch (e) {}
+  requestAnimationFrame(tick);
+}
+whenReady(mtn, armed);
+whenReady(city, armed);
+
+function smootherstep(a, b, x){
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t*t*t*(t*(t*6 - 15) + 10);
+}
+
+function drive(frame, p){
+  try {
+    const w = frame.contentWindow, d = w.document.documentElement;
+    const max = Math.max(1, d.scrollHeight - w.innerHeight);
+    w.scrollTo(0, p * max);
+  } catch (e) { /* frame not ready yet */ }
+}
+
+let last = -1, cityLive = true, mtnLive = true;
+function tick(){
+  const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  const p = Math.min(1, Math.max(0, scrollY / max));
+
+  if (p !== last){
+    last = p;
+    /* The mountain keeps being driven a little past the handover, and the city is
+       already moving before it. Both scenes stay alive across the join, so neither one
+       pops into motion when it becomes visible. */
+    const mp = Math.min(MTN_END + 0.03, (p / split) * MTN_END);
+    const cp = Math.max(0, (p - split) / (1 - split));
+    drive(mtn, mp / 1.0);
+    drive(city, cp);
+
+    const fade = smootherstep(FADE_IN, FADE_OUT, mp);
+    mtn.style.opacity = (1 - fade).toFixed(3);
+    city.style.opacity = fade.toFixed(3);
+
+    /* only the scene on screen renders; the other one is switched off entirely */
+    const cityOn = mp > FADE_IN - 0.08;
+    const mtnOn  = mp < FADE_OUT + 0.04;
+    if (cityOn !== cityLive){ city.style.display = cityOn ? 'block' : 'none'; cityLive = cityOn; }
+    if (mtnOn  !== mtnLive){  mtn.style.display  = mtnOn  ? 'block' : 'none'; mtnLive  = mtnOn; }
+    /* only the visible scene should take the drag, or the two look-arounds fight */
+    mtn.style.pointerEvents  = fade < 0.5 ? 'auto' : 'none';
+    city.style.pointerEvents = fade < 0.5 ? 'none' : 'auto';
+  }
+  requestAnimationFrame(tick);
+}
+
+/* A frame that has the pointer swallows the wheel, so the page would stop scrolling the
+   moment the cursor was over a scene. Forward it back out. */
+function forwardWheel(frame){
+  try {
+    frame.contentWindow.addEventListener('wheel', e => {
+      window.scrollBy({top: e.deltaY, behavior: 'instant'});
+    }, {passive: true});
+  } catch (e) {}
+}
+whenReady(mtn, () => forwardWheel(mtn));
+whenReady(city, () => forwardWheel(city));
+
+addEventListener('resize', () => { last = -1; });
+window.__setP = v => {
+  const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  window.scrollTo(0, v * max);
+};
+</script>
+</body>
+</html>

@@ -78,7 +78,8 @@ function lin(h){
 const ZEN_D = lin(0x6b737b), ZEN_C = lin(0xb7ceed);   // the mountain page's exact zenith   // clean zenith = the mountain's sky
 const HOR_D = lin(0xa9aeb2), HOR_C = lin(0xe4edf7);   // and its near-horizon
 const MURK  = lin(0x8b9196);
-const MTN   = lin(0x93a8c4);   // the Everest ridge, seen once the air is clean
+const MTN   = lin(0x9dabbd);
+const CLOUD = lin(0xeef5fc);   // the mountain's whiteout, measured off the handover   // the Everest ridge, seen once the air is clean
 
 function mixV(out, a, b, t){
   out.set(a.x+(b.x-a.x)*t, a.y+(b.y-a.y)*t, a.z+(b.z-a.z)*t);
@@ -94,6 +95,7 @@ const U = {
   uFront:   {value: -3000.0},   // the charged surface, in metres from the eye
   uEdge:    {value: 210.0},
   uRag:     {value: 1150.0},    // how far the smoke's own shape drags the boundary
+  uHiLead:  {value: 2300.0},    // head start the high air gets over the streets
   uResid:   {value: 0.13},      // what never clears, so pockets survive     // how sharply clean air gives way to dirty
   uTime:    {value: 0.0},
   uFwd:     {value: new THREE.Vector3(0,0,-1)},   // horizontal view axis: the plane's normal
@@ -115,9 +117,9 @@ const sky = new THREE.Mesh(
       '  float t = clamp(vD.y / 0.20, 0.0, 1.0);',
       '  vec3  c = mix(uHorCol, uZenCol, pow(t, 0.90));',
       '  float ang = atan(vD.x, vD.z);',
-      '  float ridge = 0.052 + 0.020*sin(ang*6.0 + 0.7) + 0.012*sin(ang*15.0 + 2.3)',
-      '              + 0.007*sin(ang*33.0 + 4.1);',
-      '  float m = smoothstep(ridge, ridge - 0.010, vD.y);',
+      '  float ridge = 0.050 + 0.027*sin(ang*3.1 + 0.35) + 0.016*sin(ang*7.7 + 2.15)',
+      '              + 0.009*sin(ang*19.0 + 4.35) + 0.005*sin(ang*43.0 + 1.05);',
+      '  float m = smoothstep(ridge, ridge - 0.005, vD.y);',
       '  gl_FragColor = vec4(mix(c, uMtnCol, m * uMtn), 1.0);',
       '}'
     ].join('\n')
@@ -160,7 +162,7 @@ const CITY_TONE = [
   'float g = 0.140 + 0.170 * seed + 0.130 * t;',
   'g *= mix(1.0, 1.20, smoothstep(0.55, 0.80, abs(fnrm.y)));',
   'g *= 0.62 + 0.38 * smoothstep(0.0, 9.0, vWP.y);',
-  'g *= mix(0.72, 1.0, smoothstep(300.0, 2600.0, distance(vWP, cameraPosition)));',
+  'g *= mix(0.86, 1.0, smoothstep(300.0, 2600.0, distance(vWP, cameraPosition)));',
   'diffuseColor.rgb = vec3(g) * vec3(0.975, 0.99, 1.02);'
 ].join('\n');
 
@@ -240,7 +242,7 @@ const POST_FRAG = [
   'uniform mat4 uProjInv, uCamWorld;',
   'uniform vec3 uCamPos, uMurkCol, uHorCol, uZenCol, uMtnCol;',
   'uniform float uMurk, uFall, uHaze, uFront, uTime, uMaxDist;',
-  'uniform float uEdge, uRag, uResid, uMtn;',
+  'uniform float uEdge, uRag, uResid, uMtn, uHiLead;',
   'uniform vec3 uFwd;',
   '',
   'vec3 skyCol(vec3 rd){',
@@ -249,9 +251,9 @@ const POST_FRAG = [
   '  /* the far ridge: a few sine terms against the compass angle, which is enough for',
   '     a skyline that never repeats across the seven degrees the visitor can turn */',
   '  float ang = atan(rd.x, rd.z);',
-  '  float ridge = 0.052 + 0.020*sin(ang*6.0 + 0.7) + 0.012*sin(ang*15.0 + 2.3)',
-  '              + 0.007*sin(ang*33.0 + 4.1);',
-  '  float m = smoothstep(ridge, ridge - 0.010, rd.y);',
+  '  float ridge = 0.050 + 0.027*sin(ang*3.1 + 0.35) + 0.016*sin(ang*7.7 + 2.15)',
+  '              + 0.009*sin(ang*19.0 + 4.35) + 0.005*sin(ang*43.0 + 1.05);',
+  '  float m = smoothstep(ridge, ridge - 0.005, rd.y);',
   '  return mix(c, uMtnCol, m * uMtn);',
   '}',
   '',
@@ -300,7 +302,9 @@ const POST_FRAG = [
   '    float dep  = dot(p - uCamPos, uFwd);',
   '    /* the boundary rides on the smoke: thin air clears first, thick air lags */',
   '    float rag  = (n - 0.45) * uRag;',
-  '    float keep = smoothstep(uFront - uEdge, uFront + uEdge, dep + rag);',
+  '    /* the high air clears well ahead of the streets */',
+  '    float fr   = uFront + uHiLead * smoothstep(20.0, 300.0, p.y);',
+  '    float keep = smoothstep(fr - uEdge, fr + uEdge, dep + rag);',
   '    keep = max(keep, uResid * n * n);',
   '    /* the bulk pools in the streets; a thin, much higher layer keeps the sky',
   '       looking contaminated rather than merely dark */',
@@ -338,7 +342,7 @@ const post = new THREE.Mesh(
       uCamPos: {value: new THREE.Vector3()},
       uMurkCol: U.uMurkCol, uHorCol: U.uHorCol, uZenCol: U.uZenCol,
       uMurk: U.uMurk, uFall: U.uFall, uHaze: U.uHaze, uFront: U.uFront, uTime: U.uTime,
-      uEdge: U.uEdge, uRag: U.uRag, uResid: U.uResid, uFwd: U.uFwd,
+      uEdge: U.uEdge, uRag: U.uRag, uResid: U.uResid, uHiLead: U.uHiLead, uFwd: U.uFwd,
       uMtnCol: U.uMtnCol, uMtn: U.uMtn,
       uMaxDist: {value: 6200}
     },
@@ -520,16 +524,22 @@ function frame(ms){
   /* Linear travel, not eased. Smoothstepped, the surface spent most of the scroll
      either under the viewer's feet or already gone; linear keeps it in the part of the
      picture you can see -- 800 m out to 5 km -- for 40% of the scroll instead of 16%. */
+  /* the cloud we arrive inside, turning dirty */
+  const arrive = ss(0.015, 0.17, p);
   const sweep = Math.min(1, Math.max(0, (p - 0.34) / 0.62));
   const skyP  = ss(0.38, 0.92, p);
 
   U.uFront.value = -900 + sweep * 8600;
   /* the dirt load builds as the surface collects, then thins as the whole thing
      recedes past the skyline */
+  U.uMurk.value = 0.00178 * (1 + 2.6 * (1 - arrive));   // cloud-thick on arrival
   mixV(U.uMurkCol.value, MURK,  HOR_C, skyP*0.85);
+  U.uMurkCol.value.lerp(CLOUD, 1 - arrive);
   mixV(U.uHorCol.value,  HOR_D, HOR_C, skyP);
+  U.uHorCol.value.lerp(CLOUD, 1 - arrive);
   mixV(U.uZenCol.value,  ZEN_D, ZEN_C, skyP);
-  U.uMtn.value = 0.55 * ss(0.62, 0.98, p);   // only clean air lets you see that far
+  U.uZenCol.value.lerp(CLOUD, 1 - arrive);
+  U.uMtn.value = 0.42 * ss(0.62, 0.98, p);   // only clean air lets you see that far
   document.documentElement.style.background = skyP > 0.5 ? '#eaf1fa' : '#a9aeb2';
 
   sun.intensity  = 2.05 + 1.20*skyP;
@@ -574,9 +584,9 @@ new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./nyc_city_v3.glb', fun
   bindLook(canvas);
 
   const light = innerWidth < 720;
-  makeDust(light ? 1500 : 4200, 8.40, 0.30, 0x4c535b, 55,  1100, 48);
-  makeDust(light ? 1400 : 4000, 7.20, 0.28, 0x515860, 120, 3000, 60);
-  makeDust(light ? 500 : 1500, 17.0, 0.17, 0x5b626a, 160, 2200, 74);
+  makeDust(light ? 420 : 1100, 8.40, 0.15, 0x4c535b, 55,  1100, 48);
+  makeDust(light ? 380 : 950,  7.20, 0.13, 0x515860, 120, 3000, 60);
+  makeDust(light ? 150 : 380,  17.0, 0.09, 0x5b626a, 160, 2200, 74);
 
   sizeAll();
   document.getElementById('load').classList.add('gone');
