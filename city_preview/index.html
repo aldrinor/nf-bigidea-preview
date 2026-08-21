@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Down where we live</title>
 <style>
-  @font-face{font-family:Anton;src:url('../peak_to_particle/assets/fonts/Anton-Regular.woff2') format('woff2');
-    font-weight:400;font-display:swap}
   @font-face{font-family:Montserrat;src:url('../peak_to_particle/assets/fonts/Montserrat-Variable.woff2') format('woff2');
     font-weight:100 900;font-display:swap}
   *{margin:0;padding:0;box-sizing:border-box}
@@ -15,11 +13,15 @@
   #scroller{height:660vh;pointer-events:none}
   /* The sky is the empty half of this picture, so the copy lives up in it. At the
      vertical centre it sat straight across the busiest band of the skyline. */
-  .plate{position:fixed;left:76px;top:13%;z-index:3;max-width:min(600px,44vw);opacity:0}
-  .plate h1{font-family:Anton,Impact,sans-serif;font-weight:400;color:#0d1013;
-    font-size:clamp(26px,2.72vw,43px);line-height:1.05;letter-spacing:.004em}
-  .cue{position:fixed;right:30px;bottom:26px;z-index:3;font-size:12px;font-weight:650;
-    letter-spacing:.13em;opacity:.7;transition:opacity .5s}
+  .plate{position:fixed;left:76px;top:13%;z-index:3;max-width:min(790px,52vw);opacity:0}
+  .plate .lead{font-weight:400;color:#000;
+    font-size:clamp(27px,3.05vw,50px);line-height:1.4;letter-spacing:.14rem}
+  .plate .sub{font-weight:400;color:#000;max-width:36ch;margin-top:1.35rem;
+    font-size:clamp(14px,1.05vw,16px);line-height:1.6;letter-spacing:.08rem}
+  .plate .sub b{font-weight:700;color:#000}
+  /* .fs-cta from the site: 12px / 1.2 / .025rem */
+  .cue{position:fixed;right:30px;bottom:26px;z-index:3;font-size:12px;font-weight:700;
+    letter-spacing:.025rem;color:#000;opacity:.7;transition:opacity .5s}
   .cue.away{opacity:0}
   .load{position:fixed;inset:0;display:grid;place-items:center;z-index:6;background:#a9aeb2;
     font-size:12px;font-weight:650;letter-spacing:.12em;color:#4e575f;transition:opacity .8s}
@@ -30,8 +32,10 @@
 <canvas id="c"></canvas>
 <div id="scroller"></div>
 
-<div class="plate" id="p1"><h1>Down where we live,<br>they are full of pollutants.</h1></div>
-<div class="plate" id="p2"><h1>Positive polarity<br>captures them.</h1></div>
+<div class="plate" id="p1"><p class="lead">Down where we live,<br>they are full of pollutants.</p></div>
+<div class="plate" id="p2"><p class="lead">What they carry, we capture.</p>
+  <p class="sub"><b>Positive polarity</b> captures particles, destroys up to 99.9% of
+  pathogens through a physical mechanism.</p></div>
 
 <div class="cue">scroll</div>
 <div class="load" id="load">LOADING</div>
@@ -72,9 +76,9 @@ function lin(h){
   return new THREE.Vector3(s2l((h>>16&255)/255), s2l((h>>8&255)/255), s2l((h&255)/255));
 }
 const ZEN_D = lin(0x6b737b), ZEN_C = lin(0xb7ceed);   // the mountain page's exact zenith   // clean zenith = the mountain's sky
-const HOR_D = lin(0xa9aeb2), HOR_C = lin(0xeef3f7);   // and its exact near-horizon
+const HOR_D = lin(0xa9aeb2), HOR_C = lin(0xe4edf7);   // and its near-horizon
 const MURK  = lin(0x8b9196);
-const DIRT  = lin(0x6c7278);   // matter collected on the surface: darker than the air
+const MTN   = lin(0x93a8c4);   // the Everest ridge, seen once the air is clean
 
 function mixV(out, a, b, t){
   out.set(a.x+(b.x-a.x)*t, a.y+(b.y-a.y)*t, a.z+(b.z-a.z)*t);
@@ -84,17 +88,17 @@ const U = {
   uZenCol:  {value: ZEN_D.clone()},
   uHorCol:  {value: HOR_D.clone()},
   uMurkCol: {value: MURK.clone()},
-  uDirtCol: {value: DIRT.clone()},
-  uBandFall:{value: 205.0},
   uMurk:    {value: 0.00178},   // density of the dirty air at street level
   uFall:    {value: 108.0},     // metres: how fast it thins going up
-  uHaze:    {value: 1/3600},    // permanent distance haze; never clears
+  uHaze:    {value: 1/4200},    // permanent distance haze; never clears
   uFront:   {value: -3000.0},   // the charged surface, in metres from the eye
-  uEdge:    {value: 210.0},     // how sharply clean air gives way to dirty
-  uRidge:   {value: 0.0},       // dirt collected ON the surface. this is the gesture.
-  uRidgeW:  {value: 34.0},
+  uEdge:    {value: 210.0},
+  uRag:     {value: 1150.0},    // how far the smoke's own shape drags the boundary
+  uResid:   {value: 0.13},      // what never clears, so pockets survive     // how sharply clean air gives way to dirty
   uTime:    {value: 0.0},
   uFwd:     {value: new THREE.Vector3(0,0,-1)},   // horizontal view axis: the plane's normal
+  uMtnCol:  {value: MTN.clone()},
+  uMtn:     {value: 0.0},        // how much of the far ridge is showing
 };
 
 /* ---- sky ------------------------------------------------------------------ */
@@ -102,13 +106,19 @@ const sky = new THREE.Mesh(
   new THREE.SphereGeometry(30000, 32, 20),
   new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false, toneMapped: false,
-    uniforms: {uZenCol: U.uZenCol, uHorCol: U.uHorCol},
+    uniforms: {uZenCol: U.uZenCol, uHorCol: U.uHorCol, uMtnCol: U.uMtnCol, uMtn: U.uMtn},
     vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
     fragmentShader: [
       'varying vec3 vD; uniform vec3 uZenCol; uniform vec3 uHorCol;',
+      'uniform vec3 uMtnCol; uniform float uMtn;',
       'void main(){',
-      '  float t = clamp(vD.y / 0.245, 0.0, 1.0);',
-      '  gl_FragColor = vec4(mix(uHorCol, uZenCol, pow(t, 0.74)), 1.0);',
+      '  float t = clamp(vD.y / 0.20, 0.0, 1.0);',
+      '  vec3  c = mix(uHorCol, uZenCol, pow(t, 0.90));',
+      '  float ang = atan(vD.x, vD.z);',
+      '  float ridge = 0.052 + 0.020*sin(ang*6.0 + 0.7) + 0.012*sin(ang*15.0 + 2.3)',
+      '              + 0.007*sin(ang*33.0 + 4.1);',
+      '  float m = smoothstep(ridge, ridge - 0.010, vD.y);',
+      '  gl_FragColor = vec4(mix(c, uMtnCol, m * uMtn), 1.0);',
       '}'
     ].join('\n')
   })
@@ -123,10 +133,19 @@ fill.position.set(3200, 1400, -2400); sc.add(fill);
 
 /* ---- ground ---------------------------------------------------------------- */
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(120000, 120000),
+  /* 26 km across, not 120. The old plane ran all the way to the camera's far
+     clip, so its silhouette edge landed right on the horizon and left a one-pixel
+     dark seam across 42% of the frame -- proved by hiding the plane, at which
+     point the line went away. At 13 km the haze is already total, so the plate
+     is exactly the sky colour where it stops and its edge cannot be seen. */
+  new THREE.PlaneGeometry(26000, 26000),
   new THREE.MeshStandardMaterial({color:0x8e97a0, roughness:0.98})
 );
 ground.rotation.x = -Math.PI/2; ground.position.y = -0.5; sc.add(ground);
+/* QA flags, so an artefact can be traced to a layer by removing layers rather
+   than by reasoning about which one it probably is. */
+if (q.has('noground')) ground.visible = false;
+if (q.has('nosky'))    sky.visible = false;
 
 /* ---- the city --------------------------------------------------------------
    Deliberately NOT photoreal. Flat value only -- no windows, no brick, no texture of
@@ -138,7 +157,7 @@ const CITY_TONE = [
   'vec3  fnrm = normalize(cross(dFdx(vWP), dFdy(vWP)));',
   'float seed = vBld.y;',
   'float t    = clamp(vBld.z * 3.5 / 150.0, 0.0, 1.0);',
-  'float g = 0.125 + 0.205 * seed + 0.150 * t;',
+  'float g = 0.140 + 0.170 * seed + 0.130 * t;',
   'g *= mix(1.0, 1.20, smoothstep(0.55, 0.80, abs(fnrm.y)));',
   'g *= 0.62 + 0.38 * smoothstep(0.0, 9.0, vWP.y);',
   'g *= mix(0.72, 1.0, smoothstep(300.0, 2600.0, distance(vWP, cameraPosition)));',
@@ -219,14 +238,21 @@ const POST_FRAG = [
   'uniform sampler2D tDepth;',
   'uniform sampler3D tNoise;',
   'uniform mat4 uProjInv, uCamWorld;',
-  'uniform vec3 uCamPos, uMurkCol, uHorCol, uZenCol, uDirtCol;',
+  'uniform vec3 uCamPos, uMurkCol, uHorCol, uZenCol, uMtnCol;',
   'uniform float uMurk, uFall, uHaze, uFront, uTime, uMaxDist;',
-  'uniform float uEdge, uRidge, uRidgeW, uBandFall;',
+  'uniform float uEdge, uRag, uResid, uMtn;',
   'uniform vec3 uFwd;',
   '',
   'vec3 skyCol(vec3 rd){',
-  '  float t = clamp(rd.y / 0.245, 0.0, 1.0);',
-  '  return mix(uHorCol, uZenCol, pow(t, 0.74));',
+  '  float t = clamp(rd.y / 0.20, 0.0, 1.0);',
+  '  vec3  c = mix(uHorCol, uZenCol, pow(t, 0.90));',
+  '  /* the far ridge: a few sine terms against the compass angle, which is enough for',
+  '     a skyline that never repeats across the seven degrees the visitor can turn */',
+  '  float ang = atan(rd.x, rd.z);',
+  '  float ridge = 0.052 + 0.020*sin(ang*6.0 + 0.7) + 0.012*sin(ang*15.0 + 2.3)',
+  '              + 0.007*sin(ang*33.0 + 4.1);',
+  '  float m = smoothstep(ridge, ridge - 0.010, rd.y);',
+  '  return mix(c, uMtnCol, m * uMtn);',
   '}',
   '',
   'float hash12(vec2 p){',
@@ -238,9 +264,13 @@ const POST_FRAG = [
   '/* Two octaves of the field, drifting at different rates, so the smoke keeps',
   '   changing shape instead of sliding past as one rigid pattern. */',
   'float fieldNoise(vec3 p){',
+  '  p.y *= 0.42;      // squash the field vertically, so it reads as layers',
   '  float a = texture(tNoise, p * 0.00042 + vec3(uTime*0.0042, 0.0, uTime*0.0021)).r;',
   '  float b = texture(tNoise, p * 0.00146 + vec3(-uTime*0.0075, uTime*0.002, 0.0)).r;',
-  '  return smoothstep(0.30, 0.92, a * 0.68 + b * 0.32);',
+  '  /* a third, wide, sideways-varying octave: without it the murk changes with',
+  '     height and depth but is almost uniform ACROSS the frame */',
+  '  float c = texture(tNoise, p * 0.00027 + vec3(uTime*0.0011, 0.0, 0.0)).r;',
+  '  return smoothstep(0.34, 0.97, a * 0.46 + b * 0.28 + c * 0.26);',
   '}',
   '',
   'void main(){',
@@ -257,7 +287,7 @@ const POST_FRAG = [
   '  rd /= max(L, 1e-4);',
   '  float march = min(isSky ? uMaxDist : L, uMaxDist);',
   '',
-  '  const int STEPS = 26;',
+  '  const int STEPS = 18;',
   '  float dt = march / float(STEPS);',
   '  /* jitter the first step per pixel, or 16 steps band the picture into rings */',
   '  float t = dt * (0.35 + 0.65 * hash12(gl_FragCoord.xy));',
@@ -268,37 +298,28 @@ const POST_FRAG = [
   '    /* depth measured along the horizontal view axis, so the boundary is a',
   '       vertical plane rather than a bubble around the viewer */',
   '    float dep  = dot(p - uCamPos, uFwd);',
-  '    float keep = smoothstep(uFront - uEdge, uFront + uEdge, dep);',
-  '    acc  += exp(-max(p.y,0.0)/uFall)     * (0.16 + 2.10*n) * keep * dt;',
+  '    /* the boundary rides on the smoke: thin air clears first, thick air lags */',
+  '    float rag  = (n - 0.45) * uRag;',
+  '    float keep = smoothstep(uFront - uEdge, uFront + uEdge, dep + rag);',
+  '    keep = max(keep, uResid * n * n);',
+  '    /* the bulk pools in the streets; a thin, much higher layer keeps the sky',
+  '       looking contaminated rather than merely dark */',
+  '    /* the profile dips where the buildings are and peaks just over the roofs, so',
+  '       the blocks keep their contrast and the AIR carries the pollution */',
+  '    float prof = exp(-max(p.y,0.0)/uFall) * (0.40 + 0.60*smoothstep(0.0, 85.0, p.y));',
+  '    float dens = prof * (0.10 + 2.40*n)',
+  '               + exp(-max(p.y,0.0)/900.0) * 0.16 * n;',
+  '    acc  += dens * keep * dt;',
   '    t += dt;',
   '  }',
   '  float murk = 1.0 - exp(-uMurk * acc);',
   '',
-  '  /* the dirt collected ON the surface: narrow in depth but standing tall, torn up',
-  '     by the same noise field so it is a wall and not a clean shell. Integrated in',
-  '     closed form -- sqrt(pi)*w is the exact area under the Gaussian -- so it cannot',
-  '     be missed between two march steps. */',
-  '  float dirt = 0.0;',
-  '  float fwdDot = dot(rd, uFwd);',
-  '  if (uRidge > 0.001 && uFront > 40.0 && fwdDot > 0.15) {',
-  '    float tp = uFront / fwdDot;               // where this ray crosses the plane',
-  '    if (isSky || L > tp) {',
-  '      vec3  pb = uCamPos + rd * tp;',
-  '      float nb = fieldNoise(pb * 3.4);',
-  '      /* the plane is uRidgeW thick measured along its normal, so a ray crossing it',
-  '         obliquely passes through more of it -- hence the divide by fwdDot */',
-  '      dirt = 1.0 - exp(-uMurk * uRidge * 1.7725 * (uRidgeW / fwdDot)',
-  '                       * exp(-max(pb.y, 0.0) / uBandFall) * (0.62 + 0.85 * nb));',
-  '    }',
-  '  }',
-  '',
   '  float x = L * uHaze;',
-  '  float haze = isSky ? 0.0 : 1.0 - exp(-x*x*x);',
+  '  float haze = isSky ? 0.0 : 1.0 - exp(-x*x*x*x);',
   '',
   '  vec3 col = src.rgb;',
   '  col = mix(col, skyCol(rd), clamp(haze, 0.0, 1.0));',
   '  col = mix(col, uMurkCol, clamp(murk, 0.0, 1.0));',
-  '  col = mix(col, uDirtCol, clamp(dirt, 0.0, 1.0));',
   '',
   '  // the one sRGB encode for the whole pipeline',
   '  vec3 lo = col * 12.92;',
@@ -317,8 +338,8 @@ const post = new THREE.Mesh(
       uCamPos: {value: new THREE.Vector3()},
       uMurkCol: U.uMurkCol, uHorCol: U.uHorCol, uZenCol: U.uZenCol,
       uMurk: U.uMurk, uFall: U.uFall, uHaze: U.uHaze, uFront: U.uFront, uTime: U.uTime,
-      uEdge: U.uEdge, uRidge: U.uRidge, uRidgeW: U.uRidgeW, uFwd: U.uFwd,
-      uDirtCol: U.uDirtCol, uBandFall: U.uBandFall,
+      uEdge: U.uEdge, uRag: U.uRag, uResid: U.uResid, uFwd: U.uFwd,
+      uMtnCol: U.uMtnCol, uMtn: U.uMtn,
       uMaxDist: {value: 6200}
     },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
@@ -329,85 +350,6 @@ const post = new THREE.Mesh(
 const postScene = new THREE.Scene(); postScene.add(post);
 const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-
-/* ---- the wall of captured dust -------------------------------------------
-   A flat quad, and the density is painted on it.
-
-   Cutting grains out with a hard discard was tried first and it reads as dithering:
-   same-sized squares on a regular lattice, however they are clumped. The judge's
-   requirement was a PRECISE LEADING FACE, and a flat quad already gives that for free
-   -- it has no thickness at all, so the face sits at one exact depth. That was the
-   thing the volumetric could never do, since a noise volume fades in and out over its
-   own width and so always reads as fog.
-
-   So the quad supplies the face and the noise supplies the powder. The quad's own
-   edges are never reached, because density decays to nothing well inside them. */
-const WALL_FRAG = [
-  'precision highp float;',
-  'precision highp sampler3D;',
-  'in vec3 vL;',
-  'out vec4 fragOut;',
-  'uniform sampler3D tNoise;',
-  'uniform float uCov, uFallY, uFront, uScale;',
-  'uniform vec3  uDust, uTint;',
-  'void main(){',
-  '  float hW = vL.y + 450.0;                       // height above the street',
-  '  /* the third axis is driven by how far the wall has travelled, so the powder keeps',
-  '     changing as it goes instead of sliding along as one rigid pattern */',
-  '  vec3 q = vec3(vL.x, vL.y, uFront * 0.55) * uScale;',
-  '  float n = texture(tNoise, q * 0.9).r * 0.60',
-  '          + texture(tNoise, q * 3.7).r * 0.28',
-  '          + texture(tNoise, q * 11.0).r * 0.12;',
-  '  n = smoothstep(0.24, 0.82, n);',
-  '  /* dense in the street, thinning upward: a density gradient, not a displaced edge */',
-  '  float a = uCov * exp(-hW / uFallY) * (0.18 + 1.75 * n);',
-  '  if (a < 0.004) discard;',
-  '  vec3 col = uDust * (0.86 + 0.30 * n);',
-  '  col = mix(col, uTint, 0.16 * smoothstep(0.72, 1.0, n));   // a little of the sky in it',
-  '  fragOut = vec4(col, clamp(a, 0.0, 1.0));',
-  '}'
-].join('\n');
-
-const wall = new THREE.Mesh(
-  new THREE.PlaneGeometry(5600, 1100, 1, 1),
-  new THREE.ShaderMaterial({
-    side: THREE.DoubleSide, transparent: true, depthWrite: false, depthTest: true,
-    glslVersion: THREE.GLSL3,
-    uniforms: {
-      tNoise: {value: NOISE},
-      uCov:   {value: 1.15},
-      uFallY: {value: 210.0},
-      uFront: {value: 0.0},
-      uScale: {value: 0.0016},
-      uDust:  {value: new THREE.Vector3(0.055, 0.060, 0.068)},
-      uTint:  {value: new THREE.Vector3(0.26, 0.36, 0.52)}
-    },
-    vertexShader: [
-      'out vec3 vL;',
-      'void main(){',
-      '  vL = position;',
-      '  gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);',
-      '}'
-    ].join('\n'),
-    fragmentShader: WALL_FRAG
-  })
-);
-wall.visible = false;
-wall.renderOrder = 6;
-sc.add(wall);
-
-function placeWall(front){
-  /* Below about 1.3 km the wall is wider and taller than the frame and would simply
-     black the picture out. Beyond about 6.6 km the haze has taken it and the far
-     skyline stands in front of it. Outside that band it is not drawn. */
-  if (front < 1300 || front > 6600){ wall.visible = false; return; }
-  wall.visible = true;
-  wall.position.set(cam.position.x + FWD.x * front, 450, cam.position.z + FWD.z * front);
-  wall.rotation.y = Math.atan2(FWD.x, FWD.z);
-  wall.material.uniforms.uFront.value = front;
-  /* hold the powder at a constant apparent size however far the wall has travelled */
-  wall.material.uniforms.uScale.value = 1.0 / (front * 0.62);
-}
 
 /* ---- dust ------------------------------------------------------------------
    Now a supporting part, not the whole story: the volume above carries the smoke, and
@@ -443,7 +385,7 @@ function makeDust(count, size, opacity, colour, dMin, dMax, hScale){
 
   for (let i = 0; i < count; i++){
     const d = dMin + (dMax - dMin) * Math.pow(Math.random(), 0.55);
-    const sideways = (Math.random()*2 - 1) * halfW * d * 1.25;
+    const sideways = (Math.random()*2 - 1) * halfW * d * 2.4;   // covers the look-around fence
     const h = Math.min(300, -Math.log(Math.max(1e-4, Math.random())) * hScale + 2);
     const p = cam.position.clone()
       .add(flat.clone().multiplyScalar(d))
@@ -507,6 +449,45 @@ function updateDust(t, front, fade){
   }
 }
 
+
+/* ---- look around, within a fence ------------------------------------------ */
+const LOOK = {
+  yaw: 0, pitch: 0, tYaw: 0, tPitch: 0,
+  yawLim: 0.125,          // radians, about 7 degrees each way
+  upLim: 0.075, dnLim: 0.055,
+  dragging: false, px: 0, py: 0
+};
+let BASE_Q = new THREE.Quaternion();
+
+function bindLook(el){
+  el.style.touchAction = 'pan-y';        // the page still owns vertical scrolling
+  el.addEventListener('pointerdown', e => {
+    LOOK.dragging = true; LOOK.px = e.clientX; LOOK.py = e.clientY;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', e => {
+    if (!LOOK.dragging) return;
+    const k = 0.0022;                    // roughly the mountain's rotateSpeed
+    LOOK.tYaw   = Math.max(-LOOK.yawLim, Math.min(LOOK.yawLim, LOOK.tYaw - (e.clientX - LOOK.px) * k));
+    LOOK.tPitch = Math.max(-LOOK.dnLim,  Math.min(LOOK.upLim,  LOOK.tPitch + (e.clientY - LOOK.py) * k));
+    LOOK.px = e.clientX; LOOK.py = e.clientY;
+  });
+  const stop = e => { LOOK.dragging = false; };
+  el.addEventListener('pointerup', stop);
+  el.addEventListener('pointercancel', stop);
+  el.addEventListener('pointerleave', stop);
+}
+
+function applyLook(dt){
+  /* time-based damping, so the feel is the same at 30 fps and at 144 */
+  const k = 1 - Math.pow(1 - 0.055, dt * 60);
+  LOOK.yaw   += (LOOK.tYaw   - LOOK.yaw)   * k;
+  LOOK.pitch += (LOOK.tPitch - LOOK.pitch) * k;
+  const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(LOOK.pitch, LOOK.yaw, 0, 'YXZ'));
+  cam.quaternion.copy(BASE_Q).multiply(q);
+  cam.updateMatrixWorld(true);
+}
+
 /* ---- scroll ---------------------------------------------------------------- */
 let sp = 0, tgtP = 0, lastT = 0;
 addEventListener('scroll', function () {
@@ -530,6 +511,7 @@ function frame(ms){
   if (dt > 0.25) dt = 0.25;
   sp += (tgtP - sp) * (1 - Math.pow(1-0.075, dt*60));
   const p = sp;
+  applyLook(dt);
   U.uTime.value = now;
 
   /* Three overlapping moves rather than one switch. The dust is drawn out first; then
@@ -538,27 +520,26 @@ function frame(ms){
   /* Linear travel, not eased. Smoothstepped, the surface spent most of the scroll
      either under the viewer's feet or already gone; linear keeps it in the part of the
      picture you can see -- 800 m out to 5 km -- for 40% of the scroll instead of 16%. */
-  const sweep = Math.min(1, Math.max(0, (p - 0.42) / 0.56));
-  const skyP  = ss(0.46, 0.94, p);
+  const sweep = Math.min(1, Math.max(0, (p - 0.34) / 0.62));
+  const skyP  = ss(0.38, 0.92, p);
 
   U.uFront.value = -900 + sweep * 8600;
   /* the dirt load builds as the surface collects, then thins as the whole thing
      recedes past the skyline */
-  U.uRidge.value = 5.0 * ss(0.43, 0.52, p) * (1 - ss(0.84, 0.95, p));   // just enough to seat the wall in the air
   mixV(U.uMurkCol.value, MURK,  HOR_C, skyP*0.85);
   mixV(U.uHorCol.value,  HOR_D, HOR_C, skyP);
   mixV(U.uZenCol.value,  ZEN_D, ZEN_C, skyP);
+  U.uMtn.value = 0.55 * ss(0.62, 0.98, p);   // only clean air lets you see that far
   document.documentElement.style.background = skyP > 0.5 ? '#eaf1fa' : '#a9aeb2';
 
   sun.intensity  = 2.05 + 1.20*skyP;
   hemi.intensity = 0.60 + 0.22*skyP;
 
   p1.style.opacity = (ss(0.03,0.13,p) * (1-ss(0.30,0.40,p))).toFixed(3);
-  p2.style.opacity = (ss(0.38,0.48,p)).toFixed(3);
+  p2.style.opacity = (ss(0.34,0.44,p)).toFixed(3);
   cue.classList.toggle('away', p > 0.05);
 
   updateDust(ms, U.uFront.value, 1 - ss(0.93, 1.0, p));
-  placeWall(U.uFront.value);
 
   post.material.uniforms.uProjInv.value.copy(cam.projectionMatrixInverse);
   post.material.uniforms.uCamWorld.value.copy(cam.matrixWorld);
@@ -584,11 +565,13 @@ new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./nyc_city_v3.glb', fun
      1.8 km inside the near end keeps its corner behind the camera, which is what was
      showing as a pale wedge in the bottom right. */
   cam.position.set(c.x + num('cx', 59), num('cy', 200), c.z + num('cz', 1800));
-  cam.lookAt(c.x + num('tx', 59), num('ty', 430), c.z + num('tz', -3200));
+  cam.lookAt(c.x + num('tx', 59), num('ty', 640), c.z + num('tz', -3200));
   cam.updateMatrixWorld(true);
   sky.position.copy(cam.position);
-  cam.getWorldDirection(FWD); FWD.y = 0; FWD.normalize();   // the plane's normal
+  cam.getWorldDirection(FWD); FWD.y = 0; FWD.normalize();   // fixed at load, on purpose
   U.uFwd.value.copy(FWD);
+  BASE_Q.copy(cam.quaternion);
+  bindLook(canvas);
 
   const light = innerWidth < 720;
   makeDust(light ? 1500 : 4200, 8.40, 0.30, 0x4c535b, 55,  1100, 48);
@@ -605,6 +588,11 @@ new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./nyc_city_v3.glb', fun
 });
 
 window.__setP = function (v) { tgtP = sp = v; };
+/* QA hook: report where the view is actually pointing, so the fence can be
+   verified by dragging rather than by trusting the numbers in the source. */
+window.__lookDeg = function () {
+  return {yaw: +(LOOK.yaw * 57.2958).toFixed(2), pitch: +(LOOK.pitch * 57.2958).toFixed(2)};
+};
 addEventListener('resize', sizeAll);
 </script>
 </body>
