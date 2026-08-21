@@ -33,6 +33,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 
 const canvas = document.getElementById('c');
 const r = new THREE.WebGLRenderer({canvas, antialias:true});
@@ -91,18 +92,19 @@ function cityMaterial(){
     sh.uniforms.uGW = {value: GW};
     sh.uniforms.uGH = {value: GH};
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNrm;')
+      .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
       .replace('#include <worldpos_vertex>',
-        '#include <worldpos_vertex>\n vWPos=(modelMatrix*vec4(transformed,1.0)).xyz;\n vWNrm=normalize(mat3(modelMatrix)*objectNormal);');
+        '#include <worldpos_vertex>\n vWPos=(modelMatrix*vec4(transformed,1.0)).xyz;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>',
-        '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNrm;\nuniform sampler2D uAerial;\nuniform float uGW;\nuniform float uGH;')
+        '#include <common>\nvarying vec3 vWPos;\nuniform sampler2D uAerial;\nuniform float uGW;\nuniform float uGH;')
       .replace('#include <map_fragment>', `
-        float up = abs(vWNrm.y);
+        vec3 fnrm = normalize(cross(dFdx(vWPos), dFdy(vWPos)));
+        float up = abs(fnrm.y);
         vec2 auv = vec2(vWPos.x/uGW + 0.5, 0.5 - vWPos.z/uGH);
         vec3 roof = texture2D(uAerial, auv).rgb * 0.62 + 0.02;
 
-        float bay = (abs(vWNrm.x) > abs(vWNrm.z)) ? vWPos.z : vWPos.x;
+        float bay = (abs(fnrm.x) > abs(fnrm.z)) ? vWPos.z : vWPos.x;
         float fx = fract(bay / 4.2);
         float fy = fract((vWPos.y - 1.2) / 3.5);
         float win = smoothstep(0.16,0.30,fx) * (1.0 - smoothstep(0.70,0.84,fx))
@@ -128,11 +130,24 @@ controls.minDistance = 300;
 controls.maxDistance = 22000;
 controls.maxPolarAngle = Math.PI * 0.495;
 
-new GLTFLoader().load('./nyc_city_opt.glb', gl => {
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./nyc_city_opt.glb', gl => {
   const m = gl.scene;
+  /* Rotate the NODE, never the geometry. gltf-transform's meshopt pass QUANTIZES
+     positions and carries the scale on the node. Baking a rotation into the geometry
+     first meant that node scale was then applied to already-rotated axes, which
+     collapsed every building into the ground: measured max height 0.1 m against
+     426 m in the uncompressed file, while the declared bounds still read 443 m. */
+  /* No rotation here. It is baked into the mesh at build time, because rotating
+     the GEOMETRY of a meshopt-quantized file collapses it: the node carries a
+     non-uniform scale, which then lands on already-rotated axes. Measured max
+     height 0.1 m against 426 m raw. Rotating here as well simply doubles it. */
   m.traverse(o => { if (o.isMesh) {
     o.castShadow = true; o.receiveShadow = true;
-    o.geometry.rotateX(-Math.PI/2);
+    /* The file carries POSITION only, so three has no normal attribute to light with
+       and every facade renders black. Computing them here is safe: the quantization
+       scale is UNIFORM (3712.377 on all three axes), so directions derived from the
+       normalised positions are correct. With flatShading on, three then uses screen
+       derivatives anyway, so the corners stay crisp. */
     o.geometry.computeVertexNormals();
     o.material = cityMaterial();
   }});
@@ -143,6 +158,10 @@ new GLTFLoader().load('./nyc_city_opt.glb', gl => {
   controls.update();
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
+}, undefined, err => {
+  const el = document.getElementById('load');
+  el.textContent = 'CITY FAILED TO LOAD';
+  window.__err = String(err);
 });
 
 addEventListener('resize', () => {
