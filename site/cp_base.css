@@ -38,9 +38,9 @@
    the C-POLAR asset library so the result is deterministic and self-hosted. */
 
 @font-face{font-family:Montserrat;font-weight:100 900;font-style:normal;font-display:swap;
-  src:url(/assets/fonts/Montserrat-Variable.ttf) format("truetype")}
+  src:url(./assets/fonts/Montserrat-Variable.ttf) format("truetype")}
 @font-face{font-family:"CP Anton";font-weight:400;font-style:normal;font-display:swap;
-  src:url(/assets/fonts/Anton-Regular.ttf) format("truetype")}
+  src:url(./assets/fonts/Anton-Regular.ttf) format("truetype")}
 
 
 /* --- 2. Reset ------------------------------------------------------------- */

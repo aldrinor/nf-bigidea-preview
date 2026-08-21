@@ -1,7 +1,7 @@
 @import url("./site-layout-tokens.css?v=20260819-05");
 
-@font-face{font-family:"Montserrat";src:url("/assets/fonts/Montserrat-Variable.ttf") format("truetype");font-style:normal;font-weight:100 900;font-display:swap}
-@font-face{font-family:"Anton";src:url("/assets/fonts/Anton-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"Montserrat";src:url("./assets/fonts/Montserrat-Variable.ttf") format("truetype");font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:"Anton";src:url("./assets/fonts/Anton-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
 
 .cp-contact-section{
   --cp-contact-ink:#000;
