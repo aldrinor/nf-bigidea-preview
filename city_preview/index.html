@@ -1,29 +1,28 @@
 <!doctype html>
-<html lang="en" style="background:#b7ceed">
+<html lang="en" style="background:#c3d3e2">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Manhattan</title>
 <style>
-  html,body{margin:0;height:100%;background:#b7ceed;overflow:hidden;
+  html,body{margin:0;height:100%;background:#c3d3e2;overflow:hidden;
     font-family:Montserrat,-apple-system,"Segoe UI",Arial,sans-serif;color:#000}
   canvas{display:block}
-  .hud{position:fixed;left:24px;bottom:22px;z-index:3;font-size:12px;font-weight:600;
-    letter-spacing:.08em;opacity:.72;line-height:1.9;pointer-events:none}
-  .hud b{display:block;font-size:13px;letter-spacing:.10em;opacity:1;margin-bottom:4px}
-  .load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;background:#b7ceed;
-    font-size:12px;font-weight:650;letter-spacing:.12em;color:#4b5560;transition:opacity .7s}
+  .hud{position:fixed;left:26px;bottom:24px;z-index:3;font-size:12px;font-weight:600;
+    letter-spacing:.09em;opacity:.60;line-height:1.9;pointer-events:none}
+  .hud b{display:block;font-size:13px;letter-spacing:.11em;opacity:1;margin-bottom:4px}
+  .load{position:fixed;inset:0;display:grid;place-items:center;z-index:5;background:#c3d3e2;
+    font-size:12px;font-weight:650;letter-spacing:.12em;color:#5b6672;transition:opacity .8s}
   .load.gone{opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div class="hud">
-  <b>Manhattan — real data</b>
-  23,728 buildings · OpenStreetMap heights · aerial imagery<br>
-  drag to orbit · scroll to zoom
+  <b>Manhattan</b>
+  23,728 buildings · real footprints · real heights
 </div>
-<div class="load" id="load">LOADING CITY</div>
+<div class="load" id="load">LOADING</div>
 
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -40,84 +39,79 @@ const r = new THREE.WebGLRenderer({canvas, antialias:true});
 r.setSize(innerWidth, innerHeight);
 r.setPixelRatio(Math.min(devicePixelRatio, 2));
 r.toneMapping = THREE.ACESFilmicToneMapping;
-r.toneMappingExposure = 1.05;
+r.toneMappingExposure = 1.06;
 r.shadowMap.enabled = true;
 r.shadowMap.type = THREE.PCFSoftShadowMap;
 
+const SKY = 0xc3d3e2, HAZE = 0xc9d7e4;
+
 const sc = new THREE.Scene();
-sc.background = new THREE.Color(0xb7ceed);
-sc.fog = new THREE.FogExp2(0xc2d6ea, 0.000085);
+sc.background = new THREE.Color(SKY);
+/* Heavy enough that the plate never ends anywhere the eye can see: the city dissolves
+   into air the way a real skyline does at distance. This is what hides the edge --
+   not a bigger ground plane. */
+sc.fog = new THREE.FogExp2(HAZE, 0.000082);
 
-const cam = new THREE.PerspectiveCamera(24, innerWidth/innerHeight, 10, 60000);
+const cam = new THREE.PerspectiveCamera(23, innerWidth/innerHeight, 8, 40000);
 
-/* the mountain's own light rig, unchanged, so the two scenes match */
-const sun = new THREE.DirectionalLight(0xfff6ea, 3.62);
-sun.position.set(-3800, 2100, 4600);
+/* the mountain's rig, warmed very slightly, so the two acts sit together */
+const sun = new THREE.DirectionalLight(0xfff3e2, 3.25);
+sun.position.set(-3600, 2350, 4300);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-const S = 4500;
-Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:100, far:20000});
-sun.shadow.bias = -0.0006; sun.shadow.normalBias = 1.2;
+const S = 3400;
+Object.assign(sun.shadow.camera, {left:-S, right:S, top:S, bottom:-S, near:200, far:14000});
+sun.shadow.bias = -0.0006; sun.shadow.normalBias = 1.4;
 sc.add(sun);
-sc.add(new THREE.HemisphereLight(0xcfe2f4, 0x8d99a6, 0.44));
-const fill = new THREE.DirectionalLight(0xcfe0f2, 0.26);
-fill.position.set(3000, 1500, -2000);
+sc.add(new THREE.HemisphereLight(0xd2dfec, 0x8e959b, 0.62));
+const fill = new THREE.DirectionalLight(0xe6ecf3, 0.40);
+fill.position.set(3200, 1400, -2400);
 sc.add(fill);
 
-const GW = 5380, GH = 7425;   // the plate covers the OSM bounding box exactly
-const tex = new THREE.TextureLoader().load('./nyc_ground.webp', t => {
-  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true;
-});
-
+/* No photograph anywhere. One flat ground in the same grey family as the buildings,
+   large enough that fog swallows it long before it ends. Removing the aerial plate
+   also takes 2.56 MB off the page. */
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(GW, GH),
-  new THREE.MeshStandardMaterial({map:tex, roughness:0.95})
+  new THREE.PlaneGeometry(90000, 90000),
+  new THREE.MeshStandardMaterial({color:0x7b8794, roughness:0.97, metalness:0.0})
 );
 ground.rotation.x = -Math.PI/2; ground.position.y = -0.5;
 ground.receiveShadow = true; sc.add(ground);
 
-const skirt = new THREE.Mesh(
-  new THREE.PlaneGeometry(60000, 60000),
-  new THREE.MeshStandardMaterial({color:0x101a24, roughness:0.42, metalness:0.15})
-);
-skirt.rotation.x = -Math.PI/2; skirt.position.y = -1.5; sc.add(skirt);
-
-/* Roofs take the real aerial, projected straight down. Walls get a window grid at
-   3.5 m floors and 4.2 m bays, because a building reads as a building from its
-   window rhythm, not from its silhouette. */
+/* Greyscale massing. Tone comes from height and from a stable per-building seed, so
+   23,728 buildings read as many separate objects without loading a single texture. */
 function cityMaterial(){
-  const m = new THREE.MeshStandardMaterial({color:0xc4ccd4, roughness:0.72, metalness:0.10});
+  const m = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.82, metalness:0.02, flatShading:true});
   m.onBeforeCompile = sh => {
-    sh.uniforms.uAerial = {value: tex};
-    sh.uniforms.uGW = {value: GW};
-    sh.uniforms.uGH = {value: GH};
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
+      .replace('#include <common>',
+        '#include <common>\nattribute vec3 _BLD;\nvarying vec3 vWPos;\nvarying vec3 vBld;')
       .replace('#include <worldpos_vertex>',
-        '#include <worldpos_vertex>\n vWPos=(modelMatrix*vec4(transformed,1.0)).xyz;');
+        '#include <worldpos_vertex>\n vWPos=(modelMatrix*vec4(transformed,1.0)).xyz;\n vBld=_BLD;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>',
-        '#include <common>\nvarying vec3 vWPos;\nuniform sampler2D uAerial;\nuniform float uGW;\nuniform float uGH;')
+        '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vBld;')
       .replace('#include <map_fragment>', `
         vec3 fnrm = normalize(cross(dFdx(vWPos), dFdy(vWPos)));
         float up = abs(fnrm.y);
-        vec2 auv = vec2(vWPos.x/uGW + 0.5, 0.5 - vWPos.z/uGH);
-        vec3 roof = texture2D(uAerial, auv).rgb * 0.62 + 0.02;
+        float seed = vBld.y;
+        float H = vBld.z * 3.5;
 
-        float bay = (abs(fnrm.x) > abs(fnrm.z)) ? vWPos.z : vWPos.x;
-        float fx = fract(bay / 4.2);
-        float fy = fract((vWPos.y - 1.2) / 3.5);
-        float win = smoothstep(0.16,0.30,fx) * (1.0 - smoothstep(0.70,0.84,fx))
-                  * smoothstep(0.20,0.34,fy) * (1.0 - smoothstep(0.66,0.80,fy));
+        /* one grey family, spread by seed and by height */
+        float t = clamp(H / 150.0, 0.0, 1.0);
+        float g = 0.30 + 0.19 * seed + 0.20 * t;
 
-        float seed = fract(sin(floor(vWPos.x/7.0)*12.9898 + floor(vWPos.z/7.0)*78.233)*43758.5453);
-        vec3 wall  = mix(vec3(0.46,0.47,0.50), vec3(0.24,0.26,0.30), seed);
-        vec3 glass = mix(vec3(0.17,0.21,0.28), vec3(0.09,0.12,0.18), seed);
-        vec3 face  = mix(wall, glass, win);
-        face *= 0.80 + 0.20*smoothstep(0.03,0.10,fx)*smoothstep(0.03,0.10,fy);
-        face *= 0.90 + 0.16*clamp(vWPos.y/190.0, 0.0, 1.0);
+        /* faint floor banding so a tall wall is not one flat sheet */
+        g *= 0.975 + 0.025 * sin(vWPos.y * 1.85 + seed * 8.0);
 
-        diffuseColor.rgb = mix(face, roof, smoothstep(0.5, 0.75, up));
+        /* roofs a touch lighter than walls */
+        g *= mix(1.0, 1.10, smoothstep(0.55, 0.80, up));
+
+        /* a darker line where a building meets the street */
+        g *= 0.66 + 0.34 * smoothstep(0.0, 7.0, vWPos.y);
+
+        /* the barest cool cast, matching the mountain */
+        diffuseColor.rgb = vec3(g) * vec3(0.985, 0.995, 1.015);
       `);
   };
   return m;
@@ -125,44 +119,39 @@ function cityMaterial(){
 
 const controls = new OrbitControls(cam, canvas);
 controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.minDistance = 300;
-controls.maxDistance = 22000;
-controls.maxPolarAngle = Math.PI * 0.495;
+controls.dampingFactor = 0.055;
+controls.minDistance = 400;
+controls.maxDistance = 14000;
+controls.maxPolarAngle = Math.PI * 0.492;
 
-new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./nyc_city_opt.glb', gl => {
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('./nyc_city_v3.glb', gl => {
   const m = gl.scene;
-  /* Rotate the NODE, never the geometry. gltf-transform's meshopt pass QUANTIZES
-     positions and carries the scale on the node. Baking a rotation into the geometry
-     first meant that node scale was then applied to already-rotated axes, which
-     collapsed every building into the ground: measured max height 0.1 m against
-     426 m in the uncompressed file, while the declared bounds still read 443 m. */
-  /* No rotation here. It is baked into the mesh at build time, because rotating
-     the GEOMETRY of a meshopt-quantized file collapses it: the node carries a
-     non-uniform scale, which then lands on already-rotated axes. Measured max
-     height 0.1 m against 426 m raw. Rotating here as well simply doubles it. */
   m.traverse(o => { if (o.isMesh) {
     o.castShadow = true; o.receiveShadow = true;
-    /* The file carries POSITION only, so three has no normal attribute to light with
-       and every facade renders black. Computing them here is safe: the quantization
-       scale is UNIFORM (3712.377 on all three axes), so directions derived from the
-       normalised positions are correct. With flatShading on, three then uses screen
-       derivatives anyway, so the corners stay crisp. */
+    /* positions only in the file; the quantization scale is uniform, so normals
+       computed here are correct, and flatShading keeps the corners crisp */
     o.geometry.computeVertexNormals();
     o.material = cityMaterial();
   }});
   sc.add(m);
+
+  /* The angle: low over Midtown looking downtown, so the towers stack against each
+     other and the avenue grid runs away into haze. Turned so no shoreline reaches a
+     corner of frame. */
   const c = new THREE.Box3().setFromObject(m).getCenter(new THREE.Vector3());
-  cam.position.set(c.x - 3200, 1650, c.z + 5200);
-  controls.target.set(c.x, 120, c.z);
+  cam.position.set(c.x - 2350, 1180, c.z + 3750);
+  controls.target.set(c.x + 150, 90, c.z - 250);
   controls.update();
+
   document.getElementById('load').classList.add('gone');
   window.__ready = true;
 }, undefined, err => {
   const el = document.getElementById('load');
-  el.textContent = 'CITY FAILED TO LOAD';
+  el.textContent = 'FAILED TO LOAD';
   window.__err = String(err);
 });
+
+window.__setCam = (p,t) => { cam.position.set(p[0],p[1],p[2]); controls.target.set(t[0],t[1],t[2]); controls.update(); };
 
 addEventListener('resize', () => {
   cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix();
