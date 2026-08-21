@@ -1,0 +1,283 @@
+@import url("./site-layout-tokens.css?v=20260819-05");
+
+/* Canonical C-POLAR footer component. Page styles may control how the footer
+   enters a deck, but its internal typography, rhythm and rails live here. */
+.cp-footer {
+  position: relative;
+  z-index: 20;
+  min-height: 100svh;
+  padding: 0;
+  overflow: clip;
+  background: transparent;
+}
+
+.cp-footer-panel {
+  position: relative;
+  top: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100svh;
+  padding: var(--footer-padding-block-start) var(--footer-rail-inline-end) var(--footer-padding-block-end) var(--footer-rail-inline-start);
+  color: #000;
+  border-top: 0;
+  background:
+    radial-gradient(circle at 76% 22%, rgba(255,255,255,.92), transparent 27%),
+    linear-gradient(145deg, #f8fbfd 0%, #e7f0f6 55%, #d6e6f1 100%);
+  box-shadow: none;
+}
+
+.cp-footer-panel::before {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(45,98,140,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,98,140,.045) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: linear-gradient(120deg, transparent 4%, rgba(0,0,0,.42) 52%, transparent 96%);
+  content: "";
+  pointer-events: none;
+}
+
+.cp-footer-grid,
+.cp-footer-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+.cp-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.55fr) minmax(160px,.55fr) minmax(140px,.38fr);
+  gap: var(--footer-grid-column-gap);
+  align-items: start;
+  padding: var(--footer-grid-padding-block-start) 0 var(--footer-grid-padding-block-end);
+}
+
+.cp-footer .cp-footer-newsletter h2 {
+  max-width: 18ch;
+  margin: 0;
+  color: #000;
+  font-family: Anton, Impact, sans-serif;
+  font-size: var(--footer-heading-size);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.cp-footer-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  max-width: 700px;
+  margin-top: clamp(28px,4vh,46px);
+  padding: 6px;
+  border: 1px solid rgba(0,0,0,.34);
+  border-radius: 8px;
+  background: rgba(255,255,255,.52);
+  box-shadow: 0 18px 50px rgba(18,63,96,.08);
+  backdrop-filter: blur(18px);
+}
+
+.cp-footer-form input {
+  min-width: 0;
+  min-height: 54px;
+  padding: 0 17px;
+  color: #000;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 14px;
+}
+
+.cp-footer-form input::placeholder { color: rgba(0,0,0,.58); }
+.cp-footer-form:focus-within { border-color: #000; box-shadow: 0 18px 55px rgba(18,63,96,.13); }
+
+.cp-footer-form button {
+  display: flex;
+  min-width: 132px;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  background: #000;
+  cursor: pointer;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  transition: transform .25s ease;
+}
+
+.cp-footer-form button:hover,
+.cp-footer-form button:focus-visible { transform: translateX(2px); }
+
+.cp-footer .cp-footer-consent {
+  max-width: 68ch;
+  margin: 14px 0 0;
+  color: #000;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 10.5px;
+  line-height: var(--footer-consent-line-height);
+}
+
+.cp-footer-consent a { color: #000; text-underline-offset: 3px; }
+
+.cp-footer h3 {
+  margin: 0 0 22px;
+  color: #000;
+  font-family: Anton, Impact, sans-serif;
+  font-size: var(--footer-section-heading-size);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.cp-footer ul { margin: 0; padding: 0; list-style: none; }
+.cp-footer li + li { margin-top: 13px; }
+
+.cp-footer-nav a,
+.cp-footer-contact-link,
+.cp-footer-social a {
+  display: inline-flex;
+  gap: 10px;
+  padding: 0;
+  color: #000;
+  border: 0;
+  background-color: transparent;
+  background-image: linear-gradient(currentColor,currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: var(--footer-link-line-height);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-size .28s ease;
+}
+
+.cp-footer-nav a:hover,
+.cp-footer-nav a:focus-visible,
+.cp-footer-contact-link:hover,
+.cp-footer-contact-link:focus-visible,
+.cp-footer-social a:hover,
+.cp-footer-social a:focus-visible { background-size: 100% 1px; outline: none; }
+
+.cp-footer-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 24px 0 0;
+  color: #000;
+  border-top: 1px solid rgba(0,0,0,.2);
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 10.5px;
+}
+
+.cp-footer .cp-footer-bottom p { margin: 0; font-size: 10.5px; line-height: var(--footer-link-line-height); }
+.cp-footer-legal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 28px;
+  margin-left: auto;
+}
+.cp-footer-legal a { color: #000; line-height: var(--footer-link-line-height); text-decoration: none; }
+.cp-footer-legal a:hover,
+.cp-footer-legal a:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+
+.cp-footer-top-link {
+  position: absolute;
+  z-index: 2;
+  right: var(--footer-rail-inline-end);
+  bottom: max(26px,env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #000;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: var(--button-line-height);
+  letter-spacing: .09em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.cp-footer-form input,
+.cp-footer-form button { line-height: var(--button-line-height); }
+
+.cp-footer-top-link span {
+  display: grid;
+  width: 42px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: 50%;
+  font-size: 19px;
+  line-height: 1;
+  transition: color .25s ease, background .25s ease, transform .25s ease;
+}
+
+.cp-footer-top-link:hover span,
+.cp-footer-top-link:focus-visible span { color: #fff; background: #000; transform: translateY(-3px); }
+
+/* Deck pages keep a fixed SCROLL hint over every chapter. It must yield to
+   the footer's Back to top control instead of occupying the same corner. */
+body:has(.cp-footer.is-active) .deck-hint,
+body:has(.chapter--footer.is-active) .deck-hint {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.cp-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (max-width:899px), (max-height:699px), (pointer:coarse) {
+  .cp-footer { min-height: auto; padding: 0; }
+  .cp-footer-panel {
+    min-height: 100svh;
+    padding: 28px var(--footer-rail-inline-end) max(24px,env(safe-area-inset-bottom)) var(--footer-rail-inline-start);
+  }
+  .cp-footer-grid { grid-template-columns: 1fr 1fr; gap: 38px 24px; padding: 104px 0 72px; }
+  .cp-footer-newsletter { grid-column: 1 / -1; }
+  .cp-footer .cp-footer-newsletter h2 { font-size: clamp(29px,9vw,42px); }
+  .cp-footer-form { grid-template-columns: 1fr 54px; }
+  .cp-footer-form button { min-width: 54px; padding: 0; }
+  .cp-footer-form button span:first-child { display: none; }
+  .cp-footer-bottom { align-items: flex-start; flex-direction: column; padding-right: 0; padding-bottom: 72px; }
+  .cp-footer-top-link { right: var(--footer-rail-inline-end); bottom: max(24px,env(safe-area-inset-bottom)); font-size: 9px; }
+  .cp-footer-legal { justify-content: flex-start; flex-wrap: wrap; gap: 12px 24px; margin-left: 0; }
+}
+
+@media (max-width:560px) {
+  .cp-footer-grid { grid-template-columns: 1fr; }
+  .cp-footer-social { margin-top: 8px; }
+}
+
+/* On desktop the back-to-top control occupies the same grid row as the
+   bottom bar, so its text and circular icon share the bar's center line. */
+@media (min-width:900px) and (min-height:700px) and (pointer:fine) {
+  .cp-footer-panel > .cp-footer-top-link {
+    position:relative;
+    right:auto;
+    bottom:auto;
+    grid-row:2;
+    grid-column:1;
+    align-self:center;
+    justify-self:end;
+    transform:translateY(-10px);
+  }
+}

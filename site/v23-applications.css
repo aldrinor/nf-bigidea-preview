@@ -1,0 +1,267 @@
+@import url("./site-layout-tokens.css?v=20260819-05");
+
+/* V23 application chapters embedded into the V22 landing-page journey. */
+
+.v23-applications {
+  --v23-count: 5;
+  position: relative;
+  z-index: 100;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  isolation: isolate;
+  /* Give every chapter a short reading hold plus a deliberate hand-off.
+     The old 100svh-per-chapter runway made every transition feel rushed. */
+  height: calc(var(--v23-count) * 132svh);
+  color: #000;
+  background: #eef5f9;
+}
+
+body > .v23-applications,
+.v23-applications,
+.v23-applications .v23-app-stage {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.v23-applications,
+.v23-applications .v23-chapter {
+  display: block !important;
+}
+
+/* The landing page gives generic sections their own block padding. These
+   full-viewport chapters already space their copy internally, so inheriting
+   both layers creates 240px of duplicate padding and clips mobile content. */
+.v23-applications .v23-chapter {
+  padding: 0 !important;
+}
+
+.v23-app-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100svh;
+  min-height: 680px;
+  overflow: hidden;
+  background: #eef5f9;
+}
+
+.v23-chapter {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  height: 100svh;
+  min-height: 680px;
+  overflow: hidden;
+  visibility: visible;
+  opacity: 1;
+  background: #eef5f9;
+  pointer-events: none;
+  transform: translate3d(0, 100%, 0);
+  will-change: transform, opacity;
+}
+
+.v23-chapter:first-child {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Once GSAP owns the desktop chapter positions, remove the no-JS fallback
+   transform. Otherwise the stylesheet's 100% offset is added to GSAP's
+   yPercent and chapters 02–05 remain one viewport below their target. */
+.v23-applications.is-enhanced .v23-chapter {
+  transform: none;
+}
+
+.v23-applications.is-static {
+  height: auto;
+}
+
+.v23-applications.is-static .v23-app-stage {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.v23-applications.is-static .v23-chapter {
+  position: relative;
+  inset: auto;
+  transform: none !important;
+}
+
+.v23-chapter.is-active { pointer-events: auto; }
+
+.v23-chapter__media,
+.v23-chapter__poster,
+.v23-chapter__film,
+.v23-chapter__wash {
+  position: absolute;
+  inset: 0;
+}
+
+.v23-chapter__media {
+  z-index: 0;
+  overflow: hidden;
+  background: #eef5f9;
+}
+
+.v23-chapter__poster,
+.v23-chapter__film {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  transform: scale(1.025);
+}
+
+.v23-chapter__film {
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+
+.v23-chapter__film.is-ready { opacity: 1; }
+
+.v23-chapter__wash {
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(250,253,255,.97) 0%, rgba(250,253,255,.84) 29%, rgba(250,253,255,.34) 57%, rgba(250,253,255,.06) 100%);
+}
+
+.v23-chapter--water .v23-chapter__wash,
+.v23-chapter--textiles .v23-chapter__wash {
+  background: linear-gradient(270deg, rgba(250,253,255,.97) 0%, rgba(250,253,255,.84) 29%, rgba(250,253,255,.34) 57%, rgba(250,253,255,.06) 100%);
+}
+
+.v23-chapter--textiles .v23-chapter__poster,
+.v23-chapter--textiles .v23-chapter__film { object-position: 50% 58%; }
+
+.v23-chapter__copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(570px, 40vw);
+  min-height: 100%;
+  margin-left: clamp(24px, 7vw, 142px);
+  padding: clamp(154px, 16vh, 190px) 0 clamp(60px, 10vh, 120px);
+}
+
+.v23-chapter__copy--right {
+  margin-right: clamp(24px, 7vw, 142px);
+  margin-left: auto;
+}
+
+.v23-chapter__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 22px;
+  color: #000;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: var(--eyebrow-line-height);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.v23-chapter__eyebrow::after {
+  width: 55px;
+  height: 1px;
+  content: "";
+  background: currentColor;
+  opacity: .45;
+}
+
+.v23-chapter__copy h2 {
+  max-width: 600px;
+  margin: 0 0 22px;
+  color: #000;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: clamp(45px, 4.05vw, 75px);
+  font-weight: 480;
+  line-height: .99;
+  letter-spacing: -.065em;
+}
+
+.v23-chapter__body {
+  max-width: 460px;
+  margin: 0;
+  color: #000;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: clamp(14px, 1.22vw, 18px);
+  font-weight: 460;
+  line-height: var(--body-line-height);
+}
+
+.v23-chapter__next {
+  display: inline-flex;
+  align-items: center;
+  gap: 28px;
+  width: fit-content;
+  margin-top: clamp(26px, 5vh, 54px);
+  padding: 0 0 10px;
+  color: #000;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: var(--button-line-height);
+  text-decoration: none;
+  transition: gap .25s ease;
+}
+
+.v23-chapter__next:hover,
+.v23-chapter__next:focus-visible { gap: 40px; outline: 0; }
+
+@media (max-width: 899px), (max-height: 599px), (pointer: coarse) {
+  .v23-applications { height: auto; }
+  .v23-app-stage { position: relative; height: auto; min-height: 0; overflow: visible; }
+  .v23-chapter {
+    position: relative;
+    min-height: 100svh;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none !important;
+  }
+  .v23-chapter__copy,
+  .v23-chapter__copy--right {
+    align-items: flex-start;
+    justify-content: flex-end;
+    width: min(620px, calc(100% - 48px));
+    min-height: 100svh;
+    margin-right: 24px;
+    margin-left: 24px;
+    padding: 112px 0 66px;
+  }
+  .v23-chapter__poster,
+  .v23-chapter__film { object-position: 58% 50%; }
+  .v23-chapter__wash,
+  .v23-chapter--water .v23-chapter__wash,
+  .v23-chapter--textiles .v23-chapter__wash {
+    background: linear-gradient(180deg, rgba(250,253,255,.18) 0%, rgba(250,253,255,.48) 45%, rgba(250,253,255,.96) 100%);
+  }
+  .v23-chapter__copy h2 { margin-bottom: 15px; font-size: clamp(42px, 12vw, 66px); }
+  .v23-chapter__body { width: 100%; font-size: 14px; overflow-wrap: anywhere; }
+  .v23-chapter__eyebrow { margin-bottom: 16px; font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v23-applications { height: auto; }
+  .v23-app-stage { position: relative; height: auto; min-height: 0; overflow: visible; }
+  .v23-chapter { position: relative; min-height: 100svh; visibility: visible; opacity: 1; pointer-events: auto; transform: none !important; }
+  .v23-chapter__film { display: none; }
+}
+
+/* Shared horizontal rail migration. */
+.v23-chapter__copy{margin-left:var(--section-rail-inline-start)}
+.v23-chapter__copy--right{margin-right:var(--section-rail-inline-end);margin-left:auto}

@@ -1,0 +1,108 @@
+/* C-POLAR shared horizontal rail contract.
+   Desktop: start aligns with the shield; end aligns with the Contact button.
+   Compact navigation: both edges align with the logo/menu controls. */
+
+:root {
+  /* === PRIMITIVES === */
+  --space-page-fluid: clamp(20px, 4vw, 72px);
+  --space-nav-grid-gap: 24px;
+  --space-block-compact: clamp(76px, 9vh, 96px);
+  --space-block-default: clamp(104px, 11.5vh, 124px);
+  --space-block-generous: clamp(124px, 13.5vh, 148px);
+  --size-nav-brand: min(218px, 22vw);
+  --size-nav-brand-compact: 178px;
+  --size-nav-control: 44px;
+  --leading-display-tight: .88;
+  --leading-heading: 1;
+  --leading-eyebrow: 1.25;
+  --leading-control: 1.3;
+  --leading-label: 1.35;
+  --leading-footer: 1.4;
+  --leading-caption: 1.45;
+  --leading-supporting: 1.5;
+  --leading-body: 1.55;
+  --leading-lead: 1.6;
+  --leading-longform: 1.68;
+
+  /* === SEMANTIC === */
+  --rail-inline-start: var(--space-page-fluid);
+  --rail-inline-end: calc(var(--space-page-fluid) + var(--space-nav-grid-gap));
+  --rail-inline-size: calc(100% - var(--rail-inline-start) - var(--rail-inline-end));
+  --section-space-compact: var(--space-block-compact);
+  --section-space-default: var(--space-block-default);
+  --section-space-generous: var(--space-block-generous);
+  --content-eyebrow-size: 11px;
+  --content-eyebrow-gap: 22px;
+  --content-heading-body-gap: 28px;
+  --content-action-gap: 32px;
+  --text-link-padding-block-end: 9px;
+  --line-height-display-tight: var(--leading-display-tight);
+  --line-height-heading: var(--leading-heading);
+  --line-height-eyebrow: var(--leading-eyebrow);
+  --line-height-control: var(--leading-control);
+  --line-height-label: var(--leading-label);
+  --line-height-footer: var(--leading-footer);
+  --line-height-caption: var(--leading-caption);
+  --line-height-supporting: var(--leading-supporting);
+  --line-height-body: var(--leading-body);
+  --line-height-lead: var(--leading-lead);
+  --line-height-longform: var(--leading-longform);
+
+  /* === COMPONENTS === */
+  --nav-rail-inline-start: var(--space-page-fluid);
+  --nav-rail-inline-end: var(--space-page-fluid);
+  --nav-block-start: clamp(18px, 3vw, 46px);
+  --nav-column-gap: var(--space-nav-grid-gap);
+  --nav-link-gap: clamp(12px, 1.6vw, 26px);
+  --nav-link-size: 14.4px;
+  --nav-link-weight: 650;
+  --nav-link-line-height: var(--line-height-control);
+  --nav-control-radius: 7px;
+  --section-rail-inline-start: var(--rail-inline-start);
+  --section-rail-inline-end: var(--rail-inline-end);
+  --footer-rail-inline-start: var(--rail-inline-start);
+  --footer-rail-inline-end: var(--rail-inline-end);
+
+  /* Shared vertical rhythm. Full-screen media compositions may opt out. */
+  --deck-section-padding-start: var(--section-space-generous);
+  --deck-section-padding-end: var(--section-space-compact);
+  --scroll-section-padding-block: var(--section-space-default);
+  --hero-section-padding-start: clamp(132px, 15vh, 164px);
+  --home-section-padding-block: var(--section-space-default);
+
+  /* Shared footer component rhythm. */
+  --footer-padding-block-start: clamp(30px, 4vw, 64px);
+  --footer-padding-block-end: max(28px, env(safe-area-inset-bottom));
+  --footer-grid-padding-block-start: clamp(108px, 16vh, 156px);
+  --footer-grid-padding-block-end: clamp(52px, 8vh, 92px);
+  --footer-grid-column-gap: clamp(42px, 8vw, 132px);
+  --footer-heading-size: clamp(30px, 3.6vw, 58px);
+  --footer-section-heading-size: 18px;
+  --eyebrow-line-height: var(--line-height-eyebrow);
+  --body-line-height: var(--line-height-body);
+  --lead-line-height: var(--line-height-lead);
+  --caption-line-height: var(--line-height-caption);
+  --button-line-height: var(--line-height-control);
+  --form-label-line-height: var(--line-height-label);
+  --footer-link-line-height: var(--line-height-footer);
+  --footer-consent-line-height: var(--line-height-lead);
+  --legal-body-line-height: var(--line-height-longform);
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --rail-inline-end: var(--space-page-fluid);
+  }
+}
+
+@media (max-width: 899px), (max-height: 699px), (pointer: coarse) {
+  :root {
+    --nav-block-start: 18px;
+    --size-nav-brand: var(--size-nav-brand-compact);
+    --deck-section-padding-start: 116px;
+    --deck-section-padding-end: 76px;
+    --scroll-section-padding-block: 92px;
+    --hero-section-padding-start: 128px;
+    --home-section-padding-block: 92px;
+  }
+}

@@ -1,0 +1,1779 @@
+/* C-POLAR Strategic Review visual system — UI-only override. */
+@font-face {
+  font-family: Montserrat;
+  src: url("/assets/fonts/Montserrat-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Anton;
+  src: url("/assets/fonts/Anton-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Definitive deck-theme pass: override inherited scoped and inline styles. */
+html,
+body,
+button,
+input,
+textarea,
+select,
+option {
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+header nav a,
+header nav a.on,
+header nav a[aria-current="page"],
+header .menu,
+.cp-site-nav a,
+.cp-site-nav button,
+.cp-menu,
+.cp-menu a,
+.cp-menu button {
+  color: #000 !important;
+}
+
+header nav a.on,
+header nav a[aria-current="page"] {
+  border-bottom-color: #000 !important;
+}
+
+header nav a::after,
+header nav a::before,
+.cp-site-nav a::after,
+.cp-site-nav a::before {
+  background-color: #000 !important;
+  border-color: #000 !important;
+}
+
+main :where(p, a, button, li, label, small, span, strong, em),
+.hero-transition,
+.buttons-container,
+.cp-ink,
+.cp-room-sub,
+#cp-answer,
+#cp-answer p,
+[data-cp-section],
+[data-cp-textblock],
+[data-cp-copy],
+[data-cp-morebtn],
+[data-cp-divisions],
+.scroll-to-cta-content-dk,
+.read-more-button {
+  font-family: Montserrat, Arial, sans-serif !important;
+  color: #000 !important;
+}
+
+main :where(h1, h2, h3),
+.cp-app-title,
+.cp-a1,
+.cp-room-title,
+.cp-scope-title,
+.tackle-title,
+[data-cp-divisions] > .grid > h2,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhatWeDo"] h2,
+#cp-footer h2 {
+  font-family: "CP Anton", Impact, sans-serif !important;
+  font-weight: 400 !important;
+  color: #000 !important;
+  letter-spacing: -.015em !important;
+}
+
+.cp-a2,
+.cp-cap,
+.cp-scope-copy,
+.cp-app-copy,
+.cp-intro,
+.cp-room-copy,
+.cp-tackle-row,
+.cp-tackle-row li,
+.cp-scope-card,
+.cp-scope-card * {
+  font-family: Montserrat, Arial, sans-serif !important;
+  color: #000 !important;
+}
+
+.read-more-button,
+.read-more-button::before,
+.read-more-button::after,
+.read-more-button .arrow,
+.scroll-to-cta-content-dk,
+.scroll-to-cta-content-dk svg,
+.buttons-container button,
+.link-block {
+  border-color: #000 !important;
+  color: #000 !important;
+}
+
+.read-more-button svg,
+.scroll-to-cta-content-dk svg,
+.buttons-container svg,
+.link-block svg {
+  color: #000 !important;
+  fill: #000 !important;
+  stroke: #000 !important;
+}
+
+header .contact,
+header .contact *,
+.cp-apps-row a:hover,
+.cp-apps-row a:focus-visible,
+.cp-tackle-row li.is-active,
+.cp-tackle-row li.is-active *,
+.cp-tackle-row li:hover,
+.cp-tackle-row li:hover *,
+.cp-scope-card.is-active,
+.cp-scope-card.is-active *,
+.cp-scope-card:hover,
+.cp-scope-card:hover * {
+  color: #fff !important;
+}
+
+#cp-footer h2,
+#cp-footer h3,
+#cp-footer p,
+#cp-footer a,
+#cp-footer span,
+#cp-footer label,
+#cp-footer small,
+.cp-footer h2,
+.cp-footer h3,
+.cp-footer p,
+.cp-footer a,
+.cp-footer span,
+.cp-footer label,
+.cp-footer small {
+  color: #000 !important;
+}
+
+#cp-footer button,
+#cp-footer button *,
+.cp-footer button,
+.cp-footer button * {
+  color: #fff !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-family: Montserrat, Arial, sans-serif !important;
+  color: currentColor !important;
+  opacity: .62 !important;
+}
+
+svg [style*="2d628c"],
+svg [style*="2D628C"],
+svg [style*="36719e"],
+svg [style*="16476a"] {
+  color: #000 !important;
+  fill: #000 !important;
+  stroke: #000 !important;
+}
+
+/* White chapter markers remain white over dark photographic frames. */
+.division-index.white {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+/* Final rendered-state guard: legacy component pseudo-elements live outside
+   the normal text/SVG cascade, so they must be neutralised explicitly. */
+.hero-transition[data-cp-titles] .title[data-cp-titles]::before,
+.hero-transition[data-cp-titles] .title[data-cp-titles]:not(:first-child)::before,
+.hero[data-cp-hero] .fs-cta-s[data-cp-hero]::before,
+.hero[data-cp-hero][data-theme="dark"] .hero-inner[data-cp-hero]
+  .scroll-to-cta[data-cp-hero] .fs-cta-s[data-cp-hero]::before,
+.hero[data-cp-hero][data-theme="light"] .hero-inner[data-cp-hero]
+  .scroll-to-cta[data-cp-hero] .fs-cta-s[data-cp-hero]::before {
+  background-color: #000 !important;
+}
+
+.hero[data-cp-hero] .scroll-to-cta[data-cp-hero],
+.hero[data-cp-hero] .scroll-to-cta[data-cp-hero] *,
+.hero-transition[data-cp-titles],
+.hero-transition[data-cp-titles] * {
+  color: #000 !important;
+}
+
+/* Deck-system cleanup for legacy interactive component paint. */
+button,
+input,
+textarea,
+select,
+option,
+::placeholder {
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+::placeholder {
+  color: rgba(0, 0, 0, 0.52) !important;
+}
+
+#cp-footer ::placeholder {
+  color: rgba(255, 255, 255, 0.64) !important;
+}
+
+.cp-apps-row a,
+.cp-hero .cp-apps a {
+  color: #000 !important;
+  border-color: rgba(0, 0, 0, 0.36) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.cp-apps-row a:hover,
+.cp-apps-row a:focus-visible,
+.cp-hero .cp-apps a:hover,
+.cp-hero .cp-apps a:focus-visible {
+  color: #fff !important;
+  border-color: #000 !important;
+  background: #000 !important;
+  opacity: 1 !important;
+}
+
+.cp-scope {
+  background: #fff !important;
+  box-shadow:
+    0 22px 54px -26px rgba(0, 0, 0, 0.28),
+    0 1px 8px rgba(0, 0, 0, 0.10) !important;
+}
+
+.cp-scope-ring {
+  border-color: #000 !important;
+  box-shadow:
+    inset 0 0 0 8px #000,
+    inset 0 0 0 10px rgba(255, 255, 255, 0.90),
+    inset 0 0 36px -14px rgba(0, 0, 0, 0.32) !important;
+}
+
+.cp-scope-card,
+.cp-scope-card *,
+.cp-tackle-label,
+.cp-app-mark,
+.cp-app-title,
+.cp-app-copy,
+.cp-app-copy:empty::before {
+  color: #000 !important;
+}
+
+.cp-tackle-row li,
+.cp-tackle-row a {
+  color: #000 !important;
+  border-color: rgba(0, 0, 0, 0.42) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+
+.cp-tackle-row li:hover,
+.cp-tackle-row li:focus-within,
+.cp-tackle-row li.is-on,
+.cp-tackle-row li.is-active,
+.cp-tackle-row a:hover,
+.cp-tackle-row a:focus-visible,
+.cp-tackle-row a[aria-current="page"] {
+  color: #fff !important;
+  border-color: #000 !important;
+  background: #000 !important;
+}
+
+.cp-tackle-row li:hover *,
+.cp-tackle-row li:focus-within *,
+.cp-tackle-row li.is-on *,
+.cp-tackle-row li.is-active *,
+.cp-tackle-row a:hover *,
+.cp-tackle-row a:focus-visible *,
+.cp-tackle-row a[aria-current="page"] * {
+  color: #fff !important;
+}
+
+.cp-diamond,
+.cp-app-mark,
+.cp-progress-line,
+.cp-progress-track {
+  border-color: #000 !important;
+  color: #000 !important;
+}
+
+.read-more-button,
+.cp-app-cta,
+.cp-link-arrow {
+  color: #000 !important;
+  border-color: #000 !important;
+}
+
+.read-more-button:hover,
+.read-more-button:focus-visible,
+.cp-app-cta:hover,
+.cp-app-cta:focus-visible {
+  color: #fff !important;
+  background: #000 !important;
+}
+
+.scroll-top,
+.scroll-top svg,
+.scroll-top svg path,
+.scroll-top svg line,
+.scroll-top svg polyline {
+  color: #000 !important;
+  fill: none;
+  stroke: currentColor !important;
+}
+
+body *::before,
+body *::after {
+  font-family: inherit;
+}
+
+/* Runtime typography/color lock. Some inherited Astro components inject
+   scoped declarations after their base stylesheet. Keep this final source
+   rule explicit so every visible UI label resolves to the deck system. */
+body :where(
+  p, a, button, input, textarea, select, option, label, li, dt, dd,
+  small, strong, em, span, nav, header, main, section, article, footer
+) {
+  font-family: Montserrat, Arial, sans-serif !important;
+  color: #000 !important;
+}
+
+body :where(h1, h2, h3, h4, h5, h6),
+body :where(h1, h2, h3, h4, h5, h6) * {
+  font-family: "CP Anton", Impact, sans-serif !important;
+  font-weight: 400 !important;
+  color: #000 !important;
+}
+
+body :where(svg, svg *) {
+  --cp-ui-ink: #000;
+}
+
+body :where(svg [fill="#2d628c"], svg [fill="#2D628C"], svg [fill="#12405f"], svg [fill="#24567e"]) {
+  fill: #000 !important;
+}
+
+body :where(svg [stroke="#2d628c"], svg [stroke="#2D628C"], svg [stroke="#12405f"], svg [stroke="#24567e"]) {
+  stroke: #000 !important;
+}
+
+header .contact,
+header .contact *,
+.cp-site-nav .contact,
+.cp-site-nav .contact *,
+.cp-apps-row a:hover,
+.cp-apps-row a:focus-visible,
+.cp-tackle-row li.is-active,
+.cp-tackle-row li.is-active *,
+.cp-tackle-row li:hover,
+.cp-tackle-row li:hover * {
+  color: #fff !important;
+}
+
+#cp-footer,
+#cp-footer :where(h1, h2, h3, h4, h5, h6, p, a, label, li, small, strong, em, span),
+.cp-footer,
+.cp-footer :where(h1, h2, h3, h4, h5, h6, p, a, label, li, small, strong, em, span) {
+  color: #000 !important;
+}
+
+#cp-footer :where(input, textarea, select, option, button),
+.cp-footer :where(input, textarea, select, option, button) {
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+@font-face {
+  font-family: "CP Anton";
+  src: url("/assets/fonts/Anton-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --deck-black: #000000;
+  --deck-white: #ffffff;
+  --deck-ice: #dce7ee;
+  --deck-blue: #8caabc;
+  --deck-orange: #df5d40;
+  --cp-ink: #000000;
+  --cp-blue: #000000;
+  --ink: #000000;
+  --ink-strong: #000000;
+  --ink-mid: #000000;
+  --ink-soft: #000000;
+  --ink-line: #000000;
+  --ink-bold: #000000;
+  --ink-rgb: 0, 0, 0;
+  --rule: rgba(0, 0, 0, .3);
+  --rule-faint: rgba(0, 0, 0, .16);
+  --border-button: rgba(0, 0, 0, .34);
+  --border-hover: rgba(0, 0, 0, .62);
+  --fill-hover: rgba(0, 0, 0, .08);
+  --font: Montserrat, Arial, sans-serif;
+  --font-alt: Montserrat, Arial, sans-serif;
+  --font-mono: Montserrat, Arial, sans-serif;
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select {
+  color: var(--deck-black) !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+body {
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: geometricPrecision;
+}
+
+/* Raster brand artwork carries the legacy blue in its pixels. Keep the
+   approved artwork geometry, but force the rendered mark to deck black. */
+.cp-logo,
+img[src*="cpolar.png"] {
+  filter: grayscale(1) brightness(0) !important;
+}
+
+/* Remove every inherited typeface and blue ink from the previous UI. */
+.cp-hero,
+.cp-hero *,
+.cp-room-sub,
+.menu-links-w,
+.menu-links-w *,
+.news-w,
+.news-w *,
+.menu-cta,
+.counter,
+.scroll-to-cta,
+.scroll-to-cta *,
+[data-chapter] p,
+[data-chapter] span,
+[data-chapter] a,
+[data-chapter] button,
+#cp-answer,
+#cp-answer *,
+.cp-scope-card,
+.cp-scope-card *,
+.cp-tackle,
+.cp-tackle *,
+.cp-app-mark,
+.cp-app-copy,
+.cp-menu,
+.cp-menu *,
+.hero-transition,
+.hero-transition *,
+.buttons-container,
+.buttons-container *,
+.link-block,
+.fs-cta-s,
+.fs-s2,
+.terms-link {
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+.cp-hero,
+.cp-intro,
+.cp-intro strong,
+.cp-apps-label,
+.cp-room-sub,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhoWeAre"] p,
+[data-chapter="WhoWeAre"] span,
+[data-chapter="WhoWeAre"] a,
+[data-chapter="WhatWeDo"] h2,
+[data-chapter="WhatWeDo"] p,
+[data-chapter="WhatWeDo"] span,
+#cp-answer,
+#cp-answer p,
+.cp-a1,
+.cp-a2,
+.cp-cap,
+.cp-scope-card,
+.cp-scope-card b,
+.cp-scope-card span,
+.cp-tackle-label,
+.cp-tackle-row li,
+.cp-app-mark,
+.cp-app-title,
+.cp-app-copy,
+.cp-app-copy:empty::before,
+.scroll-to-cta,
+.scroll-to-cta span,
+.cp-ink {
+  color: #000000 !important;
+}
+
+/* Remaining legacy components set blue directly instead of reading tokens. */
+header .menu,
+.menu,
+.cp-room-sub,
+.menu-links-w,
+.news-w,
+.menu-cta,
+.counter,
+.link-block,
+.buttons-container,
+.fs-cta-s,
+.fs-s2,
+.terms-link,
+.hero-transition,
+.hero-transition .title,
+.hero-transition .subtitle {
+  color: #000000 !important;
+}
+
+/* Keep the existing transparent navigation and make its hierarchy deck-like. */
+header,
+header .shell,
+header nav,
+.cp-site-nav,
+.cp-site-nav__inner {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+header nav a,
+header button,
+.cp-site-nav a,
+.cp-site-nav button {
+  color: var(--deck-black) !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em !important;
+}
+
+header .contact,
+header [data-contact-trigger],
+.cp-site-nav__contact,
+.cp-contact-button {
+  border: 1px solid var(--deck-black) !important;
+  border-radius: 8px !important;
+  background: var(--deck-black) !important;
+  color: var(--deck-white) !important;
+}
+
+header .contact:hover,
+header [data-contact-trigger]:hover,
+.cp-site-nav__contact:hover,
+.cp-contact-button:hover {
+  background: var(--deck-white) !important;
+  color: var(--deck-black) !important;
+}
+
+/* Deck typography: condensed display voice, neutral body copy. */
+.cp-app-title,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhatWeDo"] h2,
+.cp-scope-title,
+#cp-footer h2,
+.cp-footer h2 {
+  color: var(--deck-black) !important;
+  font-family: "CP Anton", Impact, sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: .005em !important;
+  line-height: .94 !important;
+}
+
+.cp-intro,
+.cp-app-copy,
+.cp-scope-copy,
+.cp-scope-card,
+.cp-apps-label,
+.cp-footer,
+.cp-footer input,
+.cp-footer button {
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+.cp-intro,
+.cp-app-copy,
+.cp-scope-copy {
+  color: var(--deck-black) !important;
+  font-weight: 400 !important;
+  line-height: 1.48 !important;
+}
+
+.cp-intro strong,
+.cp-apps-label,
+.cp-app-mark,
+.cp-scope-kicker {
+  color: var(--deck-black) !important;
+  font-weight: 700 !important;
+}
+
+/* Hero application controls mirror the deck's thin editorial rules. */
+.cp-apps-row a,
+.cp-tackle-row a,
+.cp-tackle-row button {
+  border: 1px solid rgba(0, 0, 0, .72) !important;
+  border-radius: 0 !important;
+  background: rgba(255, 255, 255, .08) !important;
+  color: var(--deck-black) !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease !important;
+}
+
+.cp-apps-row a:hover,
+.cp-apps-row a:focus-visible,
+.cp-tackle-row a:hover,
+.cp-tackle-row button:hover,
+.cp-tackle-row .active,
+.cp-tackle-row [aria-current="true"] {
+  border-color: var(--deck-black) !important;
+  background: var(--deck-black) !important;
+  color: var(--deck-white) !important;
+}
+
+/* Instrument panel uses the deck's circular science-diagram language. */
+.cp-scope,
+.cp-scope-ring {
+  border-color: var(--deck-black) !important;
+  box-shadow: none !important;
+}
+
+.cp-scope-card {
+  border: 1px solid rgba(0, 0, 0, .42) !important;
+  border-radius: 0 !important;
+  background: rgba(255, 255, 255, .82) !important;
+  color: var(--deck-black) !important;
+  box-shadow: none !important;
+}
+
+.cp-scope-card.is-active *,
+.cp-scope-card:hover * {
+  color: #fff !important;
+}
+
+.cp-tackle-row li {
+  border-color: rgba(0, 0, 0, .34) !important;
+  background: rgba(255, 255, 255, .3) !important;
+}
+
+.cp-tackle-row li.is-active,
+.cp-tackle-row li:hover {
+  border-color: #000 !important;
+  background: #000 !important;
+  color: #fff !important;
+}
+
+/* Full-screen navigation follows the deck's cool-paper and black-rule system. */
+.cp-menu {
+  color: #000 !important;
+  background: linear-gradient(120deg, #dce7ee -45%, #fff 34%, #edf3f6 108%) !important;
+}
+
+.cp-menu .nav-link,
+.cp-menu .nav-link.active,
+.cp-menu .nav-link:hover,
+.cp-menu .menu-cta,
+.cp-menu .fs-cta-s,
+.cp-menu .fs-s2,
+.cp-menu .terms-link,
+.cp-menu .terms-w li,
+.cp-menu .svg-container,
+.cp-menu .counter {
+  color: #000 !important;
+}
+
+.cp-menu .fs-cta-s::before,
+.cp-menu .fs-s2::before,
+.cp-menu .terms-link::before,
+.cp-menu .nav-link::before {
+  background-color: rgba(0, 0, 0, .28) !important;
+}
+
+svg [fill="#2D628C"],
+svg [fill="#2d628c"],
+svg [fill="#12405F"],
+svg [fill="#12405f"] {
+  fill: #000 !important;
+}
+
+svg [stroke="#2D628C"],
+svg [stroke="#2d628c"] {
+  stroke: #000 !important;
+}
+
+.spinner-defs,
+.spinner-defs * {
+  color: #000 !important;
+}
+
+.cp-app-mark,
+.cp-app-mark::before,
+.cp-app-mark::after {
+  border-color: var(--deck-black) !important;
+  color: var(--deck-black) !important;
+}
+
+/* These were explicitly removed from the approved interface. */
+.cp-diamond,
+.chapters-navigation,
+.cp-app-progress,
+.cp-progress-rail {
+  display: none !important;
+}
+
+/* Shared full-height footer — exact Company page component. */
+.cp-footer {
+  position: relative;
+  z-index: 80;
+  display: block !important;
+  min-height: 100svh;
+  padding-top: 0;
+  overflow: clip;
+  background: transparent;
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-feature-settings: normal;
+  font-kerning: auto;
+  font-synthesis: none;
+  font-variant: normal;
+  text-rendering: auto;
+  -webkit-font-smoothing: auto;
+}
+
+.cp-footer-panel {
+  position: relative;
+  top: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100svh;
+  padding: clamp(30px, 4vw, 64px) clamp(24px, 7.2vw, 148px) max(28px, env(safe-area-inset-bottom));
+  color: #000;
+  background: radial-gradient(circle at 76% 22%, rgba(255, 255, 255, .92), transparent 27%), linear-gradient(145deg, #f8fbfd 0%, #e7f0f6 55%, #d6e6f1 100%);
+  border-top: 0;
+  box-shadow: none;
+}
+
+.cp-footer-panel::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(45, 98, 140, .055) 1px, transparent 1px), linear-gradient(90deg, rgba(45, 98, 140, .045) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: linear-gradient(120deg, transparent 4%, rgba(0, 0, 0, .42) 52%, transparent 96%);
+  content: "";
+  pointer-events: none;
+}
+
+.cp-footer-grid,
+.cp-footer-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+.cp-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(160px, .55fr) minmax(140px, .38fr);
+  gap: clamp(42px, 8vw, 132px);
+  align-items: start;
+  padding: clamp(108px, 16vh, 156px) 0 clamp(52px, 8vh, 92px);
+}
+
+.cp-footer .cp-footer-nav,
+.cp-footer .cp-footer-social {
+  display: block;
+  grid-column: auto;
+}
+
+.cp-footer .cp-footer-newsletter {
+  padding: 0 !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+.cp-footer .cp-footer-newsletter h2 {
+  max-width: 18ch;
+  margin: 0 !important;
+  text-wrap: wrap;
+}
+
+.cp-footer-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  max-width: 700px;
+  margin-top: clamp(28px, 4vh, 46px);
+  padding: 6px;
+  border: 1px solid rgba(0, 0, 0, .34);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .52);
+  box-shadow: 0 18px 50px rgba(18, 63, 96, .08);
+  backdrop-filter: blur(18px);
+}
+
+.cp-footer .cp-footer-form input {
+  min-width: 0;
+  min-height: 54px;
+  padding: 0 17px;
+  color: #000 !important;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+}
+
+.cp-footer-form input::placeholder {
+  color: rgba(0, 0, 0, .58) !important;
+}
+
+.cp-footer-form:focus-within {
+  border-color: #000;
+  box-shadow: 0 18px 55px rgba(18, 63, 96, .13);
+}
+
+.cp-footer .cp-footer-form button {
+  display: flex;
+  min-width: 132px;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #000 !important;
+  cursor: pointer;
+  transition: background .25s ease, transform .25s ease;
+}
+
+.cp-footer .cp-footer-form button:hover,
+.cp-footer .cp-footer-form button:focus-visible {
+  background: #000 !important;
+  transform: translateX(2px);
+}
+
+.cp-footer-consent {
+  max-width: 68ch;
+  margin: 14px 0 0;
+  color: #000;
+}
+
+.cp-footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp-footer li + li {
+  margin-top: 13px;
+}
+
+.cp-footer .cp-footer-nav a,
+.cp-footer .cp-footer-contact-link,
+.cp-footer .cp-footer-social a {
+  display: inline-flex;
+  gap: 10px;
+  padding: 0;
+  color: #000;
+  border: 0;
+  background-color: transparent;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  text-decoration: none;
+  transition: background-size .28s ease;
+}
+
+.cp-footer .cp-footer-nav a:hover,
+.cp-footer .cp-footer-nav a:focus-visible,
+.cp-footer .cp-footer-contact-link:hover,
+.cp-footer .cp-footer-contact-link:focus-visible,
+.cp-footer .cp-footer-social a:hover,
+.cp-footer .cp-footer-social a:focus-visible {
+  background-size: 100% 1px;
+}
+
+.cp-footer-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 24px min(230px, 24vw) 0 0;
+  color: #000;
+  border-top: 1px solid rgba(0, 0, 0, .2);
+}
+
+.cp-footer .cp-footer-bottom p {
+  margin: 0;
+  font-size: 10.5px !important;
+}
+
+.cp-footer-legal {
+  display: flex;
+  gap: 28px;
+}
+
+.cp-footer-legal a {
+  color: #000;
+  text-decoration: none;
+}
+
+.cp-footer-legal a:hover,
+.cp-footer-legal a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.cp-footer .cp-footer-top-link {
+  position: absolute;
+  z-index: 2;
+  right: clamp(24px, 7.2vw, 148px);
+  bottom: max(26px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  color: #000 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .09em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.cp-footer-top-link span {
+  display: grid;
+  width: 42px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 50%;
+  font-size: 19.2px;
+  line-height: 1;
+  transition: color .25s ease, background .25s ease, transform .25s ease;
+}
+
+.cp-footer-top-link:hover span,
+.cp-footer-top-link:focus-visible span {
+  color: #fff !important;
+  background: #000;
+  transform: translateY(-3px);
+}
+
+.cp-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (max-width: 899px), (max-height: 699px), (pointer: coarse) {
+  .cp-footer {
+    min-height: auto;
+  }
+
+  .cp-footer-panel {
+    min-height: 100svh;
+    padding: 28px 24px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .cp-footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 38px 24px;
+    padding: 104px 0 72px;
+  }
+
+  .cp-footer-newsletter {
+    grid-column: 1 / -1;
+  }
+
+  .cp-footer .cp-footer-newsletter h2 {
+    font-size: clamp(29px, 9vw, 42px) !important;
+  }
+
+  .cp-footer-form {
+    grid-template-columns: 1fr 54px;
+  }
+
+  .cp-footer .cp-footer-form button {
+    min-width: 54px;
+    padding: 0;
+  }
+
+  .cp-footer-form button span:first-child {
+    display: none;
+  }
+
+  .cp-footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-right: 0;
+    padding-bottom: 72px;
+  }
+
+  .cp-footer .cp-footer-top-link {
+    right: 24px;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    font-size: 9px;
+  }
+
+  .cp-footer-legal {
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
+}
+
+/* Warm accent is reserved for interaction feedback, as in the deck. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--deck-orange) !important;
+  outline-offset: 3px !important;
+}
+
+::selection {
+  background: var(--deck-orange);
+  color: var(--deck-white);
+}
+
+@media (max-width: 767px) {
+  header nav a,
+  header button,
+  .cp-site-nav a,
+  .cp-site-nav button {
+    font-size: 11px !important;
+  }
+
+  .cp-app-title,
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhatWeDo"] h2 {
+    line-height: .98 !important;
+  }
+
+  .cp-intro,
+  .cp-app-copy,
+  .cp-scope-copy {
+    line-height: 1.42 !important;
+  }
+}
+
+/* Final cascade guard — Company Page typography roles.
+   Keep this block last: legacy landing/application styles are intentionally
+   normalised here so type does not change between sections. */
+:root {
+  --cp-type-sans: Montserrat, Arial, sans-serif;
+  --cp-type-display: "CP Anton", Anton, Impact, sans-serif;
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select,
+option {
+  font-family: var(--cp-type-sans) !important;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  font-variant-ligatures: common-ligatures contextual;
+}
+
+header nav a,
+header nav a.on,
+header nav a[aria-current="page"],
+header .menu,
+.cp-site-nav a,
+.cp-site-nav button,
+.cp-menu,
+.cp-menu a,
+.cp-menu button {
+  color: #000 !important;
+  font-family: var(--cp-type-sans) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+header nav a.on,
+header nav a[aria-current="page"] {
+  border-bottom-color: #000 !important;
+}
+
+main :where(p, a, button, li, label, small, span, strong, em),
+.cp-ink,
+.cp-room-sub,
+#cp-answer,
+#cp-answer p,
+[data-cp-section],
+[data-cp-textblock],
+[data-cp-copy],
+[data-cp-morebtn],
+[data-cp-divisions],
+.scroll-to-cta-content-dk,
+.read-more-button {
+  color: #000 !important;
+  font-family: var(--cp-type-sans) !important;
+}
+
+main :where(h1, h2, h3, h4, h5, h6),
+.cp-app-title,
+.cp-a1,
+.cp-room-title,
+.cp-scope-title,
+.tackle-title,
+[data-cp-divisions] > .grid > h2,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhatWeDo"] h2 {
+  color: #000 !important;
+  font-family: var(--cp-type-sans) !important;
+}
+
+main h1 {
+  font-size: clamp(58px, 6.2vw, 112px) !important;
+  font-weight: 470 !important;
+  line-height: .88 !important;
+  /* Montserrat already has a compact display rhythm. The former -.072em
+     collapsed counters and made adjacent letters visually touch. */
+  letter-spacing: -.032em !important;
+}
+
+main h2,
+[data-cp-divisions] > .grid > h2,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhatWeDo"] h2,
+.v23-chapter__copy h2 {
+  margin-bottom: 24px !important;
+  font-family: var(--cp-type-sans) !important;
+  font-size: clamp(42px, 4.1vw, 74px) !important;
+  font-weight: 480 !important;
+  line-height: .98 !important;
+  letter-spacing: -.022em !important;
+}
+
+/* Application copy needs the same breathing room as the Company page.
+   This changes horizontal measure only; established type size and leading
+   remain untouched. */
+.v23-chapter__copy {
+  width: min(650px, 44vw) !important;
+}
+
+.v23-chapter__copy h2 {
+  max-width: 650px !important;
+  word-spacing: .012em !important;
+}
+
+.v23-chapter__body {
+  max-width: 510px !important;
+}
+
+.v23-chapter__eyebrow,
+.cp-app-mark,
+.cp-apps-label,
+.cp-scope-kicker {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 11px !important;
+  font-weight: 720 !important;
+  line-height: 1.25 !important;
+  letter-spacing: .13em !important;
+}
+
+main p,
+.v23-chapter__body,
+.cp-intro,
+#cp-answer p.cp-a2,
+.cp-app-copy,
+.cp-scope-copy,
+.cp-room-copy,
+[data-cp-textblock] p,
+[data-cp-copy] p {
+  font-family: var(--cp-type-sans) !important;
+  font-size: clamp(14px, 1.05vw, 17px) !important;
+  font-weight: 470 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+}
+
+main h3 {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 21px !important;
+  font-weight: 620 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -.03em !important;
+}
+
+.v23-chapter__next,
+.read-more-button,
+.scroll-to-cta-content-dk,
+.cp-apps-row a,
+.link-block-label {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+}
+
+#cp-answer p.cp-a1,
+.cp-room-title,
+.cp-scope-title,
+.tackle-title {
+  font-family: var(--cp-type-sans) !important;
+  font-size: clamp(18px, 1.6vw, 24px) !important;
+  font-weight: 620 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -.015em !important;
+}
+
+.cp-scope-card b {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0 !important;
+}
+
+.cp-tackle-row li,
+.division-content h3,
+.division-content h4 {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+}
+
+.division-index .fs-label,
+.chapters-list,
+.chapters-list a {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 10px !important;
+  font-weight: 720 !important;
+  line-height: 1.25 !important;
+  letter-spacing: .13em !important;
+}
+
+.cp-scope-card span,
+.cp-cap {
+  font-family: var(--cp-type-sans) !important;
+  font-size: 11px !important;
+  font-weight: 470 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+}
+
+.cp-a2,
+.cp-cap,
+.cp-scope-copy,
+.cp-app-copy,
+.cp-intro,
+.cp-room-copy,
+.cp-tackle-row,
+.cp-tackle-row li,
+.cp-scope-card,
+.cp-scope-card * {
+  color: #000 !important;
+  font-family: var(--cp-type-sans) !important;
+}
+
+header .contact,
+header .contact *,
+.cp-apps-row a:hover,
+.cp-apps-row a:focus-visible,
+.cp-tackle-row li.is-active,
+.cp-tackle-row li.is-active *,
+.cp-tackle-row li:hover,
+.cp-tackle-row li:hover *,
+.cp-scope-card.is-active,
+.cp-scope-card.is-active *,
+.cp-scope-card:hover,
+.cp-scope-card:hover * {
+  color: #fff !important;
+}
+
+#cp-footer h2,
+.cp-footer h2 {
+  font-family: Anton, Impact, sans-serif !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+#cp-footer .cp-footer-newsletter h2,
+.cp-footer .cp-footer-newsletter h2 {
+  font-size: clamp(30px, 3.6vw, 58px) !important;
+}
+
+#cp-footer h3,
+.cp-footer h3 {
+  margin: 0 0 22px !important;
+  font-family: Anton, Impact, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+#cp-footer .cp-footer-nav a,
+#cp-footer .cp-footer-contact-link,
+#cp-footer .cp-footer-social a,
+.cp-footer .cp-footer-nav a,
+.cp-footer .cp-footer-contact-link,
+.cp-footer .cp-footer-social a {
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+}
+
+#cp-footer .cp-footer-form input,
+.cp-footer .cp-footer-form input {
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 14px !important;
+  line-height: normal !important;
+}
+
+#cp-footer .cp-footer-form button,
+.cp-footer .cp-footer-form button {
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  line-height: normal !important;
+}
+
+#cp-footer .cp-footer-consent,
+.cp-footer .cp-footer-consent {
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 10.5px !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0 !important;
+}
+
+#cp-footer .cp-footer-bottom,
+.cp-footer .cp-footer-bottom {
+  font-family: Montserrat, Arial, sans-serif !important;
+  font-size: 10.5px !important;
+  line-height: normal !important;
+  letter-spacing: 0 !important;
+}
+
+#cp-footer .cp-footer-bottom p,
+.cp-footer .cp-footer-bottom p {
+  line-height: 1.4 !important;
+}
+
+#cp-footer :where(h2, h3, p, a, span, label, small),
+.cp-footer :where(h2, h3, p, a, span, label, small) {
+  color: #000 !important;
+}
+
+#cp-footer button,
+#cp-footer button *,
+.cp-footer button,
+.cp-footer button * {
+  color: #fff !important;
+}
+
+svg [style*="2d628c"],
+svg [style*="2D628C"],
+svg [style*="36719e"],
+svg [style*="16476a"] {
+  color: #000 !important;
+  fill: #000 !important;
+  stroke: #000 !important;
+}
+
+@media (max-width: 899px) {
+  main h1 {
+    font-size: clamp(45px, 12.2vw, 58px) !important;
+    line-height: .92 !important;
+    letter-spacing: -.03em !important;
+  }
+
+  main h2,
+  [data-cp-divisions] > .grid > h2,
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhatWeDo"] h2,
+  .v23-chapter__copy h2 {
+    font-size: clamp(39px, 10.5vw, 54px) !important;
+    line-height: .98 !important;
+    letter-spacing: -.02em !important;
+  }
+}
+
+@media (max-width: 640px) {
+  main h1 {
+    font-size: clamp(45px, 12.2vw, 52px) !important;
+  }
+
+  main h2,
+  [data-cp-divisions] > .grid > h2,
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhatWeDo"] h2,
+  .v23-chapter__copy h2 {
+    margin-bottom: 18px !important;
+    font-size: clamp(39px, 10.5vw, 54px) !important;
+  }
+
+  main p,
+  .v23-chapter__body,
+  .cp-intro,
+  #cp-answer p.cp-a2,
+  .cp-app-copy,
+  .cp-scope-copy,
+  .cp-room-copy,
+  [data-cp-textblock] p,
+  [data-cp-copy] p {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+
+  .v23-chapter__copy,
+  .v23-chapter__copy--right {
+    width: auto !important;
+  }
+
+  .v23-chapter__eyebrow,
+  .cp-app-mark,
+  .cp-apps-label,
+  .cp-scope-kicker {
+    font-size: 10px !important;
+  }
+}
+
+/* Home narrative refinement -------------------------------------------
+   The clean-air statement and its delayed answer are one display beat,
+   so both use the same Company-page title face and responsive scale. */
+[data-chapter="WhoWeAre"] h2 .cp-w,
+[data-chapter="WhoWeAre"] .text-block p,
+[data-chapter="WhoWeAre"] .text-block p .cp-w {
+  color: #000 !important;
+  font-family: Anton, Impact, sans-serif !important;
+  font-size: clamp(42px, 4.1vw, 74px) !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Keep the opening phrase in the answer on the same baseline and scale
+   as the rest of its sentence; legacy .cp-cap rules made it 11px. */
+#cp-answer p.cp-a2 .cp-cap {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+}
+
+#cp-answer p.cp-a1 {
+  font-size: clamp(20px, 1.45vw, 23px) !important;
+}
+
+@media (max-width: 899px) {
+  [data-chapter="WhoWeAre"] .text-block p,
+  [data-chapter="WhoWeAre"] .text-block p .cp-w {
+    font-size: clamp(39px, 10.5vw, 54px) !important;
+  }
+}
+
+@media (max-width: 899px), (max-height: 699px), (pointer: coarse) {
+  .cp-footer .cp-footer-newsletter h2 {
+    font-size: clamp(29px, 9vw, 42px) !important;
+  }
+}
+
+/* Make each pollutant specimen tile one continuous, accessible link. */
+.cp-tackle-row li {
+  padding: 0 !important;
+}
+
+.cp-tackle-row li > a {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  padding: 10px 9px;
+  box-sizing: border-box;
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  text-align: center;
+  text-decoration: none;
+}
+
+.cp-tackle-row li > a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+/* Exact Company page typography parity ---------------------------------
+   These are the rendered roles from /versions/v23-company-page/: Anton
+   display titles, Montserrat UI/body copy, pure black ink and the same
+   responsive scale. Keep this last so legacy landing rules cannot win. */
+body,
+main,
+.v23-applications {
+  color: #000 !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+main h1,
+main h2,
+main h3,
+[data-cp-divisions] > .grid > h2,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhatWeDo"] h2,
+.v23-chapter__copy h2,
+#cp-answer p.cp-a1 {
+  color: #000 !important;
+  font-family: Anton, Impact, sans-serif !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+main h1 {
+  font-size: clamp(58px, 6.2vw, 112px) !important;
+}
+
+main h2,
+[data-cp-divisions] > .grid > h2,
+[data-chapter="WhoWeAre"] h2,
+[data-chapter="WhatWeDo"] h2,
+.v23-chapter__copy h2 {
+  font-size: clamp(42px, 4.1vw, 74px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+
+main :where(p, a, button, li, label, small, span, strong, em),
+.v23-applications :where(p, a, button, span),
+.cp-scope-card,
+.cp-scope-card * {
+  color: #000 !important;
+  font-family: Montserrat, Arial, sans-serif !important;
+}
+
+main p,
+.v23-chapter__body,
+#cp-answer p.cp-a2,
+[data-cp-textblock] p,
+[data-cp-copy] p {
+  font-size: clamp(14px, 1.05vw, 17px) !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+}
+
+.cp-intro {
+  font-size: clamp(14px, 1.05vw, 17px) !important;
+  font-weight: 470 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+}
+
+.v23-chapter__eyebrow,
+.cp-app-mark,
+.cp-apps-label,
+.cp-scope-kicker {
+  font-size: clamp(14px, 1.05vw, 17px) !important;
+  font-weight: 720 !important;
+  line-height: 1.55 !important;
+  letter-spacing: .13em !important;
+}
+
+#cp-answer p.cp-a1 {
+  font-size: 21px !important;
+  line-height: 1 !important;
+}
+
+.v23-chapter__next,
+.read-more-button,
+.scroll-to-cta-content-dk,
+.cp-apps-row a,
+.cp-tackle-row li {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: normal !important;
+  letter-spacing: 0 !important;
+}
+
+.cp-tackle-row li:hover,
+.cp-tackle-row li:focus-within,
+.cp-tackle-row li.is-on,
+.cp-tackle-row li.is-active,
+.cp-tackle-row li:hover *,
+.cp-tackle-row li:focus-within *,
+.cp-tackle-row li.is-on *,
+.cp-tackle-row li.is-active * {
+  color: #fff !important;
+}
+
+@media (max-width: 899px) {
+  main h1 {
+    font-size: clamp(45px, 12.2vw, 58px) !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+  }
+
+  main h2,
+  [data-cp-divisions] > .grid > h2,
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhatWeDo"] h2,
+  .v23-chapter__copy h2 {
+    font-size: clamp(39px, 10.5vw, 54px) !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  main h1 {
+    font-size: clamp(45px, 12.2vw, 52px) !important;
+  }
+
+  main p,
+  .v23-chapter__body,
+  .cp-intro,
+  #cp-answer p.cp-a2,
+  [data-cp-textblock] p,
+  [data-cp-copy] p,
+  .v23-chapter__eyebrow,
+  .cp-app-mark,
+  .cp-apps-label,
+  .cp-scope-kicker {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+}
+
+/* The original mobile chapter rule bottoms the first line out at 42px.
+   Override the complete paired statement together so both halves remain
+   numerically identical at every narrow viewport. */
+@media (max-width: 899px) {
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhoWeAre"] h2 .cp-w,
+  [data-chapter="WhoWeAre"] .text-block p,
+  [data-chapter="WhoWeAre"] .text-block p .cp-w {
+    font-size: clamp(39px, 10.5vw, 54px) !important;
+    line-height: 1 !important;
+  }
+
+  /* The source theme collapses both statements into one implicit 26px grid
+     track on phones. Span the chapter grid so the title treatment remains
+     readable before the midpoint position is measured. */
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhoWeAre"] .text-block {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* The second statement is centered in the live gap between the surrounding
+   headlines. JS supplies the responsive distance after fonts have settled. */
+[data-chapter="WhoWeAre"] .text-block {
+  transform: translate3d(0, var(--cp-midpoint-shift, 0px), 0);
+}
+
+/* Local review: bring the opening chapter statement closer to the hero so it
+   is already arriving on the reader's first deliberate scroll. */
+[data-chapter="WhoWeAre"] h2 {
+  transform: translate3d(0, clamp(-280px, -18vw, -180px), 0);
+}
+
+/* Narrative RWD ---------------------------------------------------------
+   The legacy max-width:1024px rule resets these two grid items to `auto`.
+   Between 900px and 1024px that collapses both statements into a zero-width
+   implicit track. Restore a deliberate full-grid span and preserve the
+   desktop's left/right editorial offset within it. */
+@media (min-width: 900px) and (max-width: 1024px) {
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhoWeAre"] .text-block {
+    grid-column: 1 / -1 !important;
+    width: min(76vw, 720px) !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  [data-chapter="WhoWeAre"] h2 {
+    justify-self: start !important;
+  }
+
+  [data-chapter="WhoWeAre"] .text-block {
+    justify-self: end !important;
+  }
+
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhoWeAre"] h2 .cp-w,
+  [data-chapter="WhoWeAre"] .text-block p,
+  [data-chapter="WhoWeAre"] .text-block p .cp-w {
+    font-size: clamp(48px, 5.8vw, 60px) !important;
+    line-height: .98 !important;
+  }
+}
+
+/* On narrow phones, remove desktop-authored hard line breaks and let the
+   available measure make balanced lines. Both statements then occupy the
+   same three-line height at 320px instead of an uneven 3/4-line stack. */
+@media (max-width: 479px) {
+  [data-chapter="WhoWeAre"] h2,
+  [data-chapter="WhoWeAre"] h2 .cp-w,
+  [data-chapter="WhoWeAre"] .text-block p,
+  [data-chapter="WhoWeAre"] .text-block p .cp-w {
+    font-size: clamp(34px, 9.5vw, 40px) !important;
+    line-height: .98 !important;
+  }
+
+  [data-chapter="WhoWeAre"] h2 br,
+  [data-chapter="WhoWeAre"] .text-block p br {
+    display: none !important;
+  }
+}
+
+/* The pollutant interaction completes early enough that the inherited 230vh
+   runway only creates an empty extra scroll before AIR. Keep 1.45 screens:
+   the interaction gets its full beat while AIR is already rising behind the
+   fade, rather than waiting below an extra screen of section padding. */
+[data-chapter="WhatWeDo"][data-cp-divisions] {
+  box-sizing: border-box;
+  min-height: 145vh !important;
+  min-height: 145svh !important;
+  padding-bottom: 0 !important;
+}
+
+/* Shared vertical rhythm for landing-page reading sections. The animated
+   hero and pollutant runway keep their scene-specific timing. */
+[data-chapter="WhoWeAre"] {
+  padding-top: var(--home-section-padding-block) !important;
+  padding-bottom: var(--home-section-padding-block) !important;
+}
+
+.v23-chapter__copy {
+  padding-top: var(--deck-section-padding-start) !important;
+  padding-bottom: var(--deck-section-padding-end) !important;
+}
+
+/* Shared horizontal rail migration. */
+.cp-footer-panel {
+  padding-right: var(--footer-rail-inline-end);
+  padding-left: var(--footer-rail-inline-start);
+}
+
+.cp-footer .cp-footer-top-link {
+  right: var(--footer-rail-inline-end);
+}
+
+/* Canonical footer legal rail fallback: shared site-footer.css normally wins,
+   but this keeps page-owned footer copies aligned during async CSS loading. */
+.cp-footer-bottom{padding-right:0}
+.cp-footer-legal{justify-content:flex-end;margin-left:auto}
+@media(max-width:899px),(max-height:699px),(pointer:coarse){
+  .cp-footer-legal{justify-content:flex-start;margin-left:0}
+}

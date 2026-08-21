@@ -1,0 +1,54 @@
+# Canonical public routes. Keep implementation version folders private while
+# preserving the current static asset layout through internal rewrites.
+/air /air/ 301
+/air/* /versions/v23-air-filtration-page/:splat 200
+/development /development/ 301
+/development/* /versions/v23-rd-page/:splat 200
+/how-it-works /how-it-works/ 301
+/how-it-works/* /versions/v23-how-it-works-page/:splat 200
+/science /science/ 301
+/science/* /versions/v23-science-evidence-page/:splat 200
+/company /company/ 301
+/company/* /versions/v23-company-page/:splat 200
+/partners /partners/ 301
+/partners/* /versions/v23-partners-page/:splat 200
+/publications /publications/ 301
+/publications/* /versions/v23-publications-downloads-page/:splat 200
+
+/contact /contact/ 301
+/privacy /privacy/ 301
+/terms /terms/ 301
+
+/pollutants/ultrafine-particles /pollutants/ultrafine-particles/ 301
+/pollutants/wildfire-smoke /pollutants/wildfire-smoke/ 301
+/pollutants/viruses /pollutants/viruses/ 301
+/pollutants/mold /pollutants/mold/ 301
+
+# Relative shared dependencies used by the versioned source documents after
+# they are served through the concise public routes above.
+/v23-site-system/* /versions/v23-site-system/:splat 200
+/v23-company-page/* /versions/v23-company-page/:splat 200
+/v24tech/* /versions/v24tech/:splat 200
+/pollutants/global-site-nav.css /global-site-nav.css 200
+/pollutants/global-site-nav.js /global-site-nav.js 200
+/pollutants/positive-charge-cursor.js /positive-charge-cursor.js 200
+
+# Legacy page URLs permanently resolve to their canonical public equivalents.
+/index.html / 301
+/versions/v23-air-filtration-page/* /air/:splat 301
+/versions/v23-rd-page/* /development/:splat 301
+/versions/v23-how-it-works-page/* /how-it-works/:splat 301
+/versions/v23-science-evidence-page/* /science/:splat 301
+/versions/v23-company-page/* /company/:splat 301
+/versions/v23-partners-page/* /partners/:splat 301
+/versions/v23-publications-downloads-page/* /publications/:splat 301
+/nanoflashing-contact-form.html /contact/ 301
+/nanoflashing-contact-form /contact/ 301
+/privacy-policy.html /privacy/ 301
+/terms-of-service.html /terms/ 301
+/pollutants/ultrafine.html /pollutants/ultrafine-particles/ 301
+/pollutants/wildfire.html /pollutants/wildfire-smoke/ 301
+/pollutants/virus.html /pollutants/viruses/ 301
+/pollutants/bacteria /pollutants/bacteria/ 301
+/pollutants/bacteria.html /pollutants/bacteria/ 301
+/pollutants/fungi.html /pollutants/mold/ 301
