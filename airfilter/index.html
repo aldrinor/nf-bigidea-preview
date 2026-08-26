@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Air filter viewer</title>
+  <style>
+    @font-face {
+      font-family: Montserrat;
+      src: url("./fonts/Montserrat-Variable.woff2") format("woff2");
+      font-weight: 100 900;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light;
+      --ink: #1f2327;
+      --ground: #ffffff;
+      --type: Montserrat, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background: var(--ground);
+      color: var(--ink);
+      font-family: var(--type);
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      min-height: 100svh;
+      align-items: start;
+      padding: 16px;
+    }
+
+    .viewer {
+      width: min(100%, 1280px);
+      min-width: 0;
+      margin-inline: auto;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: var(--ground);
+      isolation: isolate;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--ground);
+    }
+
+    .leaders,
+    .markers {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .leaders {
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .leaders g,
+    .marker {
+      opacity: var(--alpha, 0);
+    }
+
+    .leaders path {
+      fill: none;
+      stroke: rgba(31, 35, 39, 0.55);
+      stroke-width: 1;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .leaders circle {
+      fill: rgba(31, 35, 39, 0.55);
+      vector-effect: non-scaling-stroke;
+    }
+
+    .markers {
+      z-index: 2;
+    }
+
+    .marker {
+      --chip-size: clamp(42px, 6.4vw, 82px);
+      --label-gap: clamp(5px, 0.55vw, 8px);
+      position: absolute;
+      inset: 0;
+    }
+
+    .chip {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: var(--chip-size);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      border: 1px solid rgba(31, 35, 39, 0.24);
+      border-radius: 50%;
+      background: rgb(238, 238, 238);
+      box-shadow: 0 0.45vw 1.2vw rgba(31, 35, 39, 0.14);
+    }
+
+    .specimen-video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: var(--specimen-position, 50% 50%);
+    }
+
+    .label {
+      position: absolute;
+      left: var(--x);
+      top: calc(var(--y) + (var(--chip-size) / 2) + var(--label-gap));
+      max-width: 19%;
+      padding: clamp(2px, 0.22vw, 4px) clamp(3px, 0.42vw, 7px);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 0.16vw 0.6vw rgba(31, 35, 39, 0.12);
+      color: var(--ink);
+      font-size: clamp(8px, 1vw, 14px);
+      font-weight: 650;
+      line-height: 1.15;
+      text-align: center;
+      text-wrap: balance;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .label-above .label {
+      top: calc(var(--y) - (var(--chip-size) / 2) - var(--label-gap));
+      transform: translate(-50%, -100%);
+    }
+
+    .marker[data-item="spores"] {
+      --specimen-position: 50% 51%;
+    }
+
+    .marker[data-item="smoke"] {
+      --specimen-position: 50% 50%;
+    }
+
+    .marker[data-item="ultrafine"] {
+      --specimen-position: 50% 49%;
+    }
+
+    .marker[data-item="viruses"] {
+      --specimen-position: 50% 50%;
+    }
+
+    .marker[data-item="bacteria"] {
+      --specimen-position: 51% 50%;
+    }
+
+    .legend {
+      display: none;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      align-items: center;
+      padding: 20px clamp(16px, 3vw, 36px);
+      border-block: 1px solid rgba(31, 35, 39, 0.14);
+    }
+
+    button {
+      min-width: 116px;
+      min-height: 44px;
+      padding: 10px 20px;
+      border: 1px solid rgba(31, 35, 39, 0.42);
+      border-radius: 999px;
+      background: var(--ground);
+      color: var(--ink);
+      font: 600 13px/1 var(--type);
+      letter-spacing: 0.015em;
+      cursor: pointer;
+      transition: background-color 140ms ease, border-color 140ms ease;
+    }
+
+    button:first-child {
+      border-color: var(--ink);
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--ink);
+      background: rgba(31, 35, 39, 0.055);
+    }
+
+    button:focus-visible {
+      outline: 3px solid rgba(31, 35, 39, 0.32);
+      outline-offset: 3px;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .error {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      place-items: center;
+      padding: 8%;
+      color: var(--ink);
+      font-size: clamp(14px, 1.5vw, 20px);
+      text-align: center;
+    }
+
+    .stage.has-error .hero-video,
+    .stage.has-error .leaders,
+    .stage.has-error .markers {
+      display: none;
+    }
+
+    .stage.has-error .error {
+      display: grid;
+    }
+
+    .viewer.chips-hidden .leaders,
+    .viewer.chips-hidden .markers {
+      visibility: hidden;
+    }
+
+    .viewer.chips-hidden .legend {
+      display: none;
+    }
+
+    @media (max-width: 520px) {
+      .leaders,
+      .markers {
+        display: none;
+      }
+
+      .legend {
+        --legend-chip-size: clamp(64px, 21vw, 80px);
+        display: block;
+        padding: 18px 14px 17px;
+        border-top: 1px solid rgba(31, 35, 39, 0.1);
+      }
+
+      .legend-track {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 16px 6px;
+      }
+
+      .legend-item {
+        --active: 0;
+        grid-column: span 2;
+        display: grid;
+        grid-template-rows: var(--legend-chip-size) auto;
+        justify-items: center;
+        gap: 7px;
+        min-width: 0;
+        opacity: calc(0.32 + (var(--active) * 0.68));
+        transition: opacity 180ms ease;
+      }
+
+      .legend-item:nth-child(4) {
+        grid-column: 2 / span 2;
+      }
+
+      .legend-item:nth-child(5) {
+        grid-column: 4 / span 2;
+      }
+
+      .legend-chip {
+        width: var(--legend-chip-size);
+        aspect-ratio: 1;
+        overflow: hidden;
+        border: 1px solid rgba(31, 35, 39, 0.24);
+        border-radius: 50%;
+        background: rgb(238, 238, 238);
+      }
+
+      .legend-label {
+        width: max-content;
+        max-width: 112px;
+        color: var(--ink);
+        font-size: clamp(10.5px, 3vw, 11.5px);
+        font-weight: 600;
+        line-height: 1.16;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .controls {
+        gap: 8px;
+        padding: 14px 16px 16px;
+      }
+
+      button {
+        flex: 1 1 96px;
+        min-width: 0;
+        min-height: 42px;
+        padding-inline: 9px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+      }
+
+      .legend-item,
+      button {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="viewer" id="viewer" aria-label="Air filter video viewer">
+    <div class="stage" id="stage">
+      <video class="hero-video" id="video" muted playsinline preload="metadata" aria-label="Air filter demonstration">
+        <source media="(max-width: 520px)" src="plate_720.mp4" type="video/mp4">
+        <source src="plate_1080.mp4" type="video/mp4">
+      </video>
+
+      <svg class="leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <g data-item="spores" data-in="3" data-out="7.2">
+          <path d="M 12.2 15.8 C 14.1 16.4, 14.4 22.9, 15.6 24.5 C 17.4 27, 20.1 29.7, 22.4 31.5"></path>
+          <circle cx="22.4" cy="31.5" r="0.28"></circle>
+        </g>
+        <g data-item="smoke" data-in="2" data-out="6.5">
+          <path d="M 20.2 16 C 21.1 22.9, 23.3 30.5, 27.4 36.5"></path>
+          <circle cx="27.4" cy="36.5" r="0.28"></circle>
+        </g>
+        <g data-item="ultrafine" data-in="6.2" data-out="10.8">
+          <path d="M 33.2 16.8 C 35.7 18.1, 36 23.2, 35.8 25.2 C 35.5 30.4, 34 36.8, 32.7 40.5"></path>
+          <circle cx="32.7" cy="40.5" r="0.28"></circle>
+        </g>
+        <g data-item="viruses" data-in="2.2" data-out="6.8">
+          <path d="M 13.3 67.8 C 16.5 60.7, 20.5 54.8, 24.3 50.5"></path>
+          <circle cx="24.3" cy="50.5" r="0.28"></circle>
+        </g>
+        <g data-item="bacteria" data-in="6.6" data-out="11.2">
+          <path d="M 29.3 73.2 C 30 65, 31.4 57, 32.7 49.5"></path>
+          <circle cx="32.7" cy="49.5" r="0.28"></circle>
+        </g>
+      </svg>
+
+      <div class="markers">
+        <div class="marker" role="img" aria-label="Fungal spores" data-item="spores" data-in="3" data-out="7.2" style="--x: 9%; --y: 15%;">
+          <div class="chip"><video class="specimen-video" data-item="spores" data-layout="desktop" data-src="specimens_v/spore.mp4" poster="specimens_v/spore.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="label">Fungal spores</span>
+        </div>
+
+        <div class="marker label-above" role="img" aria-label="Wildfire smoke" data-item="smoke" data-in="2" data-out="6.5" style="--x: 20%; --y: 10%;">
+          <div class="chip"><video class="specimen-video" data-item="smoke" data-layout="desktop" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="label">Wildfire smoke</span>
+        </div>
+
+        <div class="marker" role="img" aria-label="Ultrafine particles" data-item="ultrafine" data-in="6.2" data-out="10.8" style="--x: 30%; --y: 16%;">
+          <div class="chip"><video class="specimen-video" data-item="ultrafine" data-layout="desktop" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="label">Ultrafine particles</span>
+        </div>
+
+        <div class="marker" role="img" aria-label="Viruses" data-item="viruses" data-in="2.2" data-out="6.8" style="--x: 11%; --y: 72%;">
+          <div class="chip"><video class="specimen-video" data-item="viruses" data-layout="desktop" data-src="specimens_v/virus.mp4" poster="specimens_v/virus.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="label">Viruses</span>
+        </div>
+
+        <div class="marker" role="img" aria-label="Bacteria" data-item="bacteria" data-in="6.6" data-out="11.2" style="--x: 29%; --y: 79%;">
+          <div class="chip"><video class="specimen-video" data-item="bacteria" data-layout="desktop" data-src="specimens_v/bacteria.mp4" poster="specimens_v/bacteria.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="label">Bacteria</span>
+        </div>
+      </div>
+
+      <p class="error" id="error" role="status">The video could not load.</p>
+    </div>
+
+    <section class="legend" aria-label="Airborne specimens">
+      <div class="legend-track">
+        <div class="legend-item" data-item="spores" data-in="3" data-out="7.2">
+          <div class="legend-chip"><video class="specimen-video" data-item="spores" data-layout="mobile" data-src="specimens_v/spore.mp4" poster="specimens_v/spore.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="legend-label">Fungal spores</span>
+        </div>
+        <div class="legend-item" data-item="smoke" data-in="2" data-out="6.5">
+          <div class="legend-chip"><video class="specimen-video" data-item="smoke" data-layout="mobile" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="legend-label">Wildfire smoke</span>
+        </div>
+        <div class="legend-item" data-item="ultrafine" data-in="6.2" data-out="10.8">
+          <div class="legend-chip"><video class="specimen-video" data-item="ultrafine" data-layout="mobile" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="legend-label">Ultrafine particles</span>
+        </div>
+        <div class="legend-item" data-item="viruses" data-in="2.2" data-out="6.8">
+          <div class="legend-chip"><video class="specimen-video" data-item="viruses" data-layout="mobile" data-src="specimens_v/virus.mp4" poster="specimens_v/virus.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="legend-label">Viruses</span>
+        </div>
+        <div class="legend-item" data-item="bacteria" data-in="6.6" data-out="11.2">
+          <div class="legend-chip"><video class="specimen-video" data-item="bacteria" data-layout="mobile" data-src="specimens_v/bacteria.mp4" poster="specimens_v/bacteria.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+          <span class="legend-label">Bacteria</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="controls" aria-label="Video controls">
+      <button type="button" id="play">Play</button>
+      <button type="button" id="restart">Restart</button>
+      <button type="button" id="chips" aria-pressed="true">Hide chips</button>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const video = document.getElementById("video");
+      const viewer = document.getElementById("viewer");
+      const stage = document.getElementById("stage");
+      const playButton = document.getElementById("play");
+      const restartButton = document.getElementById("restart");
+      const chipsButton = document.getElementById("chips");
+      const overlayItems = [...stage.querySelectorAll(".leaders [data-item], .marker[data-item]")];
+      const legendItems = [...viewer.querySelectorAll(".legend-item")];
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const mobileLayout = window.matchMedia("(max-width: 520px)");
+      const records = new Map();
+      let frameRequest = 0;
+
+      for (const marker of stage.querySelectorAll(".marker[data-item]")) {
+        const item = marker.dataset.item;
+        records.set(item, {
+          item,
+          start: Number(marker.dataset.in),
+          end: Number(marker.dataset.out),
+          desktop: viewer.querySelector('.specimen-video[data-layout="desktop"][data-item="' + item + '"]'),
+          mobile: viewer.querySelector('.specimen-video[data-layout="mobile"][data-item="' + item + '"]'),
+          loadedVideo: null,
+          failedForWindow: false
+        });
+      }
+
+      function smoothstep(value) {
+        const clamped = Math.max(0, Math.min(1, value));
+        return clamped * clamped * (3 - 2 * clamped);
+      }
+
+      function opacityAt(time, start, end) {
+        if (reducedMotion.matches) {
+          return time >= start && time <= end ? 1 : 0;
+        }
+
+        const fadeIn = smoothstep((time - start) / 0.28);
+        const fadeOut = smoothstep((end - time) / 0.32);
+        return Math.min(fadeIn, fadeOut);
+      }
+
+      function unloadSpecimen(record) {
+        const specimen = record.loadedVideo;
+        if (!specimen) return;
+
+        specimen.pause();
+        specimen.removeAttribute("src");
+        specimen.load();
+        record.loadedVideo = null;
+      }
+
+      function playSpecimen(record) {
+        const specimen = record.loadedVideo;
+        if (!specimen || !specimen.paused || video.paused || video.ended) return;
+
+        specimen.play().catch(() => {
+          if (record.loadedVideo !== specimen) return;
+          unloadSpecimen(record);
+          record.failedForWindow = true;
+        });
+      }
+
+      function loadSpecimen(record, specimen) {
+        specimen.src = specimen.dataset.src;
+        specimen.load();
+        record.loadedVideo = specimen;
+        playSpecimen(record);
+      }
+
+      function syncSpecimenMedia(time) {
+        const chipsHidden = viewer.classList.contains("chips-hidden");
+        const available = [...records.values()].filter((record) => {
+          const inWindow = time >= record.start && time < record.end;
+          if (!inWindow) record.failedForWindow = false;
+          return inWindow;
+        });
+
+        // New windows take precedence during the schedule's two brief four-item
+        // crossovers. Outgoing items retain their posters, preserving the hard cap.
+        const selected = new Set(
+          available
+            .sort((a, b) => b.start - a.start)
+            .slice(0, 3)
+        );
+        const layout = mobileLayout.matches ? "mobile" : "desktop";
+        const desired = new Map();
+
+        for (const record of records.values()) {
+          const specimen = record[layout];
+          desired.set(
+            record,
+            !reducedMotion.matches && !chipsHidden && selected.has(record) && !record.failedForWindow
+              ? specimen
+              : null
+          );
+        }
+
+        // Unload first so a layout change or crossover never creates a transient
+        // fourth media element with a live source.
+        for (const record of records.values()) {
+          if (record.loadedVideo && record.loadedVideo !== desired.get(record)) {
+            unloadSpecimen(record);
+          }
+        }
+
+        for (const record of records.values()) {
+          const specimen = desired.get(record);
+          if (specimen && !record.loadedVideo) loadSpecimen(record, specimen);
+
+          if (!record.loadedVideo) continue;
+          if (video.paused || video.ended) {
+            record.loadedVideo.pause();
+          } else {
+            playSpecimen(record);
+          }
+        }
+      }
+
+      function sync() {
+        const time = video.currentTime || 0;
+
+        for (const item of overlayItems) {
+          const alpha = opacityAt(time, Number(item.dataset.in), Number(item.dataset.out));
+          item.style.setProperty("--alpha", alpha.toFixed(3));
+        }
+
+        for (const item of legendItems) {
+          const active = time >= Number(item.dataset.in) && time < Number(item.dataset.out);
+          item.style.setProperty("--active", active ? "1" : "0");
+        }
+
+        syncSpecimenMedia(time);
+
+        frameRequest = requestAnimationFrame(sync);
+      }
+
+      function setPlayLabel() {
+        playButton.textContent = video.paused || video.ended ? "Play" : "Pause";
+      }
+
+      async function playVideo() {
+        try {
+          await video.play();
+        } catch (error) {
+          setPlayLabel();
+        }
+      }
+
+      playButton.addEventListener("click", () => {
+        if (video.paused || video.ended) {
+          if (video.ended) video.currentTime = 0;
+          playVideo();
+        } else {
+          video.pause();
+        }
+      });
+
+      restartButton.addEventListener("click", () => {
+        video.currentTime = 0;
+        playVideo();
+      });
+
+      chipsButton.addEventListener("click", () => {
+        const hidden = viewer.classList.toggle("chips-hidden");
+        chipsButton.textContent = hidden ? "Show chips" : "Hide chips";
+        chipsButton.setAttribute("aria-pressed", String(!hidden));
+      });
+
+      function showVideoError() {
+        stage.classList.add("has-error");
+        for (const record of records.values()) unloadSpecimen(record);
+        playButton.disabled = true;
+        restartButton.disabled = true;
+      }
+
+      video.addEventListener("play", setPlayLabel);
+      video.addEventListener("pause", setPlayLabel);
+      video.addEventListener("ended", setPlayLabel);
+      video.addEventListener("error", showVideoError);
+
+      reducedMotion.addEventListener?.("change", () => syncSpecimenMedia(video.currentTime || 0));
+      mobileLayout.addEventListener?.("change", () => syncSpecimenMedia(video.currentTime || 0));
+
+      frameRequest = requestAnimationFrame(sync);
+      window.addEventListener("pagehide", () => {
+        cancelAnimationFrame(frameRequest);
+        for (const record of records.values()) unloadSpecimen(record);
+      }, { once: true });
+    })();
+  </script>
+</body>
+</html>
