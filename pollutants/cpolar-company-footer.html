@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>C-POLAR footer</title>
+  <!-- This is intentionally the same Company footer component and stylesheet. -->
+  <link rel="stylesheet" href="../versions/v23-company-page/company.css?v=20260825-hiw">
+  <link rel="stylesheet" href="../site-footer.css?v=20260825-hiw">
+  <style>
+    html, body { height: 100%; min-height: 0; margin: 0; overflow-x: hidden; background: #d6e6f1; }
+    .company-deck { height: 100%; min-height: 0; }
+    .company-deck .cp-footer.chapter { display: block; width: 100%; height: 100%; min-height: 0; overflow: visible; }
+    .company-deck .cp-footer-panel { height: 100%; min-height: 0; }
+  </style>
+</head>
+<body>
+  <main class="company-deck">
+    <footer id="cp-footer" class="chapter cp-footer" data-title="Footer" data-index="7" aria-labelledby="cp-footer-title">
+      <div class="cp-footer-panel">
+        <div class="cp-footer-grid">
+          <section class="cp-footer-newsletter" data-footer-reveal="1">
+            <h2 id="cp-footer-title">Join our newsletter for updates.</h2>
+            <form class="cp-footer-form" id="cp-newsletter-form" data-newsletter-form>
+              <label class="cp-sr-only" for="cp-footer-email">Email address</label>
+              <input id="cp-footer-email" name="email" type="email" autocomplete="email" placeholder="Enter your email" required>
+              <button type="submit" aria-label="Subscribe to the C-POLAR newsletter"><span>Subscribe</span><span aria-hidden="true">→</span></button>
+              <p class="cp-sr-only" data-newsletter-status aria-live="polite"></p>
+            </form>
+            <p class="cp-footer-consent"><label class="cp-consent-check"><input type="checkbox" name="cp_terms_accept" value="1" form="cp-newsletter-form" required><span>I have read and agree to the <a href="/terms/" target="_top">Terms of Use</a>, including the US$100 liability cap, the obligations concerning certain third-party claims caused by business misuse, and the exclusive court location, and to the <a href="/privacy/" target="_top">Privacy Policy</a>.</span></label></p>
+          </section>
+
+          <nav class="cp-footer-nav" aria-label="Footer navigation" data-footer-reveal="2">
+            <h3>Navigation</h3>
+            <ul>
+              <li><a href="/science/" target="_top">Science</a></li><li><a href="/air/" target="_top">Applications</a></li>
+              <li><a href="/company/" target="_top">Company</a></li>
+              <li><a href="/contact/" target="_top">Contact C-POLAR <span aria-hidden="true">↗</span></a></li>
+            </ul>
+          </nav>
+
+          <nav class="cp-footer-social" aria-label="Social media" data-footer-reveal="3">
+            <h3>Follow us</h3>
+            <ul><li><a href="https://www.linkedin.com/company/c-polar/" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a></li><li><a href="https://www.facebook.com/people/C-Polar-Technologies-Inc/61580775117789/" target="_blank" rel="noopener noreferrer">Facebook <span aria-hidden="true">↗</span></a></li><li><a href="https://www.instagram.com/cpolartechnologies/" target="_blank" rel="noopener noreferrer">Instagram <span aria-hidden="true">↗</span></a></li></ul>
+          </nav>
+        </div>
+
+        <div class="cp-footer-bottom" data-footer-reveal="4">
+          <p>© 2026 C-POLAR Technologies, Inc. All rights reserved.</p>
+          <div class="cp-footer-legal"><a href="/privacy/" target="_top">Privacy Policy</a><a href="/terms/" target="_top">Terms of Use</a></div>
+        </div>
+        <a class="cp-footer-top-link" href="#" data-footer-top>Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+    </footer>
+  </main>
+
+  <script src="../footer.js?v=20260825-hiw"></script>
+  <script>
+    document.querySelector('[data-footer-top]').addEventListener('click', function (event) {
+      event.preventDefault();
+      window.top.location.href = window.top.location.pathname + window.top.location.search;
+    });
+  </script>
+</body>
+</html>

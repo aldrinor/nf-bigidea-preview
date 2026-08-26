@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>How It Works | C-POLAR</title>
+<link rel="canonical" href="https://cpolar.tech/how-it-works/">
+<link rel="icon" href="/favicon-32.png">
+<link href="/assets/fonts/vendor/fonts.css?v=20260824-selfhost" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--screenH:100vh;--ground:#edf0f2;--ink:#1f2327;--muted:#8a9095;--accent:#1b7bff}
+html,body{background:var(--ground)}
+body{font-family:'Space Mono',monospace}
+html.deck-mode,body.deck-mode{height:100%;overflow:hidden;overscroll-behavior:none}
+body.deck-mode .deck{position:relative;width:100%;transform:translateY(0);will-change:transform}
+body.deck-mode .deck.smooth{transition:transform 720ms cubic-bezier(.7,0,.2,1)}
+body.deck-mode .screen{height:var(--screenH);width:100%;overflow:hidden}
+body.deck-mode .screen iframe{width:100%;height:100%;border:0;display:block}
+html.flow-mode,body.flow-mode{height:auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:auto}
+body.flow-mode .deck{transform:none;position:relative;width:100%}
+body.flow-mode .screen{height:auto;min-height:100vh;min-height:100dvh;overflow:visible}
+body.flow-mode .screen iframe{width:100%;border:0;display:block}
+header{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 30px;background:linear-gradient(180deg,rgba(237,240,242,.92),rgba(237,240,242,0));pointer-events:none}
+header a{pointer-events:auto;display:inline-flex}
+header img{height:114px;width:auto;opacity:.95;display:block;transition:height .35s cubic-bezier(.2,.7,.2,1)}
+header .meta{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.04em}
+#dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:101;display:flex;flex-direction:column;gap:11px}
+#dots button{width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;background:rgba(31,35,39,.22);transition:background .3s,transform .3s}
+#dots button.on{background:var(--ink);transform:scale(1.35)}
+body.flow-mode #dots{display:none}
+body.flow-mode header{position:absolute;background:none}
+@media(max-width:700px){header img{height:72px}header{padding:12px 16px}#dots{right:10px}}
+@media(prefers-reduced-motion:reduce){.deck.smooth{transition:none}}
+</style>
+<link rel="stylesheet" href="/global-site-nav.css?v=20260825-hiw">
+</head>
+<body class="deck-mode">
+<div class="deck" id="deck">
+  <section class="screen"><iframe title="Attract. Capture. Destroy." srcdoc="<!doctype html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;>
+<link href=&quot;/assets/fonts/vendor/fonts.css?v=20260824-selfhost&quot; rel=&quot;stylesheet&quot;>
+<style>
+:root{--ground:#edf0f2;--ink:#1f2327;--muted:#8a9095;--accent:#1b7bff;--stack:-apple-system,BlinkMacSystemFont,'Space Grotesk',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--ground);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{min-height:100vh;min-height:100svh;overflow-x:hidden}
+.opening{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;gap:clamp(24px,4vw,46px);padding:clamp(120px,16vh,170px) clamp(52px,8vw,124px) clamp(64px,9vh,100px)}
+h1{max-width:1100px;font-size:clamp(64px,8vw,126px);font-weight:600;line-height:.95;letter-spacing:-.055em;text-wrap:balance}
+p{max-width:1180px;font-size:clamp(16px,1.45vw,23px);font-weight:400;line-height:1.55;letter-spacing:-.01em}
+@media(max-width:700px){.opening{justify-content:flex-start;gap:30px;padding:clamp(112px,18vh,150px) 20px 64px}h1{font-size:clamp(44px,15vw,68px);line-height:.98}p{font-size:16px;line-height:1.55}}
+</style>
+</head>
+<body>
+<main class=&quot;opening&quot;>
+  <h1>Attract. Capture. Destroy.</h1>
+  <p>Every breath indoors comes from air shared across the room. The fibres in the NanoFlashing™ Air Filter hold a permanent positive electrostatic charge that draws negatively charged particles to their surface.</p>
+</main>
+</body>
+</html>"></iframe></section>
+
+  <section class="screen"><iframe title="Attract. Capture. Destroy." allow="autoplay" srcdoc="<!doctype html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;>
+<link href=&quot;/assets/fonts/vendor/fonts.css?v=20260824-selfhost&quot; rel=&quot;stylesheet&quot;>
+<style>
+:root{color-scheme:light;--ground:#edf0f2;--ink:#1f2327;--muted:#8a9095;--accent:#1b7bff;--leader-ink:rgba(31,35,39,.9);--stack:-apple-system,BlinkMacSystemFont,'Space Grotesk',sans-serif;--mono:'Space Mono',monospace}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0;background:var(--ground);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{display:grid;min-height:100vh;min-height:100svh;place-items:center;overflow:hidden}
+.viewer{width:100%;min-width:0}
+.stage{position:relative;width:min(100vw,calc(100vh * 1.777778));width:min(100vw,calc(100svh * 1.777778));aspect-ratio:16/9;margin-inline:auto;overflow:hidden;background:var(--ground);isolation:isolate}
+.visual{position:absolute;inset:0;overflow:hidden;background:var(--ground)}
+.hero-video,.motion-poster,.motion-poster img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;background:var(--ground)}
+.motion-poster{display:none}
+.leaders,.markers{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.leaders{z-index:1;overflow:visible}
+.leaders g,.marker{opacity:var(--alpha,0)}
+.leaders line{stroke:var(--leader-ink);stroke-width:.75;stroke-linecap:butt;vector-effect:non-scaling-stroke}
+.markers{z-index:2}
+.marker{--chip-size:clamp(42px,6.4vw,82px);--label-gap:clamp(5px,.55vw,8px);position:absolute;inset:0;transform:translateX(var(--x-offset,0%))}
+.chip{position:absolute;left:var(--x);top:var(--y);width:var(--chip-size);aspect-ratio:1;transform:translate(-50%,-50%);overflow:hidden;border-radius:50%;background:rgb(238,238,238)}
+.specimen-video{display:block;width:100%;height:100%;object-fit:cover;object-position:var(--specimen-position,50% 50%)}
+.label{position:absolute;left:var(--x);top:calc(var(--y) + (var(--chip-size) / 2) + var(--label-gap));max-width:19%;padding:clamp(2px,.22vw,4px) clamp(3px,.42vw,7px);color:var(--ink);font-size:clamp(8px,1vw,14px);font-weight:650;line-height:1.15;text-align:center;text-wrap:balance;transform:translateX(-50%);white-space:nowrap}
+.label-above .label{top:calc(var(--y) - (var(--chip-size) / 2) - var(--label-gap));transform:translate(-50%,-100%)}
+.marker[data-item=&quot;spores&quot;]{--specimen-position:50% 51%}
+.marker[data-item=&quot;smoke&quot;]{--specimen-position:50% 50%}
+.marker[data-item=&quot;ultrafine&quot;]{--specimen-position:50% 49%}
+.marker[data-item=&quot;viruses&quot;]{--specimen-position:50% 50%}
+.marker[data-item=&quot;bacteria&quot;]{--specimen-position:51% 50%}
+.lens-shell{position:absolute;z-index:3;left:49%;top:45%;height:34%;aspect-ratio:1;overflow:hidden;border:1px solid rgba(31,35,39,.62);border-radius:50%;background:rgba(237,240,242,.94);opacity:var(--lens-alpha,0);transform:translate(-50%,-50%) scale(calc(.985 + (var(--lens-alpha,0) * .015)));transform-origin:center}
+.mechanism-artwork{display:block;width:100%;height:100%;object-fit:cover}
+.mechanism-placeholder{width:100%;height:100%;display:grid;place-content:center;gap:.3em;padding:12%;background:repeating-linear-gradient(135deg,rgba(31,35,39,.055) 0,rgba(31,35,39,.055) 1px,transparent 1px,transparent 9px);color:var(--muted);font-family:var(--mono);font-size:clamp(7px,.82vw,12px);line-height:1.35;text-align:center}
+.mechanism-placeholder span{display:block}
+.mechanism-copy{position:absolute;z-index:4;top:50%;right:3.4%;width:28%;display:grid;gap:clamp(9px,1.2vw,17px);transform:translateY(-50%);pointer-events:none}
+.mechanism-line{margin:0;color:var(--ink);font-size:clamp(8.5px,.88vw,13px);font-weight:400;line-height:1.43;opacity:var(--line-alpha,0)}
+.mechanism-line strong{color:var(--accent);font-weight:600}
+.legend{display:none}
+@media(max-width:520px){
+  body{display:block;overflow:visible}
+  .viewer{min-height:100vh;min-height:100svh}
+  .stage{width:100%;aspect-ratio:auto;overflow:visible}
+  .visual{position:relative;inset:auto;width:100%;aspect-ratio:16/9}
+  .leaders,.markers{display:none}
+  .mechanism-copy{position:static;width:auto;display:grid;gap:8px;padding:14px 16px 5px;transform:none}
+  .mechanism-line{font-size:clamp(10.5px,3vw,12px);line-height:1.36}
+  .legend{--legend-chip-size:clamp(64px,21vw,80px);display:block;padding:18px 14px 17px;border-top:1px solid rgba(31,35,39,.1)}
+  .legend-track{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px 6px}
+  .legend-item{--active:0;--ending-alpha:1;position:relative;grid-column:span 2;display:grid;grid-template-rows:var(--legend-chip-size) auto;justify-items:center;gap:7px;min-width:0;opacity:calc((.32 + (var(--active) * .68)) * var(--ending-alpha))}
+  .legend-item:nth-child(4){grid-column:2/span 2}
+  .legend-item:nth-child(5){grid-column:4/span 2}
+  .legend-chip{position:relative;z-index:1;width:var(--legend-chip-size);aspect-ratio:1;overflow:hidden;border-radius:50%;background:rgb(238,238,238)}
+  .legend-label{width:max-content;max-width:112px;color:var(--ink);font-size:clamp(10.5px,3vw,11.5px);font-weight:600;line-height:1.16;text-align:center;white-space:nowrap}
+  .lens-shell{border-width:.75px}
+  .mechanism-placeholder{font-size:clamp(5px,1.8vw,8px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-video{visibility:hidden}
+  .motion-poster{display:block}
+  .leaders g,.marker{opacity:1!important}
+  .lens-shell{opacity:1!important;transform:translate(-50%,-50%)!important}
+  .mechanism-line{opacity:1!important}
+  .legend-item{--active:1!important;--ending-alpha:1!important}
+}
+</style>
+</head>
+<body>
+<main class=&quot;viewer&quot; id=&quot;viewer&quot;>
+  <div class=&quot;stage&quot;>
+    <div class=&quot;visual&quot; id=&quot;visual&quot;>
+      <video class=&quot;hero-video&quot; id=&quot;video&quot; muted playsinline preload=&quot;metadata&quot; poster=&quot;/assets/videos/airfilter/plate_1080.jpg&quot;>
+        <source media=&quot;(max-width: 520px)&quot; src=&quot;/assets/videos/airfilter/plate_720.mp4&quot; type=&quot;video/mp4&quot;>
+        <source src=&quot;/assets/videos/airfilter/plate_1080.mp4&quot; type=&quot;video/mp4&quot;>
+      </video>
+      <picture class=&quot;motion-poster&quot; aria-hidden=&quot;true&quot;>
+        <source media=&quot;(max-width: 520px)&quot; srcset=&quot;/assets/videos/airfilter/plate_720.jpg&quot;>
+        <img src=&quot;/assets/videos/airfilter/plate_1080.jpg&quot; alt=&quot;&quot;>
+      </picture>
+      <svg class=&quot;leaders&quot; viewBox=&quot;0 0 100 100&quot; preserveAspectRatio=&quot;none&quot; aria-hidden=&quot;true&quot;>
+        <g data-item=&quot;spores&quot; data-in=&quot;3.2&quot; data-out=&quot;15.8&quot; data-target-x=&quot;9&quot; data-target-y=&quot;40&quot;><line></line><line></line></g>
+        <g data-item=&quot;smoke&quot; data-in=&quot;2&quot; data-out=&quot;15.8&quot; data-target-x=&quot;19.5&quot; data-target-y=&quot;40&quot;><line></line><line></line></g>
+        <g data-item=&quot;ultrafine&quot; data-in=&quot;6.2&quot; data-out=&quot;15.8&quot; data-target-x=&quot;30&quot; data-target-y=&quot;40&quot;><line></line><line></line></g>
+        <g data-item=&quot;viruses&quot; data-in=&quot;2.6&quot; data-out=&quot;15.8&quot; data-target-x=&quot;14.25&quot; data-target-y=&quot;64&quot;><line></line><line></line></g>
+        <g data-item=&quot;bacteria&quot; data-in=&quot;6.8&quot; data-out=&quot;15.8&quot; data-target-x=&quot;24.75&quot; data-target-y=&quot;64&quot;><line></line><line></line></g>
+      </svg>
+      <div class=&quot;markers&quot;>
+        <div class=&quot;marker label-above&quot; role=&quot;img&quot; aria-label=&quot;Fungal Spores&quot; data-item=&quot;spores&quot; data-in=&quot;3.2&quot; data-out=&quot;15.8&quot; style=&quot;--x:9%;--y:16%&quot;>
+          <div class=&quot;chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;spores&quot; data-layout=&quot;desktop&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/spore.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/spore.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;label&quot;>Fungal Spores</span>
+        </div>
+        <div class=&quot;marker label-above&quot; role=&quot;img&quot; aria-label=&quot;Wildfire Smoke&quot; data-item=&quot;smoke&quot; data-in=&quot;2&quot; data-out=&quot;15.8&quot; style=&quot;--x:9%;--x-offset:10.5%;--y:16%&quot;>
+          <div class=&quot;chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;smoke&quot; data-layout=&quot;desktop&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/smoke.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/smoke.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;label&quot;>Wildfire Smoke</span>
+        </div>
+        <div class=&quot;marker label-above&quot; role=&quot;img&quot; aria-label=&quot;Ultrafine Particles&quot; data-item=&quot;ultrafine&quot; data-in=&quot;6.2&quot; data-out=&quot;15.8&quot; style=&quot;--x:9%;--x-offset:21%;--y:16%&quot;>
+          <div class=&quot;chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;ultrafine&quot; data-layout=&quot;desktop&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/ultrafine.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/ultrafine.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;label&quot;>Ultrafine Particles</span>
+        </div>
+        <div class=&quot;marker&quot; role=&quot;img&quot; aria-label=&quot;Viruses&quot; data-item=&quot;viruses&quot; data-in=&quot;2.6&quot; data-out=&quot;15.8&quot; style=&quot;--x:9%;--x-offset:5.25%;--y:76%&quot;>
+          <div class=&quot;chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;viruses&quot; data-layout=&quot;desktop&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/virus.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/virus.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;label&quot;>Viruses</span>
+        </div>
+        <div class=&quot;marker&quot; role=&quot;img&quot; aria-label=&quot;Bacteria&quot; data-item=&quot;bacteria&quot; data-in=&quot;6.8&quot; data-out=&quot;15.8&quot; style=&quot;--x:9%;--x-offset:15.75%;--y:76%&quot;>
+          <div class=&quot;chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;bacteria&quot; data-layout=&quot;desktop&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/bacteria.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/bacteria.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;label&quot;>Bacteria</span>
+        </div>
+      </div>
+      <div class=&quot;lens-shell&quot; id=&quot;lens&quot;>
+        <!-- This mechanism-placeholder block is the only thing to replace when the artwork arrives; it will be a video dropped into the same circle. -->
+        <div class=&quot;mechanism-placeholder&quot;><span>Mechanism artwork</span><span>to be supplied</span></div>
+      </div>
+    </div>
+    <div class=&quot;mechanism-copy&quot;>
+      <p class=&quot;mechanism-line&quot; data-in=&quot;8.15&quot;><strong>Attract</strong> — The field pulls in whatever carries a negative charge. It does not select what reaches it.</p>
+      <p class=&quot;mechanism-line&quot; data-in=&quot;9.55&quot;><strong>Capture</strong> — The fibres hold whatever the field pulls in, at the surface. Nothing passes across the point of contact.</p>
+      <p class=&quot;mechanism-line&quot; data-in=&quot;10.95&quot;><strong>Destroy</strong> — The field stresses whatever outer boundary a captured thing has. A hard mineral boundary is left intact. A thin soft one breaks. The field makes no choice.</p>
+    </div>
+  </div>
+  <section class=&quot;legend&quot;>
+    <div class=&quot;legend-track&quot;>
+      <div class=&quot;legend-item&quot; data-item=&quot;spores&quot; data-in=&quot;3.2&quot; data-out=&quot;15.8&quot;><div class=&quot;legend-chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;spores&quot; data-layout=&quot;mobile&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/spore.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/spore.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;legend-label&quot;>Fungal Spores</span></div>
+      <div class=&quot;legend-item&quot; data-item=&quot;smoke&quot; data-in=&quot;2&quot; data-out=&quot;15.8&quot;><div class=&quot;legend-chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;smoke&quot; data-layout=&quot;mobile&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/smoke.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/smoke.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;legend-label&quot;>Wildfire Smoke</span></div>
+      <div class=&quot;legend-item&quot; data-item=&quot;ultrafine&quot; data-in=&quot;6.2&quot; data-out=&quot;15.8&quot;><div class=&quot;legend-chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;ultrafine&quot; data-layout=&quot;mobile&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/ultrafine.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/ultrafine.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;legend-label&quot;>Ultrafine Particles</span></div>
+      <div class=&quot;legend-item&quot; data-item=&quot;viruses&quot; data-in=&quot;2.6&quot; data-out=&quot;15.8&quot;><div class=&quot;legend-chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;viruses&quot; data-layout=&quot;mobile&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/virus.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/virus.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;legend-label&quot;>Viruses</span></div>
+      <div class=&quot;legend-item&quot; data-item=&quot;bacteria&quot; data-in=&quot;6.8&quot; data-out=&quot;15.8&quot;><div class=&quot;legend-chip&quot;><video class=&quot;specimen-video&quot; data-item=&quot;bacteria&quot; data-layout=&quot;mobile&quot; data-src=&quot;/assets/videos/airfilter/specimens_v/bacteria.mp4&quot; poster=&quot;/assets/videos/airfilter/specimens_v/bacteria.jpg&quot; muted loop playsinline preload=&quot;none&quot; aria-hidden=&quot;true&quot;></video></div><span class=&quot;legend-label&quot;>Bacteria</span></div>
+    </div>
+  </section>
+</main>
+<script>
+(()=>{
+  const video=document.getElementById('video');
+  const viewer=document.getElementById('viewer');
+  const visual=document.getElementById('visual');
+  const lens=document.getElementById('lens');
+  const artwork=lens.querySelector('.mechanism-artwork');
+  const overlayItems=[...visual.querySelectorAll('.leaders [data-item],.marker[data-item]')];
+  const leaderGroups=[...visual.querySelectorAll('.leaders g[data-item]')];
+  const legendItems=[...viewer.querySelectorAll('.legend-item')];
+  const mechanismLines=[...viewer.querySelectorAll('.mechanism-line')];
+  const reducedMotion=matchMedia('(prefers-reduced-motion:reduce)');
+  const mobileLayout=matchMedia('(max-width:520px)');
+  const records=new Map();
+  const fadeInDuration=.45;
+  const groupFadeStart=15;
+  const groupFadeEnd=15.8;
+  const leaderFadeStart=11.5;
+  const leaderFadeEnd=13;
+  const lensFadeInStart=8;
+  const lensFadeInEnd=8.6;
+  const lensFadeOutStart=13.4;
+  const lensFadeOutEnd=14;
+  let isActive=false;
+  let frameRequest=0;
+
+  for(const marker of visual.querySelectorAll('.marker[data-item]')){
+    const item=marker.dataset.item;
+    records.set(item,{item,start:Number(marker.dataset.in),end:Number(marker.dataset.out),desktop:viewer.querySelector('.specimen-video[data-layout=desktop][data-item='+item+']'),mobile:viewer.querySelector('.specimen-video[data-layout=mobile][data-item='+item+']'),loadedVideo:null,failedForWindow:false});
+  }
+  function updateLeaderGeometry(){
+    const stageRect=visual.getBoundingClientRect();
+    if(!stageRect.width||!stageRect.height)return;
+    for(const group of leaderGroups){
+      const marker=visual.querySelector('.marker[data-item='+group.dataset.item+']');
+      const chip=marker&&marker.querySelector('.chip');
+      const lines=[...group.querySelectorAll('line')];
+      if(!chip||lines.length!==2)continue;
+      const chipRect=chip.getBoundingClientRect();
+      const centerX=chipRect.left-stageRect.left+chipRect.width/2;
+      const centerY=chipRect.top-stageRect.top+chipRect.height/2;
+      const targetY=Number(group.dataset.targetY)*stageRect.height/100;
+      const deltaY=targetY-centerY;
+      if(!deltaY)continue;
+      const radius=chipRect.width/2;
+      const strokeWidth=parseFloat(getComputedStyle(lines[0]).strokeWidth)||.75;
+      const clearGap=strokeWidth;
+      const centerOffset=(strokeWidth+clearGap)/2;
+      const edgeOffsetY=Math.sqrt(Math.max(0,radius*radius-centerOffset*centerOffset));
+      const startY=centerY+Math.sign(deltaY)*edgeOffsetY;
+      lines.forEach((line,index)=>{
+        const lineX=centerX+(index===0?-centerOffset:centerOffset);
+        const verticalX=lineX/stageRect.width*100;
+        line.setAttribute('x1',verticalX.toFixed(3));
+        line.setAttribute('y1',(startY/stageRect.height*100).toFixed(3));
+        line.setAttribute('x2',verticalX.toFixed(3));
+        line.setAttribute('y2',group.dataset.targetY);
+      });
+    }
+  }
+  function smoothstep(value){const clamped=Math.max(0,Math.min(1,value));return clamped*clamped*(3-2*clamped)}
+  function opacityAt(time,start,end){if(reducedMotion.matches)return 1;const fadeIn=smoothstep((time-start)/fadeInDuration);const fadeOut=smoothstep((end-time)/(groupFadeEnd-groupFadeStart));return Math.min(fadeIn,fadeOut)}
+  function legendActiveAt(time,start){if(reducedMotion.matches)return 1;return smoothstep((time-start)/fadeInDuration)}
+  function endingOpacityAt(time){if(reducedMotion.matches)return 1;return smoothstep((groupFadeEnd-time)/(groupFadeEnd-groupFadeStart))}
+  function leaderOpacityAt(time,start,end){const itemOpacity=opacityAt(time,start,end);if(reducedMotion.matches)return 1;const leaderFade=smoothstep((leaderFadeEnd-time)/(leaderFadeEnd-leaderFadeStart));return itemOpacity*leaderFade}
+  function lensOpacityAt(time){if(reducedMotion.matches)return 1;return Math.min(smoothstep((time-lensFadeInStart)/(lensFadeInEnd-lensFadeInStart)),smoothstep((lensFadeOutEnd-time)/(lensFadeOutEnd-lensFadeOutStart)))}
+  function lineOpacityAt(time,start){if(reducedMotion.matches)return 1;return Math.min(smoothstep((time-start)/.4),smoothstep((lensFadeOutEnd-time)/(lensFadeOutEnd-lensFadeOutStart)))}
+  function unloadSpecimen(record){const specimen=record.loadedVideo;if(!specimen)return;specimen.pause();specimen.removeAttribute('src');specimen.load();record.loadedVideo=null}
+  function playSpecimen(record){const specimen=record.loadedVideo;if(!specimen||!specimen.paused||video.paused||video.ended)return;specimen.play().catch(()=>{if(record.loadedVideo!==specimen)return;unloadSpecimen(record);record.failedForWindow=true})}
+  function loadSpecimen(record,specimen){specimen.src=specimen.dataset.src;specimen.load();record.loadedVideo=specimen;playSpecimen(record)}
+  function syncArtwork(time){
+    if(!artwork)return;
+    if(reducedMotion.matches||!isActive||time<lensFadeInStart||time>=lensFadeOutEnd){artwork.pause();if(artwork.currentTime)artwork.currentTime=0;return}
+    if(artwork.paused)artwork.play().catch(()=>{});
+  }
+  function syncSpecimenMedia(time){
+    const available=[...records.values()].filter(record=>{const inWindow=time>=record.start&&time<record.end;if(!inWindow)record.failedForWindow=false;return inWindow});
+    const selected=new Set(available.sort((a,b)=>b.start-a.start).slice(0,3));
+    const layout=mobileLayout.matches?'mobile':'desktop';
+    const desired=new Map();
+    for(const record of records.values()){const specimen=record[layout];desired.set(record,!reducedMotion.matches&&isActive&&selected.has(record)&&!record.failedForWindow?specimen:null)}
+    for(const record of records.values()){if(record.loadedVideo&&record.loadedVideo!==desired.get(record))unloadSpecimen(record)}
+    for(const record of records.values()){const specimen=desired.get(record);if(specimen&&!record.loadedVideo)loadSpecimen(record,specimen);if(!record.loadedVideo)continue;if(video.paused||video.ended)record.loadedVideo.pause();else playSpecimen(record)}
+  }
+  function sync(){
+    const time=video.currentTime||0;
+    for(const item of overlayItems){const opacityFunction=item.matches('.leaders [data-item]')?leaderOpacityAt:opacityAt;item.style.setProperty('--alpha',opacityFunction(time,Number(item.dataset.in),Number(item.dataset.out)).toFixed(3))}
+    const endingAlpha=endingOpacityAt(time);
+    for(const item of legendItems){item.style.setProperty('--active',legendActiveAt(time,Number(item.dataset.in)).toFixed(3));item.style.setProperty('--ending-alpha',endingAlpha.toFixed(3))}
+    lens.style.setProperty('--lens-alpha',lensOpacityAt(time).toFixed(3));
+    for(const line of mechanismLines)line.style.setProperty('--line-alpha',lineOpacityAt(time,Number(line.dataset.in)).toFixed(3));
+    syncArtwork(time);
+    syncSpecimenMedia(time);
+    frameRequest=requestAnimationFrame(sync);
+  }
+  function reset(){try{video.currentTime=0}catch(error){}if(artwork){artwork.pause();try{artwork.currentTime=0}catch(error){}}for(const record of records.values()){record.failedForWindow=false;unloadSpecimen(record)}sync()}
+  function activate(){isActive=true;reset();if(reducedMotion.matches){video.pause();return}video.play().catch(()=>{})}
+  function deactivate(){isActive=false;video.pause();reset()}
+  addEventListener('message',event=>{const data=event.data||{};if(data.type==='nf-active')activate();else if(data.type==='nf-inactive')deactivate()});
+  reducedMotion.addEventListener?.('change',()=>{if(reducedMotion.matches){video.pause();reset()}else if(isActive)activate()});
+  mobileLayout.addEventListener?.('change',()=>syncSpecimenMedia(video.currentTime||0));
+  const leaderResizeObserver=new ResizeObserver(updateLeaderGeometry);
+  leaderResizeObserver.observe(visual);
+  updateLeaderGeometry();
+  frameRequest=requestAnimationFrame(sync);
+  addEventListener('pagehide',()=>{cancelAnimationFrame(frameRequest);leaderResizeObserver.disconnect();for(const record of records.values())unloadSpecimen(record)},{once:true});
+})();
+</script>
+</body>
+</html>"></iframe></section>
+
+  <section class="screen"><iframe title="How It Works" srcdoc="<!doctype html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;>
+<link href=&quot;/assets/fonts/vendor/fonts.css?v=20260824-selfhost&quot; rel=&quot;stylesheet&quot;>
+<style>
+:root{--ground:#edf0f2;--ink:#1f2327;--muted:#8a9095;--accent:#1b7bff;--stack:-apple-system,BlinkMacSystemFont,'Space Grotesk',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--ground);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{min-height:100vh;min-height:100svh;overflow-x:hidden}
+main{min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:clamp(64px,9vw,140px)}
+p{max-width:1120px;font-size:clamp(42px,5.25vw,78px);font-weight:500;line-height:1.12;letter-spacing:-.045em;text-align:center;text-wrap:balance}
+@media(max-width:700px){main{padding:96px 20px 64px}p{font-size:clamp(31px,10vw,44px);line-height:1.16}}
+</style>
+</head>
+<body>
+<main><p>The NanoFlashing™ Air Filter captures and destroys viruses, bacteria and fungal spores by direct contact with the surface of the filter media.</p></main>
+</body>
+</html>"></iframe></section>
+
+  <section class="screen"><iframe title="Why the charge does not fade" srcdoc="<!doctype html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;>
+<link href=&quot;/assets/fonts/vendor/fonts.css?v=20260824-selfhost&quot; rel=&quot;stylesheet&quot;>
+<style>
+:root{--ground:#edf0f2;--ink:#1f2327;--muted:#8a9095;--accent:#1b7bff;--stack:-apple-system,BlinkMacSystemFont,'Space Grotesk',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--ground);color:var(--ink);font-family:var(--stack);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{min-height:100vh;min-height:100svh;overflow-x:hidden}
+main{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(92px,13vh,140px) clamp(52px,8vw,124px) clamp(58px,8vh,92px)}
+h2{max-width:950px;font-size:clamp(52px,6.5vw,96px);font-weight:600;line-height:1;letter-spacing:-.052em;text-wrap:balance}
+.explanation{display:grid;gap:12px;max-width:920px;margin-top:clamp(28px,4vh,44px)}
+.explanation p{font-size:clamp(16px,1.35vw,21px);line-height:1.48;letter-spacing:-.01em}
+.charge-lines{display:grid;gap:8px;margin-top:clamp(32px,5vh,54px)}
+.charge-lines p{font-size:clamp(21px,2.2vw,34px);font-weight:500;line-height:1.25;letter-spacing:-.025em}
+@media(max-width:700px){main{justify-content:flex-start;padding:108px 20px 66px}h2{font-size:clamp(42px,13vw,58px)}.explanation{gap:14px;margin-top:28px}.explanation p{font-size:15px;line-height:1.48}.charge-lines{gap:10px;margin-top:32px}.charge-lines p{font-size:20px;line-height:1.25}}
+</style>
+</head>
+<body>
+<main>
+  <h2>Why the charge does not fade</h2>
+  <div class=&quot;explanation&quot;>
+    <p>The charge lives in the fibre. It does not wash off, smoke off or fade with time.</p>
+    <p>The filter is rated under ASHRAE 52.2 Appendix J after the charge has been stripped for the test. The published rating does not rely on the charge at all.</p>
+  </div>
+  <div class=&quot;charge-lines&quot;>
+    <p>The filter draws no power.</p>
+    <p>The filter produces no ozone.</p>
+    <p>The filter releases nothing from the media.</p>
+  </div>
+</main>
+</body>
+</html>"></iframe></section>
+
+  <section class="screen" style="background:#d6e6f1"><iframe src="/pollutants/cpolar-company-footer.html" data-deck-footer loading="eager" title="C-POLAR footer" style="display:block;background:#d6e6f1"></iframe></section>
+</div>
+<div id="dots" aria-hidden="true"></div>
+<script>
+(function(){
+  var deck=document.getElementById('deck');
+  var frames=[].slice.call(document.querySelectorAll('.screen iframe'));
+  var dotsWrap=document.getElementById('dots'),dots=[];
+  var N=frames.length,idx=0,locked=false;
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var DECK=matchMedia('(min-width:900px) and (min-height:600px) and (pointer:fine)');
+  var isDeck=null;
+  var observers=[],intervalTimers=[];
+  var flowIO=null;
+  function signalActive(activeIndex){
+    for(var i=0;i<frames.length;i++){try{if(frames[i].contentWindow)frames[i].contentWindow.postMessage({type:i===activeIndex?'nf-active':'nf-inactive'},'*')}catch(error){}}
+  }
+  frames.forEach(function(frame,i){frame.addEventListener('load',function(){try{if(frame.contentWindow&&isDeck)frame.contentWindow.postMessage({type:i===idx?'nf-active':'nf-inactive'},'*')}catch(error){}})});
+  function setH(){
+    document.documentElement.style.setProperty('--screenH',window.innerHeight+'px');
+    if(isDeck){deck.classList.remove('smooth');deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';requestAnimationFrame(function(){deck.classList.add('smooth')})}
+  }
+  function measureFrame(frame){
+    try{var doc=frame.contentDocument;if(!doc||!doc.documentElement)return;var height=Math.max(doc.documentElement.scrollHeight,doc.body?doc.body.scrollHeight:0);if(!height||height<1)return;if(height<window.innerHeight)height=window.innerHeight;frame.style.height=height+'px'}catch(error){}
+  }
+  function setupObserver(frame){
+    try{var doc=frame.contentDocument;if(!doc||!doc.documentElement)return;var observer=new ResizeObserver(function(){measureFrame(frame)});observer.observe(doc.documentElement);if(doc.body)observer.observe(doc.body);observers.push(observer)}catch(error){}
+  }
+  function setupInterval(frame){
+    var start=Date.now();var timer=setInterval(function(){measureFrame(frame);if(Date.now()-start>10000&&intervalTimers.indexOf(timer)>-1){clearInterval(timer);intervalTimers.splice(intervalTimers.indexOf(timer),1)}},800);intervalTimers.push(timer);
+  }
+  function apply(){
+    if(!isDeck)return;deck.classList.add('smooth');deck.style.transform='translateY(calc(-1 * '+idx+' * var(--screenH)))';for(var i=0;i<N;i++)dots[i].className=i===idx?'on':'';document.body.classList.toggle('compact-logo',idx!==0);signalActive(idx);
+  }
+  function go(next){
+    if(!isDeck)return;next=Math.max(0,Math.min(N-1,next));if(next===idx)return;idx=next;apply();locked=true;setTimeout(function(){locked=false},780);
+  }
+  function wheel(event){
+    if(!isDeck)return;if(locked){event.preventDefault();return}if(event.deltaY>16){event.preventDefault();go(idx+1)}else if(event.deltaY<-16){event.preventDefault();go(idx-1)}
+  }
+  var touchY=null;
+  function touchStart(event){if(!isDeck)return;touchY=(event.touches?event.touches[0]:event).clientY}
+  function touchEnd(event){if(!isDeck||touchY==null)return;var y=(event.changedTouches?event.changedTouches[0]:event).clientY,delta=touchY-y;touchY=null;if(locked)return;if(delta>44)go(idx+1);else if(delta<-44)go(idx-1)}
+  function keydown(event){if(!isDeck||locked)return;if(event.key==='ArrowDown'||event.key==='PageDown'||event.key===' '){event.preventDefault();go(idx+1)}else if(event.key==='ArrowUp'||event.key==='PageUp'){event.preventDefault();go(idx-1)}}
+  function attachFrameEvents(frame){
+    try{var frameWindow=frame.contentWindow;if(!frameWindow)return;frameWindow.addEventListener('wheel',wheel,{passive:false});frameWindow.addEventListener('touchstart',touchStart,{passive:true});frameWindow.addEventListener('touchend',touchEnd,{passive:true})}catch(error){}
+  }
+  function clearFlow(){
+    if(flowIO){try{flowIO.disconnect()}catch(error){}flowIO=null}
+    observers.forEach(function(observer){try{observer.disconnect()}catch(error){}});observers=[];
+    intervalTimers.forEach(function(timer){clearInterval(timer)});intervalTimers=[];
+    frames.forEach(function(frame){frame.style.height='';try{var frameWindow=frame.contentWindow;if(frameWindow){frameWindow.removeEventListener('wheel',wheel);frameWindow.removeEventListener('touchstart',touchStart);frameWindow.removeEventListener('touchend',touchEnd)}}catch(error){}});
+  }
+  function setupFlow(){
+    frames.forEach(function(frame){measureFrame(frame);setupObserver(frame);setupInterval(frame)});
+    if('IntersectionObserver' in window){flowIO=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){var frameIndex=frames.indexOf(entry.target);if(frameIndex>=0)signalActive(frameIndex)}})},{rootMargin:'-45% 0px -45% 0px',threshold:0});frames.forEach(function(frame){flowIO.observe(frame)})}
+  }
+  function applyMode(){
+    var newIsDeck=DECK.matches&&!reduce;
+    if(newIsDeck===isDeck&&isDeck){setH();return}
+    if(newIsDeck===isDeck&&!isDeck){frames.forEach(function(frame){measureFrame(frame)});return}
+    isDeck=newIsDeck;
+    if(isDeck){document.documentElement.classList.remove('flow-mode');document.documentElement.classList.add('deck-mode');document.body.classList.remove('flow-mode');document.body.classList.add('deck-mode');clearFlow();window.scrollTo(0,0);deck.style.transform='';setH();apply();frames.forEach(attachFrameEvents)}
+    else{document.documentElement.classList.remove('deck-mode');document.documentElement.classList.add('flow-mode');document.body.classList.remove('deck-mode');document.body.classList.add('flow-mode');deck.classList.remove('smooth');deck.style.transform='none';window.scrollTo(0,0);setupFlow()}
+  }
+  for(var i=0;i<N;i++)(function(dotIndex){var button=document.createElement('button');button.tabIndex=-1;button.addEventListener('click',function(){go(dotIndex)});dotsWrap.appendChild(button);dots.push(button)})(i);
+  window.addEventListener('wheel',wheel,{passive:false});
+  window.addEventListener('touchstart',touchStart,{passive:true});
+  window.addEventListener('touchend',touchEnd,{passive:true});
+  window.addEventListener('keydown',keydown);
+  window.addEventListener('resize',applyMode);
+  window.addEventListener('orientationchange',applyMode);
+  frames.forEach(function(frame){frame.addEventListener('load',function(){if(isDeck)attachFrameEvents(frame);else{measureFrame(frame);setupObserver(frame);setupInterval(frame)}})});
+  applyMode();
+})();
+</script>
+<script src="/global-site-nav.js?v=20260825-hiw"></script>
+</body>
+</html>
