@@ -15,6 +15,7 @@
     :root {
       color-scheme: light;
       --ink: #1f2327;
+      --leader-ink: rgba(31, 35, 39, 0.9);
       --ground: #ffffff;
       --type: Montserrat, "Helvetica Neue", Arial, sans-serif;
     }
@@ -84,17 +85,10 @@
       opacity: var(--alpha, 0);
     }
 
-    .leaders path {
-      fill: none;
-      stroke: rgba(31, 35, 39, 0.55);
-      stroke-width: 1;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .leaders circle {
-      fill: rgba(31, 35, 39, 0.55);
+    .leaders line {
+      stroke: var(--leader-ink);
+      stroke-width: 1.25;
+      stroke-linecap: butt;
       vector-effect: non-scaling-stroke;
     }
 
@@ -117,7 +111,6 @@
       aspect-ratio: 1;
       transform: translate(-50%, -50%);
       overflow: hidden;
-      border: 1px solid rgba(31, 35, 39, 0.24);
       border-radius: 50%;
       background: rgb(238, 238, 238);
       box-shadow: 0 0.45vw 1.2vw rgba(31, 35, 39, 0.14);
@@ -274,6 +267,7 @@
 
       .legend-item {
         --active: 0;
+        position: relative;
         grid-column: span 2;
         display: grid;
         grid-template-rows: var(--legend-chip-size) auto;
@@ -293,12 +287,14 @@
       }
 
       .legend-chip {
+        position: relative;
+        z-index: 1;
         width: var(--legend-chip-size);
         aspect-ratio: 1;
         overflow: hidden;
-        border: 1px solid rgba(31, 35, 39, 0.24);
         border-radius: 50%;
         background: rgb(238, 238, 238);
+        box-shadow: 0 3px 9px rgba(31, 35, 39, 0.12);
       }
 
       .legend-label {
@@ -348,50 +344,45 @@
       </video>
 
       <svg class="leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <g data-item="spores" data-in="3" data-out="7.2">
-          <path d="M 12.2 15.8 C 14.1 16.4, 14.4 22.9, 15.6 24.5 C 17.4 27, 20.1 29.7, 22.4 31.5"></path>
-          <circle cx="22.4" cy="31.5" r="0.28"></circle>
+        <g data-item="spores" data-in="3" data-out="7.2" data-target-x="10" data-target-y="47">
+          <line></line>
         </g>
-        <g data-item="smoke" data-in="2" data-out="6.5">
-          <path d="M 20.2 16 C 21.1 22.9, 23.3 30.5, 27.4 36.5"></path>
-          <circle cx="27.4" cy="36.5" r="0.28"></circle>
+        <g data-item="smoke" data-in="2" data-out="6.5" data-target-x="22" data-target-y="47">
+          <line></line>
         </g>
-        <g data-item="ultrafine" data-in="6.2" data-out="10.8">
-          <path d="M 33.2 16.8 C 35.7 18.1, 36 23.2, 35.8 25.2 C 35.5 30.4, 34 36.8, 32.7 40.5"></path>
-          <circle cx="32.7" cy="40.5" r="0.28"></circle>
+        <g data-item="ultrafine" data-in="6.5" data-out="10.8" data-target-x="22" data-target-y="47">
+          <line></line>
         </g>
-        <g data-item="viruses" data-in="2.2" data-out="6.8">
-          <path d="M 13.3 67.8 C 16.5 60.7, 20.5 54.8, 24.3 50.5"></path>
-          <circle cx="24.3" cy="50.5" r="0.28"></circle>
+        <g data-item="viruses" data-in="2.2" data-out="6.8" data-target-x="34" data-target-y="47">
+          <line></line>
         </g>
-        <g data-item="bacteria" data-in="6.6" data-out="11.2">
-          <path d="M 29.3 73.2 C 30 65, 31.4 57, 32.7 49.5"></path>
-          <circle cx="32.7" cy="49.5" r="0.28"></circle>
+        <g data-item="bacteria" data-in="6.8" data-out="11.2" data-target-x="34" data-target-y="47">
+          <line></line>
         </g>
       </svg>
 
       <div class="markers">
-        <div class="marker" role="img" aria-label="Fungal spores" data-item="spores" data-in="3" data-out="7.2" style="--x: 9%; --y: 15%;">
+        <div class="marker label-above" role="img" aria-label="Fungal spores" data-item="spores" data-in="3" data-out="7.2" style="--x: 10%; --y: 20%;">
           <div class="chip"><video class="specimen-video" data-item="spores" data-layout="desktop" data-src="specimens_v/spore.mp4" poster="specimens_v/spore.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Fungal spores</span>
         </div>
 
-        <div class="marker label-above" role="img" aria-label="Wildfire smoke" data-item="smoke" data-in="2" data-out="6.5" style="--x: 20%; --y: 10%;">
+        <div class="marker label-above" role="img" aria-label="Wildfire smoke" data-item="smoke" data-in="2" data-out="6.5" style="--x: 22%; --y: 20%;">
           <div class="chip"><video class="specimen-video" data-item="smoke" data-layout="desktop" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Wildfire smoke</span>
         </div>
 
-        <div class="marker" role="img" aria-label="Ultrafine particles" data-item="ultrafine" data-in="6.2" data-out="10.8" style="--x: 30%; --y: 16%;">
+        <div class="marker label-above" role="img" aria-label="Ultrafine particles" data-item="ultrafine" data-in="6.5" data-out="10.8" style="--x: 22%; --y: 20%;">
           <div class="chip"><video class="specimen-video" data-item="ultrafine" data-layout="desktop" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Ultrafine particles</span>
         </div>
 
-        <div class="marker" role="img" aria-label="Viruses" data-item="viruses" data-in="2.2" data-out="6.8" style="--x: 11%; --y: 72%;">
+        <div class="marker label-above" role="img" aria-label="Viruses" data-item="viruses" data-in="2.2" data-out="6.8" style="--x: 34%; --y: 20%;">
           <div class="chip"><video class="specimen-video" data-item="viruses" data-layout="desktop" data-src="specimens_v/virus.mp4" poster="specimens_v/virus.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Viruses</span>
         </div>
 
-        <div class="marker" role="img" aria-label="Bacteria" data-item="bacteria" data-in="6.6" data-out="11.2" style="--x: 29%; --y: 79%;">
+        <div class="marker label-above" role="img" aria-label="Bacteria" data-item="bacteria" data-in="6.8" data-out="11.2" style="--x: 34%; --y: 20%;">
           <div class="chip"><video class="specimen-video" data-item="bacteria" data-layout="desktop" data-src="specimens_v/bacteria.mp4" poster="specimens_v/bacteria.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Bacteria</span>
         </div>
@@ -410,7 +401,7 @@
           <div class="legend-chip"><video class="specimen-video" data-item="smoke" data-layout="mobile" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="legend-label">Wildfire smoke</span>
         </div>
-        <div class="legend-item" data-item="ultrafine" data-in="6.2" data-out="10.8">
+        <div class="legend-item" data-item="ultrafine" data-in="6.5" data-out="10.8">
           <div class="legend-chip"><video class="specimen-video" data-item="ultrafine" data-layout="mobile" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="legend-label">Ultrafine particles</span>
         </div>
@@ -418,7 +409,7 @@
           <div class="legend-chip"><video class="specimen-video" data-item="viruses" data-layout="mobile" data-src="specimens_v/virus.mp4" poster="specimens_v/virus.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="legend-label">Viruses</span>
         </div>
-        <div class="legend-item" data-item="bacteria" data-in="6.6" data-out="11.2">
+        <div class="legend-item" data-item="bacteria" data-in="6.8" data-out="11.2">
           <div class="legend-chip"><video class="specimen-video" data-item="bacteria" data-layout="mobile" data-src="specimens_v/bacteria.mp4" poster="specimens_v/bacteria.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="legend-label">Bacteria</span>
         </div>
@@ -441,6 +432,7 @@
       const restartButton = document.getElementById("restart");
       const chipsButton = document.getElementById("chips");
       const overlayItems = [...stage.querySelectorAll(".leaders [data-item], .marker[data-item]")];
+      const leaderGroups = [...stage.querySelectorAll(".leaders g[data-item]")];
       const legendItems = [...viewer.querySelectorAll(".legend-item")];
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
       const mobileLayout = window.matchMedia("(max-width: 520px)");
@@ -458,6 +450,34 @@
           loadedVideo: null,
           failedForWindow: false
         });
+      }
+
+      function updateLeaderGeometry() {
+        const stageRect = stage.getBoundingClientRect();
+        if (!stageRect.width || !stageRect.height) return;
+
+        for (const group of leaderGroups) {
+          const marker = stage.querySelector('.marker[data-item="' + group.dataset.item + '"]');
+          const chip = marker?.querySelector(".chip");
+          const line = group.querySelector("line");
+          if (!chip || !line) continue;
+
+          const chipRect = chip.getBoundingClientRect();
+          const centerX = chipRect.left - stageRect.left + chipRect.width / 2;
+          const centerY = chipRect.top - stageRect.top + chipRect.height / 2;
+          const targetY = Number(group.dataset.targetY) * stageRect.height / 100;
+          const deltaY = targetY - centerY;
+          if (!deltaY) continue;
+
+          const radius = chipRect.width / 2;
+          const startY = centerY + Math.sign(deltaY) * radius;
+          const verticalX = centerX / stageRect.width * 100;
+
+          line.setAttribute("x1", verticalX.toFixed(3));
+          line.setAttribute("y1", (startY / stageRect.height * 100).toFixed(3));
+          line.setAttribute("x2", verticalX.toFixed(3));
+          line.setAttribute("y2", group.dataset.targetY);
+        }
       }
 
       function smoothstep(value) {
@@ -511,8 +531,8 @@
           return inWindow;
         });
 
-        // New windows take precedence during the schedule's two brief four-item
-        // crossovers. Outgoing items retain their posters, preserving the hard cap.
+        // Prefer the newest windows if the schedule changes and ever exceeds the
+        // three-live-video cap. Outgoing items retain their posters.
         const selected = new Set(
           available
             .sort((a, b) => b.start - a.start)
@@ -617,9 +637,13 @@
       reducedMotion.addEventListener?.("change", () => syncSpecimenMedia(video.currentTime || 0));
       mobileLayout.addEventListener?.("change", () => syncSpecimenMedia(video.currentTime || 0));
 
+      const leaderResizeObserver = new ResizeObserver(updateLeaderGeometry);
+      leaderResizeObserver.observe(stage);
+      updateLeaderGeometry();
       frameRequest = requestAnimationFrame(sync);
       window.addEventListener("pagehide", () => {
         cancelAnimationFrame(frameRequest);
+        leaderResizeObserver.disconnect();
         for (const record of records.values()) unloadSpecimen(record);
       }, { once: true });
     })();
