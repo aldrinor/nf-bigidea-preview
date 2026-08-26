@@ -43,7 +43,7 @@
 
   document.body.insertAdjacentHTML("afterbegin", `
     <div class="cp-global-nav" role="banner">
-      <a class="cp-global-nav__brand" href="/" aria-label="C-POLAR home"><img src="assets/brand/cpolar-full-color.svg" alt="C-POLAR"></a>
+      <a class="cp-global-nav__brand" href="/" aria-label="C-POLAR home"><img src="../assets/brand/cpolar-full-color.svg" alt="C-POLAR"></a>
       <nav class="cp-global-nav__links" aria-label="Site navigation">
         <div class="cp-global-nav__item" data-cp-global-dropdown="cp-global-science-menu">
           <a class="cp-global-nav__trigger" href="/science/" aria-expanded="false" aria-controls="cp-global-science-menu"${current("science")}>Science</a>
