@@ -101,6 +101,7 @@
       --label-gap: clamp(5px, 0.55vw, 8px);
       position: absolute;
       inset: 0;
+      transform: translateX(var(--x-offset, 0%));
     }
 
     .chip {
@@ -266,6 +267,7 @@
 
       .legend-item {
         --active: 0;
+        --ending-alpha: 1;
         position: relative;
         grid-column: span 2;
         display: grid;
@@ -273,7 +275,7 @@
         justify-items: center;
         gap: 7px;
         min-width: 0;
-        opacity: calc(0.32 + (var(--active) * 0.68));
+        opacity: calc((0.32 + (var(--active) * 0.68)) * var(--ending-alpha));
       }
 
       .legend-item:nth-child(4) {
@@ -344,16 +346,16 @@
         <g data-item="spores" data-in="3.2" data-out="15.8" data-target-x="9" data-target-y="40">
           <line></line>
         </g>
-        <g data-item="smoke" data-in="2" data-out="15.8" data-target-x="20" data-target-y="40">
+        <g data-item="smoke" data-in="2" data-out="15.8" data-target-x="19.5" data-target-y="40">
           <line></line>
         </g>
         <g data-item="ultrafine" data-in="6.2" data-out="15.8" data-target-x="30" data-target-y="40">
           <line></line>
         </g>
-        <g data-item="viruses" data-in="2.6" data-out="15.8" data-target-x="11" data-target-y="64">
+        <g data-item="viruses" data-in="2.6" data-out="15.8" data-target-x="14.25" data-target-y="64">
           <line></line>
         </g>
-        <g data-item="bacteria" data-in="6.8" data-out="15.8" data-target-x="29" data-target-y="64">
+        <g data-item="bacteria" data-in="6.8" data-out="15.8" data-target-x="24.75" data-target-y="64">
           <line></line>
         </g>
       </svg>
@@ -364,22 +366,22 @@
           <span class="label">Fungal spores</span>
         </div>
 
-        <div class="marker label-above" role="img" aria-label="Wildfire smoke" data-item="smoke" data-in="2" data-out="15.8" style="--x: 20%; --y: 16%;">
+        <div class="marker label-above" role="img" aria-label="Wildfire smoke" data-item="smoke" data-in="2" data-out="15.8" style="--x: 9%; --x-offset: 10.5%; --y: 16%;">
           <div class="chip"><video class="specimen-video" data-item="smoke" data-layout="desktop" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Wildfire smoke</span>
         </div>
 
-        <div class="marker label-above" role="img" aria-label="Ultrafine particles" data-item="ultrafine" data-in="6.2" data-out="15.8" style="--x: 30%; --y: 16%;">
+        <div class="marker label-above" role="img" aria-label="Ultrafine particles" data-item="ultrafine" data-in="6.2" data-out="15.8" style="--x: 9%; --x-offset: 21%; --y: 16%;">
           <div class="chip"><video class="specimen-video" data-item="ultrafine" data-layout="desktop" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Ultrafine particles</span>
         </div>
 
-        <div class="marker" role="img" aria-label="Viruses" data-item="viruses" data-in="2.6" data-out="15.8" style="--x: 11%; --y: 76%;">
+        <div class="marker" role="img" aria-label="Viruses" data-item="viruses" data-in="2.6" data-out="15.8" style="--x: 9%; --x-offset: 5.25%; --y: 76%;">
           <div class="chip"><video class="specimen-video" data-item="viruses" data-layout="desktop" data-src="specimens_v/virus.mp4" poster="specimens_v/virus.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Viruses</span>
         </div>
 
-        <div class="marker" role="img" aria-label="Bacteria" data-item="bacteria" data-in="6.8" data-out="15.8" style="--x: 29%; --y: 76%;">
+        <div class="marker" role="img" aria-label="Bacteria" data-item="bacteria" data-in="6.8" data-out="15.8" style="--x: 9%; --x-offset: 15.75%; --y: 76%;">
           <div class="chip"><video class="specimen-video" data-item="bacteria" data-layout="desktop" data-src="specimens_v/bacteria.mp4" poster="specimens_v/bacteria.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
           <span class="label">Bacteria</span>
         </div>
@@ -497,6 +499,16 @@
         return Math.min(fadeIn, fadeOut);
       }
 
+      function legendActiveAt(time, start) {
+        if (reducedMotion.matches) return time >= start ? 1 : 0;
+        return smoothstep((time - start) / fadeInDuration);
+      }
+
+      function endingOpacityAt(time) {
+        if (reducedMotion.matches) return time < groupFadeEnd ? 1 : 0;
+        return smoothstep((groupFadeEnd - time) / (groupFadeEnd - groupFadeStart));
+      }
+
       function leaderOpacityAt(time, start, end) {
         const itemOpacity = opacityAt(time, start, end);
         if (reducedMotion.matches) {
@@ -597,9 +609,11 @@
           item.style.setProperty("--alpha", alpha.toFixed(3));
         }
 
+        const endingAlpha = endingOpacityAt(time);
         for (const item of legendItems) {
-          const active = opacityAt(time, Number(item.dataset.in), Number(item.dataset.out));
+          const active = legendActiveAt(time, Number(item.dataset.in));
           item.style.setProperty("--active", active.toFixed(3));
+          item.style.setProperty("--ending-alpha", endingAlpha.toFixed(3));
         }
 
         syncSpecimenMedia(time);
