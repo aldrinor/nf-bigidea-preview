@@ -87,7 +87,7 @@
 
     .leaders line {
       stroke: var(--leader-ink);
-      stroke-width: 1.25;
+      stroke-width: 0.75;
       stroke-linecap: butt;
       vector-effect: non-scaling-stroke;
     }
@@ -130,9 +130,6 @@
       top: calc(var(--y) + (var(--chip-size) / 2) + var(--label-gap));
       max-width: 19%;
       padding: clamp(2px, 0.22vw, 4px) clamp(3px, 0.42vw, 7px);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.94);
-      box-shadow: 0 0.16vw 0.6vw rgba(31, 35, 39, 0.12);
       color: var(--ink);
       font-size: clamp(8px, 1vw, 14px);
       font-weight: 650;
@@ -345,35 +342,40 @@
       <svg class="leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <g data-item="spores" data-in="3.2" data-out="15.8" data-target-x="9" data-target-y="40">
           <line></line>
+          <line></line>
         </g>
         <g data-item="smoke" data-in="2" data-out="15.8" data-target-x="19.5" data-target-y="40">
+          <line></line>
           <line></line>
         </g>
         <g data-item="ultrafine" data-in="6.2" data-out="15.8" data-target-x="30" data-target-y="40">
           <line></line>
+          <line></line>
         </g>
         <g data-item="viruses" data-in="2.6" data-out="15.8" data-target-x="14.25" data-target-y="64">
           <line></line>
+          <line></line>
         </g>
         <g data-item="bacteria" data-in="6.8" data-out="15.8" data-target-x="24.75" data-target-y="64">
+          <line></line>
           <line></line>
         </g>
       </svg>
 
       <div class="markers">
-        <div class="marker label-above" role="img" aria-label="Fungal spores" data-item="spores" data-in="3.2" data-out="15.8" style="--x: 9%; --y: 16%;">
+        <div class="marker label-above" role="img" aria-label="Fungal Spores" data-item="spores" data-in="3.2" data-out="15.8" style="--x: 9%; --y: 16%;">
           <div class="chip"><video class="specimen-video" data-item="spores" data-layout="desktop" data-src="specimens_v/spore.mp4" poster="specimens_v/spore.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-          <span class="label">Fungal spores</span>
+          <span class="label">Fungal Spores</span>
         </div>
 
-        <div class="marker label-above" role="img" aria-label="Wildfire smoke" data-item="smoke" data-in="2" data-out="15.8" style="--x: 9%; --x-offset: 10.5%; --y: 16%;">
+        <div class="marker label-above" role="img" aria-label="Wildfire Smoke" data-item="smoke" data-in="2" data-out="15.8" style="--x: 9%; --x-offset: 10.5%; --y: 16%;">
           <div class="chip"><video class="specimen-video" data-item="smoke" data-layout="desktop" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-          <span class="label">Wildfire smoke</span>
+          <span class="label">Wildfire Smoke</span>
         </div>
 
-        <div class="marker label-above" role="img" aria-label="Ultrafine particles" data-item="ultrafine" data-in="6.2" data-out="15.8" style="--x: 9%; --x-offset: 21%; --y: 16%;">
+        <div class="marker label-above" role="img" aria-label="Ultrafine Particles" data-item="ultrafine" data-in="6.2" data-out="15.8" style="--x: 9%; --x-offset: 21%; --y: 16%;">
           <div class="chip"><video class="specimen-video" data-item="ultrafine" data-layout="desktop" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-          <span class="label">Ultrafine particles</span>
+          <span class="label">Ultrafine Particles</span>
         </div>
 
         <div class="marker" role="img" aria-label="Viruses" data-item="viruses" data-in="2.6" data-out="15.8" style="--x: 9%; --x-offset: 5.25%; --y: 76%;">
@@ -394,15 +396,15 @@
       <div class="legend-track">
         <div class="legend-item" data-item="spores" data-in="3.2" data-out="15.8">
           <div class="legend-chip"><video class="specimen-video" data-item="spores" data-layout="mobile" data-src="specimens_v/spore.mp4" poster="specimens_v/spore.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-          <span class="legend-label">Fungal spores</span>
+          <span class="legend-label">Fungal Spores</span>
         </div>
         <div class="legend-item" data-item="smoke" data-in="2" data-out="15.8">
           <div class="legend-chip"><video class="specimen-video" data-item="smoke" data-layout="mobile" data-src="specimens_v/smoke.mp4" poster="specimens_v/smoke.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-          <span class="legend-label">Wildfire smoke</span>
+          <span class="legend-label">Wildfire Smoke</span>
         </div>
         <div class="legend-item" data-item="ultrafine" data-in="6.2" data-out="15.8">
           <div class="legend-chip"><video class="specimen-video" data-item="ultrafine" data-layout="mobile" data-src="specimens_v/ultrafine.mp4" poster="specimens_v/ultrafine.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-          <span class="legend-label">Ultrafine particles</span>
+          <span class="legend-label">Ultrafine Particles</span>
         </div>
         <div class="legend-item" data-item="viruses" data-in="2.6" data-out="15.8">
           <div class="legend-chip"><video class="specimen-video" data-item="viruses" data-layout="mobile" data-src="specimens_v/virus.mp4" poster="specimens_v/virus.jpg" muted loop playsinline preload="none" aria-hidden="true"></video></div>
@@ -463,8 +465,8 @@
         for (const group of leaderGroups) {
           const marker = stage.querySelector('.marker[data-item="' + group.dataset.item + '"]');
           const chip = marker?.querySelector(".chip");
-          const line = group.querySelector("line");
-          if (!chip || !line) continue;
+          const lines = [...group.querySelectorAll("line")];
+          if (!chip || lines.length !== 2) continue;
 
           const chipRect = chip.getBoundingClientRect();
           const centerX = chipRect.left - stageRect.left + chipRect.width / 2;
@@ -474,13 +476,20 @@
           if (!deltaY) continue;
 
           const radius = chipRect.width / 2;
-          const startY = centerY + Math.sign(deltaY) * radius;
-          const verticalX = centerX / stageRect.width * 100;
+          const strokeWidth = parseFloat(getComputedStyle(lines[0]).strokeWidth) || 0.75;
+          const clearGap = strokeWidth;
+          const centerOffset = (strokeWidth + clearGap) / 2;
+          const edgeOffsetY = Math.sqrt(Math.max(0, radius * radius - centerOffset * centerOffset));
+          const startY = centerY + Math.sign(deltaY) * edgeOffsetY;
 
-          line.setAttribute("x1", verticalX.toFixed(3));
-          line.setAttribute("y1", (startY / stageRect.height * 100).toFixed(3));
-          line.setAttribute("x2", verticalX.toFixed(3));
-          line.setAttribute("y2", group.dataset.targetY);
+          lines.forEach((line, index) => {
+            const lineX = centerX + (index === 0 ? -centerOffset : centerOffset);
+            const verticalX = lineX / stageRect.width * 100;
+            line.setAttribute("x1", verticalX.toFixed(3));
+            line.setAttribute("y1", (startY / stageRect.height * 100).toFixed(3));
+            line.setAttribute("x2", verticalX.toFixed(3));
+            line.setAttribute("y2", group.dataset.targetY);
+          });
         }
       }
 
